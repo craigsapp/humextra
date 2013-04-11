@@ -2,6 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Mar 17 07:46:28 PDT 2011
 // Last Modified: Thu Mar 17 07:46:35 PDT 2011
+// Last Modified: Mon Apr  1 12:06:53 PDT 2013 Enabled multiple segment input
 // Filename:      ...sig/examples/all/tntype.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/tntype.cpp
 // Syntax:        C++; museinfo
@@ -76,7 +77,7 @@ const char* colorindex[26];
 
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile, outfile;
+   HumdrumFileSet infiles;
 
    // process the command-line options
    checkOptions(options, argc, argv);
@@ -84,19 +85,18 @@ int main(int argc, char* argv[]) {
    // figure out the number of input files to process
    int numinputs = options.getArgCount();
 
-   for (int i=0; i<numinputs || i==0; i++) {
-      chordinit = 1;
-      infile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
+   int i;
+   if (numinputs < 1) {
+      infiles.read(cin);
+   } else {
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
       }
+   }
 
-      processRecords(infile);
-       
+   for (i=0; i<infiles.getCount(); i++) {
+      chordinit = 1;
+      processRecords(infiles[i]);
    }
 
    return 0;
@@ -218,6 +218,8 @@ void processRecords(HumdrumFile& infile) {
    int foundstart = 0;
    char aString[512] = {0};
 
+   infile.printNonemptySegmentLabel(cout);
+   
    for (int i=0; i<infile.getNumLines(); i++) {
       if (options.getBoolean("debug")) {
          cout << "processing line " << (i+1) << " of input ..." << endl;
@@ -1046,4 +1048,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 81901c7ec2a38645891dc8ea30363c40 tntype.cpp [20110325]
+// md5sum: ca1b0c6abfdc20d2ac82ecf52f13f631 tntype.cpp [20130404]

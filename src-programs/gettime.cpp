@@ -2,9 +2,10 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Apr 15 20:05:01 PDT 2002
 // Last Modified: Mon Apr 15 20:05:04 PDT 2002
-// Last Modified: Sun Mar 20 23:37:41 PST 2005 (added *rit and *accel)
-// Last Modified: Sat Oct  8 22:14:11 PDT 2005 (added time interpolation)
-// Last Modified: Wed Mar 29 20:19:00 PST 2006 (fixed various errors for kglee)
+// Last Modified: Sun Mar 20 23:37:41 PST 2005 Added *rit and *accel
+// Last Modified: Sat Oct  8 22:14:11 PDT 2005 Added time interpolation
+// Last Modified: Wed Mar 29 20:19:00 PST 2006 Fixed various errors for kglee
+// Last Modified: Tue Apr  9 08:07:21 PDT 2013 Enabled multiple segment input
 // Filename:      ...sig/examples/all/gettime.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/gettime.cpp
 // Syntax:        C++; museinfo
@@ -52,7 +53,7 @@ int          interpQ    = 0;     // used with -i option
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   HumdrumFile    infile;
+   HumdrumFileSet infiles;
    Array<double>  timings;
    Array<double>  tempo;
 
@@ -64,30 +65,32 @@ int main(int argc, char* argv[]) {
 
    double totaldur = 0.0;
 
-   for (int i=0; i<numinputs || i==0; i++) {
-      infile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
+   int i;
+   if (numinputs < 1) {
+      infiles.read(cin);
+   } else {
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
       }
+   }
 
+   for (i=0; i<infiles.getCount(); i++) {
       if (interpQ) {
-         doLinearInterpolation(infile);
+         doLinearInterpolation(infiles[i]);
       } else {
-         analyzeTiming(infile, timings, tempo);
+         analyzeTiming(infiles[i], timings, tempo);
          if (totalQ) {
             totaldur += timings[timings.getSize()-1];
             if (numinputs > 1) {
-               printtime(options.getArg(i+1), timings[timings.getSize()-1]);
+               printtime(infiles[i].getFilename(), 
+                     timings[timings.getSize()-1]);
             }
          } else {
-            printAnalysis(infile, timings, tempo);
+            printAnalysis(infiles[i], timings, tempo);
          }
       }
    }
+
    if (totalQ) {
       printtime("", totaldur);
    }
@@ -163,6 +166,7 @@ void doLinearInterpolation(HumdrumFile& infile) {
    fixendingtimes(timings, infile);
 
    // now insert the interpolated timings back into the score.
+   infile.printNonemptySegmentLabel(cout);
    int tfound = 0;
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].getType() == E_humrec_data) {
@@ -389,7 +393,6 @@ void analyzeTiming(HumdrumFile& infile, Array<double>& timings,
       tempo[i] = currtempo;
       timings[i] = timings[i-1] + (infile[i].getAbsBeat() - 
             infile[i-1].getAbsBeat()) * 60.0/currtempo;
-
    }
 
    if (!changeQ) {
@@ -410,6 +413,7 @@ void analyzeTiming(HumdrumFile& infile, Array<double>& timings,
    // the following code will have to be debugged (mostly for off-by-one
    // errors).
 
+/*
    // adjust the timing values
    double beatdiff;
    double increment = 1.0/32.0;
@@ -460,8 +464,8 @@ void analyzeTiming(HumdrumFile& infile, Array<double>& timings,
 
          timings[i] = timings[i-1] + timesum;
       }
-      
    }
+*/
 }
 
 
@@ -621,6 +625,7 @@ void printAnalysis(HumdrumFile& infile, Array<double>& timings,
    int tempomark = 0;
    int i, j;
    int m;
+   infile.printNonemptySegmentLabel(cout);
    for (i=0; i<infile.getNumLines(); i++) {
       switch (infile[i].getType()) {
       case E_humrec_global_comment:

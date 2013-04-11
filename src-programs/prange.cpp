@@ -1,7 +1,8 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Mar 31 21:51:34 PST 2005
-// Last Modified: Thu Feb  9 07:34:18 PST 2012 (SCORE display output by voice)
+// Last Modified: Thu Feb  9 07:34:18 PST 2012 SCORE display output by voice.
+// Last Modified: Sat Mar 30 13:14:05 PDT 2013 Allow segmented input.
 // Filename:      ...sig/examples/all/range.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/range.cpp
 // Syntax:        C++; museinfo
@@ -25,8 +26,7 @@ void   usage                      (const char* command);
 void   generateAnalysis           (HumdrumFile& infile, 
                                    Array<Array<double> >& rdata, 
                                    Array<int>& kernspines);
-void   printAnalysis              (Array<double>& rdata, 
-                                   HumdrumFile& infile);
+void   printAnalysis              (Array<double>& rdata);
 void   printPercentile            (Array<double>& midibins, 
                                    double percentile);
 double countNotesInRange          (Array<double>& midibins, 
@@ -85,12 +85,13 @@ int          hoverQ       = 0;   // used with --hover option
 int          quartileQ    = 0;   // used with --quartile option
 int          fillonlyQ    = 0;   // used with --fill option
 int          defineQ      = 1;   // used with --no-define option
+int          base40Q      = 0;   // used with --base40 option
 const char*  FILENAME     = "";
 
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile;
+   HumdrumFileSet infiles;
 
    // process the command-line options
    checkOptions(options, argc, argv);
@@ -112,19 +113,22 @@ int main(int argc, char* argv[]) {
       numinputs = 1;
    }
 
-   for (int i=0; i<numinputs || i==0; i++) {
-      infile.clear();
+   int i, j;
+   for (i=0; i<numinputs || i==0; i++) {
+      infiles.clear();
 
       // if no command-line arguments read data file from standard input
       if (numinputs < 1) {
-         infile.read(cin);
+         infiles.read(cin);
       } else {
          FILENAME = options.getArg(i+1);
-         infile.read(FILENAME);
+         infiles.read(FILENAME);
       }
-      infile.getTracksByExInterp(kernSpines, "**kern");
-      growHistograms(midibins, kernSpines.getSize());
-      generateAnalysis(infile, midibins, kernSpines);
+      for (j=0; j<infiles.getCount(); j++) {
+         infiles[j].getTracksByExInterp(kernSpines, "**kern");
+         growHistograms(midibins, kernSpines.getSize());
+         generateAnalysis(infiles[j], midibins, kernSpines);
+      }
    }
 
    if (xmlQ) {
@@ -132,9 +136,9 @@ int main(int argc, char* argv[]) {
    }
 
    if (!scoreQ) {
-      printAnalysis(midibins[0], infile);
+      printAnalysis(midibins[0]);
    } else {
-      printScoreFile(midibins, infile, kernSpines);
+      printScoreFile(midibins, infiles[0], kernSpines);
    }
 
    if (xmlQ) {
@@ -1264,7 +1268,7 @@ void getTitle(char* titlestring, HumdrumFile& infile) {
 void clearHistograms(Array<Array<double> >& bins, int start) {
    int i;
    for (i=start; i<bins.getSize(); i++) {
-      bins[i].setSize(128);
+      bins[i].setSize(40*11);
       bins[i].setAll(0);
       bins[i].allowGrowth(0);
    }
@@ -1279,7 +1283,7 @@ void clearHistograms(Array<Array<double> >& bins, int start) {
 // printAnalysis --
 //
 
-void printAnalysis(Array<double>& midibins, HumdrumFile& infile) {
+void printAnalysis(Array<double>& midibins) {
    if (percentileQ) {
       printPercentile(midibins, percentile);
       return;
@@ -1380,8 +1384,8 @@ void printAnalysis(Array<double>& midibins, HumdrumFile& infile) {
    cout << Convert::base12ToKern(buffer, median);
    cout << ")" << "\n";
 
-
 }
+
 
 
 //////////////////////////////
@@ -1761,4 +1765,4 @@ int getVindex(int track, Array<int>& kernspines) {
 
 
 
-// md5sum: 5878776ce2985003a8d9cc3bb76103b4 prange.cpp [20121112]
+// md5sum: 70b888b51e1f7619512b93ea733ee7d7 prange.cpp [20130404]

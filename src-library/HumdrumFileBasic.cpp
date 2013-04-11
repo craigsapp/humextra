@@ -17,6 +17,7 @@
 // Last Modified: Mon Feb 14 08:14:53 PST 2011 added VTS functions
 // Last Modified: Tue Apr 24 16:37:34 PDT 2012 added jrp:// URI
 // Last Modified: Tue Dec 11 17:23:04 PST 2012 added fileName, segmentLevel
+// Last Modified: Mon Apr  1 16:44:32 PDT 2013 added printNonemptySegmentLevel
 // Filename:      ...sig/src/sigInfo/HumdrumFileBasic.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/HumdrumFileBasic.cpp
 // Syntax:        C++ 
@@ -58,7 +59,7 @@ HumdrumFileBasic::HumdrumFileBasic(void) {
    records.setSize(100000);          // initial storage size 100000 lines
    records.setSize(0);
    records.allowGrowth();          
-   records.setAllocSize(100000);     // grow in increments of 100000 lines
+   records.setGrowth(1000000);      // grow in increments of 1000000 lines
    maxtracks = 0;
    fileName.setSize(1); fileName[0] = '\0';
    segmentLevel = 0;
@@ -71,7 +72,7 @@ HumdrumFileBasic::HumdrumFileBasic(const HumdrumFileBasic& aHumdrumFileBasic) {
    records.setSize(100000);          // initial storage size 100000 lines
    records.setSize(0);
    records.allowGrowth();          
-   records.setAllocSize(100000);     // grow in increments of 100000 lines
+   records.setGrowth(1000000);      // grow in increments of 1000000 lines
    maxtracks = 0;
    fileName.setSize(1); fileName[0] = '\0';
    segmentLevel = 0;
@@ -86,7 +87,7 @@ HumdrumFileBasic::HumdrumFileBasic(const char* filename) {
    records.setSize(100000);          // initial storage size 100000 lines
    records.setSize(0);
    records.allowGrowth();          
-   records.setAllocSize(100000);     // grow in increments of 100000 lines
+   records.setAllocSize(1000000);    // grow in increments of 1000000 lines
    maxtracks = 0;
    fileName.setSize(1); fileName[0] = '\0';
    segmentLevel = 0;
@@ -274,6 +275,18 @@ ostream& HumdrumFileBasic::printSegmentLabel(ostream& out) {
       }
    }
    out << ": " << filename << endl;
+   return out;
+}
+
+//////////////////////////////
+//
+// HumdrumFileBasic::printNonemptySegmentLabel --
+//
+
+ostream& HumdrumFileBasic::printNonemptySegmentLabel(ostream& out) {
+   if (strlen(getFilename()) > 0) {
+      printSegmentLabel(out);
+   } 
    return out;
 }
 
@@ -793,6 +806,7 @@ void HumdrumFileBasic::write(ostream& outStream) {
 //
 
 ostream& operator<<(ostream& out, HumdrumFileBasic& aHumdrumFileBasic) {
+   aHumdrumFileBasic.printNonemptySegmentLabel(out);
    for (int i=0; i<aHumdrumFileBasic.getNumLines(); i++) {
       out << aHumdrumFileBasic[i].getLine() << '\n';
    }

@@ -160,11 +160,11 @@ class MidiFile {
 
    protected:
       SigCollection<SigCollection<MFEvent>*> events;  // midi file events
-      int              ticksPerQuarterNote; // time base of file
-      int              trackCount;          // # of tracks in file
-      int              theTrackState;       // joined or split
-      int              theTimeState;        // absolute or delta
-      Array<char>      readFileName;        // read file name
+      int              ticksPerQuarterNote;           // time base of file
+      int              trackCount;                    // # of tracks in file
+      int              theTrackState;                 // joined or split
+      int              theTimeState;                  // absolute or delta
+      Array<char>      readFileName;                  // read file name
 
       int              timemapvalid;    
       Array<_TickTime> timemap;

@@ -2,7 +2,8 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Nov 23 05:24:14 PST 2009
 // Last Modified: Mon Nov 23 05:24:18 PST 2009
-// Last Modified: Thu Dec 22 11:50:31 PST 2011 (added -V and -k options)
+// Last Modified: Thu Dec 22 11:50:31 PST 2011 Added -V and -k options
+// Last Modified: Mon Apr  1 00:28:01 PDT 2013 Enabled multiple segment input
 // Filename:      ...sig/examples/all/ridx.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/ridx.cpp
 // Syntax:        C++; museinfo
@@ -56,23 +57,22 @@ int       option_V = 0;   // used with -V option
 int main(int argc, char** argv) {
    // process the command-line options
    checkOptions(options, argc, argv);
-   HumdrumFile infile;
-   infile.setAllocation(1123123);   // allow for very large inputs up to 
-                                    // million lines.
+   HumdrumFileSet infiles;
+   // infile.setAllocation(1123123);   // allow for very large inputs up to 
+   //                                  // million lines.
    int numinputs = options.getArgumentCount();
 
-   for (int i=0; i<numinputs || i==0; i++) {
-      infile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
+   int i;
+   if (numinputs < 1) {
+      infiles.read(cin);
+   } else {
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
       }
+   }
 
-      processFile(infile);
-
+   for (i=0; i<infiles.getCount(); i++) {
+      processFile(infiles[i]);
    }
 
    return 0;
@@ -91,6 +91,12 @@ void processFile(HumdrumFile& infile) {
    PerlRegularExpression pre;
 
    int revQ = option_V;
+
+   // if bibliographic/reference records are not suppressed
+   // print the !!!!SEGMENT: marker if present.
+   if (!option_G) {
+      infile.printNonemptySegmentLabel(cout);
+   }
 
    for (i=0; i<infile.getNumLines(); i++) {
 
@@ -231,6 +237,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("U|u=b",        "remove unnecessary (duplicate ex. interps.");
    opts.define("k=b",          "for -d, only consider **kern spines.");
    opts.define("V=b",          "negate filtering effect of program.");
+   opts.define("H|no-humdrum=b", "equivalent to -GLIMd.");
 
    // additional options
    opts.define("M=b",          "remove measure lines");
@@ -277,6 +284,11 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    option_c = opts.getBoolean("c");
    option_k = opts.getBoolean("k");
    option_V = opts.getBoolean("V");
+
+   if (opts.getBoolean("no-humdrum")) {
+      // remove all Humdrum file structure
+      option_G = option_L = option_I = option_M = option_d = 1;
+   }
    
 }
 
@@ -305,4 +317,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: fa0b17b2b7bee282159c7cff84b67c36 ridx.cpp [20120404]
+// md5sum: 27425e228c8c9068df0f665f264db564 ridx.cpp [20130404]

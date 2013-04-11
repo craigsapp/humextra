@@ -2,7 +2,8 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Jan 12 14:12:54 PST 2005
 // Last Modified: Wed Jan 12 15:09:07 PST 2005
-// Last Modified: Tue Apr  7 21:05:20 PDT 2009 (added -F option)
+// Last Modified: Tue Apr  7 21:05:20 PDT 2009 Added -F option
+// Last Modified: Sat Apr  6 22:23:29 PDT 2013 Enabled multiple segment input
 // Filename:      ...sig/examples/all/scaletype.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/scaletype.cpp
 // Syntax:        C++; museinfo
@@ -35,12 +36,11 @@ int          suppressQ  = 0;     // used with -F option
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile;
+   HumdrumFileSet infiles;
 
    // process the command-line options
    checkOptions(options, argc, argv);
 
-   int numinputs = options.getArgCount();
    const char* filename = "";
    int i;
 
@@ -55,32 +55,24 @@ int main(int argc, char* argv[]) {
    pc40.allowGrowth(0);
    pc40.setAll(0);
 
+   int numinputs = options.getArgCount();
 
    if (numinputs < 1) {
-      // if no command-line arguments read data file from standard input
-      infile.read(cin);
-      analyzeFile(infile, pc12, pc40);
-      if (suppressQ) {
-         filename = "";
-      }
-      printAnalysis(infile, pc12, pc40, filename);
-   } else if (options.getArgCount() == 1) {
-      infile.read(options.getArg(1));
-      if (suppressQ) {
-         filename = "";
-      }
-      analyzeFile(infile, pc12, pc40);
-      printAnalysis(infile, pc12, pc40, filename);
+      infiles.read(cin);
    } else {
-      for (i=0; i<options.getArgCount(); i++) {
-         filename = options.getArg(i+1);
-         infile.read(filename);
-         if (suppressQ) {
-            filename = "";
-         }
-         analyzeFile(infile, pc12, pc40);
-         printAnalysis(infile, pc12, pc40, filename);
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
       }
+   }
+
+   for (i=0; i<infiles.getCount(); i++) {
+      if (suppressQ) {
+         filename = "";
+      } else {
+         filename = infiles[i].getFilename();
+      }
+      analyzeFile(infiles[i], pc12, pc40);
+      printAnalysis(infiles[i], pc12, pc40, filename);
    }
 
    return 0;

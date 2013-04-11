@@ -1,10 +1,11 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Jul 18 11:23:42 PDT 2005
-// Last Modified: Tue Sep  1 13:54:42 PDT 2009 (added -f, and -p options)
-// Last Modified: Wed Sep  2 13:26:58 PDT 2009 (added -t option)
-// Last Modified: Sat Sep  5 15:21:29 PDT 2009 (added sub-spine features)
-// Last Modified: Tue Sep  8 11:43:46 PDT 2009 (added co-spine extraction)
+// Last Modified: Tue Sep  1 13:54:42 PDT 2009 Added -f, and -p options
+// Last Modified: Wed Sep  2 13:26:58 PDT 2009 Added -t option
+// Last Modified: Sat Sep  5 15:21:29 PDT 2009 Added sub-spine features
+// Last Modified: Tue Sep  8 11:43:46 PDT 2009 Added co-spine extraction
+// Last Modified: Sat Apr  6 00:48:21 PDT 2013 Enabled multiple segment input
 // Filename:      ...sig/examples/all/extractx.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/extractx.cpp
 // Syntax:        C++; museinfo
@@ -126,7 +127,7 @@ const char* grepString  = "";      // used with -g option
 
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile, outfile;
+   HumdrumFileSet infiles;
 
    // process the command-line options
    checkOptions(options, argc, argv);
@@ -134,31 +135,31 @@ int main(int argc, char* argv[]) {
    // figure out the number of input files to process
    int numinputs = options.getArgCount();
 
-   for (int i=0; i<numinputs || i==0; i++) {
-      infile.clear();
-      outfile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
+   int i;
+   if (numinputs < 1) {
+      infiles.read(cin);
+   } else {
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
       }
+   }
+
+   for (int i=0; i<infiles.getCount(); i++) {
       if (countQ) {
-         cout << infile.getMaxTracks() << endl;
+         cout << infiles[i].getMaxTracks() << endl;
          exit(0);
       }
       if (expandQ) {
-         expandSpines(field, subfield, model, infile, expandInterp);
+         expandSpines(field, subfield, model, infiles[i], expandInterp);
       } else if (interpQ) {
-         getInterpretationFields(field, subfield, model, infile, interps, 
+         getInterpretationFields(field, subfield, model, infiles[i], interps, 
                interpstate);
       } else if (reverseQ) {
-         reverseSpines(field, subfield, model, infile, reverseInterp);
+         reverseSpines(field, subfield, model, infiles[i], reverseInterp);
       } else if (fieldQ || excludeQ) {
-         fillFieldData(field, subfield, model, fieldstring, infile);
+         fillFieldData(field, subfield, model, fieldstring, infiles[i]);
       } else if (grepQ) {
-         fillFieldDataByGrep(field, subfield, model, grepString, infile, 
+         fillFieldDataByGrep(field, subfield, model, grepString, infiles[i], 
             interpstate);
       }
       
@@ -176,15 +177,18 @@ int main(int argc, char* argv[]) {
          cout << endl;
       }
 
+      // preserve SEGMENT filename if present
+      infiles[i].printNonemptySegmentLabel(cout);
+
       // analyze the input file according to command-line options
       if (fieldQ || grepQ) {
-         extractFields(infile, field, subfield, model);
+         extractFields(infiles[i], field, subfield, model);
       } else if (excludeQ) {
-         excludeFields(infile, field, subfield, model);
+         excludeFields(infiles[i], field, subfield, model);
       } else if (traceQ) {
-         extractTrace(infile, tracefile);
+         extractTrace(infiles[i], tracefile);
       } else {
-         cout << infile;
+         cout << infiles[i];
       }
    }
 

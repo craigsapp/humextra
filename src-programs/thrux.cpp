@@ -2,8 +2,9 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Jul 18 11:23:42 PDT 2005
 // Last Modified: Mon Jul 18 11:23:46 PDT 2005
-// Last Modified: Sun Mar  2 18:58:48 PST 2008 (added -l and -i options)
-// Last Modified: Mon Mar  3 13:46:34 PST 2008 (added -r option)
+// Last Modified: Sun Mar  2 18:58:48 PST 2008 Added -l and -i options
+// Last Modified: Mon Mar  3 13:46:34 PST 2008 Added -r option
+// Last Modified: Tue Apr  9 08:18:06 PDT 2013 Enabled multiple segment input
 // Filename:      ...sig/examples/all/thrux.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/thrux.cpp
 // Syntax:        C++; museinfo
@@ -50,7 +51,7 @@ const char*  realization = "";   // used with -r option
 
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile, outfile;
+   HumdrumFileSet infiles;
 
    // process the command-line options
    checkOptions(options, argc, argv);
@@ -58,28 +59,28 @@ int main(int argc, char* argv[]) {
    // figure out the number of input files to process
    int numinputs = options.getArgCount();
 
-   for (int i=0; i<numinputs || i==0; i++) {
-      infile.clear();
-      outfile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
+   int i;
+   if (numinputs < 1) {
+      infiles.read(cin);
+   } else {
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
       }
+   }
 
+   for (i=0; i<infiles.getCount(); i++) {
       if (listQ) {
-         printLabelList(infile);
+         printLabelList(infiles[i]);
          exit(0);
       }
       if (infoQ) {
-         printLabelInfo(infile);
+         printLabelInfo(infiles[i]);
          exit(0);
       }
 
       // analyze the input file according to command-line options
-      processData(infile);
+      infiles[i].printNonemptySegmentLabel(cout);
+      processData(infiles[i]);
 
    }
 

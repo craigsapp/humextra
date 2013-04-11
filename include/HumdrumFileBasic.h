@@ -81,6 +81,7 @@ class HumdrumFileBasic {
       void                   setSegmentLevel  (int level = 0);
       int                    getSegmentLevel  (void);
       ostream&               printSegmentLabel(ostream& out);
+      ostream&               printNonemptySegmentLabel(ostream& out);
       HumdrumFileBasic       extract          (int aField);
       const char*            getDotValue      (int index, int spinei);
       const char*            getLine          (int index);

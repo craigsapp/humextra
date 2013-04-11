@@ -91,7 +91,7 @@ int         doubleQ      = 0;     // used with --mstart option
 int         fileQ        = 0;     // used with --file option
 const char* Filename     = "";    // used with --file option
 int         matchlen     = 1;     // used with --mark option
-const char* marker     = "@";     // used with --marker option
+const char* marker       = "@";   // used with --marker option
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -202,6 +202,7 @@ void processDataLine(HumdrumFile& infile, const char* inputline,
    if (fileQ) {
       filename.setSize(strlen(Filename)+1);
       strcpy(filename.getBase(), Filename);
+      pre.sar(filename, "&colon;", ":", "g");
    }
    if (strcmp(filename.getBase(), "") != 0) {
       getFileAndPath(fileandpath, filename, paths);
@@ -701,6 +702,15 @@ void getFileAndPath(Array<char>& fileandpath, Array<char>& filename,
    Array<Array<char> >& paths) {
    PerlRegularExpression pre;
 
+   pre.sar(filename, "&colon;", ":", "g");
+   if (pre.search(filename, "://")) {
+      // either a URL or a URI, so no path.
+      fileandpath = filename;
+      paths.setSize(1);
+      paths[0] = '\0';
+      return;
+   }
+
    int i;
    for (i=0; i<paths.getSize(); i++) {
       if (fileexists(fileandpath, filename, paths[i])) {
@@ -816,6 +826,7 @@ void extractDataFromInputLine(Array<char>& filename,
    int value;
    PerlRegularExpression pre;
    PerlRegularExpression pre2;
+   PerlRegularExpression prefilename;
 
    if (pre.search(ptr, "^([^\\t:]+)[^\\t]*:(\\d+)\\.?(\\d+)?\\t(\\d+)([^\\s]*\\s*)")) {
       if (fileQ) {
@@ -901,6 +912,8 @@ void extractDataFromInputLine(Array<char>& filename,
       // remove directory names from filename if the -D option was used.
       pre.sar(filename, ".*/", "", "");
    }
+
+   prefilename.sar(filename, "&colon;", ":", "g");
 
 }
 

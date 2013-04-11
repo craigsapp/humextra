@@ -1,11 +1,12 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Apr 19 20:03:05 PDT 2009
-// Last Modified: Tue May  4 23:11:52 PDT 2009 added -t, -c, -B, --sep options
-// Last Modified: Tue May  5 09:54:01 PDT 2009 added -p, -P, --and options
-// Last Modified: Mon May 11 20:56:43 PDT 2009 fix initial beat for comments
-// Last Modified: Wed Apr 28 18:49:29 PDT 2010 added -T and -D options
-// Last Modified: Wed Sep 14 10:40:48 PDT 2011 added -F option
+// Last Modified: Tue May  4 23:11:52 PDT 2009 Added -t, -c, -B, --sep options
+// Last Modified: Tue May  5 09:54:01 PDT 2009 Added -p, -P, --and options
+// Last Modified: Mon May 11 20:56:43 PDT 2009 Fix initial beat for comments
+// Last Modified: Wed Apr 28 18:49:29 PDT 2010 Added -T and -D options
+// Last Modified: Wed Sep 14 10:40:48 PDT 2011 Added -F option
+// Last Modified: Sat Apr  6 01:16:22 PDT 2013 Enabled multiple segment input
 // Filename:      ...sig/examples/all/hgrep.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hgrep.cpp
 // Syntax:        C++; museinfo
@@ -94,29 +95,27 @@ int         invertQ         = 0;     // used with -v option
 int main(int argc, char** argv) {
    // process the command-line options
    checkOptions(options, argc, argv);
-   const char* filename = "";
 
-   int i;
-   HumdrumFile infile;
+   HumdrumFileSet infiles;
    int numinputs = options.getArgCount() - 1;
-   for (i=0; i<numinputs || i==0; i++) {
-      infile.clear();
+   int i;
 
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         filename = "";
-         infile.read(cin);
-      } else {
-         filename = options.getArg(i+2);
-         infile.read(filename);
+   if (numinputs < 1) {
+      infiles.read(cin);
+   } else {
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
       }
-    
+   }
+
+   for (i=0; i<infiles.getCount(); i++) {
+
       if (absbeatQ || beatQ || measureQ || fracQ) {
          // need to do this for measureQ because of pickup information
-         infile.analyzeRhythm("4");
+         infiles[i].analyzeRhythm("4");
       }
 
-      doSearch(searchstring, infile, filename);
+      doSearch(searchstring, infiles[i], infiles[i].getFilename());
    }
 
    destroyAndSearches(Andlist);

@@ -2,6 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Nov  2 18:28:33 PDT 2010
 // Last Modified: Sun Nov  7 07:52:55 PST 2010
+// Last Modified: Mon Apr  1 00:21:49 PDT 2013 Enabled multiple segment input
 // Filename:      ...sig/examples/all/serialize.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/serialize.cpp
 // Syntax:        C++; museinfo
@@ -56,7 +57,7 @@ int         nth     = 0;     // used with -n option
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile;
+   HumdrumFileSet infiles;
 
    // process the command-line options
    checkOptions(options, argc, argv);
@@ -64,26 +65,30 @@ int main(int argc, char* argv[]) {
    // figure out the number of input files to process
    int numinputs = options.getArgCount();
 
-   for (int i=0; i<numinputs || i==0; i++) {
-      infile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
+   int i;
+   if (numinputs < 1) {
+      infiles.read(cin);
+   } else {
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
       }
-      infile.analyzeRhythm();
+   }
+
+   for (i=0; i<infiles.getCount(); i++) {
+      infiles[i].analyzeRhythm();
 
       if (parsubQ) {
-         analyzeMaxSubSpines(infile, parmax);
+         analyzeMaxSubSpines(infiles[i], parmax);
       } else {
-         parmax.setSize(infile.getMaxTracks()+1); // [0] is not used.
+         parmax.setSize(infiles[i].getMaxTracks()+1); // [0] is not used.
          parmax.allowGrowth(0);
          parmax.setAll(0);
       }
       Exstart = 0;
-      printOutput(infile);
+      if (strcmp(infiles[i].getFilename(), "") != 0) {
+         cout << "!!!!SEGMENT: " << infiles[i].getFilename() << endl;
+      }
+      printOutput(infiles[i]);
    }
 
    return 0;
@@ -735,4 +740,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 44e01ab1b7dd5ef4f0389394f32a8a5b serialize.cpp [20101110]
+// md5sum: 54fdf298b2e78d54794163cea553bafe serialize.cpp [20130404]

@@ -105,6 +105,7 @@ int musicstart = 0;             // for suppressing bars before music starts
 
 Array<int> Barlines;
 
+int  ClefOctaveTranspose = 0;   // used to fix bug in MusicXML vocal tenor clef notes
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -155,13 +156,13 @@ void getBarlines(Array<int>& barlines, HumdrumFile& infile) {
    barlines.setSize(0);
    int i;
    int datafoundQ = 0;
-   int exinterpline = 0;
+   // int exinterpline = 0;
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].isData()) {
          datafoundQ = 1;
       }
       if (strncmp(infile[i][0], "**", 2) == 0) {
-         exinterpline = i;
+         // exinterpline = i;
          barlines.append(i);
       }
       if (!infile[i].isMeasure()) {
@@ -232,6 +233,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       usage(opts.getCommand());
       exit(0);
    } else if (opts.getBoolean("example")) {
+      ClefOctaveTranspose = 0;
       example();
       exit(0);
    }
@@ -427,6 +429,7 @@ void makePart(HumdrumFile& infile, int start, int track, int count) {
    minit = 0;  
    musicstart = 0;
    AbsTick = 0;
+   ClefOctaveTranspose = 0;  // reset any clef transposition from previous part
 
    checkMeasure();
    lev++;
@@ -890,6 +893,7 @@ void convertAttributeToXML(HumdrumFile& infile, int line, int col, int voice) {
       lev--;
       pline(lev, "</attributes>\n");  // att
       lev--;                          // att
+      ClefOctaveTranspose = 0;
 
    } else if (strcmp(infile[line][col], "*clefG2") == 0) {
       checkMeasure();
@@ -908,7 +912,29 @@ void convertAttributeToXML(HumdrumFile& infile, int line, int col, int voice) {
       lev--;
       pline(lev, "</attributes>\n");  // att
       lev--;                          // att
+      ClefOctaveTranspose = 0;
+
+   } else if (strcmp(infile[line][col], "*clefGv2") == 0) {
+      checkMeasure();
+      lev++;
+//      if (!attributes) {
+         pline(lev, "<attributes>\n");
+         lev++;
+//         attributes = 1;
+//      }
+      pline(lev, "<clef>\n");
+      lev++;
+      pline(lev, "<sign>G</sign>\n");
+      pline(lev, "<line>2</line>\n");
+      pline(lev, "<clef-octave-change>-1</clef-octave-change>\n");
+      lev--;
+      pline(lev, "</clef>\n");
+      lev--;
+      pline(lev, "</attributes>\n");  // att
+      lev--;                          // att
+      ClefOctaveTranspose = -1;
    }
+
 
 }
 
@@ -1036,9 +1062,11 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
  
    double output = 0;
 
-   int explicitz = 0;
+   // int explicitz = 0;
    int altered = 0;
    int pitch = Convert::kernToBase40(buffer);
+   // Sibelius interprets vocal tenor clef improperly, uncomment to fix:
+   // pitch = pitch - 40 * ClefOctaveTranspose;
    char buff2[64] = {0};
    if (pitch > 0) {
       Convert::base40ToKern(buff2, pitch);
@@ -1057,10 +1085,10 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
       altered = 1;
    } else if (strstr(buffer, "n") != NULL) {
       altered = 0;
-      explicitz = 1;
+      // explicitz = 1;
    } else {
       altered = 0;
-      explicitz = 0;
+      // explicitz = 0;
    }
    char diapitch = toupper(buff2[0]);
    int octave = 0;
@@ -1203,21 +1231,19 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
    double newduration = rat.getFloat();
    RationalNumber ratout = 1;
 
+   // newduration should be in terms of quarter note durations
+   // whole = 4.0; half - 0.5, etc.
+   double tempval = 0.0;
    if (newduration > 0.0) {
-      double tempval =  log10(newduration)/log10(2);
-      if (tempval > 0.0) {
-         tempval = int(tempval);
-         ratout *= (int)pow(2.0,tempval);
-      } else {
-         tempval = -int(-tempval);
-         ratout /= (int)pow(2.0,-tempval);
-      }
-      newduration = pow(2.0,tempval);
-      Convert::durationToKernRhythm(durstring, newduration);
-      printDurationType(durstring);
-   } else {
-      printDurationType(nodots.getBase());
+      double base2val =  log10(newduration)/log10(2);
+      tempval = pow(2.0, floor(base2val + 0.99));
    }
+
+   Convert::durationToKernRhythm(durstring, tempval);
+   ratout = Convert::kernToDurationR(durstring);
+
+   printDurationType(durstring);
+   // printDurationType(nodots.getBase());
 
    cout << "</type>\n";
 
@@ -1823,8 +1849,9 @@ void generatePartInfo(HumdrumFile& infile, int start, int col, int count) {
       pline(lev, "<part-name>");
       cout << &(infile[i][j][2]) << "</part-name>\n";
    } else {
-      pline(lev, "<part-name>XPart ");
-      cout << col << "</part-name>\n";
+      // pline(lev, "<part-name>XPart ");
+      // cout << col << "</part-name>\n";
+      pline(lev, "<part-name></part-name>\n");
    }
  
    lev--;
@@ -1860,3 +1887,4 @@ void usage(const char* command) {
 
 
 // md5sum: d9a746f91d3d9f2aca6d312361b88ef1 hum2xml.cpp [20130329]
+//

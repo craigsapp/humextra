@@ -20,6 +20,7 @@
 // Last Modified: Mon Apr  9 17:27:58 PDT 2012 NBC changes to features
 // Last Modified: Thu May 24 12:28:08 PDT 2012 added -u and -I options
 // Last Modified: Mon Nov 12 13:56:29 PST 2012 added !noff: processing
+// Last Modified: Sun Apr  7 00:38:49 PDT 2013 Enabled multiple segment input
 // Filename:      ...museinfo/examples/all/tindex.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/tindex.cpp
 // Syntax:        C++; museinfo
@@ -304,9 +305,9 @@ int pstate[PSTATESIZE] = {0};   // true for printing of particular feature
 int main(int argc, char** argv) {
    checkOptions(options, argc, argv); // process the command-line options
 
-   int i;
+   int i, j;
    int numinputs = options.getArgCount();
-   HumdrumFile infile;
+   HumdrumFileSet infiles;
 
    // use --verbose to print default settings.
    if (!quietQ) {
@@ -342,12 +343,13 @@ int main(int argc, char** argv) {
 
 
    for (i=0; i<numinputs || i==0; i++) {
-      infile.clear();
 
       // if no command-line arguments read data file from standard input
       if (numinputs < 1) {
-         infile.read(cin);
-         createIndex(infile, "");
+         infiles.read(cin);
+         for (j=0; j<infiles.getCount(); j++) {
+            createIndex(infiles[j], infiles[j].getFilename());
+         }
       } else {
          processArgument(options.getArg(i+1));
       }
@@ -367,7 +369,7 @@ int main(int argc, char** argv) {
 //
 
 void processArgument(const char* path) {
-   HumdrumFile infile;
+   HumdrumFileSet infiles;
    DIR* dir = NULL;
    char* fullname;
    struct dirent* entry;
@@ -389,8 +391,11 @@ void processArgument(const char* path) {
       if (!valid) {
          return;
       }
-      infile.read(path);
-      createIndex(infile, path);
+      infiles.read(path);
+      int i;
+      for (i=0; i<infiles.getCount(); i++) {
+         createIndex(infiles[i], infiles[i].getFilename());
+      }
    } else if (is_directory(path)) {
       dir = opendir(path);
       if (dir == NULL) {
@@ -503,6 +508,8 @@ void createIndex(HumdrumFile& infile, const char* filename) {
       printname.setSize(strlen(filename) + 1);
       strcpy(printname.getBase(), filename);
    }
+
+   pre.sar(printname, ":", "&colon;", "g");
 
    if (polyQ) {
       for (i=1; i<=maxtracks; i++) {
@@ -2372,7 +2379,7 @@ void fillIstnDatabase(Array<ISTN>& istndatabase, const char* istnfile) {
 char identifyLongMarker(HumdrumFile& infile) {
    int i;
    PerlRegularExpression pre;
-   int hasLongQ = 0;
+   // int hasLongQ = 0;
    int longchar = 0;
    for (i=infile.getNumLines()-1; i>=0; i--) {
       if (!infile[i].isBibliographic()) {
@@ -2380,7 +2387,7 @@ char identifyLongMarker(HumdrumFile& infile) {
       }       
       if (pre.search(infile[i][0], 
             "^!!!RDF\\*\\*kern\\s*:\\s*([^\\s=])\\s*=.*long", "i")) {
-         hasLongQ = 1;
+         // hasLongQ = 1;
          longchar = pre.getSubmatch(1)[0];
          break;
       }
