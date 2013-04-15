@@ -189,6 +189,7 @@ void printTriadImage(HumdrumFile& infile, int rows, int cols) {
       }
 
       if (!(majQ || minQ)) {
+cerr << cq[i] << "\t" << cq[i].getTypeName() << endl;
          continue;
       }
       start = infile[i].getAbsBeat();
