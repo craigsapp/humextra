@@ -182,6 +182,7 @@ class HumdrumFile : public HumdrumFileBasic {
       void        getTnNormalForm    (Array<int>& tnorm, int line);
       void        getBase12PitchList (Array<int>& list, int line);
       const char* getTnSetName       (int line);
+      void        getTnSetNameAllSubsets(Array<int>& list, int line);
 
 
       void analyzeDataIndex(Array<int>& indices, int segment = -1);

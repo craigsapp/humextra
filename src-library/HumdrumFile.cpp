@@ -4384,6 +4384,20 @@ const char* HumdrumFile::getTnSetName(int line) {
 
 //////////////////////////////
 //
+// HumdrumFile::getTnSetNameAllSubsets --
+//
+
+void HumdrumFile::getTnSetNameAllSubsets(Array<int>& list, int line) {
+   Array<int> base12;
+   this->getBase12PitchList(base12, line);
+   list.setSize(0);
+   Convert::base12ToTnSetNameAllSubsets(list, base12);
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFile::getTnNormalForm -- 0-transposed normal form.
 //
 
