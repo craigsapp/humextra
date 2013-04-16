@@ -3,6 +3,7 @@
 // Creation Date: Thu Mar 17 07:46:28 PDT 2011
 // Last Modified: Thu Mar 17 07:46:35 PDT 2011
 // Last Modified: Mon Apr  1 12:06:53 PDT 2013 Enabled multiple segment input
+// Last Modified: Mon Apr 15 18:24:31 PDT 2013 Added subset forms
 // Filename:      ...sig/examples/all/tntype.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/tntype.cpp
 // Syntax:        C++; museinfo
@@ -63,6 +64,7 @@ int          infoQ     = 0;      // used with -D option
 int          forteQ    = 0;      // used with --forte option
 int          tnQ       = 0;      // used with --tn option
 int          normQ     = 0;      // used with -n option
+int          subsetQ   = 0;      // used with -k option
 int          tnormQ    = 0;      // used with -t option
 int          verboseQ  = 0;      // used with -v option
 int          tniQ      = 0;      // used with --tni option
@@ -117,6 +119,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("d|notes=b",    "display pitch classes in sonority");
    opts.define("n|norm=b",     "display normal form of pitch sets");
    opts.define("D|description=b", "display musical Description of Tn type");
+   opts.define("k|combinations|subsets=b", "display all subset forms");
    opts.define("f|form|tnorm=b", "display transposed normal form of pitch sets");
    opts.define("i|iv|ic=b",    "print interval vector");
    opts.define("x|sonor|suspension=b", "print marker if not all start attacks");
@@ -160,6 +163,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    forteQ    =  opts.getBoolean("forte");
    rotationQ =  opts.getBoolean("rotation");
    tnQ       =  opts.getBoolean("Tn");
+   subsetQ   =  opts.getBoolean("combinations");
    verboseQ  =  opts.getBoolean("verbose");
    if (tnQ) {
       forteQ = 1;
@@ -204,8 +208,8 @@ void example(void) {
 
 //////////////////////////////
 //
-// processRecords -- looks at humdrum records and determines chord
-//	sonority quality;
+// processRecords -- looks at humdrum records and determines pitch-class sets
+//      from sonorities made of simultaneously sounding notes.
 //
 
 void processRecords(HumdrumFile& infile) {
@@ -414,6 +418,51 @@ void processRecords(HumdrumFile& infile) {
                } else {
                   cout << ".";
                }
+               cout << endl;
+
+            } else if (subsetQ) {
+               Array<int> tnnames;
+               infile.getTnSetNameAllSubsets(tnnames, i);
+               int cardinality;
+               int enumeration;
+               int inversion;
+               int transpose;
+               for (int ii=tnnames.getSize()-1; ii>=0; ii--) {
+                  // tntypes are sorted from smallest subset to largest
+                  // but want to print from largest to smallest
+                  // 302200 --> 3-2B
+                  cardinality = (tnnames[ii] % 10000000) / 100000;
+                  enumeration = (tnnames[ii] % 100000  ) / 1000;
+                  inversion   = (tnnames[ii] % 1000    ) / 100;
+                  transpose   = (tnnames[ii] % 100);
+                  cout << cardinality << "-" << enumeration;
+                  switch (inversion) {
+                     case 1: cout << "A"; break;
+                     case 2: cout << "B"; break;
+                  }
+                  // if (transQ) ...
+                  if (ii > 0) {
+                     cout << " ";
+                  }
+               }
+
+               // if (rotationQ) {
+               //    printRotation(infile, i);
+               // }
+               // if (attackQ) {
+               //    printAttackMarker(infile, i);
+               // }
+               // if (transQ) {
+               //    Array<int> norm;
+               //    infile.getNormalForm(norm, i);
+               //    if (norm.getSize() > 0) {
+               //       cout << "T";
+               //       if (norm[0] < 10) {
+               //          cout << "0";
+               //       }
+               //       cout << norm[0];
+               //    }
+               // }
                cout << endl;
 
             } else {
