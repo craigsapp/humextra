@@ -4,6 +4,7 @@
 // Last Modified: Sun Jun 20 13:35:41 PDT 2010 added rational rhythms
 // Last Modified: Wed Jan 26 18:14:20 PST 2011 added --debug
 // Last Modified: Tue Apr 12 12:04:23 PDT 2011 fixed findlcm for rational rhys.
+// Last Modified: Mon Apr 15 20:20:18 PDT 2013 Enabled multiple segment input
 // Filename:      ...museinfo/examples/all/minrhy.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/minrhy.cpp
 // Syntax:        C++; museinfo
@@ -43,10 +44,23 @@ int       debugQ = 0;          // used with --debug
 int main(int argc, char** argv) {
    checkOptions(options, argc, argv);
 
-   HumdrumFile hfile;
+   HumdrumFileSet infiles;
+
+   int i, j;
+   // figure out the number of input files to process
+   int numinputs = options.getArgCount();
+
+   if (numinputs < 1) {
+      infiles.read(cin);
+   } else {
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
+      }
+   }
+
    Array<RationalNumber> timebase;
    RationalNumber zeroR(0, 1);
-   timebase.setSize(argc-1);
+   timebase.setSize(infiles.getCount());
    timebase.setAll(zeroR);
    timebase.allowGrowth(0);
    Array<RationalNumber> rhythms;
@@ -55,20 +69,14 @@ int main(int argc, char** argv) {
    allrhythms.setSize(0);
    allrhythms.setGrowth(1000);
 
-   int i, j;
-   // figure out the number of input files to process
-   int numinputs = options.getArgCount();
-   
    // can't handle standard input yet
-   for (i=1; i<=numinputs; i++) {
-      hfile.clear();
-      hfile.read(options.getArg(i));
-      hfile.analyzeRhythm();
-      if (numinputs > 1) {
-         cout << argv[i] << ":\t";
+   for (i=0; i<infiles.getCount(); i++) {
+      infiles[i].analyzeRhythm();
+      if (infiles.getCount() > 1) {
+         cout << infiles[i].getFilename() << ":\t";
       }
       if (listQ) {
-         hfile.getRhythms(rhythms);
+         infiles[i].getRhythms(rhythms);
          sortArray(rhythms);
          uniqArray(rhythms);
          for (j=0; j<rhythms.getSize(); j++) {
@@ -80,12 +88,12 @@ int main(int argc, char** argv) {
          }
 	 cout << "\n";
       } else {
-         cout << hfile.getMinTimeBaseR() << "\n";
+         cout << infiles[i].getMinTimeBaseR() << "\n";
       }
-      timebase[i-1] = hfile.getMinTimeBaseR();
+      timebase[i] = infiles[i].getMinTimeBaseR();
    }
 
-   if (numinputs > 1) {
+   if (infiles.getCount() > 1) {
       if (listQ) {
          cout << "all:\t";
          for (j=0; j<allrhythms.getSize(); j++) {
@@ -96,10 +104,11 @@ int main(int argc, char** argv) {
          }
 	 cout << "\n";
       } else {
-         cout << "all:\t" << findlcmR(timebase) << endl;
+         if (infiles.getCount() > 1) {
+            cout << "all:\t" << findlcmR(timebase) << endl;
+         }
       }
    }
-
 }
 
 
