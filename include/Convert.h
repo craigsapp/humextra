@@ -129,6 +129,8 @@ class Convert {
 
    // convsions related to serial interval descriptions
       static const char* base12ToTnSetName        (Array<int>& base12);
+      static void        base12ToTnSetNameAllSubsets(Array<int>& list, 
+                                                   Array<int>& notes);
       static void      base12ToTnNormalForm       (Array<int>& tnorm, 
                                                    Array<int>& base12);
       static void      base12ToNormalForm         (Array<int>& nform, 
@@ -140,14 +142,18 @@ class Convert {
 
    protected:
       // findBestNormalRotation used with bse12ToNormalForm
-      static int     findBestNormalRotation     (Array<int>& input, int asize, 
-                                                 Array<int>& choices);
+      static int     findBestNormalRotation   (Array<int>& input, int asize, 
+                                               Array<int>& choices);
 
-      static int     calculateInversion         (int aType, int bassNote, 
-                                                    int root);
-      static int     checkChord                 (const SigCollection<int>& aSet);
-      static int     intcompare                 (const void* a, const void* b);
-      static void    rotatechord                (SigCollection<int>& aChord);
+      static int     calculateInversion       (int aType, int bassNote, 
+                                               int root);
+      static int     checkChord               (const SigCollection<int>& aSet);
+      static int     intcompare               (const void* a, const void* b);
+      static void    rotatechord              (SigCollection<int>& aChord);
+      static void    addCombinations          (Array<Array<int> >& combinations,
+                                               Array<int>& input, 
+                                               Array<int>& temp, 
+                                               int q=0, int r=0);
 
 
 };

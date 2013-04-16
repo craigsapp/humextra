@@ -39,11 +39,13 @@
 #include "PerlRegularExpression.h"
 
 #ifndef OLDCPP
+   #include <map>
    #include <sstream>
    #define SSTREAM stringstream
    #define CSTRING str().c_str()
    using namespace std;
 #else
+   #include <map.h>
    #ifdef VISUAL
       #include <strstrea.h>     /* for Windows 95 */
    #else
@@ -51,6 +53,7 @@
    #endif
    #define SSTREAM strstream
    #define CSTRING str()
+   
 #endif
    
 
@@ -1974,13 +1977,13 @@ int Convert::transToBase40(const char* buffer) {
    }
 
    int dsign = 1;
-   int csign = 1;
+   // int csign = 1;
    if (dval < 0) {
       dsign = -1;
    } 
-   if (cval < 0) {
-      csign = -1;
-   } 
+   // if (cval < 0) {
+   //    csign = -1;
+   // } 
 
    int doctave = dsign * dval / 7;
    // int coctave = csign * cval / 12;
@@ -2785,6 +2788,103 @@ void Convert::base12ToTnNormalForm(Array<int>& tnorm, Array<int>& base12) {
    int reference = tnorm[0];
    for (i=0; i<tnorm.getSize(); i++) {
       tnorm[i] = (tnorm[i] - reference + 144) % 12;
+   }
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base12ToTnSetNameAllSubsets -- given an input of base12 pitches, 
+// return the Tn set names for all pitch-class subsets for that unsorted 
+// collection (which may contain repeats).  The names are returned as
+// integers which encodes Forte numbers in this form:   nnnCCccLtt
+//    where nnn = the number of subsets containing that name (0 if no
+//    counting of subsets was generated.
+//    CC = the cardinality (number of unique pitch classes)
+//    cc = compactness enumeration for that cardinality
+//    L  = 0 for prime form (undetermined inversion), 1 = prime form is
+//         generated without inversion, 2 = prime form is generated with
+//         inversion.
+//    tt  = transpostion to reconstruct transposed normal form (original
+//          pitch classes)
+//    Example: 3-11BT05 ->  [0]311205
+//
+//    Note: transpostion is currently always set to 0, so need to add later.
+//
+
+void Convert::base12ToTnSetNameAllSubsets(Array<int>& list, Array<int>& notes) {
+   Array<int> tnorm;
+
+   // calculate the transposed normal form.  This makes the pitch-classes
+   // unique and compacts them while preserving the original pitch-class
+   // value (normal form would transpose the first pitch-class in the
+   // transposed normal form to 0.  
+   Convert::base12ToTnNormalForm(tnorm, notes);
+   int pcount = tnorm.getSize();
+
+   int i;
+   // generate all possible combinations of the pitch classes in tnorm;
+   Array<Array<int> > combinations;
+   combinations.setSize(1 << pcount); // leaving some extra space
+   list.setSize(combinations.getSize());
+   combinations.setSize(0);
+   list.setSize(0);
+   combinations.append(tnorm);
+   Array<int> temp;
+   for (i=pcount-1; i>1; i--) {
+      temp.setSize(i);
+      addCombinations(combinations, tnorm, temp);
+   }
+
+   map<int, int> tnlist;
+   const char* name;
+   int cardinality;
+   int enumeration;
+   int number;
+   for (i=0; i<combinations.getSize(); i++) {
+      name = Convert::base12ToTnSetName(combinations[i]);
+      if (sscanf(name, "%d-%d", &cardinality, &enumeration)) {
+         number = cardinality * 100000 + enumeration * 1000;
+         if (strchr(name, 'A') != NULL) {
+            number += 100;
+         } else if (strchr(name, 'B') != NULL) {
+            number += 200;
+         }
+      }
+      tnlist[number]++;
+   }
+
+   list.setSize(tnlist.size());
+   i = 0;
+   for (map<int,int>::iterator it=tnlist.begin(); it != tnlist.end(); it++ ) {
+      list[i++] = it->first;
+       // it->second contains the value (count of occurences)
+   }
+}
+
+
+
+//////////////////////////////
+//
+// Convert::addCombinations -- used in base12ToTnSetNameAllSubsets.
+//     Given a list of unique pitch-classes and a subset size, the
+//     function calculates all possible subsets of that given
+//     size from the pitch classes in the input array.  The results
+//     are appended to combinations.  The temp array should be prepared
+//     to have the same length as the desired sub-set size.
+//     default values: q=0, r=0
+//
+
+void Convert::addCombinations(Array<Array<int> >& combinations,
+      Array<int>& input, Array<int>& temp, int q, int r) {
+   if (q == temp.getSize()) {
+      combinations.append(temp);
+   } else {
+      for(int i=r; i<input.getSize(); i++) {
+         temp[q]=input[i];
+         addCombinations(combinations, input, temp, q+1, i+1);
+      }
    }
 }
 
