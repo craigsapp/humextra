@@ -3,46 +3,47 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon May 18 13:43:47 PDT 1998
 // Last Modified: Thu Jul  1 16:19:35 PDT 1999
-// Last Modified: Thu Apr 13 18:43:34 PDT 2000 (added generalized ex interps)
-// Last Modified: Sat May  6 14:52:19 PDT 2000 (added appendCompositeDuration)
-// Last Modified: Mon Dec  4 14:23:17 PST 2000 (after many analysis funtions)
-// Last Modified: Wed Dec  6 13:22:08 PST 2000 (added analyzeMetricLevel())
-// Last Modified: Sat Dec 16 13:37:19 PST 2000 (added analyzeDataIndex())
-// Last Modified: Sat Dec 16 14:41:14 PST 2000 (added analyzeCliche())
-// Last Modified: Wed Dec 27 20:19:43 PST 2000 (improved combine functions)
-// Last Modified: Wed Jan 10 12:21:22 PST 2001 (added analyzeChordProbability())
-// Last Modified: Sun Feb 11 16:01:26 PST 2001 (analyzeChordProbabilityDur())
-// Last Modified: Fri Apr  6 13:51:44 PDT 2001 (analyzeChordLikelihood())
-// Last Modified: Sun May 13 12:42:43 PDT 2001 (getNoteArray())
-// Last Modified: Sat Jun  9 15:10:26 PDT 2001 (added getMinTimeBase() functs)
-// Last Modified: Mon Nov  5 17:55:54 PST 2001 (added getNextDatum/getLastDatum)
-// Last Modified: Mon Nov 19 23:52:13 PST 2001 (made define ROUNDERR)
-// Last Modified: Wed Jan  2 12:07:52 PST 2002 (added **koto to analyzeRhythm)
-// Last Modified: Sun Mar 24 12:10:00 PST 2002 (small changes for visual c++)
-// Last Modified: Mon Apr 29 22:41:32 PDT 2002 (fixed getTiedDuration for 
-//                                              spine change (not perfect))
-// Last Modified: Wed Jan  1 22:27:59 PST 2003 (extracted Maxwell functions)
-// Last Modified: Mon Feb 10 17:56:13 PST 2003 (added getNoteArray2)
-// Last Modified: Thu Mar 18 23:11:14 PST 2004 (removd blank lines frm assemble)
-// Last Modified: Mon May 17 00:16:55 PDT 2004 (fix multiple part *v in combine)
-// Last Modified: Sat Jun  5 01:43:45 PDT 2004 (adjusted metric analysis)
-// Last Modified: Wed Jun 16 21:15:06 PDT 2004 (indep. tracks in analyzeKeyKS)
-// Last Modified: Thu Jun 17 23:04:17 PDT 2004 (fixed combine termination)
-// Last Modified: Sat Jun 26 00:43:48 PDT 2004 (spaceEmptyLines adjusted)
-// Last Modified: Sun Jun 27 01:28:56 PDT 2004 (fixed rhythm parsing interrupted
-//                                              by spine manipulators)
-// Last Modified: Mon Jun  5 06:59:27 PDT 2006 (add fixIrritatingPickupProblem)
-// Last Modified: Tue Jan 29 09:05:26 PST 2008 (fixed array bounds bug in 
-//                                              fixIrritatingPickupProblem())
-// Last Modified: Tue Oct 14 16:56:54 PDT 2008 (added 'Q' groupetto parsing)
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
-// Last Modified: Fri Jun 19 23:24:03 PDT 2009 (fixed malformed meter parsing)
-// Last Modified: Sat Sep  5 22:03:28 PDT 2009 (ArrayInt to Array<int>)
-// Last Modified: Mon Oct 12 15:49:27 PDT 2009 (fixed "*clef *v *v" type cases)
-// Last Modified: Sat May 22 10:52:36 PDT 2010 (added RationalNumber)
-// Last Modified: Thu Oct 28 21:22:51 PDT 2010 (some fixing of combine())
-// Last Modified: Sat Dec 25 13:07:09 PST 2010 (minrhythm fix with dots)
-// Last Modified: Wed Feb  2 17:51:57 PST 2011 (partial fix for breve beat)
+// Last Modified: Thu Apr 13 18:43:34 PDT 2000 Added generalized ex interps
+// Last Modified: Sat May  6 14:52:19 PDT 2000 Added appendCompositeDuration
+// Last Modified: Mon Dec  4 14:23:17 PST 2000 After many analysis funtions
+// Last Modified: Wed Dec  6 13:22:08 PST 2000 Added analyzeMetricLevel()
+// Last Modified: Sat Dec 16 13:37:19 PST 2000 Added analyzeDataIndex()
+// Last Modified: Sat Dec 16 14:41:14 PST 2000 Added analyzeCliche()
+// Last Modified: Wed Dec 27 20:19:43 PST 2000 Improved combine functions
+// Last Modified: Wed Jan 10 12:21:22 PST 2001 Added analyzeChordProbability()
+// Last Modified: Sun Feb 11 16:01:26 PST 2001 AnalyzeChordProbabilityDur()
+// Last Modified: Fri Apr  6 13:51:44 PDT 2001 AnalyzeChordLikelihood()
+// Last Modified: Sun May 13 12:42:43 PDT 2001 getNoteArray()
+// Last Modified: Sat Jun  9 15:10:26 PDT 2001 Added getMinTimeBase() functs
+// Last Modified: Mon Nov  5 17:55:54 PST 2001 Added getNextDatum/getLastDatum
+// Last Modified: Mon Nov 19 23:52:13 PST 2001 Made define ROUNDERR
+// Last Modified: Wed Jan  2 12:07:52 PST 2002 Added **koto to analyzeRhythm
+// Last Modified: Sun Mar 24 12:10:00 PST 2002 Small changes for visual c++
+// Last Modified: Mon Apr 29 22:41:32 PDT 2002 Fixed getTiedDuration for 
+//                                              spine change (not perfect)
+// Last Modified: Wed Jan  1 22:27:59 PST 2003 Extracted Maxwell functions
+// Last Modified: Mon Feb 10 17:56:13 PST 2003 Added getNoteArray2
+// Last Modified: Thu Mar 18 23:11:14 PST 2004 Removd blank lines frm assemble
+// Last Modified: Mon May 17 00:16:55 PDT 2004 Fix multiple part *v in combine
+// Last Modified: Sat Jun  5 01:43:45 PDT 2004 Adjusted metric analysis
+// Last Modified: Wed Jun 16 21:15:06 PDT 2004 Indep. tracks in analyzeKeyKS
+// Last Modified: Thu Jun 17 23:04:17 PDT 2004 Fixed combine termination
+// Last Modified: Sat Jun 26 00:43:48 PDT 2004 spaceEmptyLines adjusted
+// Last Modified: Sun Jun 27 01:28:56 PDT 2004 Fixed rhythm parsing interrupted
+//                                              by spine manipulators
+// Last Modified: Mon Jun  5 06:59:27 PDT 2006 Add fixIrritatingPickupProblem
+// Last Modified: Tue Jan 29 09:05:26 PST 2008 Fixed array bounds bug in 
+//                                              fixIrritatingPickupProblem()
+// Last Modified: Tue Oct 14 16:56:54 PDT 2008 Added 'Q' groupetto parsing
+// Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed SigCollection class
+// Last Modified: Fri Jun 19 23:24:03 PDT 2009 Fixed malformed meter parsing
+// Last Modified: Sat Sep  5 22:03:28 PDT 2009 ArrayInt to Array<int>
+// Last Modified: Mon Oct 12 15:49:27 PDT 2009 Fixed "*clef *v *v" type cases
+// Last Modified: Sat May 22 10:52:36 PDT 2010 Added RationalNumber
+// Last Modified: Thu Oct 28 21:22:51 PDT 2010 Some fixing of combine()
+// Last Modified: Sat Dec 25 13:07:09 PST 2010 Minrhythm fix with dots
+// Last Modified: Wed Feb  2 17:51:57 PST 2011 Partial fix for breve beat
+// Last Modified: Tue Apr 16 23:18:16 PDT 2013 Added attackQ to gBase12PchLst
 // Filename:      ...sig/src/sigInfo/HumdrumFile.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/HumdrumFile.cpp
 // Syntax:        C++ 
@@ -2532,10 +2533,10 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
    SigCollection<RationalNumber> lastdurations;
    SigCollection<RationalNumber> runningstatus;
 
-   int fixedTimebase = 0;
+   // int fixedTimebase = 0;
    RationalNumber timebase = 4;
    if (strcmp(base, "") != 0) {
-      fixedTimebase = 1;
+      // fixedTimebase = 1;
       int tempval;
       sscanf(base, "%d", &tempval);
       timebase = tempval;
@@ -4302,10 +4303,12 @@ int HumdrumFile::analyzeKeyKS2(Array<double>& scores, int startindex,
 //
 // HumdrumFile::getNormalForm --
 //
+// Default value: attackQ = 0
+//
 
-void HumdrumFile::getNormalForm(Array<int>& norm, int line) {
+void HumdrumFile::getNormalForm(Array<int>& norm, int line, int attackQ) {
    Array<int> base12;
-   this->getBase12PitchList(base12, line);
+   this->getBase12PitchList(base12, line, attackQ);
    Convert::base12ToNormalForm(norm, base12);
 }
 
@@ -4316,10 +4319,15 @@ void HumdrumFile::getNormalForm(Array<int>& norm, int line) {
 // getBase12PitchList --  Returns a list of the MIDI note numbers
 //    for all pitches sounding in **kern spines on the given line.
 //    Both notes which are started on the current line and ones which
-//    are sustained from a previous line are included.
+//    are sustained from a previous line are included.  If attackQ is
+//    true, then only consider notes attacked on the current line; otherwise,
+//    include all notes, both sustained from previous lines and notes
+//    attacked starting on the given line.
+//
+//    Default value: attackQ = 0
 //
 
-void HumdrumFile::getBase12PitchList(Array<int>& list, int line) {
+void HumdrumFile::getBase12PitchList(Array<int>& list, int line, int attackQ) {
    HumdrumRecord& arecord = (*this)[line];
    list.setSize(arecord.getFieldCount());
    list.setSize(0);
@@ -4336,6 +4344,9 @@ void HumdrumFile::getBase12PitchList(Array<int>& list, int line) {
       ii = line;
       jj = j;
       if (strcmp(arecord[j], ".") == 0) {
+         if (attackQ) {
+            continue;
+         }
          ii = arecord.getDotLine(j);
          jj = arecord.getDotSpine(j);
          if (ii < 0 || jj < 0) {
@@ -4348,6 +4359,12 @@ void HumdrumFile::getBase12PitchList(Array<int>& list, int line) {
       tcount = (*this)[ii].getTokenCount(jj);
       for (k=0; k<tcount; k++) {
          (*this)[ii].getToken(buffer, jj, k);
+         if (attackQ && (strchr(buffer, '_') != NULL)) {
+            continue;
+         }
+         if (attackQ && (strchr(buffer, ']') != NULL)) {
+            continue;
+         }
          value = Convert::kernToMidiNoteNumber(buffer);
          list.append(value);
       }
@@ -4361,9 +4378,9 @@ void HumdrumFile::getBase12PitchList(Array<int>& list, int line) {
 // HumdrumFile::getIntervalVector --
 //
 
-void HumdrumFile::getIntervalVector(Array<int>& iv, int line) {
+void HumdrumFile::getIntervalVector(Array<int>& iv, int line, int attackQ) {
    Array<int> base12;
-   this->getBase12PitchList(base12, line);
+   this->getBase12PitchList(base12, line, attackQ);
    Convert::base12ToIntervalVector(iv, base12);
 }
 
@@ -4371,12 +4388,18 @@ void HumdrumFile::getIntervalVector(Array<int>& iv, int line) {
 
 //////////////////////////////
 //
-// HumdrumFile::getTnSetName --
+// HumdrumFile::getTnSetName -- return the Tn Set Name (Forte number with
+//    A/B variants if necessary).  The attackQ boolean is used for 
+//    selecting only note attacks on the line, if set to 0 (the default),
+//    all notes, both sustained from previous lines and note started on 
+//    the current line, will be considered.
+//
+// Default value attackQ = 0;
 //
 
-const char* HumdrumFile::getTnSetName(int line) {
+const char* HumdrumFile::getTnSetName(int line, int attackQ) {
    Array<int> base12;
-   this->getBase12PitchList(base12, line);
+   this->getBase12PitchList(base12, line, attackQ);
    return Convert::base12ToTnSetName(base12);
 }
 
@@ -4387,9 +4410,10 @@ const char* HumdrumFile::getTnSetName(int line) {
 // HumdrumFile::getTnSetNameAllSubsets --
 //
 
-void HumdrumFile::getTnSetNameAllSubsets(Array<int>& list, int line) {
+void HumdrumFile::getTnSetNameAllSubsets(Array<int>& list, int line, 
+      int attackQ) {
    Array<int> base12;
-   this->getBase12PitchList(base12, line);
+   this->getBase12PitchList(base12, line, attackQ);
    list.setSize(0);
    Convert::base12ToTnSetNameAllSubsets(list, base12);
 }
@@ -4401,9 +4425,9 @@ void HumdrumFile::getTnSetNameAllSubsets(Array<int>& list, int line) {
 // HumdrumFile::getTnNormalForm -- 0-transposed normal form.
 //
 
-void HumdrumFile::getTnNormalForm(Array<int>& tnorm, int line) {
+void HumdrumFile::getTnNormalForm(Array<int>& tnorm, int line, int attackQ) {
    Array<int> base12;
-   this->getBase12PitchList(base12, line);
+   this->getBase12PitchList(base12, line, attackQ);
    Convert::base12ToTnNormalForm(tnorm, base12);
 }
 

@@ -4,6 +4,7 @@
 // Last Modified: Thu Mar 17 07:46:35 PDT 2011
 // Last Modified: Mon Apr  1 12:06:53 PDT 2013 Enabled multiple segment input
 // Last Modified: Mon Apr 15 18:24:31 PDT 2013 Added subset forms
+// Last Modified: Tue Apr 16 23:04:00 PDT 2013 Added attack-only analysis
 // Filename:      ...sig/examples/all/tntype.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/tntype.cpp
 // Syntax:        C++; museinfo
@@ -65,11 +66,12 @@ int          forteQ    = 0;      // used with --forte option
 int          tnQ       = 0;      // used with --tn option
 int          normQ     = 0;      // used with -n option
 int          subsetQ   = 0;      // used with -k option
+int          attackQ   = 0;      // used with -A option
 int          tnormQ    = 0;      // used with -t option
 int          verboseQ  = 0;      // used with -v option
 int          tniQ      = 0;      // used with --tni option
 int          rotationQ = 0;      // used with -r option
-int          attackQ   = 0;      // used with -x option
+int          xsattackQ = 0;      // used with -x option
 int          appendQ   = 0;      // used with -a option
 const char*  notesep   = " ";    // used with -N option
 const char* colorindex[26];
@@ -120,6 +122,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("n|norm=b",     "display normal form of pitch sets");
    opts.define("D|description=b", "display musical Description of Tn type");
    opts.define("k|combinations|subsets=b", "display all subset forms");
+   opts.define("A|attacks|attack=b", "consider only note attaks");
    opts.define("f|form|tnorm=b", "display transposed normal form of pitch sets");
    opts.define("i|iv|ic=b",    "print interval vector");
    opts.define("x|sonor|suspension=b", "print marker if not all start attacks");
@@ -158,12 +161,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
    ivQ       =  opts.getBoolean("iv");
    transQ    =  opts.getBoolean("transpose");
-   attackQ   =  opts.getBoolean("suspension");
+   xsattackQ =  opts.getBoolean("suspension");
    infoQ     =  opts.getBoolean("description");
    forteQ    =  opts.getBoolean("forte");
    rotationQ =  opts.getBoolean("rotation");
    tnQ       =  opts.getBoolean("Tn");
    subsetQ   =  opts.getBoolean("combinations");
+   attackQ   =  opts.getBoolean("attacks");
    verboseQ  =  opts.getBoolean("verbose");
    if (tnQ) {
       forteQ = 1;
@@ -345,7 +349,7 @@ void processRecords(HumdrumFile& infile) {
                      }
                   }
                }
-               if (attackQ) {
+               if (xsattackQ) {
                   printAttackMarker(infile, i);
                }
                cout << endl;
@@ -366,7 +370,7 @@ void processRecords(HumdrumFile& infile) {
                if (rotationQ) {
                   printRotation(infile, i);
                }
-               if (attackQ) {
+               if (xsattackQ) {
                   printAttackMarker(infile, i);
                }
 
@@ -389,7 +393,7 @@ void processRecords(HumdrumFile& infile) {
                if (rotationQ) {
                   printRotation(infile, i);
                }
-               if (attackQ) {
+               if (xsattackQ) {
                   printAttackMarker(infile, i);
                }
                if (transQ) {
@@ -409,7 +413,7 @@ void processRecords(HumdrumFile& infile) {
 	       cout << aString << endl;
             } else if (infoQ) {
                const char* tnname;
-               tnname = infile.getTnSetName(i);
+               tnname = infile.getTnSetName(i, attackQ);
                data.setSize(strlen(tnname)+1);
                strcpy(data.getBase(), tnname);
                pre.sar(data, "Z", "", "g");
@@ -422,11 +426,11 @@ void processRecords(HumdrumFile& infile) {
 
             } else if (subsetQ) {
                Array<int> tnnames;
-               infile.getTnSetNameAllSubsets(tnnames, i);
+               infile.getTnSetNameAllSubsets(tnnames, i, attackQ);
                int cardinality;
                int enumeration;
                int inversion;
-               int transpose;
+               // int transpose;
                for (int ii=tnnames.getSize()-1; ii>=0; ii--) {
                   // tntypes are sorted from smallest subset to largest
                   // but want to print from largest to smallest
@@ -434,7 +438,7 @@ void processRecords(HumdrumFile& infile) {
                   cardinality = (tnnames[ii] % 10000000) / 100000;
                   enumeration = (tnnames[ii] % 100000  ) / 1000;
                   inversion   = (tnnames[ii] % 1000    ) / 100;
-                  transpose   = (tnnames[ii] % 100);
+                  // transpose   = (tnnames[ii] % 100);
                   cout << cardinality << "-" << enumeration;
                   switch (inversion) {
                      case 1: cout << "A"; break;
@@ -449,7 +453,7 @@ void processRecords(HumdrumFile& infile) {
                // if (rotationQ) {
                //    printRotation(infile, i);
                // }
-               // if (attackQ) {
+               // if (xsattackQ) {
                //    printAttackMarker(infile, i);
                // }
                // if (transQ) {
@@ -467,7 +471,7 @@ void processRecords(HumdrumFile& infile) {
 
             } else {
                const char* tnname;
-               tnname = infile.getTnSetName(i);
+               tnname = infile.getTnSetName(i, attackQ);
                if (verboseQ) {
                   cout << tnname;
                } else {
@@ -485,7 +489,7 @@ void processRecords(HumdrumFile& infile) {
                if (rotationQ) {
                   printRotation(infile, i);
                }
-               if (attackQ) {
+               if (xsattackQ) {
                   printAttackMarker(infile, i);
                }
                if (transQ) {

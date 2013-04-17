@@ -176,13 +176,18 @@ class HumdrumFile : public HumdrumFileBasic {
       //
       
       // serialisms
-      void        getIntervalVector  (Array<int>& iv, int line);
+      void        getIntervalVector  (Array<int>& iv, int line, 
+                                      int attackQ = 0);
       const char* getForteSetName    (int line);
-      void        getNormalForm      (Array<int>& norm, int line);
-      void        getTnNormalForm    (Array<int>& tnorm, int line);
-      void        getBase12PitchList (Array<int>& list, int line);
-      const char* getTnSetName       (int line);
-      void        getTnSetNameAllSubsets(Array<int>& list, int line);
+      void        getNormalForm      (Array<int>& norm, int line, 
+                                      int attackQ = 0);
+      void        getTnNormalForm    (Array<int>& tnorm, int line,
+                                      int attackQ = 0);
+      void        getBase12PitchList (Array<int>& list, int line, 
+                                      int attackQ = 0);
+      const char* getTnSetName       (int line, int attackQ = 0);
+      void        getTnSetNameAllSubsets(Array<int>& list, int line,
+                                      int attackQ = 0);
 
 
       void analyzeDataIndex(Array<int>& indices, int segment = -1);
