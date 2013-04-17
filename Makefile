@@ -14,7 +14,7 @@
 ##
 
 # targets which don't actually refer to files
-.PHONY : src-programs lib src-library include bin
+.PHONY : src-programs lib src-library include bin update
 
 ###########################################################################
 #                                                                         #
@@ -41,6 +41,18 @@ info:
 library: 
 	$(MAKE) -f Makefile.library
 
+update: library-update programs-update
+
+examples-update: programs-update
+example-update:  programs-update
+program-update:  programs-update
+programs-update: 
+	touch src-programs/*.cpp
+	$(MAKE) -f Makefile.programs
+
+library-update:
+	$(MAKE) -f Makefile.library library
+
 clean:
 	$(MAKE) -f Makefile.library clean
 	-rm -rf bin
@@ -49,7 +61,7 @@ ifneq ($(wildcard external),)
 	(cd external; make clean)
 endif
 
-examples:
+examples: programs
 programs:
 	$(MAKE) -f Makefile.programs
 
