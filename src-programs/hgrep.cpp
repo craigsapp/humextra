@@ -55,6 +55,7 @@ int       singleTokenSearch   (int& column, HumdrumFile& infile, int line,
                                regex_t& re, const char* exstring);
 void      destroyAndSearches  (Array<regex_t>& relist);
 double    getBeatOfNextData   (HumdrumFile& infile, int line);
+void      printDitto          (HumdrumFile& infile, int line);
 
 // User interface variables:
 Options     options;
@@ -71,6 +72,8 @@ int         fracQ           = 0;     // used with -f option
 int         spineQ          = 0;     // used with -s option
 int         beatQ           = 0;     // used with -b option
 int         measureQ        = 0;     // used with -m option
+int         nullQ           = 0;     // used with -n option
+int         parenQ          = 1;     // used with -N,-n option
 int         quietQ          = 0;     // used with -q option
 int         exinterpQ       = 0;     // used with -x option
 int         formQ           = 0;     // used with -F option
@@ -103,7 +106,7 @@ int main(int argc, char** argv) {
    if (numinputs < 1) {
       infiles.read(cin);
    } else {
-      for (i=0; i<numinputs; i++) {
+      for (i=1; i<numinputs+1; i++) {
          infiles.readAppend(options.getArg(i+1));
       }
    }
@@ -163,14 +166,24 @@ void doSearch(const char* searchstring, HumdrumFile& infile,
       }
       if (formQ && !infile[i].isData()) {
          if (!invertQ) {
-            cout << infile[i] << endl;
+            if (nullQ) {
+               printDitto(infile, i);
+               cout << endl;
+            } else {
+               cout << infile[i] << endl;
+            }
          } else {
             if (strcmp(infile[i][0], "*-") == 0) {
                // handled at marker xyga
             } else if (strncmp(infile[i][0], "**", 2) == 0) {
                // handled at marker xyga
             } else {
-               cout << infile[i] << endl;
+               if (nullQ) {
+                  printDitto(infile, i);
+                  cout << endl;
+               } else {
+                  cout << infile[i] << endl;
+               }
             }
         }
       }
@@ -215,6 +228,11 @@ void doSearch(const char* searchstring, HumdrumFile& infile,
             if (!quietQ) {
                // marker xyga
                cout << infile[i];
+               if (nullQ) {
+                  printDitto(infile, i);
+               } else {
+                  cout << infile[i];
+               }
             }
             cout << endl;
          }
@@ -254,7 +272,11 @@ void doSearch(const char* searchstring, HumdrumFile& infile,
             } 
             printPreInfo(filename, infile, measure, i, -1);
             if (!quietQ) {
-               cout << infile[i];
+               if (nullQ) {
+                  printDitto(infile, i);
+               } else {
+                  cout << infile[i];
+               }
             }
             cout << endl;
          }
@@ -265,6 +287,40 @@ void doSearch(const char* searchstring, HumdrumFile& infile,
    regfree(&re);
    if (nomatchfilesQ && matchcount == 0) {
       cout << filename << endl;
+   }
+}
+
+
+
+//////////////////////////////
+//
+// printDitto -- fill in null tokens with/without parentheses
+//
+
+void printDitto(HumdrumFile& infile, int line) {
+   int j, ii, jj;
+   if (!infile[line].isData()) {
+      cout << infile[line] << endl;
+   }
+   int count = infile[line].getFieldCount();
+   int null = 0;
+   for (j=0; j<count; j++) {
+      ii = line;
+      jj = j; 
+      null = 0;
+      if (strcmp(infile[ii][jj], ".") == 0) {
+         ii = infile[line].getDotLine(j);
+         jj = infile[line].getDotSpine(j);
+         null = 1;
+      }
+      if (null && parenQ) {
+         cout << "(" << infile[ii][jj] << ")";
+      } else {
+         cout << infile[ii][jj];
+      }
+      if (j<count-1) {
+         cout << '\t';
+      }
    }
 }
 
@@ -494,7 +550,7 @@ void displayFraction(double fraction) {
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
 
-   opts.define("a|absbeat=b", "display the absolute beat postion of a match");
+   opts.define("a|absbeat=b",  "display the absolute beat postion of a match");
    opts.define("b|beat=b",     "display the metrical beat postion of a match");
    opts.define("B|bibliographic=b", "search only bibliographic records");
    opts.define("C|comment=b",       "search only comment records");
@@ -508,10 +564,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("t|tandem=b",        "search only data records");
    opts.define("s|spine=b",         "display spine number of match");
    opts.define("m|measure=b",       "display measure number of match");
+   opts.define("N|null|ditto=b",    "resolve null tokens like ditto command");
    opts.define("x|exinterp=s",      "search only listed exinterps");
    opts.define("T|tokenize=b",      "search tokens independently");
    opts.define("D|data-stop=b",     "stop search at first data record");
    opts.define("sep|separator=s::", "data separator string");
+   opts.define("no-paren=b",        "don't display null parentheses");
    opts.define("and=s:",            "anded search strings");
 
    // options which mimic regular grep program:
@@ -551,34 +609,36 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    if (opts.getArgCount() < 1) {
       cerr << "Error: you must supply a search string\n";
       exit(1);
-   }
-   searchstring  = opts.getArg(1);
-   basicQ        = opts.getBoolean("basic-regexp");
-   fileQ         = opts.getBoolean("with-filename");
-   matchfilesQ   = opts.getBoolean("files-with-match");
-   nomatchfilesQ = opts.getBoolean("files-without-match");
-   ignorecaseQ   = opts.getBoolean("ignore-case");
-   lineQ         = opts.getBoolean("line-number");
-   invertQ       = opts.getBoolean("invert-match");
+    }
+   searchstring  =  opts.getArg(1);
+   basicQ        =  opts.getBoolean("basic-regexp");
+   fileQ         =  opts.getBoolean("with-filename");
+   matchfilesQ   =  opts.getBoolean("files-with-match");
+   nomatchfilesQ =  opts.getBoolean("files-without-match");
+   ignorecaseQ   =  opts.getBoolean("ignore-case");
+   lineQ         =  opts.getBoolean("line-number");
+   invertQ       =  opts.getBoolean("invert-match");
 
-   absbeatQ      = opts.getBoolean("absbeat");
-   beatQ         = opts.getBoolean("beat");
-   quietQ        = opts.getBoolean("quiet");
-   kernQ         = opts.getBoolean("kern");
-   fracQ         = opts.getBoolean("fraction");
-   dataQ         = opts.getBoolean("data");
-   tandemQ       = opts.getBoolean("tandem");
-   primaryQ      = opts.getBoolean("primary");
-   commentQ      = opts.getBoolean("comment");
-   nonprimaryQ   = opts.getBoolean("nonprimary");
-   bibliographicQ= opts.getBoolean("bibliographic");
-   spineQ        = opts.getBoolean("spine");
-   formQ         = opts.getBoolean("form");
-   measureQ      = opts.getBoolean("measure");
-   tokenizeQ     = opts.getBoolean("tokenize");
-   datastopQ     = opts.getBoolean("data-stop");
-   exinterpQ     = opts.getBoolean("exinterp");
-   exinterps     = opts.getString("exinterp");
+   absbeatQ      =  opts.getBoolean("absbeat");
+   beatQ         =  opts.getBoolean("beat");
+   quietQ        =  opts.getBoolean("quiet");
+   kernQ         =  opts.getBoolean("kern");
+   fracQ         =  opts.getBoolean("fraction");
+   dataQ         =  opts.getBoolean("data");
+   tandemQ       =  opts.getBoolean("tandem");
+   primaryQ      =  opts.getBoolean("primary");
+   commentQ      =  opts.getBoolean("comment");
+   nonprimaryQ   =  opts.getBoolean("nonprimary");
+   bibliographicQ=  opts.getBoolean("bibliographic");
+   spineQ        =  opts.getBoolean("spine");
+   formQ         =  opts.getBoolean("form");
+   measureQ      =  opts.getBoolean("measure");
+   nullQ         =  opts.getBoolean("ditto");
+   parenQ        = !opts.getBoolean("no-paren");
+   tokenizeQ     =  opts.getBoolean("tokenize");
+   datastopQ     =  opts.getBoolean("data-stop");
+   exinterpQ     =  opts.getBoolean("exinterp");
+   exinterps     =  opts.getString("exinterp");
    char tempbuffer[1024] = {0};
    searchAndReplace(tempbuffer, "[\\]t", "	", opts.getString("separator"));
    searchAndReplace(separator, "[\\]n", "\n", tempbuffer);
