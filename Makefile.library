@@ -147,7 +147,9 @@ OBJS = $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/*.cpp)))
 # Hardware Configurations:                                                #
 #                                                                         #
 
-all: makedirs external $(OBJS)
+all: makedirs external library
+
+library: $(OBJS)
 
    ifeq ($(OSTYPE),LINUX)
 	@echo "Creating humextra library file for linux ..."
