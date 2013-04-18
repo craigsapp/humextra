@@ -16,7 +16,7 @@ Compiling
 =========
 
 To compile everything, type within the humextra directory:
-    make
+    ```make```
 
 To compile only the library:
     make library
