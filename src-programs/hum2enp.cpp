@@ -723,6 +723,7 @@ int printSubBeatLevel(HumdrumFile& infile, Array<Coordinate>& items,
 
    RationalNumber minrhy;
    minrhy.setValue(1,2);
+   // minrhy is smallest duration in terms of quarter notes.
    minrhy = getSmallestRhythm(infile, items, notes, noteindex, groupcount);
    indent(LEVEL++); cout << "(" << groupduration << " ("<< endl;
    RationalNumber quarternote(1,4);
@@ -735,8 +736,9 @@ int printSubBeatLevel(HumdrumFile& infile, Array<Coordinate>& items,
       jj = items[notes[i]].j;
 
       indent(LEVEL);
-      notediv = Convert::kernToDurationR(infile[ii][jj]) * minrhy / quarternote;
-      cout << "(" << notediv.getNumerator();
+      notediv = Convert::kernToDurationR(infile[ii][jj]) / minrhy;
+      // cout << "(" << notediv.getNumerator();
+      cout << "(" << notediv;
       cout << " :notes (";
       printMidiNotes(infile, ii, jj);
       cout << ")"; // end of MIDI pitch list

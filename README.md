@@ -96,7 +96,7 @@ Updating
 ========
 
 To update if you downloaded with git:
-   ```git update```
+   ```git pull```
 
 Then either type `make` to recompile the external libraries, the humextra 
 library and the programs, or type `make update` to compile the humextra
@@ -140,6 +140,7 @@ is the value `1`.  Options can also have types `d` for double arguments
 
 For more detailed information about each humextra program, go to the webpage
     http://extras.humdrum.org/man
+
 
 For a basic tutorial on programming with the humextra library, see the webpage
     http://wiki.ccarh.org/wiki/Humdrum_Extras
