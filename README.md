@@ -9,7 +9,8 @@ Downloading
 
 To download from the terminal if you have git installed on your system:
    ```git clone https://github.com/craigsapp/humextra```
-Otherwise you can download from the "zip" link at the top of this page.
+Otherwise you can download from the "zip" link at the top of this page
+(https://github.com/craigsapp/humextra/archive/master.zip).
 
 
 Compiling
