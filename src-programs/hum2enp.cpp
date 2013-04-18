@@ -537,15 +537,17 @@ void printMeasureContent(HumdrumFile& infile, Array<Coordinate>& items) {
          // simple case where the note is an integer number of beats.
          indent(LEVEL);
          if (strchr(infile[ii][jj], 'r') != NULL) {
-            cout << "(" << dur << " ((-" << dur;
+            // this rest has no attributes so not adding an extra paren set
+            // otherwise it would be "((-".
+            cout << "(" << dur << " (-" << 1;
             printTieDot(infile, ii, jj);
-            cout << ")))";
+            cout << "))";
             if (sidecommentQ) {
                cout << "\t; " << infile[ii][jj];
             }
             cout << endl;
          } else {
-            cout << "(" << dur << " ((" << dur;
+            cout << "(" << dur << " ((" << 1;
             printTieDot(infile, ii, jj);
             cout << " :notes (";
             printMidiNotes(infile, ii, jj);
