@@ -64,13 +64,43 @@ int main(int argc, char** argv) {
    }
 
    // if printing segments, then don't do extra work to suppress **/*-:
+   int ii;
+   int hasfilename;
    if (segmentQ && good1) {
-      infiles[0].printSegmentLabel(cout);
-      cout << infiles[0];
+      infiles[0].printNonemptySegmentLabel(cout);
+      if (strcmp(infiles[0].getFilename(), "") == 0) {
+         hasfilename = 0;
+      } else {
+         hasfilename = 1;
+      }
+      for (ii=0; ii<infiles[0].getNumLines(); ii++) {
+         if (hasfilename) {
+            if (strncmp(infiles[0][ii][0], "!!!!SEGMENT", 
+                  strlen("!!!!SEGMENT")) != 0) {
+               cout << infiles[0][ii] << '\n';
+            }
+         } else {
+            cout << infiles[0][ii] << '\n';
+         }
+      }
    }
    if (segmentQ && good2) {
-      infiles[1].printSegmentLabel(cout);
-      cout << infiles[1];
+      infiles[1].printNonemptySegmentLabel(cout);
+      if (strcmp(infiles[1].getFilename(), "") == 0) {
+         hasfilename = 0;
+      } else {
+         hasfilename = 1;
+      }
+      for (ii=0; ii<infiles[1].getNumLines(); ii++) {
+         if (hasfilename) {
+            if (strncmp(infiles[1][ii][0], "!!!!SEGMENT", 
+                  strlen("!!!!SEGMENT")) != 0) {
+               cout << infiles[1][ii] << '\n';
+            }
+         } else {
+            cout << infiles[1][ii] << '\n';
+         } 
+      }
    }
 
    if (!segmentQ) {
@@ -94,9 +124,25 @@ int main(int argc, char** argv) {
    int count = 0;
    while (streamer.read(infiles[currindex])) {
       count++;
+cout << "!! COUNTER = " << count << endl;
+      if (strcmp(infiles[currindex].getFilename(), "") == 0) {
+         hasfilename = 0;
+      } else {
+         hasfilename = 1;
+      }
       if (segmentQ) {
-         infiles[currindex].printSegmentLabel(cout);
-         cout << infiles[currindex];
+         infiles[currindex].printNonemptySegmentLabel(cout);
+         for (ii=0; ii<infiles[currindex].getNumLines(); ii++) {
+            if (hasfilename) {
+               if (strncmp(infiles[currindex][ii][0], "!!!!SEGMENT", 
+                     strlen("!!!!SEGMENT")) != 0) {
+                  cout << infiles[currindex][ii] << '\n';
+               }
+            } else {
+               cout << infiles[currindex][ii] << '\n';
+            } 
+         }
+         currindex = !currindex;
          continue;
       }
 
