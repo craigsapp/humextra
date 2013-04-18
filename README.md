@@ -135,9 +135,9 @@ option requires an integer argument, and the default value if not given
 is the value `1`.  Options can also have types `d` for double arguments 
 (floating-point numbers) and `s` for string arguments.
 
-For more detailed information about each humextra program, go to the webpage:
-    ```http://extras.humdrum.org/man```
+For more detailed information about each humextra program, go to the webpage
+    http://extras.humdrum.org/man
 
-For a basic tutorial on programming with the humextra library, see the webpage:
-    ```http://wiki.ccarh.org/wiki/Humdrum_Extras```
+For a basic tutorial on programming with the humextra library, see the webpage
+    http://wiki.ccarh.org/wiki/Humdrum_Extras
 
