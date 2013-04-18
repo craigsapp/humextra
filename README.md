@@ -38,8 +38,8 @@ Book I fugue 1:
 Installing
 ==========
 
-Compiled programs will be stored in the humextra/bin subdirectory.
-To use these programs from any location in the filesystem, you must tell
+Compiled programs will be stored in the humextra/bin sub-directory.
+To use these programs from any location in the file system, you must tell
 the computer where to search for them.  This is done in the terminal by
 adding the bin directory to the $PATH variable.  Type ```echo $PATH```
 to see what directories are currently being searched for commands.
@@ -73,7 +73,7 @@ To update if you downloaded with git:
    ```git update```
 
 Then either type `make` to recompile the external libraries, the humextra 
-library and the programs, or type `make updatex` to compile the humextra
+library and the programs, or type `make update` to compile the humextra
 library and programs.
 
 When using git to download and update the humextra repository, you can add these
@@ -90,7 +90,27 @@ Documentation
 =============
 
 All humextra programs include an option called `--options` which will list
-all of the options along with their aliases and default values. 
+all of the defined options for the program along with their aliases and default values. 
+For example here is the options list for the barnum program:
+```
+barnum --options
+   r|remove=b
+   s|start=i:1
+   a|all=b
+   debug=b
+   author=b
+   version=b
+   example=b
+   h|help=b
+```
+
+The line `r|remove=b` means that the barnum program accepts an option
+called `-r` or equivalently `--remove` which is a Boolean type of option
+(it does not take arguments, but is rather a switch to turn on a feature
+in the program).  The line `s|start=i:1` means that the `-s` or `--start`
+option requires an integer argument, and the default value if not given
+is the value `1`.  Options can also have types `d` for double arguments 
+(floating-point numbers) and `s` for string arguments.
 
 For more detailed information about each humextra program, go to the webpage:
     ```http://extras.humdrum.org/man```
