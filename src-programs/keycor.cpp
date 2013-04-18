@@ -1,11 +1,11 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun May 13 14:15:43 PDT 2001
-// Last Modified: Sun May 13 14:15:46 PDT 2001
 // Last Modified: Sun Apr 24 12:48:19 PDT 2005
-// Last Modified: Thu May 28 22:30:54 PDT 2009 added continuous analysis
-// Last Modified: Mon Mar  7 14:58:02 PST 2011 added --name option
-// Last Modified: Mon Sep 10 15:43:07 PDT 2012 added enharmonic key labeling
+// Last Modified: Thu May 28 22:30:54 PDT 2009 Added continuous analysis
+// Last Modified: Mon Mar  7 14:58:02 PST 2011 Added --name option
+// Last Modified: Mon Sep 10 15:43:07 PDT 2012 Added enharmonic key labeling
+// Last Modified: Thu Apr 18 13:40:06 PDT 2013 Enabled multiple segment input
 // Filename:      ...sig/examples/all/keycordl.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/keycor.cpp
 // Syntax:        C++; museinfo
@@ -238,7 +238,7 @@ double minorKeyUser[12] = {0};
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile;
+   HumdrumFileSet infiles;
 
    majorKey = majorKeyBellman;
    minorKey = minorKeyBellman;
@@ -258,27 +258,27 @@ int main(int argc, char* argv[]) {
    const char* filename = "";
 
    Array<int> b40hist;
-  
+
    int bestkey = 0;
    int i, j;
-   for (i=0; i<numinputs || i==0; i++) {
-      infile.clear();
 
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-         filename = "";
-      } else {
-         infile.read(options.getArg(i+1));
-         filename = options.getArg(i+1);
+   if (numinputs < 1) {
+      infiles.read(cin);
+   } else {
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
       }
+   }
+  
+   for (i=0; i<infiles.getCount(); i++) {
+      filename = infiles[i].getFilename();
 
       if (continuousQ) {
-         analyzeContinuously(infile, windowsize, stepsize, majorKey, minorKey);
+         analyzeContinuously(infiles[i], windowsize, stepsize, majorKey, minorKey);
          continue;
       }
 
-      infile.getNoteArray(absbeat, pitch, duration, level);
+      infiles[i].getNoteArray(absbeat, pitch, duration, level);
       for (j=0; j<pitch.getSize(); j++) {
          pitch[j] = Convert::base40ToMidiNoteNumber(pitch[j]);
       }
@@ -302,7 +302,7 @@ int main(int argc, char* argv[]) {
                pitch.getBase(), duration.getBase(), pitch.getSize(), rhythmQ,
                      majorKey, minorKey);
       }
-      getBase40Histogram(b40hist, infile);
+      getBase40Histogram(b40hist, infiles[i]);
       printAnalysis(bestkey, scores, distribution, filename, b40hist);
    }
 
