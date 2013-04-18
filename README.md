@@ -29,9 +29,12 @@ XCode (b) select "command line tools" (c) click on "install" button.
 If MacPorts is installed, then type `sudo port install git`; for Homebrew
 the command would be `sudo brew install git`.
 
-IDEs such as Eclipse (http://www.eclipse.org/downloads) have a git interface
-built into them.  Other GUI-based git programs can be found at this link:
-http://git-scm.com/downloads/guis
+IDEs such as Eclipse (http://www.eclipse.org/downloads) have a git
+interface built into them.  Other GUI-based git programs can be found
+at this link: http://git-scm.com/downloads/guis . These might be more
+appropriate for MS Windows, although you will have to install a unix
+terminal system, such as cygwin (http://www.cygwin.com) to use the
+humextras program in MS Windows.
 
 
 Compiling
