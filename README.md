@@ -19,19 +19,19 @@ To compile everything, type within the humextra directory:
     ```make```
 
 To compile only the library:
-    make library
+    ```make library```
 
 To compile all programs (after making the library):
-    make programs
+    ```make programs```
 
 To compile a particular program (after making the library):
-    make humcat
+    ```make humcat```
 
 To test that the programs have been compiled successfully:
-    bin/keycor h://wtc/wtc1f01.krn
+    ```bin/keycor h://wtc/wtc1f01.krn```
 which should reply with an estimate of the key for J.S. Bach's Well-Tempered Clavier, 
 Book I fugue:
-    The best key is: C Major
+    ```The best key is: C Major```
 
 
 Installing
@@ -40,14 +40,14 @@ Installing
 Compiled programs will be stored in the humextra/bin subdirectory.
 To use these programs from any location in the filesystem, you must tell
 the computer where to search for them.  This is done in the terminal by
-adding the bin directory to the $PATH variable.  Type "echo $PATH" to see
-what directories are currently being searched for commands.  A lazy way
-of installing would be to copy the programs in humextra/bin into one of
-those locations, such as /usr/bin.  
+adding the bin directory to the $PATH variable.  Type ```echo $PATH```
+to see what directories are currently being searched for commands.
+A lazy way of installing would be to copy the programs in humextra/bin
+into one of those locations, such as /usr/bin.
 
 A more proper way would be to update the $PATH environmental variable.
-To do this you will need to know which shell you are using.  Type "echo
-$SHELL" in the terminal to see which one: bash or tcsh are the two main
+To do this you will need to know which shell you are using.  Type ```echo
+$SHELL``` in the terminal to see which one: bash or tcsh are the two main
 ones.  If you are using bash, then you can temporarily add humextra/bin
 to the $PATH with this command:
     PATH=$PATH:/location/of/humextra/bin
@@ -69,17 +69,19 @@ Updating
 ========
 
 To update if you downloaded with git:
-   git update
+   ```git update```
 
 Then either type "make" to recompile the external libraries, the humextra 
-library and the programs, or type "make update" to compile the humextra
+library and the programs, or type ```make updatex``` to compile the humextra
 library and programs.
 
 When using git to download and update the humextra repository, you can add these
 lines to ~/.gitconfig:
+```
     [alias]
         hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
-Then the command "git hist" will give a short listing of changes (one commit per line)
+```
+Then the command ```git hist``` will give a short listing of changes (one commit per line)
 sorted in reverse chronological order.
 
 
@@ -90,5 +92,5 @@ All humextra programs include an option called `--options` which will list
 all of the options along with their aliases and default values. 
 
 For more detailed information about each humextra program, go to the webpage:
-    http://extras.humdrum.org/man
+    ```http://extras.humdrum.org/man```
 
