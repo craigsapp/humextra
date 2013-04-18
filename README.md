@@ -8,7 +8,7 @@ Downloading
 ===========
 
 To download from the terminal if you have git installed on your system:
-   git clone https://github.com/craigsapp/humextra
+   ```git clone https://github.com/craigsapp/humextra```
 Otherwise you can download from the "zip" link at the top of this page.
 
 
@@ -27,10 +27,10 @@ To compile all programs (after making the library):
 To compile a particular program (after making the library):
     ```make humcat```
 
-To test that the programs have been compiled successfully:
+To test that the programs have been compiled successfully, try typing:
     ```bin/keycor h://wtc/wtc1f01.krn```
 which should reply with an estimate of the key for J.S. Bach's Well-Tempered Clavier, 
-Book I fugue:
+Book I fugue 1:
     ```The best key is: C Major```
 
 
@@ -50,16 +50,16 @@ To do this you will need to know which shell you are using.  Type ```echo
 $SHELL``` in the terminal to see which one: bash or tcsh are the two main
 ones.  If you are using bash, then you can temporarily add humextra/bin
 to the $PATH with this command:
-    PATH=$PATH:/location/of/humextra/bin
+    ```PATH=$PATH:/location/of/humextra/bin```
 To do the same in tcsh (without the outer set of quotes):
-    setenv PATH $PATH":/location/of/humextra/bin"
+    ```setenv PATH $PATH":/location/of/humextra/bin"```
 
 For a more permanent installation the $PATH must be updated in the login
 scripts for bash/tcsh, either for a single user or for the entire system.
 For an individual user in bash, add this line:
-    export PATH=$PATH:/location/of/humextra/bin
+    ```export PATH=$PATH:/location/of/humextra/bin```
 to the file ~/.bashrc .  For tcsh, add the line
-    setenv PATH $PATH":/location/of/humextra/bin
+    ```setenv PATH $PATH":/location/of/humextra/bin```
 to the file ~/.csrhc .  If you want to install for all users on a computer
 system, then you would add such lines to the system login script (which
 will vary on the version of unix you are using).
@@ -71,8 +71,8 @@ Updating
 To update if you downloaded with git:
    ```git update```
 
-Then either type "make" to recompile the external libraries, the humextra 
-library and the programs, or type ```make updatex``` to compile the humextra
+Then either type `make` to recompile the external libraries, the humextra 
+library and the programs, or type `make updatex` to compile the humextra
 library and programs.
 
 When using git to download and update the humextra repository, you can add these
@@ -81,7 +81,7 @@ lines to ~/.gitconfig:
     [alias]
         hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
 ```
-Then the command ```git hist``` will give a short listing of changes (one commit per line)
+Then the command `git hist` will give a short listing of changes (one commit per line)
 sorted in reverse chronological order.
 
 
