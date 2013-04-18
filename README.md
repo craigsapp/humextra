@@ -42,13 +42,13 @@ To compile everything, type within the humextra directory:
 If using OS X, see the above notes on XCode in the Download section if you get a 
 complaint about the make command not being found.
 
-To compile only the library:
+To compile only the humextra library:
     ```make library```
 
-To compile all programs (after making the library):
+To compile all humextra programs (after making the library):
     ```make programs```
 
-To compile a particular program (after making the library):
+To compile a particular humextra program (after making the library):
     ```make humcat```
 
 To test that the programs have been compiled successfully, try typing:
