@@ -412,11 +412,11 @@ int main(int argc, char* argv[]) {
 void insertBendData(MidiFile& outfile, double* bendbypc) {
    int i, j;
    int channel;
-   int track = 0;
+   // int track = 0;
    double bendvalue;
    if (outfile.getNumTracks() > 1) {
       // don't store in first track if a multi-track file.
-      track = 1;
+      // track = 1;
    }
    Array<uchar> mididata;
    mididata.setSize(2);

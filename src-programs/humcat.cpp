@@ -38,6 +38,7 @@ int       findTag               (Array<Array<char> >& primaryids,
 void      printLineID           (HumdrumFile& infile, int index, 
                                  Array<Array<char> >& primaryids, 
 				 Array<Array<char> >& idtags);
+int       hasSegment            (HumdrumFile& infile);
 
 // User interface variables:
 Options   options;
@@ -65,18 +66,13 @@ int main(int argc, char** argv) {
 
    // if printing segments, then don't do extra work to suppress **/*-:
    int ii;
-   int hasfilename;
+   int hassegment;
    if (segmentQ && good1) {
       infiles[0].printNonemptySegmentLabel(cout);
-      if (strcmp(infiles[0].getFilename(), "") == 0) {
-         hasfilename = 0;
-      } else {
-         hasfilename = 1;
-      }
+      hassegment = hasSegment(infiles[0]);
       for (ii=0; ii<infiles[0].getNumLines(); ii++) {
-         if (hasfilename) {
-            if (strncmp(infiles[0][ii][0], "!!!!SEGMENT", 
-                  strlen("!!!!SEGMENT")) != 0) {
+         if (hassegment) {
+            if (strncmp(infiles[0][ii][0], "!!!!SEGMENT", 11) != 0) {
                cout << infiles[0][ii] << '\n';
             }
          } else {
@@ -86,15 +82,10 @@ int main(int argc, char** argv) {
    }
    if (segmentQ && good2) {
       infiles[1].printNonemptySegmentLabel(cout);
-      if (strcmp(infiles[1].getFilename(), "") == 0) {
-         hasfilename = 0;
-      } else {
-         hasfilename = 1;
-      }
+      hassegment = hasSegment(infiles[1]);
       for (ii=0; ii<infiles[1].getNumLines(); ii++) {
-         if (hasfilename) {
-            if (strncmp(infiles[1][ii][0], "!!!!SEGMENT", 
-                  strlen("!!!!SEGMENT")) != 0) {
+         if (hassegment) {
+            if (strncmp(infiles[1][ii][0], "!!!!SEGMENT", 11) != 0) {
                cout << infiles[1][ii] << '\n';
             }
          } else {
@@ -124,18 +115,12 @@ int main(int argc, char** argv) {
    int count = 0;
    while (streamer.read(infiles[currindex])) {
       count++;
-cout << "!! COUNTER = " << count << endl;
-      if (strcmp(infiles[currindex].getFilename(), "") == 0) {
-         hasfilename = 0;
-      } else {
-         hasfilename = 1;
-      }
+      infiles[currindex].printNonemptySegmentLabel(cout);
+      hassegment = hasSegment(infiles[currindex]);
       if (segmentQ) {
-         infiles[currindex].printNonemptySegmentLabel(cout);
          for (ii=0; ii<infiles[currindex].getNumLines(); ii++) {
-            if (hasfilename) {
-               if (strncmp(infiles[currindex][ii][0], "!!!!SEGMENT", 
-                     strlen("!!!!SEGMENT")) != 0) {
+            if (hassegment) {
+               if (strncmp(infiles[currindex][ii][0], "!!!!SEGMENT", 11) != 0) {
                   cout << infiles[currindex][ii] << '\n';
                }
             } else {
@@ -168,6 +153,25 @@ cout << "!! COUNTER = " << count << endl;
 }
 
 //////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////
+//
+// hasSegment -- true if the content of the Humdrum file has a line starting
+//      with !!!!SEGMENT .  This is necessary to suppress writing more than
+//      one SEGMENT marker for the file.  Only looks at the first line in the
+//      file.
+//
+
+int hasSegment(HumdrumFile& infile) {
+   if (strncmp(infile[0][0], "!!!!SEGMENT", 11) == 0) {
+      return 1;
+   } else {
+      return 0;
+   }
+}
+
+
 
 //////////////////////////////
 //
