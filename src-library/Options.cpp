@@ -935,7 +935,7 @@ int Options::getRegIndex(const char* optionName) {
       return (*((option_list**)searchresult))->getIndex();
    } else if (strcmp("options", optionName) == 0) {
       print();
-      exit(1);
+      exit(0);
    } 
 
    if (options_error_check) {
