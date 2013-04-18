@@ -12,12 +12,30 @@ To download from the terminal if you have git installed on your system:
 Otherwise you can download from the "zip" link at the top of this page
 (https://github.com/craigsapp/humextra/archive/master.zip).
 
+If you want to use the "git" command to download the humextra software, there are
+several ways to install it:
+
+(1) In linux/unix, use some automated installation system which is instlled
+on your computer.  Some possible methods: `yum install git`, `apt-get
+install git` (Ubuntu), or `emerge git` (Gentoo).
+
+(2) in OS X, use a package management system such as MacPorts
+(http://macports.org) or Homebrew (http://mxcl.github.io/homebrew).  These
+are the OS X equivalents of apg-get/yum/emerge found on linux systems.
+Typically you will also need to first install XCode from the Apple App
+Store (free).  After installing XCode, go into its menu system and install
+the command-line development tools: (a) click on the Downloads tab in
+XCode (b) select "command line tools" (c) click on "install" button.
+If MacPorts is installed, then type `sudo port install git`.
+
 
 Compiling
 =========
 
 To compile everything, type within the humextra directory:
     ```make```
+If using OS X, see the above notes on XCode in the Download section if you get a 
+complaint about the make command not being found.
 
 To compile only the library:
     ```make library```
@@ -114,4 +132,7 @@ is the value `1`.  Options can also have types `d` for double arguments
 
 For more detailed information about each humextra program, go to the webpage:
     ```http://extras.humdrum.org/man```
+
+For a basic tutorial on programming with the humextra library, see the webpage:
+    ```http://wiki.ccarh.org/wiki/Humdrum_Extras```
 
