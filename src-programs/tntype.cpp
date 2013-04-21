@@ -1101,4 +1101,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: ca1b0c6abfdc20d2ac82ecf52f13f631 tntype.cpp [20130404]
+// md5sum: 6745642f50b60d70467597a03c9dd764 tntype.cpp [20130420]

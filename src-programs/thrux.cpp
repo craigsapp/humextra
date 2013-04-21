@@ -610,4 +610,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: d1a47ae31dbed6847227a405ca13f3c5 thrux.cpp [20090508]
+// md5sum: 6f87e1d96ad34013dfe1d0f5c5abc58e thrux.cpp [20130420]

@@ -206,7 +206,7 @@ or click on the command name in the list below:
 [minrhy](http://extras.humdrum.org/man/minrhy),
 [hgrep](http://extras.humdrum.org/man/hgrep),
 [time2matlab](http://extras.humdrum.org/man/time2matlab),
-[mid2hum](http://extras.humdrum.org/man/mid2hum)
+[mid2hum](http://extras.humdrum.org/man/mid2hum).
 
 For a basic tutorial on programming with the humextra library, see the webpage
     http://wiki.ccarh.org/wiki/Humdrum_Extras
