@@ -16,11 +16,15 @@
 void         checkOptions  (Options& opts, int argc, char* argv[]);
 void         example       (void);
 void         printOutput   (HumdrumFile& infile);
+void         printKernOutput(HumdrumFile& infile);
+void         printKernTokenLineDuration(HumdrumFile& infile, int line, 
+                            int field);
 void         usage         (const char* command);
 
 // global variables
 Options      options;      // database for command-line arguments
 int          parensQ = 0;  // used with the -p option
+int          kernQ   = 0;  // used with -k option
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +48,11 @@ int main(int argc, char* argv[]) {
    }
 
    for (i=0; i<infiles.getCount(); i++) {
-      printOutput(infiles[i]);
+      if (kernQ) {
+         printKernOutput(infiles[i]);
+      } else {
+         printOutput(infiles[i]);
+      }
    }
 
    return 0;
@@ -61,6 +69,7 @@ int main(int argc, char* argv[]) {
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("p|parens=b", "print parentheses around ditto data");
+   opts.define("k|kern=b", "print keeping kern data rhythm parseable");
 
    opts.define("author=b");                     // author of program
    opts.define("version=b");                    // compilation info
@@ -87,6 +96,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    parensQ = opts.getBoolean("parens");
+   kernQ   = opts.getBoolean("kern");
 
 }
 
@@ -133,6 +143,136 @@ void printOutput(HumdrumFile& infile) {
          }
          cout << "\n";
       }
+   }
+}
+
+
+
+//////////////////////////////
+//
+// printKernOutput -- Notes are split into a sequence of tied notes.
+//
+
+void printKernOutput(HumdrumFile& infile) {
+   int i, j;
+   infile.analyzeRhythm("4");
+   infile.printNonemptySegmentLabel(cout);
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isData()) {
+         cout << infile[i].getLine() << "\n";
+         continue;
+      }
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         if (!infile[i].isExInterp(j, "**kern")) {
+            if (strcmp(infile[i][j], ".") == 0) {
+               if (parensQ) {
+                  cout << "(";
+               }
+               cout << infile.getDotValue(i, j);
+               if (parensQ) {
+                  cout << ")";
+               }
+            } else {
+               cout << infile[i][j];
+            }
+         } else { 
+            // this is **kern data, so create tied notes if note duration
+            // is longer than the current line's duration
+            printKernTokenLineDuration(infile, i, j);
+         }
+         if (j < infile[i].getFieldCount() - 1) {
+            cout << "\t";
+         }
+      }
+      cout << "\n";
+   }
+}
+
+
+
+//////////////////////////////
+//
+// printKernTokenLineDuration -- print a kern token with only the
+//     the duration of the line for the duration of the note(s).
+//
+//     Beaming information may become messed up by this function.
+//
+
+void printKernTokenLineDuration(HumdrumFile& infile, int line, int field) {
+   RationalNumber notestartabsbeat; // starting absbeat of note
+   RationalNumber noteendabsbeat;   // ending absbeat of note
+   RationalNumber linedur;          // absbeat of current line
+   RationalNumber notedur;          // duration of note
+   int ii, jj;
+   linedur = infile[line].getDurationR();
+   Array<char> notebuffer;
+   if (linedur == 0) {
+      // don't bother with grace notes for now:
+      cout << infile[line][field];
+   }
+   ii = line;
+   jj = field;
+   if (infile[line].isNullToken(field)) {
+      ii = infile[line].getDotLine(field);
+      jj = infile[line].getDotField(field);
+   }
+   PerlRegularExpression pre;
+   RationalNumber linestartabsbeat = infile[line].getAbsBeatR();
+   notestartabsbeat = infile[ii].getAbsBeatR();
+   RationalNumber lineendabsbeat;
+   char newdur[1024] = {0};
+   lineendabsbeat = linestartabsbeat + linedur;
+   notedur = Convert::kernToDurationR(infile[ii][jj]);
+   if (notedur == linedur) {
+      cout << infile[ii][jj];
+      return;
+   }
+   noteendabsbeat = notestartabsbeat + notedur;
+   Convert::durationToKernRhythm(newdur, linedur.getFloat());
+   notebuffer = infile[ii][jj];
+   pre.sar(notebuffer, "[\\d%.]+", newdur, "g");
+   
+   // handle tie structure:
+   //   Chord notes are all presumed to be tied in the same way.  This
+   //   may not be true, so to be fully generalized, keeping track
+   //   of the tie states of notes in the chord should be done.
+
+   // * If the original note duration is the same as the line duration
+   //   just keep the original note (already taken care of above).
+
+   // * If the note starts at this point, then add a "[" tie marker
+   //   if there is not a "[" or "_" character already on the note(s)
+   if ((notestartabsbeat == linestartabsbeat) 
+         && (strchr(infile[ii][jj], '[') == NULL)
+         && (strchr(infile[ii][jj], '_') == NULL)) {
+      pre.sar(notebuffer, " ", " [", "g");
+      cout << "[" << notebuffer;
+      return;
+   }
+
+   // * If the linenote ends on this line, add "]" unless the original
+   //   note had "_".
+   if (lineendabsbeat == noteendabsbeat) {
+      if (strchr(infile[ii][jj], '_') != NULL) {
+         cout << notebuffer;
+      } else if (strchr(infile[ii][jj], '[') != NULL) {
+         pre.sar(notebuffer, "\\[", "", "g");
+         pre.sar(notebuffer, " ", "_ ", "g");
+         cout << notebuffer << "_";
+      } else {
+         pre.sar(notebuffer, "\\[", "", "g");
+         pre.sar(notebuffer, " ", "\\] ", "g");
+         cout << notebuffer << "]";
+      }
+      return;
+   }
+
+   
+   if (strchr(notebuffer.getBase(), '[') != NULL) {
+      cout << notebuffer;
+   } else {
+      pre.sar(notebuffer, " ", "_ ", "g");
+      cout << notebuffer << "_";
    }
 }
 
