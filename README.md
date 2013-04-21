@@ -33,7 +33,7 @@ IDEs such as Eclipse (http://www.eclipse.org/downloads) have a git
 interface built into them.  Other GUI-based git programs can be found
 at this link: http://git-scm.com/downloads/guis . These might be more
 appropriate for MS Windows, although you will have to install a unix
-terminal system, such as cygwin (http://www.cygwin.com) to use the
+terminal system such as cygwin (http://www.cygwin.com) to use the
 humextras program in MS Windows.
 
 
@@ -83,12 +83,12 @@ To do the same in tcsh (without the outer set of quotes):
 
 For a more permanent installation the $PATH must be updated in the login
 scripts for bash/tcsh, either for a single user or for the entire system.
-For an individual user in bash, add this line:
+For an individual user in bash add this line:
     ```export PATH=$PATH:/location/of/humextra/bin```
 to the file ~/.bashrc .  For tcsh, add the line
     ```setenv PATH $PATH":/location/of/humextra/bin```
 to the file ~/.csrhc .  If you want to install for all users on a computer
-system, then you would add such lines to the system login script (which
+system then you would add such lines to the system login script (which
 will vary on the version of unix you are using).
 
 
@@ -99,7 +99,7 @@ To update if you downloaded with git:
    ```git pull```
 
 Then either type `make` to recompile the external libraries, the humextra 
-library and the programs, or type `make update` to compile the humextra
+library and the programs, or type `make update` to compile just the humextra
 library and programs.
 
 When using git to download and update the humextra repository, you can add these
@@ -142,72 +142,74 @@ For more detailed information about each humextra program, go to the webpage
     http://extras.humdrum.org/man
 or click on the command name in the list below:
 
+[addref](http://extras.humdrum.org/man/addref),
+[autodynam](http://extras.humdrum.org/man/autodynam),
 [autostem](http://extras.humdrum.org/man/autostem),
+[barnum](http://extras.humdrum.org/man/barnum),
+[beat](http://extras.humdrum.org/man/beat),
+[chorck](http://extras.humdrum.org/man/chorck),
+[ditto](http://extras.humdrum.org/man/ditto),
+[extractx](http://extras.humdrum.org/man/extractx),
+[gettime](http://extras.humdrum.org/man/gettime),
+[harm2kern](http://extras.humdrum.org/man/harm2kern),
+[hgrep](http://extras.humdrum.org/man/hgrep),
+[hum2abc](http://extras.humdrum.org/man/hum2abc),
+[hum2gmn](http://extras.humdrum.org/man/hum2gmn),
+[hum2mid](http://extras.humdrum.org/man/hum2mid),
+[hum2muse](http://extras.humdrum.org/man/hum2muse),
+[hum2xml](http://extras.humdrum.org/man/hum2xml),
+[humcat](http://extras.humdrum.org/man/humcat),
+[humpdf](http://extras.humdrum.org/man/humpdf),
+[humplay](http://extras.humdrum.org/man/humplay),
+[humsplit](http://extras.humdrum.org/man/humsplit),
+[humtable](http://extras.humdrum.org/man/humtable),
+[kern2cmn](http://extras.humdrum.org/man/kern2cmn),
+[kern2dm](http://extras.humdrum.org/man/kern2dm),
+[kern2melisma](http://extras.humdrum.org/man/kern2melisma),
+[kern2skini](http://extras.humdrum.org/man/kern2skini),
+[keycor](http://extras.humdrum.org/man/keycor),
+[lofcog](http://extras.humdrum.org/man/lofcog),
+[mid2hum](http://extras.humdrum.org/man/mid2hum),
+[minrhy](http://extras.humdrum.org/man/minrhy),
+[mkeyscape](http://extras.humdrum.org/man/mkeyscape),
+[motive](http://extras.humdrum.org/man/motive),
 [mvspine](http://extras.humdrum.org/man/mvspine),
 [myank](http://extras.humdrum.org/man/myank),
 [notearray](http://extras.humdrum.org/man/notearray),
-[transpose](http://extras.humdrum.org/man/transpose),
-[zscores](http://extras.humdrum.org/man/zscores),
-[barnum](http://extras.humdrum.org/man/barnum),
-[scaletype](http://extras.humdrum.org/man/scaletype),
-[theloc](http://extras.humdrum.org/man/theloc),
-[keycor](http://extras.humdrum.org/man/keycor),
-[hum2muse](http://extras.humdrum.org/man/hum2muse),
-[humplay](http://extras.humdrum.org/man/humplay),
-[satb2gs](http://extras.humdrum.org/man/satb2gs),
-[kern2skini](http://extras.humdrum.org/man/kern2skini),
-[gettime](http://extras.humdrum.org/man/gettime),
-[hum2xml](http://extras.humdrum.org/man/hum2xml),
-[humcat](http://extras.humdrum.org/man/humcat),
-[pitchmix](http://extras.humdrum.org/man/pitchmix),
-[sonority](http://extras.humdrum.org/man/sonority),
-[tindex](http://extras.humdrum.org/man/tindex),
-[mkeyscape](http://extras.humdrum.org/man/mkeyscape),
-[humsplit](http://extras.humdrum.org/man/humsplit),
-[hum2abc](http://extras.humdrum.org/man/hum2abc),
-[thrux](http://extras.humdrum.org/man/thrux),
-[kern2cmn](http://extras.humdrum.org/man/kern2cmn),
-[pae2kern](http://extras.humdrum.org/man/pae2kern),
-[addref](http://extras.humdrum.org/man/addref),
-[thememakerx](http://extras.humdrum.org/man/thememakerx),
-[rscale](http://extras.humdrum.org/man/rscale),
-[hum2mid](http://extras.humdrum.org/man/hum2mid),
-[sample](http://extras.humdrum.org/man/sample),
-[simil](http://extras.humdrum.org/man/simil),
-[xml2hum](http://extras.humdrum.org/man/xml2hum),
-[spinetrace](http://extras.humdrum.org/man/spinetrace),
-[proll](http://extras.humdrum.org/man/proll),
-[tiefix](http://extras.humdrum.org/man/tiefix),
-[kern2melisma](http://extras.humdrum.org/man/kern2melisma),
-[swing](http://extras.humdrum.org/man/swing),
-[tsroot](http://extras.humdrum.org/man/tsroot),
-[humpdf](http://extras.humdrum.org/man/humpdf),
-[rcheck](http://extras.humdrum.org/man/rcheck),
-[prange](http://extras.humdrum.org/man/prange),
-[autodynam](http://extras.humdrum.org/man/autodynam),
 [ottava](http://extras.humdrum.org/man/ottava),
-[time2tempo](http://extras.humdrum.org/man/time2tempo),
-[chorck](http://extras.humdrum.org/man/chorck),
+[pae2kern](http://extras.humdrum.org/man/pae2kern),
+[pitchmix](http://extras.humdrum.org/man/pitchmix),
+[prange](http://extras.humdrum.org/man/prange),
 [prettystar](http://extras.humdrum.org/man/prettystar),
+[proll](http://extras.humdrum.org/man/proll),
+[rcheck](http://extras.humdrum.org/man/rcheck),
 [ridx](http://extras.humdrum.org/man/ridx),
-[hum2gmn](http://extras.humdrum.org/man/hum2gmn),
-[beat](http://extras.humdrum.org/man/beat),
-[serialize](http://extras.humdrum.org/man/serialize),
-[extractx](http://extras.humdrum.org/man/extractx),
-[tntype](http://extras.humdrum.org/man/tntype),
-[humtable](http://extras.humdrum.org/man/humtable),
+[rscale](http://extras.humdrum.org/man/rscale),
+[sample](http://extras.humdrum.org/man/sample),
+[satb2gs](http://extras.humdrum.org/man/satb2gs),
+[scaletype](http://extras.humdrum.org/man/scaletype),
 [scordur](http://extras.humdrum.org/man/scordur),
-[motive](http://extras.humdrum.org/man/motive),
-[lofcog](http://extras.humdrum.org/man/lofcog),
-[kern2dm](http://extras.humdrum.org/man/kern2dm),
+[serialize](http://extras.humdrum.org/man/serialize),
+[simil](http://extras.humdrum.org/man/simil),
 [similx](http://extras.humdrum.org/man/similx),
-[harm2kern](http://extras.humdrum.org/man/harm2kern),
+[sonority](http://extras.humdrum.org/man/sonority),
+[spinetrace](http://extras.humdrum.org/man/spinetrace),
+[swing](http://extras.humdrum.org/man/swing),
+[theloc](http://extras.humdrum.org/man/theloc),
 [themax](http://extras.humdrum.org/man/themax),
-[minrhy](http://extras.humdrum.org/man/minrhy),
-[hgrep](http://extras.humdrum.org/man/hgrep),
+[thememakerx](http://extras.humdrum.org/man/thememakerx),
+[thrux](http://extras.humdrum.org/man/thrux),
+[tiefix](http://extras.humdrum.org/man/tiefix),
 [time2matlab](http://extras.humdrum.org/man/time2matlab),
-[mid2hum](http://extras.humdrum.org/man/mid2hum).
+[time2tempo](http://extras.humdrum.org/man/time2tempo),
+[tindex](http://extras.humdrum.org/man/tindex),
+[tntype](http://extras.humdrum.org/man/tntype),
+[transpose](http://extras.humdrum.org/man/transpose),
+[tsroot](http://extras.humdrum.org/man/tsroot),
+[xml2hum](http://extras.humdrum.org/man/xml2hum),
+[zscores](http://extras.humdrum.org/man/zscores).
 
 For a basic tutorial on programming with the humextra library, see the webpage
-    http://wiki.ccarh.org/wiki/Humdrum_Extras
+    http://wiki.ccarh.org/wiki/Humdrum_Extras 
+.
 
