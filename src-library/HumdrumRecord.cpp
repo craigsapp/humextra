@@ -1088,6 +1088,19 @@ int HumdrumRecord::isExInterp(int index, const char* string) {
 
 //////////////////////////////
 //
+// HumdrumRecord::isNullToken -- returns true of the given cell is
+//    equivalent to ".".
+//
+
+int HumdrumRecord::isNullToken(int index) {
+   HumdrumRecord& aRecord = *this;
+   return !strcmp(aRecord[index], ".");
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumRecord::isOriginalClef -- returns true if a clef, but prefixed
 //     with "o" to indicate the clef in the original source.
 //
