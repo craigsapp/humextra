@@ -106,7 +106,24 @@ ostream& operator<<(ostream& out, Array<float>& alist) {
 
 /////////////////////////////
 //
-// operator= == Definition for Array<char> = const char*
+// operator== -- Equivalence test.
+//
+
+template<>
+int Array<char>::operator==(const char* string) {
+   Array<char>& object = *this;
+   if (string == NULL) {
+      return 0;
+   }
+cout << "GOT HERE AAA" << endl;
+   return !strcmp(string, object.getBase());
+}
+
+
+
+/////////////////////////////
+//
+// operator= -- Definition for Array<char> = const char*
 //
 
 template<>
