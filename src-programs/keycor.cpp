@@ -6,6 +6,7 @@
 // Last Modified: Mon Mar  7 14:58:02 PST 2011 Added --name option
 // Last Modified: Mon Sep 10 15:43:07 PDT 2012 Added enharmonic key labeling
 // Last Modified: Thu Apr 18 13:40:06 PDT 2013 Enabled multiple segment input
+// Last Modified: Sun Apr 21 21:52:30 PDT 2013 Added -e option
 // Filename:      ...sig/examples/all/keycordl.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/keycor.cpp
 // Syntax:        C++; museinfo
@@ -24,7 +25,7 @@ void   checkOptions             (Options& opts, int argc, char* argv[]);
 void   example                  (void);
 void   printAnalysis            (int bestkey, Array<double>& scores,
                                  Array<double>& durhist, const char* filename,
-                                 Array<int>& b40hist);
+                                 Array<int>& b40hist, HumdrumFile& infile);
 void   usage                    (const char* command);
 void   readWeights              (const char* filename);
 int    analyzeKeyRawCorrelation (double* scores, double* distribution, 
@@ -63,6 +64,8 @@ void   getLocations             (Array<double>& measures, HumdrumFile& infile,
                                  int segments);
 void   getBase40Histogram       (Array<int>& base40, HumdrumFile& infile);
 int    identifyBranchCut        (int base12, Array<int>& base40);
+void   printErrorMarker         (HumdrumFile& infile, int best40, 
+                                 const char* mode);
 
 // user interface variables
 Options      options;           // database for command-line arguments
@@ -80,6 +83,7 @@ int          continuousQ = 0;    // used with -c option
 int          roundQ      = 1;    // used with -R option
 int          debugQ      = 0;    // used with --debug option
 int          nameQ       = 0;    // used with --name option
+int          errorQ      = 0;    // used with -e option
 
 double* majorKey;
 double* minorKey;
@@ -274,7 +278,8 @@ int main(int argc, char* argv[]) {
       filename = infiles[i].getFilename();
 
       if (continuousQ) {
-         analyzeContinuously(infiles[i], windowsize, stepsize, majorKey, minorKey);
+         analyzeContinuously(infiles[i], windowsize, stepsize, majorKey, 
+               minorKey);
          continue;
       }
 
@@ -303,7 +308,8 @@ int main(int argc, char* argv[]) {
                      majorKey, minorKey);
       }
       getBase40Histogram(b40hist, infiles[i]);
-      printAnalysis(bestkey, scores, distribution, filename, b40hist);
+      printAnalysis(bestkey, scores, distribution, filename, b40hist, 
+            infiles[i]);
    }
 
    return 0;
@@ -780,7 +786,7 @@ void addToHistogramDouble(Array<Array<double> >& histogram, int pc,
 //
 
 void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist,
-      const char* filename, Array<int>& b40hist) {
+      const char* filename, Array<int>& b40hist, HumdrumFile& infile) {
    char buffer[64] = {0};
 
    if (mmaQ) {
@@ -812,7 +818,11 @@ void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist,
       best40 = identifyBranchCut(bestkey, b40hist);
       // cout << Convert::base12ToKern(buffer, bestkey+12*4)
       cout << Convert::base40ToKern(buffer, best40+40*3)
-           << " Major" << "\n";
+           << " Major";
+      if (errorQ) {
+         printErrorMarker(infile, best40, "major");
+      }
+      cout  << "\n";
    } else {
       if (nameQ) {
          cout << filename << ":\t";
@@ -822,7 +832,11 @@ void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist,
       best40 = identifyBranchCut(bestkey, b40hist);
       // cout << Convert::base12ToKern(buffer, bestkey+12*3)
       cout << Convert::base40ToKern(buffer, best40+40*3)
-           << " Minor" << "\n";
+           << " Minor";
+      if (errorQ) {
+         printErrorMarker(infile, best40, "minor");
+      }
+      cout << "\n";
    }
    int i;
 
@@ -838,6 +852,57 @@ void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist,
          cout << "Pitch[" << i << "] = " << durhist[i] << "\n";
       }
    }
+}
+
+
+//////////////////////////////
+//
+// printErrorMarker --  Compare the computer's analysis against one
+//    found at the start of the file.
+//
+
+void printErrorMarker(HumdrumFile& infile, int best40, const char* mode) {
+   PerlRegularExpression pre;
+   int foundQ = 0;
+   int i, j;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (infile[i].isData()) {
+          break;
+      }
+      if (!infile[i].isInterpretation()) {
+         continue;
+      }
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         if (pre.search(infile[i][j], "^\\*([A-Ga-g#-]+):")) {
+            foundQ = 1;
+            break;
+         }
+      }
+      if (foundQ) {
+         break;
+      }      
+   }
+   if (!foundQ) {
+      cout << "?";
+      return;
+   }
+   PerlRegularExpression pre2;
+   const char* testmode = "major";
+   if (islower(pre.getSubmatch(1)[0])) {
+      testmode = "minor";
+   }
+   int testbase40 = Convert::kernToBase40(pre.getSubmatch());
+   if ((testbase40 % 40) == (best40 % 40)) {
+      if (strcmp(mode, testmode) == 0) {
+         // the answer is correct
+         return;
+      }
+   }
+
+   // the answer was not correct, so print the correct answer
+   char buffer[1024] = {0};
+   Convert::base40ToKern(buffer, (testbase40 % 40) + 3 * 40);
+   cout << " X:" << buffer << " " << testmode;
 }
 
 
@@ -865,7 +930,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("window=i:32",         "window size for continuous analysis");
    opts.define("c|continuous=b",      "continuous analysis");
    opts.define("R|no-round=b",        "don't round correlation values");
-   opts.define("name=b",              "print filenames");
+   opts.define("l|name=b",            "print filenames");
+   opts.define("error|errors=b", "print * marker on analyses which are errors");
 
    opts.define("debug=b",       "trace input parsing");   
    opts.define("author=b",      "author of the program");   
@@ -908,6 +974,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    roundQ      = !opts.getBoolean("no-round");
    debugQ      =  opts.getBoolean("debug");
    nameQ       =  opts.getBoolean("name");
+   errorQ      =  opts.getBoolean("error");
 
    if (opts.getBoolean("Krumhansl")) {
       majorKey = majorKeyKrumhansl;
