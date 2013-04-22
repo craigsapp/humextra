@@ -170,6 +170,20 @@ int Array<type>::operator==(const Array<type>& aArray) {
 }
 
 
+// this template mostly presumes that the type is char:
+template<class type>
+int Array<type>::operator==(const char* aString) {
+   if (this->getSize() == 0) {
+      return 0;
+   }
+   if (aString == NULL) {
+      return 0;
+   }
+   Array<type>& t = *this;
+   return !strcmp(t.getBase(), aString);
+}
+
+
 
 //////////////////////////////
 //

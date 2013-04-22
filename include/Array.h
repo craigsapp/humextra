@@ -48,6 +48,7 @@ class Array : public SigCollection<type> {
       void           zero              (int minIndex = -1, int maxIndex = -1);
 
       int            operator==        (const Array<type>& aArray);
+      int            operator==        (const char* aString);
       Array<type>&   operator=         (const Array<type>& aArray);
       Array<type>&   operator=         (const char* string);
       Array<type>&   operator+=        (const Array<type>& aArray);
