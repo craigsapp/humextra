@@ -148,7 +148,7 @@ or click on the command name in the list below:
 [barnum](http://extras.humdrum.org/man/barnum),
 [beat](http://extras.humdrum.org/man/beat),
 [chorck](http://extras.humdrum.org/man/chorck),
-[dittox](http://extras.humdrum.org/man/dittos),
+[dittox](http://extras.humdrum.org/man/dittox),
 [extractx](http://extras.humdrum.org/man/extractx),
 [gettime](http://extras.humdrum.org/man/gettime),
 [harm2kern](http://extras.humdrum.org/man/harm2kern),
