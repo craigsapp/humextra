@@ -1573,9 +1573,11 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                      }
                   }
                }
-               if (VolumeMapping.getSize() > 0) {
-                  volume = VolumeMapping[infile[i].getPrimaryTrack(j)];
-               }
+               // This code is disabling dynamics, should be fixed.
+               // [20130424]
+               // if (VolumeMapping.getSize() > 0) {
+               //    volume = VolumeMapping[infile[i].getPrimaryTrack(j)];
+               // }
                for (k=0; k<tokencount; k++) {
                   infile[i].getToken(buffer1, j, k); 
 
