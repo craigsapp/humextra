@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Mar 19 15:51:09 PDT 2013
-// Last Modified: Tue Mar 19 15:51:16 PDT 2013
+// Last Modified: Tue Apr 23 17:32:43 PDT 2013 Added colored notes
 // Filename:      ...sig/examples/all/hum2enp.cpp 
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2enp.cpp
 // Syntax:        C++; museinfo
@@ -74,6 +74,11 @@ void  printTrailerComments     (HumdrumFile& infile);
 void  printDataComments        (HumdrumFile& infile, Array<Coordinate>& items, 
                                 int index);
 void  printTieDot              (HumdrumFile& infile, int line, int field);
+void  checkMarks               (HumdrumFile& infile, Array<char>& marks, 
+                                Array<Array<char> >& markcolors);
+void  getNoteAttributes        (SSTREAM& attributes, HumdrumFile& infile, 
+                                int line, int field, int subfield, 
+                                const char* buffer);
 
 // User interface variables:
 Options options;
@@ -82,6 +87,10 @@ int    originalQ    = 0;          // used with --original option
 int    sidecommentQ = 1;          // not hooked up to an option yet
 const char*  INDENT = "\t";       // indentation for each level
 int    LEVEL        = 0;          // used to indent the score
+
+Array<char> marks;                // used to color notes
+Array<Array<char> > markcolors;   // used to color notes
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -118,6 +127,8 @@ void convertHumdrumToEnp(HumdrumFile& infile) {
    getPartNames(infile, partnames);
    Array<int> barlines;
    getBarlines(barlines, infile);
+
+   checkMarks(infile, marks, markcolors);
 
    printHeaderComments(infile);
 
@@ -676,13 +687,49 @@ void printMidiNotes(HumdrumFile& infile, int line, int field) {
       if (k > 0) {
          cout << " ";
       }
-      if (strchr(buffer, '-') != NULL) {
-         // indicate the the MIDI pitch should be displayed as a diatonic flat
-         cout << "(" << base12 << " :enharmonic :flat)";
+      SSTREAM slots;
+      getNoteAttributes(slots, infile, line, field, k, buffer);
+      slots << ends;
+      if (strlen(slots.CSTRING) > 0) {
+         cout << "(";
+         cout << base12;
+         cout << slots.CSTRING;
+         cout << ")";
       } else {
          cout << base12;
       }
    }
+}
+
+
+//////////////////////////////
+//
+// getNoteAttributes -- returns a list of attributes for a note (if any)
+//
+
+void getNoteAttributes(SSTREAM& attributes, HumdrumFile& infile, int line, 
+      int field, int subfield, const char* buffer) {
+
+   // if the note is supposed to be shows as a flatted note, then
+   // add an attribute which says to display it as a flat (otherwise
+   // ENP will always show accidentals as sharped notes).
+   if (strchr(buffer, '-') != NULL) {
+      // indicate the the MIDI pitch should be displayed as a diatonic flat
+      attributes << " :enharmonic :flat";
+   }
+
+   // check for colored notes based on !!!RDF: entries in the file.
+   int i;
+   for (i=0; i<marks.getSize(); i++) {
+      if (marks[i] == '\0') {
+         // ignore any null-character
+         continue;
+      }
+      if (strchr(buffer, marks[i]) != NULL) {
+         attributes << " :color :" << markcolors[i];
+      }
+   }
+
 }
 
 
@@ -1011,6 +1058,54 @@ void getKernTracks(Array<int>& tracks, HumdrumFile& infile) {
       cout << "\t**kern tracks:\n";
       for (i=0; i<tracks.getSize(); i++) {
          cout << "\t" << tracks[i] << endl;
+      }
+   }
+}
+
+
+
+//////////////////////////////
+//
+// checkMarks -- Check for notes which are marked with a particular
+//       color.
+//
+
+void checkMarks(HumdrumFile& infile, Array<char>& marks, 
+      Array<Array<char> >& markcolors) {
+   int markQ = 1;
+   if (!markQ) {
+      marks.setSize(0);
+      markcolors.setSize(0);
+      return;
+   }
+
+   marks.setSize(0);
+   markcolors.setSize(0);
+   int i;
+   char target;
+   PerlRegularExpression pre;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isBibliographic()) {
+         continue;
+      }
+      if (pre.search(infile[i][0], 
+            "!!!RDF\\*\\*kern\\s*:\\s*([^=])\\s*=\\s*match", "i")) {
+         target = pre.getSubmatch(1)[0];
+         marks.append(target);
+         markcolors.setSize(markcolors.getSize()+1);
+         markcolors.last() = "red";
+      } else if (pre.search(infile[i][0], 
+            "!!!RDF\\*\\*kern\\s*:\\s*([^=])\\s*=\\s*mark", "i")) {
+         target = pre.getSubmatch(1)[0];
+         marks.append(target);
+         markcolors.setSize(markcolors.getSize()+1);
+         markcolors.last() = "red";
+      }
+   }
+
+   if (debugQ) {
+      for (i=0; i<marks.getSize(); i++) {
+         cout << "MARK " << marks[i] << "\t" << markcolors[i] << endl;
       }
    }
 }
