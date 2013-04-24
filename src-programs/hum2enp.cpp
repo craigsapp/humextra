@@ -1113,6 +1113,7 @@ void checkMarks(HumdrumFile& infile, Array<char>& marks,
    int markQ = 1;
    if (!markQ) {
       marks.setSize(0);
+      markline.setSize(0);
       markcolors.setSize(0);
       return;
    }
