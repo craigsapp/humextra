@@ -761,10 +761,12 @@ void getNoteExpressions(SSTREAM& expressions, HumdrumFile& infile, int line,
    PerlRegularExpression pre;
    
    int i;
-   for (i=0; i<markline.getSize(); i++) {
-      if (pre.search(infile[markline[i]][0], "circle")) {
-         expressions << "(:score-expression/" << InstanceIdCounter++;
-         expressions << " :kind :circled" << ")";
+   for (i=0; i<marks.getSize(); i++) {
+      if (strchr(buffer, marks[i]) != NULL) {
+         if (pre.search(infile[markline[i]][0], "circle")) {
+            expressions << "(:score-expression/" << InstanceIdCounter++;
+            expressions << " :kind :circled" << ")";
+         }
       }
    }
 
@@ -1119,6 +1121,7 @@ void checkMarks(HumdrumFile& infile, Array<char>& marks,
    }
 
    marks.setSize(0);
+   markline.setSize(0);
    markcolors.setSize(0);
    int i;
    char target;
