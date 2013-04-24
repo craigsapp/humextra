@@ -79,6 +79,9 @@ void  checkMarks               (HumdrumFile& infile, Array<char>& marks,
 void  getNoteAttributes        (SSTREAM& attributes, HumdrumFile& infile, 
                                 int line, int field, int subfield, 
                                 const char* buffer);
+void  getNoteExpressions       (SSTREAM& expressions, HumdrumFile& infile, 
+                                int line, int field, int subfield, 
+                                const char* buffer);
 
 // User interface variables:
 Options options;
@@ -90,7 +93,10 @@ int    LEVEL        = 0;          // used to indent the score
 
 Array<char> marks;                // used to color notes
 Array<Array<char> > markcolors;   // used to color notes
+Array<int> markline;              // used to search for circles
 
+// The instance ID works similar to XML::id
+int InstanceIdCounter = 0;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -730,6 +736,38 @@ void getNoteAttributes(SSTREAM& attributes, HumdrumFile& infile, int line,
       }
    }
 
+   SSTREAM expressions;
+   getNoteExpressions(expressions, infile, line, field, subfield, buffer);
+   
+   expressions << ends;
+   if (strlen(expressions.CSTRING) > 0) {
+      attributes << " :expressions (";
+      attributes << expressions.CSTRING;      
+      attributes << ")";
+   }
+
+}
+
+
+
+//////////////////////////////
+//
+// getNoteExpressions --
+//
+
+void getNoteExpressions(SSTREAM& expressions, HumdrumFile& infile, int line, 
+      int field, int subfield, const char* buffer) {
+
+   PerlRegularExpression pre;
+   
+   int i;
+   for (i=0; i<markline.getSize(); i++) {
+      if (pre.search(infile[markline[i]][0], "circle")) {
+         expressions << "(:score-expression/" << InstanceIdCounter++;
+         expressions << " :kind :circled" << ")";
+      }
+   }
+
 }
 
 
@@ -1092,12 +1130,14 @@ void checkMarks(HumdrumFile& infile, Array<char>& marks,
             "!!!RDF\\*\\*kern\\s*:\\s*([^=])\\s*=\\s*match", "i")) {
          target = pre.getSubmatch(1)[0];
          marks.append(target);
+         markline.append(i);
          markcolors.setSize(markcolors.getSize()+1);
          markcolors.last() = "red";
       } else if (pre.search(infile[i][0], 
             "!!!RDF\\*\\*kern\\s*:\\s*([^=])\\s*=\\s*mark", "i")) {
          target = pre.getSubmatch(1)[0];
          marks.append(target);
+         markline.append(i);
          markcolors.setSize(markcolors.getSize()+1);
          markcolors.last() = "red";
       }
