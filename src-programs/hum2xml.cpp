@@ -76,6 +76,8 @@ int       getMaxVoice           (HumdrumFile& infile, int track,
                                  int startline, int endline);
 void      convertVoice          (HumdrumFile& infile, int track, int startbar, 
                                  int endbar, int voice);
+void      printMode             (int lev, HumdrumFile& infile, int line, 
+                                 int col, int voice);
 
 // User interface variables:
 Options   options;
@@ -870,6 +872,7 @@ void convertAttributeToXML(HumdrumFile& infile, int line, int col, int voice) {
       lev++;
       pline(lev, "<fifths>");
       cout << keyinfo << "</fifths>\n";
+      printMode(lev, infile, line, col, voice);
       lev--;
       pline(lev, "</key>\n");
       lev--;
@@ -936,6 +939,82 @@ void convertAttributeToXML(HumdrumFile& infile, int line, int col, int voice) {
    }
 
 
+}
+
+
+
+//////////////////////////////
+//
+// printMode -- print the mode of the key
+//
+
+void printMode(int lev, HumdrumFile& infile, int line, int col, int voice) {
+
+   int startline = line;
+   int endline   = line;
+   int i, j;
+   int track = infile[line].getPrimaryTrack(col);
+   PerlRegularExpression pre;
+   for (i=line; i>=0; i--) {
+      if (infile[i].isData()) {
+         startline = i+1;
+         break;
+      } else {
+         startline = i;
+      }
+   }
+   for (i=line; i<infile.getNumLines(); i++) {
+      if (infile[i].isData()) {
+         endline = i-1;
+         break;
+      } else {
+         endline = i;
+      }
+   }
+   for (i=startline; i<=endline; i++) {
+      if (!infile[i].isInterpretation()) {
+         continue;
+      }
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         if (track != infile[i].getPrimaryTrack(j)) {
+            continue;
+         }
+
+         if (pre.search(infile[i][j], "^\\*([A-Ga-g][#-]*):")) {
+            if (strstr(infile[i][j], ":dor") != NULL) {
+               pline(lev, "<mode>dorian</mode>\n");
+               return;
+            }
+            if (strstr(infile[i][j], ":phr") != NULL) {
+               pline(lev, "<mode>phrygian</mode>\n");
+               return;
+            }
+            if (strstr(infile[i][j], ":lyd") != NULL) {
+               pline(lev, "<mode>lydian</mode>\n");
+               return;
+            }
+            if (strstr(infile[i][j], ":mix") != NULL) {
+               pline(lev, "<mode>mixolydian</mode>\n");
+               return;
+            }
+            if (strstr(infile[i][j], ":aeo") != NULL) {
+               pline(lev, "<mode>aeolean</mode>\n");
+               return;
+            }
+            if (strstr(infile[i][j], ":loc") != NULL) {
+               pline(lev, "<mode>locrian</mode>\n");
+               return;
+            }
+            if (islower(pre.getSubmatch(1)[0])) {
+               pline(lev, "<mode>minor</mode>\n");
+               return;
+            } else {
+               pline(lev, "<mode>major</mode>\n");
+               return;
+            }
+         }
+      }
+   }
 }
 
 
