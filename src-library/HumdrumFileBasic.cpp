@@ -49,6 +49,149 @@
 char HumdrumFileBasic::empty[1] = {0};
 
 
+///////////////////////////////////////////////////////////////////////////
+//
+// HumdrumFileAddress class
+//
+
+
+//////////////////////////////
+//
+// HumdrumFileAddress::HumdrumFileAddress --
+//
+
+HumdrumFileAddress::HumdrumFileAddress(void) {
+   // do nothing (address has uninitialized concents)
+}
+
+HumdrumFileAddress::HumdrumFileAddress(int aLine) {
+    address[0] = aLine;
+    address[1] = 0;
+    address[2] = 0;
+}
+
+HumdrumFileAddress::HumdrumFileAddress(int aLine, int aField) {
+    address[0] = aLine;
+    address[1] = aField;
+    address[2] = 0;
+}
+
+HumdrumFileAddress::HumdrumFileAddress(int aLine, int aField, int aSubfield) {
+    address[0] = aLine;
+    address[1] = aField;
+    address[2] = aSubfield;
+}
+
+HumdrumFileAddress::HumdrumFileAddress(const HumdrumFileAddress& anAddress) {
+    address[0] = anAddress.address[0];
+    address[1] = anAddress.address[1];
+    address[2] = anAddress.address[2];
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileAddress::~HumdrumFileAddress --
+//
+
+HumdrumFileAddress::~HumdrumFileAddress() {
+   // do nothing
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileAddress::operator[] -- Returns the requested address component,
+//     or returns the line number if the index is invalid.
+//
+
+int& HumdrumFileAddress::operator[](int index) { 
+   if (index < 0 || index > 2) {
+      return address[0];
+   }
+   return address[index];
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileAddress::line --  Return the line in the Humdrum file.
+//
+
+int& HumdrumFileAddress::line(void)    { return address[0]; }
+int& HumdrumFileAddress::getLine(void) { return address[0]; }
+int& HumdrumFileAddress::row(void)     { return address[0]; }
+int& HumdrumFileAddress::getRow(void)  { return address[0]; }
+int& HumdrumFileAddress::i(void)       { return address[0]; }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileAddress::field -- Returns the column on the line.
+//
+
+int& HumdrumFileAddress::field(void)     { return address[1]; }
+int& HumdrumFileAddress::getField(void)  { return address[1]; }
+int& HumdrumFileAddress::column(void)    { return address[1]; }
+int& HumdrumFileAddress::getColumn(void) { return address[1]; }
+int& HumdrumFileAddress::col(void)       { return address[1]; }
+int& HumdrumFileAddress::getCol(void)    { return address[1]; }
+int& HumdrumFileAddress::j(void)         { return address[1]; }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileAddress::subfield --
+//
+
+int& HumdrumFileAddress::subfield(void)    { return address[2]; }
+int& HumdrumFileAddress::getSubfield(void) { return address[2]; }
+int& HumdrumFileAddress::subtoken(void)    { return address[2]; }
+int& HumdrumFileAddress::getSubtoken(void) { return address[2]; }
+int& HumdrumFileAddress::k(void)           { return address[2]; }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileAddress::zero -- Set all address components to 0.
+//
+
+void HumdrumFileAddress::zero(void) { 
+   address[0] = 0;
+   address[1] = 0;
+   address[2] = 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileAddress::operator= --
+//
+
+HumdrumFileAddress HumdrumFileAddress::operator=(const 
+      HumdrumFileAddress& anAddress) {
+   if (this == &anAddress) {
+      return *this;
+   }
+   address[0] = anAddress.address[0];
+   address[1] = anAddress.address[1];
+   address[2] = anAddress.address[2];
+   return *this;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////
+//
+// HumdrumFileBasic class
+//
 
 //////////////////////////////
 //

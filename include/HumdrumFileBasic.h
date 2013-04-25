@@ -63,6 +63,46 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
+class HumdrumFileAddress {
+   public:
+      HumdrumFileAddress   (void);
+      HumdrumFileAddress   (int aLine);
+      HumdrumFileAddress   (int aLine, int aField);
+      HumdrumFileAddress   (int aLine, int aField, int aSubfield);
+      HumdrumFileAddress   (const HumdrumFileAddress& anAddress);
+      ~HumdrumFileAddress  ();
+
+      int&               operator[]  (int index);
+
+      int&               line        (void);
+      int&               getLine     (void);
+      int&               row         (void);
+      int&               getRow      (void);
+      int&               i           (void);
+
+      int&               field       (void);
+      int&               getField    (void);
+      int&               column      (void);
+      int&               getColumn   (void);
+      int&               col         (void);
+      int&               getCol      (void);
+      int&               j           (void);
+
+      int&               subfield    (void);
+      int&               getSubfield (void);
+      int&               subtoken    (void);
+      int&               getSubtoken (void);
+      int&               k           (void);
+
+      void               zero        (void);
+      HumdrumFileAddress operator=   (const HumdrumFileAddress& anAddress);
+
+   protected:
+      int address[3];   // line, field, subfield
+};
+
+///////////////////////////////////////////////////////////////////////////
+
 class HumdrumFileBasic {
    public:
                              HumdrumFileBasic (void);
