@@ -56,6 +56,7 @@ int       singleTokenSearch   (int& column, HumdrumFile& infile, int line,
 void      destroyAndSearches  (Array<regex_t>& relist);
 double    getBeatOfNextData   (HumdrumFile& infile, int line);
 void      printDitto          (HumdrumFile& infile, int line);
+void      markKernNotes       (HumdrumFile& infile, int line);
 
 // User interface variables:
 Options     options;
@@ -79,10 +80,13 @@ int         exinterpQ       = 0;     // used with -x option
 int         formQ           = 0;     // used with -F option
 int         tokenizeQ       = 0;     // used with -T option
 int         datastopQ       = 0;     // used with -D option
+int         markQ           = 0;     // used with --mark option
 const char* exinterps       = "";    // used with -x option
 char        separator[1024] = {0};   // used with --sep option
 Array<regex_t> Andlist;              // used with --and option
 Array<Array<char> > Andexinterp;     // used with --and option
+int         MarkerCount     = 0;
+int         MarkerMatchCount= 0;
 
 // standard grep option emulations:
 int         fileQ           = 0;     // used with -H option
@@ -119,6 +123,16 @@ int main(int argc, char** argv) {
       }
 
       doSearch(searchstring, infiles[i], infiles[i].getFilename());
+      if (markQ) {
+         cout << infiles[i];
+         if (MarkerCount) {
+            cout << "!!!RDF**kern: @ = marked note ("
+                 << MarkerCount << " marks in " << MarkerMatchCount
+                 << " matches)" << endl;
+            MarkerCount = 0;
+            MarkerMatchCount = 0;
+         }
+      }
    }
 
    destroyAndSearches(Andlist);
@@ -211,6 +225,10 @@ void doSearch(const char* searchstring, HumdrumFile& infile,
          status = tokenSearch(column, infile, i, re);
          // status == 0 means a match was found
          // status != 0 means a match was not found
+         if (markQ && !status) {
+            markKernNotes(infile, i);
+            continue;
+         }
 
          if (invertQ) {
             status = !status;
@@ -242,12 +260,20 @@ void doSearch(const char* searchstring, HumdrumFile& infile,
             status = 0;
             for (int ii=0; ii<infile[i].getFieldCount(); ii++) {
                status = tokenSearch(ii, infile, i, re);
+               if (markQ && !status) {
+                  markKernNotes(infile, i);
+                  continue;
+               }
                if (status == 0) {
                   break;
                }
             }
          } else {
             status = regexec(&re, infile[i].getLine(), 0, NULL, 0);
+            if (markQ && !status) {
+               markKernNotes(infile, i);
+               continue;
+            }
          }
          if (Andlist.getSize() > 0) {
             for (int aa=0; aa<Andlist.getSize(); aa++) {
@@ -287,6 +313,43 @@ void doSearch(const char* searchstring, HumdrumFile& infile,
    regfree(&re);
    if (nomatchfilesQ && matchcount == 0) {
       cout << filename << endl;
+   }
+}
+
+
+
+//////////////////////////////
+//
+// markKernNotes -- Read across the line and mark all notes with '@' which
+// occur on that line, or resolve the null tokens to mark previous notes 
+// which are currently sounding.
+//
+
+void markKernNotes(HumdrumFile& infile, int line) {
+   int j;
+   if (!infile[line].isData()) {
+      return;
+   }
+   MarkerMatchCount++;
+   char buffer[1024] = {0};
+   HumdrumFileAddress add;
+   for (j=0; j<infile[line].getFieldCount(); j++) {
+      if (!infile[line].isExInterp(j, "**kern")) {
+         continue;
+      }
+      add.setLineField(line, j);
+      infile.getNonNullAddress(add);
+      if (strchr(infile[add], 'r') != NULL) {
+         continue;
+      }
+      if (strchr(infile[add], '@') != NULL) {
+         // don't duplicate @ marker in a token
+         continue;
+      }
+      MarkerCount++;
+      strcpy(buffer, infile[add]);
+      strcat(buffer, "@");
+      infile.changeField(add, buffer);
    }
 }
 
@@ -567,6 +630,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("N|null|ditto=b",    "resolve null tokens like ditto command");
    opts.define("x|exinterp=s",      "search only listed exinterps");
    opts.define("T|tokenize=b",      "search tokens independently");
+   opts.define("mark=b",            "mark notes on data lines that match");
    opts.define("D|data-stop=b",     "stop search at first data record");
    opts.define("sep|separator=s::", "data separator string");
    opts.define("no-paren=b",        "don't display null parentheses");
@@ -637,6 +701,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    parenQ        = !opts.getBoolean("no-paren");
    tokenizeQ     =  opts.getBoolean("tokenize");
    datastopQ     =  opts.getBoolean("data-stop");
+   markQ         =  opts.getBoolean("mark");
    exinterpQ     =  opts.getBoolean("exinterp");
    exinterps     =  opts.getString("exinterp");
    char tempbuffer[1024] = {0};
