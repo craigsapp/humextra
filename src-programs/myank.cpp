@@ -3,6 +3,7 @@
 // Creation Date: Sun Dec 26 17:03:54 PST 2010
 // Last Modified: Fri Jan 14 17:06:32 PST 2011 (added --mark and --mdsep)
 // Last Modified: Wed Feb  2 12:13:11 PST 2011 (added *met extraction)
+// Last Modified: Mon Apr  1 00:28:01 PDT 2013 Enabled multiple segment input
 // Filename:      ...sig/examples/all/myank.cpp 
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/myank.cpp
 // Syntax:        C++; museinfo
@@ -113,19 +114,21 @@ void      getMetStates         (Array<Array<Coord> >& metstates,
                                 HumdrumFile& infile);
 Coord     getLocalMetInfo      (HumdrumFile& infile, int row, int track);
 int       atEndOfFile          (HumdrumFile& infile, int line);
+void      processFile          (HumdrumFile& infile);
 
 
 // User interface variables:
 Options options;
-int    debugQ     = 0;             // used with --debug option
-int    verboseQ   = 0;             // used with -v option
-int    invisibleQ = 1;             // used with --visible option
-int    maxQ       = 0;             // used with --max option
-int    minQ       = 0;             // used with --min option
-int    instrumentQ= 0;             // used with -I option
-int    nolastbarQ = 0;             // used with -B option
-int    markQ      = 0;             // used with --mark option
-int    doubleQ    = 0;             // used with --mdsep option
+int    debugQ      = 0;            // used with --debug option
+int    verboseQ    = 0;            // used with -v option
+int    invisibleQ  = 1;            // used with --visible option
+int    maxQ        = 0;            // used with --max option
+int    minQ        = 0;            // used with --min option
+int    instrumentQ = 0;            // used with -I option
+int    nolastbarQ  = 0;            // used with -B option
+int    markQ       = 0;            // used with --mark option
+int    doubleQ     = 0;            // used with --mdsep option
+int    barnumtextQ = 0;            // used with -T option
 Array<MeasureInfo> MeasureOutList; // used with -m option
 Array<MeasureInfo> MeasureInList;  // used with -m option
 
@@ -134,16 +137,37 @@ Array<Array<Coord> > metstates;
 //////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv) {
-   HumdrumFile infile;
+   HumdrumFileSet infiles;
 
    // initial processing of the command-line options
    checkOptions(options, argc, argv);
 
-   if (options.getArgCount() < 1) {
-      infile.read(cin);
+   int numinputs = options.getArgumentCount();
+
+   int i;
+   if (numinputs < 1) {
+      infiles.read(cin);
    } else {
-      infile.read(options.getArg(1));
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
+      }
    }
+
+   for (i=0; i<infiles.getCount(); i++) {
+      processFile(infiles[i]);
+   } 
+
+   return 0;
+}
+
+
+
+////////////////////////
+//
+// processFile --
+//
+
+void processFile(HumdrumFile& infile) {
 
    getMetStates(metstates, infile);
    getMeasureStartStop(MeasureInList, infile);
@@ -240,9 +264,13 @@ int main(int argc, char** argv) {
       }
    }
 
-   myank(infile, MeasureOutList);
+   if (MeasureOutList.getSize() == 0) {
+      // disallow processing files with no barlines
+      return;
+   }
 
-   return 0;
+   infile.printNonemptySegmentLabel(cout);
+   myank(infile, MeasureOutList);
 }
 
 
@@ -447,8 +475,8 @@ void getMarkString(ostream& out, HumdrumFile& infile)  {
                k++;
             }
          }
-outerforloop: ;
       }
+outerforloop: ;
    }
 }
 
@@ -460,7 +488,6 @@ outerforloop: ;
 //
 
 void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
-
    if (outmeasures.getSize() > 0) {
       printStarting(infile);
    }
@@ -472,12 +499,14 @@ void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
    int mcount = 0;
    int measurestart = 1;
    int datastart = 0;
+   int bartextcount = 0;
    for (h=0; h<outmeasures.getSize(); h++) {
       measurestart = 1;
       printed = 0;
       counter = 0;
       if (debugQ) {
          cout << "!! =====================================\n";
+         cout << "!! processing " << outmeasures[h].num << endl;
       }
       if (h > 0) {
          reconcileSpineBoundary(infile, outmeasures[h-1].stop,
@@ -505,11 +534,25 @@ void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
          if ((mcount == 1) && invisibleQ && infile[i].isMeasure()) {
             printInvisibleMeasure(infile, i);
             measurestart = 0;
+            if ((bartextcount++ == 0) && infile[i].isMeasure()) {
+               int barline = 0;
+               sscanf(infile[i][0], "=%d", &barline);
+               if (barline > 0) {
+                  cout << "!!LO:TX:Z=20:X=-90:t=" << barline << endl;
+               }
+            }
          } else if (doubleQ && measurestart) {
             printDoubleBarline(infile, i);
             measurestart = 0;
          } else {
             cout << infile[i] << "\n";
+            if ((bartextcount++ == 0) && infile[i].isMeasure()) {
+               int barline = 0;
+               sscanf(infile[i][0], "=%d", &barline);
+               if (barline > 0) {
+                  cout << "!!LO:TX:Z=20:X=-25:t=" << barline << endl;
+               }
+            }
          }
          lastline = i;
       }
@@ -517,8 +560,13 @@ void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
 
    PerlRegularExpression pre;
    Array<char> token;
-   int lasti = outmeasures.last().stop;
-   if ((!nolastbarQ) &&  infile[lasti].isMeasure()) {
+   int lasti;
+   if (outmeasures.getSize() > 0) {
+      lasti = outmeasures.last().stop;
+   } else {
+      lasti = -1;
+   }
+   if ((!nolastbarQ) &&  (lasti >= 0) && infile[lasti].isMeasure()) {
       for (j=0; j<infile[lasti].getFieldCount(); j++) {
          token.setSize(strlen(infile[lasti][j])+1);
          strcpy(token.getBase(), infile[lasti][j]);
@@ -566,6 +614,10 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
       return;
    }
 
+   if (!infile[ii].isInterpretation()) { 
+      return;
+   }
+
    int i;
 
    int clefQ    = 0;
@@ -590,10 +642,9 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
 //      return;
 //   }
 
-
    for (i=1; i<=tracks; i++) {
 
-      if (!clefQ) {
+      if (!clefQ && (outmeasures[index].sclef.getSize() > 0)) {
          x  = outmeasures[index].sclef[i].x;
          y  = outmeasures[index].sclef[i].y;
          xo = outmeasures[index-1].eclef[i].x;
@@ -605,7 +656,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
          }
       }
 
-      if (!keysigQ) {
+      if (!keysigQ && (outmeasures[index].skeysig.getSize() > 0)) {
          x  = outmeasures[index].skeysig[i].x;
          y  = outmeasures[index].skeysig[i].y;
          xo = outmeasures[index-1].ekeysig[i].x;
@@ -617,7 +668,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
          }
       }
 
-      if (!keyQ) {
+      if (!keyQ && (outmeasures[index].skey.getSize() > 0)) {
          x  = outmeasures[index].skey[i].x;
          y  = outmeasures[index].skey[i].y;
          xo = outmeasures[index-1].ekey[i].x;
@@ -629,7 +680,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
          }
       }
 
-      if (!timesigQ) {
+      if (!timesigQ && (outmeasures[index].stimesig.getSize() > 0)) {
          x  = outmeasures[index].stimesig[i].x;
          y  = outmeasures[index].stimesig[i].y;
          xo = outmeasures[index-1].etimesig[i].x;
@@ -641,7 +692,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
          }
       }
 
-      if (!metQ) {
+      if (!metQ && (outmeasures[index].smet.getSize() > 0)) {
          x  = outmeasures[index].smet[i].x;
          y  = outmeasures[index].smet[i].y;
          xo = outmeasures[index-1].emet[i].x;
@@ -653,7 +704,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
          }
       }
 
-      if (!tempoQ) {
+      if (!tempoQ && (outmeasures[index].stempo.getSize() > 0)) {
          x  = outmeasures[index].stempo[i].x;
          y  = outmeasures[index].stempo[i].y;
          xo = outmeasures[index-1].etempo[i].x;
@@ -1007,6 +1058,8 @@ void adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
 //
 
 void printDoubleBarline(HumdrumFile& infile, int line) {
+
+
    if (!infile[line].isMeasure()) {
       cout << infile[line] << "\n";
       return;
@@ -1026,6 +1079,15 @@ void printDoubleBarline(HumdrumFile& infile, int line) {
       }
    }
    cout << "\n";
+
+   if (barnumtextQ) {
+      int barline = 0;
+      sscanf(infile[line][0], "=%d", &barline);
+      if (barline > 0) {
+         cout << "!!LO:TX:Z=20:X=-25:t=" << barline << endl;
+      }
+   }
+
 }
 
 
@@ -1973,6 +2035,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
    opts.define("v|verbose=b",  "Verbose output of data");
    opts.define("d|debug=b",    "Debugging information");
    opts.define("mark|marks=b",    "Yank measure with marked notes");
+   opts.define("T|M|bar-number-text=b", "print barnum with LO text above system ");
    opts.define("double|dm|md|mdsep|mdseparator=b", "Put double barline between non-consecutive measure segments");
    opts.define("m|b|measures|bars|measure|bar=s", "Measures to yank");
    opts.define("I|i|instrument=b", "Include instrument codes from start of data");
@@ -2015,6 +2078,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
    nolastbarQ  = opts.getBoolean("noendbar");
    markQ       = opts.getBoolean("mark");
    doubleQ     = opts.getBoolean("mdsep");
+   barnumtextQ = opts.getBoolean("bar-number-text");
 
    if (!(opts.getBoolean("measures") || markQ)) {
       // if -m option is not given, then --mark option presumed
