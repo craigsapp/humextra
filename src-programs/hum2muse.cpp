@@ -4062,6 +4062,10 @@ int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
 void printPrehangTie(MuseRecord& arecord, const char* buffer, 
       HumdrumFile& infile, int row, int col, int voice) {
 
+   if (!tieQ) {
+      return;
+   }
+
    int voicecount = 0;
    int track = infile[row].getPrimaryTrack(col);
    int ptrack;
@@ -6619,6 +6623,10 @@ void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line,
 
 int printUnterminatedTies(MuseData& tempdata, HumdrumFile& infile, 
       int line, int track) {
+
+   if (!tieQ) {
+      return 0;
+   }
 
    if (!infile[line].isMeasure()) {
       return 0;
