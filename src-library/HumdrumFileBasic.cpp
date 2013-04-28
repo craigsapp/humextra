@@ -65,27 +65,31 @@ HumdrumFileAddress::HumdrumFileAddress(void) {
 }
 
 HumdrumFileAddress::HumdrumFileAddress(int aLine) {
-    address[0] = aLine;
-    address[1] = 0;
+    address[0] = 0;
+    address[1] = aLine;
     address[2] = 0;
+    address[3] = 0;
 }
 
 HumdrumFileAddress::HumdrumFileAddress(int aLine, int aField) {
-    address[0] = aLine;
-    address[1] = aField;
-    address[2] = 0;
+    address[0] = 0;
+    address[1] = aLine;
+    address[2] = aField;
+    address[3] = 0;
 }
 
 HumdrumFileAddress::HumdrumFileAddress(int aLine, int aField, int aSubfield) {
-    address[0] = aLine;
-    address[1] = aField;
-    address[2] = aSubfield;
+    address[0] = 0;
+    address[1] = aLine;
+    address[2] = aField;
+    address[3] = aSubfield;
 }
 
 HumdrumFileAddress::HumdrumFileAddress(const HumdrumFileAddress& anAddress) {
-    address[0] = anAddress.address[0];
-    address[1] = anAddress.address[1];
-    address[2] = anAddress.address[2];
+    address[0] = 0;
+    address[1] = anAddress.address[0];
+    address[2] = anAddress.address[1];
+    address[3] = anAddress.address[2];
 }
 
 
@@ -103,29 +107,14 @@ HumdrumFileAddress::~HumdrumFileAddress() {
 
 //////////////////////////////
 //
-// HumdrumFileAddress::operator[] -- Returns the requested address component,
-//     or returns the line number if the index is invalid.
-//
-
-int& HumdrumFileAddress::operator[](int index) { 
-   if (index < 0 || index > 2) {
-      return address[0];
-   }
-   return address[index];
-}
-
-
-
-//////////////////////////////
-//
 // HumdrumFileAddress::line --  Return the line in the Humdrum file.
 //
 
-int& HumdrumFileAddress::line(void)    { return address[0]; }
-int& HumdrumFileAddress::getLine(void) { return address[0]; }
-int& HumdrumFileAddress::row(void)     { return address[0]; }
-int& HumdrumFileAddress::getRow(void)  { return address[0]; }
-int& HumdrumFileAddress::i(void)       { return address[0]; }
+int& HumdrumFileAddress::line(void)    { return address[1]; }
+int& HumdrumFileAddress::getLine(void) { return address[1]; }
+int& HumdrumFileAddress::row(void)     { return address[1]; }
+int& HumdrumFileAddress::getRow(void)  { return address[1]; }
+int& HumdrumFileAddress::i(void)       { return address[1]; }
 
 
 
@@ -134,13 +123,13 @@ int& HumdrumFileAddress::i(void)       { return address[0]; }
 // HumdrumFileAddress::field -- Returns the column on the line.
 //
 
-int& HumdrumFileAddress::field(void)     { return address[1]; }
-int& HumdrumFileAddress::getField(void)  { return address[1]; }
-int& HumdrumFileAddress::column(void)    { return address[1]; }
-int& HumdrumFileAddress::getColumn(void) { return address[1]; }
-int& HumdrumFileAddress::col(void)       { return address[1]; }
-int& HumdrumFileAddress::getCol(void)    { return address[1]; }
-int& HumdrumFileAddress::j(void)         { return address[1]; }
+int& HumdrumFileAddress::field(void)     { return address[2]; }
+int& HumdrumFileAddress::getField(void)  { return address[2]; }
+int& HumdrumFileAddress::column(void)    { return address[2]; }
+int& HumdrumFileAddress::getColumn(void) { return address[2]; }
+int& HumdrumFileAddress::col(void)       { return address[2]; }
+int& HumdrumFileAddress::getCol(void)    { return address[2]; }
+int& HumdrumFileAddress::j(void)         { return address[2]; }
 
 
 
@@ -149,11 +138,11 @@ int& HumdrumFileAddress::j(void)         { return address[1]; }
 // HumdrumFileAddress::subfield --
 //
 
-int& HumdrumFileAddress::subfield(void)    { return address[2]; }
-int& HumdrumFileAddress::getSubfield(void) { return address[2]; }
-int& HumdrumFileAddress::subtoken(void)    { return address[2]; }
-int& HumdrumFileAddress::getSubtoken(void) { return address[2]; }
-int& HumdrumFileAddress::k(void)           { return address[2]; }
+int& HumdrumFileAddress::subfield(void)    { return address[3]; }
+int& HumdrumFileAddress::getSubfield(void) { return address[3]; }
+int& HumdrumFileAddress::subtoken(void)    { return address[3]; }
+int& HumdrumFileAddress::getSubtoken(void) { return address[3]; }
+int& HumdrumFileAddress::k(void)           { return address[3]; }
 
 
 
@@ -166,6 +155,7 @@ void HumdrumFileAddress::zero(void) {
    address[0] = 0;
    address[1] = 0;
    address[2] = 0;
+   address[3] = 0;
 }
 
 
@@ -183,7 +173,20 @@ HumdrumFileAddress HumdrumFileAddress::operator=(const
    address[0] = anAddress.address[0];
    address[1] = anAddress.address[1];
    address[2] = anAddress.address[2];
+   address[3] = anAddress.address[3];
    return *this;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileAddress::setLineField --
+//
+
+void HumdrumFileAddress::setLineField(int aLine, int aField) {
+   line() = aLine;
+   field() = aField;
 }
 
 
@@ -379,6 +382,18 @@ void HumdrumFileBasic::clear(void) {
 
 //////////////////////////////
 //
+// changeField -- Change the contents of a token in the Humdrum file.
+//
+
+void HumdrumFileBasic::changeField(HumdrumFileAddress& add,
+      const char* newField) {
+   (*this)[add.line()].changeField(add.field(), newField);
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBasic::setFilename -- set the filename for the HumdrumFile
 //     (used by HumdrumStream class management).
 //
@@ -495,6 +510,24 @@ HumdrumFileBasic HumdrumFileBasic::extract(int aField) {
    }
 
    return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBasic::getNonNullAddress --
+//
+
+void HumdrumFileBasic::getNonNullAddress(HumdrumFileAddress& add) {
+   HumdrumFileBasic& afile = *this;
+   if (strcmp(afile[add], ".") != 0) {
+      return;
+   }
+   int i = afile[add.line()].getDotLine(add.field());
+   int j = afile[add.line()].getDotField(add.field());
+   add.line() = i;
+   add.field() = j;
 }
 
 
@@ -902,6 +935,10 @@ HumdrumRecord& HumdrumFileBasic::operator[](int index) {
    }
 
    return *records[index];
+}
+
+const char* HumdrumFileBasic::operator[](HumdrumFileAddress& add) {
+   return (*this)[add.line()][add.field()];
 }
 
 

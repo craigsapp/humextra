@@ -8,6 +8,7 @@
 // Last Modified: Mon Feb 14 08:11:01 PST 2011 added VTS functions
 // Last Modified: Tue Apr 24 16:54:50 PDT 2012 added readFromJrpURI()
 // Last Modified: Tue Dec 11 17:23:04 PST 2012 added fileName, segmentLevel
+// Last Modified: Sat Apr 27 13:36:16 PDT 2013 added changeField()
 // Filename:      ...sig/include/sigInfo/HumdrumFileBasic.h
 // Web Address:   http://museinfo.sapp.org/include/sigInfo/HumdrumFileBasic.h
 // Syntax:        C++ 
@@ -72,8 +73,6 @@ class HumdrumFileAddress {
       HumdrumFileAddress   (const HumdrumFileAddress& anAddress);
       ~HumdrumFileAddress  ();
 
-      int&               operator[]  (int index);
-
       int&               line        (void);
       int&               getLine     (void);
       int&               row         (void);
@@ -93,6 +92,8 @@ class HumdrumFileAddress {
       int&               subtoken    (void);
       int&               getSubtoken (void);
       int&               k           (void);
+
+      void               setLineField(int aLine, int aField);
 
       void               zero        (void);
       HumdrumFileAddress operator=   (const HumdrumFileAddress& anAddress);
@@ -115,6 +116,8 @@ class HumdrumFileBasic {
       void                   appendLine       (HumdrumRecord& aRecord);
       void                   appendLine       (HumdrumRecord* aRecord);
       void                   setAllocation    (int allocation);
+      void                   changeField      (HumdrumFileAddress& add,
+                                               const char* newField);
       void                   clear            (void);
       void                   setFilename      (const char* filename);
       const char*            getFilename      (void);
@@ -123,6 +126,7 @@ class HumdrumFileBasic {
       ostream&               printSegmentLabel(ostream& out);
       ostream&               printNonemptySegmentLabel(ostream& out);
       HumdrumFileBasic       extract          (int aField);
+      void                   getNonNullAddress(HumdrumFileAddress& add);
       const char*            getDotValue      (int index, int spinei);
       const char*            getLine          (int index);
       const char*            getBibValue      (char* buffer, const char* key);
@@ -144,6 +148,7 @@ class HumdrumFileBasic {
       void                   read             (istream& inStream);
       HumdrumFileBasic       removeNullRecords(void);
       HumdrumRecord&         operator[]       (int index);
+      const char*            operator[]       (HumdrumFileAddress& add);
       void                   write            (const char* filename);
       void                   write            (ostream& outstream);
 
