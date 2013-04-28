@@ -78,6 +78,8 @@ void      convertVoice          (HumdrumFile& infile, int track, int startbar,
                                  int endbar, int voice);
 void      printMode             (int lev, HumdrumFile& infile, int line, 
                                  int col, int voice);
+int       adjustKeyInfo         (HumdrumFile& infile, int line, int col, 
+                                 int voice);
 
 // User interface variables:
 Options   options;
@@ -518,7 +520,7 @@ void convertVoice(HumdrumFile& infile, int track, int startbar, int endbar,
       start++;
    }
    
-   for (i=start; i<endbar; i++) {
+   for (i=start; i<=endbar; i++) {
       v = 0;
       for (j=0; j<infile[i].getFieldCount(); j++) {
          t = infile[i].getPrimaryTrack(j);
@@ -635,13 +637,39 @@ void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) {
    updateAccidentals();
    const char *ptr;
 
-   if (strcmp(infile[line][col], "==") == 0
-       || strcmp(infile[line+1][0], "*-") == 0) {
-    
-      checkbackup(AbsTick, LineTick[line]);
+/*
+   int nextline = -1;
+   int nextcol = -1;
+   int track = infile[line].getPrimaryTrack(col);
+   
+   // locate the next barline
+   int i, j;
+   for (i=line+1; i<infile.getNumLines(); i++) {
+      if (infile[i].isMeasure()) {
+         nextline = i;
+         break;
+      }
+   }
+   if (nextline > 0) {
+      for (j=0; j<infile[nextline].getFieldCount(); j++) {
+         if (track != infile[nextline].getPrimaryTrack(j)) {
+            continue;
+         }
+         nextcol = j;
+      }
+   }
 
+   const char* nextbar = "";
+   if ((nextline >= 0) && (nextcol >= 0)) {
+      nextbar = infile[nextline][nextcol];
+   }
+*/
+
+   if ((strncmp(infile[line][col], "==", 2) == 0) 
+         || (strcmp(infile[line][col], "*-") == 0)) {
+      checkbackup(AbsTick, LineTick[line]);
       lev++;
-      pline(lev, "<barline>\n"); 
+      pline(lev, "<barline location=\"right\">\n"); 
       lev++;
       pline(lev, "<bar-style>light-heavy</bar-style>\n");
       lev--;
@@ -649,7 +677,6 @@ void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) {
       lev--;
       pline(lev, "</measure>\n");
       measurestate = 0;
-
    } else if ((ptr = strchr(infile[line][col], ':')) != NULL) {
       if ((ptr+1)[0] == '|' || (ptr+1)[0] == '!') {
          lev++;
@@ -871,6 +898,7 @@ void convertAttributeToXML(HumdrumFile& infile, int line, int col, int voice) {
       pline(lev, "<key>\n");
       lev++;
       pline(lev, "<fifths>");
+      // keyinfo += adjustKeyInfo(infile, line, col, voice);
       cout << keyinfo << "</fifths>\n";
       printMode(lev, infile, line, col, voice);
       lev--;
@@ -945,6 +973,78 @@ void convertAttributeToXML(HumdrumFile& infile, int line, int col, int voice) {
 
 //////////////////////////////
 //
+// adjustKeyInfo -- account for modal keys:
+//   ionian     =  0 (to get to major)
+//   dorian     = -1 (to get to minor)
+//   phrygian   = +1 (to get to minor)
+//   lydian     = -1 (to get to major)
+//   mixolydian = +1 (to get to major)
+//   aeolean    =  0 (to get to minor)
+//   mixolydian = +2 (to get to minor)
+//
+
+int adjustKeyInfo(HumdrumFile& infile, int line, int col, int voice) {
+   int startline = line;
+   int endline   = line;
+   int i, j;
+   int track = infile[line].getPrimaryTrack(col);
+   PerlRegularExpression pre;
+   for (i=line; i>=0; i--) {
+      if (infile[i].isData()) {
+         startline = i+1;
+         break;
+      } else {
+         startline = i;
+      }
+   }
+   for (i=line; i<infile.getNumLines(); i++) {
+      if (infile[i].isData()) {
+         endline = i-1;
+         break;
+      } else {
+         endline = i;
+      }
+   }
+
+   for (i=startline; i<=endline; i++) {
+      if (!infile[i].isInterpretation()) {
+         continue;
+      }
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         if (track != infile[i].getPrimaryTrack(j)) {
+            continue;
+         }
+
+         if (pre.search(infile[i][j], "^\\*([A-Ga-g][#-]*):")) {
+            if (strstr(infile[i][j], ":dor") != NULL) {
+               return -1;
+            }
+            if (strstr(infile[i][j], ":phr") != NULL) {
+               return +1;
+            }
+            if (strstr(infile[i][j], ":lyd") != NULL) {
+               return -1;
+            }
+            if (strstr(infile[i][j], ":mix") != NULL) {
+               return +1;
+            }
+            if (strstr(infile[i][j], ":aeo") != NULL) {
+               return 0;
+            }
+            if (strstr(infile[i][j], ":loc") != NULL) {
+               return +2;
+            }
+            return 0;
+         }
+      }
+   }
+   return 0;
+}
+
+
+
+//////////////////////////////
+//
 // printMode -- print the mode of the key
 //
 
@@ -971,6 +1071,7 @@ void printMode(int lev, HumdrumFile& infile, int line, int col, int voice) {
          endline = i;
       }
    }
+
    for (i=startline; i<=endline; i++) {
       if (!infile[i].isInterpretation()) {
          continue;
