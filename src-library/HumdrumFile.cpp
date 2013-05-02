@@ -2712,8 +2712,24 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
       timebaseC[i] = timebase;
    }
 
+
+   // set the durtion of each measure (barline)
+   RationalNumber lastabs = infile[infile.getNumLines()-1].getAbsBeatR();
+   RationalNumber currentabs;
+   RationalNumber difference;
+   for (i=infile.getNumLines()-1; i>=0; i--) {
+      if (!infile[i].isMeasure()) {
+         continue;
+      }
+      currentabs = infile[i].getAbsBeatR();
+      difference = lastabs - currentabs;
+      lastabs = currentabs;
+      infile[i].setBeatR(difference);
+   }
+
    fixIncompleteBarMeterR(meterbeats, timebaseC);
    fixIrritatingPickupProblem();
+
    rhythms.setSize(rhythmsR.getSize());
    for (i=0; i<rhythms.getSize(); i++) {
       // cout << "XRHYTHM = " << rhythmsR[i] << endl;
@@ -2751,6 +2767,7 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
    // this will eventually replace minrhythm:
    minrhythmR = getMinimumRationalRhythm(rhythmsR);
 }
+
 
 
 ///////////////////////////////
