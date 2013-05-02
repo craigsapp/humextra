@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 
    int measure = 0;
 
-   cout << "absbeat\tdur\tbeat\tmeasure\t::\tdata\n";
+   cout << "absbeat\tdur\tbar\tbeat\t::\tdata\n";
    cout << ":::::::::::::::::::::::::::::::::::::::::::::::::::::\n";
    for (int i=0; i<hfile.getNumLines(); i++) {
       if (hfile[i].isMeasure()) {
