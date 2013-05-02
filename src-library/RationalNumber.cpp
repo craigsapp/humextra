@@ -744,7 +744,7 @@ ostream& RationalNumber::printTwoPart(ostream& out, const char* spacer) const {
 //    as the rhythm "2%3" rather than "4.".
 //
 
-ostream& RationalNumber::printRecip(ostream& out, const char* spacer = "%") {
+ostream& RationalNumber::printRecip(ostream& out, const char* spacer) {
    RationalNumber& num = *this;
    out << num.getDenominator();
    if (num.getNumerator() != 1) {
