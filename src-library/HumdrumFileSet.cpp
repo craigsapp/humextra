@@ -114,6 +114,23 @@ int HumdrumFileSet::read(istream& inStream) {
    return readAppend(inStream);
 }
 
+int HumdrumFileSet::read(Options& options) {
+   clear();
+   int i;
+   int numinputs = options.getArgumentCount();
+   HumdrumFileSet& infiles = *this;
+
+   if (numinputs < 1) {
+      infiles.read(cin);
+   } else {
+      for (i=0; i<numinputs; i++) {
+         infiles.readAppend(options.getArg(i+1));
+      }
+   }
+
+   return infiles.getCount();
+}
+
 
 
 //////////////////////////////

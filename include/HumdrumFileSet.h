@@ -22,6 +22,7 @@
 #define USING_URI
 
 #include "HumdrumFile.h"
+#include "Options.h"
 
 #ifndef OLDCPP
    #include <iostream>
@@ -46,6 +47,7 @@ class HumdrumFileSet {
       HumdrumFile&           operator[]       (int index);
       int                    read             (const char* filename);
       int                    read             (istream& inStream);
+      int                    read             (Options& options);
       int                    readAppend       (const char* filename);
       int                    readAppend       (istream& inStream);
 
