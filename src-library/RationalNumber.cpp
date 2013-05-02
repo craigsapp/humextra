@@ -734,6 +734,29 @@ ostream& RationalNumber::printTwoPart(ostream& out, const char* spacer) const {
 
 //////////////////////////////
 //
+// RationalNumber::printRecip -- print the Humdrum **recip value for a
+//    duration.  The RationalNumber is printed upside-down with a "%" character
+//    separating the denominator and numerator.  If the numerator is 1, then
+//    it is not printed (and the "%" is not printed).  Augmentation dots
+//    are not considered by this fuction (but may be added as an optional
+//    parameter in the future.  For example the Humdrum rhythm 4. is a dotted
+//    quarter note, or 1 + 1/2 = 3/2 of a quarter note.  This will be printed
+//    as the rhythm "2%3" rather than "4.".
+//
+
+ostream& RationalNumber::printRecip(ostream& out, const char* spacer = "%") {
+   RationalNumber& num = *this;
+   out << num.getDenominator();
+   if (num.getNumerator() != 1) {
+      out << spacer << num.getNumerator();
+   } 
+   return out;
+}
+
+
+
+//////////////////////////////
+//
 // operator>> --
 //
 

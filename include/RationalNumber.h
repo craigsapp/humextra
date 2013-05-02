@@ -62,6 +62,7 @@ class RationalNumber {
       void            setDenominator(int val) { _den = val; }
       ostream&        printTwoPart  (ostream& out, const char* spacer = "+") 
                                     const;
+      ostream&        printRecip    (ostream& out, const char* spacer = "%");
       void            zero          (void) { _num = 0; _den = 1; }
       double          getFloat      (void) const { return getFloat(*this); }
       RationalNumber  getInversion  (void) const;
