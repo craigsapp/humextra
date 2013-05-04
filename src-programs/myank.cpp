@@ -537,7 +537,7 @@ void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
             if ((bartextcount++ == 0) && infile[i].isMeasure()) {
                int barline = 0;
                sscanf(infile[i][0], "=%d", &barline);
-               if (barline > 0) {
+               if (barnumtextQ && (barline > 0)) {
                   cout << "!!LO:TX:Z=20:X=-90:t=" << barline << endl;
                }
             }
@@ -546,7 +546,7 @@ void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
             measurestart = 0;
          } else {
             cout << infile[i] << "\n";
-            if ((bartextcount++ == 0) && infile[i].isMeasure()) {
+            if (barnumtextQ && (bartextcount++ == 0) && infile[i].isMeasure()) {
                int barline = 0;
                sscanf(infile[i][0], "=%d", &barline);
                if (barline > 0) {
