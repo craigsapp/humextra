@@ -2712,7 +2712,6 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
       timebaseC[i] = timebase;
    }
 
-
    // set the durtion of each measure (barline)
    RationalNumber lastabs = infile[infile.getNumLines()-1].getAbsBeatR();
    RationalNumber currentabs;
@@ -2728,7 +2727,6 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
    }
 
    fixIncompleteBarMeterR(meterbeats, timebaseC);
-   fixIrritatingPickupProblem();
 
    rhythms.setSize(rhythmsR.getSize());
    for (i=0; i<rhythms.getSize(); i++) {
@@ -2755,14 +2753,14 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
    // spaceEmptyLines();
 
    // add offset of +1 if there are no barlines present in the file
-   if (measurecount == 0) {
-      for (i=0; i<infile.getNumLines(); i++) {
-         if (infile[i].getType() != E_humrec_data) {
-            continue;
-         }
-         infile[i].setBeatR(infile[i].getBeatR()+1);
-      }
-   }
+   //if (measurecount == 0) {
+   //   for (i=0; i<infile.getNumLines(); i++) {
+   //      if (infile[i].getType() != E_humrec_data) {
+   //         continue;
+   //      }
+   //      infile[i].setBeatR(infile[i].getBeatR()+1);
+   //   }
+   //}
 
    // this will eventually replace minrhythm:
    minrhythmR = getMinimumRationalRhythm(rhythmsR);
@@ -2822,70 +2820,6 @@ RationalNumber HumdrumFile::getMinimumRationalRhythm(
    // }
    
    return output;
-}
-
-
-
-//////////////////////////////
-//
-// fixIrritatingPickupProblem -- some pickup beats are not assigned
-//     the correct beat value, so fix here.
-//
-
-void HumdrumFile::fixIrritatingPickupProblem(void) {
-   int bari;
-
-   int numerator;
-   int denominator;
-   RationalNumber beatsperbar(0,1);
-   int j;
-
-   for (bari=0; bari<getNumLines(); bari++) {
-      if (getType(bari) == E_humrec_data_interpretation) {
-         for (j=0; j<(*this)[bari].getFieldCount(); j++) {
-            if (sscanf((*this)[bari][j], "*M%d/%d", &numerator, &denominator) 
-                  == 2) {
-               if (denominator == 0) {
-                  // allow for breve beats 20110202
-                  numerator *=  2;
-                  denominator = 1;
-               }
-               beatsperbar.setValue(numerator * 4, denominator);
-               break;
-            }
-         }
-      }
-
-      if (getType(bari) == E_humrec_data_measure) {
-         break;
-      } 
-   }
-
-   if (bari < getNumLines()) {
-
-      if (getType(bari) != E_humrec_data_measure) {
-         return;
-      }
-
-      if (getBeatR(bari).isPositive()) {
-         return;
-      }
-
-      if (getBeatR(bari).isZero() && getAbsBeatR(bari).isZero()) {
-         return;
-      }
-
-      if (beatsperbar.isZero()) {
-         return;
-      }
-   }
-   int i;
-   RationalNumber sum = 0;
-   for (i=bari-1; i>=0; i--) {
-      sum += getDurationR(i);      
-      (*this)[i].setBeatR(beatsperbar - sum + 1);
-   }
-
 }
 
 
@@ -3089,107 +3023,148 @@ void HumdrumFile::fixIncompleteBarMeterR(
       SigCollection<RationalNumber>& meterbeats,
       SigCollection<RationalNumber>& timebase) {
 
-   int sumstatus = 0;
-   int lasti = 0;
-   int init = 0;
-   int k;
-   int i;
-   RationalNumber mb(0,1);
-   
-   for (i=0; i<getNumLines(); i++) {
+   HumdrumFile& file = *this;
+  
+   Array<int> barlocs;
+   barlocs.setSize(file.getNumLines());
+   barlocs.setSize(0);
 
-      // at each measure line determine one of three cases:
-      // (1) all ok -- the summation of durations in the measure
-      //     matches the current time signature.
-      // (2) a partial measure -- the measure durations do not
-      //     add up to the time signature, but the measure is
-      //     at the start/end of a musical section such as the
-      //     beginning of a piece, end of a piece, or between
-      //     repeat bar dividing a full measure.
-      // (3) the sum of the durations does not match the 
-      //     time signature because the durations are incorrectly
-      //     given.
-      //
-
-      if (getType(i) != E_humrec_data_kern_measure) {
+   int i, j;
+   for (i=0; i<file.getNumLines(); i++) {
+      if (!file[i].isMeasure()) {
          continue;
       }
-
-      // case 2a: start of piece
-      RationalNumber difference;
-      if (init == 0) {
-         init = 1;
-         lasti = i;
-         (*this)[i].setBeatR(getBeatR(i)-1);
-         if (pickupdur.isNegative()) {
-            pickupdur = getAbsBeatR(i);
-         }
-	 if (pickupdur == meterbeats[i]) {
-            pickupdur.zero();
-         }
-         if (pickupdur.isPositive()) {
-            k = i-1;
-	    RationalNumber sum(0,1);
-            while (k >= 0) {
-               if (mb.isZero()) {
-                  mb = meterbeats[k];
-               }
-	       sum += getDurationR(k);
-               ((*this)[k]).setBeatR(mb - sum + 1);
-               k--;
-            }
-         } else if (pickupdur.isZero()) {
-            // fix offset from zero to offset from one
-            k=i-1;
-            while (k >= 0)  {
-               if (getType(k) == E_humrec_data) {
-                  (*this)[k].setBeatR((*this)[k].getBeatR()+1);
-               }
-               k--;
-            }
-         }
-         continue;
-      }
-
-      // case 1: measure sum is complete
-      if (getBeatR(i) == meterbeats[i] + 1) {
-         if (pickupdur.isNegative()) {
-            pickupdur = 0;
-         }
-         lasti = i;
-         ((*this)[i]).setBeatR(getBeatR(i)-1);
-         sumstatus = 0;
-         continue;
-      }
+      barlocs.append(i);
+   }
+   for (i=0; i<barlocs.getSize()-1; i++) {
+      file[barlocs[i]].setBeatR(
+            file[barlocs[i+1]].getAbsBeatR() - 
+            file[barlocs[i]].getAbsBeatR()
+         );
+   }
+   file[barlocs.last()].setBeatR(
+       file[file.getNumLines()-1].getAbsBeatR() -
+       file[barlocs.last()].getAbsBeatR()
+   );
  
-      // case 2b: repeat bar or something splitting up a regular bar
-      if (getBeatR(i) < meterbeats[i] + 1) {
-         ((*this)[i]).setBeatR(getBeatR(i)-1);
-         if (pickupdur.isNegative()) {
-            pickupdur = getBeatR(i);
-         }
-         if (sumstatus == 1 && (getBeatR(i) + 
-				 getBeatR(lasti) == meterbeats[i])) {
-            for (k=i-1; k>lasti; k--) {
-               ((*this)[k]).setBeatR(getBeatR(lasti) + getBeatR(k));
-            }
-         } 
-         lasti = i;
-         sumstatus = 1;
+   Array<RationalNumber> timedur;  // timesig dur at each bar
+   timedur.setSize(barlocs.getSize());
+   timedur.setSize(0);
+   PerlRegularExpression pre;
+   PerlRegularExpression pre2;
+   int top, bot, bot2;
+   RationalNumber rat;
+   int barcounter = 0;
+   for (i=0; i<file.getNumLines(); i++) {
+      if (file[i].isMeasure()) {
+         barcounter++;
+         timedur.append(rat);
       }
-
-      // case 3: incorrect measure duration: ignore this error 
-
+      if (!file[i].isInterpretation()) {
+         continue;
+      }
+      for (j=0; j<file[i].getFieldCount(); j++) {
+         if (!file[i].isExInterp(j, "**kern")) {
+            continue;
+         }
+         if (pre.search(file[i][j], "^\\*M(\\d+)/(\\d+)")) {
+            if (pre2.search(file[i][j], "^\\*M(\\d+)/(\\d+)%(\\d+)")) {
+               top  = atoi(pre2.getSubmatch(1));
+               bot  = atoi(pre2.getSubmatch(2));
+               bot2 = atoi(pre2.getSubmatch(3));
+               rat  = top;
+               rat  /= bot;
+               rat  *= bot2;
+               rat  *= 4;
+            } else {
+               top = atoi(pre.getSubmatch(1));
+               bot = atoi(pre.getSubmatch(2));
+               rat = top;
+               rat /= bot;
+               rat *= 4;       // deal with different scalings later...
+            }
+            if (barcounter > 0) {
+               timedur.last() = rat;
+            }
+         }
+         break;
+      }
    }
 
-   if (pickupdur.isZero()) {
-      for (i=0; i<getNumLines(); i++) {
-         if (!(((*this)[i].getType() == E_humrec_data) 
-               || ((*this)[i].getType() == E_humrec_data_measure))) {
-            (*this)[i].setBeatR(0,1);
-         } else {
+   // debuging: show bar number, expected sum, actual sum
+   // for (i=0; i<barlocs.getSize(); i++) {
+   //    cout << file[barlocs[i]][0] << "\t" << timedur[i] 
+   //         << "\t" << file[barlocs[i]].getBeatR()
+   //         << endl;
+   // }
+
+   int ii;
+   for (i=0; i<barlocs.getSize(); i++) {
+      if (timedur[i] == file[barlocs[i]].getBeatR()) {
+         // the duration of the measure matches what is expected
+         // so continue to next measure.
+         continue;
+      }
+      if (timedur[i] < file[barlocs[i]].getBeatR()) {
+         // measure is overfilled, so cannot link multiple measures
+         // together.
+         continue;
+      }
+      // the measure is underfilled, so try to link a chain of 
+      // successive measures to the expected duration 
+      // If the time signature changes inside one of these measures,
+      // this will need to be handled properly.
+      RationalNumber barsum = file[barlocs[i]].getBeatR();
+      RationalNumber temp;
+      for (j=i+1; j<barlocs.getSize(); j++) {
+         barsum += file[barlocs[j]].getBeatR();
+         if (barsum > timedur[i]) {
+            // measures cannot be combined into the expected duration
+            // based on the time signature.
+            break;
+         } else if (barsum == timedur[i]) {
+            // the sequence of multiple measures adds up to the 
+            // expected time signature, so make the meter values increase
+            // instead of reset after each internal barline
+            int endline = file.getNumLines()-1;
+            if (j < barlocs.getSize() - 1) {
+               endline = barlocs[j+1]-1;
+            }
+            RationalNumber correction = file[barlocs[i]].getBeatR();
+            for (ii=barlocs[i+1]+1; ii<=endline; ii++) {
+               if (file[ii].isMeasure()) {
+                  correction += file[ii].getBeatR();
+                  continue;
+               }
+               temp = file[ii].getBeatR() + correction;
+               file[ii].setBeat(temp);
+            }
+            i += j-i;
             break;
          }
+      }
+   }
+
+   if (barlocs.getSize() == 0) {
+      return;
+   }
+
+   pickupdur = 0;
+   if (file[barlocs[0]].getAbsBeatR() > 0) {
+      if (file[barlocs[0]].getAbsBeatR() < timedur[0]) {
+         pickupdur = file[barlocs[0]].getAbsBeat();
+      }
+   }
+   if (pickupdur > 0) {
+      int dataQ = 0;
+      for (i=0; i<barlocs[0]; i++) {
+         if (file[i].isData()) {
+            dataQ = 1;
+         }
+         if (!dataQ) {
+            continue;
+         }
+         file[i].setBeat(timedur[0]-pickupdur+file[i].getBeatR()+1);      
       }
    }
 
