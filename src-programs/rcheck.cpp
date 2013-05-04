@@ -56,4 +56,4 @@ int main(int argc, char** argv) {
 
 
 
-// md5sum: 677ba3c8bf85ca49f1b618140d96c361 rcheck.cpp [20120404]
+// md5sum: 4b0eace00d6eeaf8595686d895ba0628 rcheck.cpp [20130504]

@@ -342,4 +342,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 51fd57b05e75ed2eb3ab1ca6cdfa2023 dittox.cpp [20130421]
+// md5sum: abe3c775e11412a7ee7715e893fadbd9 dittox.cpp [20130504]

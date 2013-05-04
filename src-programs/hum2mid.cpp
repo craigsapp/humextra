@@ -3194,4 +3194,4 @@ void getKernTracks(Array<int>& tracks, HumdrumFile& infile) {
 
 
 
-// md5sum: e9a407df34d2637d3f9f4a991e694888 hum2mid.cpp [20121112]
+// md5sum: 550cc9663fd7fac80e14a7b9024429ce hum2mid.cpp [20130504]

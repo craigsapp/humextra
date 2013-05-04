@@ -1447,4 +1447,4 @@ int identifyBranchCut(int base12, Array<int>& base40) {
 
 
 
-// md5sum: 4148d35ca0c0e64a86769cb208af7205 keycor.cpp [20130420]
+// md5sum: 20b211c8108cc922c81a7460ed2a366e keycor.cpp [20130504]
