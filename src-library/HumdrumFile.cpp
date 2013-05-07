@@ -2716,17 +2716,21 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
    RationalNumber lastabs = infile[infile.getNumLines()-1].getAbsBeatR();
    RationalNumber currentabs;
    RationalNumber difference;
+   int barcount = 0;
    for (i=infile.getNumLines()-1; i>=0; i--) {
       if (!infile[i].isMeasure()) {
          continue;
       }
+      barcount++;
       currentabs = infile[i].getAbsBeatR();
       difference = lastabs - currentabs;
       lastabs = currentabs;
       infile[i].setBeatR(difference);
    }
 
-   fixIncompleteBarMeterR(meterbeats, timebaseC);
+   if (barcount > 0) {
+      fixIncompleteBarMeterR(meterbeats, timebaseC);
+   }
 
    rhythms.setSize(rhythmsR.getSize());
    for (i=0; i<rhythms.getSize(); i++) {
