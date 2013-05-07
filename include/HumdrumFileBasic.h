@@ -99,7 +99,7 @@ class HumdrumFileAddress {
       HumdrumFileAddress operator=   (const HumdrumFileAddress& anAddress);
 
    protected:
-      int address[3];   // line, field, subfield
+      int address[4];   // segment, line, field, subfield
 };
 
 ///////////////////////////////////////////////////////////////////////////
