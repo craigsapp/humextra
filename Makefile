@@ -50,6 +50,10 @@ programs-update:
 	touch src-programs/*.cpp
 	$(MAKE) -f Makefile.programs
 
+libupdate: library-update
+updatelib: library-update
+uplib: library-update
+libup: library-update
 library-update:
 	$(MAKE) -f Makefile.library library
 
