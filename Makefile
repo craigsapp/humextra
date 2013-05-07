@@ -14,7 +14,7 @@
 ##
 
 # targets which don't actually refer to files
-.PHONY : src-programs lib src-library include bin update
+.PHONY : src-programs lib src-library include bin update libupdate updatelib libup uplib
 
 ###########################################################################
 #                                                                         #
