@@ -166,7 +166,8 @@ int ScorePageBaseSimple::findStaff(int staffno) {
    if (searchresult == NULL) {
       return -1;
    } else {
-      int start = (int)((searchresult - data.getBase())/sizeof(ScoreRecord));
+      int start = (int)((searchresult - 
+            (void*)data.getBase())/sizeof(ScoreRecord));
       int i;
       for (i=start; i>=0; i++) {
          if ((int)data[i].getPValue(2) != staffno) {
