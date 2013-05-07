@@ -1101,6 +1101,45 @@ int HumdrumRecord::isNullToken(int index) {
 
 //////////////////////////////
 //
+// HumdrumRecord::hasNoteAttack -- Returns true if there is not a 
+//     null token, "r", "_", or "]" in the given field.  Does not
+//     check to see if the data is **kern data, though.  In the future
+//     the data type could be examined, and if the data is **kern, apply
+//     the **kern definition of a note attack; otherwise, apply the definition
+//     of whatever data type is in effect.
+//
+
+int HumdrumRecord::hasNoteAttack(int field) {
+   PerlRegularExpression pre;
+   Array<Array<char> > notes;
+   pre.getTokens(notes, " ", (*this)[field]);
+   int i;
+   for (i=0; i<notes.getSize(); i++) {
+      if (strcmp(notes[i].getBase(), ".") == 0) {
+         // a Null token (not allowed in chords as a subtoken).
+         return 0;
+      }
+      if (strchr(notes[i].getBase(), 'r') != NULL) {
+         // rest (not allowed in a chord)
+         return 0;
+      }
+      if (strchr(notes[i].getBase(), ']') != NULL) {
+         // ending printed note if a tie group
+         return 0;
+      }
+      if (strchr(notes[i].getBase(), '_') != NULL) {
+         // tie continuation note
+         return 0;
+      }
+   }
+    
+   return 1;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumRecord::isOriginalClef -- returns true if a clef, but prefixed
 //     with "o" to indicate the clef in the original source.
 //

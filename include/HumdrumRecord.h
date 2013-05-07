@@ -124,6 +124,7 @@ class HumdrumRecord {
       int               hasSpines          (void) const;
       int               isSpineLine        (void) { return hasSpines(); }
       int               isNullToken        (int index);
+      int               hasNoteAttack      (int field);
 
 
       int               dataQ              (void) const;
