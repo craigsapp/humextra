@@ -100,7 +100,8 @@ To update if you downloaded with git:
 
 Then either type `make` to recompile the external libraries, the humextra 
 library and the programs, or type `make update` to compile just the humextra
-library and programs.
+library and programs, or `make libupdate` to update only the library file 
+without recompiling example programs.
 
 When using git to download and update the humextra repository, you can add these
 lines to ~/.gitconfig:
