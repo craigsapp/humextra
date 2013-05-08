@@ -2739,8 +2739,8 @@ void cleanPscaleDegree(Array<char>& data) {
    }
 
    // remove any characters which are not 1-7
-   pre.sar(data, "[^Rr1-7]", "", "g");
-   pre.tr(data, "r", "R");
+   pre.sar(data, "[^Rr1-7@+.]", "", "g");
+   pre.tr(data, "r@", "R+");
 }
 
 
