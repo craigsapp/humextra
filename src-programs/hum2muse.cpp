@@ -1721,11 +1721,14 @@ void printMuse2PsOptions(HumdrumFile& infile) {
             // already a title so don't try to add one
             hascomposer = 1;
          }
-      } else if ((titleline < 0) && pre.search(tempdata, "^!!!OTL[^:]*:", "")) {
+      } else if ((titleline < 0) && pre.search(tempdata, 
+            "^!!!OTL[^:]*:\\s*.+", "")) {
          titleline = i;
-      } else if ((composerline < 0) && pre.search(tempdata, "^!!!COM[^:]*:", "")) {
+      } else if ((composerline < 0) && pre.search(tempdata, 
+            "^!!!COM[^:]*:\\s*.+", "")) {
          composerline = i;
-      } else if ((dateline < 0) && pre.search(tempdata, "^!!!CDT[^:]*:", "")) {
+      } else if ((dateline < 0) && pre.search(tempdata, 
+            "^!!!CDT[^:]*:\\s*.+", "")) {
          dateline = i;
       }
    }
@@ -1734,7 +1737,7 @@ void printMuse2PsOptions(HumdrumFile& infile) {
    // Print title if not found in muse2ps options, but found in file.
    // Think about !!!title: and !!title: markers (from Themefinder system).
    if (titleQ && (!hastitle) && (titleline >= 0)) {
-      if (pre.search(infile[titleline][0], "^!!!OTL[^:]*:\\s*(.*)\\s*$", "")) {
+      if (pre.search(infile[titleline][0], "^!!!OTL[^:]*:\\s*(.+)\\s*$", "")) {
          Array<char> title;
          title.setSize(strlen(pre.getSubmatch(1))+1);
          strcpy(title.getBase(), pre.getSubmatch());
@@ -3206,7 +3209,7 @@ void addWorkTitle(HumdrumFile& infile, MuseData& tempdata) {
       if (!infile[i].isBibliographic()) {
          continue;
       }
-      if (pre.search(infile[i][0], "^!!!OTL[^:]*:\\s*(.*)\\s*$", "")) {
+      if (pre.search(infile[i][0], "^!!!OTL[^:]*:\\s*(.+)\\s*$", "")) {
          otlline = i;
          break;
       }
