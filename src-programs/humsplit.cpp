@@ -138,7 +138,14 @@ void saveToDisk(HumdrumFile& infile, int count) {
       // preserve segment label
       infile.printSegmentLabel(output);
    }
-   output << infile;
+   int i;
+   int start = 0;
+   if (strncmp(infile[0][0], "!!!!SEGMENT", strlen("!!!!SEGMENT")) == 0) {
+      start = 1;
+   }
+   for (i=start; i<infile.getNumLines(); i++) {
+      output << infile[i] << '\n';
+   }
    output.close();
 }
 
