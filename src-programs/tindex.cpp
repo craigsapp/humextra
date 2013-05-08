@@ -375,6 +375,7 @@ void processArgument(const char* path) {
    struct dirent* entry;
    int namelen = 0;
    int valid = 0;
+   const char* filename;
 
    if (is_file(path)) {
       namelen = strlen(path);
@@ -394,7 +395,11 @@ void processArgument(const char* path) {
       infiles.read(path);
       int i;
       for (i=0; i<infiles.getCount(); i++) {
-         createIndex(infiles[i], infiles[i].getFilename());
+         filename = infiles[i].getFilename();
+         if (strlen(filename) == 0) {
+            filename = path;
+         }
+         createIndex(infiles[i], filename);
       }
    } else if (is_directory(path)) {
       dir = opendir(path);
