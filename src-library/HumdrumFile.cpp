@@ -3156,18 +3156,18 @@ void HumdrumFile::fixIncompleteBarMeterR(
    pickupdur = 0;
    if (file[barlocs[0]].getAbsBeatR() > 0) {
       if (file[barlocs[0]].getAbsBeatR() < timedur[0]) {
-         pickupdur = file[barlocs[0]].getAbsBeat();
+         pickupdur = file[barlocs[0]].getAbsBeatR();
       }
    }
    if (pickupdur > 0) {
-      int dataQ = 0;
+      // int dataQ = 0;
       for (i=0; i<barlocs[0]; i++) {
-         if (file[i].isData()) {
-            dataQ = 1;
-         }
-         if (!dataQ) {
-            continue;
-         }
+         // if (file[i].isData()) {
+         //    dataQ = 1;
+         // }
+         //if (!dataQ) {
+         //   continue;
+         //}
          file[i].setBeat(timedur[0]-pickupdur+file[i].getBeatR()+1);      
       }
    }
