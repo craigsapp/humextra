@@ -986,6 +986,25 @@ char* HumdrumRecord::getToken(Array<char>& buffer, int fieldIndex,
 
 
 
+
+//////////////////////////////
+//
+// HumdrumRecord::getTokens -- return a list of all subtokens in token.
+//    Default value: separator = ' ';
+//
+
+void HumdrumRecord::getTokens(Array<Array<char> >& tokens, int fieldIndex, 
+      char separator) {
+   char sep[2] = {0};
+   HumdrumRecord& arecord = *this;
+   sep[0] = separator;
+   PerlRegularExpression pre;
+   pre.getTokens(tokens, sep, arecord[fieldIndex]);
+}
+
+
+
+
 //////////////////////////////
 //
 // HumdrumRecord::getType -- returns the type of the record.
@@ -1117,23 +1136,24 @@ int HumdrumRecord::hasNoteAttack(int field) {
    for (i=0; i<notes.getSize(); i++) {
       if (strcmp(notes[i].getBase(), ".") == 0) {
          // a Null token (not allowed in chords as a subtoken).
-         return 0;
+         continue;
       }
       if (strchr(notes[i].getBase(), 'r') != NULL) {
          // rest (not allowed in a chord)
-         return 0;
+         continue;
       }
       if (strchr(notes[i].getBase(), ']') != NULL) {
          // ending printed note if a tie group
-         return 0;
+         continue;
       }
       if (strchr(notes[i].getBase(), '_') != NULL) {
          // tie continuation note
-         return 0;
+         continue;
       }
+      return 1;
    }
     
-   return 1;
+   return 0;
 }
 
 
