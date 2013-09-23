@@ -44,6 +44,7 @@
 // Last Modified: Sat Dec 25 13:07:09 PST 2010 Minrhythm fix with dots
 // Last Modified: Wed Feb  2 17:51:57 PST 2011 Partial fix for breve beat
 // Last Modified: Tue Apr 16 23:18:16 PDT 2013 Added attackQ to gBase12PchLst
+// Last Modified: Mon Sep 16 20:26:17 PDT 2013 Added getMeasureNumber()
 // Filename:      ...sig/src/sigInfo/HumdrumFile.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/HumdrumFile.cpp
 // Syntax:        C++ 
@@ -1404,6 +1405,35 @@ HumdrumFile HumdrumFile::extract(int aField) {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumFile::getMeasureNumber -- If the current line is a
+//      barline, then read the first integer found in the fields on the line.
+//
+
+int HumdrumFile::getMeasureNumber(int line) {
+   HumdrumFile& infile = *this;
+   int j;
+   if (!infile[line].isMeasure()) {
+      // Return -1 if not a barline.  May be changed in the future
+      // to return the measure number of the previous barline.
+      return -1;
+   }
+   PerlRegularExpression pre;
+   int measurenumber = -1;
+   for (j=0; j<infile[line].getFieldCount(); j++) {
+      if (pre.search(infile[line][j], "^=[^\\d]*(\\d+)", "")) {
+         measurenumber = atoi(pre.getSubmatch(1));
+         return measurenumber;
+      }
+   }
+
+   return -1;
+}
+
+
+
 //////////////////////////////
 //
 // HumdrumFile::getDuration -- returns the duration of the current
@@ -1417,6 +1447,35 @@ double HumdrumFile::getDuration(int index) {
 RationalNumber HumdrumFile::getDurationR(int index) {
    return (*this)[index].getDurationR();
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::hasNoteAttack -- true if any **kern spine on the
+//    given line has a note attack.  Not placed in HumdrumRecord
+//    class so as to avoid typos with index hasNoteAttack.
+//
+
+int HumdrumFile::hasNoteAttack(int line) {
+   HumdrumFile& afile = *this;
+   if (!afile[line].isData()) {
+      return 0;
+   }
+   int i;
+   for (i=0; i<afile[line].getFieldCount(); i++) {
+      if (!afile[line].isExInterp(i, "**kern")) {
+         continue;
+      }
+      if (afile[line].hasNoteAttack(i)) {
+         return 1;
+      }
+   }
+
+   return 0;
+
+}
+
 
 
 //////////////////////////////
@@ -2419,7 +2478,7 @@ RationalNumber HumdrumFile::getTotalDurationR(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::operator=
+// HumdrumFile::operator= --
 //
 
 HumdrumFile& HumdrumFile::operator=(const HumdrumFile& aFile) {
@@ -2444,6 +2503,12 @@ HumdrumFile& HumdrumFile::operator=(const HumdrumFile& aFile) {
    rhythmcheck = aFile.rhythmcheck;
    maxtracks = aFile.maxtracks;
    localrhythms = aFile.localrhythms;
+
+   // Store the filename. Also should store the segment number
+   // and maybe other stuff (see HumdrumFileBasic.h for newer
+   // data fields which need to also be copied [20130807]
+   fileName = aFile.fileName;
+
    return *this;
 }
 

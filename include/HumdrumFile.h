@@ -2,22 +2,23 @@
 // Copyright 1998-2001 by Craig Stuart Sapp, All Rights Reserved.
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon May 18 13:43:47 PDT 1998
-// Last Modified: Mon Oct 16 18:04:47 PDT 2000 (revised for spines and rhythm)
-// Last Modified: Tue Nov 28 11:35:23 PST 2000 (rebuilt deleted include)
-// Last Modified: Sat Dec  2 11:53:10 PST 2000 (added basic assemble command)
-// Last Modified: Wed Dec  6 13:22:08 PST 2000 (added analyzeMetricLevel())
-// Last Modified: Wed Dec 13 13:52:07 PST 2000 (added analyzeTempoMarkings())
-// Last Modified: Sat Dec 16 13:37:19 PST 2000 (added analyzeDataIndex())
-// Last Modified: Sat Dec 16 14:41:14 PST 2000 (added analyzeCliche())
-// Last Modified: Mon May 14 18:21:37 PDT 2001 (moved chord functions)
-// Last Modified: Mon Nov  5 17:55:54 PST 2001 (added getNextDatum/getLastDatum)
-// Last Modified: Wed Jan  1 16:23:10 PST 2003 (removed Maxwell functions)
-// Last Modified: Thu Aug 21 20:13:10 PDT 2003 (add *free, *strict markers)
-// Last Modified: Wed Jun 16 21:15:06 PDT 2004 (indep. tracks in analyzeKeyKS)
-// Last Modified: Mon Jun  5 06:59:27 PDT 2006 (add fixIrritatingPickupProblem)
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
-// Last Modified: Sat Sep  5 22:03:28 PDT 2009 (ArrayInt to Array<int>)
-// Last Modified: Sun Jun 20 13:42:12 PDT 2010 (Added rhythm list)
+// Last Modified: Mon Oct 16 18:04:47 PDT 2000 Revised for spines and rhythm
+// Last Modified: Tue Nov 28 11:35:23 PST 2000 Rebuilt deleted include
+// Last Modified: Sat Dec  2 11:53:10 PST 2000 Added basic assemble command
+// Last Modified: Wed Dec  6 13:22:08 PST 2000 Added analyzeMetricLevel()
+// Last Modified: Wed Dec 13 13:52:07 PST 2000 Added analyzeTempoMarkings()
+// Last Modified: Sat Dec 16 13:37:19 PST 2000 Added analyzeDataIndex()
+// Last Modified: Sat Dec 16 14:41:14 PST 2000 Added analyzeCliche()
+// Last Modified: Mon May 14 18:21:37 PDT 2001 Moved chord functions
+// Last Modified: Mon Nov  5 17:55:54 PST 2001 Added getNextDatum/getLastDatum
+// Last Modified: Wed Jan  1 16:23:10 PST 2003 Removed Maxwell functions
+// Last Modified: Thu Aug 21 20:13:10 PDT 2003 Add *free, *strict markers
+// Last Modified: Wed Jun 16 21:15:06 PDT 2004 Indep. tracks in analyzeKeyKS
+// Last Modified: Mon Jun  5 06:59:27 PDT 2006 Add fixIrritatingPickupProblem
+// Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed SigCollection class
+// Last Modified: Sat Sep  5 22:03:28 PDT 2009 ArrayInt to Array<int>
+// Last Modified: Sun Jun 20 13:42:12 PDT 2010 Added rhythm list)
+// Last Modified: Mon Sep 16 20:26:17 PDT 2013 Added getMeasureNumber()
 // Filename:      ...sig/include/sigInfo/HumdrumFile.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/HumdrumFile.h
 // Syntax:        C++ 
@@ -117,6 +118,8 @@ class HumdrumFile : public HumdrumFileBasic {
       double                 getBeat          (int index);
       RationalNumber         getBeatR         (int index);
       double                 getDuration      (int index);
+      int                    getMeasureNumber (int line);
+      int                    hasNoteAttack    (int line);
       RationalNumber         getDurationR     (int index);
       const char*            getLastDatum     (int index, int spine, 
                                                int options = 0);
