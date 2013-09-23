@@ -104,6 +104,8 @@ class Convert {
       static int       base40ToDiatonic           (int pitch);
       static char*     base40ToIntervalAbbr       (char* output, 
                                                    int base40value);
+      static char*     base40ToIntervalAbbrWrap   (char* output, 
+                                                   int base40value);
       static char*     base40ToIntervalAbbr2      (char* output, 
                                                    int base40value);
       static char*     base40ToPerfViz            (char* output, 
