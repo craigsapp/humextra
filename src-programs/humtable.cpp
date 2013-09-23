@@ -39,7 +39,6 @@ int     getSubTracks         (HumdrumFile& infile, int line, int track);
 void    addLabelHyperlinks   (Array<char>& strang);
 void    addLabelHyperlinkName(Array<char>& strang);
 
-
 // global variables
 Options      options;            // database for command-line arguments
 int          fullQ = 1;          // used with --page option
@@ -186,6 +185,11 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
                strang.setSize(strlen(infile[i][j])+1);
                strcpy(strang.getBase(), infile[i][j]); 
                pre.sar(strang, " ", "&nbsp;", "g");
+
+               // deal with HTML entities, just < and > for now:
+               pre.sar(strang, ">", "&gt;", "g");
+               pre.sar(strang, "<", "&lt;", "g");
+
                if (pre.search(strang, "^\\*>.*\\[", "")) {
                   addLabelHyperlinks(strang);
                } else if (pre.search(strang, "^\\*>", "")) {
@@ -205,6 +209,11 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
                strang.setSize(strlen(infile[i][j])+1);
                strcpy(strang.getBase(), infile[i][j]); 
                pre.sar(strang, " ", "&nbsp;", "g");
+
+               // deal with HTML entities, just < and > for now:
+               pre.sar(strang, ">", "&gt;", "g");
+               pre.sar(strang, "<", "&lt;", "g");
+
                if (pre.search(strang, "^\\*>.*\\[", "")) {
                   addLabelHyperlinks(strang);
                } else if (pre.search(strang, "^\\*>", "")) {
@@ -406,4 +415,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: e1c838725d9cdef3baa8f1da95da60ad humtable.cpp [20120727]
+// md5sum: 04be8d9cd277dd97fbb01f0a1790770e humtable.cpp [20130916]
