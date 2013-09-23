@@ -128,7 +128,6 @@ void printTextString(const char* string) {
    int i;
    for (i=0; i<(int)strlen(string); i++) {
       if (string[i] == '\xC3') {
-
          if (string[i+1] == '\xA0') { cout << "&agrave;"; i+=1; continue; }
          if (string[i+1] == '\xA1') { cout << "&aacute;"; i+=1; continue; }
          if (string[i+1] == '\xA2') { cout << "&acirc;";  i+=1; continue; }
@@ -154,8 +153,18 @@ void printTextString(const char* string) {
          if (string[i+1] == '\xBA') { cout << "&uacute;"; i+=1; continue; }
          if (string[i+1] == '\xBB') { cout << "&ucirc;";  i+=1; continue; }
          if (string[i+1] == '\xBB') { cout << "&uuml;";   i+=1; continue; }
+         if (string[i+1] == '\x8B') { cout << "&Agrave;"; i+=1; continue; }
 
       }
+      // Mac OS X en-dash: could also do &ndash;
+      if (string[i] == '\xD0') { cout << "-";   i+=1; continue; }
+      if (string[i] == '\xCB') { 
+         if (string[i+1] == '\x86') {
+            cout << "&agrave;";   i+=1; continue; 
+         }
+      }
+
+      
       cout << string[i];
    }
 
@@ -253,4 +262,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 355276b61985f1c5dc1f2d6a0268dc30 xml2hum.cpp [20111215]
+// md5sum: 805e64703bce702ae9fa69764efa650b xml2hum.cpp [20130916]
