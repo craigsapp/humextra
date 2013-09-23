@@ -1561,7 +1561,79 @@ char* Convert::base40ToKern(char* output, int aPitch) {
 // Convert::base40ToIntervalAbbr --
 //
 
-char* Convert::base40ToIntervalAbbr(char* output, int base40value) {
+char* Convert::base40ToIntervalAbbr(char* output, int base40interval) {
+   if (base40interval < -1000) {
+      strcpy(output, "r");
+      return output;
+   }
+
+   output[0] = '\0';
+   if (base40interval < 0) {
+      strcpy(output, "-");
+      base40interval = -base40interval;
+   }
+
+   // Add chromatic prefix
+   switch (base40interval % 40) {
+      case  0: strcat(output, "p"   ); break;  // C
+      case  1: strcat(output, "a"   ); break;  // C#
+      case  2: strcat(output, "aa"  ); break;  // C##
+      case  3: strcat(output, "X"   ); break;  // X
+      case  4: strcat(output, "d"   ); break;  // D--
+      case  5: strcat(output, "m"   ); break;  // D-
+      case  6: strcat(output, "M"   ); break;  // D
+      case  7: strcat(output, "a"   ); break;  // D#
+      case  8: strcat(output, "aa"  ); break;  // D##
+      case  9: strcat(output, "X"   ); break;  // X
+      case 10: strcat(output, "d"   ); break;  // E--
+      case 11: strcat(output, "m"   ); break;  // E-
+      case 12: strcat(output, "M"   ); break;  // E
+      case 13: strcat(output, "a"   ); break;  // E#
+      case 14: strcat(output, "aa"  ); break;  // E##
+      case 15: strcat(output, "dd"  ); break;  // F--
+      case 16: strcat(output, "d"   ); break;  // F-
+      case 17: strcat(output, "p"   ); break;  // F
+      case 18: strcat(output, "a"   ); break;  // F#
+      case 19: strcat(output, "aa"  ); break;  // F##
+      case 20: strcat(output, "X"   ); break;  // X
+      case 21: strcat(output, "dd"  ); break;  // G--
+      case 22: strcat(output, "d"   ); break;  // G-
+      case 23: strcat(output, "p"   ); break;  // G
+      case 24: strcat(output, "a"   ); break;  // G#
+      case 25: strcat(output, "aa"  ); break;  // G##
+      case 26: strcat(output, "X"   ); break;  // X
+      case 27: strcat(output, "d"   ); break;  // A--
+      case 28: strcat(output, "m"   ); break;  // A-
+      case 29: strcat(output, "M"   ); break;  // A
+      case 30: strcat(output, "a"   ); break;  // A#
+      case 31: strcat(output, "aa"  ); break;  // A##
+      case 32: strcat(output, "X"   ); break;  // X
+      case 33: strcat(output, "d"   ); break;  // B--
+      case 34: strcat(output, "m"   ); break;  // B-
+      case 35: strcat(output, "M"   ); break;  // B
+      case 36: strcat(output, "a"   ); break;  // B#
+      case 37: strcat(output, "aa"  ); break;  // B##
+      case 38: strcat(output, "dd"  ); break;  // C--
+      case 39: strcat(output, "d"   ); break;  // C-
+   }
+
+   // Add base-7 number
+   char buffer2[32] = {0};
+   int diatonic = Convert::base40IntervalToDiatonic(base40interval)+1;
+   sprintf(buffer2, "%d", diatonic);
+   strcat(output, buffer2);
+
+   return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base40ToIntervalAbbrWrap --
+//
+
+char* Convert::base40ToIntervalAbbrWrap(char* output, int base40value) {
    base40value += 400;
    if (base40value < 0) {
       strcpy(output, "r");
