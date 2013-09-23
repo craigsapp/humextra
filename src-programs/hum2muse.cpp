@@ -16,6 +16,7 @@
 // Last Modified: Mon Jul 16 16:21:25 PDT 2012 added unterminated tie handling
 // Last Modified: Mon Aug 20 14:18:50 PDT 2012 added -textvadd
 // Last Modified: Tue Aug 21 09:36:43 PDT 2012 added line extensions
+// Last Modified: Mon Aug 19 15:12:09 PDT 2013 added *elision controls
 // Filename:      ...sig/examples/all/hum2muse.cpp 
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2muse.cpp
 // Syntax:        C++; museinfo
@@ -475,12 +476,14 @@ void  addUnDash                (MuseData& tempdata, HumdrumFile& infile,
                                 LayoutParameters& lpd);
 void  setupTextAssignments     (HumdrumFile& infile, int& textQ, 
                                 Array<Array<int> >& TextAssignment,
+                                Array<Array<int> >& TextElisions,
                                 const char* textspines);
 void  track2column             (Array<int>& trackcol, HumdrumFile& infile, 
                                 int row);
 void  addLyrics                (MuseRecord& arecord, HumdrumFile& infile, 
                                 int row, int col, 
-                                Array<Array<int> >& TextAssignment);
+                                Array<Array<int> >& TextAssignment,
+                                Array<Array<int> >& TextElisions);
 void  convertHumdrumTextToMuseData(Array<char> & text);
 void  convertHtmlTextToMuseData(Array<char> & text);
 void  getWorkAndMovement       (Array<char>& work, Array<char>& movment, 
@@ -605,6 +608,7 @@ const char* muse2psoptionstring = "";  // used with --mo option
 Array<char> NEWLINE;               // used to control the newline style
 
 Array<Array<int> > TextAssignment;  // used to keep track of lyics by staff
+Array<Array<int> > TextElisions;    // used to keep track of elision display
 
 Array<int> DynamicsAssignment;    
 Array<Array<Coord> > ClefState;     // which clef is being used for every note
@@ -654,7 +658,7 @@ int main(int argc, char** argv) {
    DashState.setAll(0);
    getKernTracks(KernTracks, infile);
 
-   setupTextAssignments(infile, textQ, TextAssignment, TextSpines);
+   setupTextAssignments(infile, textQ, TextAssignment, TextElisions, TextSpines);
    setupMusicaFictaVariables(infile);
    getBeamState(BeamState, LayoutInfo, GlobalLayoutInfo, ClefState, infile);
    getTupletState(hasTuplet, TupletState, TupletTopNum, TupletBotNum, infile);
@@ -701,7 +705,8 @@ int main(int argc, char** argv) {
 //////////////////////////////
 //
 // getRscaleState --  Does not work on sub-tracks.  Only powers of two will
-//     give predictable results at the moment.
+//     give predictable results at the moment.  *rscale:2/3 is used to remove
+//     dots from dotted rhythms (e.g., q. -> q).
 //
 
 void getRscaleState(HumdrumFile& infile, 
@@ -1293,11 +1298,15 @@ void printWithMd5sum(MuseData& datafile) {
 //
 
 void setupTextAssignments(HumdrumFile& infile, int& textQ, 
-      Array<Array<int> >& TextAssignment, const char* textspines) {
+      Array<Array<int> >& TextAssignment, 
+      Array<Array<int> >& TextElisions, 
+      const char* textspines) {
    int i, j, track;
    TextAssignment.setSize(infile.getMaxTracks()+1);
+   TextElisions.setSize(infile.getMaxTracks()+1);
    for (i=0; i<TextAssignment.getSize(); i++) {
       TextAssignment[i].setSize(0);
+      TextElisions[i].setSize(0);
    }
    if (textQ == 0) {
       // user request to not print text
@@ -1314,6 +1323,7 @@ void setupTextAssignments(HumdrumFile& infile, int& textQ,
       textspines = "**text";
    }
 
+   int zero = 1;
    if (strlen(LyricSpines) > 0) {
       textQ = 1;
       Array<Array<int> > lyricspines;
@@ -1324,6 +1334,7 @@ void setupTextAssignments(HumdrumFile& infile, int& textQ,
       for (i=0; i<kerntracks.getSize(); i++) {
          for (j=0; j<lyricspines[kerntracks[i]].getSize(); j++) {
             TextAssignment[kerntracks[i]].append(lyricspines[kerntracks[i]][j]);
+            TextElisions[kerntracks[i]].append(zero); 
             foundtext++;
          }
       }
@@ -1347,6 +1358,7 @@ void setupTextAssignments(HumdrumFile& infile, int& textQ,
                track = infile[i].getPrimaryTrack(j);
                foundtext = 1;
                TextAssignment[lastkern].append(track);
+               TextElisions[lastkern].append(zero);
             }
          }
          break;
@@ -3089,7 +3101,7 @@ void getWorkAndMovement(Array<char>& work, Array<char>& movement,
    int omvline = -1;
    int sctline = -1;
    int opsline = -1;
-   int onmline = -1;
+   // int onmline = -1;
 
    int i;
    for (i=0; i<infile.getNumLines(); i++) {
@@ -3102,8 +3114,8 @@ void getWorkAndMovement(Array<char>& work, Array<char>& movement,
          sctline = i;
       } else if (strncmp(infile[i][0], "!!!OPS", 6) == 0) {
          opsline = i;
-      } else if (strncmp(infile[i][0], "!!!ONM", 6) == 0) {
-         onmline = i;
+      // } else if (strncmp(infile[i][0], "!!!ONM", 6) == 0) {
+         // onmline = i;
       }
    }
 
@@ -3945,9 +3957,10 @@ int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
       if (hasLongQ) {
          // Longa notehead shape
          if (strchr(infile[row][col], LongChar) != NULL) {
-            if (strlen(visual_display) == 0) {
+            // Force to display a long regardless of visual_display
+            // if (strlen(visual_display) == 0) {
                arecord.setNoteheadLong();
-            }
+            // }
             // current usage of the longa will not desire an
             // augmentation dot.  If it is ever needed, then 
             // there should be an option added to suppress
@@ -4022,7 +4035,7 @@ int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
          arecord.getColumn(19) = ' ';
       }
       if (kk == 0) {
-         addLyrics(arecord, infile, row, col, TextAssignment);
+         addLyrics(arecord, infile, row, col, TextAssignment, TextElisions);
       }
       tempdata.append(arecord);
       if (!psuggestion.isEmpty()) {
@@ -4251,7 +4264,7 @@ void hideNotesAfterLong(HumdrumFile& infile, int row, int col) {
 //
 
 void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col, 
-      Array<Array<int> >& TextAssignment) {
+      Array<Array<int> >& TextAssignment, Array<Array<int> >& TextElisions) {
    int track = infile[row].getPrimaryTrack(col);
    int versecount = TextAssignment[track].getSize();
    if (versecount == 0) {
@@ -4272,6 +4285,7 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
    verses.setSize(versecount);
    int i;
    int texttrack;
+   int elisionQ = 1;
    const char* ptr;
    PerlRegularExpression pre;
    char buffer[1024] = {0};
@@ -4279,7 +4293,8 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
    for (i=0; i<versecount; i++) {
       verses[i].setSize(1);
       verses[i][0] = '\0';
-      textcol = trackcol[TextAssignment[track][i]];
+      textcol  = trackcol[TextAssignment[track][i]];
+      elisionQ = TextElisions[track][i];
       ptr = infile[row][textcol];
       if (strcmp(ptr, ".") == 0) {
          // don't print null records, but keep track of verse
@@ -4311,6 +4326,9 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
          if (isdigit(verses[i].getBase()[0]) && (strcmp(ptr, "") != 0)) {
             strcat(buffer, "\\+");
          }
+         else if ((verses[i].getBase()[0] == '<') && (strcmp(ptr, "") != 0)) { 
+            strcat(buffer, "\\+"); 
+         }
 
          extensionneeded = 0;
          if (extensionQ && needsWordExtension(infile, row, col, textcol, 
@@ -4326,11 +4344,22 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
             pre3.sar(verses[i], "&\\s*$", "");
          }
 
+         // add elision characters if requested, currently forcing
+         // elison characters if the exinterp is **text:
+//         if (elisionQ) {
+            pre3.sar(verses[i], "(?<=[A-Za-z])\\s+(?=[A-Za-z])", "\\0+", "g");
+            // deal with punctuation, such as ".", ",", ":", ";", etc:
+            // This avoids eliding text such as "1. A" which might be the
+            // hacked number at the start of a verse.
+            pre3.sar(verses[i], "(?<=[A-Za-z].)\\s+(?=[A-Za-z])", "\\0+", "g");
+//        }
+
          strcat(buffer, verses[i].getBase());
 
          if (extensionneeded) {
             strcat(buffer, "_");
          }
+
       } else {
          // treat non **text spines as lyrics:
          // (Don't apply convertHumdrumTextToMuseData)
@@ -4351,6 +4380,10 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
          if (isdigit(verses[i].getBase()[0]) && (strcmp(ptr, "") != 0)) {
             strcat(buffer, "\\+");
          }
+         // same for "<"
+         else if ((verses[i].getBase()[0] == '<') && (strcmp(ptr, "") != 0)) { 
+            strcat(buffer, "\\+"); 
+         }
 
          extensionneeded = 0;
          if (extensionQ && needsWordExtension(infile, row, col, textcol, 
@@ -4366,6 +4399,15 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
             pre3.sar(verses[i], "&\\s*$", "");
          }
 
+         // add elision characters if requested:
+         if (elisionQ) {
+            pre3.sar(verses[i], "(?=[A-Za-z])\\s+(?=[A-Z][a-z])", "\\0+", "g");
+            // deal with punctuation, such as ".", ",", ":", ";", etc:
+            // This avoids eliding text such as "1. A" which might be the
+            // hacked number at the start of a verse.
+            pre3.sar(verses[i], "(?=[A-Za-z].)\\s+(?=[A-Z][a-z])", "\\0+", "g");
+         }
+
          strcat(buffer, verses[i].getBase());
 
          if (extensionneeded) {
@@ -4374,7 +4416,7 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
       }
    }
 
-   // convert spaces to \+
+   // Convert spaces to \+ (elison character may have removed some spaces).
    Array<char> newbuffer;
    newbuffer.setSize(strlen(buffer)+1);
    strcpy(newbuffer.getBase(), buffer);
@@ -6111,14 +6153,14 @@ void addChordLevelArtic(MuseData& tempdata, MuseRecord&  arecord,
 
 void insertArpeggio(MuseData& tempdata, HumdrumFile& infile, int row, int col) {
    PerlRegularExpression pre;
-   int stemdir = +1;
+   // int stemdir = +1;
    int& i = row;
    int& j = col;
-   if (pre.search(infile[i][j], "^[^ ]*\\\\", "")) {
-      // if the first note listed in the chord contains a down stem, then
-      // switch the direction of the stem.
-      stemdir = -1;
-   }
+   //if (pre.search(infile[i][j], "^[^ ]*\\\\", "")) {
+   //   // if the first note listed in the chord contains a down stem, then
+   //   // switch the direction of the stem.
+   //   stemdir = -1;
+   //}
    Array<int> pitches;
    getPitches(pitches, infile, row, col);
    Array<int> chordmapping;
@@ -9304,4 +9346,4 @@ getNewLine:
 
 */
 
-// md5sum: e86e33edcf63e09feb94dc06286a42a2 hum2muse.cpp [20130504]
+// md5sum: 1eb7e3d76ec77834ae3313729a7ca265 hum2muse.cpp [20130916]
