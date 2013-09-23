@@ -20,6 +20,7 @@
 // Last Modified: Sun Apr  3 08:24:08 PDT 2011 added ficta marks from parens
 // Last Modified: Tue Jun 19 14:03:03 PDT 2012 added printing of text
 // Last Modified: Wed Jun 20 15:43:34 PDT 2012 various updates/enhancements
+// Last Modified: Mon Aug 19 20:30:28 PDT 2013 handle multi-syllable lyric
 //
 // Filename:      ...sig/include/sigInfo/MusicXmlFile.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/MusicXmlFile.h
@@ -2600,7 +2601,7 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
                // add "*", "**text", or "*-" token
                // cout << "Adding a interpretation element" << endl;
                if (strncmp(hfile[i][0], "**", 2) == 0) {
-               hfile[i].appendField("**silbe", E_unknown, "1");
+               hfile[i].appendField("**text", E_unknown, "1");
                } else if (strncmp(hfile[i][0], "*-", 2) == 0) {
                   hfile[i].appendField("*-", E_unknown, "1");
                } else if (strncmp(hfile[i][0], "*staff", 6) == 0) {
@@ -2702,6 +2703,21 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
 //
 // MusicXmlFile::getLyricText -- extract lyric text.
 //
+// Lyrics have two components <syllabic> followed by <text>.  When there
+// are more than one syllable on the line, there may be an <elision>
+// entry, like this for the lyric word "-li e", with an elision
+// character between the two syllables. The elison is converted into
+// a space. This space can be converted back into an elision in the
+// convertion to other notation.
+//
+//      <lyric default-y="-80" number="1">
+//        <syllabic>end</syllabic>
+//        <text>li</text>
+//        <elision>‿</elision>
+//        <syllabic>single</syllabic>
+//        <text>e</text>
+//      </lyric>
+//
 
 char* MusicXmlFile::getLyricText(char* buffer, CXMLObject* object) {
    buffer[0] = '\0';
@@ -2718,8 +2734,12 @@ char* MusicXmlFile::getLyricText(char* buffer, CXMLObject* object) {
 
    CXMLCharacterData* textdata;
    CXMLCharacterData* formatdata;
-   XMLString string;
-   XMLString formatstring;
+   SigCollection<XMLString> string;
+   SigCollection<XMLString> formatstring;
+   XMLString xmls;
+   string.setSize(0);
+   formatstring.setSize(0);
+
    object = object->Zoom();
    CXMLObject* obj2;
    while (object != NULL) {
@@ -2734,7 +2754,8 @@ char* MusicXmlFile::getLyricText(char* buffer, CXMLObject* object) {
          while (obj2 != NULL) {
             if (obj2->GetType() == xmlCharacterData) {
                textdata = (CXMLCharacterData*)obj2;
-               string = textdata->GetData();
+               xmls = textdata->GetData();
+               string.append(xmls);
                break;
             }
             obj2 = obj2->GetNext();
@@ -2744,7 +2765,8 @@ char* MusicXmlFile::getLyricText(char* buffer, CXMLObject* object) {
          while (obj2 != NULL) {
             if (obj2->GetType() == xmlCharacterData) {
                formatdata = (CXMLCharacterData*)obj2;
-               formatstring = formatdata->GetData();
+               xmls = formatdata->GetData();
+               formatstring.append(xmls);
                break;
             }
             obj2 = obj2->GetNext();
@@ -2754,18 +2776,31 @@ char* MusicXmlFile::getLyricText(char* buffer, CXMLObject* object) {
    }
 
    buffer[0] = '\0';
-   if (strcmp(formatstring.c_str(), "end") == 0) {
-      strcat(buffer, "-");
+
+
+   int i;
+   int maxx = string.getSize();
+   if (formatstring.getSize() < maxx) {
+      maxx = formatstring.getSize();
    }
-   if (strcmp(formatstring.c_str(), "middle") == 0) {
-      strcat(buffer, "-");
-   }
-   strncat(buffer, string.c_str(), 1024);
-   if (strcmp(formatstring.c_str(), "begin") == 0) {
-      strcat(buffer, "-");
-   }
-   if (strcmp(formatstring.c_str(), "middle") == 0) {
-      strcat(buffer, "-");
+
+   for (i=0; i<maxx; i++) {
+      if (i>0) {
+         strcat(buffer, " ");
+      }
+      if (strcmp(formatstring[i].c_str(), "end") == 0) {
+         strcat(buffer, "-");
+      }
+      if (strcmp(formatstring[i].c_str(), "middle") == 0) {
+         strcat(buffer, "-");
+      }
+      strncat(buffer, string[i].c_str(), 1024);
+      if (strcmp(formatstring[i].c_str(), "begin") == 0) {
+         strcat(buffer, "-");
+      }
+      if (strcmp(formatstring[i].c_str(), "middle") == 0) {
+         strcat(buffer, "-");
+      }
    }
 
    // <extend/> is used to place underscore starting on current
@@ -2851,7 +2886,9 @@ void MusicXmlFile::printInstrument(ostream& out, int staffno, int index) {
       }
       if (((CXMLElement*)object)->GetName() == "part-name") {
          getCharacterData(buffer, object);
-         out << "*I\"" << buffer;
+         // This statement disabled for now because multiple spines
+         // are not compensated for.
+         // out << "*I\"" << buffer;
          return;
       }
    }
