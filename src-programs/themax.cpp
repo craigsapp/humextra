@@ -564,6 +564,7 @@ int searchForMatches(const char* filename, Array<char>& ss,
 
 int searchForMatches(istream& inputfile, Array<char>& ss, 
       PerlRegularExpression& pre, int mcount) {
+
    PerlRegularExpression blanktest;
    PerlRegularExpression messagetest;
    PerlRegularExpression noteoffsettest;
@@ -581,7 +582,8 @@ int searchForMatches(istream& inputfile, Array<char>& ss,
       if (blanktest.search(line.c_str(), "^\\s*$", "")) {
          continue;
       }
-      if (messagetest.search(line.c_str(), "^#", "")) {
+      // if (messagetest.search(line.c_str(), "^#", "")) {
+      if (line.c_str()[0] == '#') {
          if (!quietQ) {
             // echo control messages in the index file.
             cout << line << "\n";
@@ -589,6 +591,9 @@ int searchForMatches(istream& inputfile, Array<char>& ss,
          continue;
       }
       state = pre.search(line.c_str());
+      if (!state) {
+         continue;
+      }
       if (noteoffsettest.search(line.c_str())) {
          offset = atoi(noteoffsettest.getSubmatch(1));
       } else {
@@ -2316,7 +2321,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
    // note that overlapQ is only implemented for --location option
    // and not in other cases (yet).
-   if (printendQ || !overlapQ) {
+   if (printendQ && !overlapQ) {
       location2Q = 1;
    }
 }
@@ -3407,4 +3412,4 @@ void processKernString(const char* astring) {
 }
 
 
-// md5sum: 878e8c189062674f1d1eafb13c6f33df themax.cpp [20121112]
+// md5sum: 5def68070759f95120560d12021fc894 themax.cpp [20130923]
