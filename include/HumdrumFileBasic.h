@@ -121,6 +121,7 @@ class HumdrumFileBasic {
       void                   clear            (void);
       void                   setFilename      (const char* filename);
       const char*            getFilename      (void);
+      const char*            getFileName      (void) { return getFilename(); }
       void                   setSegmentLevel  (int level = 0);
       int                    getSegmentLevel  (void);
       ostream&               printSegmentLabel(ostream& out);
