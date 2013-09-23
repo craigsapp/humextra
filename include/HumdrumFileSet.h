@@ -49,7 +49,8 @@ class HumdrumFileSet {
       int                    read             (istream& inStream);
       int                    read             (Options& options);
       int                    readAppend       (const char* filename);
-      int                    readAppend       (istream& inStream);
+      int                    readAppend       (istream& inStream, 
+                                               const char* filename = "");
 
    protected:
       Array<HumdrumFile*>    data;

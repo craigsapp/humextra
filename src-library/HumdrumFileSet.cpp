@@ -185,19 +185,20 @@ int HumdrumFileSet::readAppend(const char* filename) {
       return readAppend(embeddedData);
    }
 
-   return readAppend(infile);
+   return readAppend(infile, filename);
 }
 
 
 // !!!!SEGMENT: filename
 
-int HumdrumFileSet::readAppend(istream& inStream) {
+int HumdrumFileSet::readAppend(istream& inStream, const char* filename) {
    PerlRegularExpression pre;
    int contentQ   = 0;
    int exclusiveQ = 0;
    char line[1123123] = {0};
    SSTREAM* inbuffer;
-   char filename[123123] = {0};
+   char tfilename[123123] = {0};
+   strcpy(tfilename, filename);
    inbuffer = new SSTREAM;
    while (!inStream.eof()) {
       line[0] = '\0';
@@ -210,12 +211,12 @@ int HumdrumFileSet::readAppend(istream& inStream) {
       }
       if (pre.search(line, "^!!!!SEGMENT:\\s*(.*)\\s*$", "")) {
          if (contentQ != 0) {
-            appendHumdrumFileContent(filename, *inbuffer);
+            appendHumdrumFileContent(tfilename, *inbuffer);
             delete inbuffer;
             inbuffer = new SSTREAM;
-            strcpy(filename, "");
+            strcpy(tfilename, "");
          }
-         strcpy(filename, pre.getSubmatch(1));
+         strcpy(tfilename, pre.getSubmatch(1));
          contentQ = 0;
          exclusiveQ = 0;
       } else if (exclusiveQ == 2) {
