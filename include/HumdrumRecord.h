@@ -81,8 +81,10 @@ class HumdrumRecord {
       int               getFieldCount      (void) const;
       int               getFieldCount      (const char* exinterp) const;
       int               getFieldCount      (int exinterp) const;
-      int               getFieldsByExInterp(Array<int>& fields, const char* exinterp);
-      int               getTracksByExInterp(Array<int>& tracks, const char* exinterp);
+      int               getFieldsByExInterp(Array<int>& fields, 
+                                            const char* exinterp);
+      int               getTracksByExInterp(Array<int>& tracks, 
+                                            const char* exinterp);
       char*             getBibKey          (char* buffer, int maxsize = 0);
       char*             getBibValue        (char* buffer, int maxsize = 0);
       const char*       getBibLangIso639_2 (const char* string = NULL);
@@ -106,6 +108,9 @@ class HumdrumRecord {
                                               int tokenIndex, 
                                               int buffersize = -1, 
                                               char separator = ' ');
+      void              getTokens          (Array<Array<char> >& tokens, 
+                                              int fieldIndex, 
+                                              char separator = ' ');
       char*             getToken           (Array<char>& buffer, 
                                               int fieldIndex, 
                                               int tokenIndex, 
@@ -118,6 +123,7 @@ class HumdrumRecord {
       int               isGlobalComment    (void) const;
       int               isBibliographic    (void) const;
       int               isMeasure          (void) const;
+      int               isBarline          (void) const { return isMeasure(); }
       int               isLocalComment     (void) const;
       int               isComment          (void) const;
       int               isExInterp         (int index, const char* string);
