@@ -40,10 +40,11 @@ class NoteNode {
       int spine;    // spine number in original score of note
       int measure;  // measure number of note
       int serial;   // number number 
+      int mark;     // for marking search matches
       double beatsize; // time signature bottom value which or
                        // 3 times the bottom if compound meter
       NoteNode(void)      { clear(); }
-      void clear(void)    { measure = beatsize = serial = b40 = 0; 
+      void clear(void)    { mark = measure = beatsize = serial = b40 = 0; 
                             line = spine = -1; }
       int isRest(void)    { return b40 == 0 ? 1 : 0; }
       int isSustain(void) { return b40 < 0 ? 1 : 0; }
@@ -55,6 +56,7 @@ class NoteNode {
 #define RESTSTRING "R"
 #define INTERVAL_HARMONIC 1
 #define INTERVAL_MELODIC  2
+#define MARKNOTES  1
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -62,7 +64,7 @@ class NoteNode {
 void      checkOptions         (Options& opts, int argc, char* argv[]);
 void      example              (void);
 void      usage                (const char* command);
-void      processFile          (HumdrumFile& infile, const char* filename);
+int       processFile          (HumdrumFile& infile, const char* filename);
 void      getKernTracks        (Array<int>& ktracks, HumdrumFile& infile);
 int       validateInterval     (Array<Array<NoteNode> >& notes, 
                                 int i, int j, int k);
@@ -105,7 +107,7 @@ int       printInterleavedLattice(HumdrumFile& infile, int line,
                                 Array<int>& ktracks, Array<int>& reverselookup,
                                 int n, int currentindex,
                                 Array<Array<NoteNode> >& notes);
-void      printCombinations    (Array<Array<NoteNode> >& notes, 
+int       printCombinations    (Array<Array<NoteNode> >& notes, 
                                 HumdrumFile& infile, Array<int>& ktracks, 
                                 Array<int>& reverselookup, int n);
 void      printAsCombination   (HumdrumFile& infile, int line, 
@@ -114,14 +116,21 @@ void      printAsCombination   (HumdrumFile& infile, int line,
 int       printModuleCombinations(HumdrumFile& infile, int line, 
                                 Array<int>& ktracks, Array<int>& reverselookup,
                                 int n, int currentindex, 
-                                Array<Array<NoteNode> >& notes);
+                                Array<Array<NoteNode> >& notes, 
+                                int& matchcount);
 int       printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, 
-                                int n, int startline, int part1, int part2);
-void      printCombinationModulePrepare(ostream& out, 
+                                int n, int startline, int part1, int part2,
+                                int markstate = 0);
+int       printCombinationModulePrepare(ostream& out, 
                                 Array<Array<NoteNode> >& notes, int n, 
                                 int startline, int part1, int part2);
 int       getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, 
                                 int n, int startline, int part1, int part2);
+void      addMarksToInputData  (HumdrumFile& infile, 
+                                Array<Array<NoteNode> >& notes,
+                                Array<int>& ktracks,
+                                Array<int>& reverselookup);
+void      markNote             (HumdrumFile& infile, int line, int col);
 
 // global variables
 Options   options;             // database for command-line arguments
@@ -145,15 +154,20 @@ int       parenQ      = 0;      // used with -p option
 int       rowsQ       = 0;      // used with --rows option
 int       hmarkerQ    = 0;      // used with -h option
 int       mmarkerQ    = 0;      // used with -m option
-int       attackQ     = 0;      // used with --attacks
-int       rawQ        = 0;      // used with --raw
-int       xoptionQ    = 0;      // used with -x 
-int       octaveallQ  = 0;      // used with -O 
-int       octaveQ     = 0;      // used with -o 
-int       noharmonicQ = 0;      // used with -H 
-int       nomelodicQ  = 0;      // used with -M 
-int       norestsQ    = 0;      // used with -R 
-int       nounisonsQ  = 0;      // used with -U 
+int       attackQ     = 0;      // used with --attacks option
+int       rawQ        = 0;      // used with --raw option
+int       xoptionQ    = 0;      // used with -x option
+int       octaveallQ  = 0;      // used with -O option
+int       octaveQ     = 0;      // used with -o option
+int       noharmonicQ = 0;      // used with -H option
+int       nomelodicQ  = 0;      // used with -M option
+int       norestsQ    = 0;      // used with -R option
+int       nounisonsQ  = 0;      // used with -U option
+int       filenameQ   = 0;      // used with -f option
+int       searchQ     = 0;      // used with --search option
+int       markQ       = 0;      // used with --mark option
+int       countQ      = 0;      // used with --count option
+PerlRegularExpression SearchString;
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -164,9 +178,26 @@ int main(int argc, char** argv) {
    HumdrumStream streamer(options.getArgList());
    HumdrumFile infile;
 
+   int count = 0;
+   int totalcount = 0;
    while (streamer.read(infile)) {
-      processFile(infile, infile.getFileName());
+      count = processFile(infile, infile.getFileName());
+      totalcount += count;
+      if (countQ) {
+         if (filenameQ) {
+            cout << infile.getFileName() << "\t";
+            cout << count << endl;
+         }
+      }
    }
+
+   if (countQ) {
+      if (filenameQ) {
+         cout << "TOTAL:\t";
+      }
+      cout << totalcount << endl;
+   }
+
 }
 
 
@@ -178,7 +209,7 @@ int main(int argc, char** argv) {
 // processFile -- Do requested analysis on a given file.
 //
 
-void processFile(HumdrumFile& infile, const char* filename) {
+int processFile(HumdrumFile& infile, const char* filename) {
 
    Array<Array<NoteNode> > notes;
    Array<Array<char> >     names;
@@ -212,19 +243,28 @@ void processFile(HumdrumFile& infile, const char* filename) {
       exit(0);
    }
 
+   int count = 0;
    if (latticeQ) {
       printLattice(notes, infile, ktracks, reverselookup, Chaincount);
    } else if (interleavedQ) {
       printLatticeInterleaved(notes, infile, ktracks, reverselookup, 
          Chaincount);
    } else {
-      printCombinations(notes, infile, ktracks, reverselookup, 
+      count = printCombinations(notes, infile, ktracks, reverselookup, 
          Chaincount);
    }
 
 
    // handle search results here
+   if (markQ) {
+      if (count > 0) {
+         addMarksToInputData(infile, notes, ktracks, reverselookup);
+      }
+      cout << infile;
+      cout << "!!!RDF**kern: @ = matched note, color=\"#ff0000\"\n";
+   } 
 
+   return count;
 }
 
 
@@ -234,16 +274,17 @@ void processFile(HumdrumFile& infile, const char* filename) {
 // printCombinations --
 //
 
-void printCombinations(Array<Array<NoteNode> >& notes, 
+int  printCombinations(Array<Array<NoteNode> >& notes, 
       HumdrumFile& infile, Array<int>& ktracks, Array<int>& reverselookup, 
       int n) {
-   int currentindex = 0;
    int i;
+   int currentindex = 0;
+   int matchcount   = 0;
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].hasSpines()) {
          // print all lines here which do not contain spine 
          // information.
-         if (!rawQ) {
+         if (!(rawQ || markQ || countQ)) {
             cout << infile[i] << "\n";
          }
          continue;
@@ -270,12 +311,14 @@ void printCombinations(Array<Array<NoteNode> >& notes,
       } else {
          // print combination data
          currentindex = printModuleCombinations(infile, i, ktracks, 
-            reverselookup, n, currentindex, notes);
+            reverselookup, n, currentindex, notes, matchcount);
       }
-      if (!rawQ) {
-         cout << "\n";
+      if (!(rawQ || markQ || countQ)) {
+            cout << "\n";
       }
    }
+
+   return matchcount;
 }
 
 
@@ -287,7 +330,7 @@ void printCombinations(Array<Array<NoteNode> >& notes,
 
 int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
       Array<int>& reverselookup, int n, int currentindex, 
-      Array<Array<NoteNode> >& notes) {
+      Array<Array<NoteNode> >& notes, int& matchcount) {
 
    int fileline = line;
 
@@ -296,7 +339,7 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
       currentindex++;
    }
    if (currentindex >= notes[0].getSize()) {
-      if (!rawQ) {
+      if (!(rawQ || markQ || countQ)) {
          cout << ".";
          printAsCombination(infile, line, ktracks, reverselookup, ".");
       }
@@ -324,7 +367,7 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
    int count = 0;
    for (j=0; j<infile[line].getFieldCount(); j++) {
       if (!infile[line].isExInterp(j, "**kern")) {
-         if (!rawQ) {
+         if (!(rawQ || markQ || countQ)) {
             cout << infile[line][j];
             if (j < infile[line].getFieldCount() - 1) {
                cout << "\t";
@@ -339,7 +382,7 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
          tracknext = -23525;
       }
       if (track == tracknext) {
-         if (!rawQ) {
+         if (!(rawQ || markQ || countQ)) {
             cout << infile[line][j];
             if (j < infile[line].getFieldCount() - 1) {
                cout << "\t";
@@ -350,24 +393,24 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
 
       // print the **kern spine, then check to see if there
       // is some **cint data to print
-      if (!rawQ) {
-         cout << infile[line][j];
+      if (!(rawQ || markQ || countQ)) {
+            cout << infile[line][j];
       }
       if ((track != ktracks.last()) && (reverselookup[track] >= 0)) {
          count = ktracks.getSize() - reverselookup[track] - 1;
          for (jj = 0; jj<count; jj++) {
-            if (!rawQ) {
+            if (!(rawQ || markQ || countQ)) {
                cout << "\t";
             }
             int part1 = reverselookup[track];
             int part2 = part1+1+jj;
             // cout << part1 << "," << part2;
-            printCombinationModulePrepare(cout, notes, n, currentindex, 
-                  part1, part2);
+            matchcount += printCombinationModulePrepare(cout, notes, n, 
+                  currentindex, part1, part2);
          }
       }
 
-      if (!rawQ) {
+      if (!(rawQ || markQ || countQ)) {
          if (j < infile[line].getFieldCount() - 1) {
             cout << "\t";
          }
@@ -384,19 +427,176 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
 // printCombinationModulePrepare --
 //
 
-void printCombinationModulePrepare(ostream& out, Array<Array<NoteNode> >& notes,
+int printCombinationModulePrepare(ostream& out, Array<Array<NoteNode> >& notes,
        int n, int startline, int part1, int part2) {
+   int count = 0;
    SSTREAM tempstream;
+   int match;
    int status = printCombinationModule(tempstream, notes, n, startline, 
-                                                                 part1, part2);
+                   part1, part2);
    if (status) { 
       tempstream << ends;
-      out << tempstream.CSTRING;
+      if (searchQ) {
+         // Check to see if the extracted module matches to the
+         // search query.
+         match = SearchString.search(tempstream.CSTRING);
+         if (match) {
+            count++;
+            if (rawQ) {
+               cout << tempstream.CSTRING << "\n";
+            } else {
+               // mark notes of the matched module(s) in the note array 
+               // for later marking in input score.
+               printCombinationModule(tempstream, notes, n, startline, 
+                   part1, part2, MARKNOTES);
+            }
+         }
+      } else {
+         out << tempstream.CSTRING;
+      }
    } else {
-      if (!rawQ) {
+      if (!(rawQ || markQ || countQ || searchQ)) {
          out << ".";
       }
    }
+
+   return count;
+}
+
+
+
+//////////////////////////////
+//
+// addMarksToInputData -- mark notes in the score which matched
+//     to the search query.
+//
+
+void addMarksToInputData(HumdrumFile& infile, 
+      Array<Array<NoteNode> >& notes, Array<int>& ktracks,
+      Array<int>& reverselookup) {
+
+   // first carry all marks from sustained portions of notes onto their
+   // note attacks.
+   int i, j;
+
+   int mark = 0;
+   int track = 0;
+   int markpitch = -1;
+ 
+   for (i=0; i<notes.getSize(); i++) {
+      mark = 0;
+      for (j=notes[i].getSize()-1; j>=0; j--) {
+         if (mark && (-markpitch == notes[i][j].b40)) {
+            // In the sustain region between a note
+            // attack and the marked sustain. Mark the 
+            // sustained region as well (don't know
+            // if this behavior might change in the
+            // future.
+            notes[i][j].mark = mark; 
+            continue;
+         }
+         if (mark && (markpitch == notes[i][j].b40)) {
+            // At the start of a notes which was marked.
+            // Mark the attack since only note attacks
+            // will be marked in the score
+            notes[i][j].mark = mark; 
+            mark = 0;
+            continue;
+         }
+         if (mark && (markpitch != notes[i][j].b40)) {
+            // something strange happened.  Probably
+            // an open tie which was not started
+            // properly, so just clear mark.
+            mark = 0;
+         }
+         if (notes[i][j].mark) {
+            mark = 1;
+            markpitch = abs(notes[i][j].b40);
+         } else {
+            mark = 0;
+         }
+         
+      }
+   }
+
+   // a forward loop here into notes array to continue
+   // marks to end of sutained region of marked notes
+   for (i=0; i<notes.getSize(); i++)  {
+      for (j=0; j<notes[i].getSize(); j++) {
+         if (notes[i][j].mark) {
+            markpitch = -abs(notes[i][j].b40);
+            continue;
+         } else if (notes[i][j].b40 == markpitch) {
+            notes[i][j].mark = 1;
+            continue;
+         } else {
+            markpitch = -1;
+         }
+      }
+   }
+
+   // print mark information:
+   // for (j=0; j<notes[0].getSize(); j++) {
+   //    for (i=0; i<notes.getSize(); i++) {
+   //       cout << notes[i][j].b40;
+   //       if (notes[i][j].mark) {
+   //          cout << "m";
+   //       }
+   //       cout << " ";
+   //    }
+   //    cout << "\n";
+   // }
+
+
+   // now go through the input score placing user-markers onto notes
+   // which were marked in the note array.
+   int currentindex = 0;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isData()) {
+         continue;
+      }
+      while ((currentindex < notes[0].getSize()) 
+            && (i > notes[0][currentindex].line)) {
+         currentindex++;
+      }
+      if (currentindex >= notes[0].getSize()) {
+         continue;
+      }
+      if (notes[0][currentindex].line != i) {
+         continue;
+      }
+
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         if (!infile[i].isExInterp(j, "**kern")) {
+            continue;
+         }
+         if (strcmp(infile[i][j], ".") == 0) {
+            // Don't mark null tokens.
+            continue;
+         }
+         track = infile[i].getPrimaryTrack(j);
+         if (reverselookup[track] < 0) {
+            continue;
+         }
+         if (notes[reverselookup[track]][currentindex].mark != 0) {
+            markNote(infile, i, j);
+         }
+      }
+   }
+}
+
+
+
+//////////////////////////////
+//
+// markNote --
+//
+
+void markNote(HumdrumFile& infile, int line, int col) {
+   char buffer[1024] = {0};
+   strcpy(buffer, infile[line][col]);
+   strcat(buffer, "@");
+   infile[line].changeField(col, buffer);
 }
 
 
@@ -504,7 +704,7 @@ int getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, int n,
 //
 
 int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n, 
-      int startline, int part1, int part2) {
+      int startline, int part1, int part2, int markstate) {
 
    if (norestsQ) {
       if (notes[part1][startline].b40 == 0) {
@@ -522,7 +722,7 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
    }
 
    ostream *outp = &out;
-   if (rawQ) {
+   if (rawQ && !searchQ) {
       outp = &cout;
    }
 
@@ -622,8 +822,13 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
          if (hparenQ) {
            (*outp) << "[";
          }
-         printInterval((*outp), notes[part1][i], notes[part2][i], 
-               INTERVAL_HARMONIC, octaveadjust);
+         if (markstate) {
+            notes[part1][i].mark = 1;
+            notes[part2][i].mark = 1;
+         } else {
+            printInterval((*outp), notes[part1][i], notes[part2][i], 
+                  INTERVAL_HARMONIC, octaveadjust);
+         }
          if (hmarkerQ) {
             (*outp) << "h";
          }
@@ -684,7 +889,7 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
 void printAsCombination(HumdrumFile& infile, int line, Array<int>& ktracks, 
     Array<int>& reverselookup, const char* interstring) {
 
-   if (rawQ) {
+   if (rawQ || markQ || countQ) {
       return;
    }
 
@@ -1930,7 +2135,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("pitch|pitches=b", 
          "display pitch grid used to calculate modules");
    opts.define("r|rhythm=b", "display rhythmic positions of notes");
+   opts.define("f|filename=b", "display filenames with --count");
    opts.define("raw=b", "display only modules without formatting");
+   opts.define("suspension|suspensions=b", "mark suspensions");
    opts.define("rows|row=b", "display lattices in row form");
    opts.define("L|interleaved-lattice=b", "display interleaved lattices");
    opts.define("q|harmonic-parentheses=b", 
@@ -1962,6 +2169,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
          "transpose all harmonic intervals to within an octave");
    opts.define("chromatic=b", 
          "display intervals as diatonic intervals with chromatic alterations");
+   opts.define("search=s:", "search string");
+   opts.define("mark=b", "mark matches notes from searches in data");
+   opts.define("count=b", "count matched modules from search query");
    opts.define("debug=b");              // determine bad input line num
    opts.define("author=b");             // author of program
    opts.define("version=b");            // compilation info
@@ -1975,7 +2185,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
            << "craig@ccrma.stanford.edu, September 2013" << endl;
       exit(0);
    } else if (opts.getBoolean("version")) {
-      cout << argv[0] << ", version: 15 September 2013" << endl;
+      cout << argv[0] << ", version: 23 September 2013" << endl;
       cout << "compiled: " << __DATE__ << endl;
       cout << MUSEINFO_VERSION << endl;
       exit(0);
@@ -2032,9 +2242,60 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    norestsQ     = opts.getBoolean("no-rests");
    nounisonsQ   = opts.getBoolean("no-melodic-unisons");
    Chaincount   = opts.getInteger("n");
+   searchQ      = opts.getBoolean("search");
+   markQ        = opts.getBoolean("mark");
+   countQ       = opts.getBoolean("count");
+   filenameQ    = opts.getBoolean("filename");
    if (Chaincount < 1) {
       Chaincount = 1;
    }
+   
+
+   if (markQ && !searchQ) { 
+      cerr << "Error: in order to mark matches, provide a search query" << endl;
+      exit(1);
+   }
+   if (countQ && !searchQ) { 
+      cerr << "Error: in order to count matches, provide a search query" 
+           << endl;
+      exit(1);
+   }
+
+   if (searchQ) {
+      // Automatically assume marking of --search is used
+      // (may change in the future).
+      markQ = 1;
+   } 
+   if (countQ) {
+      searchQ = 1;
+      markQ   = 0;
+   }
+
+
+   if (searchQ) {
+      SearchString.initializeSearchAndStudy(opts.getString("search"));
+   }
+
+   if (opts.getBoolean("suspensions")) {
+      Chaincount = 2;   // -n 2
+      xoptionQ = 1;     // -x
+      searchQ = 1;     
+      char buffer[4096] = {0};
+      strcpy(buffer, "^7xs 1 6sx -2 8xx");
+      strcat(buffer, "|");
+      strcat(buffer, "^2sx -2 3xs 2 1xx");
+      strcat(buffer, "|");
+      strcat(buffer, "^7xs 1 6sx 2 6xx");
+      strcat(buffer, "|");
+      strcat(buffer, "^11xs 1 10sx -5 15xx");
+      strcat(buffer, "|");
+      strcat(buffer, "^4xs 1 3sx -5 8xx");
+      strcat(buffer, "|");
+      strcat(buffer, "^2sx -2 3xs 2 3xx");
+      SearchString.initializeSearchAndStudy(buffer);
+      markQ = 1;
+    }
+
 }
 
 
