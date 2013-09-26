@@ -118,6 +118,9 @@ int       printModuleCombinations(HumdrumFile& infile, int line,
                                 int n, int currentindex, 
                                 Array<Array<NoteNode> >& notes, 
                                 int& matchcount);
+int       printCombinationsSuspensions(Array<Array<NoteNode> >& notes, 
+                                HumdrumFile& infile, Array<int>& ktracks, 
+                                Array<int>& reverselookup, int n);
 int       printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, 
                                 int n, int startline, int part1, int part2,
                                 int markstate = 0);
@@ -167,6 +170,7 @@ int       filenameQ   = 0;      // used with -f option
 int       searchQ     = 0;      // used with --search option
 int       markQ       = 0;      // used with --mark option
 int       countQ      = 0;      // used with --count option
+int       suspensionsQ= 0;      // used with --suspensions option
 PerlRegularExpression SearchString;
 
 
@@ -249,9 +253,12 @@ int processFile(HumdrumFile& infile, const char* filename) {
    } else if (interleavedQ) {
       printLatticeInterleaved(notes, infile, ktracks, reverselookup, 
          Chaincount);
+   } else if (suspensionsQ) {
+      count = printCombinationsSuspensions(notes, infile, ktracks, 
+            reverselookup, Chaincount);
    } else {
       count = printCombinations(notes, infile, ktracks, reverselookup, 
-         Chaincount);
+            Chaincount);
    }
 
 
@@ -265,6 +272,73 @@ int processFile(HumdrumFile& infile, const char* filename) {
    } 
 
    return count;
+}
+
+
+
+//////////////////////////////
+//
+// printCombinationsSuspensions --
+//
+
+int  printCombinationsSuspensions(Array<Array<NoteNode> >& notes, 
+      HumdrumFile& infile, Array<int>& ktracks, Array<int>& reverselookup, 
+      int n) {
+
+   char sbuffer[24096] = {0};
+
+   int oldcountQ = countQ;
+   countQ = 1;             // mostly used to suppress intermediate output
+
+   int countsum = 0;
+
+   searchQ    = 1;               // turn on searching
+
+   // Suspensions with length-2 modules
+   n = 2;                        // -n 2
+   xoptionQ   = 1;               // -x
+   strcpy(sbuffer, "");
+
+   strcat(sbuffer, "^7xs 1 6sx -2 8xx$"); 	strcat(sbuffer, "|");
+   strcat(sbuffer, "^2sx -2 3xs 2 1xx$"); 	strcat(sbuffer, "|");
+   strcat(sbuffer, "^7xs 1 6sx 2 6xx$"); 	strcat(sbuffer, "|");
+   strcat(sbuffer, "^11xs 1 10sx -5 15xx$"); 	strcat(sbuffer, "|");
+   strcat(sbuffer, "^4xs 1 3sx -5 8xx$"); 	strcat(sbuffer, "|");
+   strcat(sbuffer, "^2sx -2 3xs 2 3xx$");	strcat(sbuffer, "|");
+   // "9xs 1 8sx -2 10xx" archetype: Jos1405 m10 A&B
+   strcat(sbuffer, "^9xs 1 8sx -2 10xx$");	strcat(sbuffer, "|");
+   // "4xs 1 3sx 5xx" archetype: Jos1713 m87-88 A&B
+   strcat(sbuffer, "^4xs 1 3sx -2 5xx$");	strcat(sbuffer, "|");
+   // "11xs 1 10sx 4 8xx" archetype: Jos1402 m23-24 S&B
+   strcat(sbuffer, "^11xs 1 10sx 4 8xx$");	
+
+   SearchString.initializeSearchAndStudy(sbuffer);
+   countsum += printCombinations(notes, infile, ktracks, reverselookup, n);
+
+   // Suspensions with length-3 modules /////////////////////////////////
+   n = 3;                        // -n 2
+   xoptionQ   = 1;               // -x
+   strcpy(sbuffer, "");
+
+   // "7xs 1 6sx 1 5sx 1 6sx" archetype: Jos2721 m27-78 S&T
+   strcat(sbuffer, "^7xs 1 6sx 1 5sx 1 6sx$");	strcat(sbuffer, "|");
+   // "7xs 1 6sx 1 6sx -2 8xx" archetype: Rue2018 m38-88 S&T
+   strcat(sbuffer, "^7xs 1 6sx 1 6sx -2 8xx$");	strcat(sbuffer, "|");
+   // "11xs 1 10sx 1 10sx -5 15xx" archetype: Rue2018 m38-88 S&B
+   strcat(sbuffer, "^11xs 1 10sx 1 10sx -5 15xx$");	
+
+   SearchString.initializeSearchAndStudy(sbuffer);
+   countsum += printCombinations(notes, infile, ktracks, reverselookup, n);
+
+   
+   // Suspensions with rests modules
+
+
+   // done with multiple searches.  Mark the notes in the score if required.
+
+   countQ = oldcountQ;
+
+   return countsum;
 }
 
 
@@ -443,7 +517,9 @@ int printCombinationModulePrepare(ostream& out, Array<Array<NoteNode> >& notes,
          if (match) {
             count++;
             if (rawQ) {
-               cout << tempstream.CSTRING << "\n";
+               cout << tempstream.CSTRING;
+               // newline already added somewhere previously.
+               // cout << "\n";
             } else {
                // mark notes of the matched module(s) in the note array 
                // for later marking in input score.
@@ -748,6 +824,7 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
 
    int i;
    int count = 0;
+   int countm = 0;
    int attackcount = 0;
 
    int lastindex = -1;
@@ -817,6 +894,8 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
          printSpacer((*outp));
       }
 
+      countm++;
+
       // print harmonic interval
       if (!noharmonicQ) {
          if (hparenQ) {
@@ -870,13 +949,14 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
 
    if (attackQ && (attackcount == n)) {
       return 1;
-   } else if (count == n) {
+   } else if ((countm>1) && (count == n)) {
       return 1;
    } else {
       // did not print the required number of modules.
       return 0;
    }
 
+   return 0;
 }
 
 
@@ -2246,21 +2326,11 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    markQ        = opts.getBoolean("mark");
    countQ       = opts.getBoolean("count");
    filenameQ    = opts.getBoolean("filename");
+   suspensionsQ = opts.getBoolean("suspensions");
    if (Chaincount < 1) {
       Chaincount = 1;
    }
    
-
-   if (markQ && !searchQ) { 
-      cerr << "Error: in order to mark matches, provide a search query" << endl;
-      exit(1);
-   }
-   if (countQ && !searchQ) { 
-      cerr << "Error: in order to count matches, provide a search query" 
-           << endl;
-      exit(1);
-   }
-
    if (searchQ) {
       // Automatically assume marking of --search is used
       // (may change in the future).
@@ -2275,26 +2345,6 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    if (searchQ) {
       SearchString.initializeSearchAndStudy(opts.getString("search"));
    }
-
-   if (opts.getBoolean("suspensions")) {
-      Chaincount = 2;   // -n 2
-      xoptionQ = 1;     // -x
-      searchQ = 1;     
-      char buffer[4096] = {0};
-      strcpy(buffer, "^7xs 1 6sx -2 8xx");
-      strcat(buffer, "|");
-      strcat(buffer, "^2sx -2 3xs 2 1xx");
-      strcat(buffer, "|");
-      strcat(buffer, "^7xs 1 6sx 2 6xx");
-      strcat(buffer, "|");
-      strcat(buffer, "^11xs 1 10sx -5 15xx");
-      strcat(buffer, "|");
-      strcat(buffer, "^4xs 1 3sx -5 8xx");
-      strcat(buffer, "|");
-      strcat(buffer, "^2sx -2 3xs 2 3xx");
-      SearchString.initializeSearchAndStudy(buffer);
-      markQ = 1;
-    }
 
 }
 
