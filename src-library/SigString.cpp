@@ -39,6 +39,7 @@ SigString::SigString(int arraySize) {
 
 
 SigString::SigString(SigString& aString) { 
+   Array<char>& data = *this;
    int aSize = aString.getSize();
    data.setSize(aSize);
    memcpy(data.getBase(), aString.getBase(), aSize);
@@ -46,6 +47,7 @@ SigString::SigString(SigString& aString) {
 
 
 SigString::SigString(Array<char>& aString) { 
+   Array<char>& data = *this;
    int aSize = aString.getSize();
    if ((aSize > 0) && (aString.last() == '\0')) {
       aSize--;
@@ -56,12 +58,14 @@ SigString::SigString(Array<char>& aString) {
 
 
 SigString::SigString(int aSize, const char *cstring) { 
+   Array<char>& data = *this;
    data.setSize(aSize);
    memcpy(data.getBase(), cstring, aSize);
 }
 
 
 SigString::SigString(const char *cstring) { 
+   Array<char>& data = *this;
    int aSize = ::strlen(cstring);
    data.setSize(aSize);
    memcpy(data.getBase(), cstring, aSize);
@@ -98,6 +102,7 @@ void SigString::clear(void) {
 //
 
 void SigString::setSize(int aSize) { 
+   Array<char>& data = *this;
    data.setSize(aSize+1);
    data.last() = '\0';
    data.setSize(aSize);
@@ -111,9 +116,10 @@ void SigString::setSize(int aSize) {
 //      the terminal null character.
 //
 
-int SigString::getSize(void) const { 
-   return data.getSize();
-}
+//int SigString::getSize(void) const { 
+//   Array<char>& data = *this;
+//   return data.getSize();
+//}
 
 
 
@@ -123,6 +129,7 @@ int SigString::getSize(void) const {
 //
 
 char& SigString::operator[](int index) {
+   Array<char>& data = *this;
    return data[index];
 }
 
@@ -187,6 +194,7 @@ int SigString::operator==(const char* cstring) {
 //
 
 SigString& SigString::operator=(const SigString& aString) { 
+   Array<char>& data = *this;
    int aSize = aString.getSize();
    setSize(aSize);
    memcpy(data.getBase(), aString.getBase(), aSize);
@@ -195,6 +203,7 @@ SigString& SigString::operator=(const SigString& aString) {
 
 
 SigString& SigString::operator=(Array<char>& aString) { 
+   Array<char>& data = *this;
    int aSize = aString.getSize();
    if ((aSize > 0) && (aString.last() == '\0')) {
       aSize--;
@@ -206,6 +215,7 @@ SigString& SigString::operator=(Array<char>& aString) {
 
 
 SigString& SigString::operator=(const char* cstring) {
+   Array<char>& data = *this;
    int aSize = ::strlen(cstring);
    setSize(aSize);
    memcpy(data.getBase(), cstring, aSize);
@@ -220,6 +230,7 @@ SigString& SigString::operator=(const char* cstring) {
 //
 
 SigString& SigString::operator+=(const SigString& aString) { 
+   Array<char>& data = *this;
    int oldsize = getSize();
    setSize(oldsize + aString.getSize());
    memcpy(data.getBase()+oldsize, aString.getBase(), aString.getSize());
@@ -228,6 +239,7 @@ SigString& SigString::operator+=(const SigString& aString) {
 
 
 SigString& SigString::operator+=(Array<char>& aString) { 
+   Array<char>& data = *this;
    int oldsize = getSize();
    int aSize = aString.getSize();
    if ((aSize > 0) && (aString.last() == '\0')) {
@@ -240,6 +252,7 @@ SigString& SigString::operator+=(Array<char>& aString) {
 
 
 SigString& SigString::operator+=(const char* cstring) { 
+   Array<char>& data = *this;
    int oldsize = getSize();
    int aSize = ::strlen(cstring);
    setSize(oldsize + aSize);

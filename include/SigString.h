@@ -23,7 +23,7 @@
    #include <ostream.h>
 #endif
 
-class SigString {
+class SigString : public Array<char> {
    public:
                  SigString         (void);
                  SigString         (int arraySize);
@@ -36,9 +36,9 @@ class SigString {
       void       clear             (void);
 
       void       setSize           (int aSize);
-      int        getSize           (void) const;
+//      int        getSize           (void) const;
       int        strlen            (void) { return getSize(); }
-      char*      getBase           (void) const { return data.getBase(); }
+//      char*      getBase           (void) const { return data.getBase(); }
 
       char&      operator[]        (int index);
 
@@ -60,8 +60,8 @@ class SigString {
       SigString& operator-=        (Array<char>& aString);
       SigString& operator-=        (const char* cstring);
 
-   protected:
-      Array<char> data;
+//   protected:
+//      Array<char> data;
 };
 
 
