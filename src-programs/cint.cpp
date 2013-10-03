@@ -9,6 +9,8 @@
 // Description:   Calculates counterpoint interval modules in polyphonic
 // 		  music.
 //
+// 		  Crossing code not yet finished.
+//
 
 #include "humdrum.h"
 #include <stdlib.h>
@@ -89,7 +91,7 @@ void      printLattice         (Array<Array<NoteNode> >& notes,
                                 HumdrumFile& infile, Array<int>& ktracks, 
                                 Array<int>& reverselookup, int n);
 void      printSpacer          (ostream& out);
-void      printInterval        (ostream& out, NoteNode& note1, NoteNode& note2,
+int       printInterval        (ostream& out, NoteNode& note1, NoteNode& note2,
                                 int type, int octaveadjust = 0);
 int       printLatticeItem     (Array<Array<NoteNode> >& notes, int n, 
                                 int currentindex, int fileline);
@@ -109,7 +111,8 @@ int       printInterleavedLattice(HumdrumFile& infile, int line,
                                 Array<Array<NoteNode> >& notes);
 int       printCombinations    (Array<Array<NoteNode> >& notes, 
                                 HumdrumFile& infile, Array<int>& ktracks, 
-                                Array<int>& reverselookup, int n);
+                                Array<int>& reverselookup, int n,
+                                Array<Array<SigString> >& retrospective);
 void      printAsCombination   (HumdrumFile& infile, int line, 
                                 Array<int>& ktracks, Array<int>& reverselookup,
                                 const char* interstring);
@@ -117,16 +120,20 @@ int       printModuleCombinations(HumdrumFile& infile, int line,
                                 Array<int>& ktracks, Array<int>& reverselookup,
                                 int n, int currentindex, 
                                 Array<Array<NoteNode> >& notes, 
-                                int& matchcount);
+                                int& matchcount, 
+                                Array<Array<SigString> >& retrospective);
 int       printCombinationsSuspensions(Array<Array<NoteNode> >& notes, 
                                 HumdrumFile& infile, Array<int>& ktracks, 
-                                Array<int>& reverselookup, int n);
+                                Array<int>& reverselookup, int n,
+                                Array<Array<SigString> >& retrospective);
 int       printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, 
                                 int n, int startline, int part1, int part2,
+                                Array<Array<SigString> >& retrospective,
                                 int markstate = 0);
 int       printCombinationModulePrepare(ostream& out, 
                                 Array<Array<NoteNode> >& notes, int n, 
-                                int startline, int part1, int part2);
+                                int startline, int part1, int part2,
+                                Array<Array<SigString> >& retrospective);
 int       getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, 
                                 int n, int startline, int part1, int part2);
 void      addMarksToInputData  (HumdrumFile& infile, 
@@ -134,43 +141,48 @@ void      addMarksToInputData  (HumdrumFile& infile,
                                 Array<int>& ktracks,
                                 Array<int>& reverselookup);
 void      markNote             (HumdrumFile& infile, int line, int col);
+void      initializeRetrospective(Array<Array<SigString> >& retrospective, 
+                                HumdrumFile& infile, Array<int>& ktracks);
+int       getTriangleIndex     (int number, int num1, int num2);
 
 // global variables
 Options   options;             // database for command-line arguments
-int       debugQ      = 0;      // used with --debug option
-int       base40Q     = 0;      // used with --40 option
-int       base12Q     = 0;      // used with --12 option
-int       base7Q      = 0;      // used with -7 option
-int       pitchesQ    = 0;      // used with --pitches option
-int       rhythmQ     = 0;      // used with -r option
-int       latticeQ    = 0;      // used with -l option
-int       interleavedQ= 0;      // used with -L option
-int       Chaincount  = 1;      // used with -n option
-int       chromaticQ  = 0;      // used with --chromatic option
-int       sustainQ    = 0;      // used with -s option
-int       zeroQ       = 0;      // used with -z option
-int       topQ        = 0;      // used with -t option
-int       toponlyQ    = 0;      // used with -T option
-int       hparenQ     = 0;      // used with -h option
-int       mparenQ     = 0;      // used with -y option
-int       parenQ      = 0;      // used with -p option
-int       rowsQ       = 0;      // used with --rows option
-int       hmarkerQ    = 0;      // used with -h option
-int       mmarkerQ    = 0;      // used with -m option
-int       attackQ     = 0;      // used with --attacks option
-int       rawQ        = 0;      // used with --raw option
-int       xoptionQ    = 0;      // used with -x option
-int       octaveallQ  = 0;      // used with -O option
-int       octaveQ     = 0;      // used with -o option
-int       noharmonicQ = 0;      // used with -H option
-int       nomelodicQ  = 0;      // used with -M option
-int       norestsQ    = 0;      // used with -R option
-int       nounisonsQ  = 0;      // used with -U option
-int       filenameQ   = 0;      // used with -f option
-int       searchQ     = 0;      // used with --search option
-int       markQ       = 0;      // used with --mark option
-int       countQ      = 0;      // used with --count option
-int       suspensionsQ= 0;      // used with --suspensions option
+int       debugQ       = 0;      // used with --debug option
+int       base40Q      = 0;      // used with --40 option
+int       base12Q      = 0;      // used with --12 option
+int       base7Q       = 0;      // used with -7 option
+int       pitchesQ     = 0;      // used with --pitches option
+int       rhythmQ      = 0;      // used with -r option
+int       latticeQ     = 0;      // used with -l option
+int       interleavedQ = 0;      // used with -L option
+int       Chaincount   = 1;      // used with -n option
+int       chromaticQ   = 0;      // used with --chromatic option
+int       sustainQ     = 0;      // used with -s option
+int       zeroQ        = 0;      // used with -z option
+int       topQ         = 0;      // used with -t option
+int       toponlyQ     = 0;      // used with -T option
+int       hparenQ      = 0;      // used with -h option
+int       mparenQ      = 0;      // used with -y option
+int       parenQ       = 0;      // used with -p option
+int       rowsQ        = 0;      // used with --rows option
+int       hmarkerQ     = 0;      // used with -h option
+int       mmarkerQ     = 0;      // used with -m option
+int       attackQ      = 0;      // used with --attacks option
+int       rawQ         = 0;      // used with --raw option
+int       xoptionQ     = 0;      // used with -x option
+int       octaveallQ   = 0;      // used with -O option
+int       octaveQ      = 0;      // used with -o option
+int       noharmonicQ  = 0;      // used with -H option
+int       nomelodicQ   = 0;      // used with -M option
+int       norestsQ     = 0;      // used with -R option
+int       nounisonsQ   = 0;      // used with -U option
+int       filenameQ    = 0;      // used with -f option
+int       searchQ      = 0;      // used with --search option
+int       markQ        = 0;      // used with --mark option
+int       countQ       = 0;      // used with --count option
+int       suspensionsQ = 0;      // used with --suspensions option
+int       uncrossQ     = 0;      // used with -c option
+int       retroQ       = 0;      // used with --retro option
 PerlRegularExpression SearchString;
 
 
@@ -225,6 +237,11 @@ int processFile(HumdrumFile& infile, const char* filename) {
    reverselookup.setSize(infile.getMaxTracks()+1);
    reverselookup.setAll(-1);
 
+   Array<Array<SigString>> retrospective;
+   if (retroQ) {
+      initializeRetrospective(retrospective, infile, ktracks);
+   }
+
    if (rhythmQ) {
       infile.analyzeRhythm("4");
    }
@@ -255,10 +272,10 @@ int processFile(HumdrumFile& infile, const char* filename) {
          Chaincount);
    } else if (suspensionsQ) {
       count = printCombinationsSuspensions(notes, infile, ktracks, 
-            reverselookup, Chaincount);
+            reverselookup, Chaincount, retrospective);
    } else {
       count = printCombinations(notes, infile, ktracks, reverselookup, 
-            Chaincount);
+            Chaincount, retrospective);
    }
 
 
@@ -278,12 +295,69 @@ int processFile(HumdrumFile& infile, const char* filename) {
 
 //////////////////////////////
 //
+// initializeRetrospective --
+//
+
+void initializeRetrospective(Array<Array<SigString> >& retrospective, 
+      HumdrumFile& infile, Array<int>& ktracks) {
+
+   int columns = ktracks.getSize();
+   columns = columns * (columns + 1) / 2; // triangle number of analysis cols.
+
+   retrospective.setSize(columns);
+   retrospective.allowGrowth(0);
+   int i, j;
+
+   for (i=0; i<retrospective.getSize(); i++) {
+      retrospective[i].setSize(infile.getNumLines());
+      retrospective.allowGrowth(0);
+   }
+
+   SigString token;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (infile[i].isLocalComment()) {
+         token = "!";
+      } else if (infile[i].isGlobalComment()) {
+         token = "!";
+      } else if (infile[i].isReferenceRecord()) {
+         token = "!!";
+      } else if (infile[i].isBarline()) {
+         token = infile[i][0];
+      } else if (infile[i].isData()) {
+         token = ".";
+      } else if (infile[i].isInterpretation()) {
+         token = "*";
+         if (infile[i].isExclusiveInterpretation(0)) {
+            token = "**cint";
+         }
+      }
+
+      for (j=0; j<retrospective.getSize(); j++) {
+         retrospective[j][i] = token;
+      }
+   }
+
+   for (i=0; i<retrospective[0].getSize(); i++) {
+      for (j=0; j<retrospective.getSize(); j++) {
+         cout << retrospective[j][i];
+         if (j < retrospective.getSize() - 1) {
+            cout << "\t";
+         }
+      }
+      cout << "\n";
+   }
+}
+
+
+
+//////////////////////////////
+//
 // printCombinationsSuspensions --
 //
 
 int  printCombinationsSuspensions(Array<Array<NoteNode> >& notes, 
       HumdrumFile& infile, Array<int>& ktracks, Array<int>& reverselookup, 
-      int n) {
+      int n, Array<Array<SigString> >& retrospective) {
 
    char sbuffer[24096] = {0};
 
@@ -313,7 +387,8 @@ int  printCombinationsSuspensions(Array<Array<NoteNode> >& notes,
    strcat(sbuffer, "^11xs 1 10sx 4 8xx$");	
 
    SearchString.initializeSearchAndStudy(sbuffer);
-   countsum += printCombinations(notes, infile, ktracks, reverselookup, n);
+   countsum += printCombinations(notes, infile, ktracks, reverselookup, n,
+                     retrospective);
 
    // Suspensions with length-3 modules /////////////////////////////////
    n = 3;                        // -n 2
@@ -328,7 +403,8 @@ int  printCombinationsSuspensions(Array<Array<NoteNode> >& notes,
    strcat(sbuffer, "^11xs 1 10sx 1 10sx -5 15xx$");	
 
    SearchString.initializeSearchAndStudy(sbuffer);
-   countsum += printCombinations(notes, infile, ktracks, reverselookup, n);
+   countsum += printCombinations(notes, infile, ktracks, reverselookup, n,
+                     retrospective);
 
    
    // Suspensions with rests modules
@@ -350,7 +426,7 @@ int  printCombinationsSuspensions(Array<Array<NoteNode> >& notes,
 
 int  printCombinations(Array<Array<NoteNode> >& notes, 
       HumdrumFile& infile, Array<int>& ktracks, Array<int>& reverselookup, 
-      int n) {
+      int n, Array<Array<SigString> >& retrospective) {
    int i;
    int currentindex = 0;
    int matchcount   = 0;
@@ -358,7 +434,7 @@ int  printCombinations(Array<Array<NoteNode> >& notes,
       if (!infile[i].hasSpines()) {
          // print all lines here which do not contain spine 
          // information.
-         if (!(rawQ || markQ || countQ)) {
+         if (!(rawQ || markQ || retroQ || countQ)) {
             cout << infile[i] << "\n";
          }
          continue;
@@ -385,9 +461,9 @@ int  printCombinations(Array<Array<NoteNode> >& notes,
       } else {
          // print combination data
          currentindex = printModuleCombinations(infile, i, ktracks, 
-            reverselookup, n, currentindex, notes, matchcount);
+            reverselookup, n, currentindex, notes, matchcount, retrospective);
       }
-      if (!(rawQ || markQ || countQ)) {
+      if (!(rawQ || markQ || retroQ || countQ)) {
             cout << "\n";
       }
    }
@@ -404,7 +480,8 @@ int  printCombinations(Array<Array<NoteNode> >& notes,
 
 int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
       Array<int>& reverselookup, int n, int currentindex, 
-      Array<Array<NoteNode> >& notes, int& matchcount) {
+      Array<Array<NoteNode> >& notes, int& matchcount, 
+      Array<Array<SigString> >& retrospective) {
 
    int fileline = line;
 
@@ -413,7 +490,7 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
       currentindex++;
    }
    if (currentindex >= notes[0].getSize()) {
-      if (!(rawQ || markQ || countQ)) {
+      if (!(rawQ || markQ || retroQ || countQ)) {
          cout << ".";
          printAsCombination(infile, line, ktracks, reverselookup, ".");
       }
@@ -441,7 +518,7 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
    int count = 0;
    for (j=0; j<infile[line].getFieldCount(); j++) {
       if (!infile[line].isExInterp(j, "**kern")) {
-         if (!(rawQ || markQ || countQ)) {
+         if (!(rawQ || markQ || retroQ || countQ)) {
             cout << infile[line][j];
             if (j < infile[line].getFieldCount() - 1) {
                cout << "\t";
@@ -456,7 +533,7 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
          tracknext = -23525;
       }
       if (track == tracknext) {
-         if (!(rawQ || markQ || countQ)) {
+         if (!(rawQ || markQ || retroQ || countQ)) {
             cout << infile[line][j];
             if (j < infile[line].getFieldCount() - 1) {
                cout << "\t";
@@ -467,24 +544,24 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
 
       // print the **kern spine, then check to see if there
       // is some **cint data to print
-      if (!(rawQ || markQ || countQ)) {
+      if (!(rawQ || markQ || retroQ || countQ)) {
             cout << infile[line][j];
       }
       if ((track != ktracks.last()) && (reverselookup[track] >= 0)) {
          count = ktracks.getSize() - reverselookup[track] - 1;
          for (jj = 0; jj<count; jj++) {
-            if (!(rawQ || markQ || countQ)) {
+            if (!(rawQ || markQ || retroQ || countQ)) {
                cout << "\t";
             }
             int part1 = reverselookup[track];
             int part2 = part1+1+jj;
             // cout << part1 << "," << part2;
             matchcount += printCombinationModulePrepare(cout, notes, n, 
-                  currentindex, part1, part2);
+                  currentindex, part1, part2, retrospective);
          }
       }
 
-      if (!(rawQ || markQ || countQ)) {
+      if (!(rawQ || markQ || retroQ || countQ)) {
          if (j < infile[line].getFieldCount() - 1) {
             cout << "\t";
          }
@@ -502,12 +579,13 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
 //
 
 int printCombinationModulePrepare(ostream& out, Array<Array<NoteNode> >& notes,
-       int n, int startline, int part1, int part2) {
+       int n, int startline, int part1, int part2, 
+       Array<Array<SigString> >& retrospective) {
    int count = 0;
    SSTREAM tempstream;
    int match;
    int status = printCombinationModule(tempstream, notes, n, startline, 
-                   part1, part2);
+                   part1, part2, retrospective);
    if (status) { 
       tempstream << ends;
       if (searchQ) {
@@ -524,19 +602,37 @@ int printCombinationModulePrepare(ostream& out, Array<Array<NoteNode> >& notes,
                // mark notes of the matched module(s) in the note array 
                // for later marking in input score.
                printCombinationModule(tempstream, notes, n, startline, 
-                   part1, part2, MARKNOTES);
+                   part1, part2, retrospective, MARKNOTES);
             }
          }
       } else {
-         out << tempstream.CSTRING;
+         if (retroQ) {
+            int column = getTriangleIndex(notes.getSize(), part1, part2);
+            retrospective[column][status] = tempstream.CSTRING;
+         } else {
+            out << tempstream.CSTRING;
+         }
       }
    } else {
-      if (!(rawQ || markQ || countQ || searchQ)) {
+      if (!(rawQ || markQ || retroQ || countQ || searchQ)) {
          out << ".";
       }
    }
 
    return count;
+}
+
+
+
+//////////////////////////////
+//
+// getTriangleIndex --
+//
+
+int getTriangleIndex(int number, int num1, int num2) {
+   int triangle = number * (number + 1) / 2;
+   // intermediate code, not active yet
+   return 0;
 }
 
 
@@ -688,8 +784,6 @@ void markNote(HumdrumFile& infile, int line, int col) {
 int getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, int n, 
       int startline, int part1, int part2) {
 
-   int minimum = 100000;
-
    // if the current two notes are both sustains, then skip
    if ((notes[part1][startline].b40 <= 0) && 
        (notes[part2][startline].b40 <= 0)) {
@@ -710,6 +804,10 @@ int getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, int n,
    int attackcount = 0;
    int hint;
 
+   Array<int> hintlist;
+   hintlist.setSize(1000);
+   hintlist.setSize(0);
+
    for (i=startline; i<notes[0].getSize(); i++) {
       if ((notes[part1][i].b40 <= 0) && (notes[part2][i].b40 <= 0)) {
          // skip notes if both are sustained
@@ -727,9 +825,10 @@ int getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, int n,
       // consider  harmonic interval
       if ((notes[part2][i].b40 != 0) && (notes[part1][i].b40 != 0)) {
          hint = abs(notes[part2][i].b40) - abs(notes[part1][i].b40);
-         if (hint > 40) {
-            minimum = hint;
+         if (uncrossQ && (hint < 0)) {
+            hint = -hint;
          }
+         hintlist.append(hint);
       }
 
       // if count matches n, then exit loop
@@ -749,21 +848,43 @@ int getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, int n,
 
    }
 
+   int minimum = 100000;
+
+   for (i=0; i<hintlist.getSize(); i++) {
+      if (hintlist[i] < minimum) {
+         minimum = hintlist[i];
+      }
+   }
+
    if (minimum > 1000) {
      // no intervals found to consider
      return 0;
    }
 
-   int octaveadjust = -(minimum / 40);
-
-   if (attackQ && (attackcount == n)) {
-      return octaveadjust;
-   } else if (count == n) {
-      return octaveadjust;
-   } else {
-      // did not find the required number of modules.
+   if ((minimum >= 0) && (minimum <= 40)) {
+      // nothing to do
       return 0;
    }
+
+   if (minimum > 40) {
+      return -(minimum/40);
+   } else if (minimum < 0) {
+      // don't go positive, this will invert the interval.
+      return (-minimum)/40;
+   }
+
+   //int octaveadjust = -(minimum / 40);
+
+   //if (attackQ && (attackcount == n)) {
+   //   return octaveadjust;
+   //} else if (count == n) {
+   //   return octaveadjust;
+   //} else {
+   //   // did not find the required number of modules.
+   //   return 0;
+   //}
+
+   return 0;
 }
 
 
@@ -780,7 +901,9 @@ int getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, int n,
 //
 
 int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n, 
-      int startline, int part1, int part2, int markstate) {
+      int startline, int part1, int part2, 
+      Array<Array<SigString> >& retrospective,
+      int markstate) {
 
    if (norestsQ) {
       if (notes[part1][startline].b40 == 0) {
@@ -790,6 +913,9 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
          return 0;
       }
    }
+
+   int crossing =  0;
+   int oldcrossing =  0;
 
    int octaveadjust = 0;   // used for -o option
    if (octaveQ) {
@@ -828,6 +954,7 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
    int attackcount = 0;
 
    int lastindex = -1;
+   int retroline = 0;
 
    for (i=startline; i<notes[0].getSize(); i++) {
       if ((notes[part1][i].b40 <= 0) && (notes[part2][i].b40 <= 0)) {
@@ -905,7 +1032,8 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
             notes[part1][i].mark = 1;
             notes[part2][i].mark = 1;
          } else {
-            printInterval((*outp), notes[part1][i], notes[part2][i], 
+            oldcrossing = crossing;
+            crossing = printInterval((*outp), notes[part1][i], notes[part2][i], 
                   INTERVAL_HARMONIC, octaveadjust);
          }
          if (hmarkerQ) {
@@ -918,6 +1046,7 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
 
       // if count matches n, then exit loop
       if ((count == n) && !attackQ) {
+         retroline = i;
          break;
       } else {
          if (!noharmonicQ) {
@@ -930,6 +1059,7 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
       if ((notes[part1][i].b40 > 0) && (notes[part2][i].b40 > 0)) {
          // keep track of double attacks
          if (attackcount >= n) {
+            retroline = i;
             break;
          } else {
             attackcount++;
@@ -942,15 +1072,14 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
       (*outp) << ")";
    }
 
-
    if (rawQ) {
       (*outp) << "\n";
    }
 
    if (attackQ && (attackcount == n)) {
-      return 1;
+      return retroline;
    } else if ((countm>1) && (count == n)) {
-      return 1;
+      return retroline;
    } else {
       // did not print the required number of modules.
       return 0;
@@ -969,7 +1098,7 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
 void printAsCombination(HumdrumFile& infile, int line, Array<int>& ktracks, 
     Array<int>& reverselookup, const char* interstring) {
 
-   if (rawQ || markQ || countQ) {
+   if (rawQ || markQ || retroQ || countQ) {
       return;
    }
 
@@ -1306,8 +1435,8 @@ int printLatticeModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
       if (hparenQ) {
          out << "[";
       }
-      printInterval(out, notes[part1][startline+i], notes[part2][startline+i],
-         INTERVAL_HARMONIC);
+      printInterval(out, notes[part1][startline+i], 
+         notes[part2][startline+i], INTERVAL_HARMONIC);
       if (hmarkerQ) {
          out << "h";
       }
@@ -1349,8 +1478,8 @@ int printLatticeModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
    if (hparenQ) {
      out << "[";
    }
-   printInterval(out, notes[part1][startline+n], notes[part2][startline+n],
-         INTERVAL_HARMONIC);
+   printInterval(out, notes[part1][startline+n], 
+         notes[part2][startline+n], INTERVAL_HARMONIC);
    if (hmarkerQ) {
       out << "h";
    }
@@ -1539,16 +1668,25 @@ int printLatticeItem(Array<Array<NoteNode> >& notes, int n, int currentindex,
 // printInterval --
 //
 
-void printInterval(ostream& out, NoteNode& note1, NoteNode& note2,
+int printInterval(ostream& out, NoteNode& note1, NoteNode& note2,
       int type, int octaveadjust) {
    if ((note1.b40 == REST) || (note2.b40 == REST)) {
       out << RESTSTRING;
-      return;
+      return 0;
    }
+   int cross = 0;
    int pitch1 = abs(note1.b40);
    int pitch2 = abs(note2.b40);
    int interval = pitch2 - pitch1;
-   interval = interval + octaveadjust  * 40;
+
+   if ((type == INTERVAL_HARMONIC) && (interval < 0)) {
+      cross = 1;
+      if (uncrossQ) {
+         interval = -interval;
+      }
+   } else {
+      interval = interval + octaveadjust  * 40;
+   }
 
    if ((type == INTERVAL_HARMONIC) && (octaveallQ)) {
       if (interval <= -40) {
@@ -1565,8 +1703,7 @@ void printInterval(ostream& out, NoteNode& note1, NoteNode& note2,
       }
    }
    if (base12Q && !chromaticQ) {
-      interval = Convert::base40ToMidiNoteNumber(pitch2) - 
-                 Convert::base40ToMidiNoteNumber(pitch1);
+      interval = Convert::base40ToMidiNoteNumber(interval + 40*4 + 2) - 12*5;
       if ((type == INTERVAL_HARMONIC) && (octaveallQ)) {
          if (interval <= -12) {
             interval = interval + 1200;
@@ -1583,8 +1720,7 @@ void printInterval(ostream& out, NoteNode& note1, NoteNode& note2,
       }
       interval = interval + octaveadjust  * 12;
    } else if (base7Q && !chromaticQ) {
-      interval = Convert::base40ToDiatonic(pitch2) - 
-                 Convert::base40ToDiatonic(pitch1);
+      interval = Convert::base40ToDiatonic(interval + 40*4 + 2) - 7*4;
       if ((type == INTERVAL_HARMONIC) && (octaveallQ)) {
          if (interval <= -7) {
             interval = interval + 700;
@@ -1633,6 +1769,7 @@ void printInterval(ostream& out, NoteNode& note1, NoteNode& note2,
       }
    }
 
+   return cross;
 }
 
 
@@ -2217,17 +2354,20 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("r|rhythm=b", "display rhythmic positions of notes");
    opts.define("f|filename=b", "display filenames with --count");
    opts.define("raw=b", "display only modules without formatting");
+   opts.define("c|uncross=b", "uncross crossed voices when creating modules");
+   opts.define("retro|retrospective=b", 
+                  "Retrospective module display in the score");
    opts.define("suspension|suspensions=b", "mark suspensions");
    opts.define("rows|row=b", "display lattices in row form");
    opts.define("L|interleaved-lattice=b", "display interleaved lattices");
    opts.define("q|harmonic-parentheses=b", 
-               "put square brackets around harmonic intervals");
+                  "put square brackets around harmonic intervals");
    opts.define("h|harmonic-marker=b", 
-               "put h character after harmonic intervals");
+                  "put h character after harmonic intervals");
    opts.define("m|melodic-marker=b", 
-               "put m character after melodic intervals");
+                  "put m character after melodic intervals");
    opts.define("y|melodic-parentheses=b", 
-               "put curly braces around melodic intervals");
+                  "put curly braces around melodic intervals");
    opts.define("p|parentheses=b", "put parentheses around modules intervals");
    opts.define("l|lattice=b", "calculate lattice");
    opts.define("s|sustain=b", "display sustain/attack states of notes");
@@ -2327,6 +2467,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    countQ       = opts.getBoolean("count");
    filenameQ    = opts.getBoolean("filename");
    suspensionsQ = opts.getBoolean("suspensions");
+   uncrossQ     = opts.getBoolean("uncross");
+   retroQ       = opts.getBoolean("retrospective");
    if (Chaincount < 1) {
       Chaincount = 1;
    }
@@ -2375,4 +2517,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 2abf5bbe8cc8b316649b0647532bf24b cint.cpp [20130923]
+// md5sum: 9ab7f5f4bcb7446842448bef74c01863 cint.cpp [20130927]
