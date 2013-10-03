@@ -43,11 +43,12 @@ class NoteNode {
       int measure;  // measure number of note
       int serial;   // number number 
       int mark;     // for marking search matches
+      int notemarker;  // for pass-through of marks
       double beatsize; // time signature bottom value which or
                        // 3 times the bottom if compound meter
       NoteNode(void)      { clear(); }
       void clear(void)    { mark = measure = beatsize = serial = b40 = 0; 
-                            line = spine = -1; }
+                            notemarker = 0; line = spine = -1; }
       int isRest(void)    { return b40 == 0 ? 1 : 0; }
       int isSustain(void) { return b40 < 0 ? 1 : 0; }
       int isAttack(void)  { return b40 > 0 ? 1 : 0; }
@@ -129,7 +130,7 @@ int       printCombinationsSuspensions(Array<Array<NoteNode> >& notes,
 int       printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, 
                                 int n, int startline, int part1, int part2,
                                 Array<Array<SigString> >& retrospective,
-                                int markstate = 0);
+                                char& notemarker, int markstate = 0);
 int       printCombinationModulePrepare(ostream& out, 
                                 Array<Array<NoteNode> >& notes, int n, 
                                 int startline, int part1, int part2,
@@ -183,6 +184,7 @@ int       countQ       = 0;      // used with --count option
 int       suspensionsQ = 0;      // used with --suspensions option
 int       uncrossQ     = 0;      // used with -c option
 int       retroQ       = 0;      // used with --retro option
+char      NoteMarker   = '\0';   // used with -N option
 PerlRegularExpression SearchString;
 
 
@@ -584,10 +586,14 @@ int printCombinationModulePrepare(ostream& out, Array<Array<NoteNode> >& notes,
    int count = 0;
    SSTREAM tempstream;
    int match;
+   char notemarker = '\0';
    int status = printCombinationModule(tempstream, notes, n, startline, 
-                   part1, part2, retrospective);
+                   part1, part2, retrospective, notemarker);
    if (status) { 
       tempstream << ends;
+      if ((NoteMarker != '\0') && (notemarker == NoteMarker)) {
+         out << (char)NoteMarker;
+      }
       if (searchQ) {
          // Check to see if the extracted module matches to the
          // search query.
@@ -595,14 +601,14 @@ int printCombinationModulePrepare(ostream& out, Array<Array<NoteNode> >& notes,
          if (match) {
             count++;
             if (rawQ) {
-               cout << tempstream.CSTRING;
+               out << tempstream.CSTRING;
                // newline already added somewhere previously.
                // cout << "\n";
             } else {
                // mark notes of the matched module(s) in the note array 
                // for later marking in input score.
                printCombinationModule(tempstream, notes, n, startline, 
-                   part1, part2, retrospective, MARKNOTES);
+                   part1, part2, retrospective, notemarker, MARKNOTES);
             }
          }
       } else {
@@ -902,8 +908,10 @@ int getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, int n,
 
 int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n, 
       int startline, int part1, int part2, 
-      Array<Array<SigString> >& retrospective,
+      Array<Array<SigString> >& retrospective, char& notemarker, 
       int markstate) {
+
+   notemarker = '\0';
 
    if (norestsQ) {
       if (notes[part1][startline].b40 == 0) {
@@ -924,9 +932,9 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
    }
 
    ostream *outp = &out;
-   if (rawQ && !searchQ) {
-      outp = &cout;
-   }
+   // if (rawQ && !searchQ) {
+   //    outp = &cout;
+   // }
 
    if (n + startline >= notes[0].getSize()) {
       // definitely nothing to do
@@ -1042,6 +1050,14 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
          if (hparenQ) {
            (*outp) << "]";
          }
+      }
+
+      // keep track of notemarker state
+      if (notes[part1][i].notemarker == NoteMarker) {
+         notemarker = NoteMarker;
+      }
+      if (notes[part2][i].notemarker == NoteMarker) {
+         notemarker = NoteMarker;
       }
 
       // if count matches n, then exit loop
@@ -1825,6 +1841,9 @@ void printPitchGrid(Array<Array<NoteNode> >& notes, HumdrumFile& infile) {
             cout << beat << "\t";
          }
          for (j=0; j<notes.getSize(); j++) {
+            if (notes[j][i].notemarker) {
+               cout << (char)notes[j][i].notemarker;
+            }
             cout << notes[j][i].b40;
             if (j < notes.getSize()-1) {
                cout << "\t";
@@ -1869,6 +1888,9 @@ void printPitchGrid(Array<Array<NoteNode> >& notes, HumdrumFile& infile) {
             cout << beat << "\t";
          }
          for (j=0; j<notes.getSize(); j++) {
+            if (notes[j][i].notemarker) {
+               cout << (char)notes[j][i].notemarker;
+            }
             pitch = notes[j][i].b40;
             abspitch = abs(pitch);
             if (pitch == 0) {
@@ -1919,11 +1941,17 @@ void printPitchGrid(Array<Array<NoteNode> >& notes, HumdrumFile& infile) {
          if (rhythmQ) {
             line = notes[0][i].line;
             beat = (infile[line].getBeat()-1) * notes[0][i].beatsize + 1; 
+            if (notes[j][i].notemarker) {
+               cout << (char)notes[j][i].notemarker;
+            }
             cout << infile[line].getAbsBeat() << "\t";
             cout << notes[0][i].measure << "\t";
             cout << beat << "\t";
          }
          for (j=0; j<notes.getSize(); j++) {
+            if (notes[j][i].notemarker) {
+               cout << (char)notes[j][i].notemarker;
+            }
             pitch = notes[j][i].b40;
             if (pitch == 0) {
                // print rest
@@ -1976,11 +2004,17 @@ void printPitchGrid(Array<Array<NoteNode> >& notes, HumdrumFile& infile) {
          if (rhythmQ) {
             line = notes[0][i].line;
             beat = (infile[line].getBeat()-1) * notes[0][i].beatsize + 1; 
+            if (notes[j][i].notemarker) {
+               cout << (char)notes[j][i].notemarker;
+            }
             cout << infile[line].getAbsBeat() << "\t";
             cout << notes[0][i].measure << "\t";
             cout << beat << "\t";
          }
          for (j=0; j<notes.getSize(); j++) {
+            if (notes[j][i].notemarker) {
+               cout << (char)notes[j][i].notemarker;
+            }
             pitch = notes[j][i].b40;
             abspitch = abs(pitch);
             if (pitch == 0) {
@@ -2122,6 +2156,9 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
          } else {
             ii = i;
             jj = j;
+         }
+         if (strchr(infile[ii][jj], NoteMarker) != NULL) {
+            current[index].notemarker = NoteMarker;
          }
          if (strchr(infile[ii][jj], 'r') != NULL) {
             current[index].b40 = 0;
@@ -2349,7 +2386,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
          "display pitches/intervals in base-12");
    opts.define("base-7|base7|b7|7|diatonic=b", 
          "display pitches/intervals in base-7");
-   opts.define("pitch|pitches=b", 
+   opts.define("g|grid|pitch|pitches=b", 
          "display pitch grid used to calculate modules");
    opts.define("r|rhythm=b", "display rhythmic positions of notes");
    opts.define("f|filename=b", "display filenames with --count");
@@ -2380,6 +2417,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("attacks|attack=b", 
          "start/stop module chains on pairs of note attacks");
    opts.define("z|zero=b", "display diatonic intervals with 0 offset");
+   opts.define("N|note-marker=s:@", "pass-through note marking character");
    opts.define("x|xoption=b", 
          "display attack/sustain information on harmonic intervals only");
    opts.define("n|chain=i:1", "number of sequential modules");
@@ -2469,6 +2507,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    suspensionsQ = opts.getBoolean("suspensions");
    uncrossQ     = opts.getBoolean("uncross");
    retroQ       = opts.getBoolean("retrospective");
+   NoteMarker   = 0;
+   if (opts.getBoolean("note-marker")) {
+      NoteMarker = opts.getString("note-marker")[0];
+   }
    if (Chaincount < 1) {
       Chaincount = 1;
    }
