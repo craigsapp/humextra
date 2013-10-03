@@ -1160,6 +1160,24 @@ int HumdrumRecord::hasNoteAttack(int field) {
 
 //////////////////////////////
 //
+// HumdrumRecord::isRest -- Returns if the token
+//     contains a rest ("r" character). Currently the function will
+//     assume that the data type is **kern, and does not truly
+//     recognize rests in other types of interpretations.
+//
+
+int HumdrumRecord::isRest(int field) {
+   HumdrumRecord& record = *this;
+   if (strchr(record[field], 'r') != NULL) {
+      return 1;
+   }
+   return 0;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumRecord::isOriginalClef -- returns true if a clef, but prefixed
 //     with "o" to indicate the clef in the original source.
 //
@@ -1724,6 +1742,21 @@ int HumdrumRecord::bibRecordQ(void) const {
 
 int HumdrumRecord::interpretationQ(void) const {
    if (getType() == E_humrec_data_interpretation) {
+      return 1;
+   } else {
+      return 0;
+   }
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumRecord::interpretationQ --
+//
+
+int HumdrumRecord::isExclusiveInterpretation(int index) const {
+   if (strncmp((*this)[index], "**", 2) == 0) {
       return 1;
    } else {
       return 0;

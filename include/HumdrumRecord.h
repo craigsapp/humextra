@@ -122,6 +122,10 @@ class HumdrumRecord {
       int               isEmpty            (void) const;
       int               isGlobalComment    (void) const;
       int               isBibliographic    (void) const;
+      int               isReferenceRecord  (void) const 
+                              { return isBibliographic(); }
+      int               isReference        (void) const
+                              { return isBibliographic(); }
       int               isMeasure          (void) const;
       int               isBarline          (void) const { return isMeasure(); }
       int               isLocalComment     (void) const;
@@ -131,6 +135,7 @@ class HumdrumRecord {
       int               isSpineLine        (void) { return hasSpines(); }
       int               isNullToken        (int index);
       int               hasNoteAttack      (int field);
+      int               isRest             (int field);
 
 
       int               dataQ              (void) const;
@@ -145,6 +150,9 @@ class HumdrumRecord {
 
       // Interpretation record functions:
       int               isInterpretation   (void) const;
+      int               isExclusiveInterpretation (int index) const;
+      int               isExInterp         (int index) const 
+			      { return isExclusiveInterpretation(index); }
       int               isTandem           (void) const;
       int               isSpineManipulator (int index);
       int               isSpineManipulator (void);
