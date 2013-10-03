@@ -239,7 +239,7 @@ int processFile(HumdrumFile& infile, const char* filename) {
    reverselookup.setSize(infile.getMaxTracks()+1);
    reverselookup.setAll(-1);
 
-   Array<Array<SigString>> retrospective;
+   Array<Array<SigString> > retrospective;
    if (retroQ) {
       initializeRetrospective(retrospective, infile, ktracks);
    }
