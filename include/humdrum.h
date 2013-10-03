@@ -40,6 +40,7 @@
 // support classes borrowed from sig++
    #include "SigCollection.h"
    #include "Array.h"
+   #include "SigString.h"
    #include "Options.h"
    #include "PixelColor.h"
    #include "EnvelopeString.h"
