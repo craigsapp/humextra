@@ -35,7 +35,7 @@
    #define CSTRING str()
 #endif
 
-#define EMPTY_ID -1
+#define EMPTY_ID ""
 #define REST 0
 #define RESTINT -1000000
 #define RESTSTRING "R"
@@ -45,24 +45,116 @@
 
 class NoteNode {
    public:
-      int b40;      // base-40 pitch number or 0 if a rest, negative if tied
-      int line;     // line number in original score of note
-      int spine;    // spine number in original score of note
-      int measure;  // measure number of note
-      int serial;   // serial number 
-      int id;       // id number provided by data
-      int mark;     // for marking search matches
+      int b40;         // base-40 pitch number or 0 if a rest, negative if tied
+      int line;        // line number in original score of note
+      int spine;       // spine number in original score of note
+      int measure;     // measure number of note
+      int serial;      // serial number 
+      int mark;        // for marking search matches
       int notemarker;  // for pass-through of marks
       double beatsize; // time signature bottom value which or
                        // 3 times the bottom if compound meter
-      NoteNode(void)      { clear(); }
-      void clear(void)    { mark = measure = beatsize = serial = b40 = 0; 
-                            notemarker = 0; line = spine = -1; 
-                            id = EMPTY_ID; }
+      void clear(void);
+      NoteNode(void)      { protected_id = NULL; clear(); }
+      NoteNode(NoteNode& anode);
+      NoteNode& operator=(NoteNode& anode);
+     ~NoteNode(void);
       int isRest(void)    { return b40 == 0 ? 1 : 0; }
       int isSustain(void) { return b40 < 0 ? 1 : 0; }
       int isAttack(void)  { return b40 > 0 ? 1 : 0; }
+      void setId (const char* anid);
+      const char* getIdString (void);
+      SigString&  getId       (void);
+
+   protected:
+      SigString* protected_id; // id number provided by data
 };
+
+
+NoteNode::NoteNode(NoteNode& anode) {
+   b40        = anode.b40; 
+   line       = anode.line; 
+   spine      = anode.spine; 
+   measure    = anode.measure; 
+   serial     = anode.serial; 
+   mark       = anode.mark; 
+   notemarker = anode.notemarker; 
+   beatsize   = anode.beatsize; 
+   if (anode.protected_id == NULL) {
+      protected_id = NULL;
+   } else {
+      protected_id = new SigString(*anode.protected_id);
+   }
+}
+
+
+NoteNode& NoteNode::operator=(NoteNode& anode) {
+   if (this == &anode) {
+      return *this;
+   }
+   b40        = anode.b40; 
+   line       = anode.line; 
+   spine      = anode.spine; 
+   measure    = anode.measure; 
+   serial     = anode.serial; 
+   mark       = anode.mark; 
+   notemarker = anode.notemarker; 
+   beatsize   = anode.beatsize; 
+   if (anode.protected_id == NULL) {
+      protected_id = NULL;
+   } else {
+      protected_id = new SigString(*anode.protected_id);
+   }
+   return *this;
+}
+
+
+void NoteNode::setId(const char* anid) {
+   if (protected_id == NULL) {
+      protected_id = new SigString(anid);
+   } else {
+      *protected_id = anid;
+   }
+}
+
+
+NoteNode::~NoteNode(void) {
+   if (protected_id != NULL) {
+      delete protected_id;
+      protected_id = NULL;
+   }
+}
+
+
+void NoteNode::clear(void) { 
+   mark = measure = beatsize = serial = b40 = 0; 
+   notemarker = 0; 
+   line = spine = -1; 
+   if (protected_id != NULL) {
+      delete protected_id;
+      protected_id = NULL;
+   }
+}
+
+
+const char* NoteNode::getIdString(void) { 
+   if (protected_id == NULL) {
+      return "";
+   } else {
+      return protected_id->getBase(); 
+   }
+}
+
+
+SigString& NoteNode::getId(void) {
+   if (protected_id == NULL) {
+      protected_id = new SigString("");
+   }
+ 
+   return *protected_id;
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -188,7 +280,7 @@ int       suspensionsQ = 0;      // used with --suspensions option
 int       uncrossQ     = 0;      // used with -c option
 int       retroQ       = 0;      // used with --retro option
 int       idQ          = 0;      // used with --id option
-Array<int> Ids;                  // used with --id option
+Array<SigString> Ids;            // used with --id option
 char      NoteMarker   = '\0';   // used with -N option
 PerlRegularExpression SearchString;
 
@@ -608,6 +700,9 @@ int printCombinationModulePrepare(ostream& out,
    int status = printCombinationModule(tempstream, notes, n, startline, 
                    part1, part2, retrospective, notemarker);
    if (status) { 
+      if (rawQ) {
+         tempstream << "\n";
+      }
       tempstream << ends;
       if ((NoteMarker != '\0') && (notemarker == NoteMarker)) {
          out << (char)NoteMarker;
@@ -625,9 +720,13 @@ int printCombinationModulePrepare(ostream& out,
             } else {
                // mark notes of the matched module(s) in the note array 
                // for later marking in input score.
-               printCombinationModule(tempstream, notes, n, startline, 
+               status = printCombinationModule(tempstream, notes, n, startline, 
                    part1, part2, retrospective, notemarker, MARKNOTES);
+               if (status && rawQ) {
+                  tempstream << "\n";
+               }
             }
+
          }
       } else {
          if (retroQ) {
@@ -1075,24 +1174,25 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
 
       // prepare the ids string if requested
       if (idQ) {
-         if (count == 0) {
+      //   if (count == 0) {
             // insert both first two notes, even if sustain.
             if (idstart != 0) { idstream << ':'; }
             idstart++;
-            idstream << notes[part1][i].id << ':' << notes[part2][i].id;
-         } else {
-            // only insert IDs if an attack
-            if (notes[part1][i].b40 > 0) {
-               if (idstart != 0) { idstream << ':'; }
-               idstart++;
-               idstream << notes[part1][i].id;
-            }
-            if (notes[part2][i].b40 > 0) {
-               if (idstart != 0) { idstream << ':'; }
-               idstart++;
-               idstream << notes[part2][i].id;
-            }
-         }
+            idstream << notes[part1][i].getId() << ':' 
+                     << notes[part2][i].getId();
+      //   } else {
+      //      // only insert IDs if an attack
+      //      if (notes[part1][i].b40 > 0) {
+      //         if (idstart != 0) { idstream << ':'; }
+      //         idstart++;
+      //         idstream << notes[part1][i].getId();
+      //      }
+      //      if (notes[part2][i].b40 > 0) {
+      //         if (idstart != 0) { idstream << ':'; }
+      //         idstart++;
+      //         idstream << notes[part2][i].getId();
+      //      }
+      //   }
       }
 
       // keep track of notemarker state
@@ -1134,11 +1234,6 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
    if (idQ && idstart) {
       idstream << ends;
       (*outp) << " ID:" << idstream.CSTRING;
-   }
-
-   // maybe move this elsewhere?
-   if (rawQ) {
-      (*outp) << "\n";
    }
 
    if (attackQ && (attackcount == n)) {
@@ -2123,7 +2218,11 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
    PerlRegularExpression pre;
 
    Ids.setSize(infile.getMaxTracks()+1);
-   Ids.setAll(EMPTY_ID);
+   Ids.allowGrowth(0);
+   int i, j, ii, jj;
+   for (i=0; i<Ids.getSize(); i++) {
+      Ids[i] = EMPTY_ID;
+   }
 
    Array<NoteNode> current;
    current.setSize(ktracks.getSize());
@@ -2135,7 +2234,6 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
    int sign;
    int track = 0;
    int index;
-   int i, j, ii, jj;
 
    int snum = 0;
    int measurenumber = 0;
@@ -2188,10 +2286,9 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
          }
       } else if (idQ && infile[i].isLocalComment()) {
          for (j=0; j<infile[i].getFieldCount(); j++) {
-            if (pre.search(infile[i][j], "^!ID:\\s*(\\d+)")) {
-               int id = atoi(pre.getSubmatch(1));
+            if (pre.search(infile[i][j], "^!ID:\\s*([^\\s]*)")) {
                int track = infile[i].getPrimaryTrack(j);
-               Ids[track] = id;
+               Ids[track] = pre.getSubmatch(1);
             }
          }
       }
@@ -2207,7 +2304,9 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
          }
          track = infile[i].getPrimaryTrack(j);
          index = reverselookup[track];
-         current[index].id    = Ids[track];
+         if (idQ) {
+            current[index].getId() = Ids[track];
+         }
          current[index].line  = i;
          current[index].spine = j;
          current[index].beatsize = beatsizes[track];
