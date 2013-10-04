@@ -35,31 +35,34 @@
    #define CSTRING str()
 #endif
 
-class NoteNode {
-   public:
-      int b40;      // base-40 pitch number or 0 if a rest, negative if tied
-      int line;     // line number in original score of note
-      int spine;    // spine number in original score of note
-      int measure;  // measure number of note
-      int serial;   // number number 
-      int mark;     // for marking search matches
-      int notemarker;  // for pass-through of marks
-      double beatsize; // time signature bottom value which or
-                       // 3 times the bottom if compound meter
-      NoteNode(void)      { clear(); }
-      void clear(void)    { mark = measure = beatsize = serial = b40 = 0; 
-                            notemarker = 0; line = spine = -1; }
-      int isRest(void)    { return b40 == 0 ? 1 : 0; }
-      int isSustain(void) { return b40 < 0 ? 1 : 0; }
-      int isAttack(void)  { return b40 > 0 ? 1 : 0; }
-};
-
+#define EMPTY_ID -1
 #define REST 0
 #define RESTINT -1000000
 #define RESTSTRING "R"
 #define INTERVAL_HARMONIC 1
 #define INTERVAL_MELODIC  2
 #define MARKNOTES  1
+
+class NoteNode {
+   public:
+      int b40;      // base-40 pitch number or 0 if a rest, negative if tied
+      int line;     // line number in original score of note
+      int spine;    // spine number in original score of note
+      int measure;  // measure number of note
+      int serial;   // serial number 
+      int id;       // id number provided by data
+      int mark;     // for marking search matches
+      int notemarker;  // for pass-through of marks
+      double beatsize; // time signature bottom value which or
+                       // 3 times the bottom if compound meter
+      NoteNode(void)      { clear(); }
+      void clear(void)    { mark = measure = beatsize = serial = b40 = 0; 
+                            notemarker = 0; line = spine = -1; 
+                            id = EMPTY_ID; }
+      int isRest(void)    { return b40 == 0 ? 1 : 0; }
+      int isSustain(void) { return b40 < 0 ? 1 : 0; }
+      int isAttack(void)  { return b40 > 0 ? 1 : 0; }
+};
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -184,6 +187,8 @@ int       countQ       = 0;      // used with --count option
 int       suspensionsQ = 0;      // used with --suspensions option
 int       uncrossQ     = 0;      // used with -c option
 int       retroQ       = 0;      // used with --retro option
+int       idQ          = 0;      // used with --id option
+Array<int> Ids;                  // used with --id option
 char      NoteMarker   = '\0';   // used with -N option
 PerlRegularExpression SearchString;
 
@@ -290,6 +295,19 @@ int processFile(HumdrumFile& infile, const char* filename) {
       cout << "!!!RDF**kern: @ = matched note, color=\"#ff0000\"\n";
    } 
 
+   if (debugQ) { 
+      int j;
+      for (i=0; i<retrospective[0].getSize(); i++) {
+         for (j=0; j<retrospective.getSize(); j++) {
+            cout << retrospective[j][i];
+            if (j < retrospective.getSize() - 1) {
+               cout << "\t";
+            }
+         }
+         cout << "\n";
+      }
+   }
+
    return count;
 }
 
@@ -339,14 +357,16 @@ void initializeRetrospective(Array<Array<SigString> >& retrospective,
       }
    }
 
-   for (i=0; i<retrospective[0].getSize(); i++) {
-      for (j=0; j<retrospective.getSize(); j++) {
-         cout << retrospective[j][i];
-         if (j < retrospective.getSize() - 1) {
-            cout << "\t";
+   if (debugQ) {
+      for (i=0; i<retrospective[0].getSize(); i++) {
+         for (j=0; j<retrospective.getSize(); j++) {
+            cout << retrospective[j][i];
+            if (j < retrospective.getSize() - 1) {
+               cout << "\t";
+            }
          }
+         cout << "\n";
       }
-      cout << "\n";
    }
 }
 
@@ -408,9 +428,7 @@ int  printCombinationsSuspensions(Array<Array<NoteNode> >& notes,
    countsum += printCombinations(notes, infile, ktracks, reverselookup, n,
                      retrospective);
 
-   
    // Suspensions with rests modules
-
 
    // done with multiple searches.  Mark the notes in the score if required.
 
@@ -580,9 +598,9 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
 // printCombinationModulePrepare --
 //
 
-int printCombinationModulePrepare(ostream& out, Array<Array<NoteNode> >& notes,
-       int n, int startline, int part1, int part2, 
-       Array<Array<SigString> >& retrospective) {
+int printCombinationModulePrepare(ostream& out, 
+       Array<Array<NoteNode> >& notes, int n, int startline, int part1, 
+       int part2, Array<Array<SigString> >& retrospective) {
    int count = 0;
    SSTREAM tempstream;
    int match;
@@ -922,6 +940,8 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
       }
    }
 
+   SSTREAM idstream;
+
    int crossing =  0;
    int oldcrossing =  0;
 
@@ -960,6 +980,7 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
    int count = 0;
    int countm = 0;
    int attackcount = 0;
+   int idstart = 0;
 
    int lastindex = -1;
    int retroline = 0;
@@ -1052,6 +1073,28 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
          }
       }
 
+      // prepare the ids string if requested
+      if (idQ) {
+         if (count == 0) {
+            // insert both first two notes, even if sustain.
+            if (idstart != 0) { idstream << ':'; }
+            idstart++;
+            idstream << notes[part1][i].id << ':' << notes[part2][i].id;
+         } else {
+            // only insert IDs if an attack
+            if (notes[part1][i].b40 > 0) {
+               if (idstart != 0) { idstream << ':'; }
+               idstart++;
+               idstream << notes[part1][i].id;
+            }
+            if (notes[part2][i].b40 > 0) {
+               if (idstart != 0) { idstream << ':'; }
+               idstart++;
+               idstream << notes[part2][i].id;
+            }
+         }
+      }
+
       // keep track of notemarker state
       if (notes[part1][i].notemarker == NoteMarker) {
          notemarker = NoteMarker;
@@ -1088,6 +1131,12 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
       (*outp) << ")";
    }
 
+   if (idQ && idstart) {
+      idstream << ends;
+      (*outp) << " ID:" << idstream.CSTRING;
+   }
+
+   // maybe move this elsewhere?
    if (rawQ) {
       (*outp) << "\n";
    }
@@ -2073,6 +2122,9 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
 
    PerlRegularExpression pre;
 
+   Ids.setSize(infile.getMaxTracks()+1);
+   Ids.setAll(EMPTY_ID);
+
    Array<NoteNode> current;
    current.setSize(ktracks.getSize());
   
@@ -2114,8 +2166,7 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
          for (j=0; j<notes.getSize(); j++) {
             notes[j].append(current[j]);
          }
-      }
-      if (infile[i].isInterpretation()) {
+      } else if (infile[i].isInterpretation()) {
          // search for time signatures from which to extract beat information.
          for (j=0; j<infile[i].getFieldCount(); j++) {
             track = infile[i].getPrimaryTrack(j);
@@ -2135,10 +2186,20 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
                beatsizes[track] = 2.0 / 4.0;
             }
          }
+      } else if (idQ && infile[i].isLocalComment()) {
+         for (j=0; j<infile[i].getFieldCount(); j++) {
+            if (pre.search(infile[i][j], "^!ID:\\s*(\\d+)")) {
+               int id = atoi(pre.getSubmatch(1));
+               int track = infile[i].getPrimaryTrack(j);
+               Ids[track] = id;
+            }
+         }
       }
+       
       if (!infile[i].isData()) {
          continue;
       }
+
       for (j=0; j<infile[i].getFieldCount(); j++) {
          sign = 1;
          if (!infile[i].isExInterp(j, "**kern")) {
@@ -2146,6 +2207,7 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
          }
          track = infile[i].getPrimaryTrack(j);
          index = reverselookup[track];
+         current[index].id    = Ids[track];
          current[index].line  = i;
          current[index].spine = j;
          current[index].beatsize = beatsizes[track];
@@ -2396,6 +2458,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
                   "Retrospective module display in the score");
    opts.define("suspension|suspensions=b", "mark suspensions");
    opts.define("rows|row=b", "display lattices in row form");
+   opts.define("id=b", "ids are echoed in module data");
    opts.define("L|interleaved-lattice=b", "display interleaved lattices");
    opts.define("q|harmonic-parentheses=b", 
                   "put square brackets around harmonic intervals");
@@ -2455,7 +2518,6 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       exit(0);
    }
 
-
    // dispay as base-7 by default
    base7Q = 1;
 
@@ -2502,6 +2564,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    Chaincount   = opts.getInteger("n");
    searchQ      = opts.getBoolean("search");
    markQ        = opts.getBoolean("mark");
+   idQ          = opts.getBoolean("id");
    countQ       = opts.getBoolean("count");
    filenameQ    = opts.getBoolean("filename");
    suspensionsQ = opts.getBoolean("suspensions");
