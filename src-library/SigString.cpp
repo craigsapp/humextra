@@ -169,12 +169,22 @@ int SigString::operator==(const SigString& aString) {
 }
 
 
+int SigString::operator!=(const SigString& aString) { 
+   return !(*this == aString);
+}
+
+
 int SigString::operator==(const Array<char>& aString) { 
    if (strcmp(getBase(), aString.getBase()) == 0) {
       return 1;
    } else {
       return 0;
    }
+}
+
+
+int SigString::operator!=(const Array<char>& aString) { 
+   return !(*this == aString);
 }
 
 
@@ -186,6 +196,9 @@ int SigString::operator==(const char* cstring) {
    }
 }
 
+int SigString::operator!=(const char* cstring) { 
+   return !(*this == cstring);
+}
 
 
 //////////////////////////////

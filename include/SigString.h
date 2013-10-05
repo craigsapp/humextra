@@ -46,6 +46,10 @@ class SigString : public Array<char> {
       int        operator==        (const Array<char>& aString);
       int        operator==        (const char* aString);
 
+      int        operator!=        (const SigString& aString);
+      int        operator!=        (const Array<char>& aString);
+      int        operator!=        (const char* aString);
+
       SigString& operator=         (const SigString& aString);
       SigString& operator=         (Array<char>& aString);
       SigString& operator=         (const char* cstring);
