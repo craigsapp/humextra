@@ -2367,6 +2367,11 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
             if (notes[j][i].isAttack()) {
                continue;
             }
+            if (notes[j][i].getId().getSize() > 0) {
+               // allow for Ids on sustained notes which probably means
+               // that there is a written tied note in the music.
+               continue;
+            }
             if (notes[j][i].getB40() == notes[j][i-1].getB40()) {
                notes[j][i].getId() = notes[j][i-1].getId();
             }
