@@ -243,8 +243,12 @@ vpath %.cpp   $(SRCDIR)
 PROGS1=$(notdir $(patsubst %.cpp,%,$(wildcard $(SRCDIR)/*.cpp)))
 PROGS=$(PROGS1)
 
+# Prepare a list of scripts to link into bin directory.
+SCRIPTS_PERL=$(wildcard scripts/perl/*)
+SCRIPTS=$(SCRIPTS_PERL)
+
 # Targets which don't actually refer to files
-.PHONY : bin src-programs src-library include obj bin-win obj-win
+.PHONY : bin scripts src-programs src-library include obj bin-win obj-win
 
 
 ###########################################################################
@@ -252,7 +256,7 @@ PROGS=$(PROGS1)
 #                                                                         #
 
 examples: all
-all: bin $(addprefix $(TARGDIR)/,$(PROGS))
+all: bin scripts $(addprefix $(TARGDIR)/,$(PROGS))
 	@echo Finished compiling all programs.
 
 info:
@@ -262,6 +266,11 @@ bin:
 ifeq ($(wildcard $(TARGDIR)),)
 	-mkdir -p $(TARGDIR)
 endif
+
+# link all scripts into the bin directory
+scripts: 
+	for i in $(SCRIPTS); do ln -s ../$$i bin/`basename $$i`; done
+
 
 ###########################################################################
 # 

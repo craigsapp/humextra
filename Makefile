@@ -14,7 +14,7 @@
 ##
 
 # targets which don't actually refer to files
-.PHONY : src-programs lib src-library include bin update libupdate updatelib libup uplib
+.PHONY : src-programs lib src-library include bin scripts update libupdate updatelib libup uplib
 
 ###########################################################################
 #                                                                         #
@@ -56,6 +56,9 @@ uplib: library-update
 libup: library-update
 library-update:
 	$(MAKE) -f Makefile.library library
+
+scripts:
+	$(MAKE) -f Makefile.programs scripts
 
 clean:
 	$(MAKE) -f Makefile.library clean
