@@ -62,6 +62,7 @@ class NoteNode {
       int isRest(void)    { return b40 == 0 ? 1 : 0; }
       int isSustain(void) { return b40 < 0 ? 1 : 0; }
       int isAttack(void)  { return b40 > 0 ? 1 : 0; }
+      int getB40(void)    { return abs(b40); }
       void setId (const char* anid);
       const char* getIdString (void);
       SigString&  getId       (void);
@@ -2306,6 +2307,7 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
          index = reverselookup[track];
          if (idQ) {
             current[index].getId() = Ids[track];
+            Ids[track] = "";  // don't assign to next item;
          }
          current[index].line  = i;
          current[index].spine = j;
@@ -2357,6 +2359,21 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
          notes[j].append(current[j]);
       }
    }
+
+   // attach ID tag to all sustain sections of notes
+   if (idQ) {
+      for (j=0; j<notes.getSize(); j++) {
+         for (i=1; i<notes[j].getSize(); i++) {
+            if (notes[j][i].isAttack()) {
+               continue;
+            }
+            if (notes[j][i].getB40() == notes[j][i-1].getB40()) {
+               notes[j][i].getId() = notes[j][i-1].getId();
+            }
+         }
+      }
+   }
+
 }
 
 
