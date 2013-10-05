@@ -269,7 +269,7 @@ endif
 
 # link all scripts into the bin directory
 scripts: 
-	for i in $(SCRIPTS); do ln -s ../$$i bin/`basename $$i`; done
+	-for i in $(SCRIPTS); do ln -s ../$$i bin/`basename $$i`; done
 
 
 ###########################################################################
