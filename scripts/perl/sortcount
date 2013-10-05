@@ -1,0 +1,69 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Sat Apr  6 23:09:41 PDT 2013
+# Last Modified: Sat Apr  6 23:52:28 PDT 2013
+# Filename:      /tmp/sortcount
+# Syntax:        perl 5
+#
+# Description:   shorthand for the pipeline:
+# 			sort | uniq -c | sort -nr
+#
+
+use strict;
+use Getopt::Long;
+
+my $alphabeticQ = 0;  # sort output lines alphabetically
+my $percentQ    = 0;  # show counts as percentages
+my $fractionQ   = 0;  # show counts as fractions
+my $totalQ      = 0;  # show total count of input lines
+my $smallQ      = 0;  # sort by smallest numbers first
+my $humdrumQ    = 0;  # output data in Humdrum file format
+
+Getopt::Long::Configure("bundling");
+GetOptions (
+   'a|alphabetic'	=> \$alphabeticQ,
+   'p|percent'		=> \$percentQ,
+   'f|fraction'		=> \$fractionQ,
+   't|totalQ'		=> \$totalQ,
+   's|smallQ'		=> \$smallQ,
+   'h|humdrum'		=> \$humdrumQ,
+);
+
+my @contents = <>;
+
+my (%unique, $line, @output, $sum, $key, @output2, $value, @keys);
+
+foreach $line (@contents) {
+   $unique{$line}++;
+}
+@keys = keys %unique;
+@keys = sort @keys if $alphabeticQ;
+foreach $key (@keys) {
+   $sum += $unique{$key};
+   $output[@output] = $key;
+}
+if    ($humdrumQ && $percentQ)  { print "**pcent\t**data\n"; } 
+elsif ($humdrumQ && $fractionQ) { print "**frac\t**data\n";    } 
+elsif ($humdrumQ)               { print "**count\t**data\n";   }
+   
+foreach $key (@keys) {
+   if    ($percentQ)  { $value = int(10000.0*$unique{$key}/$sum + 0.5)/100.0; } 
+   elsif ($fractionQ) { $value = int(1000.0*$unique{$key}/$sum + 0.5)/1000.0; }
+   else               { $value = $unique{$key}; }
+   $output2[@output2] =  "$value\t$key";
+}
+if ($smallQ && !$alphabeticQ) {
+   @output2 = sort { $a <=> $b } @output2;
+} elsif (!$alphabeticQ) {
+   @output2 = sort { $b <=> $a } @output2;
+}
+print join("", @output2);
+
+print "*-\t*-\n" if $humdrumQ;
+if ($totalQ) {
+   print "!!" if $humdrumQ;
+   print "TOTAL:\t$sum\n";
+}
+
+
