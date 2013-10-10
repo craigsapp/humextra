@@ -2077,6 +2077,14 @@ void extractPitchSequence(Array<int>& pitches, HumdrumFile& infile,
       }
    }
 
+   if (debugQ) {
+      cout << "PITCHES: ";
+      for (i=0; i<pitches.getSize(); i++) {
+         cout << pitches[i] << " ";
+      }
+      cout << endl;
+   }
+
 }
 
 
@@ -2426,4 +2434,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: f7fb086c7bfddd0605ff7a6c11106fd3 tindex.cpp [20130531]
+// md5sum: 1518b9f37f3df3743bdd8b85c637067f tindex.cpp [20131009]
