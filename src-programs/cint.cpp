@@ -54,6 +54,7 @@ class NoteNode {
       int notemarker;  // for pass-through of marks
       double beatsize; // time signature bottom value which or
                        // 3 times the bottom if compound meter
+      RationalNumber duration;  // duration
       void clear(void);
       NoteNode(void)      { protected_id = NULL; clear(); }
       NoteNode(NoteNode& anode);
@@ -81,6 +82,7 @@ NoteNode::NoteNode(NoteNode& anode) {
    mark       = anode.mark; 
    notemarker = anode.notemarker; 
    beatsize   = anode.beatsize; 
+   duration   = 0;
    if (anode.protected_id == NULL) {
       protected_id = NULL;
    } else {
@@ -101,6 +103,7 @@ NoteNode& NoteNode::operator=(NoteNode& anode) {
    mark       = anode.mark; 
    notemarker = anode.notemarker; 
    beatsize   = anode.beatsize; 
+   duration   = anode.duration;
    if (anode.protected_id == NULL) {
       protected_id = NULL;
    } else {
@@ -249,7 +252,8 @@ int       base40Q      = 0;      // used with --40 option
 int       base12Q      = 0;      // used with --12 option
 int       base7Q       = 0;      // used with -7 option
 int       pitchesQ     = 0;      // used with --pitches option
-int       rhythmQ      = 0;      // used with -r option
+int       rhythmQ      = 0;      // used with -r option and others
+int       durationQ    = 0;      // used with --dur option
 int       latticeQ     = 0;      // used with -l option
 int       interleavedQ = 0;      // used with -L option
 int       Chaincount   = 1;      // used with -n option
@@ -300,7 +304,7 @@ int main(int argc, char** argv) {
       count = processFile(infile, infile.getFileName());
       totalcount += count;
       if (countQ) {
-         if (filenameQ) {
+         if (filenameQ && (count > 0)) {
             cout << infile.getFileName() << "\t";
             cout << count << endl;
          }
@@ -342,7 +346,7 @@ int processFile(HumdrumFile& infile, const char* filename) {
       initializeRetrospective(retrospective, infile, ktracks);
    }
 
-   if (rhythmQ) {
+   if (rhythmQ || durationQ) {
       infile.analyzeRhythm("4");
    }
 
@@ -1165,6 +1169,16 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
             crossing = printInterval((*outp), notes[part1][i], notes[part2][i], 
                   INTERVAL_HARMONIC, octaveadjust);
          }
+
+         if (durationQ) {
+            if (notes[part1][i].isAttack()) {
+               (*outp) << "D" << notes[part1][i].duration;
+            }
+            if (notes[part2][i].isAttack()) {
+               (*outp) << "d" << notes[part1][i].duration;
+            }
+         }
+      
          if (hmarkerQ) {
             (*outp) << "h";
          }
@@ -2344,6 +2358,9 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
          current[index].b40 *= sign;
          if (sign > 0) {
             current[index].serial = ++snum;
+            if (durationQ) { 
+               current[index].duration = infile.getTiedDurationR(ii, jj);
+            }
          }
       }
       if (onlyRests(current) && onlyRests(notes.last())) {
@@ -2579,6 +2596,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
                   "Retrospective module display in the score");
    opts.define("suspension|suspensions=b", "mark suspensions");
    opts.define("rows|row=b", "display lattices in row form");
+   opts.define("dur|duration=b", 
+          "display durations appended to harmonic interval note attacks");
    opts.define("id=b", "ids are echoed in module data");
    opts.define("L|interleaved-lattice=b", "display interleaved lattices");
    opts.define("q|harmonic-parentheses=b", 
@@ -2662,6 +2681,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    pitchesQ     = opts.getBoolean("pitches");
    debugQ       = opts.getBoolean("debug");
    rhythmQ      = opts.getBoolean("rhythm");
+   durationQ    = opts.getBoolean("duration");
    latticeQ     = opts.getBoolean("lattice");
    sustainQ     = opts.getBoolean("sustain");
    topQ         = opts.getBoolean("top");
@@ -2743,4 +2763,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 9ab7f5f4bcb7446842448bef74c01863 cint.cpp [20130927]
+// md5sum: eca8bb4606a56d4264da010dbea79943 cint.cpp [20131009]
