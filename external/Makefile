@@ -32,6 +32,7 @@ else
 endif
 
 pcre:
+	(cd $(PCRE); autoreconf -vi)
 	(cd $(PCRE); ./configure)
 	(cd $(PCRE); $(MAKE))
 	-mkdir ../lib
