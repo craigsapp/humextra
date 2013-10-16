@@ -42,11 +42,15 @@ void      example              (void);
 void      usage                (const char* command);
 void      processFile          (HumdrumFile& infile, const char* filename);
 int       getVoiceCount        (HumdrumFile& infile, int line);
+void      printExclusiveInterpretation(void);
+void      printAnalysis        (HumdrumFile& infile, int line);
 
 
 // global variables
 Options   options;             // database for command-line arguments
-int       debugQ       = 0;      // used with --debug option
+int       debugQ       = 0;    // used with --debug option
+int       appendQ      = 0;    // used with -a option
+int       prependQ     = 0;    // used with -p option
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -60,7 +64,8 @@ int main(int argc, char** argv) {
    while (streamer.read(infile)) {
       processFile(infile, infile.getFileName());
    }
-
+  
+   return 0;
 }
 
 
@@ -75,28 +80,62 @@ int main(int argc, char** argv) {
 void processFile(HumdrumFile& infile, const char* filename) {
    int i;
    for (i=0; i<infile.getNumLines(); i++) {
+      if (appendQ) { cout << infile[i]; }
       if (infile[i].isData()) {
-         cout << infile[i] << "\t";
-         cout << getVoiceCount(infile, i);
-         cout << "\n";
+         if (appendQ)  { cout << '\t'; }
+         printAnalysis(infile, i);
+         if (prependQ) { cout << '\t'; }
+         if (appendQ)  { cout << '\n'; }
       } else if (infile[i].isInterpretation()) {
-         cout << infile[i] << "\t";
+         if (appendQ)  { cout << '\t'; }
          if (strcmp(infile[i][0], "*-") == 0) {
             cout << "*-";
          } else if (strncmp(infile[i][0], "**", 2) == 0) {
-            cout << "**vcount";
+            printExclusiveInterpretation();
          } else {
             cout << "*";
          }
-         cout << "\n";
+         if (prependQ) { cout << '\t'; }
+         if (appendQ)  { cout << '\n'; }
       } else if (infile[i].isBarline()) {
-         cout << infile[i] << "\t" << infile[i][0] << "\n";
+         if (appendQ)  { cout << '\t'; }
+         cout << infile[i][0];
+         if (prependQ) { cout << '\t'; }
+         if (appendQ)  { cout << '\n'; }
       } else if (infile[i].isLocalComment()) {
-         cout << infile[i] << "\t!\n";
+         if (appendQ)  { cout << '\t'; }
+         cout << infile[i] << "!";
+         if (prependQ) { cout << '\t'; }
+         if (appendQ)  { cout << '\n'; }
       } else {
-         cout << infile[i] << "\n";
+         if (!(appendQ || prependQ)) { cout << infile[i]; }
+         if (appendQ)  { cout << '\n'; }
       }
+      if (prependQ) { cout << infile[i]; }
+      if (!appendQ) { cout << '\n'; }
    }
+}
+
+
+
+//////////////////////////////
+//
+// printAnalysis --
+//
+
+void printAnalysis(HumdrumFile& infile, int line) {
+   cout << getVoiceCount(infile, line);
+}
+
+
+
+//////////////////////////////
+//
+// printExclusiveInterpretation --
+//
+
+void printExclusiveInterpretation(void) {
+   cout << "**vcount";
 }
 
 
@@ -136,6 +175,8 @@ int getVoiceCount(HumdrumFile& infile, int line) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
+   opts.define("a|append=b", "append analysis data to input"); 
+   opts.define("p|prepend=b", "prepend analysis data to input"); 
 
    opts.define("debug=b");              // determine bad input line num
    opts.define("author=b");             // author of program
@@ -162,7 +203,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       exit(0);
    }
 
+   appendQ    = opts.getBoolean("append");
+   prependQ   = opts.getBoolean("prepend");
 
+   if (appendQ) {
+      // mutually exclusive options
+      prependQ = 0;
+   }
 
 }
 
