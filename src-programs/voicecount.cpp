@@ -659,11 +659,11 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       }
    }
 
-   if (!allQ) {
+   if (uniqueQ) {
       // if unique, then set to fortyQ if none of the
       // pitch systems are given.
       if (!(twelveQ || fortyQ || sevenQ)) {
-         noteQ = 1;
+         fortyQ = 1;
       }
    }
 
