@@ -115,6 +115,55 @@ int HumdrumStream::read(HumdrumFile& infile) {
 
 //////////////////////////////
 //
+// HumdrumStream::eof -- returns true if there is no more segements
+//     to read from the input source(s).
+//
+
+int HumdrumStream::eof(void) {
+   istream* newinput = NULL;
+
+   if (!urlbuffer.eof()) {
+      // If the URL buffer is at its end, clear the buffer.
+      return 0;
+   }
+   // Read HumdrumFile contents from:
+   // (1) Current ifstream if open
+   // (2) Next filename if ifstream is done
+   // (3) cin if no ifstream open and no filenames
+
+   // (1) Is an ifstream open?, then yes, there is more data to read.
+   if (instream.is_open() && !instream.eof()) {
+      return 0;
+   } 
+
+   // (1b) Is the URL data buffer open?
+   else if (urlbuffer.str() != "") {
+      return 0;
+   }
+
+   // (2) If ifstream is closed but there is a file to be processed,
+   // load it into the ifstream and start processing it immediately.
+   else if ((filelist.getSize() > 0) && (curfile < filelist.getSize()-1)) {
+      return 0;
+   } else {
+      // no input fstream open and no list of files to process, so
+      // start (or continue) reading from standard input.
+      if (curfile < 0) {
+         // but only read from cin if no files have previously been read
+         newinput = &cin;
+      }
+      if ((newinput != NULL) && newinput->eof()) {
+         return 1;
+      }
+   }
+
+   return 1;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumStream::getFile -- fills a HumdrumFile class with content
 //    from the input stream or next input file in the list.  Returns
 //    true if content was extracted, fails if there is no more HumdrumFiles
