@@ -5,6 +5,7 @@
 // Last Modified: Tue Sep 13 13:33:52 PDT 2011 added -k option
 // Last Modified: Thu Sep 15 01:36:49 PDT 2011 added -D option
 // Last Modified: Thu Oct 20 22:23:27 PDT 2011 fixed init bug
+// Last Modified: Sun Oct 20 17:41:10 PDT 2013 fixed tie problem
 // Filename:      ...sig/examples/all/notearray.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/notearray.cpp
 // Syntax:        C++; museinfo
@@ -115,7 +116,7 @@ int       kerntieQ  = 1;       // used with --no-tie option
 int       doubletieQ= 0;       // used with -T option
 RationalNumber Absoffset;      // used with --sa option
 
-const char* commentStart = "#";
+const char* commentStart = "%";
 const char* commentStop  = "";
 const char* mathvar  = "data"; // used with --mathematica option
 const char* beatbase = "";     // used with -t option
@@ -172,7 +173,7 @@ int main(int argc, char** argv) {
          } else if (humdrumQ) {
             cout << "!!!!!!!!!!\n";         
          } else {
-            cout << "##########\n";
+            cout << "%%%%%%%%%%\n";
          }
       }
    }
@@ -285,6 +286,12 @@ void getNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
          } else {
             ii = i;
             jj = j;
+            if (strchr(infile[ii][jj], '_') != NULL) { 
+               attack = -1;
+            }
+            if (strchr(infile[ii][jj], ']') != NULL) { 
+               attack = -1;
+            }
          }
          int baseval = Convert::kernToBase40(infile[ii][jj]);
          baseval += 40 * octadj;
@@ -1076,7 +1083,7 @@ void printExclusiveInterpretations(int basecount) {
 
    char basename[1024] = {0};
 
-   const char* prefix = "##";
+   const char* prefix = "%%";
    if (humdrumQ || mathQ) {
       prefix = "**";
    } 
@@ -1336,7 +1343,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    commentStop  = " *)";
 
    if (!mathQ) {
-      commentStart = "# ";
+      commentStart = "% ";
       commentStop  = "";
    }
 
