@@ -245,7 +245,6 @@ void doSearch(const char* searchstring, HumdrumFile& infile,
             printPreInfo(filename, infile, measure, i, column);
             if (!quietQ) {
                // marker xyga
-               cout << infile[i];
                if (nullQ) {
                   printDitto(infile, i);
                } else {
