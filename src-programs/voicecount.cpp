@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Oct  9 18:44:49 PDT 2013
-// Last Modified: Wed Oct  9 18:44:52 PDT 2013
+// Last Modified: Thu Oct 24 12:26:05 PDT 2013 Finished initial set of options
 // Filename:      ...museinfo/examples/all/voicecount.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/voicecount.cpp
 // Syntax:        C++; museinfo
@@ -14,26 +14,6 @@
 #include <stdlib.h>
 #include "PerlRegularExpression.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-
-
 ///////////////////////////////////////////////////////////////////////////
 
 // function declarations
@@ -42,35 +22,70 @@ void      example              (void);
 void      usage                (const char* command);
 void      processFile          (HumdrumFile& infile, const char* filename);
 int       getVoiceCount        (HumdrumFile& infile, int line);
+int       getNoteCount         (HumdrumFile& infile, int line);
 void      printExclusiveInterpretation(void);
-void      printAnalysis        (HumdrumFile& infile, int line);
-
+int       doAnalysis           (HumdrumFile& infile, int line);
+int       isAttack             (const char* token);
+void      printMeasureData     (Array<int>& analysis, HumdrumFile& infile, 
+                                int line);
+void      printSummary         (Array<double>& Summary);
+int       isValidFile          (HumdrumFile& infile);
 
 // global variables
 Options   options;             // database for command-line arguments
 int       debugQ       = 0;    // used with --debug option
 int       appendQ      = 0;    // used with -a option
 int       prependQ     = 0;    // used with -p option
-
+int       spineQ       = 0;    // used with -s option
+int       pcQ          = 0;    // used with --pc option
+int       twelveQ      = 0;    // used with --12 option
+int       fortyQ       = 0;    // used with --40 option
+int       sevenQ       = 0;    // used with -7 option
+int       attackQ      = 0;    // used with --attack option
+int       trackQ       = 0;    // used with --track option
+int       allQ         = 0;    // used with --all option
+int       measureQ     = 0;    // used with -m option
+int       mdurQ        = 0;    // used with -M option
+int       noteQ        = 0;    // used with -n option
+int       kernQ        = 0;    // used with -k option
+int       nograceQ     = 0;    // used with -G option
+int       validQ       = 0;    // used with -v option
+int       summaryQ     = 0;    // used with --summary option
+Array<double> Summary;         // used with --summary option
+int       SEGMENTS     = 0;    // used if there are more than one segment.
 
 ///////////////////////////////////////////////////////////////////////////
-
 
 int main(int argc, char** argv) {
    checkOptions(options, argc, argv);
    HumdrumStream streamer(options.getArgList());
    HumdrumFile infile;
 
+   if (summaryQ) {
+      Summary.setSize(1000);
+      Summary.setAll(0);
+   }
+
    while (streamer.read(infile)) {
+cout << "GOT HERE XXX" << endl;
+      if (!streamer.eof()) {
+cout << "GOT HERE YYY" << endl;
+         // if there are multiple segments, store a segement marker
+         // for each segment.  Do not store if only a single segment,
+         // unless --segement option is given.
+         SEGMENTS = 1;
+      }
       processFile(infile, infile.getFileName());
+   }
+
+   if (summaryQ) {
+      printSummary(Summary);
    }
   
    return 0;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////
-
 
 //////////////////////////////
 //
@@ -79,11 +94,62 @@ int main(int argc, char** argv) {
 
 void processFile(HumdrumFile& infile, const char* filename) {
    int i;
+   if (SEGMENTS && !summaryQ) {
+      cout << "!!!!SEGMENT: " << infile.getFileName() << endl;
+   }
+
+   if (debugQ) {
+      cout << "!! file: " << infile.getFileName() << endl;
+   }
+   if (validQ && !isValidFile(infile)) {
+      return;
+   }
+
+   if (kernQ) {
+      Array<int> ktracks;
+      infile.getTracksByExInterp(ktracks, "**kern");
+      cout << ktracks.getSize() << endl;
+      return;
+   }
+
+   if (mdurQ || summaryQ || nograceQ) {
+      infile.analyzeRhythm("4");
+   }
+
+   Array<int> analysis(infile.getNumLines());
+   analysis.setAll(0);
+   analysis.allowGrowth(0);
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isData()) {
+         continue;
+      }
+      analysis[i] = doAnalysis(infile, i);
+   }
+
+   if (summaryQ) {
+      return;
+   }
+
+   // print analysis:
+
+   int firstdata = 1;
+   PerlRegularExpression pre;
    for (i=0; i<infile.getNumLines(); i++) {
       if (appendQ) { cout << infile[i]; }
       if (infile[i].isData()) {
          if (appendQ)  { cout << '\t'; }
-         printAnalysis(infile, i);
+         if (measureQ && firstdata) {
+            printMeasureData(analysis, infile, i);
+            firstdata = 0;
+         } else if (measureQ) {
+            cout << ".";
+         } else {
+            if (nograceQ && (infile[i].getDuration() == 0)) {
+               cout << ".";
+            } else {
+               cout << analysis[i];
+            }
+         }
          if (prependQ) { cout << '\t'; }
          if (appendQ)  { cout << '\n'; }
       } else if (infile[i].isInterpretation()) {
@@ -98,13 +164,16 @@ void processFile(HumdrumFile& infile, const char* filename) {
          if (prependQ) { cout << '\t'; }
          if (appendQ)  { cout << '\n'; }
       } else if (infile[i].isBarline()) {
+         if (pre.search(infile[i][0], "\\d")) {
+            firstdata = 1;
+         } 
          if (appendQ)  { cout << '\t'; }
          cout << infile[i][0];
          if (prependQ) { cout << '\t'; }
          if (appendQ)  { cout << '\n'; }
       } else if (infile[i].isLocalComment()) {
          if (appendQ)  { cout << '\t'; }
-         cout << infile[i] << "!";
+         cout << "!";
          if (prependQ) { cout << '\t'; }
          if (appendQ)  { cout << '\n'; }
       } else {
@@ -120,11 +189,104 @@ void processFile(HumdrumFile& infile, const char* filename) {
 
 //////////////////////////////
 //
-// printAnalysis --
+// isValidFile --
 //
 
-void printAnalysis(HumdrumFile& infile, int line) {
-   cout << getVoiceCount(infile, line);
+int isValidFile(HumdrumFile& infile) {
+   int actual;
+   PerlRegularExpression pre;
+   Array<int> ktracks;
+   infile.getTracksByExInterp(ktracks, "**kern");
+   actual = ktracks.getSize();
+   int i;
+   int target = -1;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (pre.search(infile[i][0], "!!+voices\\s*:\\s*(\\d+)")) {
+         target = atoi(pre.getSubmatch(1));
+         break;
+      }
+   }
+
+   if (target < 0) {
+      // no !!voices: line, so presum valid
+      return 1;
+   }
+
+   if (target == actual) {
+      return 1;
+   } else {
+      return 0;
+   }
+
+}
+
+
+
+//////////////////////////////
+//
+// printMeasureData -- Sum the analysis data from the current line
+//     until the next measure which contains a measure number.
+//
+
+void printMeasureData(Array<int>& analysis, HumdrumFile& infile, int line) {
+   int i;
+   PerlRegularExpression pre;
+   RationalNumber startdur;
+   RationalNumber enddur;
+
+   if (mdurQ) {
+      startdur = infile[line].getAbsBeatR();
+      enddur   = infile[infile.getNumLines()-1].getAbsBeatR();
+   }
+   int sum = 0;
+   for (i=line; i<infile.getNumLines(); i++) {
+      if (infile[i].isMeasure()) {
+         if (pre.search(infile[i][0], "\\d")) {
+            if (mdurQ) {
+               enddur = infile[i].getAbsBeatR();
+            }
+            break;
+         }
+      }
+      if (!infile[i].isData()) { 
+         continue;
+      }
+      if (nograceQ && (infile[i].getDuration() == 0)) {
+         continue;
+      }
+      sum += analysis[i];
+   }
+   if (mdurQ) {
+      RationalNumber duration;
+      duration = enddur - startdur;
+      duration.printTwoPart(cout);
+      cout << ":";
+   }
+   cout << sum;
+}
+
+
+
+//////////////////////////////
+//
+// doAnalysis --
+//
+
+int doAnalysis(HumdrumFile& infile, int line) {
+   int value = 0.0;
+
+   if (nograceQ && (infile[line].getDuration() == 0.0)) {
+      return -1;
+   }
+   if (noteQ || twelveQ || fortyQ || sevenQ) {
+      value = getNoteCount(infile, line); 
+   } else {
+      value = getVoiceCount(infile, line);
+   }
+   if (summaryQ) {
+      Summary[value] += infile.getDuration(line);
+   }
+   return value;
 }
 
 
@@ -135,7 +297,39 @@ void printAnalysis(HumdrumFile& infile, int line) {
 //
 
 void printExclusiveInterpretation(void) {
-   cout << "**vcount";
+   if (noteQ) {
+      if (allQ) {
+         cout << "**p#";
+      } else {
+         cout << "**up#";
+      }
+   } else if (twelveQ) {
+      if (pcQ) { 
+         cout << "**12pc#"; 
+      } else if (allQ) {
+         cout << "**12p#"; 
+      } else {
+         cout << "**12up#"; 
+      }
+   } else if (fortyQ) {
+      if (pcQ) { 
+         cout << "**40pc#"; 
+      } else if (allQ) {
+         cout << "**40p#"; 
+      } else {
+         cout << "**40up#"; 
+      }
+   } else if (sevenQ) {
+      if (pcQ) { 
+         cout << "**7pc#"; 
+      } else if (allQ) {
+         cout << "**7p#"; 
+      } else {
+         cout << "**7up#"; 
+      }
+   } else {
+      cout << "**v#";
+   }
 }
 
 
@@ -146,9 +340,79 @@ void printExclusiveInterpretation(void) {
 //
 
 int getVoiceCount(HumdrumFile& infile, int line) {
-   int j;
+   int i, j, k;
    int ii, jj;
    int count = 0;
+   int track;
+   int acount;
+   Array<int> tracks(infile.getMaxTracks()+1);
+   Array<Array<char> > tokens;
+   tracks.setAll(0);
+   tracks.allowGrowth(0);
+   for (j=0; j<infile[line].getFieldCount(); j++) {
+      if (!infile[line].isExInterp(j, "**kern")) {
+         continue;
+      }
+      ii = line;
+      jj = j;
+      if (attackQ && (strcmp(infile[line][j], ".") == 0)) {
+         continue;
+      }
+      if (infile[line].isNullToken(j)) {
+        ii = infile[line].getDotLine(j);
+        if (ii < 0) { continue; }  // . at start of data spine
+        jj = infile[line].getDotSpine(j);
+        if (jj < 0) { continue; }  // . at start of data spine
+      }
+      if (strchr(infile[ii][jj], 'r') != NULL) {
+         continue;
+      }
+      if (attackQ) {
+         infile[ii].getTokens(tokens, jj);
+         acount = 0;
+         for (k=0; k<tokens.getSize(); k++) {
+            if (isAttack(tokens[k].getBase())) {
+               acount++;
+            } 
+         }
+         if (acount == 0) {
+            continue;
+         }
+      }
+      if (trackQ) {
+         track = infile[ii].getPrimaryTrack(jj);
+         tracks[track]++;
+      } else {
+         count++;
+      }
+   }
+
+   if (trackQ) {
+      count = 0;
+      for (i=1; i<tracks.getSize(); i++) {
+         if (tracks[i]) {
+            count++;
+         }
+      }
+   } 
+   return count;
+}
+
+
+
+//////////////////////////////
+//
+// getNoteCount -- Get the number of pitch (classes) currently sounding
+//
+
+int getNoteCount(HumdrumFile& infile, int line) {
+   Array<int> states(1000);
+   states.setAll(0);
+   Array<Array<char> > tokens;
+   int i, j, k;
+   int ii, jj;
+   int count = 0;
+   int notenum;
    for (j=0; j<infile[line].getFieldCount(); j++) {
       if (!infile[line].isExInterp(j, "**kern")) {
          continue;
@@ -156,15 +420,152 @@ int getVoiceCount(HumdrumFile& infile, int line) {
       ii = line;
       jj = j;
       if (infile[line].isNullToken(j)) {
+        if (attackQ) {
+           // Null tokens never contain note attacks
+           continue;
+        }
         ii = infile[line].getDotLine(j);
+        if (ii < 0) { continue; }  // . at start of data spine
         jj = infile[line].getDotSpine(j);
+        if (jj < 0) { continue; }  // . at start of data spine
       }
       if (strchr(infile[ii][jj], 'r') != NULL) {
          continue;
       }
-      count++;
+      infile[ii].getTokens(tokens, jj);
+      for (k=0; k<tokens.getSize(); k++) {
+         if (attackQ && !isAttack(tokens[k].getBase())) {
+            continue;
+         }
+         notenum = -1;
+         if (fortyQ) {
+            notenum = Convert::kernToBase40(tokens[k].getBase());
+            if (pcQ) { notenum = notenum % 40; }
+         } else if (twelveQ) {
+            notenum = Convert::kernToMidiNoteNumber(tokens[k].getBase());
+            if (pcQ) { notenum = notenum % 12; }
+         } else if (sevenQ) {
+            notenum = Convert::kernToDiatonicPitch(tokens[k].getBase());
+            if (pcQ) { notenum = notenum % 7; }
+         } else if (noteQ) {
+            count++;
+         }
+         if (notenum < 0) {
+            continue;
+         }
+         states[notenum]++;
+      }
    }
-   return count;
+
+   if (pcQ) {
+      int pcount = 0;
+      for (i=0; i<states.getSize(); i++) {
+         if (states[i]) {
+            pcount++;
+         }
+         if (pcQ && i>40) {
+            break;
+         }
+      }
+      return pcount;
+   } else if (allQ || noteQ) {
+      return count;
+   } else {
+      int unique = 0;
+      for (i=0; i<states.getSize(); i++) {
+         if (states[i]) {
+            unique++;
+         }
+         if (pcQ && i>40) {
+            break;
+         }
+      }
+      return unique;
+   }
+}
+
+
+
+//////////////////////////////
+//
+// isAttack -- returns true if no r, _, or ] character in string.
+//
+
+int isAttack(const char* token) {
+   if (strchr(token, 'r') != NULL) {
+      return 0;
+   }
+   if (strchr(token, '_') != NULL) {
+      return 0;
+   }
+   if (strchr(token, ']') != NULL) {
+      return 0;
+   }
+   if (strcmp(token, ".") == 0) {
+      return 0;
+   }
+   return 1;
+}
+
+
+
+//////////////////////////////
+//
+// printSummary -- Print the duration of each voice count and relative percent.
+//
+
+void printSummary(Array<double>& Summary) {
+   int i;
+   double sum = 0.0;
+   double percent = 0.0;
+   double weight = 0.0;
+   int maxx = 0;
+   int minn = 1000;
+   for (i=0; i<Summary.getSize(); i++) {
+      if (Summary[i] != 0.0) {
+         sum += Summary[i];
+         if (i > maxx) { maxx = i; }   
+         if (i < minn) { minn = i; }   
+         weight += (i+1) * Summary[i];
+      }
+   }
+   if (sum == 0.0) {
+      return;
+   }
+   cout << "**dur\t**pcent\t";
+   if (noteQ || twelveQ || fortyQ || sevenQ) {
+      if (pcQ) {
+         cout << "**";
+         if (sevenQ)       { cout <<  "7"; }
+         else if (twelveQ) { cout << "12"; }
+         else              { cout << "40"; }
+         cout << "pc#";
+      } else {
+         cout << "**";
+         if (sevenQ)       { cout <<  "7"; }
+         else if (twelveQ) { cout << "12"; }
+         else              { cout << "40"; }
+         cout << "p#";
+      }
+   } else {
+      cout << "**v#";
+   }
+   cout << '\n';
+   for (i=minn; i<=maxx; i++) {
+      if (Summary[i] == 0.0) {
+         continue;
+      }
+      percent = Summary[i] / sum * 100.0;
+      percent = int(percent*100.0+0.5)/100.0;
+      cout << Summary[i] << '\t' << percent << '\t' << i << '\n';
+   }
+   cout << "*-\t*-\t*-\n";
+   cout << "!!total-duration: " << sum << endl;
+   if (pcQ) {
+      cout << "!!average-pcs: " << (weight/sum-1) << endl;
+   } else {
+      cout << "!!average-voices: " << (weight/sum-1) << endl;
+   }
 }
 
 
@@ -175,8 +576,23 @@ int getVoiceCount(HumdrumFile& infile, int line) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("a|append=b", "append analysis data to input"); 
-   opts.define("p|prepend=b", "prepend analysis data to input"); 
+   opts.define("a|append=b",         "append analysis data to input"); 
+   opts.define("u|uniq|unique=b",    "count unique number of notes");
+   opts.define("p|prepend=b",        "prepend analysis data to input"); 
+   opts.define("y|summary=b",        "list voice counts by durations"); 
+   opts.define("c|pc|pitch-class=b", "pitch classes only; ignore octaves"); 
+   opts.define("12|twelve-tone=b",   "count of twelvetone pitch classes"); 
+   opts.define("40|base-40=b",       "count of base-40 pitches "); 
+   opts.define("G|no-grace-notes=b", "do not process lines with grace notes"); 
+   opts.define("m|measure|b|bar=b",  "sum results for measure"); 
+   opts.define("M|measure-duration=b", "list duration of measure"); 
+   opts.define("7|diatonic=b",       "count of diatonic pitches "); 
+   opts.define("x|attack=b",         "only count note attacks"); 
+   opts.define("n|notes|note=b",     "only count note attacks"); 
+   opts.define("segment|segments=b","display segment marker for single input"); 
+   opts.define("k|kern=b",           "count number of **kern spines "); 
+   opts.define("v|valid=b",          "only consider complete part segments"); 
+   opts.define("s|spines|spine|tracks|track=b", "only count note attacks"); 
 
    opts.define("debug=b");              // determine bad input line num
    opts.define("author=b");             // author of program
@@ -191,7 +607,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
            << "craig@ccrma.stanford.edu, October 2013" << endl;
       exit(0);
    } else if (opts.getBoolean("version")) {
-      cout << argv[0] << ", version: 10 October 2013" << endl;
+      cout << argv[0] << ", version: 24 October 2013" << endl;
       cout << "compiled: " << __DATE__ << endl;
       cout << MUSEINFO_VERSION << endl;
       exit(0);
@@ -203,8 +619,50 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       exit(0);
    }
 
-   appendQ    = opts.getBoolean("append");
-   prependQ   = opts.getBoolean("prepend");
+   debugQ     =  opts.getBoolean("debug");
+   trackQ     =  opts.getBoolean("spine");
+   appendQ    =  opts.getBoolean("append");
+   prependQ   =  opts.getBoolean("prepend");
+   pcQ        =  opts.getBoolean("pc");
+   noteQ      =  opts.getBoolean("notes");
+   twelveQ    =  opts.getBoolean("12");
+   fortyQ     =  opts.getBoolean("40");
+   nograceQ   =  opts.getBoolean("no-grace-notes");
+   sevenQ     =  opts.getBoolean("7");
+   attackQ    =  opts.getBoolean("attack");
+   allQ       = !opts.getBoolean("unique");
+   measureQ   =  opts.getBoolean("measure");
+   mdurQ      =  opts.getBoolean("measure-duration");
+   kernQ      =  opts.getBoolean("kern");
+   validQ     =  opts.getBoolean("valid");
+   summaryQ   =  opts.getBoolean("summary");
+   SEGMENTS   =  opts.getBoolean("segment");
+
+   if (noteQ) {
+      allQ = 1;
+   }
+
+   if (pcQ && !(twelveQ || fortyQ || sevenQ)) {
+      // use base-12 as default if --pc option given
+      twelveQ = 1;
+   }
+
+   if (!(pcQ || (!allQ))) {
+      // if --12 --14 or -7 is given but no -u
+      // or --pc option given, then turn on noteQ
+      // if one of the pitch options is given.
+      if (twelveQ || fortyQ || sevenQ) {
+         noteQ = 1;
+      }
+   }
+
+   if (!allQ) {
+      // if unique, then set to fortQ if none of the
+      // pitch systems are given.
+      if (!(twelveQ || fortyQ || sevenQ)) {
+         noteQ = 1;
+      }
+   }
 
    if (appendQ) {
       // mutually exclusive options
@@ -240,4 +698,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 061bdcd3de38bb305b57576a99831ad8 voicecount.cpp [20131009]
+// md5sum: 2fec2d31350a93bb111491e052b7dc93 voicecount.cpp [20131017]
