@@ -6,6 +6,7 @@
 // Last Modified: Sat Sep  5 15:21:29 PDT 2009 Added sub-spine features
 // Last Modified: Tue Sep  8 11:43:46 PDT 2009 Added co-spine extraction
 // Last Modified: Sat Apr  6 00:48:21 PDT 2013 Enabled multiple segment input
+// Last Modified: Thu Oct 24 12:32:47 PDT 2013 Switch to HumdrumStream class
 // Filename:      ...sig/examples/all/extractx.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/extractx.cpp
 // Syntax:        C++; museinfo
@@ -30,6 +31,7 @@
 
 // function declarations
 void    checkOptions            (Options& opts, int argc, char* argv[]);
+void    processFile             (HumdrumFile& infile);
 void    excludeFields           (HumdrumFile& infile, Array<int>& field, 
                                  Array<int>& subfield, Array<int>& model);
 void    extractFields           (HumdrumFile& infile, Array<int>& field, 
@@ -127,76 +129,78 @@ const char* grepString  = "";      // used with -g option
 
 
 int main(int argc, char* argv[]) {
-   HumdrumFileSet infiles;
-
-   // process the command-line options
    checkOptions(options, argc, argv);
+   HumdrumStream streamer(options.getArgList());
+   HumdrumFile infile;
 
-   // figure out the number of input files to process
-   int numinputs = options.getArgCount();
-
-   int i;
-   if (numinputs < 1) {
-      infiles.read(cin);
-   } else {
-      for (i=0; i<numinputs; i++) {
-         infiles.readAppend(options.getArg(i+1));
+   while (streamer.read(infile)) {
+      if (!streamer.eof()) {
+         cout << "!!!!SEGMENT: " << infile.getFileName() << endl;
       }
+      processFile(infile);
    }
-
-   for (int i=0; i<infiles.getCount(); i++) {
-      if (countQ) {
-         cout << infiles[i].getMaxTracks() << endl;
-         exit(0);
-      }
-      if (expandQ) {
-         expandSpines(field, subfield, model, infiles[i], expandInterp);
-      } else if (interpQ) {
-         getInterpretationFields(field, subfield, model, infiles[i], interps, 
-               interpstate);
-      } else if (reverseQ) {
-         reverseSpines(field, subfield, model, infiles[i], reverseInterp);
-      } else if (fieldQ || excludeQ) {
-         fillFieldData(field, subfield, model, fieldstring, infiles[i]);
-      } else if (grepQ) {
-         fillFieldDataByGrep(field, subfield, model, grepString, infiles[i], 
-            interpstate);
-      }
-      
-      if (debugQ && !traceQ) {
-         cout << "!! Field Expansion List:";
-         for (int j=0; j<field.getSize(); j++) {
-            cout << " " << field[j];
-	    if (subfield[j]) {
-               cout << (char)subfield[j];
-            }
-	    if (model[j]) {
-               cout << (char)model[j];
-            }
-         }
-         cout << endl;
-      }
-
-      // preserve SEGMENT filename if present
-      infiles[i].printNonemptySegmentLabel(cout);
-
-      // analyze the input file according to command-line options
-      if (fieldQ || grepQ) {
-         extractFields(infiles[i], field, subfield, model);
-      } else if (excludeQ) {
-         excludeFields(infiles[i], field, subfield, model);
-      } else if (traceQ) {
-         extractTrace(infiles[i], tracefile);
-      } else {
-         cout << infiles[i];
-      }
-   }
-
+  
    return 0;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////
+//
+// processFile --
+//
+
+void processFile(HumdrumFile& infile) {
+   if (countQ) {
+      cout << infile.getMaxTracks() << endl;
+      return;
+   }
+   if (expandQ) {
+      expandSpines(field, subfield, model, infile, expandInterp);
+   } else if (interpQ) {
+      getInterpretationFields(field, subfield, model, infile, interps, 
+            interpstate);
+   } else if (reverseQ) {
+      reverseSpines(field, subfield, model, infile, reverseInterp);
+   } else if (fieldQ || excludeQ) {
+      fillFieldData(field, subfield, model, fieldstring, infile);
+   } else if (grepQ) {
+      fillFieldDataByGrep(field, subfield, model, grepString, infile, 
+         interpstate);
+   }
+   
+   int j;
+   if (debugQ && !traceQ) {
+      cout << "!! Field Expansion List:";
+      for (j=0; j<field.getSize(); j++) {
+         cout << " " << field[j];
+  if (subfield[j]) {
+            cout << (char)subfield[j];
+         }
+  if (model[j]) {
+            cout << (char)model[j];
+         }
+      }
+      cout << endl;
+   }
+
+   // preserve SEGMENT filename if present (now printed in main())
+   // infile.printNonemptySegmentLabel(cout);
+
+   // analyze the input file according to command-line options
+   if (fieldQ || grepQ) {
+      extractFields(infile, field, subfield, model);
+   } else if (excludeQ) {
+      excludeFields(infile, field, subfield, model);
+   } else if (traceQ) {
+      extractTrace(infile, tracefile);
+   } else {
+      cout << infile;
+   }
+}
+
 
 
 //////////////////////////////
