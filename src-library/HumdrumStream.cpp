@@ -122,10 +122,6 @@ int HumdrumStream::read(HumdrumFile& infile) {
 int HumdrumStream::eof(void) {
    istream* newinput = NULL;
 
-   if (!urlbuffer.eof()) {
-      // If the URL buffer is at its end, clear the buffer.
-      return 0;
-   }
    // Read HumdrumFile contents from:
    // (1) Current ifstream if open
    // (2) Next filename if ifstream is done
