@@ -7,27 +7,56 @@ C++ programs and library for processing Humdrum data files.
 Downloading
 ===========
 
-To download from the terminal if you have git installed on your system:
+To download from a terminal if you have git installed on your system:
    ```git clone https://github.com/craigsapp/humextra```
+
 Otherwise you can download from the "zip" link at the top of this page
-(https://github.com/craigsapp/humextra/archive/master.zip).
+(https://github.com/craigsapp/humextra/archive/master.zip).  From the
+command line you can download the humextra ZIP file with this command 
+in linux:
+    ```wget https://github.com/craigsapp/humextra/archive/master.zip```
+or use curl in OS X:
+    ```curl -L https://github.com/craigsapp/humextra/archive/master.zip > master.zip```
+Then unzip the file with this command:
+    ```unzip master.zip```
 
-If you want to use the "git" command to download the humextra software, there are
-several ways to install it:
+If you want to use the "git" command to download the humextra software,
+check to see if it is installed on your computer by typing this command
+in the terminal:
+   ```which git```
+It should return with the location of the command in the file structure,
+such as:
+    ```/usr/bin/git```
+If `which git` does not reply with any location, then you will have to
+install git.  There are several ways to install it:
 
-(1) In linux/unix, use some automated installation system which is installed
-on your computer.  Some possible methods: `yum install git`, `apt-get
-install git` (Ubuntu), or `emerge git` (Gentoo).
+(1) In linux/unix, use some automated installation system which is
+installed on your computer.  Some possible methods: `yum install git`,
+`apt-get install git` (Ubuntu), or `emerge git` (Gentoo).
 
-(2) in OS X, use a package management system such as MacPorts
-(http://macports.org) or Homebrew (http://mxcl.github.io/homebrew).  These
-are the OS X equivalents of apt-get/yum/emerge found on linux systems.
-Typically you will also need to first install XCode from the Apple App
-Store (free).  After installing XCode, go into its menu system and install
-the command-line development tools: (a) click on the Downloads tab in
-XCode (b) select "command line tools" (c) click on "install" button.
-If MacPorts is installed, then type `sudo port install git`; for Homebrew
-the command would be `sudo brew install git`.
+(2) in OS X, use a package management system such as Homebrew
+(http://mxcl.github.io/homebrew) or MacPorts (http://macports.org).
+For example, to install Homebrew type the following command in the
+terminal:
+   ```ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"```
+Homebrew and MacPorts are two OS X equivalents of apt-get/yum/emerge 
+which are used to install software over the internet on linux systems.
+
+In Mac OS X 10.9 (Mavericks) you should first install the Xcode 
+command-line compiling tools using this command:
+   ```xcode-select --install```
+This will install xcode command-line tools over the internet after you
+click on a few pop-up windows.
+
+For older Mac OS X versions, you will need to first install XCode from
+the Apple App Store (free).  After installing XCode, go into its menu
+system and install the command-line development tools: (a) click on
+the Downloads tab in XCode (b) select "command line tools" (c) click on
+"install" button.  
+
+To install git after homebrew/macports and XCode command line tools are
+installed.  type `brew install git` if using Homebrew, or `sudo port
+install git` if using MacPorts.
 
 IDEs such as Eclipse (http://www.eclipse.org/downloads) have a git
 interface built into them.  Other GUI-based git programs can be found
@@ -40,7 +69,7 @@ humextras program in MS Windows.
 Compiling
 =========
 
-To compile everything, type within the humextra directory:
+To compile everything, type within the main humextra directory:
     ```make```
 If using OS X, see the above notes on XCode in the Download section if you get a 
 complaint about the make command not being found.
@@ -87,9 +116,10 @@ For an individual user in bash add this line:
     ```export PATH=$PATH:/location/of/humextra/bin```
 to the file ~/.bashrc .  For tcsh, add the line
     ```setenv PATH $PATH":/location/of/humextra/bin```
-to the file ~/.csrhc .  If you want to install for all users on a computer
-system then you would add such lines to the system login script (which
-will vary on the version of unix you are using).
+to the file ~/.csrhc .  Alternatively, the PATH environmental variable
+may need to be set in `~/.profile`.If you want to install for all users
+on a computer system then you would add such lines to the system login
+script (which will vary on the version of unix you are using).
 
 
 Updating
@@ -101,7 +131,8 @@ To update if you downloaded with git:
 Then either type `make` to recompile the external libraries, the humextra 
 library and the programs, or type `make update` to compile just the humextra
 library and programs, or `make libupdate` to update only the library file 
-without recompiling example programs.
+without recompiling example programs.  If you installed by download a ZIP file,
+then you would need to re-download another ZIP file with the updated code.
 
 When using git to download and update the humextra repository, you can add these
 lines to ~/.gitconfig:
@@ -149,6 +180,7 @@ or click on the command name in the list below:
 [barnum](http://extras.humdrum.org/man/barnum),
 [beat](http://extras.humdrum.org/man/beat),
 [chorck](http://extras.humdrum.org/man/chorck),
+[cint](http://extras.humdrum.org/man/cint),
 [dittox](http://extras.humdrum.org/man/dittox),
 [extractx](http://extras.humdrum.org/man/extractx),
 [gettime](http://extras.humdrum.org/man/gettime),
@@ -169,6 +201,7 @@ or click on the command name in the list below:
 [kern2melisma](http://extras.humdrum.org/man/kern2melisma),
 [kern2skini](http://extras.humdrum.org/man/kern2skini),
 [keycor](http://extras.humdrum.org/man/keycor),
+[location](http://extras.humdrum.org/man/location),
 [lofcog](http://extras.humdrum.org/man/lofcog),
 [mid2hum](http://extras.humdrum.org/man/mid2hum),
 [minrhy](http://extras.humdrum.org/man/minrhy),
@@ -207,6 +240,7 @@ or click on the command name in the list below:
 [tntype](http://extras.humdrum.org/man/tntype),
 [transpose](http://extras.humdrum.org/man/transpose),
 [tsroot](http://extras.humdrum.org/man/tsroot),
+[voicecount](http://extras.humdrum.org/man/voicecount),
 [xml2hum](http://extras.humdrum.org/man/xml2hum),
 [zscores](http://extras.humdrum.org/man/zscores).
 
