@@ -50,6 +50,7 @@ int       noteQ        = 0;    // used with -n option
 int       kernQ        = 0;    // used with -k option
 int       nograceQ     = 0;    // used with -G option
 int       validQ       = 0;    // used with -v option
+int       uniqueQ      = 0;    // used with -u option
 int       summaryQ     = 0;    // used with --summary option
 Array<double> Summary;         // used with --summary option
 int       SEGMENTS     = 0;    // used if there are more than one segment.
@@ -67,9 +68,7 @@ int main(int argc, char** argv) {
    }
 
    while (streamer.read(infile)) {
-cout << "GOT HERE XXX" << endl;
       if (!streamer.eof()) {
-cout << "GOT HERE YYY" << endl;
          // if there are multiple segments, store a segement marker
          // for each segment.  Do not store if only a single segment,
          // unless --segement option is given.
@@ -278,7 +277,7 @@ int doAnalysis(HumdrumFile& infile, int line) {
    if (nograceQ && (infile[line].getDuration() == 0.0)) {
       return -1;
    }
-   if (noteQ || twelveQ || fortyQ || sevenQ) {
+   if (uniqueQ || noteQ || twelveQ || fortyQ || sevenQ) {
       value = getNoteCount(infile, line); 
    } else {
       value = getVoiceCount(infile, line);
@@ -438,17 +437,18 @@ int getNoteCount(HumdrumFile& infile, int line) {
             continue;
          }
          notenum = -1;
-         if (fortyQ) {
-            notenum = Convert::kernToBase40(tokens[k].getBase());
-            if (pcQ) { notenum = notenum % 40; }
-         } else if (twelveQ) {
+         if (twelveQ) {
             notenum = Convert::kernToMidiNoteNumber(tokens[k].getBase());
             if (pcQ) { notenum = notenum % 12; }
          } else if (sevenQ) {
             notenum = Convert::kernToDiatonicPitch(tokens[k].getBase());
             if (pcQ) { notenum = notenum % 7; }
-         } else if (noteQ) {
+         } else if (noteQ && !uniqueQ) {
             count++;
+         } else {
+            // assume fortyQ:
+            notenum = Convert::kernToBase40(tokens[k].getBase());
+            if (pcQ) { notenum = notenum % 40; }
          }
          if (notenum < 0) {
             continue;
@@ -468,9 +468,7 @@ int getNoteCount(HumdrumFile& infile, int line) {
          }
       }
       return pcount;
-   } else if (allQ || noteQ) {
-      return count;
-   } else {
+   } else if (uniqueQ) {
       int unique = 0;
       for (i=0; i<states.getSize(); i++) {
          if (states[i]) {
@@ -481,7 +479,12 @@ int getNoteCount(HumdrumFile& infile, int line) {
          }
       }
       return unique;
+   } else if (allQ || noteQ) {
+      return count;
    }
+   
+   // shouldn't get here...
+   return -1;
 }
 
 
@@ -630,7 +633,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    nograceQ   =  opts.getBoolean("no-grace-notes");
    sevenQ     =  opts.getBoolean("7");
    attackQ    =  opts.getBoolean("attack");
-   allQ       = !opts.getBoolean("unique");
+   uniqueQ    =  opts.getBoolean("unique");
    measureQ   =  opts.getBoolean("measure");
    mdurQ      =  opts.getBoolean("measure-duration");
    kernQ      =  opts.getBoolean("kern");
@@ -647,7 +650,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       twelveQ = 1;
    }
 
-   if (!(pcQ || (!allQ))) {
+   if (!(pcQ || uniqueQ)) {
       // if --12 --14 or -7 is given but no -u
       // or --pc option given, then turn on noteQ
       // if one of the pitch options is given.
@@ -657,7 +660,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (!allQ) {
-      // if unique, then set to fortQ if none of the
+      // if unique, then set to fortyQ if none of the
       // pitch systems are given.
       if (!(twelveQ || fortyQ || sevenQ)) {
          noteQ = 1;
@@ -668,7 +671,6 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       // mutually exclusive options
       prependQ = 0;
    }
-
 }
 
 
