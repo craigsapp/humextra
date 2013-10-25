@@ -59,14 +59,13 @@ class HumdrumStream {
                       HumdrumStream      (void);
                       HumdrumStream      (char** list);
 
-   int                setFileList        (char** list);
+      int             setFileList        (char** list);
 
-   int                is_open            (void);
-   int                hasData            (void);
-   void               clear              (void);
+      void            clear              (void);
+      int             eof                (void);
    
-   int                getFile            (HumdrumFile& infile);
-   int                read               (HumdrumFile& infile);
+      int             getFile            (HumdrumFile& infile);
+      int             read               (HumdrumFile& infile);
 
    protected:
       ifstream            instream;      // used to read from list of files.
