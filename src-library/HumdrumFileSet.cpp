@@ -452,11 +452,11 @@ void HumdrumFileSet::readAppendFromHttpURI(SSTREAM& inputstream,
    while (header.getline(buffer, URI_BUFFER_SIZE)) {
       int len = strlen(buffer);
       for (i=0; i<len; i++) {
-         buffer[i] = tolower(buffer[i]);
+         buffer[i] = std::tolower(buffer[i]);
       }
       if (strstr(buffer, "content-length") != NULL) {
          for (i=14; i<len; i++) {
-            if (isdigit(buffer[i])) {
+            if (std::isdigit(buffer[i])) {
                sscanf(&buffer[i], "%d", &datalength);
                if (datalength == 0) {
                   cerr << "Error: no data found for URI, probably invalid\n";

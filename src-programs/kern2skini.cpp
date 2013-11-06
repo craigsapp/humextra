@@ -13,7 +13,7 @@
 #include "humdrum.h"
 
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <stdio.h>
 #include <math.h>
 
@@ -300,7 +300,7 @@ void generateSkini(HumdrumFile& hfile, SigCollection<SKINI>& skini) {
                if (hfile[i][j][2] == '#') {
                   cout << "-sharp";
                }
-               if (islower(hfile[i][j][1])) {
+               if (std::islower(hfile[i][j][1])) {
                   cout << " Minor";
                } else {
                   cout << " Major";
@@ -320,7 +320,7 @@ void generateSkini(HumdrumFile& hfile, SigCollection<SKINI>& skini) {
             }
             double tempomark = 0.0;
             if (strncmp(hfile[i][j], "*MM", 3) == 0 && 
-                  isdigit(hfile[i][j][3])) {
+                  std::isdigit(hfile[i][j][3])) {
                sscanf(hfile[i][j], "*MM%lf", &tempomark);
                // cout << "// Tempo " << tempomark << " MM per quarter note" 
                //      << endl;
@@ -345,7 +345,7 @@ void generateSkini(HumdrumFile& hfile, SigCollection<SKINI>& skini) {
                continue;
             }
             if (strncmp(hfile[i][j], "*I", 2) == 0 && 
-                  islower(hfile[i][j][2])) {
+                  std::islower(hfile[i][j][2])) {
                tempskini.message = INSTRUMENT;
                tempskini.time = currentmillisecond/1000.0;
                tempskini.chan = (TEMP64BITFIX)&hfile[i][j][2];

@@ -1970,7 +1970,7 @@ int getTupletInfo(TupletInfo& tupletstuff, Coordinate& nogracelist,
 
    infile[row].getToken(buffer, col, 0, 32);
    int i=0;
-   while ((buffer[i] != EMPTY) && (!isdigit(buffer[i]))) {
+   while ((buffer[i] != EMPTY) && (!std::isdigit(buffer[i]))) {
      i++;
    }
    if (sscanf(&buffer[i], "%d", &rhythm) == 1) {
@@ -2424,7 +2424,7 @@ void printAbcClef(ostream& out, const char* string, int track,
          return;
       }
       if ((string[5] == 'F') || (string[5] == 'C') || (string[5] == 'G')) {
-         if (isdigit(string[6])) {
+         if (std::isdigit(string[6])) {
             out << string[5] << string[6];
             cleftranspose[track] = 0;
             return;
@@ -2853,10 +2853,10 @@ void printGraceRhythm(ostream& out, const char* buffer, int top, int bot,
 
    int i;
    for (i=0; i<length; i++) {
-      if (toupper(buffer[i]) == 'Q') {
+      if (std::toupper(buffer[i]) == 'Q') {
          continue;
       }
-      if (isdigit(buffer[i])) {
+      if (std::isdigit(buffer[i])) {
          digitQ = 1;
       }
       ch = buffer[i];
@@ -3149,9 +3149,9 @@ int getRhythm(const char* buffer) {
    int length = strlen(buffer);
    int i;
    for (i=0; i<length; i++) {
-      if (isdigit(buffer[i])) {
+      if (std::isdigit(buffer[i])) {
          if (buffer[i] == '0') {
-            if (isdigit(buffer[i+1])) {
+            if (std::isdigit(buffer[i+1])) {
                // do something for large durations greater than whole note:
                rhythm = -1 * (buffer[i+1] - '0');
             }
@@ -3452,7 +3452,7 @@ int norhythm(const char* buffer) {
    int length = strlen(buffer);
    int i;
    for (i=0; i<length; i++) {
-      if (isdigit(buffer[i]) || (toupper(buffer[i]) == 'Q')) {
+      if (std::isdigit(buffer[i]) || (std::toupper(buffer[i]) == 'Q')) {
          return 0;
       }
    }
@@ -4017,7 +4017,7 @@ void printNumberFromString(ostream& out, const char* filename,
    }
 
    for (i=slashi; i<length; i++) {
-      if (!isdigit(filename[i]) || (filename[i] == '0')) { 
+      if (!std::isdigit(filename[i]) || (filename[i] == '0')) { 
          continue;
       } 
       foundQ = 1;
@@ -4621,7 +4621,7 @@ void printAbcKeySignature(ostream& out, const char* kernkey) {
       return;
    }
 
-   tonic[0] = toupper(tonic[0]);   // upper case for tonic
+   tonic[0] = std::toupper(tonic[0]);   // upper case for tonic
    pre.sar(tonic, "-", "b", "g");
    out << tonic.getBase();
    
@@ -5727,7 +5727,7 @@ char* base40ToAbcPitch(char* buffer, int base40) {
       case 6:  strcpy(dianame, "b"); break;
    }
    if (octave < 5) {
-      dianame[0] = toupper(dianame[0]);
+      dianame[0] = std::toupper(dianame[0]);
    }
    
    strcpy(buffer, dianame);

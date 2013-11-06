@@ -534,7 +534,7 @@ void addTempoTrack(HumdrumFile& infile, MidiFile& outfile) {
       if (infile[i].getType() == E_humrec_data) {
          for (j=0; j<infile[i].getFieldCount(); j++) {
             if (strcmp(infile[i].getExInterp(j), "**tempo") == 0) {
-               if (isdigit(infile[i][j][0])) {
+               if (std::isdigit(infile[i][j][0])) {
                   tempo = strtod(infile[i][j], NULL);
                   //cout << "The tempo value read was " << tempo << endl;
                   tempo = tempo * tscaling;
@@ -2761,7 +2761,7 @@ void getStaffValues(HumdrumFile& infile, int staffline,
             // more than one number in the staff assignment
             cptr = &(infile[staffline][i][6]);
             while (strlen(cptr) > 0) {
-               if (!isdigit(cptr[0])) {
+               if (!std::isdigit(cptr[0])) {
                   break;
                }
                value = strtol(cptr, &newcptr, 10);

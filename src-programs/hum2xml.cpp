@@ -19,7 +19,7 @@
 #include "RationalNumber.h"
 
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <stdio.h>
 
 #ifndef OLDCPP
@@ -1106,7 +1106,7 @@ void printMode(int lev, HumdrumFile& infile, int line, int col, int voice) {
                pline(lev, "<mode>locrian</mode>\n");
                return;
             }
-            if (islower(pre.getSubmatch(1)[0])) {
+            if (std::islower(pre.getSubmatch(1)[0])) {
                pline(lev, "<mode>minor</mode>\n");
                return;
             } else {
@@ -1893,7 +1893,7 @@ void printDurationType(const char* durstring) {
    for (int i=0; i<length; i++) {
       if (buffer[i] == '0') {
          counter++;
-      } else if (isdigit(buffer[i])) {
+      } else if (std::isdigit(buffer[i])) {
          counter = -100;
       }
       if (buffer[i] == '.') {

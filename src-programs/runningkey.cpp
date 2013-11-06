@@ -21,7 +21,7 @@
 
 #include "humdrum.h"
 #include <math.h>
-#include <ctype.h>
+#include <cctype>
 
 // function declarations
 void   checkOptions             (Options& opts, int argc, char* argv[]);
@@ -430,7 +430,7 @@ void readWeights(const char* filename) {
       for (j=0; j<wfile[i].getFieldCount(); j++) {
          if (strcmp(wfile[i].getExInterp(j), "**kern") == 0) {
             key = Convert::kernToMidiNoteNumber(wfile[i][j]) % 12;
-            if (islower(wfile[i][j][0])) {
+            if (std::islower(wfile[i][j][0])) {
                key += 12;
             }
          } else if (strcmp(wfile[i].getExInterp(j), "**weight") == 0) {

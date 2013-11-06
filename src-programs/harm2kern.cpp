@@ -14,7 +14,7 @@
 #include "PerlRegularExpression.h"
 
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 
 // function declarations
 void      checkOptions      (Options& opts, int argc, char* argv[]);
@@ -195,7 +195,7 @@ void generateAnalysis(HumdrumFile& infile, Array<double>& durs) {
             if (testpitch >= 0) {
                cout << infile[i][0];
                keyroot = testpitch % 40;
-               keymode = islower(infile[i][0][1]) ? 1 : 0;
+               keymode = std::islower(infile[i][0][1]) ? 1 : 0;
             }
          } else if (strncmp(infile[i][0], "**", 2) == 0) {
             if (rootQ) {

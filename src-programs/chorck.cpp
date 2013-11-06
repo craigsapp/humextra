@@ -49,7 +49,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <ctype.h>
+#include <cctype>
 #include <string.h>
 
 #ifndef OLDCPP
@@ -263,7 +263,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       int length = strlen(pointer);
       int i;
       for (i=0; i<length; i++) {
-         if (isdigit(pointer[i]) && pointer[i] != '0') {
+         if (std::isdigit(pointer[i]) && pointer[i] != '0') {
             errorCheck[pointer[i]  - '1'] = 0;
          }
       }
@@ -277,7 +277,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       int length = strlen(pointer);
       int i;
       for (i=0; i<length; i++) {
-         if (isdigit(pointer[i]) && pointer[i] != '0') {
+         if (std::isdigit(pointer[i]) && pointer[i] != '0') {
             errorCheck[pointer[i]  - '1'] = 1;
          }
       }
@@ -485,7 +485,7 @@ void initialize(HumdrumFile& infile) {
 void printRules(const char* ruleString) {
    int length = strlen(ruleString);
    for (int i=0; i<length; i++) {
-      if (isdigit(ruleString[i]) && ruleString[i] != '0') {
+      if (std::isdigit(ruleString[i]) && ruleString[i] != '0') {
          switch (ruleString[i] - '0') {
             case 1:
                cout << "Rule 1: Parallel 5ths\n"

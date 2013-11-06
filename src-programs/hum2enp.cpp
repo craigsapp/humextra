@@ -365,7 +365,7 @@ void printKeySignature(HumdrumFile& infile, int spine, int line) {
 
    int mode = 0;  // major by default.
    if (key.i > 0) {
-      if (islower(infile[key.i][key.j][1])) {
+      if (std::islower(infile[key.i][key.j][1])) {
          mode = 1;
       }
    }

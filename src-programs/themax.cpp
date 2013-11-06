@@ -406,7 +406,7 @@ int main(int argc, char** argv) {
    meterss.setSize(0);
    if (meterQ) {
       appendString(meterss, "M");
-      if (!isdigit(meterstring[0])) {
+      if (!std::isdigit(meterstring[0])) {
          appendString(meterss, "[^\\t]*?");
       }
       appendString(meterss, meterstring);
@@ -3252,12 +3252,12 @@ void cleanUpRangeSyntaxNoOutsideDigitsOrComma(Array<char>& data) {
          tempdata << data[i];
       }
       if (inside) {
-         if (isdigit(data[i]) || (data[i] == ',')) {
+         if (std::isdigit(data[i]) || (data[i] == ',')) {
             tempdata << data[i];
          }
          continue;
       } else {
-         if (isdigit(data[i]) || (data[i] == ',') || (data[i] == '}') ||
+         if (std::isdigit(data[i]) || (data[i] == ',') || (data[i] == '}') ||
                (data[i] == '{')) {
             continue;
          } else {

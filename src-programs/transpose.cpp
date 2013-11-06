@@ -452,7 +452,7 @@ int calculateTranspositionFromKey(int targetkey, HumdrumFile& infile) {
          }
 
          mode = 0;  // major key
-         if (islower(infile[i][j][1])) {
+         if (std::islower(infile[i][j][1])) {
             mode = 1;  // minor key
          }
          base40 = Convert::kernToBase40(infile[i][j]);
@@ -789,7 +789,7 @@ void printNewKeyInterpretation(HumdrumRecord& aRecord, int index,
       int transval) {
 
    int mode = 0;
-   if (islower(aRecord[index][1])) {
+   if (std::islower(aRecord[index][1])) {
       mode = 1;
    }
    int base40 = Convert::kernToBase40(aRecord[index]);

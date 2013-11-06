@@ -16,7 +16,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
+#include <cctype>
 
 #ifndef OLDCPP
    #include <sstream>
@@ -111,7 +111,7 @@ void PlotData::read(istream& input) {
          // real data point
          ptr = strtok(buffer, " \t,:\n\r");
          while (ptr != NULL) {
-            if (isdigit(ptr[0]) || ptr[0] == '-' || 
+            if (std::isdigit(ptr[0]) || ptr[0] == '-' || 
                   ptr[0] == '+' || ptr[0] == '.') {
                datum = strtod(ptr, NULL);
                data[index].append(datum);
@@ -140,7 +140,7 @@ void PlotData::read(istream& input) {
 int PlotData::commandEqual(const char* command, const char* string) {
    int i = 0;
    while ((command[i] != '\0') && (string[i] != '\0') && 
-         (tolower(command[i]) == tolower(string[i]))) {
+         (std::tolower(command[i]) == std::tolower(string[i]))) {
       i++;
    }
    if (command[i] == '\0') {

@@ -14,7 +14,7 @@
 #include "Identify.h"
 
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 
 #ifndef OLDCPP
    using namespace std;
@@ -49,7 +49,7 @@ int Identify::kernTimeSignature(const char* kernString) {
    }
 
    // next character after '*' must be a number:
-   if (!isdigit(kernString[1])) {
+   if (!std::isdigit(kernString[1])) {
       return 0;
    }
 
@@ -60,7 +60,7 @@ int Identify::kernTimeSignature(const char* kernString) {
    }
 
    // The next character after a slash must be a number
-   if (!isdigit(slash[1])) {
+   if (!std::isdigit(slash[1])) {
       return 0;
    }
   

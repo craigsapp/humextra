@@ -5,6 +5,7 @@
 // Last Modified: Mon Apr  1 12:06:53 PDT 2013 Enabled multiple segment input
 // Last Modified: Mon Apr 15 18:24:31 PDT 2013 Added subset forms
 // Last Modified: Tue Apr 16 23:04:00 PDT 2013 Added attack-only analysis
+// Last Modified: Sat Oct 26 20:56:11 PDT 2013 Added --index option
 // Filename:      ...sig/examples/all/tntype.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/tntype.cpp
 // Syntax:        C++; museinfo
@@ -51,6 +52,7 @@ double      getMeasureSize        (HumdrumFile& infile, int width);
 void        printAttackMarker     (HumdrumFile& infile, int line);
 void        printRotation         (HumdrumFile& infile, int line);
 const char* getDescription        (const char* tntype);
+int         getIndex              (const char* tntype);
 
 // global variables
 Options      options;            // database for command-line arguments
@@ -73,6 +75,7 @@ int          tniQ      = 0;      // used with --tni option
 int          rotationQ = 0;      // used with -r option
 int          xsattackQ = 0;      // used with -x option
 int          appendQ   = 0;      // used with -a option
+int          indexQ    = 0;      // used with --index option
 const char*  notesep   = " ";    // used with -N option
 const char* colorindex[26];
 
@@ -125,6 +128,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("A|attacks|attack=b", "consider only note attaks");
    opts.define("f|form|tnorm=b", "display transposed normal form of pitch sets");
    opts.define("i|iv|ic=b",    "print interval vector");
+   opts.define("index=b",      "print Tn-type index");
    opts.define("x|sonor|suspension=b", "print marker if not all start attacks");
    opts.define("F|forte=b",      "print forte interval vector set name");
    opts.define("r|rotation=b", "mark which note is in the bass");
@@ -183,6 +187,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    suppressQ =  opts.getBoolean("suppress");
    parenQ    = !opts.getBoolean("paren-off");
    appendQ   =  opts.getBoolean("append");
+   indexQ    =  opts.getBoolean("index");
 }
 
 
@@ -273,6 +278,8 @@ void processRecords(HumdrumFile& infile) {
                   cout << "**iv";
                } else if (infoQ) {
                   cout << "**description";
+               } else if (indexQ) {
+                  cout << "**tnidx";
                } else {
                   cout << "**tnt";
                }
@@ -424,6 +431,18 @@ void processRecords(HumdrumFile& infile) {
                }
                cout << endl;
 
+            } else if (indexQ) {
+               const char* tnname;
+               tnname = infile.getTnSetName(i, attackQ);
+               data.setSize(strlen(tnname)+1);
+               strcpy(data.getBase(), tnname);
+               pre.sar(data, "Z", "", "g");
+               if (pre.search(data, "^(\\d+-\\d+[AB]?)", "")) {
+                  cout << getIndex(pre.getSubmatch(1));
+               } else {
+                  cout << ".";
+               }
+               cout << endl;
             } else if (subsetQ) {
                Array<int> tnnames;
                infile.getTnSetNameAllSubsets(tnnames, i, attackQ);
@@ -805,6 +824,417 @@ int identifyBassNote(SigCollection<int>& notes, HumdrumFile& infile,
    }
    return output;
 }
+
+
+
+//////////////////////////////
+//
+// getIndex -- return a tn-type index number when given its
+//     Forte number.
+//
+
+int getIndex(const char* tntype) {
+   int cardinality = 0;
+   if (!sscanf(tntype, "%d", &cardinality)) {
+      return -1;
+   }
+   switch (cardinality) {
+      case 0:
+         if (strcmp(tntype, "0-1") == 0)	return 0;
+         break;
+
+      case 1:
+         if (strcmp(tntype, "1-1") == 0)	return 1;
+         break;
+
+      case 2:
+         if (strcmp(tntype, "2-1") == 0)	return 2;
+         if (strcmp(tntype, "2-2") == 0)	return 3;
+         if (strcmp(tntype, "2-3") == 0)	return 4;
+         if (strcmp(tntype, "2-4") == 0)	return 5;
+         if (strcmp(tntype, "2-5") == 0)	return 6;
+         if (strcmp(tntype, "2-6") == 0)	return 7;
+         break;
+
+      case 3:
+         if (strcmp(tntype, "3-1") == 0)	return 8;
+         if (strcmp(tntype, "3-2A") == 0)	return 9;
+         if (strcmp(tntype, "3-2B") == 0)	return 10;
+         if (strcmp(tntype, "3-3A") == 0)	return 11;
+         if (strcmp(tntype, "3-3B") == 0)	return 12;
+         if (strcmp(tntype, "3-4A") == 0)	return 13;
+         if (strcmp(tntype, "3-4B") == 0)	return 14;
+         if (strcmp(tntype, "3-5A") == 0)	return 15;
+         if (strcmp(tntype, "3-5B") == 0)	return 16;
+         if (strcmp(tntype, "3-6") == 0)	return 17;
+         if (strcmp(tntype, "3-7A") == 0)	return 18;
+         if (strcmp(tntype, "3-7B") == 0)	return 19;
+         if (strcmp(tntype, "3-8A") == 0)	return 20;
+         if (strcmp(tntype, "3-8B") == 0)	return 21;
+         if (strcmp(tntype, "3-9") == 0)	return 22;
+         if (strcmp(tntype, "3-10") == 0)	return 23;
+         if (strcmp(tntype, "3-11A") == 0)	return 24;
+         if (strcmp(tntype, "3-11B") == 0)	return 25;
+         if (strcmp(tntype, "3-12") == 0)	return 26;
+         break;
+
+      case 4:
+         if (strcmp(tntype, "4-1") == 0)	return 27;
+         if (strcmp(tntype, "4-2A") == 0)	return 28;
+         if (strcmp(tntype, "4-2B") == 0)	return 29;
+         if (strcmp(tntype, "4-3") == 0)	return 30;
+         if (strcmp(tntype, "4-4A") == 0)	return 31;
+         if (strcmp(tntype, "4-4B") == 0)	return 32;
+         if (strcmp(tntype, "4-5A") == 0)	return 33;
+         if (strcmp(tntype, "4-5B") == 0)	return 34;
+         if (strcmp(tntype, "4-6") == 0)	return 35;
+         if (strcmp(tntype, "4-7") == 0)	return 36;
+         if (strcmp(tntype, "4-8") == 0)	return 37;
+         if (strcmp(tntype, "4-9") == 0)	return 38;
+         if (strcmp(tntype, "4-10") == 0)	return 39;
+         if (strcmp(tntype, "4-11A") == 0)	return 40;
+         if (strcmp(tntype, "4-11B") == 0)	return 41;
+         if (strcmp(tntype, "4-12A") == 0)	return 42;
+         if (strcmp(tntype, "4-12B") == 0)	return 43;
+         if (strcmp(tntype, "4-13A") == 0)	return 44;
+         if (strcmp(tntype, "4-13B") == 0)	return 45;
+         if (strcmp(tntype, "4-14A") == 0)	return 46;
+         if (strcmp(tntype, "4-14B") == 0)	return 47;
+         if (strcmp(tntype, "4-15A") == 0)	return 48;
+         if (strcmp(tntype, "4-15B") == 0)	return 49;
+         if (strcmp(tntype, "4-16A") == 0)	return 50;
+         if (strcmp(tntype, "4-16B") == 0)	return 51;
+         if (strcmp(tntype, "4-17") == 0)	return 52;
+         if (strcmp(tntype, "4-18A") == 0)	return 53;
+         if (strcmp(tntype, "4-18B") == 0)	return 54;
+         if (strcmp(tntype, "4-19A") == 0)	return 55;
+         if (strcmp(tntype, "4-19B") == 0)	return 56;
+         if (strcmp(tntype, "4-20") == 0)	return 57;
+         if (strcmp(tntype, "4-21") == 0)	return 58;
+         if (strcmp(tntype, "4-22A") == 0)	return 59;
+         if (strcmp(tntype, "4-22B") == 0)	return 60;
+         if (strcmp(tntype, "4-23") == 0)	return 61;
+         if (strcmp(tntype, "4-24") == 0)	return 62;
+         if (strcmp(tntype, "4-25") == 0)	return 63;
+         if (strcmp(tntype, "4-26") == 0)	return 64;
+         if (strcmp(tntype, "4-27A") == 0)	return 65;
+         if (strcmp(tntype, "4-27B") == 0)	return 66;
+         if (strcmp(tntype, "4-28") == 0)	return 67;
+         if (strcmp(tntype, "4-29A") == 0)	return 68;
+         if (strcmp(tntype, "4-29B") == 0)	return 69;
+         break;
+
+      case 5:
+         if (strcmp(tntype, "5-1") == 0)	return 70;
+         if (strcmp(tntype, "5-2A") == 0)	return 71;
+         if (strcmp(tntype, "5-2B") == 0)	return 72;
+         if (strcmp(tntype, "5-3A") == 0)	return 73;
+         if (strcmp(tntype, "5-3B") == 0)	return 74;
+         if (strcmp(tntype, "5-4A") == 0)	return 75;
+         if (strcmp(tntype, "5-4B") == 0)	return 76;
+         if (strcmp(tntype, "5-5A") == 0)	return 77;
+         if (strcmp(tntype, "5-5B") == 0)	return 78;
+         if (strcmp(tntype, "5-6A") == 0)	return 79;
+         if (strcmp(tntype, "5-6B") == 0)	return 80;
+         if (strcmp(tntype, "5-7A") == 0)	return 81;
+         if (strcmp(tntype, "5-7B") == 0)	return 82;
+         if (strcmp(tntype, "5-8") == 0)	return 83;
+         if (strcmp(tntype, "5-9A") == 0)	return 84;
+         if (strcmp(tntype, "5-9B") == 0)	return 85;
+         if (strcmp(tntype, "5-10A") == 0)	return 86;
+         if (strcmp(tntype, "5-10B") == 0)	return 87;
+         if (strcmp(tntype, "5-11A") == 0)	return 88;
+         if (strcmp(tntype, "5-11B") == 0)	return 89;
+         if (strcmp(tntype, "5-12") == 0)	return 90;
+         if (strcmp(tntype, "5-13A") == 0)	return 91;
+         if (strcmp(tntype, "5-13B") == 0)	return 92;
+         if (strcmp(tntype, "5-14A") == 0)	return 93;
+         if (strcmp(tntype, "5-14B") == 0)	return 94;
+         if (strcmp(tntype, "5-15") == 0)	return 95;
+         if (strcmp(tntype, "5-16A") == 0)	return 96;
+         if (strcmp(tntype, "5-16B") == 0)	return 97;
+         if (strcmp(tntype, "5-17") == 0)	return 98;
+         if (strcmp(tntype, "5-18A") == 0)	return 99;
+         if (strcmp(tntype, "5-18B") == 0)	return 100;
+         if (strcmp(tntype, "5-19A") == 0)	return 101;
+         if (strcmp(tntype, "5-19B") == 0)	return 102;
+         if (strcmp(tntype, "5-20A") == 0)	return 103;
+         if (strcmp(tntype, "5-20B") == 0)	return 104;
+         if (strcmp(tntype, "5-21A") == 0)	return 105;
+         if (strcmp(tntype, "5-21B") == 0)	return 106;
+         if (strcmp(tntype, "5-22") == 0)	return 107;
+         if (strcmp(tntype, "5-23A") == 0)	return 108;
+         if (strcmp(tntype, "5-23B") == 0)	return 109;
+         if (strcmp(tntype, "5-24A") == 0)	return 110;
+         if (strcmp(tntype, "5-24B") == 0)	return 111;
+         if (strcmp(tntype, "5-25A") == 0)	return 112;
+         if (strcmp(tntype, "5-25B") == 0)	return 113;
+         if (strcmp(tntype, "5-26A") == 0)	return 114;
+         if (strcmp(tntype, "5-26B") == 0)	return 115;
+         if (strcmp(tntype, "5-27A") == 0)	return 116;
+         if (strcmp(tntype, "5-27B") == 0)	return 117;
+         if (strcmp(tntype, "5-28A") == 0)	return 118;
+         if (strcmp(tntype, "5-28B") == 0)	return 119;
+         if (strcmp(tntype, "5-29A") == 0)	return 120;
+         if (strcmp(tntype, "5-29B") == 0)	return 121;
+         if (strcmp(tntype, "5-30A") == 0)	return 122;
+         if (strcmp(tntype, "5-30B") == 0)	return 123;
+         if (strcmp(tntype, "5-31A") == 0)	return 124;
+         if (strcmp(tntype, "5-31B") == 0)	return 125;
+         if (strcmp(tntype, "5-32A") == 0)	return 126;
+         if (strcmp(tntype, "5-32B") == 0)	return 127;
+         if (strcmp(tntype, "5-33") == 0)	return 128;
+         if (strcmp(tntype, "5-34") == 0)	return 129;
+         if (strcmp(tntype, "5-35") == 0)	return 130;
+         if (strcmp(tntype, "5-36A") == 0)	return 131;
+         if (strcmp(tntype, "5-36B") == 0)	return 132;
+         if (strcmp(tntype, "5-37") == 0)	return 133;
+         if (strcmp(tntype, "5-38A") == 0)	return 134;
+         if (strcmp(tntype, "5-38B") == 0)	return 135;
+         break;
+
+      case 6:
+         if (strcmp(tntype, "6-1") == 0)	return 136;
+         if (strcmp(tntype, "6-2A") == 0)	return 137;
+         if (strcmp(tntype, "6-2B") == 0)	return 138;
+         if (strcmp(tntype, "6-3A") == 0)	return 139;
+         if (strcmp(tntype, "6-3B") == 0)	return 140;
+         if (strcmp(tntype, "6-4") == 0)	return 141;
+         if (strcmp(tntype, "6-5A") == 0)	return 142;
+         if (strcmp(tntype, "6-5B") == 0)	return 143;
+         if (strcmp(tntype, "6-6") == 0)	return 144;
+         if (strcmp(tntype, "6-7") == 0)	return 145;
+         if (strcmp(tntype, "6-8") == 0)	return 146;
+         if (strcmp(tntype, "6-9A") == 0)	return 147;
+         if (strcmp(tntype, "6-9B") == 0)	return 148;
+         if (strcmp(tntype, "6-10A") == 0)	return 149;
+         if (strcmp(tntype, "6-10B") == 0)	return 150;
+         if (strcmp(tntype, "6-11A") == 0)	return 151;
+         if (strcmp(tntype, "6-11B") == 0)	return 152;
+         if (strcmp(tntype, "6-12A") == 0)	return 153;
+         if (strcmp(tntype, "6-12B") == 0)	return 154;
+         if (strcmp(tntype, "6-13") == 0)	return 155;
+         if (strcmp(tntype, "6-14A") == 0)	return 156;
+         if (strcmp(tntype, "6-14B") == 0)	return 157;
+         if (strcmp(tntype, "6-15A") == 0)	return 158;
+         if (strcmp(tntype, "6-15B") == 0)	return 159;
+         if (strcmp(tntype, "6-16A") == 0)	return 160;
+         if (strcmp(tntype, "6-16B") == 0)	return 161;
+         if (strcmp(tntype, "6-17A") == 0)	return 162;
+         if (strcmp(tntype, "6-17B") == 0)	return 163;
+         if (strcmp(tntype, "6-18A") == 0)	return 164;
+         if (strcmp(tntype, "6-18B") == 0)	return 165;
+         if (strcmp(tntype, "6-19A") == 0)	return 166;
+         if (strcmp(tntype, "6-19B") == 0)	return 167;
+         if (strcmp(tntype, "6-20") == 0)	return 168;
+         if (strcmp(tntype, "6-21A") == 0)	return 169;
+         if (strcmp(tntype, "6-21B") == 0)	return 170;
+         if (strcmp(tntype, "6-22A") == 0)	return 171;
+         if (strcmp(tntype, "6-22B") == 0)	return 172;
+         if (strcmp(tntype, "6-23") == 0)	return 173;
+         if (strcmp(tntype, "6-24A") == 0)	return 174;
+         if (strcmp(tntype, "6-24B") == 0)	return 175;
+         if (strcmp(tntype, "6-25A") == 0)	return 176;
+         if (strcmp(tntype, "6-25B") == 0)	return 177;
+         if (strcmp(tntype, "6-26") == 0)	return 178;
+         if (strcmp(tntype, "6-27A") == 0)	return 179;
+         if (strcmp(tntype, "6-27B") == 0)	return 180;
+         if (strcmp(tntype, "6-28") == 0)	return 181;
+         if (strcmp(tntype, "6-29") == 0)	return 182;
+         if (strcmp(tntype, "6-30A") == 0)	return 183;
+         if (strcmp(tntype, "6-30B") == 0)	return 184;
+         if (strcmp(tntype, "6-31A") == 0)	return 185;
+         if (strcmp(tntype, "6-31B") == 0)	return 186;
+         if (strcmp(tntype, "6-32") == 0)	return 187;
+         if (strcmp(tntype, "6-33A") == 0)	return 188;
+         if (strcmp(tntype, "6-33B") == 0)	return 189;
+         if (strcmp(tntype, "6-34A") == 0)	return 190;
+         if (strcmp(tntype, "6-34B") == 0)	return 191;
+         if (strcmp(tntype, "6-35") == 0)	return 192;
+         if (strcmp(tntype, "6-36A") == 0)	return 193;
+         if (strcmp(tntype, "6-36B") == 0)	return 194;
+         if (strcmp(tntype, "6-37") == 0)	return 195;
+         if (strcmp(tntype, "6-38") == 0)	return 196;
+         if (strcmp(tntype, "6-39A") == 0)	return 197;
+         if (strcmp(tntype, "6-39B") == 0)	return 198;
+         if (strcmp(tntype, "6-40A") == 0)	return 199;
+         if (strcmp(tntype, "6-40B") == 0)	return 200;
+         if (strcmp(tntype, "6-41A") == 0)	return 201;
+         if (strcmp(tntype, "6-41B") == 0)	return 202;
+         if (strcmp(tntype, "6-42") == 0)	return 203;
+         if (strcmp(tntype, "6-43A") == 0)	return 204;
+         if (strcmp(tntype, "6-43B") == 0)	return 205;
+         if (strcmp(tntype, "6-44A") == 0)	return 206;
+         if (strcmp(tntype, "6-44B") == 0)	return 207;
+         if (strcmp(tntype, "6-45") == 0)	return 208;
+         if (strcmp(tntype, "6-46A") == 0)	return 209;
+         if (strcmp(tntype, "6-46B") == 0)	return 210;
+         if (strcmp(tntype, "6-47A") == 0)	return 211;
+         if (strcmp(tntype, "6-47B") == 0)	return 212;
+         if (strcmp(tntype, "6-48") == 0)	return 213;
+         if (strcmp(tntype, "6-49") == 0)	return 214;
+         if (strcmp(tntype, "6-50") == 0)	return 215;
+         break;
+
+      case 7:
+         if (strcmp(tntype, "7-1") == 0)	return 216;
+         if (strcmp(tntype, "7-2A") == 0)	return 217;
+         if (strcmp(tntype, "7-2B") == 0)	return 218;
+         if (strcmp(tntype, "7-3A") == 0)	return 219;
+         if (strcmp(tntype, "7-3B") == 0)	return 220;
+         if (strcmp(tntype, "7-4A") == 0)	return 221;
+         if (strcmp(tntype, "7-4B") == 0)	return 222;
+         if (strcmp(tntype, "7-5A") == 0)	return 223;
+         if (strcmp(tntype, "7-5B") == 0)	return 224;
+         if (strcmp(tntype, "7-6A") == 0)	return 225;
+         if (strcmp(tntype, "7-6B") == 0)	return 226;
+         if (strcmp(tntype, "7-7A") == 0)	return 227;
+         if (strcmp(tntype, "7-7B") == 0)	return 228;
+         if (strcmp(tntype, "7-8") == 0)	return 229;
+         if (strcmp(tntype, "7-9A") == 0)	return 230;
+         if (strcmp(tntype, "7-9B") == 0)	return 231;
+         if (strcmp(tntype, "7-10A") == 0)	return 232;
+         if (strcmp(tntype, "7-10B") == 0)	return 233;
+         if (strcmp(tntype, "7-11A") == 0)	return 234;
+         if (strcmp(tntype, "7-11B") == 0)	return 235;
+         if (strcmp(tntype, "7-12") == 0)	return 236;
+         if (strcmp(tntype, "7-13A") == 0)	return 237;
+         if (strcmp(tntype, "7-13B") == 0)	return 238;
+         if (strcmp(tntype, "7-14A") == 0)	return 239;
+         if (strcmp(tntype, "7-14B") == 0)	return 240;
+         if (strcmp(tntype, "7-15") == 0)	return 241;
+         if (strcmp(tntype, "7-16A") == 0)	return 242;
+         if (strcmp(tntype, "7-16B") == 0)	return 243;
+         if (strcmp(tntype, "7-17") == 0)	return 244;
+         if (strcmp(tntype, "7-18A") == 0)	return 245;
+         if (strcmp(tntype, "7-18B") == 0)	return 246;
+         if (strcmp(tntype, "7-19A") == 0)	return 247;
+         if (strcmp(tntype, "7-19B") == 0)	return 248;
+         if (strcmp(tntype, "7-20A") == 0)	return 249;
+         if (strcmp(tntype, "7-20B") == 0)	return 250;
+         if (strcmp(tntype, "7-21A") == 0)	return 251;
+         if (strcmp(tntype, "7-21B") == 0)	return 252;
+         if (strcmp(tntype, "7-22") == 0)	return 253;
+         if (strcmp(tntype, "7-23A") == 0)	return 254;
+         if (strcmp(tntype, "7-23B") == 0)	return 255;
+         if (strcmp(tntype, "7-24A") == 0)	return 256;
+         if (strcmp(tntype, "7-24B") == 0)	return 257;
+         if (strcmp(tntype, "7-25A") == 0)	return 258;
+         if (strcmp(tntype, "7-25B") == 0)	return 259;
+         if (strcmp(tntype, "7-26A") == 0)	return 260;
+         if (strcmp(tntype, "7-26B") == 0)	return 261;
+         if (strcmp(tntype, "7-27A") == 0)	return 262;
+         if (strcmp(tntype, "7-27B") == 0)	return 263;
+         if (strcmp(tntype, "7-28A") == 0)	return 264;
+         if (strcmp(tntype, "7-28B") == 0)	return 265;
+         if (strcmp(tntype, "7-29A") == 0)	return 266;
+         if (strcmp(tntype, "7-29B") == 0)	return 267;
+         if (strcmp(tntype, "7-30A") == 0)	return 268;
+         if (strcmp(tntype, "7-30B") == 0)	return 269;
+         if (strcmp(tntype, "7-31A") == 0)	return 270;
+         if (strcmp(tntype, "7-31B") == 0)	return 271;
+         if (strcmp(tntype, "7-32A") == 0)	return 272;
+         if (strcmp(tntype, "7-32B") == 0)	return 273;
+         if (strcmp(tntype, "7-33") == 0)	return 274;
+         if (strcmp(tntype, "7-34") == 0)	return 275;
+         if (strcmp(tntype, "7-35") == 0)	return 276;
+         if (strcmp(tntype, "7-36A") == 0)	return 277;
+         if (strcmp(tntype, "7-36B") == 0)	return 278;
+         if (strcmp(tntype, "7-37") == 0)	return 279;
+         if (strcmp(tntype, "7-38A") == 0)	return 280;
+         if (strcmp(tntype, "7-38B") == 0)	return 281;
+	 break;
+
+      case 8:
+         if (strcmp(tntype, "8-1") == 0)	return 282;
+         if (strcmp(tntype, "8-2A") == 0)	return 283;
+         if (strcmp(tntype, "8-2B") == 0)	return 284;
+         if (strcmp(tntype, "8-3") == 0)	return 285;
+         if (strcmp(tntype, "8-4A") == 0)	return 286;
+         if (strcmp(tntype, "8-4B") == 0)	return 287;
+         if (strcmp(tntype, "8-5A") == 0)	return 288;
+         if (strcmp(tntype, "8-5B") == 0)	return 289;
+         if (strcmp(tntype, "8-6") == 0)	return 290;
+         if (strcmp(tntype, "8-7") == 0)	return 291;
+         if (strcmp(tntype, "8-8") == 0)	return 292;
+         if (strcmp(tntype, "8-9") == 0)	return 293;
+         if (strcmp(tntype, "8-10") == 0)	return 294;
+         if (strcmp(tntype, "8-11A") == 0)	return 295;
+         if (strcmp(tntype, "8-11B") == 0)	return 296;
+         if (strcmp(tntype, "8-12A") == 0)	return 297;
+         if (strcmp(tntype, "8-12B") == 0)	return 298;
+         if (strcmp(tntype, "8-13A") == 0)	return 299;
+         if (strcmp(tntype, "8-13B") == 0)	return 300;
+         if (strcmp(tntype, "8-14A") == 0)	return 301;
+         if (strcmp(tntype, "8-14B") == 0)	return 302;
+         if (strcmp(tntype, "8-15A") == 0)	return 303;
+         if (strcmp(tntype, "8-15B") == 0)	return 304;
+         if (strcmp(tntype, "8-16A") == 0)	return 305;
+         if (strcmp(tntype, "8-16B") == 0)	return 306;
+         if (strcmp(tntype, "8-17") == 0)	return 307;
+         if (strcmp(tntype, "8-18A") == 0)	return 308;
+         if (strcmp(tntype, "8-18B") == 0)	return 309;
+         if (strcmp(tntype, "8-19A") == 0)	return 310;
+         if (strcmp(tntype, "8-19B") == 0)	return 311;
+         if (strcmp(tntype, "8-20") == 0)	return 312;
+         if (strcmp(tntype, "8-21") == 0)	return 313;
+         if (strcmp(tntype, "8-22A") == 0)	return 314;
+         if (strcmp(tntype, "8-22B") == 0)	return 315;
+         if (strcmp(tntype, "8-23") == 0)	return 316;
+         if (strcmp(tntype, "8-24") == 0)	return 317;
+         if (strcmp(tntype, "8-25") == 0)	return 318;
+         if (strcmp(tntype, "8-26") == 0)	return 319;
+         if (strcmp(tntype, "8-27A") == 0)	return 320;
+         if (strcmp(tntype, "8-27B") == 0)	return 321;
+         if (strcmp(tntype, "8-28") == 0)	return 322;
+         if (strcmp(tntype, "8-29A") == 0)	return 323;
+         if (strcmp(tntype, "8-29B") == 0)	return 324;
+	 break;
+
+      case 9:
+         if (strcmp(tntype, "9-1") == 0)	return 325;
+         if (strcmp(tntype, "9-2A") == 0)	return 326;
+         if (strcmp(tntype, "9-2B") == 0)	return 327;
+         if (strcmp(tntype, "9-3A") == 0)	return 328;
+         if (strcmp(tntype, "9-3B") == 0)	return 329;
+         if (strcmp(tntype, "9-4A") == 0)	return 330;
+         if (strcmp(tntype, "9-4B") == 0)	return 331;
+         if (strcmp(tntype, "9-5A") == 0)	return 332;
+         if (strcmp(tntype, "9-5B") == 0)	return 333;
+         if (strcmp(tntype, "9-6") == 0)	return 334;
+         if (strcmp(tntype, "9-7A") == 0)	return 335;
+         if (strcmp(tntype, "9-7B") == 0)	return 336;
+         if (strcmp(tntype, "9-8A") == 0)	return 337;
+         if (strcmp(tntype, "9-8B") == 0)	return 338;
+         if (strcmp(tntype, "9-9") == 0)	return 339;
+         if (strcmp(tntype, "9-10") == 0)	return 340;
+         if (strcmp(tntype, "9-11A") == 0)	return 341;
+         if (strcmp(tntype, "9-11B") == 0)	return 342;
+         if (strcmp(tntype, "9-12") == 0)	return 343;
+	 break;
+
+      case 10:
+         if (strcmp(tntype, "10-1") == 0)	return 344;
+         if (strcmp(tntype, "10-2") == 0)	return 345;
+         if (strcmp(tntype, "10-3") == 0)	return 346;
+         if (strcmp(tntype, "10-4") == 0)	return 347;
+         if (strcmp(tntype, "10-5") == 0)	return 348;
+         if (strcmp(tntype, "10-6") == 0)	return 349;
+	 break;
+
+      case 11:
+         if (strcmp(tntype, "11-1") == 0)	return 350;
+	 break;
+
+      case 12:
+         if (strcmp(tntype, "12-1") == 0)	return 351;
+         break;
+   }
+
+   // no index desciption of the Tn type
+   return -1;
+}
+
 
 
 //////////////////////////////

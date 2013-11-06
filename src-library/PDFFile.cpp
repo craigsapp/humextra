@@ -279,7 +279,7 @@ void PDFFile::getStreamData(int streamobject, ostream& out) {
    char ch;
    file.seekg(dictend+1); 
    file.get(ch);
-   while ((!file.eof()) && isspace(ch)) {
+   while ((!file.eof()) && std::isspace(ch)) {
       file.get(ch);
    }
    if (ch != 's') {
@@ -569,12 +569,12 @@ int PDFFile::getXrefOffset(istream& file) {
    i = i-2;
    file.seekg(i, ios::beg);
    file.get(ch);
-   while ((i>0) && (!isdigit(ch))) {
+   while ((i>0) && (!std::isdigit(ch))) {
       i--;
       file.seekg(i, ios::beg);
       file.get(ch);
    }
-   if (!isdigit(ch)) {
+   if (!std::isdigit(ch)) {
       cerr << "ERROR5 extracting xref offset in file " << endl;
       cerr << "Expected digit, but found " << ch << endl;
       exit(1);
@@ -583,7 +583,7 @@ int PDFFile::getXrefOffset(istream& file) {
    i--;
    file.seekg(i, ios::beg);
    file.get(ch);
-   while ((bindex > 0) && (i>0) && (isdigit(ch))) {
+   while ((bindex > 0) && (i>0) && (std::isdigit(ch))) {
       buffer[bindex--] = ch;
       i--;
       file.seekg(i, ios::beg);
@@ -687,7 +687,7 @@ void PDFFile::initializeXrefTable(void) {
    
    while (!file.eof()) {
       file.get(ch);
-      while (!file.eof() && !isdigit(ch) && (ch != 't')) {
+      while (!file.eof() && !std::isdigit(ch) && (ch != 't')) {
          file.get(ch);
       }
       if (file.eof() || (ch == 't')) {
@@ -762,7 +762,7 @@ void PDFFile::processXrefList(istream& file, char firstdigit) {
    char ch;
    int startindex = firstdigit - '0';
    file.get(ch);
-   while (!file.eof() && isdigit(ch)) {
+   while (!file.eof() && std::isdigit(ch)) {
       startindex *= 10;
       startindex += ch - '0';
       file.get(ch);
@@ -772,7 +772,7 @@ void PDFFile::processXrefList(istream& file, char firstdigit) {
    // previous character should be a space and is not a digit.
    int objectcount = 0;
    file.get(ch);
-   while (!file.eof() && isdigit(ch)) {
+   while (!file.eof() && std::isdigit(ch)) {
       objectcount *= 10;
       objectcount += ch - '0';
       file.get(ch);
@@ -785,7 +785,7 @@ void PDFFile::processXrefList(istream& file, char firstdigit) {
 
    // now read the list of objects:
    int i;
-   while (!file.eof() && (isspace(ch))) {
+   while (!file.eof() && (std::isspace(ch))) {
       file.get(ch);
    }
    if (ch != '0') {
@@ -927,8 +927,8 @@ int PDFFile::getPreviousOffset(istream& file) {
 
    // skip any non-digit characters:
    file.get(ch);
-   while (!file.eof() && !isdigit(ch)) {
-      if (!isspace(ch)) {
+   while (!file.eof() && !std::isdigit(ch)) {
+      if (!std::isspace(ch)) {
          cerr << "ERROR: found a strange character after /Prev in trailer: " 
               << ch << endl;
       }
@@ -939,7 +939,7 @@ int PDFFile::getPreviousOffset(istream& file) {
    }
    int value = ch - '0';
    file.get(ch);
-   while (!file.eof() && isdigit(ch)) {
+   while (!file.eof() && std::isdigit(ch)) {
       value *= 10;
       value += ch - '0';
       file.get(ch);
@@ -988,7 +988,7 @@ void PDFFile::buildIndirectObjectIndex(istream& file, int xrefoffset) {
    
    while (!file.eof()) {
       file.get(ch);
-      while (!file.eof() && !isdigit(ch) && (ch != 't')) {
+      while (!file.eof() && !std::isdigit(ch) && (ch != 't')) {
          file.get(ch);
       }
       if (file.eof() || (ch == 't')) {

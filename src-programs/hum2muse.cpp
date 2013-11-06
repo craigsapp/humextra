@@ -1614,9 +1614,10 @@ void filterOptions(Array<char>& options, const char* filter) {
                break;
             }
          }
-      } else if (isdigit(options[i+1])) {
+      } else if (std::isdigit(options[i+1])) {
          // read one or more integers, separated by commas
-         while ((i < olength) && (isdigit(options[i]) || (options[i] == ','))) {
+         while ((i < olength) && (std::isdigit(options[i]) 
+               || (options[i] == ','))) {
             singles.last().append(options[i++]);
          }
          if (i <= olength) {
@@ -4323,7 +4324,7 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
          // printed by default in MuseData muse2ps program.  Adding
          // the string "\+" without quote in front of the number will
          // allow the number to be printed.
-         if (isdigit(verses[i].getBase()[0]) && (strcmp(ptr, "") != 0)) {
+         if (std::isdigit(verses[i].getBase()[0]) && (strcmp(ptr, "") != 0)) {
             strcat(buffer, "\\+");
          }
          else if ((verses[i].getBase()[0] == '<') && (strcmp(ptr, "") != 0)) { 
@@ -4377,7 +4378,7 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
          // printed by default in MuseData muse2ps program.  Adding
          // the string "\+" without quote in front of the number will
          // allow the number to be printed.
-         if (isdigit(verses[i].getBase()[0]) && (strcmp(ptr, "") != 0)) {
+         if (std::isdigit(verses[i].getBase()[0]) && (strcmp(ptr, "") != 0)) {
             strcat(buffer, "\\+");
          }
          // same for "<"

@@ -18,7 +18,7 @@
 
 #include "humdrum.h"
 #include <math.h>
-#include <ctype.h>
+#include <cctype>
 
 // function declarations
 void   checkOptions             (Options& opts, int argc, char* argv[]);
@@ -888,7 +888,7 @@ void printErrorMarker(HumdrumFile& infile, int best40, const char* mode) {
    }
    PerlRegularExpression pre2;
    const char* testmode = "major";
-   if (islower(pre.getSubmatch(1)[0])) {
+   if (std::islower(pre.getSubmatch(1)[0])) {
       testmode = "minor";
    }
    int testbase40 = Convert::kernToBase40(pre.getSubmatch());
@@ -1025,7 +1025,7 @@ void readWeights(const char* filename) {
       for (j=0; j<wfile[i].getFieldCount(); j++) {
          if (strcmp(wfile[i].getExInterp(j), "**kern") == 0) {
             key = Convert::kernToMidiNoteNumber(wfile[i][j]) % 12;
-            if (islower(wfile[i][j][0])) {
+            if (std::islower(wfile[i][j][0])) {
                key += 12;
             }
          } else if (strcmp(wfile[i].getExInterp(j), "**weight") == 0) {

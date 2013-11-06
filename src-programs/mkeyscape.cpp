@@ -2445,7 +2445,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 int hasdigit(const char* strang) {
    int i=0;
    while (strang[i] != '\0') {
-      if (isdigit(strang[i++])) {
+      if (std::isdigit(strang[i++])) {
          return 1;
       }
    }
@@ -2762,7 +2762,7 @@ void processWeights(const char* filename, Array<HISTTYPE>& major,
       for (j=0; j<wfile[i].getFieldCount(); j++) {
          if (strcmp(wfile[i].getExInterp(j), "**kern") == 0) {
             key = Convert::kernToMidiNoteNumber(wfile[i][j]) % 12;
-            if (islower(wfile[i][j][0])) {
+            if (std::islower(wfile[i][j][0])) {
                key += 12;
             }
          } else if (strcmp(wfile[i].getExInterp(j), "**weight") == 0) {
@@ -2845,7 +2845,7 @@ void setFilterOptions(Array<int>& channelfilter, const char* exclude) {
       if (!isxdigit(character)) {
          continue;
       }
-      if (isdigit(character)) {
+      if (std::isdigit(character)) {
          value = character - '0';
       } else {
          value = character - 'A' + 10;

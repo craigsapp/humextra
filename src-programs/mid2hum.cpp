@@ -47,7 +47,7 @@
 #include "Convert.h"
 #include "HumdrumFile.h"
 #include <math.h>
-#include <ctype.h>
+#include <cctype>
 
 #ifndef OLDCPP
    #include <sstream>
@@ -631,14 +631,14 @@ void printMetaData(ostream& out, Array<MetaInfo>& metadata, int metaindex) {
          break;    // ignore for now
 
          for (ii=0; ii<metadata[metaindex].tsize; ii++) {
-            if (isprint(metadata[metaindex].text[ii])) {
+            if (std::isprint(metadata[metaindex].text[ii])) {
                count++;
             } 
          }
          if (count > 0) {
             out << "! ";
             for (ii=0; ii<metadata[metaindex].tsize; ii++) {
-               if (isprint(metadata[metaindex].text[ii])) {
+               if (std::isprint(metadata[metaindex].text[ii])) {
                   out << metadata[metaindex].text[ii];
                } 
             }
@@ -650,14 +650,14 @@ void printMetaData(ostream& out, Array<MetaInfo>& metadata, int metaindex) {
          break;    // ignore for now
 
          for (ii=0; ii<metadata[metaindex].tsize; ii++) {
-            if (isprint(metadata[metaindex].text[ii])) {
+            if (std::isprint(metadata[metaindex].text[ii])) {
                count++;
             } 
          }
          if (count > 0) {
             out << "! ";
             for (ii=0; ii<metadata[metaindex].tsize; ii++) {
-               if (isprint(metadata[metaindex].text[ii])) {
+               if (std::isprint(metadata[metaindex].text[ii])) {
                   out << metadata[metaindex].text[ii];
                } 
             }

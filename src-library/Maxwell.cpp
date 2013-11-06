@@ -274,7 +274,7 @@ void Maxwell::analyzeAccent(HumdrumFile& score, Array<int>& accent, int flag) {
                continue;
             }
             if ((strncmp(score[line][j], "*M", 2) == 0) && 
-                  isdigit(score[line][j][2]) && 
+                  std::isdigit(score[line][j][2]) && 
                   (strchr(score[line][j], '/') != NULL)) {
                sscanf(score[line][j], "*M%d/%d", &metercount, &meterbase);
                break;

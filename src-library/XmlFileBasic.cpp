@@ -256,7 +256,7 @@ void XmlFileBasic::parseXmlStream(istream& input) {
          // end of data stream
          break;
       }
-      if (isspace((char)ch)) {
+      if (std::isspace((char)ch)) {
          extractWhiteSpace(space, input);
          space.append(null); 
          appendItem(space);
@@ -305,7 +305,7 @@ void XmlFileBasic::extractText(Array<char>& output, Array<char>& trailingspace,
    ch = input.get();
    while ((!input.eof()) && ((char)ch != '<')) {
       cch = (char)ch;
-      if (isspace(cch)) {
+      if (std::isspace(cch)) {
          whitespace.append(cch);
       } else {
          for (i=0; i<whitespace.getSize(); i++) {
@@ -381,7 +381,7 @@ void XmlFileBasic::extractTag(Array<char>& output, istream& input) {
             break;
 
          case 1:   // start of attribute value but not inside of parens
-            if (isspace(cch)) {
+            if (std::isspace(cch)) {
                output.append(cch);
             } else if (cch == '\'') {
                parenState = '\'';
@@ -434,7 +434,7 @@ void XmlFileBasic::extractWhiteSpace(Array<char>& output, istream& input) {
    char cch;
    output.setSize(0);
    ch = input.get();
-   while (!input.eof() && isspace((char)ch)) {
+   while (!input.eof() && std::isspace((char)ch)) {
       cch = (char)ch;
       output.append(cch);
       ch = input.get();

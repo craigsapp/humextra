@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
+#include <cctype>
 #include <stdio.h>
 #include <math.h>
 
@@ -196,13 +196,13 @@ int parseInterpretation(HumdrumFile& infile, int line, int track) {
          } else if (infile[line][i][0] == '*' && 
                infile[line][i][length-1] == ':') {
             key = Convert::kernToBase40(infile[line][i]);
-            if (isupper(infile[line][i][1])) {
+            if (std::isupper(infile[line][i][1])) {
                cout << " " << (char)tolower(infile[line][i][1]) << "-major\n";
-            } else if (islower(infile[line][i][1])) {
+            } else if (std::islower(infile[line][i][1])) {
                cout << " " << infile[line][i][1] << "-minor\n";
             } 
          } else if (strncmp(infile[line][i], "*I", 2) == 0) {
-            if (islower(infile[line][i][2])) {
+            if (std::islower(infile[line][i][2])) {
                strcpy(name, &infile[line][i][2]);
             }
          } else if (strncmp(infile[line][i], "*MM", 3) == 0) {

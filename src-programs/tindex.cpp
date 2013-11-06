@@ -1389,7 +1389,7 @@ void printMeter(HumdrumFile& infile) {
          if (infile[i][0][1] != 'M') {
             continue;
          }
-         if (!isdigit(infile[i][0][2])) {
+         if (!std::isdigit(infile[i][0][2])) {
             if (strcmp("*MX", infile[i][0]) == 0) {
                cout << "irregular";
                return;
@@ -1485,10 +1485,10 @@ void getKey(HumdrumFile& infile, int& mode, int& tonic) {
          if (infile[i][0][length-1] != ':') {
             continue;
          }
-         if (!isalpha(infile[i][0][1])) {
+         if (!std::isalpha(infile[i][0][1])) {
             continue;
          }
-         if (islower(infile[i][0][1])) {
+         if (std::islower(infile[i][0][1])) {
             mode = 1;  // minor
          } else {
             mode = 0;  // major

@@ -22,7 +22,7 @@ int optionListCompare(const void* a, const void* b);
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 
 #ifndef OLDCPP
    #include <iostream>
@@ -214,12 +214,12 @@ void Options::define(const char* aDefinition) {
    }
    i++;
    // skip over any white space
-   while (isspace(definitionString[i]) && i < len) {
+   while (std::isspace(definitionString[i]) && i < len) {
       i++;
    }
 
    // this character must be the option type
-   char optionType = (char)tolower(definitionString[i]);
+   char optionType = (char)std::tolower(definitionString[i]);
    definitionEntry->setType(optionType);
    i++;
       
@@ -237,7 +237,7 @@ void Options::define(const char* aDefinition) {
    }
 
    // skip any white space after option type.
-   while (isspace(definitionString[i]) && i < len) {
+   while (std::isspace(definitionString[i]) && i < len) {
       i++; 
    }
 
@@ -256,7 +256,7 @@ void Options::define(const char* aDefinition) {
    // now proces the default string.  store it in a temp storage for copying
 
    // skip any white space after option type.
-   while (i < len && isspace(definitionString[i])) {
+   while (i < len && std::isspace(definitionString[i])) {
       i++; 
    }
    if (i >= len || definitionString[i] == '\0') {
@@ -759,7 +759,7 @@ void Options::appendOptions(const char* strang) {
       }
 
 
-      if ((!doublequote && !singlequote) && isspace(strang[i])) {
+      if ((!doublequote && !singlequote) && std::isspace(strang[i])) {
          if (tempvalue.getSize() > 0) {
             ch = '\0';
             tempvalue.append(ch);

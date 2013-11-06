@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <ctype.h>
+#include <cctype>
 
 #ifndef OLDCPP
    #include <iostream>
@@ -1177,7 +1177,7 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
       if ((type & E_humrec_data) == E_humrec_data) {
          for (m=0; m<getSpineCount(n); m++) {
             ptr = ((*this)[n]).getSpineInfo(m);
-            while (ptr[0] != '\0' && !isdigit(ptr[0])) {
+            while (ptr[0] != '\0' && !std::isdigit(ptr[0])) {
                ptr++;
             }
             sscanf(ptr, "%d", &spineindex);
@@ -2001,11 +2001,11 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
    while (header.getline(buffer, URI_BUFFER_SIZE)) {
       int len = strlen(buffer);
       for (i=0; i<len; i++) {
-         buffer[i] = tolower(buffer[i]);
+         buffer[i] = std::tolower(buffer[i]);
       }
       if (strstr(buffer, "content-length") != NULL) {
          for (i=14; i<len; i++) {
-            if (isdigit(buffer[i])) {
+            if (std::isdigit(buffer[i])) {
                sscanf(&buffer[i], "%d", &datalength);
                if (datalength == 0) {
                   cerr << "Error: no data found for URI, probably invalid\n";

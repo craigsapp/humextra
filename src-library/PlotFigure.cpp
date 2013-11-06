@@ -14,7 +14,7 @@
 #include "PlotFigure.h"
 
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <math.h>
 
 #ifndef OLDCPP
@@ -417,12 +417,12 @@ void PlotFigure::readPoints(istream& input) {
          double ypos = 0;
          // real data point
          ptr = strtok(buffer, " \t,\n\r");
-         if (isdigit(ptr[0]) || ptr[0] == '-' || 
+         if (std::isdigit(ptr[0]) || ptr[0] == '-' || 
                ptr[0] == '+' || ptr[0] == '.') {
             xpos = strtod(ptr, NULL);
          }
          ptr = strtok(NULL, "\t,\n\r");
-         if (isdigit(ptr[0]) || ptr[0] == '-' || 
+         if (std::isdigit(ptr[0]) || ptr[0] == '-' || 
                ptr[0] == '+' || ptr[0] == '.') {
             ypos = strtod(ptr, NULL);
          }
@@ -1470,7 +1470,7 @@ void PlotFigure::addPoint(double x, double y, double radius, int type) {
 int PlotFigure::commandEqual(const char* command, const char* string) {
    int i = 0;
    while ((command[i] != '\0') && (string[i] != '\0') && 
-         (tolower(command[i]) == tolower(string[i]))) {
+         (std::tolower(command[i]) == std::tolower(string[i]))) {
       i++;
    }
    if (command[i] == '\0') {

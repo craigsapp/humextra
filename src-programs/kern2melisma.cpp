@@ -15,7 +15,7 @@
 #include "humdrum.h"
 
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <stdio.h>
 
 #ifndef OLDCPP
@@ -213,7 +213,7 @@ void printOutput(HumdrumFile& hfile) {
                if (hfile[i][j][2] == '#') {
                   cout << "-sharp";
                }
-               if (islower(hfile[i][j][1])) {
+               if (std::islower(hfile[i][j][1])) {
                   cout << " Minor";
                } else {
                   cout << " Major";
@@ -232,7 +232,7 @@ void printOutput(HumdrumFile& hfile) {
             }
             double tempomark = 0.0;
             if (strncmp(hfile[i][j], "*MM", 3) == 0 && 
-                  isdigit(hfile[i][j][3])) {
+                  std::isdigit(hfile[i][j][3])) {
                sscanf(hfile[i][j], "*MM%lf", &tempomark);
                cout << "Info Tempo " << tempomark << " MM per quarter note" 
                     << endl;

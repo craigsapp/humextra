@@ -18,7 +18,7 @@
 #include "PerlRegularExpression.h"
 
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -107,7 +107,7 @@ int MuseRecord::getOctave(void) {
    char recordInfo[16];
    getNoteField(recordInfo);
    int index = 0;
-   while (recordInfo[index] != '\0' && !isdigit(recordInfo[index])) {
+   while (recordInfo[index] != '\0' && !std::isdigit(recordInfo[index])) {
       index++;
    }
 
@@ -126,7 +126,7 @@ char* MuseRecord::getOctave(char* output) {
    char recordInfo[16];
    getNoteField(recordInfo);
    int index = 0;
-   while (recordInfo[index] != '\0' && !isdigit(recordInfo[index])) {
+   while (recordInfo[index] != '\0' && !std::isdigit(recordInfo[index])) {
       index++;
    }
 
@@ -183,7 +183,7 @@ int MuseRecord::getPitchClass(void) {
 char* MuseRecord::getPitchClass(char* output) {
    getNoteField(output);
    int index = 0;
-   while (output[index] != '\0' &&  !isdigit(output[index])) {
+   while (output[index] != '\0' &&  !std::isdigit(output[index])) {
       index++;
    }
    output[index] = '\0';
@@ -2831,7 +2831,7 @@ char* MuseRecord::getKernMeasureStyle(char* output) {
       strcat(output, temp);
    }
    for (int i=0; i<7; i++) {
-      temp[i] = tolower(temp[i]);
+      temp[i] = std::tolower(temp[i]);
    }
 
    if (strcmp(tempstyle, "mheavy1") == 0) {

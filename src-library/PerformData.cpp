@@ -15,7 +15,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <stdio.h>
 
 #ifndef OLDCPP
@@ -713,7 +713,7 @@ void PerformData::swap(int index1, int index2, int timeHeld) {
 //
  
 int PerformData::getLineType(const char* line) {
-   if (line == NULL || line[0] == '\0'|| isspace(line[0])) {
+   if (line == NULL || line[0] == '\0'|| std::isspace(line[0])) {
       return LINE_TYPE_NULL;
    } else if (line[0] == '=') {
       return LINE_TYPE_BARLINE;

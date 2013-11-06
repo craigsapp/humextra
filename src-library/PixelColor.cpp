@@ -11,7 +11,7 @@
 #include "PixelColor.h"
 
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -581,7 +581,7 @@ PixelColor PixelColor::getColor(const char* colorstring) {
    strncpy(buffer, colorstring, 100);
    length = strlen(buffer);
    for (i=0; i<length; i++) {
-      buffer[i] = tolower(buffer[i]);
+      buffer[i] = std::tolower(buffer[i]);
    }
    output.setColor(0,0,0);
 

@@ -35,7 +35,7 @@
 #include "PerlRegularExpression.h"
 
 #include <stdio.h>
-#include <ctype.h>
+#include <cctype>
 #include <string.h>
 
 #ifndef OLDCPP
@@ -458,13 +458,13 @@ char* HumdrumRecord::getBibValue(char* buffer, int maxsize) {
    for (i=3; i<length; i++) {
       if (recordString[i] == ':') {
          i++;
-         while ((i < length) && (isspace(recordString[i]))) {
+         while ((i < length) && (std::isspace(recordString[i]))) {
             i++;
          }
          strncpy(buffer, recordString + i, maxsize);
          length = strlen(buffer);
          for (j=length-1; j>=0; j++) {
-            if (isspace(buffer[j])) {
+            if (std::isspace(buffer[j])) {
                buffer[j] = '\0';
             } else {
                break;
@@ -761,7 +761,7 @@ int HumdrumRecord::getSpinePrediction(void) {
 double HumdrumRecord::getTrack(int spineNumber) {
    const char* info = getSpineInfo(spineNumber);
    int i = 0;
-   while (info[i] != '\0' && !isdigit(info[i])) {
+   while (info[i] != '\0' && !std::isdigit(info[i])) {
       i++;
    }
    double output;
@@ -772,8 +772,8 @@ double HumdrumRecord::getTrack(int spineNumber) {
    int subtrack = 0;
    if (info[i] != '\0') {
       i++;
-      if (isalpha(info[i])) {
-         subtrack = tolower(info[i]) - 'a';
+      if (std::isalpha(info[i])) {
+         subtrack = std::tolower(info[i]) - 'a';
          output += subtrack/1000.0;
       }
    }
@@ -818,7 +818,7 @@ int HumdrumRecord::getPrimaryTrack(int spineNumber) {
    }
    const char* info = getSpineInfo(spineNumber);
    int i = 0;
-   while (info[i] != '\0' && !isdigit(info[i])) {
+   while (info[i] != '\0' && !std::isdigit(info[i])) {
       i++;
    }
    int track = 0;
@@ -2764,7 +2764,7 @@ const char* HumdrumRecord::getLanguageName(const char* code) {
    int len = strlen(string);
    int i;
    for (i=0; i<len; i++) {
-      string[i] = tolower(string[i]);
+      string[i] = std::tolower(string[i]);
    }
 	  
    if (strcmp(string, "aar") == 0) { return "Afar"; }
@@ -3499,7 +3499,7 @@ const char* HumdrumRecord::getBibLangIso639_2(const char* string) {
 
    int i;
    for (i=0; i<len; i++) {
-      ptr[i] = tolower(ptr[i]);
+      ptr[i] = std::tolower(ptr[i]);
    }
    
    if (strcmp(ptr, "aar") == 0) { return "aar"; }  // Afar

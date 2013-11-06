@@ -1614,7 +1614,7 @@ void getRange(int& rangeL, int& rangeH, const char* rangestring) {
    char* buffer = new char[length+1];
    strcpy(buffer, rangestring);
    char* ptr;
-   if (isdigit(buffer[0])) {
+   if (std::isdigit(buffer[0])) {
       ptr = strtok(buffer, " \t\n:-");
       sscanf(ptr, "%d", &rangeL);
       ptr = strtok(NULL, " \t\n:-");

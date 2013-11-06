@@ -31,7 +31,7 @@
 
 #include "humdrum.h"
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <stdio.h>
 
 #ifndef OLDCPP
@@ -502,10 +502,10 @@ int convertInterpretationToGMN(HumdrumFile& hfile, int part, int line) {
       if (length >= 5) {
          clef = hfile[line][spine][5];
       }
-      if (length >= 6 && isdigit(hfile[line][spine][6])) {
+      if (length >= 6 && std::isdigit(hfile[line][spine][6])) {
          ctype = hfile[line][spine][6] - '0'; 
       }
-      clef = tolower(clef);
+      clef = std::tolower(clef);
       if (ctype != 99) {
          sprintf(buffer, "\\clef<\"%c%d\">", clef, ctype);
       } else {
@@ -694,7 +694,7 @@ void convertNoteToGMN(const char* note, int graceQ) {
       base40 = Convert::kernToBase40(note);
       octave = (base40 / 40) - 3;           // Middle C = C1 in Guido
       Convert::base40ToKern(buffer, base40);
-      name = tolower(buffer[0]);
+      name = std::tolower(buffer[0]);
    }
 
    if (restQ) {

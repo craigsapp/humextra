@@ -62,7 +62,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <ctype.h>
+#include <cctype>
 #include <math.h>
 
 #ifndef OLDCPP
@@ -2673,7 +2673,7 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
 
                /* 20110202
                slash = strchr(infile[i][0], '/');
-               if ((infile[i][0][1] == 'M') && isdigit(infile[i][0][2]) &&
+               if ((infile[i][0][1] == 'M') && std::isdigit(infile[i][0][2]) &&
                      (slash != NULL)) {
                   measureBeats = atoi(&infile[i][0][2]);
                   if (!fixedTimebase) {
@@ -3991,7 +3991,7 @@ void HumdrumFile::analyzeTempoMarkings(Array<double>& tempo, double tdefault) {
             continue;
          }
 
-         if (strncmp(score[i][j], "*MM", 3) == 0 && isdigit(score[i][j][3])) {
+         if (strncmp(score[i][j], "*MM", 3) == 0 && std::isdigit(score[i][j][3])) {
             sscanf(score[i][j], "*MM%lf", &lasttempo);
             break;
          }
@@ -4032,7 +4032,7 @@ void HumdrumFile::analyzeMeter(Array<double>& top, Array<double>& bottom,
                continue;
             }
             if ((strncmp(score[line][j], "*M", 2) == 0) &&
-                  isdigit(score[line][j][2]) &&
+                  std::isdigit(score[line][j][2]) &&
                   (strchr(score[line][j], '/') != NULL)) {
                count = sscanf(score[line][j], "*M%d/%d", &testtop,
                      &testbottom);

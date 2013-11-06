@@ -12,7 +12,7 @@
 #include "humdrum.h"
 
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 
 #ifndef OLDCPP
    #include <sstream>
@@ -111,7 +111,7 @@ void printWithoutBarNumbers(HumdrumRecord& humrecord) {
       } else {
          length = strlen(humrecord[i]);
          for (j=0; j<length; j++) {
-            if (!isdigit(humrecord[i][j])) {
+            if (!std::isdigit(humrecord[i][j])) {
                cout << humrecord[i][j];
             }
          }
@@ -344,7 +344,7 @@ void printSingleBarNumber(const char* string, int measurenum) {
    for (i=0; i<length; i++) {
       if (string[i] == '=' && string[i+1] != '=') {
          cout << string[i] << measurenum;
-      } else if (!isdigit(string[i])) {
+      } else if (!std::isdigit(string[i])) {
          cout << string[i];
       }
    }

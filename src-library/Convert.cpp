@@ -29,7 +29,7 @@
 //                
 
 #include <math.h>
-#include <ctype.h>
+#include <cctype>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -401,7 +401,7 @@ RationalNumber Convert::kernToDurationR(const char* aKernString) {
    }
 
    index = 0;
-   while (aKernString[index] != '\0' && !isdigit(aKernString[index])) {
+   while (aKernString[index] != '\0' && !std::isdigit(aKernString[index])) {
       index++;
    }
    if (aKernString[index] == '\0') {
@@ -411,7 +411,7 @@ RationalNumber Convert::kernToDurationR(const char* aKernString) {
    
    // should now be at start of kern rhythm
    int orhythm = 0;
-   while (aKernString[index] != '\0' && isdigit(aKernString[index])) {
+   while (aKernString[index] != '\0' && std::isdigit(aKernString[index])) {
       orhythm *= 10;
       orhythm += aKernString[index] - '0';
       index++;
@@ -580,7 +580,7 @@ int Convert::kernToDiatonicPitchClass(const char* buffer) {
    int i = 0;
    int character;
    while (buffer[i] != '\0') {
-      character = tolower(buffer[i]);
+      character = std::tolower(buffer[i]);
       if (character == 'a') {
          return 'a';
       } else if (character == 'b') {
@@ -1515,9 +1515,9 @@ char* Convert::base40ToKern(char* output, int aPitch) {
 
    strcpy(output, kernPitchClass.getName(chroma));
    if (octave >= 4) {
-      output[0] = tolower(output[0]);
+      output[0] = std::tolower(output[0]);
    } else {
-      output[0] = toupper(output[0]);
+      output[0] = std::toupper(output[0]);
    }
    int repeat = 0;
    switch (octave) {
@@ -1913,8 +1913,8 @@ int Convert::kernToBase40(const char* kernfield) {
    int note = E_unknown;
    int i = 0;
    while (kernfield[i] != '\0') {
-      if (isalpha(kernfield[i])) {
-         switch (toupper(kernfield[i])) {
+      if (std::isalpha(kernfield[i])) {
+         switch (std::toupper(kernfield[i])) {
             case 'A': case 'B': case 'C': case 'D':
             case 'E': case 'F': case 'G':
                note = kernNoteToBase40(&kernfield[i]);
@@ -1990,7 +1990,7 @@ int Convert::kernNoteToBase40(const char* name) {
    while (name[octave] != '\0' && name[octave] == name[0]) {
       octave++;
    }
-   if (islower(name[0])) {
+   if (std::islower(name[0])) {
       output += (octave - 1) * 40;
    } else {
       output -= (octave - 1) * 40;
@@ -2320,7 +2320,7 @@ int Convert::museToBase40(const char* pitchString) {
    strcpy(temp, pitchString);
    int octave;
    int i = length;
-   while (i >= 0 && !isdigit(temp[i])) {
+   while (i >= 0 && !std::isdigit(temp[i])) {
       i--;
    }
   
@@ -2446,7 +2446,7 @@ char* Convert::base12ToKern(char* output, int aPitch) {
    }
 
    if (octave >= 4) {
-      output[0] = tolower(output[0]);
+      output[0] = std::tolower(output[0]);
    } else {
       output[0] = toupper(output[0]);
    }
@@ -3353,6 +3353,13 @@ const char* Convert::base12ToTnSetName(Array<int>& base12) {
       case 12:
          if (x[1]==1 && x[2]==2 && x[3]==3 && x[4]==4 && x[5]==5 && x[6]==6 && x[7]==7 && x[8]==8 && x[9]==9 && x[10]==10 && x[11]==11)	return "12-1*S1";
    }
+
+int z;
+for (z=0; z<x.getSize(); z++) {
+cout << "UNKNOWN: ";
+cout << x[z] << " ";
+}
+cout << endl;
 
    return "unknown";
 }

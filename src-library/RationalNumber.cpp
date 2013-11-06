@@ -839,7 +839,7 @@ int RationalNumber::isNumber(char *number) {
    }
 
    while (i<len && isnumber) {
-       if (isdigit(number[i]) == 0) {
+       if (std::isdigit(number[i]) == 0) {
            if (number[i] == '.') {
             if (i+1 > len-1) {
                isnumber = false;

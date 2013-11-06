@@ -70,7 +70,7 @@
 #include "MusicXmlFile.h"
 #include "Convert.h"
 #include "PerlRegularExpression.h"
-#include <ctype.h>
+#include <cctype>
 #include <string.h>
 #include <stdio.h>
 
@@ -426,7 +426,7 @@ void MusicXmlFile::removeBorderSpaces(char* buffer) {
    int length = strlen(buffer);
    int i;
    for (i=length-1; i>=0; i--) {
-      if (isspace(buffer[i])) {
+      if (std::isspace(buffer[i])) {
          buffer[i] = '\0';
       } else {
          break;
@@ -435,7 +435,7 @@ void MusicXmlFile::removeBorderSpaces(char* buffer) {
 
    int count = 0;
    for (i=0; i<length; i++) {
-      if (isspace(buffer[i])) {
+      if (std::isspace(buffer[i])) {
          count++;
       } else {
          break;
@@ -1945,8 +1945,8 @@ int MusicXmlFile::parsePitch(CXMLObject* entry) {
                   string = cdata->GetData();
                   strncpy(buffer, string.c_str(), 512);
                   removeBorderSpaces(buffer);
-                  if (isalpha(buffer[0])) {
-                     switch (toupper(buffer[0])) {
+                  if (std::isalpha(buffer[0])) {
+                     switch (std::toupper(buffer[0])) {
                         case 'C': chroma =  2; break;
                         case 'D': chroma =  8; break;
                         case 'E': chroma = 14; break;

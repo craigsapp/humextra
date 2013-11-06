@@ -16,7 +16,7 @@
 
 
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <stdlib.h>
 
 #ifndef OLDCPP

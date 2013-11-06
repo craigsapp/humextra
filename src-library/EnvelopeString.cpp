@@ -12,7 +12,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <math.h>
 
 #ifndef OLDCPP
@@ -493,7 +493,7 @@ int EnvelopeString::determineType(const char* aString) {
 
    // if the first non-space character is a '[' then a MusicKit envelope
    for (index=0; index<length; index++) {
-      if (!isspace(aString[index])) {
+      if (!std::isspace(aString[index])) {
          if (aString[index] == '[') return MUSICKIT_ENV;
          else break;
       }
@@ -501,7 +501,7 @@ int EnvelopeString::determineType(const char* aString) {
 
    // if the first non-space character is a '{' then a Mathematica envelope
    for (index=0; index<length; index++) {
-      if (!isspace(aString[index])) {
+      if (!std::isspace(aString[index])) {
          if (aString[index] == '{') return MMA_ENV;
          else break;
       }
@@ -556,7 +556,7 @@ double EnvelopeString::extractNumber(const char* aString, int& index) {
 
    // skip to the number to extract
    while (aString[index] != '\0') {
-      if (isdigit(aString[index]) ||
+      if (std::isdigit(aString[index]) ||
             aString[index] == '+' ||
             aString[index] == '-' ||
             aString[index] == '.' ||
@@ -571,7 +571,7 @@ double EnvelopeString::extractNumber(const char* aString, int& index) {
 
    // skip number  just read
    while (aString[index] != '\0') {
-      if (isdigit(aString[index]) ||
+      if (std::isdigit(aString[index]) ||
             aString[index] == '+' ||
             aString[index] == '-' ||
             aString[index] == '.' ||
@@ -585,7 +585,7 @@ double EnvelopeString::extractNumber(const char* aString, int& index) {
 
    // skip any white space after number
    while (aString[index] != '\0') {
-      if (isspace(aString[index])) {
+      if (std::isspace(aString[index])) {
          index++;
       } else { 
          break;
@@ -857,7 +857,7 @@ void EnvelopeString::makeSIGenv(void) {
    SSTREAM newString;
    int i, j;
    
-   if (toupper(defaultInterpolation) != 'L') {
+   if (std::toupper(defaultInterpolation) != 'L') {
       newString << defaultInterpolation;
    }
    // put the default parameter here later.
@@ -1629,7 +1629,7 @@ void EnvelopeString::processPLAINenv(const char* aString, int aDimension) {
    index = 0;
    skipSpace(aString, index);
 
-   if (isalpha(aString[index])) {
+   if (std::isalpha(aString[index])) {
       cerr << "Error at beginning of string: " << aString << endl;
       exit(1);
    }
@@ -1708,7 +1708,7 @@ void EnvelopeString::processSIGenv(const char* aString) {
    int sCount = 0;
    for (i=0; i<length; i++) {
       if (aString[i] == ';') pointCount++;
-      if (tolower(aString[i]) == 's') {
+      if (std::tolower(aString[i]) == 's') {
          pointCount--;
          sCount++;
          if (sCount > 1) {
@@ -1738,12 +1738,12 @@ void EnvelopeString::processSIGenv(const char* aString) {
    defaultParameter = -9999;
    index = 0;
    skipSpace(aString, index);
-   if (isalpha(aString[index])) {
+   if (std::isalpha(aString[index])) {
       validateInterpolation(aString[index]);
-      defaultInterpolation = toupper(aString[index]);
+      defaultInterpolation = std::toupper(aString[index]);
       index++;
       skipSpace(aString, index);
-      if (isdigit(aString[index])) {
+      if (std::isdigit(aString[index])) {
          defaultParameter = extractNumber(aString, index);
          skipSpace(aString, index);
       } 
@@ -1766,7 +1766,7 @@ void EnvelopeString::processSIGenv(const char* aString) {
            << testNumbers[getDimension()-1] << " in " << aString << endl;
       exit(1);
    }
-   while (aString[index] != ';' && !isalpha(aString[index]) &&
+   while (aString[index] != ';' && !std::isalpha(aString[index]) &&
           aString[index] != ')' && aString[index] != '\0' ) {
       dimension++;
       if (getDimension() >= MAX_ENVELOPE_POINT_DIMENSION) {
@@ -1807,7 +1807,7 @@ void EnvelopeString::processSIGenv(const char* aString) {
    pointParameter[0] = -9999;
 
    // check for any interpolation data in first point
-   if (isalpha(aString[index])) {
+   if (std::isalpha(aString[index])) {
       validateInterpolation(aString[index]);
       pointInterp[0] = aString[index];
       index++;
@@ -1836,7 +1836,7 @@ void EnvelopeString::processSIGenv(const char* aString) {
       index++;
 
       skipSpace(aString, index);
-      if (tolower(aString[index]) == 's') {
+      if (std::tolower(aString[index]) == 's') {
          if (tempStickIndex != -1) {
             cerr << "Error: can have only one stick point in envelope: "
                  << aString << endl;
@@ -1867,11 +1867,11 @@ void EnvelopeString::processSIGenv(const char* aString) {
       pointParameter[i] = 0.0;
 
       // check for any interpolation data.
-      if (isalpha(aString[index])) {
+      if (std::isalpha(aString[index])) {
          pointInterp[i] = aString[index];
          // skip any whitespace and see if next char is ';' or ')'
          // otherwise a parameter for interpolation
-         while (index < length && isspace(aString[index])) index++;
+         while (index < length && std::isspace(aString[index])) index++;
         if (aString[index] == ';' || aString[index] == ')') {
             pointParameter[i] = 0.0;
          } else {
@@ -1885,7 +1885,7 @@ void EnvelopeString::processSIGenv(const char* aString) {
             points[j][i] = extractNumber(aString, index);
          
             // check for any interpolation data.
-            if (isalpha(aString[index])) {
+            if (std::isalpha(aString[index])) {
                validateInterpolation(aString[index]);
                pointInterp[i] = aString[index];
                index++;
@@ -1927,9 +1927,9 @@ void EnvelopeString::processSIGenv(const char* aString) {
 
    if (aString[index] == '\0') {
       return;
-   } else if (tolower(aString[index]) == 't') {
+   } else if (std::tolower(aString[index]) == 't') {
       absoluteType = 't';
-   } else if (tolower(aString[index]) == 'm') {
+   } else if (std::tolower(aString[index]) == 'm') {
       absoluteType = 'm';
    } else {
       cerr << "Error: unknown characters after end of envelope: "
@@ -2007,7 +2007,7 @@ void EnvelopeString::skipSpace(const char* string, int& index,
 
 
 int EnvelopeString::validateInterpolation(char anInterp) {
-   switch (tolower(anInterp)) {
+   switch (std::tolower(anInterp)) {
       case 'l':
       case 'g':
       case 'c':

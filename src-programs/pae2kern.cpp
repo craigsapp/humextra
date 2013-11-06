@@ -332,7 +332,7 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
       }
       
       // rhythmic values
-      else if (isdigit(incipit[i]) != 0) {
+      else if (std::isdigit(incipit[i]) != 0) {
          i += getDurations( incipit, &current_measure, i );
       }
 
@@ -568,7 +568,7 @@ int getDurations(const char* incipit, MeasureObject* measure, int index ) {
       measure->dots.setSize(j+1);
       i += getDuration(incipit, &measure->durations[j], &measure->dots[j], i );
       j++;
-      if ((i+1 < length) && isdigit(incipit[i+1])) {
+      if ((i+1 < length) && std::isdigit(incipit[i+1])) {
          i++;
       } else {
          break;
@@ -636,7 +636,7 @@ int getTupletFermata(const char* incipit, double current_duration, NoteObject *n
                           // we need to change the tuplet duration in consequence
       int note_dot = 0;
       // the duration for the tuplet given before it, or by the first duration value in triplets
-      if ((index == 0) || (isdigit(incipit[index-1]) == 0)) {
+      if ((index == 0) || (std::isdigit(incipit[index-1]) == 0)) {
          is_triplet = true; // this means that we have to keep the first value for triplets
          current_duration *= 2; // in case there is no value, use the current value
                                 // this is wrong syntax wise but it appears in the data
@@ -645,7 +645,7 @@ int getTupletFermata(const char* incipit, double current_duration, NoteObject *n
       
       double tuplet_duration = 0.0;
       while ((t < length) && (incipit[t] != ')') && (incipit[t] != ';')) {
-         if (isdigit(incipit[t]) != 0) { // new duration in the tuplet
+         if (std::isdigit(incipit[t]) != 0) { // new duration in the tuplet
             t += getDuration( incipit, &note_duration, &note_dot, t );
             note_duration = getDurationWithDot(note_duration, note_dot);
             if (is_triplet && is_first_event) { // it is a triplet
@@ -983,13 +983,13 @@ int getTimeInfo( const char* incipit, Array<double>& timeinfo, string *output, i
    int i = index;
    int length = strlen(incipit);
    
-   if (!isdigit(incipit[i]) && (incipit[i] != 'c') && (incipit[i] != 'o'))
+   if (!std::isdigit(incipit[i]) && (incipit[i] != 'c') && (incipit[i] != 'o'))
        return 0;
 
    // find the end of time signature end
    i++; // the time signature length is a least 1
    while (i < length) {
-      if (!isdigit(incipit[i]) && (incipit[i] != '/') && (incipit[i] != '.')) {
+      if (!std::isdigit(incipit[i]) && (incipit[i] != '/') && (incipit[i] != '.')) {
          break;
       }
       i++;
@@ -1099,7 +1099,7 @@ int getWholeRest( const char *incipit, int *wholerest, int index ) {
    int i = index;
 
    *wholerest = 1;
-   if ((i+1 < length) && isdigit(incipit[i+1])) {
+   if ((i+1 < length) && std::isdigit(incipit[i+1])) {
       sscanf(&(incipit[i+1]), "%d", wholerest);
       char buf[10];
       memset( buf, 0, 10 );

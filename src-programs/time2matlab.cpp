@@ -14,7 +14,7 @@
 #include "humdrum.h"
 
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <stdio.h>
 
 #ifndef OLDCPP
@@ -467,7 +467,7 @@ int getMeasureNum(HumdrumFile& hfile, int index) {
 
    int i;
    for (i=index; i>=0; i--) {
-      if (hfile[i][0][0] == '=' && isdigit(hfile[i][0][1])) {
+      if (hfile[i][0][0] == '=' && std::isdigit(hfile[i][0][1])) {
          sscanf(hfile[i][0], "=%d", &output);
          break;
       }

@@ -14,7 +14,7 @@
 #include "MuseRecordBasic.h"
 #include "Enum_muserec.h"
 #include <string.h>
-#include <ctype.h>
+#include <cctype>
 #include <stdio.h>
 
 #ifndef OLDCPP
@@ -124,10 +124,10 @@ void MuseRecordBasic::clear(void) {
 int MuseRecordBasic::isEmpty(void) {
    int i;
    for (i=0; i<recordString.getSize(); i++) {
-      if (!isprint(recordString[i])) {
+      if (!std::isprint(recordString[i])) {
          continue;
       }
-      if (!isspace(recordString[i])) {
+      if (!std::isspace(recordString[i])) {
          return 0;
       }
    }
