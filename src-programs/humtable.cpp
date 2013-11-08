@@ -23,25 +23,31 @@
 #endif
 
 
-#define C0C0 "cellpadding=0 cellspacing=0"
+#define C0C0 "cellpadding=\"0\" cellspacing=\"0\""
 #define TDSEP 10
 #define TOKENWIDTH 70
 
 // function declarations
-void    checkOptions         (Options& opts, int argc, char* argv[]);
-void    example              (void);
-void    usage                (const char* command);
-void    createTable          (ostream& out, HumdrumFile& infile);
-void    printGlobalComment   (ostream& out, HumdrumFile& infile, int line);
-void    printReferenceRecord (ostream& out, HumdrumFile& infile, int line);
-void    printFields          (ostream& out, HumdrumFile& infile, int line);
-int     getSubTracks         (HumdrumFile& infile, int line, int track);
-void    addLabelHyperlinks   (Array<char>& strang);
-void    addLabelHyperlinkName(Array<char>& strang);
+void     checkOptions         (Options& opts, int argc, char* argv[]);
+void     example              (void);
+void     usage                (const char* command);
+void     createTable          (ostream& out, HumdrumFile& infile);
+void     printGlobalComment   (ostream& out, HumdrumFile& infile, int line);
+void     printReferenceRecord (ostream& out, HumdrumFile& infile, int line);
+void     printFields          (ostream& out, HumdrumFile& infile, int line);
+int      getSubTracks         (HumdrumFile& infile, int line, int track);
+void     addLabelHyperlinks   (Array<char>& strang);
+void     addLabelHyperlinkName(Array<char>& strang);
+ostream& printHtmlPageHeader  (ostream& out);
+ostream& printHtmlPageFooter  (ostream& out);
+ostream& printHtmlPageFooter  (ostream& out);
+ostream& printCss             (ostream& out);
 
 // global variables
 Options      options;            // database for command-line arguments
 int          fullQ = 1;          // used with --page option
+int          classQ = 1;         // used with -C option
+int          cssQ   = 0;         // used with --css option
 int          textareaQ = 0;      // used with --textarea option
 
 
@@ -49,42 +55,24 @@ int          textareaQ = 0;      // used with --textarea option
 
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile, outfile;
-
    // process the command-line options
    checkOptions(options, argc, argv);
-
-   // figure out the number of input files to process
-   int numinputs = options.getArgCount();
+   HumdrumFileSet infiles;
+   infiles.read(options);
 
    if (fullQ) {
-      cout << "<html><head><title>full page</title>\n";
-      cout << "<style type=\"text/css\">\n";
-      cout << "<!-- \n";
-      cout << "a {text-decoration:none}\n";
-      cout << ".hi:hover {background:#d0d0ff}\n";
-      cout << "//-->\n";
-      cout << "</style>\n";
-      cout << "</head><body>\n";
+      printHtmlPageHeader(cout);
+   } else if (cssQ) {
+      printCss(cout);
+      exit(0);
    }
 
-   for (int i=0; i<numinputs || i==0; i++) {
-      infile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
-      }
-
-      // analyze the input file according to command-line options
-      createTable(cout, infile);
-       
+   for (int i=0; i<infiles.getCount(); i++) {
+      createTable(cout, infiles[i]);
    }
 
    if (fullQ) {
-      cout << "</body></html>\n";
+      printHtmlPageFooter(cout);
    }
 
    return 0;
@@ -92,6 +80,77 @@ int main(int argc, char* argv[]) {
 
 
 ///////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////
+//
+// printCss -- print an example Cascading Style Sheet.
+//
+
+ostream& printCss(ostream& out) {
+   out << ".humhi:hover {background:#d0d0ff}\n";
+
+   out << "\n/* add a spacing after each cell so that the never touch */\n";
+   out << "td {padding-right:10px; }\n";
+
+   out << "\n/* Humdrum data tokens */\n";
+   out << ".humdat { color:black; }\n";
+
+   out << "\n/* Humdrum barlines*/\n";
+   out << ".humbar { background-color:#eeeeee; }\n";
+ 
+   out << "\n/* Humdrum interpretations */\n";
+   out << "\n/* Exclusive interpretations */\n";
+   out << ".humexinterp { color:magenta; }\n";
+   out << "\n/* Spine manipulators */\n";
+   out << ".hummanip { color:#f62217; }\n";
+   out << "\n/* other interpretations*/\n";
+   out << ".huminterp { color:#9f000f; }\n";
+
+   out << "\n/* Humdrum Comments */\n";
+   out << "\n/* Reference records*/\n";
+   out << ".humref { color:green; }\n";
+   out << "\n/* Global comments*/\n";
+   out << ".humgcom { color:blue; }\n";
+   out << "\n/* Local comments*/\n";
+   out << ".humlcom { color:#7d1b7e; }\n";
+
+   return out;
+}
+
+
+
+//////////////////////////////
+//
+// printHtmlPageFooter -- 
+//
+
+ostream& printHtmlPageFooter(ostream& out) {
+   out << "</body></html>\n";
+   return out;
+}
+
+
+
+//////////////////////////////
+//
+// printHtmlPageHeader --
+//
+
+ostream& printHtmlPageHeader(ostream& out) {
+   out << "<html><head><title>full page</title>\n";
+
+   if (cssQ) {
+      out << "<style type=\"text/css\">\n";
+      out << "a {text-decoration:none}\n";
+      printCss(out);
+      out << "</style>\n";
+   }
+   out << "</head><body>\n";
+   return out;
+}
+
+
 
 //////////////////////////////
 //
@@ -161,7 +220,25 @@ int getSubTracks(HumdrumFile& infile, int line, int track) {
 //
 
 void printFields(ostream& out, HumdrumFile& infile, int line) {
-   out << "<tr class=\"hi\" valign=baseline>";
+   out << "<tr valign=\"baseline\"";
+   if (classQ) {
+      if (infile[line].isBarline()) {
+         out << " class=\"humhi humbar\"";
+      } else if (infile[line].isData()) {
+         out << " class=\"humhi humdat\"";
+      } else if (infile[line].isInterpretation()) {
+         if (strncmp(infile[line][0], "**", 2) == 0) {
+            out << " class=\"humhi humexinterp\"";
+         } else if (infile[line].isSpineManipulator()) {
+            out << " class=\"humhi hummanip\"";
+         } else {
+            out << " class=\"humhi huminterp\"";
+         }
+      } else if (infile[line].isLocalComment()) {
+         out << " class=\"humhi humlcom\"";
+      }
+   }
+   out << ">";
    int& i = line;
    int j;
    int track;
@@ -299,11 +376,14 @@ void printReferenceRecord(ostream& out, HumdrumFile& infile, int line) {
 
    PerlRegularExpression pre;
    if (!pre.search(infile[line][0], "^!!!([^:]+):(.*)$", "")) {
-      out << "<tr valign=baseline><td colspan=" << infile.getMaxTracks() << ">";
+      out << "<tr valign=\"baseline\"";
+      if (classQ) {
+         out << " class=\"humhi humref\"";
+      }
+      out << "><td colspan=" << infile.getMaxTracks() << ">";
       out << "<font color=green>" << infile[i] << "</font></td></tr>";
       return;
    } 
-
 
    Array<char> description;
    char buffer[128] = {0};
@@ -313,7 +393,6 @@ void printReferenceRecord(ostream& out, HumdrumFile& infile, int line) {
    pre2.sar(description, "\"", "", "g");
 
    out << "<tr valign=baseline><td colspan=" << infile.getMaxTracks() << ">";
-   out << "<font color=green>";
    out << "<span title=\"";
    out << infile[line].getBibKey(buffer);
    out << ": ";
@@ -326,7 +405,7 @@ void printReferenceRecord(ostream& out, HumdrumFile& infile, int line) {
    out << pre.getSubmatch(2);
 
    out << "</span>";
-   out << "</font></td></tr>";
+   out << "</td></tr>";
 
 }
 
@@ -339,7 +418,11 @@ void printReferenceRecord(ostream& out, HumdrumFile& infile, int line) {
 
 void printGlobalComment(ostream& out, HumdrumFile& infile, int line) {
    int& i = line;
-   out << "<tr valign=baseline><td colspan=" << infile.getMaxTracks() << ">";
+   out << "<tr valign=\"baseline\"";
+   if (classQ) {
+      out << " class=\"humhi humgcom\"";
+   }
+   out << "><td colspan=" << infile.getMaxTracks() << ">";
    out << "<font color=blue>" << infile[i] << "</font></td></tr>";
 }
 
@@ -351,7 +434,9 @@ void printGlobalComment(ostream& out, HumdrumFile& infile, int line) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("page|full|p=b", "print a full page instead of just table");
+   opts.define("p|page|full=b", "print a full page instead of just table");
+   opts.define("C|no-class=b", "don't label elements with classes");
+   opts.define("css=b", "Print an example CSS ");
    opts.define("textarea|ta|t=b", "print data in a textarea after main table");
 
    opts.define("author=b",          "author of program");
@@ -378,11 +463,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       exit(0);
    }
 
-
-   fullQ     = opts.getBoolean("page");
-   textareaQ = opts.getBoolean("textarea");
-
-
+   fullQ     =  opts.getBoolean("page");
+   classQ    = !opts.getBoolean("no-class");
+   cssQ      =  opts.getBoolean("css");
+   textareaQ =  opts.getBoolean("textarea");
 }
 
 
