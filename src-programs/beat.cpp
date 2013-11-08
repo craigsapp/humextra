@@ -1103,9 +1103,7 @@ void printOutput(HumdrumFile& file, Array<RationalNumber>& Bfeatures,
 		     if (uQ) {
                         rat *= 4;
                      }
-                     cout << rat << " = " 
-			     << tickanalysis[i] << " x "
-			     << file.getMinTimeBase();
+                     cout << rat;
                   } else {
                      cout << Dinfo[i].getFloat();
                   }
