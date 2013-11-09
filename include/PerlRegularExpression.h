@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include "Array.h"
+#include "SigString.h"
 #include <pcre.h>
 
 
@@ -48,6 +49,9 @@ class PerlRegularExpression {
       void tr                       (Array<char>& inout, 
 		                     const char* inputlist, 
 		                     const char* outputlist);
+      static int getTokens          (Array<SigString>& output, 
+                                     const char* separator, 
+                                     const char* input);
       static int getTokens          (Array<Array<char> >& output, 
                                      const char* separator, 
                                      const char* input);
