@@ -42,6 +42,7 @@ ostream& printHtmlPageHeader  (ostream& out);
 ostream& printHtmlPageFooter  (ostream& out);
 ostream& printHtmlPageFooter  (ostream& out);
 ostream& printCss             (ostream& out);
+ostream& printClassInfo       (ostream& out, HumdrumFile& infile, int line);
 
 // global variables
 Options      options;            // database for command-line arguments
@@ -55,7 +56,6 @@ int          textareaQ = 0;      // used with --textarea option
 
 
 int main(int argc, char* argv[]) {
-   // process the command-line options
    checkOptions(options, argc, argv);
    HumdrumFileSet infiles;
    infiles.read(options);
@@ -91,7 +91,7 @@ ostream& printCss(ostream& out) {
    out << ".humhi:hover {background:#d0d0ff}\n";
 
    out << "\n/* add a spacing after each cell so that the never touch */\n";
-   out << "td {padding-right:10px; }\n";
+   out << ".humtd {padding-right:10px; }\n";
 
    out << "\n/* Humdrum data tokens */\n";
    out << ".humdat { color:black; }\n";
@@ -216,28 +216,41 @@ int getSubTracks(HumdrumFile& infile, int line, int track) {
 
 //////////////////////////////
 //
+// printClassInfo --
+//
+
+ostream& printClassInfo(ostream& out, HumdrumFile& infile, int line) {
+   if (infile[line].isBarline()) {
+      out << " class=\"humhi humbar\"";
+   } else if (infile[line].isData()) {
+      out << " class=\"humhi humdat\"";
+   } else if (infile[line].isInterpretation()) {
+      if (strncmp(infile[line][0], "**", 2) == 0) {
+         out << " class=\"humhi humexinterp\"";
+      } else if (infile[line].isSpineManipulator()) {
+         out << " class=\"humhi hummanip\"";
+      } else {
+         out << " class=\"humhi huminterp\"";
+      }
+   } else if (infile[line].isLocalComment()) {
+      out << " class=\"humhi humlcom\"";
+   }
+   return out;
+}
+
+
+
+//////////////////////////////
+//
 // printFields --
 //
 
 void printFields(ostream& out, HumdrumFile& infile, int line) {
    out << "<tr valign=\"baseline\"";
    if (classQ) {
-      if (infile[line].isBarline()) {
-         out << " class=\"humhi humbar\"";
-      } else if (infile[line].isData()) {
-         out << " class=\"humhi humdat\"";
-      } else if (infile[line].isInterpretation()) {
-         if (strncmp(infile[line][0], "**", 2) == 0) {
-            out << " class=\"humhi humexinterp\"";
-         } else if (infile[line].isSpineManipulator()) {
-            out << " class=\"humhi hummanip\"";
-         } else {
-            out << " class=\"humhi huminterp\"";
-         }
-      } else if (infile[line].isLocalComment()) {
-         out << " class=\"humhi humlcom\"";
-      }
+      printClassInfo(out, infile, line);
    }
+
    out << ">";
    int& i = line;
    int j;
@@ -249,11 +262,15 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
 
    for (track=1; track<=infile.getMaxTracks(); track++) {
       subtracks = getSubTracks(infile, line, track);
-      out << "<td>";
+      out << "<td";
+      if (classQ) {
+         out << " class=\"humtd\"";
+      }
+      out << ">";
       if (subtracks > 1) {
-         out << "<table " << C0C0 << "><tr valign=top";
-         if (infile[i].isMeasure()) {
-            out << " bgcolor=#eeeeee ";
+         out << "<table " << C0C0 << "><tr valign=baseline";
+         if (classQ) {
+            printClassInfo(out, infile, line);
          }
          out << ">";
          counter = 0;
@@ -375,35 +392,32 @@ void printReferenceRecord(ostream& out, HumdrumFile& infile, int line) {
    int& i = line;
 
    PerlRegularExpression pre;
-   if (!pre.search(infile[line][0], "^!!!([^:]+):(.*)$", "")) {
+   if (!pre.search(infile[line][0], "^!!!([^!:]+):(.*)$", "")) {
       out << "<tr valign=\"baseline\"";
       if (classQ) {
-         out << " class=\"humhi humref\"";
+         out << " class=\"humhi humgcom\"";
       }
       out << "><td colspan=" << infile.getMaxTracks() << ">";
-      out << "<font color=green>" << infile[i] << "</font></td></tr>";
+      out << infile[i] << "</font></td></tr>";
       return;
    } 
 
    Array<char> description;
-   char buffer[128] = {0};
    
    infile[line].getBibliographicMeaning(description, pre.getSubmatch(1));
    PerlRegularExpression pre2;
    pre2.sar(description, "\"", "", "g");
 
-   out << "<tr valign=baseline><td colspan=" << infile.getMaxTracks() << ">";
-   out << "<span title=\"";
-   out << infile[line].getBibKey(buffer);
-   out << ": ";
-   out << description;
-   out << "\">";
-
+   out << "<tr valign=\"baseline\"";
+   if (classQ) {
+      out << " class=\"humhi humref\"";
+   }
+   out << "><td colspan=" << infile.getMaxTracks() << ">";
+   out << "<span class=\"key\" title=\"" << description << "\">";
    out << "!!!";
    out << pre.getSubmatch(1);
    out << ":";
    out << pre.getSubmatch(2);
-
    out << "</span>";
    out << "</td></tr>";
 
@@ -423,7 +437,7 @@ void printGlobalComment(ostream& out, HumdrumFile& infile, int line) {
       out << " class=\"humhi humgcom\"";
    }
    out << "><td colspan=" << infile.getMaxTracks() << ">";
-   out << "<font color=blue>" << infile[i] << "</font></td></tr>";
+   out << infile[i] << "</font></td></tr>";
 }
 
 
@@ -499,4 +513,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 04be8d9cd277dd97fbb01f0a1790770e humtable.cpp [20130916]
+// md5sum: ba2bac14b7e14dd9ab188a7ac12411ee humtable.cpp [20131108]
