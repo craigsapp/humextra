@@ -745,4 +745,4 @@ void equalizeData2(double* data, int asize, double summation) {
 }
 
 
-// md5sum: 9df4276c4c37b5b431df00e4be811bc0 runningkey.cpp [20090323]
+// md5sum: ebf4f4f6e9fb25fcc6e6726775627c93 runningkey.cpp [20131108]

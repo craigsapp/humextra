@@ -560,4 +560,4 @@ int getMetricLevel(HumdrumFile& hfile, int index) {
 
 
 
-// md5sum: edad163cf9797b125c2fd80500199c0f time2matlab.cpp [20090406]
+// md5sum: 7f7e6c02137798962721d81fe5133af8 time2matlab.cpp [20131108]

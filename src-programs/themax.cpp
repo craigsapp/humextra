@@ -3412,4 +3412,4 @@ void processKernString(const char* astring) {
 }
 
 
-// md5sum: 5def68070759f95120560d12021fc894 themax.cpp [20130923]
+// md5sum: 371801038a4aace6608c2dd516f871f2 themax.cpp [20131108]

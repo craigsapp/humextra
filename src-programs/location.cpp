@@ -405,4 +405,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 1a0db1086f3c617f89bcef90507de076 location.cpp [20131017]
+// md5sum: cde7fed6b654fb814d2b9ea960ccfa3e location.cpp [20131108]

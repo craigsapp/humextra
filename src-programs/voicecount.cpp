@@ -700,4 +700,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 2fec2d31350a93bb111491e052b7dc93 voicecount.cpp [20131017]
+// md5sum: c7d1f19e533f408e64646c06a5a9d038 voicecount.cpp [20131108]

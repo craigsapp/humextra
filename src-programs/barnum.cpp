@@ -424,4 +424,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: dc8a875e92aded1fc1ae7353f83977fa barnum.cpp [20050403]
+// md5sum: 8faf137a3c9e29cc6d038697d92df53d barnum.cpp [20131108]
