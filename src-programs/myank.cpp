@@ -2033,10 +2033,10 @@ void removeDollarsFromString(Array<char>& buffer, int maxx) {
 
 void checkOptions(Options& opts, int argc, char** argv) {
    opts.define("v|verbose=b",  "Verbose output of data");
-   opts.define("d|debug=b",    "Debugging information");
+   opts.define("debug=b",    "Debugging information");
    opts.define("mark|marks=b",    "Yank measure with marked notes");
    opts.define("T|M|bar-number-text=b", "print barnum with LO text above system ");
-   opts.define("double|dm|md|mdsep|mdseparator=b", "Put double barline between non-consecutive measure segments");
+   opts.define("d|double|dm|md|mdsep|mdseparator=b", "Put double barline between non-consecutive measure segments");
    opts.define("m|b|measures|bars|measure|bar=s", "Measures to yank");
    opts.define("I|i|instrument=b", "Include instrument codes from start of data");
    opts.define("visible|not-invisible=b", "Do not make initial measure invisible");
