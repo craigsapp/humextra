@@ -1,7 +1,7 @@
 humextra
 ========
 
-C++ programs and library for processing Humdrum data files.
+C++ library and programs for processing Humdrum data files.
 
 
 Downloading
@@ -121,6 +121,49 @@ may need to be set in `~/.profile`.If you want to install for all users
 on a computer system then you would add such lines to the system login
 script (which will vary on the version of unix you are using).
 
+
+Online Commands
+===============
+
+Most command-line tools from Humdrum Extras can be run online from
+[this page](http://extras.humdrum.org/online).  These online versions
+of the programs were compiled with 
+[Emscripten](https://github.com/kripken/emscripten)
+into JavaScript and run directly in your browser.  Here are 
+some of the online version of the humextra tools:
+
+[barnum](http://extras.humdrum.org/online/#barnum),
+[beat](http://extras.humdrum.org/online/#beat),
+[blank](http://extras.humdrum.org/online/#blank),
+[cint](http://extras.humdrum.org/online/#cint),
+[dittox](http://extras.humdrum.org/online/#dittox),
+[extractx](http://extras.humdrum.org/online/#extractx),
+[gettime](http://extras.humdrum.org/online/#gettime),
+[harm2kern](http://extras.humdrum.org/online/#harm2kern),
+[hgrep](http://extras.humdrum.org/online/#hgrep),
+[hum2xml](http://extras.humdrum.org/online/#hum2xml),
+[humcat](http://extras.humdrum.org/online/#humcat),
+[humtable](http://extras.humdrum.org/online/#humtable),
+[keycor](http://extras.humdrum.org/online/#keycor),
+[location](http://extras.humdrum.org/online/#location),
+[minrhy](http://extras.humdrum.org/online/#minrhy),
+[mvspine](http://extras.humdrum.org/online/#mvspine),
+[myank](http://extras.humdrum.org/online/#myank),
+[pitchmix](http://extras.humdrum.org/online/#pitchmix),
+[prange](http://extras.humdrum.org/online/#prange),
+[prettystar](http://extras.humdrum.org/online/#prettystar),
+[ridx](http://extras.humdrum.org/online/#ridx),
+[rscale](http://extras.humdrum.org/online/#rscale),
+[runningkey](http://extras.humdrum.org/online/#runningkey),
+[sample](http://extras.humdrum.org/online/#sample),
+[satb2gs](http://extras.humdrum.org/online/#satb2gs),
+[scaletype](http://extras.humdrum.org/online/#scaletype),
+[scordur](http://extras.humdrum.org/online/#scordur),
+[serialize](http://extras.humdrum.org/online/#serialize),
+[thrux](http://extras.humdrum.org/online/#thrux),
+[tntype](http://extras.humdrum.org/online/#tntype),
+[transpose](http://extras.humdrum.org/online/#transpose),
+[voicecount](http://extras.humdrum.org/online/#voicecount).
 
 Updating
 ========
