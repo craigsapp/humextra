@@ -43,13 +43,22 @@ ostream& printHtmlPageFooter  (ostream& out);
 ostream& printHtmlPageFooter  (ostream& out);
 ostream& printCss             (ostream& out);
 ostream& printClassInfo       (ostream& out, HumdrumFile& infile, int line);
+void     getMarks             (HumdrumFile& infile, Array<char>& chars, 
+                               Array<SigString>& colors);
+ostream& printMarkStyle       (ostream& out, HumdrumFile& infile, int line, 
+                               int track, Array<char>& chars, 
+                               Array<SigString>& colors);
 
 // global variables
 Options      options;            // database for command-line arguments
-int          fullQ = 1;          // used with --page option
-int          classQ = 1;         // used with -C option
-int          cssQ   = 0;         // used with --css option
+int          fullQ     = 1;      // used with --page option
+int          classQ    = 1;      // used with -C option
+int          cssQ      = 0;      // used with --css option
 int          textareaQ = 0;      // used with --textarea option
+int          markQ     = 1;	 // used with -M option
+
+Array<char>      Markchar;
+Array<SigString> Markcolor;
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -158,6 +167,12 @@ ostream& printHtmlPageHeader(ostream& out) {
 //
 
 void createTable(ostream& out, HumdrumFile& infile) {
+   if (markQ) {
+      getMarks(infile, Markchar, Markcolor);
+   } else {
+      Markchar.setSize(0);;
+      Markcolor.setSize(0);;
+   }
 
    out << "<table " << C0C0 << ">\n";
 
@@ -190,6 +205,42 @@ void createTable(ostream& out, HumdrumFile& infile) {
       out << "</textarea>\n";
    }
 
+}
+
+
+
+//////////////////////////////
+//
+// getMarks -- Return a list of mark characters in **kern data.  Only
+//     considering **kern markers for the moment.
+//
+
+void getMarks(HumdrumFile& infile, Array<char>& chars, 
+      Array<SigString>& colors) {
+   const char* defaultcolor = "#dd0000";
+   const char* color = defaultcolor;
+   PerlRegularExpression pre;
+   char marker;
+   int i;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isReferenceRecord()) {
+         continue;
+      }
+      if (pre.search(infile[i][0], 
+            "!!!RDF\\*\\*kern:\\s*([^\\s])\\s*=.*(match|mark).*note")) {
+         marker = pre.getSubmatch(1)[0];
+         if (pre.search(infile[i][0], "color\\s*=\\s*[\"']([^\"']+)[\"']")) {
+            color = pre.getSubmatch(1);
+         } else if (pre.search(infile[i][0], "color\\s*=\\s*([^\\s]+)")) {
+            color = pre.getSubmatch(1);
+         } else {
+            color = defaultcolor;
+         }
+         chars.append(marker);
+         colors.increase(1);
+         colors.last() = color;
+      }
+   }
 }
 
 
@@ -263,6 +314,9 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
    for (track=1; track<=infile.getMaxTracks(); track++) {
       subtracks = getSubTracks(infile, line, track);
       out << "<td";
+      if (markQ && (subtracks == 1)) {
+         printMarkStyle(out, infile, line, track, Markchar, Markcolor);
+      }
       if (classQ) {
          out << " class=\"humtd\"";
       }
@@ -289,8 +343,14 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
                } else if (pre.search(strang, "^\\*>", "")) {
                   addLabelHyperlinkName(strang);
                }
-               out << "<td width=" << TOKENWIDTH << ">" << strang << "</td>";
+               out << "<td ";
+               if (markQ && (subtracks == 1)) {
+                  printMarkStyle(out, infile, line, track, Markchar, Markcolor);
+               }
+               out << " width=" << TOKENWIDTH << ">" << strang << "</td>";
                counter++;
+               // maybe get rid of this if statement since separation
+               // is not being handled by CSS:
                if (counter < subtracks) {
                   out << "<td width=" << TDSEP << "></td>";
                }
@@ -320,6 +380,48 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
       out << "</td>";
    }
    out << "</tr>\n";
+}
+
+
+
+//////////////////////////////
+//
+// printMarkStyle --  Have to do spine split marks as well.
+//
+
+ostream& printMarkStyle(ostream& out, HumdrumFile& infile, int line, 
+      int track, Array<char>& chars, Array<SigString>& colors) {
+   if (!infile[line].isData()) {
+      return out;
+   }
+   int ii, jj;
+   int j;
+   int k;
+   int ttrack;
+   for (j=0; j<infile[line].getFieldCount(); j++) {
+      ttrack = infile[line].getPrimaryTrack(j);
+      if (ttrack != track) {
+         continue;
+      }
+      
+      ii = line;
+      jj = j;
+      if (strcmp(infile[line][j], ".") == 0) {
+         ii = infile[line].getDotLine(j);
+         jj = infile[line].getDotSpine(j);
+      }
+
+      for (k=0; k<chars.getSize(); k++) {
+         if (strchr(infile[ii][jj], chars[k]) == NULL) {
+            continue;
+         }
+         // found a mark so set background color of cell
+         out << " style=\"background-color:" << colors[k] << "\"";
+         return out;
+      }
+   }
+
+   return out;
 }
 
 
@@ -448,10 +550,11 @@ void printGlobalComment(ostream& out, HumdrumFile& infile, int line) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("p|page|full=b", "print a full page instead of just table");
-   opts.define("C|no-class=b", "don't label elements with classes");
-   opts.define("css=b", "Print an example CSS ");
+   opts.define("p|page|full=b",   "print a full page instead of just table");
+   opts.define("C|no-class=b",    "don't label elements with classes");
+   opts.define("css=b",           "Print an example CSS ");
    opts.define("textarea|ta|t=b", "print data in a textarea after main table");
+   opts.define("M|no-marks=b",    "don't highlight marked notes");
 
    opts.define("author=b",          "author of program");
    opts.define("version=b",         "compilation info");
@@ -481,6 +584,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    classQ    = !opts.getBoolean("no-class");
    cssQ      =  opts.getBoolean("css");
    textareaQ =  opts.getBoolean("textarea");
+   markQ     = !opts.getBoolean("no-marks");
+
+   Markchar.setSize(0);;
+   Markcolor.setSize(0);;
 }
 
 
