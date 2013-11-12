@@ -569,6 +569,8 @@ int  printCombinations(Array<Array<NoteNode> >& notes,
             pattern = "**cint";
          } else if (strcmp(infile[i][0], "*-") == 0) {
             pattern = "*-";
+         } else if (strncmp(infile[i][0], "*>", 2) == 0) {
+            pattern = infile[i][0];
          }
          printAsCombination(infile, i, ktracks, reverselookup, pattern);
       } else if (infile[i].isLocalComment()) {
@@ -758,7 +760,7 @@ int printCombinationModulePrepare(ostream& out,
 //
 
 int getTriangleIndex(int number, int num1, int num2) {
-   int triangle = number * (number + 1) / 2;
+   // int triangle = number * (number + 1) / 2;
    // intermediate code, not active yet
    return 0;
 }
@@ -1359,6 +1361,8 @@ void printLatticeInterleaved(Array<Array<NoteNode> >& notes,
             pattern = "**cint";
          } else if (strcmp(infile[i][0], "*-") == 0) {
             pattern = "*-";
+         } else if (strncmp(infile[i][0], "*>", 2) == 0) {
+            pattern = infile[i][0];
          }
          printInterleaved(infile, i, ktracks, reverselookup, pattern);
       } else if (infile[i].isLocalComment()) {
