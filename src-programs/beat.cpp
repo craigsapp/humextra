@@ -464,6 +464,8 @@ void printMatchesWithData(Array<int>& linematch, HumdrumFile& infile) {
                cout << "**match";
             } else if (strcmp(infile[i][0], "*-") == 0) {
                cout << "*-";
+            } else if (strncmp(infile[i][0], "*>", 2) == 0) {
+               cout << infile[i][0];
             } else {
                cout << "*";
             }
@@ -1065,6 +1067,8 @@ void printOutput(HumdrumFile& file, Array<RationalNumber>& Bfeatures,
                }
             } else if (strcmp(file[i][0], "*-") == 0) {
                cout << "*-";
+            } else if (strncmp(file[i][0], "*>", 2) == 0) {
+               cout << file[i][0];
             } else {
                if ((strncmp(file[i][0], "*M", 2) == 0) && 
                   (strchr(file[i][0], '/') != NULL)) {
