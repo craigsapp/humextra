@@ -6,6 +6,8 @@
 // Last Modified: Sat Oct  8 22:14:11 PDT 2005 Added time interpolation
 // Last Modified: Wed Mar 29 20:19:00 PST 2006 Fixed various errors for kglee
 // Last Modified: Tue Apr  9 08:07:21 PDT 2013 Enabled multiple segment input
+// Last Modified: Mon Nov 11 23:41:54 PST 2013 Output null interpretations
+// Last Modified: Mon Nov 11 23:49:10 PST 2013 Defaut time is seconds
 // Filename:      ...sig/examples/all/gettime.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/gettime.cpp
 // Syntax:        C++; museinfo
@@ -543,7 +545,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("p|prepend=b",       "prepend analysis to input data");
    opts.define("i|interpolation=b", "interpolate times in prexisting spine");
    opts.define("o|offset=d:0.0",    "starting time offset");
-   opts.define("s|seconds=b",       "use seconds as the time unit");
+   opts.define("m|ms|milliseconds=b", "use seconds as the time unit");
    opts.define("simple=b",          "print total time in pure seconds");
    opts.define("t|tempo=b",         "display tempo rather than time");
    opts.define("d|default-tempo=d:60.0",  "default tempo to use if none in file");   
@@ -580,10 +582,10 @@ roundQ = 0;
    interpQ =  opts.getBoolean("interpolation");
    debugQ  =  opts.getBoolean("debug");
    offset  =  opts.getDouble("offset");
-   if (opts.getBoolean("seconds")) {
-      style = 's';
-   } else {
+   if (opts.getBoolean("milliseconds")) {
       style = 'm';
+   } else {
+      style = 's';
    }
    dtempo = opts.getDouble("default-tempo");
 
@@ -743,52 +745,24 @@ void printAnalysis(HumdrumFile& infile, Array<double>& timings,
             }
             cout << "\n";
          } else {
-            if (prependQ) {
-               if (strcmp(infile[i][0], "*-") == 0) {
-                  cout << "*-";
-               } else if (strncmp(infile[i][0], "*MM", 3) == 0) {
-                  tempomark = 1;
-                  cout << infile[i][0];
-               } else if (infile[i].equalFieldsQ("**kern")) {
-                  if ((strcmp(infile[i][0], "*^") != 0) &&
-                      (strcmp(infile[i][0], "*+") != 0) &&
-                      (strcmp(infile[i][0], "*x") != 0) &&
-                      (strcmp(infile[i][0], "*v") != 0)) {
-                     cout << infile[i][0];
-                  } else {
-                     cout << "*";
-                  }
-               } else {
-                  cout << "*";
-               }
-               cout << "\t";
-            }
-
-            if (prependQ || appendQ) {
-               cout << infile[i].getLine();
-            }
-
             if (appendQ) {
-               cout << "\t";
-               if (strcmp(infile[i][0], "*-") == 0) {
-                  cout << "*-";
-               } else if (strncmp(infile[i][0], "*MM", 3) == 0) {
-                  tempomark = 1;
-                  cout << infile[i][0];
-               } else if (infile[i].equalFieldsQ("**kern")) {
-                  if ((strcmp(infile[i][0], "*^") != 0) &&
-                      (strcmp(infile[i][0], "*+") != 0) &&
-                      (strcmp(infile[i][0], "*x") != 0) &&
-                      (strcmp(infile[i][0], "*v") != 0)) {
-                     cout << infile[i][0];
-                  } else {
-                     cout << "*";
-                  }
-               } else {
-                  cout << "*";
-               }
+               cout << infile[i] << '\t';
+            }
+            if (strcmp(infile[i][0], "*-") == 0) {
+               cout << "*-";
+            } else if (strncmp(infile[i][0], "*MM", 3) == 0) {
+               tempomark = 1;
+               cout << infile[i][0];
+            } else if (strncmp(infile[i][0], "*>", 2) == 0) {
+               // expansion label
+               cout << infile[i][0];
+            } else {
+               cout << "*";
             }
 
+            if (prependQ) {
+               cout << "\t" << infile[i];
+            }
             cout << "\n";
          }
          break;
