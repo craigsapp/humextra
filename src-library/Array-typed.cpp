@@ -115,7 +115,6 @@ int Array<char>::operator==(const char* string) {
    if (string == NULL) {
       return 0;
    }
-cout << "GOT HERE AAA" << endl;
    return !strcmp(string, object.getBase());
 }
 
