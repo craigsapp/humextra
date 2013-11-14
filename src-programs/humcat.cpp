@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 
    if (good1 == 0) {
       // nothing to do
-      exit(0);
+      exit(1);
    }
 
    // if printing segments, then don't do extra work to suppress **/*-:
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
    }
 
    int currindex = 0;
-   int count = 0;
+   int count = 1;
    while (streamer.read(infiles[currindex])) {
       count++;
       infiles[currindex].printNonemptySegmentLabel(cout);
