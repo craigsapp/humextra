@@ -1,9 +1,11 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Apr 11 11:43:12 PDT 2002
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 renamed SigCollection class
-// Last Modified: Mon Feb 21 08:29:14 PST 2011 added --match
-// Last Modified: Sun Feb 27 15:09:29 PST 2011 added fixed vocal colors
+// Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed SigCollection class
+// Last Modified: Mon Feb 21 08:29:14 PST 2011 Added --match
+// Last Modified: Sun Feb 27 15:09:29 PST 2011 Added fixed vocal colors
+// Last Modified: Thu Nov 14 12:17:29 PST 2013 Added choice of P3/P6 image 
+// Last Modified: Thu Nov 14 14:01:01 PST 2013 Changed P3 to default output
 // Filename:      ...sig/examples/all/proll.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/proll.cpp
 // Syntax:        C++; museinfo
@@ -56,6 +58,8 @@ int       maxfactor = 5;
 int       measureQ  = 1;              // used with the -M option
 int       keyboardQ = 1;              // used with the -K option
 int       style     = 'H';            // used with the -s option
+int       P3Q       = 1;              // used with -3 option
+int       P6Q       = 0;              // used with -6 option
 const char* keyboardcolor = "151515"; // used with the -k option
 
 ///////////////////////////////////////////////////////////////////////////
@@ -116,21 +120,40 @@ void printPicture(Array<PixelRow>& picturedata, Array<PixelRow>& background,
    PixelColor temp;
    PixelColor black(0,0,0);
    height = cfactor * height;
-   cout << "P6\n" << width << " " << height << "\n255\n";
+   if (P3Q) {
+      cout << "P3\n" << width << " " << height << "\n255\n";
+   } else {
+      cout << "P6\n" << width << " " << height << "\n255\n";
+   }
    for (i=maxp; i>=minp; i--) {
       for (m=0; m<cfactor; m++) {
          for (j=0; j<picturedata[i].getSize(); j++) {
             if (picturedata[i][j] == black) {
-               background[i][j].writePpm6(cout);
+               if (P3Q) {
+                  background[i][j].writePpm3(cout);
+               } else {
+                  background[i][j].writePpm6(cout);
+               }
             } else {
                if ((i > 0) && (cfactor > 1) && (m == cfactor-1) && 
                      (picturedata[i-1][j] == picturedata[i][j])) {
                   temp = picturedata[i][j] * 0.667;
-                  temp.writePpm6(cout);
+                  if (P3Q) {
+                     temp.writePpm3(cout);
+                  } else {
+                     temp.writePpm6(cout);
+                  }
                } else {
-                  picturedata[i][j].writePpm6(cout);
+                  if (P3Q) {
+                     picturedata[i][j].writePpm3(cout);
+                  } else {
+                     picturedata[i][j].writePpm6(cout);
+                  }
                }
             }
+         }
+         if (P3Q) {
+            cout << "\n";
          }
       }
    }
@@ -467,6 +490,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("k|keyboard=s:151515", "keyboard white keys color");
    opts.define("s|style=s:H",         "Coloring style");
    opts.define("mark=b",              "Highlight marked/matched notes");
+   opts.define("3|p3|P3=b",           "Output as P3 (ASCII) Portable anymap");
+   opts.define("6|p6|P6=b",           "Output as P6 (binary) Portable anymap");
 
    opts.define("debug=b",          "trace input parsing");   
    opts.define("author=b",         "author of the program");   
@@ -496,6 +521,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
    debugQ    =  opts.getBoolean("debug");
    markQ     =  opts.getBoolean("mark");
+   P6Q       =  opts.getBoolean("p6");
+   if (opts.getBoolean("p6")) {
+      P3Q = 0;
+   } else {
+      P3Q = 1;
+   }
    maxwidth  =  opts.getInteger("width");
    maxheight =  opts.getInteger("height");
    measureQ  = !opts.getBoolean("no-measure");
