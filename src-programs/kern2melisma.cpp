@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Dec 13 13:35:37 PST 2000
-// Last Modified: Wed Dec 13 13:35:41 PST 2000
+// Last Modified: Wed Nov 13 08:19:37 PST 2013 Updated to allow data downloading
 // Filename:      ...sig/examples/all/kern2melisma.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/kern2melisma.cpp
 // Syntax:        C++; museinfo
@@ -44,8 +44,12 @@ double    tdefault  = 60.0;   // used with the -t option
 int main(int argc, char** argv) {
    // process the command-line options
    checkOptions(options, argc, argv);
-
-   HumdrumFile hfile(options.getArg(1));
+   HumdrumStream streamer(options.getArgList());
+   HumdrumFile hfile;
+   if (!streamer.read(hfile)) {
+      // no data could be read
+      exit(1);
+   }
    hfile.analyzeRhythm("4");
    printOutput(hfile);
    return 0;
