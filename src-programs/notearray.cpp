@@ -2,10 +2,11 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Aug 30 10:51:26 PDT 2011
 // Last Modified: Fri Sep  2 18:25:34 PDT 2011
-// Last Modified: Tue Sep 13 13:33:52 PDT 2011 added -k option
-// Last Modified: Thu Sep 15 01:36:49 PDT 2011 added -D option
-// Last Modified: Thu Oct 20 22:23:27 PDT 2011 fixed init bug
-// Last Modified: Sun Oct 20 17:41:10 PDT 2013 fixed tie problem
+// Last Modified: Tue Sep 13 13:33:52 PDT 2011 Added -k option
+// Last Modified: Thu Sep 15 01:36:49 PDT 2011 Added -D option
+// Last Modified: Thu Oct 20 22:23:27 PDT 2011 Fixed init bug
+// Last Modified: Sun Oct 20 17:41:10 PDT 2013 Fixed tie problem
+// Last Modified: Tue Nov 12 14:37:11 PST 2013 Added column for measure duration
 // Filename:      ...sig/examples/all/notearray.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/notearray.cpp
 // Syntax:        C++; museinfo
@@ -36,6 +37,8 @@
 #define TYPE_KERN       1000
 #define TYPE_LINE	(2000-1)  /* +1 will be added later to make 2000 */
 #define TYPE_MEASURE	3000
+#define TYPE_BARDUR	3100
+#define TYPE_BEATDUR	3200
 #define TYPE_BEAT 	4000
 #define TYPE_ABSOLUTE	5000
 #define TYPE_LINEDUR    6000
@@ -48,7 +51,8 @@ void getNoteArray           (Array<Array<int> >& notes, Array<int>& measpos,
                              Array<int>& linenum, HumdrumFile& infile, 
                              int base, int flags);
 void printNoteArray         (Array<Array<int> >& notes, Array<int>& measpos, 
-                             Array<int>& linenum, HumdrumFile& infile);
+                             Array<int>& linenum, HumdrumFile& infile,
+                             Array<double>& bardur, Array<double>& beatdur);
 void printComments          (HumdrumFile& infile, int startline, int stopline, 
                              int style);
 void printExclusiveInterpretations(int basecount);
@@ -56,7 +60,8 @@ void printLine              (Array<Array<int> >& notes,
                              Array<Array<int> >& attacks, 
                              Array<Array<int> >& lasts, 
                              Array<Array<int> >& nexts, Array<int>& measpos, 
-                             Array<int>& linenum, HumdrumFile& infile, 
+                             Array<int>& linenum, Array<double>& bardur, 
+                             Array<double>& beatdur, HumdrumFile& infile, 
                              int index, int style);
 void usage                  (const char* command);
 void example                (void);
@@ -71,6 +76,8 @@ int  noteStartMarker        (Array<Array<int> >& notes, int line, int column);
 int  noteEndMarker          (Array<Array<int> >& notes, int line, int column);
 int  noteContinueMarker     (Array<Array<int> >& notes, int line, int column);
 int  singleNote             (Array<Array<int> >& notes, int line, int column);
+void getMeasureDurations    (Array<double>& bardur, HumdrumFile& infile);
+void getBeatDurations       (Array<double>& beatdur, HumdrumFile& infile);
 
 
 // global variables
@@ -87,6 +94,8 @@ int       rationalQ = 0;       // used with -r option
 int       fractionQ = 0;       // used with -f option
 int       absoluteQ = 0;       // used with -a option
 int       linedurQ  = 0;       // used with -D option
+int       measuredurQ = 1;     // used with --no-measure-duration
+int       beatdurQ  = 1;       // used with --no-beat-duration
 int       doubleQ   = 0;       // used with --double option
 int       lineQ     = 0;       // used with -l option
 int       mathQ     = 0;       // used with --mathematica option
@@ -114,6 +123,7 @@ int       Mincrement= 0;       // used to increment between pieces/movements
 int       kernQ     = 0;       // used with -k option
 int       kerntieQ  = 1;       // used with --no-tie option
 int       doubletieQ= 0;       // used with -T option
+int       zeroQ     = 1;       // used with -Z option
 RationalNumber Absoffset;      // used with --sa option
 
 const char* commentStart = "%";
@@ -127,7 +137,8 @@ const char* beatbase = "";     // used with -t option
 int main(int argc, char** argv) {
 
    Array<Array<int> > notelist;
-   Array<double>      metpos;
+   Array<double>      bardur;
+   Array<double>      beatdur;
    Array<int>         measpos;
    Array<int>         linenum;
  
@@ -157,9 +168,11 @@ int main(int argc, char** argv) {
       }
       // analyze the input file according to command-line options
       infile.analyzeRhythm(beatbase);
+      getMeasureDurations(bardur, infile);
+      getBeatDurations(beatdur, infile);
 
       getNoteArray(notelist, measpos, linenum, infile, base, doubleQ);
-      printNoteArray(notelist, measpos, linenum, infile);
+      printNoteArray(notelist, measpos, linenum, infile, bardur, beatdur);
       OffsetSum += notelist.getSize();
     
       if (!saQ) {
@@ -183,6 +196,52 @@ int main(int argc, char** argv) {
 
 
 ///////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////
+//
+// getMeasureDurations -- Calculate the duration of a measure for each
+//      line in the music.
+//
+
+void getMeasureDurations(Array<double>& bardur, HumdrumFile& infile) {
+   int i;
+   double value = infile.getPickupDuration();
+   bardur.setSize(infile.getNumLines());
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (infile[i].isBarline()) {
+         value = infile[i].getBeat();
+      } 
+      bardur[i] = value;      
+   }
+}
+
+
+
+//////////////////////////////
+//
+// getBeatDurations -- Extract the duration of a beat for each
+//      line in the music.
+//
+
+void getBeatDurations(Array<double>& bardur, HumdrumFile& infile) {
+   int i;
+   double value = 1.0; // quarter note
+   bardur.setSize(infile.getNumLines());
+   PerlRegularExpression pre;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (infile[i].isInterpretation()) {
+         if (pre.search(infile[i][0], "^\\*M(\\d+)/(\\d+)%(\\d+)")) {
+            
+            value = 4.0 / atoi(pre.getSubmatch(2)) * atoi(pre.getSubmatch(3));
+         } else if (pre.search(infile[i][0], "^\\*M(\\d+)/(\\d+)")) {
+            value = 4.0 / atoi(pre.getSubmatch(2));
+         }
+      } 
+      bardur[i] = value;      
+   }
+}
+
 
 
 //////////////////////////////
@@ -386,7 +445,8 @@ void getNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
 //
 
 void printNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
-      Array<int>& linenum, HumdrumFile& infile) {
+      Array<int>& linenum, HumdrumFile& infile, Array<double>& bardur, 
+      Array<double>& beatdur) {
 
    linenum.allowGrowth(0);
    measpos.allowGrowth(0);
@@ -432,9 +492,11 @@ void printNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
          printComments(infile, linenum[i-1]+1, linenum[i], humdrumQ);
       }
       if (typeQ && i == 0) {
-         printLine(notes, attacks, lasts, nexts, measpos, linenum, infile,i,1);
+         printLine(notes, attacks, lasts, nexts, measpos, linenum, 
+               bardur, beatdur, infile, i, 1);
       } else {
-         printLine(notes, attacks, lasts, nexts, measpos, linenum, infile,i,0);
+         printLine(notes, attacks, lasts, nexts, measpos, linenum, 
+               bardur, beatdur, infile, i, 0);
       }
    }
 
@@ -656,7 +718,8 @@ void getNoteAttackIndexes(Array<Array<int> >& attacks,
 
 void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks, 
       Array<Array<int> >& lasts, Array<Array<int> >& nexts, 
-      Array<int>& measpos, Array<int>& linenum, HumdrumFile& infile, 
+      Array<int>& measpos, Array<int>& linenum, Array<double>& bardur,
+      Array<double>& beatdur, HumdrumFile& infile, 
       int index, int style) {
 
    int& i = index;
@@ -690,8 +753,36 @@ void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks,
       cout << measpos[i];
    }
 
-   if (beatQ) {
+   if (measuredurQ) {
       if (indexQ || lineQ || measureQ) {
+         if (mathQ) {
+            cout << ",";
+         }
+         cout << "\t";
+      }
+      if ((i == 0) && (linenum[i] == TYPE_LINE)) {
+         cout << TYPE_BARDUR;
+      } else {
+         cout << bardur[linenum[i]];
+      }
+   }
+
+   if (beatdurQ) {
+      if (indexQ || lineQ || measureQ || measuredurQ) {
+         if (mathQ) {
+            cout << ",";
+         }
+         cout << "\t";
+      }
+      if ((i == 0) && (linenum[i] == TYPE_LINE)) {
+         cout << TYPE_BEATDUR;
+      } else {
+         cout << beatdur[linenum[i]];
+      }
+   }
+
+   if (beatQ) {
+      if (indexQ || lineQ || measuredurQ || measureQ || beatdurQ) {
          if (mathQ) {
             cout << ",";
          }
@@ -701,18 +792,21 @@ void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks,
          cout << TYPE_BEAT;
       } else if (rationalQ) {
          if (fractionQ) {
-            cout << infile[linenum[i]].getBeatR();
+            cout << infile[linenum[i]].getBeatR() - 1;
          } else {
-            infile[linenum[i]].getBeatR().printTwoPart(cout);
+            // switched to 0-offset metrical position
+            RationalNumber value = infile[linenum[i]].getBeatR();
+            value -= 1;
+            value.printTwoPart(cout);
          }
       } else {
          // print beat position as a floating-point number:
-         cout << infile[linenum[i]].getBeat();
+         cout << infile[linenum[i]].getBeat() - 1;
       }
    }
 
    if (absoluteQ) {
-      if (indexQ || lineQ || measureQ || beatQ) {
+      if (indexQ || lineQ || measuredurQ || measureQ || beatdurQ || beatQ) {
          if (mathQ) {
             cout << ",";
          }
@@ -735,7 +829,8 @@ void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks,
    }
 
    if (linedurQ) {
-      if (indexQ || lineQ || measureQ || beatQ || absoluteQ) {
+      if (indexQ || lineQ || measuredurQ || measureQ || beatdurQ || 
+            beatQ || absoluteQ) {
          if (mathQ) {
             cout << ",";
          }
@@ -756,7 +851,8 @@ void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks,
       }
  
    }
-   if (indexQ || lineQ || measureQ || beatQ || absoluteQ || linedurQ) {
+   if (indexQ || lineQ || measuredurQ || measureQ || beatdurQ || 
+         beatQ || absoluteQ || linedurQ) {
       if (mathQ) {
          cout << ",";
       }
@@ -1150,6 +1246,26 @@ void printExclusiveInterpretations(int basecount) {
       cout << "bar\t"; 
    }
 
+   if (measuredurQ) { 
+      if ((startmark == 0) && mathQ) {
+         cout << "(*";
+         startmark++;
+      } else {
+         cout << prefix;
+      }
+      cout << "mdur\t"; 
+   }
+
+   if (beatdurQ) { 
+      if ((startmark == 0) && mathQ) {
+         cout << "(*";
+         startmark++;
+      } else {
+         cout << prefix;
+      }
+      cout << "bdur\t"; 
+   }
+
    if (beatQ) { 
       if ((startmark == 0) && mathQ) {
          cout << "(*";
@@ -1269,6 +1385,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("N|no-cols=b",     "turn off all information columns");
    opts.define("attack=b",        "display note-attack index values");
    opts.define("double=b",        "add rests at double barlines");
+   opts.define("no-measure-duration=b",  "don't display duration of measures");
+   opts.define("no-beat-duration=b",  "don't display duration of beats");
    opts.define("last=b",          "display previous note-attack index values");
    opts.define("math|mathematica=s:data", "print output data as Matlab array");
    opts.define("mel|melodic=b",    "display melodic note index columns");
@@ -1278,6 +1396,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("sa|separate-absolute=b", "single absolute beat positions");
    opts.define("sep|separator=b",  "print a separator between input analyses");
    opts.define("quote=b",          "print quotes around kern names");
+   opts.define("Z|no-zero-beat=b", "start first beat of measure at 1 rather than 0");
 
    opts.define("debug=b");        // determine bad input line num
    opts.define("author=b");       // author of program
@@ -1305,7 +1424,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (opts.getBoolean("josquin")) {
-      beatbase  = "1";  // beat is the whole note.
+      // fix analysis, until then this is turned off:
+      // beatbase  = "1";  // beat is the whole note.
       doubleQ   = 1;
    } else {
       beatbase  = opts.getString("beat");
@@ -1365,6 +1485,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    typeQ     =  opts.getBoolean("type");
    attackQ   =  opts.getBoolean("attack");
    nextQ     =  opts.getBoolean("last");
+   measuredurQ = !opts.getBoolean("no-measure-duration");
+   beatdurQ    = !opts.getBoolean("no-beat-duration");
    lastQ     =  opts.getBoolean("next");
    indexQ    =  opts.getBoolean("index");
    sepQ      =  opts.getBoolean("sep");
@@ -1372,6 +1494,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    Mincrement=  opts.getInteger("measure-offset");
    moQ       =  opts.getBoolean("measure-offset");
    Offset    =  opts.getInteger("offset");
+   zeroQ     = !opts.getInteger("no-zero-beat");
    quoteQ    =  opts.getBoolean("quote");
    doubletieQ=  opts.getBoolean("all-tie");
    if (doubletieQ) {
