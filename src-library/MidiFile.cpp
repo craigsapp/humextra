@@ -3,16 +3,17 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Nov 26 14:12:01 PST 1999
 // Last Modified: Fri Dec  2 13:26:29 PST 1999
-// Last Modified: Wed Dec 13 10:33:30 PST 2000 (modified sorting routine)
-// Last Modified: Tue Jan 22 23:23:37 PST 2002 (allowed reading of meta events)
-// Last Modified: Tue Nov  4 23:09:19 PST 2003 (adjust noteoff in eventcompare)
-// Last Modified: Tue Jun 29 09:43:10 PDT 2004 (fixed end-of-track problem)
-// Last Modified: Sat Dec 17 23:11:57 PST 2005 (added millisecond ticks)
-// Last Modified: Thu Sep 14 20:07:45 PDT 2006 (added SMPTE ASCII printing)
-// Last Modified: Tue Apr  7 09:23:48 PDT 2009 (added addMetaEvent)
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
-// Last Modified: Mon Jul 26 13:38:23 PDT 2010 (added timing in seconds)
-// Last Modified: Tue Feb 22 13:26:40 PST 2011 (added write(ostream))
+// Last Modified: Wed Dec 13 10:33:30 PST 2000 Modified sorting routine
+// Last Modified: Tue Jan 22 23:23:37 PST 2002 Allowed reading of meta events
+// Last Modified: Tue Nov  4 23:09:19 PST 2003 Adjust noteoff in eventcompare
+// Last Modified: Tue Jun 29 09:43:10 PDT 2004 Fixed end-of-track problem
+// Last Modified: Sat Dec 17 23:11:57 PST 2005 Added millisecond ticks
+// Last Modified: Thu Sep 14 20:07:45 PDT 2006 Added SMPTE ASCII printing
+// Last Modified: Tue Apr  7 09:23:48 PDT 2009 Added addMetaEvent
+// Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed SigCollection class
+// Last Modified: Mon Jul 26 13:38:23 PDT 2010 Added timing in seconds
+// Last Modified: Tue Feb 22 13:26:40 PST 2011 Added write(ostream)
+// Last Modified: Mon Nov 18 13:10:37 PST 2013 Added .printHex function.
 // Filename:      ...sig/src/sigInfo/MidiFile.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/MidiFile.cpp
 // Syntax:        C++ 
@@ -28,10 +29,20 @@
 #ifndef OLDCPP
    #include <iomanip>
    #include <fstream>
+   #include <sstream>
+   #define SSTREAM stringstream
+   #define CSTRING str().c_str()
    using namespace std;
 #else
    #include <iomanip.h>
    #include <fstream.h>
+   #ifdef VISUAL
+      #include <strstrea.h>
+   #else
+      #include <strstream.h>
+   #endif
+   #define SSTREAM strstream
+   #define CSTRING str()
 #endif
 
 
@@ -1479,6 +1490,38 @@ int MidiFile::write(const char* aFile) {
    int status = write(outputfile);
    outputfile.close();
    return status;
+}
+
+
+
+//////////////////////////////
+//
+// MidiFile::printHex -- print as a list of ASCII Hex bytes, 
+//    formatted 25 to a line, and two digits each.
+//
+
+ostream& MidiFile::printHex(ostream& out) {
+   SSTREAM tempstream;
+   MidiFile::write(tempstream);
+   int value = 0;
+   int i;
+   int len = tempstream.str().length();
+   int wordcount = 0;
+   int linewidth = 25;
+   for (i=0; i<len; i++) {
+      value = (unsigned char)tempstream.str()[i];
+      printf("%02x", value);
+      if (i < len - 1) {
+         if (wordcount % linewidth) {
+            out << ' ';
+         } else {
+            out << '\n';
+         }
+      }
+      wordcount++;
+   }
+   out << '\n';
+   return out;
 }
 
 

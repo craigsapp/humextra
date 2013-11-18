@@ -29,6 +29,7 @@
 // Last Modified: Wed Oct 12 16:23:02 PDT 2011 fixed --temperament pc 0 prob.
 // Last Modified: Fri Aug  3 16:09:29 PDT 2012 added DEFAULT for --timbres
 // Last Modified: Tue Oct 16 21:02:56 PDT 2012 added getTitle/song title
+// Last Modified: Mon Nov 18 13:04:44 PST 2013 default output as ASCII MIDI
 // Filename:      ...sig/examples/all/hum2mid.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2mid.cpp
 // Syntax:        C++; museinfo
@@ -161,6 +162,7 @@ int     stdoutQ          =   0;    // used with --stdout option
 int     starttick        =   0;    // used with --no-rest option
 int     bendQ            =   0;    // used with --bend option
 int     metQ             =   0;    // used with --met option
+int     infoQ            =   0;    // used with --info option
 int     timbresQ         =   0;    // used with --timbres option
 Array<SigString> TimbreName;       // used with --timbres option
 Array<int> TimbreValue;            // used with --timbres option
@@ -382,6 +384,8 @@ int main(int argc, char* argv[]) {
       if (stdoutQ) {
          outfile.write(cout);
       } else if (outlocation == NULL) {
+         outfile.printHex(cout);
+      } else if (infoQ) {
          cout << outfile;
       } else {
          outfile.write(outlocation);
@@ -873,6 +877,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("debug=b",        "Debugging turned on");
    opts.define("stdout=b",       "Print MIDI file to standard output");
    opts.define("mark=b",         "Handle marked notes somehow");
+   opts.define("info=b",         "Display as quasi ASCII MIDI");
    opts.define("bend=d:200.0",   "Turn on pitch-bend with given half-depth");
    opts.define("temperament|tune=s:", "Turn on pitch-bend with given data file");
    opts.define("monotune=s:", "Turn on pitch-bend tuning for monophonic tracks");
@@ -1001,6 +1006,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    norestQ       =  opts.getBoolean("no-rest");
    autopanQ      =  opts.getBoolean("autopan");
    bendQ         =  opts.getBoolean("bend");
+   infoQ         =  opts.getBoolean("info");
    rhysc         = opts.getDouble("rhythmic-scaling");
    if (bendQ) {
       bendamt    =  opts.getDouble("bend");

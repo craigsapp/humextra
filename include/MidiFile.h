@@ -3,16 +3,17 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Nov 26 14:12:01 PST 1999
 // Last Modified: Fri Dec  2 13:26:44 PST 1999
-// Last Modified: Fri Nov 10 12:13:15 PST 2000 (added some more editing cap.)
-// Last Modified: Thu Jan 10 10:03:39 PST 2002 (added allocateEvents())
-// Last Modified: Mon Jun 10 22:43:10 PDT 2002 (added clear())
-// Last Modified: Sat Dec 17 23:11:57 PST 2005 (added millisecond ticks)
-// Last Modified: Tue Feb  5 11:51:43 PST 2008 (read() set to const char*)
-// Last Modified: Tue Apr  7 09:23:48 PDT 2009 (added addMetaEvent)
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
-// Last Modified: Thu Jul 22 23:28:54 PDT 2010 (added tick to time mapping)
-// Last Modified: Thu Jul 22 23:28:54 PDT 2010 (changed _MFEvent to MFEvent)
-// Last Modified: Tue Feb 22 13:26:40 PST 2011 (added write(ostream))
+// Last Modified: Fri Nov 10 12:13:15 PST 2000 Added some more editing cap.
+// Last Modified: Thu Jan 10 10:03:39 PST 2002 Added allocateEvents()
+// Last Modified: Mon Jun 10 22:43:10 PDT 2002 Added clear()
+// Last Modified: Sat Dec 17 23:11:57 PST 2005 Added millisecond ticks
+// Last Modified: Tue Feb  5 11:51:43 PST 2008 Read() set to const char*
+// Last Modified: Tue Apr  7 09:23:48 PDT 2009 Added addMetaEvent
+// Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed SigCollection class
+// Last Modified: Thu Jul 22 23:28:54 PDT 2010 Added tick to time mapping
+// Last Modified: Thu Jul 22 23:28:54 PDT 2010 Changed _MFEvent to MFEvent
+// Last Modified: Tue Feb 22 13:26:40 PST 2011 Added write(ostream)
+// Last Modified: Mon Nov 18 13:10:37 PST 2013 Added .printHex function.
 // Filename:      ...sig/include/sigInfo/MidiFile.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/MidiFile.h
 // Syntax:        C++ 
@@ -138,6 +139,7 @@ class MidiFile {
       void      splitTracks               (void);
       int       write                     (const char* aFile);
       int       write                     (ostream& out);
+      ostream&  printHex                  (ostream& out);
       void      setFilename               (const char* aname);
       const char* getFilename             (void);
 
