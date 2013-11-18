@@ -2,11 +2,11 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Jun  5 13:48:27 PDT 2001
 // Last Modified: Tue Jun  5 13:48:29 PDT 2001
-// Last Modified: Fri Feb 25 00:09:19 PST 2005 (balanced <measure> markers)
-// Last Modified: Tue Dec 12 20:23:42 PST 2006 (handling > and < as text)
-// Last Modified: Tue Nov 22 07:08:10 PST 2011 (fixed grace noteshapes)
-// Last Modified: Tue Jun 26 15:13:50 PDT 2012 (added <time-modification> for tuplets)
-// Last Modified: Tue Jun 26 17:06:38 PDT 2012 (some bug fixes for multi-voice treatment)
+// Last Modified: Fri Feb 25 00:09:19 PST 2005 Balanced <measure> markers
+// Last Modified: Tue Dec 12 20:23:42 PST 2006 Handling > and < as text
+// Last Modified: Tue Nov 22 07:08:10 PST 2011 Fixed grace noteshapes
+// Last Modified: Tue Jun 26 15:13:50 PDT 2012 Added <time-modification> for tuplets
+// Last Modified: Tue Jun 26 17:06:38 PDT 2012 Some bug fixes for multi-voice treatment
 // Filename:      ...sig/examples/all/hum2xml.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2xml.cpp
 // Syntax:        C++; museinfo
