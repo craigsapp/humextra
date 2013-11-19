@@ -1506,7 +1506,7 @@ ostream& MidiFile::printHex(ostream& out) {
    int value = 0;
    int i;
    int len = tempstream.str().length();
-   int wordcount = 0;
+   int wordcount = 1;
    int linewidth = 25;
    for (i=0; i<len; i++) {
       value = (unsigned char)tempstream.str()[i];
