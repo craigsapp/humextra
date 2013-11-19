@@ -2066,5 +2066,5 @@ void usage(const char* command) {
 
 
 
-// md5sum: 834bae599078089fdd06c77daaa6be15 hum2xml.cpp [20131108]
+// md5sum: 04578d4f669c377cc07655bb6af7caf5 hum2xml.cpp [20131118]
 //

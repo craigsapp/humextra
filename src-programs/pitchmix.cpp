@@ -1,7 +1,9 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed May  1 21:18:12 PDT 2002
-// Last Modified: Wed May  1 21:18:16 PDT 2002
+// Last Modified: Mon Nov 18 15:41:51 PST 2013 Moved -t to -v
+// Last Modified: Mon Nov 18 15:56:37 PST 2013 Moved -n to -t
+// Last Modified: Mon Nov 18 15:56:37 PST 2013 -S reversed, depends on -s
 // Filename:      ...sig/examples/all/pitchmix.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/pitchmix.cpp
 // Syntax:        C++; museinfo
@@ -56,12 +58,12 @@ int       throwDice             (double piecefraction);
 
 // User interface variables:
 Options   options;
-int       debugQ = 0;          // used with the --debug option
-int       restQ = 0;           // mix rests as well with -r option
-int       seed = 0;            // seed the random number generator
-int       displaySeedQ = 0;    // used with the -S option
-int       transQ = 0;          // display tranlation data only
-int       trackQ = 0;          // randomize by track 
+int       debugQ = 0;          // used with --debug option
+int       restQ = 0;           // used with -r option
+int       seed = 0;            // used with -s option
+int       displaySeedQ = 0;    // used with -S option
+int       transQ = 0;          // used with -m option
+int       voiceQ = 0;          // used with -v option
 int       neighborQ = 0;       // used with -n option
 int       lowlimit = 40;       // lowest note when tranposing
 EnvelopeString distring;       // used with -d option
@@ -201,7 +203,7 @@ void scrambleNotes(Array<NoteUnit>& notes) {
       notes2[i].random = rand();
    }
 
-   if (trackQ) {
+   if (voiceQ) {
       qsort(notes.getBase(), notes.getSize(), sizeof(NoteUnit), 
          compareNoteSortTrack);
       qsort(notes2.getBase(), notes2.getSize(), sizeof(NoteUnit), 
@@ -311,11 +313,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("debug=b",          "print debug information"); 
    opts.define("r|rests=b",        "mixup rest as well as pitches"); 
    opts.define("s|seed=b",         "seed the random number generator"); 
-   opts.define("t|track=b",        "randomize by track"); 
+   opts.define("v|voice|track=b",  "randomize by voice"); 
    opts.define("m|mapping=b",      "display mapping of pitches"); 
    opts.define("d|distribution=s:0 1 1 1", "random mixing amount in file"); 
-   opts.define("n|neighbor=b", "move random note octave to be near old note "); 
-   opts.define("S|display-seed=b","print seed used in random number generator");
+   opts.define("t|transpose|neighbor=b", 
+         "move random note octave to be near old note "); 
+   opts.define("S|no-display-seed=b",
+         "do not print seed used in random number generator");
    opts.define("author=b",  "author of program"); 
    opts.define("version=b", "compilation info");
    opts.define("example=b", "example usages");   
@@ -357,10 +361,11 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    } else {
       srand(seed);
    }
-   trackQ       = opts.getBoolean("track");
-   displaySeedQ = opts.getBoolean("S");
-   transQ       = opts.getBoolean("mapping");
-   neighborQ    = opts.getBoolean("neighbor");
+   voiceQ       =  opts.getBoolean("voice");
+   displaySeedQ = !opts.getBoolean("no-display-seed");
+   
+   transQ       =  opts.getBoolean("mapping");
+   neighborQ    =  opts.getBoolean("neighbor");
 }
 
 
@@ -605,4 +610,4 @@ int throwDice(double piecefraction) {
 
 
 
-// md5sum: 825362ac32bd38b19c76c8ef1d2bb416 pitchmix.cpp [20080518]
+// md5sum: c327acd28436adb7b3fe8009978bdc8a pitchmix.cpp [20131118]

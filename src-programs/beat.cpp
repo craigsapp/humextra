@@ -1419,4 +1419,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: e6877e233288474995998b834215c47f beat.cpp [20131108]
+// md5sum: 445764f6b699e13d174f93ccc90ac52f beat.cpp [20131118]

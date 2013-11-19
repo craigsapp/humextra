@@ -593,4 +593,4 @@ void getMarkChars(Array<char>& marks, HumdrumFile& infile) {
 
 
 
-// md5sum: 3d3af5f512f6fef7c9c890dd52011719 proll.cpp [20120805]
+// md5sum: f1eb5e4fc53a7db30a30f66059645f4a proll.cpp [20131118]
