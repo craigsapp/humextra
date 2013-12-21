@@ -32,6 +32,11 @@
 #include "humdrum.h"
 #include "PerlRegularExpression.h"
 
+
+#define CLEF_UNKNOWN 0
+#define CLEF_TREBLE  1
+#define CLEF_BASS    2
+
 class Coordinate {
    public:
       int i, j;
@@ -52,12 +57,13 @@ void  plineStart               (ostream& out, int level, const char* string);
 void  indent                   (ostream& out, int level);
 void  printPart                (ostream& out, HumdrumFile& infile, int spine, 
                                 int subspine, Array<int>&  barlines, 
-                                int keysig);
+                                int keysig, int clef);
 void  getBarlines              (Array<int>& barlines, HumdrumFile& infile);
 void  printMeasure             (ostream& out, HumdrumFile& infile, int spine, 
                                 int voice, Array<int>& barlines, int index,
-                                int keysig);
-void  printInitialStaff        (ostream& out, HumdrumFile& infile, int spine);
+                                int defaulkeysig, int defaultclef, int& activeclef);
+void  printInitialStaff        (ostream& out, HumdrumFile& infile, int spine, 
+                                int& defaultClef);
 int   printKeySignature        (ostream& out, HumdrumFile& infile, int spine, 
                                 int line);
 void  printTimeSignature       (ostream& out, HumdrumFile& infile, int spine, 
@@ -66,11 +72,13 @@ void  extractVoiceItems        (Array<Coordinate>& items, HumdrumFile& infile,
                                 int spine, int voice, int startbar, int endbar);
 int   printSubBeatLevel        (ostream& out, HumdrumFile& infile, 
                                 Array<Coordinate>& items, 
-                                Array<int>& notes, int noteindex, int keysig);
+                                Array<int>& notes, int noteindex, int keysig,
+                                int defaultclef, int currentclef);
 void  printMeasureContent      (ostream& out, HumdrumFile& infile, 
                                 Array<Coordinate>& items,
                                 RationalNumber& starttime,
-                                RationalNumber& endtime, int keysig);
+                                RationalNumber& endtime, int defaultkeysig, 
+                                int defaultclef, int& activeclef);
 void  printMidiNotes           (ostream& out, HumdrumFile& infile, int line, 
                                 int field, int keysig);
 int   getBeatGroupCount        (HumdrumFile& infile, Array<Coordinate>& items,
@@ -97,12 +105,14 @@ void  getNoteExpressions       (SSTREAM& expressions, HumdrumFile& infile,
 void  getSubspines             (Array<int>& subtracks, HumdrumFile& infile, 
                                 Array<int>& kerntracks);
 void  printChord              (ostream& out, HumdrumFile& infile, int line, 
-                               int field, RationalNumber& dur, int keysig);
+                               int field, RationalNumber& dur, int keysig,
+                               int defaultclef, int currentclef);
 void  printRest               (ostream& out, HumdrumFile& infile, int line, 
                                int field, RationalNumber& dur);
 void  printStem               (ostream& out, HumdrumFile& infile, int line, 
                                int field);
 void  getEnharmonic           (ostream& out, const char* note, int keysig);
+ostream& printClefAttribute   (ostream& out, int activeclef);
 
 // User interface variables:
 Options options;
@@ -234,15 +244,17 @@ void convertHumdrumToEnp(ostream& out, HumdrumFile& infile) {
       }
       out << endl;
 
-      printInitialStaff(out, infile, kerntracks[i]);
+      int initialclef = CLEF_UNKNOWN;
+      printInitialStaff(out, infile, kerntracks[i], initialclef);
       int initialkeysig = printKeySignature(out, infile, kerntracks[i], 0);
       printTimeSignature(out, infile, kerntracks[i], 0);
-      printPart(out, infile, kerntracks[i], 0, barlines, initialkeysig);
+      printPart(out, infile, kerntracks[i], 0, barlines, initialkeysig, initialclef);
+      // print voices/layers after the first one:
       for (j=1; j<subtracks[i]; j++) {
-         printPart(out, infile, kerntracks[i], j, barlines, initialkeysig);
+         printPart(out, infile, kerntracks[i], j, barlines, initialkeysig, initialclef);
       }
 
-      plineStart(out, --LEVEL, ")"); // part-level parentheis
+      plineStart(out, --LEVEL, ")"); // part-level parenthesis
       if (labelQ) {
          out << " ; end :part" << partnum;
       }
@@ -535,7 +547,7 @@ int printKeySignature(ostream& out, HumdrumFile& infile, int spine, int line) {
 // printInitialStaff -- print the starting staff for a part (if any).
 //
 
-void printInitialStaff(ostream& out, HumdrumFile& infile, int spine) {
+void printInitialStaff(ostream& out, HumdrumFile& infile, int spine, int& defaultClef) {
    int i, j;
    int track;
    for (i=0; i<infile.getNumLines(); i++) {
@@ -553,8 +565,10 @@ void printInitialStaff(ostream& out, HumdrumFile& infile, int spine) {
          }
          if (strcmp(infile[i][j], "*clefG2") == 0) {
             pline(out, LEVEL, ":staff :treble-staff");
+            defaultClef = CLEF_TREBLE;
          } else if (strcmp(infile[i][j], "*clefF4") == 0) {
             pline(out, LEVEL, ":staff :bass-staff");
+            defaultClef = CLEF_BASS;
          } else if (strcmp(infile[i][j], "*clefGv2") == 0) {
             pline(out, LEVEL, ":staff :tenor-staff");  // vocal-tenor clef?
          } else if (strcmp(infile[i][j], "*clefC3") == 0) {
@@ -576,7 +590,7 @@ void printInitialStaff(ostream& out, HumdrumFile& infile, int spine) {
 //
 
 void printPart(ostream& out, HumdrumFile& infile, int spine, 
-      int subspine, Array<int>& barlines, int keysig) {
+      int subspine, Array<int>& barlines, int defaultkeysig, int defaultclef) {
    int i;
    int voice = subspine;
    plineStart(out, LEVEL++, "(");
@@ -584,8 +598,9 @@ void printPart(ostream& out, HumdrumFile& infile, int spine,
       out << ":begin :voice" << voice+1;
    }
    out << endl;
+   int activeclef = defaultclef;
    for (i=0; i<barlines.getSize()-1; i++) {
-      printMeasure(out, infile, spine, voice, barlines, i, keysig);
+      printMeasure(out, infile, spine, voice, barlines, i, defaultkeysig, defaultclef, activeclef);
    }
    plineStart(out, --LEVEL, ")");
    if (labelQ) {
@@ -602,7 +617,7 @@ void printPart(ostream& out, HumdrumFile& infile, int spine,
 //
 
 void printMeasure(ostream& out, HumdrumFile& infile, int spine, int voice, 
-      Array<int>& barlines, int index, int keysig) {
+      Array<int>& barlines, int index, int defaultkeysig, int defaultclef, int& activeclef) {
 
    int startbar = barlines[index];
    int endbar = barlines[index+1];
@@ -645,7 +660,7 @@ void printMeasure(ostream& out, HumdrumFile& infile, int spine, int voice,
 
    RationalNumber starttime = infile[startbar].getAbsBeatR();
    RationalNumber endtime   = infile[endbar].getAbsBeatR();
-   printMeasureContent(out, infile, items, starttime, endtime, keysig);
+   printMeasureContent(out, infile, items, starttime, endtime, defaultkeysig, defaultclef, activeclef);
 
    pline(out, --LEVEL, ")");
 }
@@ -660,7 +675,7 @@ void printMeasure(ostream& out, HumdrumFile& infile, int spine, int voice,
 
 void printMeasureContent(ostream& out, HumdrumFile& infile, 
       Array<Coordinate>& items, RationalNumber& starttime,
-      RationalNumber& endtime, int keysig) {
+      RationalNumber& endtime, int keysig, int defaultclef, int& activeclef) {
 
    RationalNumber mdur;
    mdur = endtime - starttime;
@@ -673,14 +688,26 @@ void printMeasureContent(ostream& out, HumdrumFile& infile,
 
    int i;
    Array<int> notes;
+
    notes.setSize(items.getSize());
    notes.setSize(0);
+
+   Array<int> clefs;
+   clefs.setSize(items.getSize());
+   clefs.setSize(0);
+
    for (i=0; i<items.getSize(); i++) {
+      if (infile[items[i].i].isInterpretation()) {
+         const char* token = infile[items[i].i][items[i].j];
+         if      (strcmp(token, "*clefG2") == 0) { activeclef = CLEF_TREBLE; }
+         else if (strcmp(token, "*clefF4") == 0) { activeclef = CLEF_BASS;   }
+      }
       if (!infile[items[i].i].isData()) {
          continue;
       }
       if (strcmp(infile[items[i].i][items[i].j], ".") != 0) {
          notes.append(i);
+         clefs.append(activeclef);
       }      
    }
 
@@ -698,11 +725,12 @@ void printMeasureContent(ostream& out, HumdrumFile& infile,
          exit(1);
       }
       if (dur.isInteger()) {
-         printChord(out, infile, ii, jj, dur, keysig);
+         printChord(out, infile, ii, jj, dur, keysig, defaultclef, clefs[i]);
       } else {
-         i = printSubBeatLevel(out, infile, items, notes, i, keysig);
+         i = printSubBeatLevel(out, infile, items, notes, i, keysig, defaultclef, clefs[i]);
       }
    }
+
 }
 
 
@@ -719,7 +747,7 @@ void printMeasureContent(ostream& out, HumdrumFile& infile,
 
 int printSubBeatLevel(ostream& out, HumdrumFile& infile, 
       Array<Coordinate>& items, Array<int>& notes, int noteindex,
-      int keysig) {
+      int keysig, int defaultclef, int currentclef) {
 
    // groupcount is the number of notes in an integer number
    // of beats within the measure.
@@ -757,7 +785,7 @@ int printSubBeatLevel(ostream& out, HumdrumFile& infile,
       jj = items[notes[i]].j;
 
       notediv = Convert::kernToDurationR(infile[ii][jj]) / minrhy;
-      printChord(out, infile, ii, jj, notediv, keysig);
+      printChord(out, infile, ii, jj, notediv, keysig, defaultclef, currentclef);
 
 /*
       if (strchr(infile[ii][jj], 'r') != NULL) {
@@ -791,7 +819,7 @@ int printSubBeatLevel(ostream& out, HumdrumFile& infile,
 //
 
 void printChord(ostream& out, HumdrumFile& infile, int line, int field, 
-      RationalNumber& dur, int keysig) {
+      RationalNumber& dur, int keysig, int defaultclef, int currentclef) {
    int& ii = line;
    int& jj = field;
 
@@ -816,6 +844,10 @@ void printChord(ostream& out, HumdrumFile& infile, int line, int field,
       printChordArticulations(out, infile, ii, jj);
 
       printStem(out, infile, ii, jj);
+ 
+      if (defaultclef != currentclef) {
+         printClefAttribute(out, currentclef);
+      }
 
       out << ")"; // end of chord parentheses
       out << ")"; // end of beat list
@@ -829,6 +861,22 @@ void printChord(ostream& out, HumdrumFile& infile, int line, int field,
       out << "\t; " << infile[ii][jj];
    }
    out << endl;
+}
+
+
+
+//////////////////////////////
+//
+// printClefAttribute --
+//
+
+ostream& printClefAttribute(ostream& out, int activeclef) {
+   switch(activeclef) {
+      case CLEF_TREBLE: out << " :clef :treble-clef"; break;
+      case CLEF_BASS:   out << " :clef :bass-clef";   break;
+   }
+      
+   return out;
 }
 
 
