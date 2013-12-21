@@ -610,7 +610,12 @@ int RationalNumber::isInteger(void) const {
    if (this->getDenominator() == 1) {
       return 1;
    } else {  
-      return 0;
+      if (this->getNumerator() == 0) {
+         // zero could have any denominator (except zero -- but who cares?).
+         return 1;
+      } else {
+         return 0;
+      }
    }
 }
 
