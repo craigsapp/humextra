@@ -835,15 +835,15 @@ void printChord(ostream& out, HumdrumFile& infile, int line, int field,
 
 //////////////////////////////
 //
-// printStem -- / -> :stem :up  & \ -> :stem :down
+// printStem -- / -> :stem-direction :up  & \ -> :stem-direction :down
 // Can't have a chord with stems in both directions (will print with stem up).
 //
 
 void printStem(ostream& out, HumdrumFile& infile, int line, int field) {
    if (strchr(infile[line][field], '/') != NULL) {
-      out << " :stem :up";
+      out << " :stem-direction :up";
    } else if (strchr(infile[line][field], '\\') != NULL) {
-      out << " :stem :down";
+      out << " :stem-direction :down";
    }
 }
 
