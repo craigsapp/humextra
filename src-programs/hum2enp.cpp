@@ -1023,14 +1023,24 @@ void getNoteAttributes(SSTREAM& attributes, HumdrumFile& infile, int line,
       attributes << " :enharmonic :flat";
    }
 */
+
+/* Temporarily get rid of enharmonics:
    SSTREAM enharmonic;
    getEnharmonic(enharmonic, kernnote, keysig);
    enharmonic << ends;
    if (strlen(enharmonic.CSTRING) > 0) {
       attributes << " :enharmonic " << enharmonic.CSTRING;
    }
+*/
 
-
+   // check for cautionary accidentals.  These are marked with "X" immediately after the 
+   // accidental.
+   if ((strstr(kernnote, "nX") != NULL)
+       || (strstr(kernnote, "#X") != NULL)
+       || (strstr(kernnote, "-X") != NULL)) {
+      attributes << " :draw-alteration-p :force";
+   }
+   
    // check for colored notes based on !!!RDF: entries in the file.
    int i;
    for (i=0; i<marks.getSize(); i++) {
