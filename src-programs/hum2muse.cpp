@@ -4323,11 +4323,15 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
          // if the verse syllable starts with a digit, then it will not be
          // printed by default in MuseData muse2ps program.  Adding
          // the string "\+" without quote in front of the number will
-         // allow the number to be printed.
+         // allow the number to be printed.  Likewise, < and . characters need to be
+         // forced to print in a similar manner.
          if (std::isdigit(verses[i].getBase()[0]) && (strcmp(ptr, "") != 0)) {
             strcat(buffer, "\\+");
          }
          else if ((verses[i].getBase()[0] == '<') && (strcmp(ptr, "") != 0)) { 
+            strcat(buffer, "\\+"); 
+         }
+         else if ((verses[i].getBase()[0] == '.') && (strcmp(ptr, "") != 0)) { 
             strcat(buffer, "\\+"); 
          }
 
@@ -7169,6 +7173,14 @@ int getTupletTop(HumdrumFile& infile, int row, int col) {
       if (rn.getDenominator() == 1) {
          return 1;
       }
+      if (rn.isEqualTo(3,2)) {
+         return 2;
+      }
+      if (rn.isEqualTo(3,4)) {
+         return 4;
+      }
+
+
       cerr << "Error: Cannot handle exotic tuplets " << rn << NEWLINE;
       exit(1);
    }
