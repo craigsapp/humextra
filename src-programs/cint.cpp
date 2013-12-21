@@ -525,6 +525,17 @@ int  printCombinationsSuspensions(Array<Array<NoteNode> >& notes,
    countsum += printCombinations(notes, infile, ktracks, reverselookup, n,
                      retrospective);
 
+   // Suspensions with length-5 modules /////////////////////////////////
+   n = 5;                        // -n 2
+   xoptionQ   = 1;               // -x
+   strcpy(sbuffer, "");
+   // "8xs 1 7sx 1 7sx 1 6sx 1 6sx 1 5sx -1 8xx" archetype: Duf3015a m94 S&T
+   strcat(sbuffer, "^8xs 1 7sx 1 7sx 1 6sx 1 5sx -2 8xx$");
+ 
+   SearchString.initializeSearchAndStudy(sbuffer);
+   countsum += printCombinations(notes, infile, ktracks, reverselookup, n,
+                     retrospective);
+
    // Suspensions with rests modules
 
    // done with multiple searches.  Mark the notes in the score if required.
