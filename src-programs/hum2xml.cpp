@@ -512,6 +512,9 @@ void convertMeasureToMusicXML(HumdrumFile& infile, int track, int startbar,
 void convertVoice(HumdrumFile& infile, int track, int startbar, int endbar, 
       int voice) {
 
+    // off by one for some reason
+    endbar = endbar - 1;
+
    int i, j, t, v;
 
    int start = startbar;
