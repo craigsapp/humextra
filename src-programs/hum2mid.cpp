@@ -30,6 +30,7 @@
 // Last Modified: Fri Aug  3 16:09:29 PDT 2012 added DEFAULT for --timbres
 // Last Modified: Tue Oct 16 21:02:56 PDT 2012 added getTitle/song title
 // Last Modified: Mon Nov 18 13:04:44 PST 2013 default output as ASCII MIDI
+// Last Modified: Wed Dec 11 22:24:36 PST 2013 added !!midi-transpose: 
 // Filename:      ...sig/examples/all/hum2mid.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2mid.cpp
 // Syntax:        C++; museinfo
@@ -172,6 +173,7 @@ double  bendamt          = 200;    // used with --bend option
 int     bendpcQ          =   0;    // used with --temperament option
 double  bendbypc[12]     = {0};    // used with --temperament and --monotune
 int     monotuneQ        =   0;    // used with --monotune option
+int     MidiTranspose    = 0;      // used with --transpose
 double  rhysc            = 1.0;    // used with -r option
     // for example, use -r 4.0 to make written sixteenth notes
     // appear as if they were quarter notes in the MIDI file.
@@ -858,6 +860,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("v|volume=i:64",   "Default attack velocity");
    opts.define("d|dyn|idyn=d:40.0","Extract attack velocities from **idyn");
    opts.define("t|tempo-scaling=d:1.0", "Tempo scaling");
+   opts.define("transpose=i:0", "Internal transposition");
    opts.define("ts|tempo|tempo-spine=b", "Use tempo markings from tempo spine");
    opts.define("I|noinstrument=b", "Do not store MIDI instrument programs");
    opts.define("i|instruments=s", "Specify MIDI conversions for instruments");
@@ -1033,6 +1036,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    } else {
       TimbreName.setSize(0);
       TimbreValue.setSize(0);
+   }
+
+   if (opts.getBoolean("transpose")) {
+      MidiTranspose = opts.getInteger("transpose");
    }
 }
 
@@ -1334,10 +1341,19 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
       }
    }
 
+   PerlRegularExpression pre;
+
    for (i=0; i<infile.getNumLines(); i++) {
       if (debugQ) {
          cout << "Line " << i+1 << "::\t" << infile[i] << endl;
       }
+
+      if (infile[i].isGlobalComment()) {
+         if (pre.search(infile[i][0], "midi-transpose\\s*:\\s*(-?\\d+)")) {
+            MidiTranspose = atoi(pre.getSubmatch(1));
+         }
+      }
+
 
       if (storeCommentQ && (infile[i].getType() == E_humrec_global_comment)) {
          if (timeQ || perfvizQ) {
@@ -1435,6 +1451,9 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             int key;
             if (infile[i][j][length-1] == ':') {
                key = Convert::kernToBase40(infile[i][j]);
+               key += MidiTranspose;
+               if (key > 127) { key = 127; }
+               else if (key < 0) { key = 0; }
                if (key != PerfVizNote::key) {
                   printPerfVizKey(key);
                   PerfVizNote::key = key;
@@ -1581,9 +1600,10 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                }
                // This code is disabling dynamics, should be fixed.
                // [20130424]
-               // if (VolumeMapping.getSize() > 0) {
-               //    volume = VolumeMapping[infile[i].getPrimaryTrack(j)];
-               // }
+               // But needs to be here so that --timbre volumes work [20131012]
+               if (VolumeMapping.getSize() > 0) {
+                  volume = VolumeMapping[infile[i].getPrimaryTrack(j)];
+               }
                for (k=0; k<tokencount; k++) {
                   infile[i].getToken(buffer1, j, k); 
 
@@ -1614,6 +1634,10 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                      }
                   }
                   midinote = Convert::kernToMidiNoteNumber(buffer1); 
+                  midinote += MidiTranspose;
+                  if (midinote > 127) { midinote = 127; }
+                  else if (midinote < 0) { midinote = 0; }
+                  // base40note will be inaccurate if MidiTranspose <> 0
                   base40note = Convert::kernToBase40(buffer1);
                   // skip rests 
                   if (midinote < 0) {
@@ -3165,7 +3189,6 @@ void storeTimbres(Array<SigString>& name, Array<int>& value,
          volumes.append(temp);
          tempstr = pre.getSubmatch(1);
          name.append(tempstr);
-
       } else if (pre.search(tokens[i], "(.*)\\s*:\\s*(\\d+)", "")) {
          temp = atoi(pre.getSubmatch(2));
          value.append(temp);
