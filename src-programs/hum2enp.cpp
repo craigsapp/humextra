@@ -43,51 +43,74 @@ class Coordinate {
 void  checkOptions             (Options& opts, int argc, char** argv);
 void  example                  (void);
 void  usage                    (const char* command);
-void  convertHumdrumToEnp      (HumdrumFile& infile);
+void  convertHumdrumToEnp      (ostream& out, HumdrumFile& infile);
 void  getKernTracks            (Array<int>& tracks, HumdrumFile& infile);
 void  getPartNames             (HumdrumFile& infile, 
                                 Array<Array<char> >& PartNames);
-void  pline                    (int level, const char* string);
-void  indent                   (int level);
-void  printPart                (HumdrumFile& infile, int spine, 
-                                Array<int>&  barlines);
+void  pline                    (ostream& out, int level, const char* string);
+void  plineStart               (ostream& out, int level, const char* string);
+void  indent                   (ostream& out, int level);
+void  printPart                (ostream& out, HumdrumFile& infile, int spine, 
+                                int subspine, Array<int>&  barlines, 
+                                int keysig);
 void  getBarlines              (Array<int>& barlines, HumdrumFile& infile);
-void  printMeasure             (HumdrumFile& infile, int spine, 
-                                int voice, Array<int>& barlines, int index);
-void  printInitialStaff        (HumdrumFile& infile, int spine);
-void  printKeySignature        (HumdrumFile& infile, int spine, int line);
-void  printTimeSignature       (HumdrumFile& infile, int spine, int line);
+void  printMeasure             (ostream& out, HumdrumFile& infile, int spine, 
+                                int voice, Array<int>& barlines, int index,
+                                int keysig);
+void  printInitialStaff        (ostream& out, HumdrumFile& infile, int spine);
+int   printKeySignature        (ostream& out, HumdrumFile& infile, int spine, 
+                                int line);
+void  printTimeSignature       (ostream& out, HumdrumFile& infile, int spine, 
+                                int line);
 void  extractVoiceItems        (Array<Coordinate>& items, HumdrumFile& infile, 
                                 int spine, int voice, int startbar, int endbar);
-int   printSubBeatLevel        (HumdrumFile& infile, Array<Coordinate>& items, 
-                                Array<int>& notes, int noteindex);
-void  printMeasureContent      (HumdrumFile& infile, Array<Coordinate>& items);
-void  printMidiNotes           (HumdrumFile& infile, int line, int field);
+int   printSubBeatLevel        (ostream& out, HumdrumFile& infile, 
+                                Array<Coordinate>& items, 
+                                Array<int>& notes, int noteindex, int keysig);
+void  printMeasureContent      (ostream& out, HumdrumFile& infile, 
+                                Array<Coordinate>& items,
+                                RationalNumber& starttime,
+                                RationalNumber& endtime, int keysig);
+void  printMidiNotes           (ostream& out, HumdrumFile& infile, int line, 
+                                int field, int keysig);
 int   getBeatGroupCount        (HumdrumFile& infile, Array<Coordinate>& items,
                                 Array<int>& notes, int noteindex);
 RationalNumber getSmallestRhythm(HumdrumFile& infile, Array<Coordinate>& items,
                                 Array<int>&  notes, int noteindex, 
                                 int groupcount);
-void  printChordArticulations  (HumdrumFile& infile, int line, int field);
-void  printHeaderComments      (HumdrumFile& infile);
-void  printTrailerComments     (HumdrumFile& infile);
-void  printDataComments        (HumdrumFile& infile, Array<Coordinate>& items, 
-                                int index);
-void  printTieDot              (HumdrumFile& infile, int line, int field);
+void  printChordArticulations  (ostream& out, HumdrumFile& infile, int line, 
+                                int field);
+void  printHeaderComments      (ostream& out, HumdrumFile& infile);
+void  printTrailerComments     (ostream& out, HumdrumFile& infile);
+void  printDataComments        (ostream& out, HumdrumFile& infile, 
+                                Array<Coordinate>& items, int index);
+void  printTieDot              (ostream& out, HumdrumFile& infile, int line, 
+                                int field);
 void  checkMarks               (HumdrumFile& infile, Array<char>& marks, 
                                 Array<Array<char> >& markcolors);
 void  getNoteAttributes        (SSTREAM& attributes, HumdrumFile& infile, 
                                 int line, int field, int subfield, 
-                                const char* buffer);
+                                const char* kernnote, int keysig);
 void  getNoteExpressions       (SSTREAM& expressions, HumdrumFile& infile, 
                                 int line, int field, int subfield, 
-                                const char* buffer);
+                                const char* kernnote);
+void  getSubspines             (Array<int>& subtracks, HumdrumFile& infile, 
+                                Array<int>& kerntracks);
+void  printChord              (ostream& out, HumdrumFile& infile, int line, 
+                               int field, RationalNumber& dur, int keysig);
+void  printRest               (ostream& out, HumdrumFile& infile, int line, 
+                               int field, RationalNumber& dur);
+void  printStem               (ostream& out, HumdrumFile& infile, int line, 
+                               int field);
+void  getEnharmonic           (ostream& out, const char* note, int keysig);
 
 // User interface variables:
 Options options;
 int    debugQ       = 0;          // used with --debug option
 int    originalQ    = 0;          // used with --original option
-int    sidecommentQ = 1;          // not hooked up to an option yet
+int    labelQ       = 0;          // used with -L option
+int    commentQ     = 0;          // used with -C option
+int    humdrumQ     = 0;          // not hooked up to an option yet
 const char*  INDENT = "\t";       // indentation for each level
 int    LEVEL        = 0;          // used to indent the score
 
@@ -112,7 +135,7 @@ int main(int argc, char** argv) {
       infile.read(options.getArg(1));
    }
 
-   convertHumdrumToEnp(infile);
+   convertHumdrumToEnp(cout, infile);
 
    return 0;
 }
@@ -120,15 +143,64 @@ int main(int argc, char** argv) {
 
 //////////////////////////////////////////////////////////////////////////
 
+
+//////////////////////////////
+//
+// getSubspineCount -- Return a count of each track's maximum sub-spine
+//     count.
+//
+
+void getSubspines(Array<int>& subtracks, HumdrumFile& infile, 
+      Array<int>& kerntracks) {
+   int i;
+   int j;
+
+   int track;
+   int maxtracks = infile.getMaxTracks();
+   Array<int> maxvals(maxtracks+1);
+   maxvals.setAll(0);
+
+   Array<int> linevals(maxtracks+1);
+   
+
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].hasSpines()) {
+         continue;
+      }
+      linevals.setAll(0);
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         track = infile[i].getPrimaryTrack(j);
+         linevals[track]++;
+      }
+      for (j=0; j<linevals.getSize(); j++) {
+         if (linevals[j] > maxvals[j]) {
+            maxvals[j] = linevals[j];
+         }
+      }
+   }
+   
+   subtracks.setSize(kerntracks.getSize());
+   subtracks.setAll(0);
+   for (i=0; i<kerntracks.getSize(); i++) {
+      subtracks[i] = maxvals[kerntracks[i]];
+   }
+}
+
+
+
 //////////////////////////////
 //
 // convertHumdrumToEnp --
 //
 
-void convertHumdrumToEnp(HumdrumFile& infile) {
+void convertHumdrumToEnp(ostream& out, HumdrumFile& infile) {
    infile.analyzeRhythm("4");
    Array<int> kerntracks;
    getKernTracks(kerntracks, infile);
+
+   Array<int> subtracks;
+   getSubspines(subtracks, infile, kerntracks);
+
    Array<Array<char> > partnames;
    getPartNames(infile, partnames);
    Array<int> barlines;
@@ -136,26 +208,55 @@ void convertHumdrumToEnp(HumdrumFile& infile) {
 
    checkMarks(infile, marks, markcolors);
 
-   printHeaderComments(infile);
+   if (commentQ) {
+      printHeaderComments(out, infile);
+   }
 
    LEVEL = 0;
+
    // Print the outer score parentheses
-   pline(LEVEL++, "(:begin :score");   // score-level parenthesis
-   int i;
+   plineStart(out, LEVEL++, "(");
+   if (labelQ) {
+      out << ":begin :score";
+   }
+   out << endl;
+
+   int i, j;
    int partnum = 0;
    for (i=kerntracks.getSize()-1; i>=0; i--) {
       partnum++;
-      indent(LEVEL++);
-      cout << "(:begin :part" << partnum << endl; // part-level parenthesis
-      printInitialStaff(infile, kerntracks[i]);
-      printKeySignature(infile, kerntracks[i], 0);
-      printTimeSignature(infile, kerntracks[i], 0);
-      printPart(infile, kerntracks[i], barlines);
-      pline(--LEVEL, ") ; end :part");   // part-level parenthesis
-   }
-   pline(--LEVEL, ") ; end :score");  // score level parenthesis
+      indent(out, LEVEL++);
 
-   printTrailerComments(infile);
+      // print part-level parenthesis
+      out << "(";
+      if (labelQ) {
+         out << ":begin :part" << partnum;
+      }
+      out << endl;
+
+      printInitialStaff(out, infile, kerntracks[i]);
+      int initialkeysig = printKeySignature(out, infile, kerntracks[i], 0);
+      printTimeSignature(out, infile, kerntracks[i], 0);
+      printPart(out, infile, kerntracks[i], 0, barlines, initialkeysig);
+      for (j=1; j<subtracks[i]; j++) {
+         printPart(out, infile, kerntracks[i], j, barlines, initialkeysig);
+      }
+
+      plineStart(out, --LEVEL, ")"); // part-level parentheis
+      if (labelQ) {
+         out << " ; end :part" << partnum;
+      }
+      out << endl;
+   }
+   plineStart(out, --LEVEL, ")");
+   if (labelQ) {
+      out << " ; end :score";  // score level parenthesis
+   }
+   out << endl;
+
+   if (commentQ) {
+      printTrailerComments(out, infile);
+   }
 }
 
 
@@ -165,15 +266,15 @@ void convertHumdrumToEnp(HumdrumFile& infile) {
 // printHeaderComments --
 //
 
-void printHeaderComments(HumdrumFile& infile) {
+void printHeaderComments(ostream& out, HumdrumFile& infile) {
    int i;
    for (i=0; i<infile.getNumLines(); i++ ) {
       if (infile[i].isBibliographic()) {
-         cout << ";" << infile[i] << endl;
+         out << ";" << infile[i] << endl;
          continue;
       }
       if (infile[i].isGlobalComment()) {
-         cout << ";" << infile[i] << endl;
+         out << ";" << infile[i] << endl;
          continue;
       }
       if (infile[i].isInterpretation()) {
@@ -189,7 +290,7 @@ void printHeaderComments(HumdrumFile& infile) {
 // printTrailerComments --
 //
 
-void printTrailerComments(HumdrumFile& infile) {
+void printTrailerComments(ostream& out, HumdrumFile& infile) {
    int i;
    int endline = -1;
    for (i=infile.getNumLines()-1; i>=0; i--) {
@@ -198,14 +299,17 @@ void printTrailerComments(HumdrumFile& infile) {
       }
       endline = i;
    }
+   if (endline < 0) {
+      return;
+   }
 
    for (i=endline; i<infile.getNumLines(); i++ ) {
       if (infile[i].isBibliographic()) {
-         cout << ";" << infile[i] << endl;
+         out << ";" << infile[i] << endl;
          continue;
       }
       if (infile[i].isGlobalComment()) {
-         cout << ";" << infile[i] << endl;
+         out << ";" << infile[i] << endl;
          continue;
       }
    }
@@ -218,7 +322,8 @@ void printTrailerComments(HumdrumFile& infile) {
 // printTimeSignature --
 //
 
-void printTimeSignature(HumdrumFile& infile, int spine, int line) {
+void printTimeSignature(ostream& out, HumdrumFile& infile, int spine, 
+      int line) {
    Coordinate timesig;
    timesig.i = -1;
    timesig.j = -1;
@@ -276,23 +381,26 @@ void printTimeSignature(HumdrumFile& infile, int spine, int line) {
    }
 
    // for the moment, do not allow % within time signature
-   pre.search(infile[timesig.i][timesig.j], "^\\*M(\\d+)/(\\d+)");
+   pre.search(infile[timesig.i][timesig.j], "^\\*M(\\d+)\\/(\\d+)");
 
-   indent(LEVEL);
-   cout << ":time-signature (" 
-        << pre.getSubmatch(1) 
+   int topnum = atoi(pre.getSubmatch(1));
+   int botnum = atoi(pre.getSubmatch(2));
+
+   indent(out, LEVEL);
+   out << ":time-signature (" 
+        << topnum
         << " "
-        << pre.getSubmatch(2);
+        << botnum;
    if (line == 0) {
       // printing initial time signature
       // check to see if the first measure is a pickup beat
       RationalNumber pickupdur;
       pickupdur = infile.getPickupDurationR();
       if (pickupdur > 0) {
-         cout << " :kind :pickup";
+         out << " :kind :pickup";
       }
    }
-   cout << ")" << endl;
+   out << ")" << endl;
 }
 
 
@@ -303,8 +411,10 @@ void printTimeSignature(HumdrumFile& infile, int spine, int line) {
 //      voice.  Search anywhere within enclosing data lines for
 //      the *k[] (key signature) and *C: (key) markers.
 //
+//      Returns the key signatures in terms of sharp/flat count.
+//
 
-void printKeySignature(HumdrumFile& infile, int spine, int line) {
+int printKeySignature(ostream& out, HumdrumFile& infile, int spine, int line) {
    Coordinate keysig;
    Coordinate key;
    keysig.i = -1;
@@ -375,45 +485,47 @@ void printKeySignature(HumdrumFile& infile, int spine, int line) {
       fifthskey = Convert::kernKeyToNumber(infile[keysig.i][keysig.j]);
    }
 
-   indent(LEVEL);  cout << ":key-signature ";
+   indent(out, LEVEL);  out << ":key-signature ";
    if (mode == 0) {   // major mode
       switch (fifthskey) {
-         case -7: cout << ":c-flat-major"; break;
-         case -6: cout << ":g-flat-major"; break;
-         case -5: cout << ":d-flat-major"; break;
-         case -4: cout << ":a-flat-major"; break;
-         case -3: cout << ":e-flat-major"; break;
-         case -2: cout << ":b-flat-major"; break;
-         case -1: cout << ":f-major"; break;
-         case  0: cout << ":c-major"; break;
-         case +1: cout << ":g-major"; break;
-         case +2: cout << ":d-major"; break;
-         case +3: cout << ":a-major"; break;
-         case +4: cout << ":e-major"; break;
-         case +5: cout << ":b-major"; break;
-         case +6: cout << ":f-sharp-major"; break;
-         case +7: cout << ":c-sharp-major"; break;
+         case -7: out << ":c-flat-major"; break;
+         case -6: out << ":g-flat-major"; break;
+         case -5: out << ":d-flat-major"; break;
+         case -4: out << ":a-flat-major"; break;
+         case -3: out << ":e-flat-major"; break;
+         case -2: out << ":b-flat-major"; break;
+         case -1: out << ":f-major"; break;
+         case  0: out << ":c-major"; break;
+         case +1: out << ":g-major"; break;
+         case +2: out << ":d-major"; break;
+         case +3: out << ":a-major"; break;
+         case +4: out << ":e-major"; break;
+         case +5: out << ":b-major"; break;
+         case +6: out << ":f-sharp-major"; break;
+         case +7: out << ":c-sharp-major"; break;
       }
    } else if (mode == 1) {  // minor modes
       switch (fifthskey) {
-         case -7: cout << ":a-flat-minor"; break;
-         case -6: cout << ":e-flat-minor"; break;
-         case -5: cout << ":b-flat-minor"; break;
-         case -4: cout << ":f-minor"; break;
-         case -3: cout << ":c-minor"; break;
-         case -2: cout << ":g-minor"; break;
-         case -1: cout << ":d-minor"; break;
-         case  0: cout << ":a-minor"; break;
-         case +1: cout << ":e-minor"; break;
-         case +2: cout << ":b-minor"; break;
-         case +3: cout << ":f-sharp-minor"; break;
-         case +4: cout << ":c-sharp-minor"; break;
-         case +5: cout << ":g-sharp-minor"; break;
-         case +6: cout << ":d-sharp-minor"; break;
-         case +7: cout << ":a-sharp-minor"; break;
+         case -7: out << ":a-flat-minor"; break;
+         case -6: out << ":e-flat-minor"; break;
+         case -5: out << ":b-flat-minor"; break;
+         case -4: out << ":f-minor"; break;
+         case -3: out << ":c-minor"; break;
+         case -2: out << ":g-minor"; break;
+         case -1: out << ":d-minor"; break;
+         case  0: out << ":a-minor"; break;
+         case +1: out << ":e-minor"; break;
+         case +2: out << ":b-minor"; break;
+         case +3: out << ":f-sharp-minor"; break;
+         case +4: out << ":c-sharp-minor"; break;
+         case +5: out << ":g-sharp-minor"; break;
+         case +6: out << ":d-sharp-minor"; break;
+         case +7: out << ":a-sharp-minor"; break;
       }
    }
-   cout << endl;
+   out << endl;
+
+   return fifthskey;
 }
 
 
@@ -423,7 +535,7 @@ void printKeySignature(HumdrumFile& infile, int spine, int line) {
 // printInitialStaff -- print the starting staff for a part (if any).
 //
 
-void printInitialStaff(HumdrumFile& infile, int spine) {
+void printInitialStaff(ostream& out, HumdrumFile& infile, int spine) {
    int i, j;
    int track;
    for (i=0; i<infile.getNumLines(); i++) {
@@ -440,15 +552,15 @@ void printInitialStaff(HumdrumFile& infile, int spine) {
             break;
          }
          if (strcmp(infile[i][j], "*clefG2") == 0) {
-            pline(LEVEL, ":staff :treble-staff");
+            pline(out, LEVEL, ":staff :treble-staff");
          } else if (strcmp(infile[i][j], "*clefF4") == 0) {
-            pline(LEVEL, ":staff :bass-staff");
+            pline(out, LEVEL, ":staff :bass-staff");
          } else if (strcmp(infile[i][j], "*clefGv2") == 0) {
-            pline(LEVEL, ":staff :tenor-staff");  // vocal-tenor clef?
+            pline(out, LEVEL, ":staff :tenor-staff");  // vocal-tenor clef?
          } else if (strcmp(infile[i][j], "*clefC3") == 0) {
-            pline(LEVEL, ":staff :alto-staff");
+            pline(out, LEVEL, ":staff :alto-staff");
          } else if (strcmp(infile[i][j], "*clefX") == 0) {
-            pline(LEVEL, ":staff :percussion-staff");
+            pline(out, LEVEL, ":staff :percussion-staff");
          }
          // only checking the first subspine for clef information:
          break; 
@@ -463,15 +575,23 @@ void printInitialStaff(HumdrumFile& infile, int spine) {
 // printPart -- print a particular part.  Just the first one for now.
 //
 
-void printPart(HumdrumFile& infile, int spine, Array<int>& barlines) {
+void printPart(ostream& out, HumdrumFile& infile, int spine, 
+      int subspine, Array<int>& barlines, int keysig) {
    int i;
-   int voice = 0;
-   indent(LEVEL++);
-   cout << "(:begin :voice" << voice+1 << endl;
-   for (i=0; i<barlines.getSize()-1; i++) {
-      printMeasure(infile, spine, voice, barlines, i);
+   int voice = subspine;
+   plineStart(out, LEVEL++, "(");
+   if (labelQ) {
+      out << ":begin :voice" << voice+1;
    }
-   pline(--LEVEL, ") ; end :voice");
+   out << endl;
+   for (i=0; i<barlines.getSize()-1; i++) {
+      printMeasure(out, infile, spine, voice, barlines, i, keysig);
+   }
+   plineStart(out, --LEVEL, ")");
+   if (labelQ) {
+      out << " ; end :voice" << voice+1;
+   }
+   out << endl;
 }
 
 
@@ -481,12 +601,9 @@ void printPart(HumdrumFile& infile, int spine, Array<int>& barlines) {
 // printMeasure --
 //
 
-void printMeasure(HumdrumFile& infile, int spine, int voice, 
-      Array<int>& barlines, int index) {
-   if (voice != 0) {
-      // multiple voices are not allowed at the moment.
-      exit(1);
-   }
+void printMeasure(ostream& out, HumdrumFile& infile, int spine, int voice, 
+      Array<int>& barlines, int index, int keysig) {
+
    int startbar = barlines[index];
    int endbar = barlines[index+1];
    int i;
@@ -494,36 +611,66 @@ void printMeasure(HumdrumFile& infile, int spine, int voice,
    Array<Coordinate> items;
    extractVoiceItems(items, infile, spine, voice, startbar, endbar);
 
-   indent(LEVEL++); 
-   int barnum = -1;
-   cout << "(";
-   if (sscanf(infile[items[0].i][items[0].j], "=%d", &barnum)) {
-      cout << ":begin :measure" << barnum;
-      if (sidecommentQ && infile[items[0].i].isMeasure()) {
-         cout << "\t; " << infile[items[0].i][0];
+   indent(out, LEVEL++); 
+   out << "(";
+   if (labelQ) {
+      int barnum = -1;
+      if (items.getSize() == 0) {
+         if (sscanf(infile[startbar][0], "=%d", &barnum)) {
+            out << ":begin :measure" << barnum;
+            if (humdrumQ && infile[items[0].i].isMeasure()) {
+               out << "\t; " << infile[items[0].i][0];
+            }
+         }
+      } else {
+         if (sscanf(infile[items[0].i][items[0].j], "=%d", &barnum)) {
+            out << ":begin :measure" << barnum;
+            if (humdrumQ && infile[items[0].i].isMeasure()) {
+               out << "\t; " << infile[items[0].i][0];
+            }
+         }
       }
    }
-   cout << endl;
+   out << endl;
 
-   for (i=0; i<items.getSize(); i++) {
-      if ((i == items.getSize()-1) && infile[items[i].i].isMeasure()) {
-         break;
+   if (humdrumQ) {
+      for (i=0; i<items.getSize(); i++) {
+         if ((i == items.getSize()-1) && infile[items[i].i].isMeasure()) {
+            break;
+         }
+         indent(out, LEVEL); 
+         out << "; " << infile[items[i].i][items[i].j] << endl;
       }
-      indent(LEVEL); cout << "; " << infile[items[i].i][items[i].j] << endl;
    }
-   printMeasureContent(infile, items);
 
-   pline(--LEVEL, ")");
+   RationalNumber starttime = infile[startbar].getAbsBeatR();
+   RationalNumber endtime   = infile[endbar].getAbsBeatR();
+   printMeasureContent(out, infile, items, starttime, endtime, keysig);
+
+   pline(out, --LEVEL, ")");
 }
 
 
 
 //////////////////////////////
 //
-// printMeasureContent --
+// printMeasureContent --  Adds invisible rests if there is a gap
+//    in the voice data.
 //
 
-void printMeasureContent(HumdrumFile& infile, Array<Coordinate>& items) {
+void printMeasureContent(ostream& out, HumdrumFile& infile, 
+      Array<Coordinate>& items, RationalNumber& starttime,
+      RationalNumber& endtime, int keysig) {
+
+   RationalNumber mdur;
+   mdur = endtime - starttime;
+   if (items.getSize() == 0) {
+      // print invisible full-measure rest
+      indent(out, LEVEL);
+      out << "(" << mdur << " ((-1 :visible-p nil)))" << endl;
+      return;
+   }
+
    int i;
    Array<int> notes;
    notes.setSize(items.getSize());
@@ -540,47 +687,193 @@ void printMeasureContent(HumdrumFile& infile, Array<Coordinate>& items) {
    RationalNumber start, dur;
    int ii, jj;
    for (i=0; i<notes.getSize(); i++) {
-      printDataComments(infile, items, notes[i]);
+      printDataComments(out, infile, items, notes[i]);
       ii = items[notes[i]].i;
       jj = items[notes[i]].j;
       start = infile[ii].getBeatR();
       dur   = Convert::kernToDurationR(infile[ii][jj]);
       if (!start.isInteger()) {
-         cout << "RHYTHM ERROR at token (" << ii << "," << jj << "): " 
+         out << "RHYTHM ERROR at token (" << ii << "," << jj << "): " 
               << infile[ii][jj] << endl;
          exit(1);
       }
       if (dur.isInteger()) {
-         // simple case where the note is an integer number of beats.
-         indent(LEVEL);
-         if (strchr(infile[ii][jj], 'r') != NULL) {
-            // this rest has no attributes so not adding an extra paren set
-            // otherwise it would be "((-".
-            cout << "(" << dur << " (-" << 1;
-            printTieDot(infile, ii, jj);
-            cout << "))";
-            if (sidecommentQ) {
-               cout << "\t; " << infile[ii][jj];
-            }
-            cout << endl;
-         } else {
-            cout << "(" << dur << " ((" << 1;
-            printTieDot(infile, ii, jj);
-            cout << " :notes (";
-            printMidiNotes(infile, ii, jj);
-            cout << ")";  // end of notes list
-            printChordArticulations(infile, ii, jj);
-            cout << "))"; // end of beat list
-            cout << ")";  // end of beat group
-            if (sidecommentQ) {
-               cout << "\t; " << infile[ii][jj];
-            }
-            cout << endl;
-         }
+         printChord(out, infile, ii, jj, dur, keysig);
       } else {
-         i = printSubBeatLevel(infile, items, notes, i);
+         i = printSubBeatLevel(out, infile, items, notes, i, keysig);
       }
    }
+}
+
+
+
+//////////////////////////////
+//
+// printSubBeatLevel -- Print a list of notes which occur within a beat
+//   (or more than one beat, possibly).  Noteindex is the index into 
+//   the notes array for the first note of the group to process.  Keep
+//   including notes until a beat boundary has been reached.  Return the index
+//   of the next note to process after the sub-beat grouping (or the size
+//   of notes if there is no more notes to process).
+//
+
+int printSubBeatLevel(ostream& out, HumdrumFile& infile, 
+      Array<Coordinate>& items, Array<int>& notes, int noteindex,
+      int keysig) {
+
+   // groupcount is the number of notes in an integer number
+   // of beats within the measure.
+   int groupcount = getBeatGroupCount(infile, items, notes, noteindex);
+   RationalNumber groupduration;
+   RationalNumber startpos;
+   RationalNumber endpos;
+   RationalNumber enddur;
+   int ii, jj;
+   ii = items[notes[noteindex]].i;
+   jj = items[notes[noteindex]].j;
+   startpos = infile[ii].getAbsBeatR();
+   ii = items[notes[noteindex+groupcount-1]].i;
+   jj = items[notes[noteindex+groupcount-1]].j;
+   endpos   = infile[ii].getAbsBeatR();
+   enddur   = Convert::kernToDurationR(infile[ii][jj]);
+   groupduration = (endpos - startpos) + enddur;
+   if (!groupduration.isInteger()) {
+      cerr << "Funny error: group duration is not an integer" << endl;
+      exit(1);
+   }
+
+   RationalNumber minrhy;
+   minrhy.setValue(1,2);
+   // minrhy is smallest duration in terms of quarter notes.
+   minrhy = getSmallestRhythm(infile, items, notes, noteindex, groupcount);
+   indent(out, LEVEL++); out << "(" << groupduration << " ("<< endl;
+   RationalNumber quarternote(1,4);
+
+   // print group notes
+   int i;
+   RationalNumber notediv;
+   for (i=noteindex; i<noteindex+groupcount; i++) {
+      ii = items[notes[i]].i;
+      jj = items[notes[i]].j;
+
+      notediv = Convert::kernToDurationR(infile[ii][jj]) / minrhy;
+      printChord(out, infile, ii, jj, notediv, keysig);
+
+/*
+      if (strchr(infile[ii][jj], 'r') != NULL) {
+         // out << "(" << notediv;
+         // out << "(";   // add this paren if rest has attributes
+         out << "-1"; // rest
+         // out << ")";   // add this paren if rest has attributes
+         // out << ")";
+      } else {
+         out << "(" << notediv;
+         out << " :notes (";
+         printMidiNotes(out, infile, ii, jj);
+         out << ")"; // end of MIDI pitch list
+         out << ")"; // end of note
+      }
+*/
+
+
+   }
+  
+   indent(out, --LEVEL); out << "))" << endl;  // end of beat group list
+
+   return noteindex + groupcount - 1;
+}
+
+
+
+///////////////////////////////
+//
+// printChord -- A chord, single note, or rest.
+//
+
+void printChord(ostream& out, HumdrumFile& infile, int line, int field, 
+      RationalNumber& dur, int keysig) {
+   int& ii = line;
+   int& jj = field;
+
+   int tdur = dur.getNumerator();
+   if (tdur == 0) {
+      // grace notes are stored with duration of 1 (and :class :grace-beat)
+      tdur = 1;
+   }
+
+   // simple case where the note is an integer number of beats.
+   indent(out, LEVEL);
+
+   if (strchr(infile[ii][jj], 'r') != NULL) {
+      printRest(out, infile, line, field, dur);
+   } else {
+      out << "(" << tdur << " ((" << 1;
+      printTieDot(out, infile, ii, jj);
+      out << " :notes (";
+      printMidiNotes(out, infile, ii, jj, keysig);
+      out << ")";  // end of notes list
+      
+      printChordArticulations(out, infile, ii, jj);
+
+      printStem(out, infile, ii, jj);
+
+      out << ")"; // end of chord parentheses
+      out << ")"; // end of beat list
+      if (dur == 0) {
+         out << " :class :grace-beat";
+      }
+      out << ")";  // end of beat group
+   }
+
+   if (humdrumQ) {
+      out << "\t; " << infile[ii][jj];
+   }
+   out << endl;
+}
+
+
+
+//////////////////////////////
+//
+// printStem -- / -> :stem :up  & \ -> :stem :down
+// Can't have a chord with stems in both directions (will print with stem up).
+//
+
+void printStem(ostream& out, HumdrumFile& infile, int line, int field) {
+   if (strchr(infile[line][field], '/') != NULL) {
+      out << " :stem :up";
+   } else if (strchr(infile[line][field], '\\') != NULL) {
+      out << " :stem :down";
+   }
+}
+
+
+
+//////////////////////////////
+//
+// printRest --
+//
+
+void printRest(ostream& out, HumdrumFile& infile, int line, int field, 
+      RationalNumber& dur) {
+   int& ii = line;
+   int& jj = field;
+
+   int tdur = dur.getNumerator();
+   if (tdur == 0) {
+      // grace notes are stored with duration of 1 (and :class :grace-beat)
+      tdur = 1;
+   }
+
+   // this rest has no attributes so not adding an extra paren set
+   // otherwise it would be "((-".
+   out << "(" << tdur << " (-" << 1;
+   printTieDot(out, infile, ii, jj);
+   out << ")"; // paren for inner units
+   if (dur == 0) {
+      out << " :class :grace-beat";
+   }
+   out << ")"; // paren for outer unit
 }
 
 
@@ -594,7 +887,7 @@ void printMeasureContent(HumdrumFile& infile, Array<Coordinate>& items) {
 //      of the rhythm.  Note that adding "." by itself does not work.
 //
 
-void printTieDot(HumdrumFile& infile, int line, int field) {
+void printTieDot(ostream& out, HumdrumFile& infile, int line, int field) {
    int tieQ = 0;
    if (strchr(infile[line][field], ']') != NULL) {
       tieQ = 1;
@@ -603,7 +896,7 @@ void printTieDot(HumdrumFile& infile, int line, int field) {
    }
 
    if (tieQ) {
-      cout << ".0";
+      out << ".0";
    }
 }
 
@@ -614,7 +907,8 @@ void printTieDot(HumdrumFile& infile, int line, int field) {
 // printChordArticulations --
 //
 
-void  printChordArticulations(HumdrumFile& infile, int line, int field) {
+void  printChordArticulations(ostream& out, HumdrumFile& infile, int line, 
+      int field) {
    int fermataQ = 0;
 
    if (strchr(infile[line][field], ';') != NULL) {
@@ -626,12 +920,12 @@ void  printChordArticulations(HumdrumFile& infile, int line, int field) {
 
    int counter = 0;
    if (expressionQ) {
-      cout << " :expressions (";
+      out << " :expressions (";
       if (fermataQ) {
-         if (counter++ != 0) { cout << " "; }
-         cout << ":fermata";
+         if (counter++ != 0) { out << " "; }
+         out << ":fermata";
       }
-      cout << ")";
+      out << ")";
    }
 }
 
@@ -644,8 +938,8 @@ void  printChordArticulations(HumdrumFile& infile, int line, int field) {
 //      if a previous note/rest is found.
 //
 
-void printDataComments(HumdrumFile& infile, Array<Coordinate>& items, 
-      int index) {
+void printDataComments(ostream& out, HumdrumFile& infile, 
+      Array<Coordinate>& items, int index) {
 
    int start = -1;
    int ii;
@@ -667,8 +961,8 @@ void printDataComments(HumdrumFile& infile, Array<Coordinate>& items,
    for (i=start; i<items.getSize(); i++) {
       ii = items[i].i;
       if (infile[ii].isComment()) {
-         indent(LEVEL);
-         cout << ";" << infile[ii] << endl;
+         indent(out, LEVEL);
+         out << ";" << infile[ii] << endl;
          continue;
       }
       break;
@@ -682,7 +976,8 @@ void printDataComments(HumdrumFile& infile, Array<Coordinate>& items,
 // printMidiNotes --
 //
 
-void printMidiNotes(HumdrumFile& infile, int line, int field) {
+void printMidiNotes(ostream& out, HumdrumFile& infile, int line, int field,
+         int keysig) {
    int tokencount = infile[line].getTokenCount(field);
    int k;
    int base12;
@@ -691,18 +986,18 @@ void printMidiNotes(HumdrumFile& infile, int line, int field) {
       infile[line].getToken(buffer, field, k);
       base12 = Convert::kernToMidiNoteNumber(buffer);
       if (k > 0) {
-         cout << " ";
+         out << " ";
       }
       SSTREAM slots;
-      getNoteAttributes(slots, infile, line, field, k, buffer);
+      getNoteAttributes(slots, infile, line, field, k, buffer, keysig);
       slots << ends;
       if (strlen(slots.CSTRING) > 0) {
-         cout << "(";
-         cout << base12;
-         cout << slots.CSTRING;
-         cout << ")";
+         out << "(";
+         out << base12;
+         out << slots.CSTRING;
+         out << ")";
       } else {
-         cout << base12;
+         out << base12;
       }
    }
 }
@@ -714,15 +1009,27 @@ void printMidiNotes(HumdrumFile& infile, int line, int field) {
 //
 
 void getNoteAttributes(SSTREAM& attributes, HumdrumFile& infile, int line, 
-      int field, int subfield, const char* buffer) {
+      int field, int subfield, const char* kernnote, int keysig) {
 
    // if the note is supposed to be shows as a flatted note, then
    // add an attribute which says to display it as a flat (otherwise
    // ENP will always show accidentals as sharped notes).
+
+/* 
+ * :enharmonic :flat will be in context of the key so 61 may be default
+ * sharp if in A major, but 
    if (strchr(buffer, '-') != NULL) {
       // indicate the the MIDI pitch should be displayed as a diatonic flat
       attributes << " :enharmonic :flat";
    }
+*/
+   SSTREAM enharmonic;
+   getEnharmonic(enharmonic, kernnote, keysig);
+   enharmonic << ends;
+   if (strlen(enharmonic.CSTRING) > 0) {
+      attributes << " :enharmonic " << enharmonic.CSTRING;
+   }
+
 
    // check for colored notes based on !!!RDF: entries in the file.
    int i;
@@ -731,13 +1038,13 @@ void getNoteAttributes(SSTREAM& attributes, HumdrumFile& infile, int line,
          // ignore any null-character
          continue;
       }
-      if (strchr(buffer, marks[i]) != NULL) {
+      if (strchr(kernnote, marks[i]) != NULL) {
          attributes << " :color :" << markcolors[i];
       }
    }
 
    SSTREAM expressions;
-   getNoteExpressions(expressions, infile, line, field, subfield, buffer);
+   getNoteExpressions(expressions, infile, line, field, subfield, kernnote);
    
    expressions << ends;
    if (strlen(expressions.CSTRING) > 0) {
@@ -752,17 +1059,71 @@ void getNoteAttributes(SSTREAM& attributes, HumdrumFile& infile, int line,
 
 //////////////////////////////
 //
+// getEnharmonic --
+//
+
+void getEnharmonic(ostream& out, const char* note, int keysig) {
+   Array<int> diatonic(7);
+   diatonic.setAll(0);
+   if (keysig > 0) {
+      switch (keysig) {
+         case 7: diatonic[6] = 1;  // B
+         case 6: diatonic[2] = 1;  // E
+         case 5: diatonic[5] = 1;  // A
+         case 4: diatonic[1] = 1;  // D
+         case 3: diatonic[4] = 1;  // G
+         case 2: diatonic[0] = 1;  // C
+         case 1: diatonic[3] = 1;  // F
+      }
+   } else if (keysig < 0) {
+      switch (keysig) {
+         case -7: diatonic[3] = -1;  // F
+         case -6: diatonic[0] = -1;  // C
+         case -5: diatonic[4] = -1;  // G
+         case -4: diatonic[1] = -1;  // D
+         case -3: diatonic[5] = -1;  // A
+         case -2: diatonic[2] = -1;  // E
+         case -1: diatonic[6] = -1;  // B
+      }
+   }
+
+   int notedia = Convert::kernToDiatonicPitch(note) % 7;
+   int base40 = Convert::kernToBase40(note);
+   int accid = Convert::base40ToAccidental(base40);
+   
+   //int midi    = Convert::kernToMidiNoteNumber(note);
+
+   int difference = accid - diatonic[notedia];
+
+   if (difference == 0) {
+      // MIDI note is in the scale, so no need to alter it.
+      return;
+   } else if (difference == 1) {
+      out << ":sharp"; 
+      return;
+   } else if (difference == -1) {
+      out << ":flat"; 
+      return;
+   }
+
+   // don't know what to do: some exotic accidental
+}
+
+
+
+//////////////////////////////
+//
 // getNoteExpressions --
 //
 
 void getNoteExpressions(SSTREAM& expressions, HumdrumFile& infile, int line, 
-      int field, int subfield, const char* buffer) {
+      int field, int subfield, const char* kernnote) {
 
    PerlRegularExpression pre;
    
    int i;
    for (i=0; i<marks.getSize(); i++) {
-      if (strchr(buffer, marks[i]) != NULL) {
+      if (strchr(kernnote, marks[i]) != NULL) {
          if (pre.search(infile[markline[i]][0], "circle")) {
             expressions << "(:score-expression/" << InstanceIdCounter++;
             expressions << " :kind :circled" << ")";
@@ -770,75 +1131,6 @@ void getNoteExpressions(SSTREAM& expressions, HumdrumFile& infile, int line,
       }
    }
 
-}
-
-
-
-//////////////////////////////
-//
-// printSubBeatLevel -- Print a list of notes which occur within a beat
-//   (or more than one beat, possibly).  Noteindex is the index into 
-//   the notes array for the first note of the group to process.  Keep
-//   including notes until a beat boundary has been reached.  Return the index
-//   of the next note to process after the sub-beat grouping (or the size
-//   of notes if there is no more notes to process).
-//
-
-int printSubBeatLevel(HumdrumFile& infile, Array<Coordinate>& items, 
-      Array<int>& notes, int noteindex) {
-
-   // groupcount is the number of notes in an integer number
-   // of beats within the measure.
-   int groupcount = getBeatGroupCount(infile, items, notes, noteindex);
-   RationalNumber groupduration;
-   RationalNumber startpos;
-   RationalNumber endpos;
-   RationalNumber enddur;
-   int ii, jj;
-   ii = items[notes[noteindex]].i;
-   jj = items[notes[noteindex]].j;
-   startpos = infile[ii].getAbsBeatR();
-   ii = items[notes[noteindex+groupcount-1]].i;
-   jj = items[notes[noteindex+groupcount-1]].j;
-   endpos   = infile[ii].getAbsBeatR();
-   enddur   = Convert::kernToDurationR(infile[ii][jj]);
-   groupduration = (endpos - startpos) + enddur;
-   if (!groupduration.isInteger()) {
-      cout << "Funny error: group duration is not an integer" << endl;
-      exit(1);
-   }
-
-   RationalNumber minrhy;
-   minrhy.setValue(1,2);
-   // minrhy is smallest duration in terms of quarter notes.
-   minrhy = getSmallestRhythm(infile, items, notes, noteindex, groupcount);
-   indent(LEVEL++); cout << "(" << groupduration << " ("<< endl;
-   RationalNumber quarternote(1,4);
-
-   // print group notes
-   int i;
-   RationalNumber notediv;
-   for (i=noteindex; i<noteindex+groupcount; i++) {
-      ii = items[notes[i]].i;
-      jj = items[notes[i]].j;
-
-      indent(LEVEL);
-      notediv = Convert::kernToDurationR(infile[ii][jj]) / minrhy;
-      // cout << "(" << notediv.getNumerator();
-      cout << "(" << notediv;
-      cout << " :notes (";
-      printMidiNotes(infile, ii, jj);
-      cout << ")"; // end of MIDI pitch list
-      cout << ")"; // end of note
-      if (sidecommentQ) {
-         cout << "\t; " << infile[ii][jj];
-      }
-      cout << endl;
-   }
-  
-   indent(--LEVEL); cout << "))" << endl;  // end of beat group list
-
-   return noteindex + groupcount - 1;
 }
 
 
@@ -860,7 +1152,7 @@ RationalNumber getSmallestRhythm(HumdrumFile& infile, Array<Coordinate>& items,
       jj = items[notes[i]].j;
       testrhy = Convert::kernToDurationR(infile[ii][jj]);
       if (testrhy.getNumerator() == 0) {
-         cout << "ERROR: grace notes are not yet handled by program" << endl;
+         cerr << "ERROR: grace notes are not yet handled by program" << endl;
          exit(1);
       }
       if (minrhy > testrhy) {
@@ -894,8 +1186,8 @@ int getBeatGroupCount(HumdrumFile& infile, Array<Coordinate>& items,
          return output;
       }
    }
-   cout << "ERROR: measure does not sum to an integer amount of beats." << endl;
-   cout << "Instead the group duration is: " << dursum << endl;
+   cerr << "ERROR: measure does not sum to an integer amount of beats." << endl;
+   cerr << "Instead the group duration is: " << dursum << endl;
    exit(1);
    return -1;
 }
@@ -987,10 +1279,22 @@ void getBarlines(Array<int>& barlines, HumdrumFile& infile) {
 // pline -- Print a line of data.
 //
 
-void pline(int level, const char* string) {
-   indent(level);
-   cout << string;
-   cout << endl;
+void pline(ostream& out, int level, const char* string) {
+   indent(out, level);
+   out << string;
+   out << endl;
+} 
+
+
+
+//////////////////////////////
+//
+// plineStart -- Like pline, but does not put a newline at end.
+//
+
+void plineStart(ostream& out, int level, const char* string) {
+   indent(out, level);
+   out << string;
 } 
 
 
@@ -1000,9 +1304,9 @@ void pline(int level, const char* string) {
 // indent -- indent the line the specified level
 //
 
-void indent(int level) {
+void indent(ostream& out, int level) {
    for (int i=0; i<level; i++) {
-      cout << INDENT;
+      out << INDENT;
    }
 } 
 
@@ -1095,9 +1399,9 @@ void getKernTracks(Array<int>& tracks, HumdrumFile& infile) {
    }
 
    if (debugQ) {
-      cout << "\t**kern tracks:\n";
+      cerr << "\t**kern tracks:\n";
       for (i=0; i<tracks.getSize(); i++) {
-         cout << "\t" << tracks[i] << endl;
+         cerr << "\t" << tracks[i] << endl;
       }
    }
 }
@@ -1149,7 +1453,7 @@ void checkMarks(HumdrumFile& infile, Array<char>& marks,
 
    if (debugQ) {
       for (i=0; i<marks.getSize(); i++) {
-         cout << "MARK " << marks[i] << "\t" << markcolors[i] << endl;
+         cerr << "MARK " << marks[i] << "\t" << markcolors[i] << endl;
       }
    }
 }
@@ -1162,6 +1466,9 @@ void checkMarks(HumdrumFile& infile, Array<char>& marks,
 //
 
 void checkOptions(Options& opts, int argc, char** argv) {
+   opts.define("H|humdrum=b", "Display original Humdrum data in tandem with output data.");
+   opts.define("L|no-labels=b",   "Suppress fuction labels");
+   opts.define("C|no-comments=b", "Suppress reference record printing");
    opts.define("debug=b",     "Debugging flag");
    opts.define("author=b",    "Program author");
    opts.define("version=b",   "Program version");
@@ -1188,6 +1495,9 @@ void checkOptions(Options& opts, int argc, char** argv) {
    }
 
    debugQ        =  opts.getBoolean("debug");
+   humdrumQ      =  opts.getBoolean("humdrum");
+   labelQ        = !opts.getBoolean("no-labels");
+   commentQ      = !opts.getBoolean("no-comments");
 }
 
 
