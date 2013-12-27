@@ -113,6 +113,7 @@ void  printStem               (ostream& out, HumdrumFile& infile, int line,
                                int field);
 void  getEnharmonic           (ostream& out, const char* note, int keysig);
 ostream& printClefAttribute   (ostream& out, int activeclef);
+ostream& printScoreInformation(ostream& out, HumdrumFile& infile);
 
 // User interface variables:
 Options options;
@@ -230,6 +231,7 @@ void convertHumdrumToEnp(ostream& out, HumdrumFile& infile) {
       out << ":begin :score";
    }
    out << endl;
+   printScoreInformation(out, infile);
 
    int i, j;
    int partnum = 0;
@@ -269,6 +271,139 @@ void convertHumdrumToEnp(ostream& out, HumdrumFile& infile) {
    if (commentQ) {
       printTrailerComments(out, infile);
    }
+}
+
+
+
+//////////////////////////////
+//
+// printScoreInformation --
+//
+// :catalog-info (:TITLE		""
+//                :COMPOSER		""
+//                :SUBTITLE		""
+//                :TEMPO-HEADING	""
+//                :MOVEMENT-INFO	""
+//                :INSTRUMENT		""
+//  )
+//
+
+ostream& printScoreInformation(ostream& out, HumdrumFile& infile) {
+   int otl = -1;
+   int opr = -1;
+   int com = -1;
+   int omd = -1;
+   int yec = -1;
+   int dataQ = 0;
+   int i;
+   char key[1024] = {0};
+
+   PerlRegularExpression pre;
+
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isBibliographic()) {
+         continue;
+      }
+      infile[i].getBibKey(key);
+      if ((otl < 0) && pre.search("^OTL", key)) {
+         otl = i; dataQ = 1; continue;
+      }
+      if ((opr < 0) && pre.search("^OPR", key)) {
+         opr = i; dataQ = 1; continue;
+      }
+      if ((omd < 0) && pre.search("^OMD", key)) {
+         omd = i; dataQ = 1; continue;
+      }
+      if ((com < 0) && pre.search("^COM", key)) {
+         com = i; dataQ = 1; continue;
+      }
+      if ((yec < 0) && pre.search("^YEC", key)) {
+         yec = i; dataQ = 1; continue;
+      }
+   }
+ 
+
+   if (!dataQ) {
+      return out;
+   }
+   
+   indent(out, LEVEL++);
+   out << ":catalog-info (" << endl;
+
+   Array<char> value1;
+   Array<char> value2;
+  
+   if (opr >= 0) {
+      if (otl >= 0) {
+         infile[opr].getBibValue(value1);
+         infile[otl].getBibValue(value2);
+         pre.sar(value1, "\"", "\'", "g");
+         pre.sar(value2, "\"", "\'", "g");
+
+         indent(out, LEVEL);
+         out << "(:title \"";
+         out << value1;
+         out << "\")" << endl;
+
+         indent(out, LEVEL);
+         out << "(:subtitle \"";
+         out << value2;
+         out << "\")" << endl;
+      } else {
+         infile[opr].getBibValue(value1);
+         pre.sar(value1, "\"", "\'", "g");
+
+         indent(out, LEVEL);
+         out << "(:title \"";
+         out << value1;
+         out << "\")" << endl;
+      }
+   } else if (otl >= 0) {
+         infile[otl].getBibValue(value1);
+         pre.sar(value1, "\"", "\'", "g");
+
+         indent(out, LEVEL);
+         out << "(:title \"";
+         out << value1;
+         out << "\")" << endl;
+   }
+
+   if (com >= 0) {
+         infile[com].getBibValue(value1);
+         pre.sar(value1, "\"", "\'", "g");
+
+         indent(out, LEVEL);
+         out << "(:composer \"";
+         out << value1;
+         out << "\")" << endl;
+   }
+
+   if (omd >= 0) {
+         infile[omd].getBibValue(value1);
+         pre.sar(value1, "\"", "\'", "g");
+
+         indent(out, LEVEL);
+         out << "(:tempo-heading \"";
+         out << value1;
+         out << "\")" << endl;
+   }
+
+   if (yec >= 0) {
+         infile[yec].getBibValue(value1);
+         pre.sar(value1, "\"", "\'", "g");
+
+         indent(out, LEVEL);
+         out << "(:copyright \"";
+         out << value1;
+         out << "\")" << endl;
+   }
+
+
+
+   indent(out, --LEVEL);
+   out << ")" << endl;
+
+   return out;
 }
 
 
@@ -836,6 +971,7 @@ void printChord(ostream& out, HumdrumFile& infile, int line, int field,
       printRest(out, infile, line, field, dur);
    } else {
       out << "(" << tdur << " ((" << 1;
+
       printTieDot(out, infile, ii, jj);
       out << " :notes (";
       printMidiNotes(out, infile, ii, jj, keysig);
@@ -849,8 +985,8 @@ void printChord(ostream& out, HumdrumFile& infile, int line, int field,
          printClefAttribute(out, currentclef);
       }
 
-      out << ")"; // end of chord parentheses
-      out << ")"; // end of beat list
+      out << ")"; // end of chord parentheses 
+      out << ")"; // end of beat list 
       if (dur == 0) {
          out << " :class :grace-beat";
       }
@@ -957,14 +1093,29 @@ void printTieDot(ostream& out, HumdrumFile& infile, int line, int field) {
 
 void  printChordArticulations(ostream& out, HumdrumFile& infile, int line, 
       int field) {
-   int fermataQ = 0;
+   int fermataQ   = 0;
+   int staccatoQ  = 0;
+   int accentQ    = 0;   // visually: >   in Humdrum: '
+   int marcatoQ   = 0;   // visually: ^   in Humdrum: ^
 
    if (strchr(infile[line][field], ';') != NULL) {
       fermataQ = 1;
    }
+   if (strchr(infile[line][field], '\'') != NULL) {
+      staccatoQ = 1;
+   }
+   if (strchr(infile[line][field], '^') != NULL) {
+      accentQ = 1;
+   }
+   if (strchr(infile[line][field], '`') != NULL) {
+      marcatoQ = 1;
+   }
 
    int expressionQ = 0;
    expressionQ |= fermataQ;
+   expressionQ |= staccatoQ;
+   expressionQ |= marcatoQ;
+   expressionQ |= accentQ;
 
    int counter = 0;
    if (expressionQ) {
@@ -973,6 +1124,32 @@ void  printChordArticulations(ostream& out, HumdrumFile& infile, int line,
          if (counter++ != 0) { out << " "; }
          out << ":fermata";
       }
+
+      if (staccatoQ && accentQ) {
+         if (counter++ != 0) { out << " "; }
+         out << ":accent+staccato";
+      }
+
+      if (staccatoQ && marcatoQ) {
+         if (counter++ != 0) { out << " "; }
+         out << ":marcato+staccato";
+      }
+
+      if (staccatoQ && !accentQ && !marcatoQ) {
+         if (counter++ != 0) { out << " "; }
+         out << ":staccato";
+      }
+   
+      if (!staccatoQ && accentQ) {
+         if (counter++ != 0) { out << " "; }
+         out << ":accent";
+      }
+
+      if (!marcatoQ && accentQ) {
+         if (counter++ != 0) { out << " "; }
+         out << ":marcato";
+      }
+
       out << ")";
    }
 }
