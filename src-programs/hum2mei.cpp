@@ -2561,13 +2561,13 @@ void printMeiKeyAttributes(SSTREAM& out, const char* key) {
             strcpy(mode, "aeolian");
          } else if (strcmp(pre.getSubmatch(), "loc") == 0) {
             strcpy(mode, "locrian");
-         } else if (isupper(pname)) {
+         } else if (std::isupper(pname)) {
             strcpy(mode, "major");
          } else {
             strcpy(mode, "minor");
          }
       } else {
-         if (isupper(pname)) {
+         if (std::isupper(pname)) {
             strcpy(mode, "major");
          } else {
             strcpy(mode, "minor");
