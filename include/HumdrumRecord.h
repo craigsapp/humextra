@@ -87,6 +87,8 @@ class HumdrumRecord {
                                             const char* exinterp);
       char*             getBibKey          (char* buffer, int maxsize = 0);
       char*             getBibValue        (char* buffer, int maxsize = 0);
+      char*             getBibKey          (Array<char>& buffer);
+      char*             getBibValue        (Array<char>& buffer);
       const char*       getBibLangIso639_2 (const char* string = NULL);
       static const char*getLanguageName    (const char* code);
       static const char*getBibliographicMeaning(Array<char>& output, 

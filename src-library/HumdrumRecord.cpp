@@ -430,6 +430,34 @@ char* HumdrumRecord::getBibKey(char* buffer, int maxsize) {
 }
 
 
+//
+// Array<char> version
+//
+
+char* HumdrumRecord::getBibKey(Array<char>& buffer) {
+   if (!isBibliographic()) {
+      buffer.setSize(1);
+      buffer[0] = '\0';
+     return buffer.getBase();
+   }
+
+   int length = strlen(recordFields[0]+3);
+
+   buffer.setSize(length+1);
+
+   int i;
+   for (i=0; i<length; i++) {
+      if (buffer[i] == ':') {
+         buffer[i] = '\0';
+         buffer.setSize(i+1);
+         return buffer.getBase();
+      }
+   }
+
+   return buffer.getBase();
+}
+
+
 
 //////////////////////////////
 //
@@ -477,6 +505,32 @@ char* HumdrumRecord::getBibValue(char* buffer, int maxsize) {
 */
    buffer[0] = '\0';
    return buffer;
+}
+
+
+//
+// Array<char> version
+//
+
+char* HumdrumRecord::getBibValue(Array<char>& buffer) {
+   if (!isBibliographic()) {
+      buffer.setSize(1);
+      buffer[0] = '\0';
+      return buffer.getBase();
+   }
+
+   PerlRegularExpression pre;
+   int length;
+   if (pre.search(recordString, "^!!![^:]+:\\s*(.*)\\s*$", "")) {
+      length = strlen(pre.getSubmatch(1));
+      buffer.setSize(length+1);
+      strcpy(buffer.getBase(), pre.getSubmatch());
+      return buffer.getBase();
+   }
+
+   buffer.setSize(1);
+   buffer[0] = '\0';
+   return buffer.getBase();
 }
 
 
