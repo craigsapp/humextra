@@ -1,12 +1,12 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Apr 14 09:41:45 PDT 2000
-// Last Modified: Sun Apr 16 14:27:17 PDT 2000
-// Last Modified: Sun May 24 09:15:43 PDT 2009 (para octs removed from #6)
-// Last Modified: Sun May 24 09:15:43 PDT 2009 (added -s, -d, and -d options)
-// Last Modified: Sun May 24 19:23:l2 PDT 2009 (added -f option)
-// Last Modified: Sun May 24 19:23:l2 PDT 2009 (exclude unison motion in #3)
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
+// Last Modified: Sun May 24 09:15:43 PDT 2009 Para octs removed from #6
+// Last Modified: Sun May 24 09:15:43 PDT 2009 Added -s, -d, and -d options
+// Last Modified: Sun May 24 19:23:l2 PDT 2009 Added -f option
+// Last Modified: Sun May 24 19:23:l2 PDT 2009 Exclude unison motion in #3
+// Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed SigCollection class
+// Last Modified: Fri Dec 27 17:36:01 PST 2013 Added note IDs
 // Filename:      ...sig/examples/all/chorck.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/chorck.cpp
 // Syntax:        C++; museinfo
@@ -80,7 +80,7 @@ void   checkForErrors      (void);
 void   checkOptions        (Options& opts, int argc, char* argv[]);
 int    errorCompare        (const void* a, const void* b);
 void   errormessage        (int errornumber, const char* voice1, 
-                            const char* voice2, int linenumber);
+                            const char* voice2, int linenumber, int endline);
 void   example             (void);
 void   initialize          (HumdrumFile& infile);
 void   prepareVoices       (void);
@@ -111,6 +111,7 @@ const char*  marker = "";        // Warning string start
 int          voicemin = 0;       // used with -s, -d, -t option
 int          fileQ    = 0;       // used with -f option
 const char*  Filename = "";      // used with -f option
+int           idQ     = 0;       // used with --id option
 
 // Analysis variables
 SigCollection<Error> errorList;  // a list of detected errors in chorale
@@ -218,6 +219,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("t|no-triple=b",     "exclude triple note attacks and fewer");
    opts.define("w|warnings=b",      "show only warnings");
    opts.define("x|exclude=s:",      "exclude certain error checking rules");
+   opts.define("id=b",              "add note ID numbers for each note");
 
    opts.define("debug=b",           "determine bad input line num");
    opts.define("author=b",          "author of program");
@@ -290,6 +292,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
    marker = opts.getString("marker");
    fileQ  = opts.getBoolean("filename");
+   idQ    = opts.getBoolean("id");
 }
 
 
@@ -379,7 +382,27 @@ int errorCompare(const void* a, const void* b) {
 //
 
 void errormessage(int errornumber, const char* voice1, const char* voice2,
-      int linenumber) {
+      int linenumber, int endline) {
+
+   if (idQ) {
+      int v1 = 0;
+      int v2 = 0;
+      if (strcmp(voice1, "tenor")   == 0) { v1 = 1; }
+      if (strcmp(voice1, "alto")    == 0) { v1 = 2; }
+      if (strcmp(voice1, "soprano") == 0) { v1 = 3; }
+      if (strcmp(voice2, "tenor")   == 0) { v2 = 1; }
+      if (strcmp(voice2, "alto")    == 0) { v2 = 2; }
+      if (strcmp(voice2, "soprano") == 0) { v2 = 3; }
+      
+      cout << "!!ERROR: " << errornumber << " "
+           << linenumber * 100 + v1 << " " << linenumber * 100 + v2;
+      if (errornumber < 7) {
+         // print ending note values
+         cout << " " << endline * 100 + v1;
+         cout << " " << endline * 100 + v2;
+      }
+      cout << endl;
+   }
    
    Error anError;
    anError.line = linenumber;
@@ -877,7 +900,7 @@ void writeoutput(HumdrumFile& infile) {
    sortErrorMessages(errorList.getBase(), errorList.getSize());
 
    int errorIndex = 0;
-   int i;
+   int i, j;
 
    if (options.getBoolean("warnings")) {
       for (i=0; i<errorList.getSize(); i++) {
@@ -900,6 +923,20 @@ void writeoutput(HumdrumFile& infile) {
             }
             cout << '\n';
             errorIndex++;
+         }
+         if (idQ && infile[i].isData()) {
+            for (j=0; j<infile[i].getFieldCount(); j++) {
+               cout << "!";
+               if (infile[i].isExInterp(j, "**kern")) {
+                  if (strcmp(infile[i][j], ".") != 0) {
+                     cout << "ID:" << i * 100 + j;
+                  } 
+               } 
+               if (j < infile[i].getFieldCount() - 1) {
+                  cout << "\t";
+               }
+            }
+            cout << "\n";
          }
          cout << infile[i] << '\n';
       }
@@ -957,19 +994,19 @@ void error1(void) {
 
       if (tenor != 0 && newtenor != 0 && bdir == tdir) {
          if ((tenor-bass+40)%40 == 23 && (newtenor-newbass+40)%40 == 23) {
-            errormessage(1, "bass", "tenor", linenum[i]);
+            errormessage(1, "bass", "tenor", linenum[i], linenum[i+1]);
          }
       }
 
       if (newalto != 0 && alto != 0 && bdir == adir) {
          if ((alto-bass+40)%40 == 23 && (newalto-newbass+40)%40 == 23) {
-            errormessage(1, "bass", "alto", linenum[i]);
+            errormessage(1, "bass", "alto", linenum[i], linenum[i+1]);
          }
       }
 
       if (newsoprano != 0 && soprano != 0 && bdir == sdir) {
          if ((soprano-bass+40)%40 == 23 && (newsoprano-newbass+40)%40 == 23) {
-            errormessage(1, "bass", "soprano", linenum[i]);
+            errormessage(1, "bass", "soprano", linenum[i], linenum[i+1]);
          }
       }
 
@@ -981,13 +1018,13 @@ tenorvoice1:
 
       if (newalto != 0 && alto != 0 && adir == tdir) {
          if ((alto-tenor+40)%40 == 23 && (newalto-newtenor+40)%40 == 23) {
-            errormessage(1, "tenor", "alto", linenum[i]);
+            errormessage(1, "tenor", "alto", linenum[i], linenum[i+1]);
          }
       }
 
       if (newsoprano != 0 && soprano != 0 && adir == sdir) {
          if ((soprano-tenor+40)%40 == 23 && (newsoprano-newtenor+40)%40 == 23) {
-            errormessage(1, "tenor", "soprano", linenum[i]);
+            errormessage(1, "tenor", "soprano", linenum[i], linenum[i+1]);
          }
       }
 
@@ -999,7 +1036,7 @@ altovoice1:
 
       if (newsoprano != 0 && soprano != 0 && adir == sdir) {
          if ((soprano-alto+40)%40 == 23 && (newsoprano-newalto+40)%40 == 23) {
-            errormessage(1, "alto", "soprano", linenum[i]);
+            errormessage(1, "alto", "soprano", linenum[i], linenum[i+1]);
          }
       }
    }
@@ -1051,13 +1088,13 @@ void error2(void) {
 
       if (tenor != 0 && newtenor != 0 && bdir == tdir && tenor != bass) {
          if ((tenor-bass+400)%40 == 0 && (newtenor-newbass+400)%40 == 0) {
-            errormessage(2, "bass", "tenor", linenum[i]);
+            errormessage(2, "bass", "tenor", linenum[i], linenum[i+1]);
          }
       }
 
       if (newalto != 0 && alto != 0 && bdir == adir && alto != bass) {
          if ((alto-bass+400)%40 == 0 && (newalto-newbass+400)%40 == 0) {
-            errormessage(2, "bass", "alto", linenum[i]);
+            errormessage(2, "bass", "alto", linenum[i], linenum[i+1]);
          }
       }
 
@@ -1069,7 +1106,7 @@ cout << "\tnewbass = " << newbass << Convert::base40ToKern(buffer, newbass) << e
 cout << "sopr = " << soprano << Convert::base40ToKern(buffer, soprano);
 cout << "\tnewsopr = " << newsoprano << Convert::base40ToKern(buffer, newsoprano) << endl;
 cout << "diff = " << soprano - bass << "\tdiff2 = " << newsoprano - newbass << endl;
-            errormessage(2, "bass", "soprano", linenum[i]);
+            errormessage(2, "bass", "soprano", linenum[i], linenum[i+1]);
          }
       }
 
@@ -1081,13 +1118,13 @@ tenorvoice2:
 
       if (newalto != 0 && alto != 0 && adir == tdir && tenor != alto) {
          if ((alto-tenor+400)%40 == 0 && (newalto-newtenor+400)%40 == 0) {
-            errormessage(2, "tenor", "alto", linenum[i]);
+            errormessage(2, "tenor", "alto", linenum[i], linenum[i+1]);
          }
       }
 
       if (newsoprano != 0 && soprano != 0 && adir == sdir && tenor != soprano) {
          if ((soprano-tenor+400)%40 == 0 && (newsoprano-newtenor+400)%40 == 0) {
-            errormessage(2, "tenor", "soprano", linenum[i]);
+            errormessage(2, "tenor", "soprano", linenum[i], linenum[i+1]);
          }
       }
 
@@ -1100,7 +1137,7 @@ altovoice2:
 
       if (newsoprano != 0 && soprano != 0 && adir == sdir && alto != soprano) {
          if ((soprano-alto+400)%40 == 0 && (newsoprano-newalto+400)%40 == 0) {
-            errormessage(2, "alto", "soprano", linenum[i]);
+            errormessage(2, "alto", "soprano", linenum[i], linenum[i+1]);
          }
       }
    }
@@ -1156,19 +1193,19 @@ void error3(void) {
 
       if (tenor != 0 && newtenor != 0 && bdir != tdir) {
          if ((tenor-bass+400)%40 == 23 && (newtenor-newbass+400)%40 == 23) {
-            errormessage(3, "bass", "tenor", linenum[i]);
+            errormessage(3, "bass", "tenor", linenum[i], linenum[i+1]);
          }
       }
 
       if (newalto != 0 && alto != 0 && bdir != adir) {
          if ((alto-bass+400)%40 == 23 && (newalto-newbass+400)%40 == 23) {
-            errormessage(3, "bass", "alto", linenum[i]);
+            errormessage(3, "bass", "alto", linenum[i], linenum[i+1]);
          }
       }
 
       if (newsoprano != 0 && soprano != 0 && bdir != sdir) {
          if ((soprano-bass+400)%40 == 23 && (newsoprano-newbass+400)%40 == 23) {
-            errormessage(3, "bass", "soprano", linenum[i]);
+            errormessage(3, "bass", "soprano", linenum[i], linenum[i+1]);
          }
       }
 
@@ -1183,13 +1220,13 @@ tenorvoice3:
 
       if (newalto != 0 && alto != 0 && adir != tdir) {
          if ((alto-tenor+40)%40 == 23 && (newalto-newtenor+40)%40 == 23) {
-            errormessage(3, "tenor", "alto", linenum[i]);
+            errormessage(3, "tenor", "alto", linenum[i], linenum[i+1]);
          }
       }
 
       if (newsoprano != 0 && soprano != 0 && adir != sdir) {
          if ((soprano-tenor+40)%40 == 23 && (newsoprano-newtenor+40)%40 == 23) {
-            errormessage(3, "tenor", "soprano", linenum[i]);
+            errormessage(3, "tenor", "soprano", linenum[i], linenum[i+1]);
          }
       }
 
@@ -1205,7 +1242,7 @@ altovoice3:
 
       if (newsoprano != 0 && soprano != 0 && adir != sdir) {
          if ((soprano-alto+40)%40 == 23 && (newsoprano-newalto+40)%40 == 23) {
-            errormessage(3, "alto", "soprano", linenum[i]);
+            errormessage(3, "alto", "soprano", linenum[i], linenum[i+1]);
          }
       }
    }
@@ -1244,7 +1281,7 @@ void error4(void) {
          interval1 = (tenor-bass+40)%40;
          interval2 = (newtenor-newbass+40)%40;
          if (interval1 == 23 && interval2 == 22) {
-            errormessage(4, "bass", "tenor", linenum[i]);
+            errormessage(4, "bass", "tenor", linenum[i], linenum[i+1]);
          }
       }
 
@@ -1252,7 +1289,7 @@ void error4(void) {
          interval1 = (alto-bass+40)%40;
          interval2 = (newalto-newbass+40)%40;
          if (interval1 == 23 && interval2 == 22) {
-            errormessage(4, "bass", "alto", linenum[i]);
+            errormessage(4, "bass", "alto", linenum[i], linenum[i+1]);
          }
       }
 
@@ -1260,7 +1297,7 @@ void error4(void) {
          interval1 = (soprano-bass+40)%40;
          interval2 = (newsoprano-newbass+40)%40;
          if (interval1 == 23 && interval2 == 22) {
-            errormessage(4, "bass", "soprano", linenum[i]);
+            errormessage(4, "bass", "soprano", linenum[i], linenum[i+1]);
          }
       }
       
@@ -1314,19 +1351,19 @@ void error5(void) {
       if (abs(newsoprano - soprano) > 7) {
          if (sdir == adir && newalto != 0 && alto != 0) {
             if ((newsoprano-newalto+40)%40 == 23) {
-               errormessage(5, "soprano", "alto", linenum[i]);
+               errormessage(5, "soprano", "alto", linenum[i], linenum[i+1]);
             }
          }
 
          if (sdir == tdir && newtenor != 0 && tenor != 0) {
             if ((newsoprano-newtenor+40)%40 == 23) {
-               errormessage(5, "soprano", "tenor", linenum[i]);
+               errormessage(5, "soprano", "tenor", linenum[i], linenum[i+1]);
             }
          }
 
          if (sdir == bdir && newbass != 0 && bass != 0) {
             if ((newsoprano-newbass+40)%40 == 23) {
-               errormessage(5, "soprano", "bass", linenum[i]);
+               errormessage(5, "soprano", "bass", linenum[i], linenum[i+1]);
             }
          }
 
@@ -1384,7 +1421,7 @@ void error6(void) {
          if ((sdir == adir) && (newalto != 0) && (alto != 0)) {
             if (((newsoprano-newalto+400)%40 == 0) && (newsoprano != newalto)) {
                if ((soprano - alto + 400)%40 != 0) { // exclude para octaves
-                  errormessage(6, "soprano", "alto", linenum[i]);
+                  errormessage(6, "soprano", "alto", linenum[i], linenum[i+1]);
                }
             }
          }
@@ -1393,7 +1430,7 @@ void error6(void) {
             if (((newsoprano-newtenor+400)%40 == 0) && 
                   (newsoprano != newtenor)) {
                if ((soprano - tenor + 400)%40 != 0) { // exclude para octaves
-                  errormessage(6, "soprano", "tenor", linenum[i]);
+                  errormessage(6, "soprano", "tenor", linenum[i], linenum[i+1]);
                }
             }
          }
@@ -1401,7 +1438,7 @@ void error6(void) {
          if ((sdir == bdir) && (newbass != 0) && (bass != 0)) {
             if (((newsoprano-newbass+400)%40 == 0) && (newsoprano != newbass)) {
                if ((soprano - bass + 400)%40 != 0) { // exclude para octaves
-                  errormessage(6, "soprano", "bass", linenum[i]);
+                  errormessage(6, "soprano", "bass", linenum[i], linenum[i+1]);
                }
             }
          }
@@ -1429,23 +1466,23 @@ void error7(void) {
 
       if (tenor > 0 && bass > 0) {
          if (tenor - bass < 0) {
-            errormessage(7, "tenor", "bass", linenum[i]);
+            errormessage(7, "tenor", "bass", linenum[i], linenum[i+1]);
          }
       } 
       if (alto > 0 && bass > 0) {
          if (alto - bass < 0) {
-            errormessage(7, "alto", "bass", linenum[i]);
+            errormessage(7, "alto", "bass", linenum[i], linenum[i+1]);
          }
       }
       
       if (soprano > 0 && alto > 0) {
          if (soprano - alto < 0) {
-            errormessage(7, "soprano", "alto", linenum[i]);
+            errormessage(7, "soprano", "alto", linenum[i], linenum[i+1]);
          }
       } 
       if (soprano > 0 && tenor > 0) {
          if (soprano - tenor < 0) {
-            errormessage(7, "soprano", "tenor", linenum[i]);
+            errormessage(7, "soprano", "tenor", linenum[i], linenum[i+1]);
          }
       }
    }
@@ -1470,7 +1507,7 @@ void error8(void) {
 
       if (tenor > 0 && alto > 0) {
          if (alto - tenor > 40) {
-            errormessage(8, "alto", "tenor", linenum[i]);
+            errormessage(8, "alto", "tenor", linenum[i], linenum[i+1]);
          } else if (alto - tenor < 0) {
             temp = alto;
 	    alto = tenor;
@@ -1480,7 +1517,7 @@ void error8(void) {
 
       if (alto > 0 && soprano > 0) {
          if (soprano - alto > 40) {
-            errormessage(8, "soprano", "alto", linenum[i]);
+            errormessage(8, "soprano", "alto", linenum[i], linenum[i+1]);
          } 
       }
 
