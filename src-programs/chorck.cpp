@@ -112,6 +112,7 @@ int          voicemin = 0;       // used with -s, -d, -t option
 int          fileQ    = 0;       // used with -f option
 const char*  Filename = "";      // used with -f option
 int          idQ      = 0;       // used with --id option
+int          rawQ     = 0;       // used with --raw option
 
 // Analysis variables
 SigCollection<Error> errorList;  // a list of detected errors in chorale
@@ -159,7 +160,9 @@ int main(int argc, char* argv[]) {
       }
 
       checkForErrors();
-      writeoutput(infile);
+      if (!rawQ) {
+         writeoutput(infile);
+      }
    }
 
    return 0;
@@ -221,6 +224,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("w|warnings=b",      "show only warnings");
    opts.define("x|exclude=s:",      "exclude certain error checking rules");
    opts.define("id=b",              "add note ID numbers for each note");
+   opts.define("raw=b",             "display error numbers and input note ids");
 
    opts.define("debug=b",           "determine bad input line num");
    opts.define("author=b",          "author of program");
@@ -294,6 +298,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    marker = opts.getString("marker");
    fileQ  = opts.getBoolean("filename");
    idQ    = opts.getBoolean("id");
+   rawQ   = opts.getBoolean("raw");
+   if (rawQ) {
+      idQ = 1;
+   }
 }
 
 
@@ -395,16 +403,29 @@ void errormessage(int errornumber, const char* voice1, const char* voice2,
       if (strcmp(voice2, "alto")    == 0) { v2 = 2; }
       if (strcmp(voice2, "soprano") == 0) { v2 = 3; }
       
-      cout << "!!ERROR: " << errornumber;
-//    cout << linenumber * 100 + v1 << " " << linenumber * 100 + v2;
-      cout << " " << ids[v1][linenumber];
-      cout << " " << ids[v2][linenumber];
+      if (rawQ) {
+         cout << errornumber;
+         cout << " ";
+         cout << "ID";
+         cout << ":" << ids[v1][linenumber];
+         cout << ":" << ids[v2][linenumber];
+         if (errornumber < 7) {
+            cout << ":" << ids[v1][endline];
+            cout << ":" << ids[v2][endline];
+         }
+      } else {
+         cout << "!!ERROR: ";
+         cout << errornumber;
+//       cout << linenumber * 100 + v1 << " " << linenumber * 100 + v2;
+         cout << " " << ids[v1][linenumber];
+         cout << " " << ids[v2][linenumber];
       if (errornumber < 7) {
-         // print ending note values
-         //cout << " " << endline * 100 + v1;
-         //cout << " " << endline * 100 + v2;
-         cout << " " << ids[v1][endline];
-         cout << " " << ids[v2][endline];
+            // print ending note values
+            //cout << " " << endline * 100 + v1;
+            //cout << " " << endline * 100 + v2;
+            cout << " " << ids[v1][endline];
+            cout << " " << ids[v2][endline];
+         }
       }
       cout << endl;
    }
