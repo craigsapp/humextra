@@ -111,13 +111,15 @@ const char*  marker = "";        // Warning string start
 int          voicemin = 0;       // used with -s, -d, -t option
 int          fileQ    = 0;       // used with -f option
 const char*  Filename = "";      // used with -f option
-int           idQ     = 0;       // used with --id option
+int          idQ      = 0;       // used with --id option
 
 // Analysis variables
 SigCollection<Error> errorList;  // a list of detected errors in chorale
 Array<int>   linenum;            // line number in file of given pitch set
+Array <Array<SigString> > ids;   // used with --id option
 Array<int>   voices[4];          // pitches from SATB lines
 int          voiceloc[4];        // SATB voice spine locations 
+int          locvoice[1000] = {0}; // SATB voice spine locations 
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -132,8 +134,6 @@ int main(int argc, char* argv[]) {
    int numinputs = options.getArgCount();
 
    for (int i=0; i<numinputs || i==0; i++) {
-      initialize(infile);
-
       // if no command-line arguments read data file from standard input
       if (numinputs < 1) {
          infile.read(cin);
@@ -143,6 +143,7 @@ int main(int argc, char* argv[]) {
             Filename = options.getArg(i+1);
          }
       }
+      initialize(infile);
 
       // build note array from the input file according to command-line options
       processRecords(infile);
@@ -394,12 +395,16 @@ void errormessage(int errornumber, const char* voice1, const char* voice2,
       if (strcmp(voice2, "alto")    == 0) { v2 = 2; }
       if (strcmp(voice2, "soprano") == 0) { v2 = 3; }
       
-      cout << "!!ERROR: " << errornumber << " "
-           << linenumber * 100 + v1 << " " << linenumber * 100 + v2;
+      cout << "!!ERROR: " << errornumber;
+//    cout << linenumber * 100 + v1 << " " << linenumber * 100 + v2;
+      cout << " " << ids[v1][linenumber];
+      cout << " " << ids[v2][linenumber];
       if (errornumber < 7) {
          // print ending note values
-         cout << " " << endline * 100 + v1;
-         cout << " " << endline * 100 + v2;
+         //cout << " " << endline * 100 + v1;
+         //cout << " " << endline * 100 + v2;
+         cout << " " << ids[v1][endline];
+         cout << " " << ids[v2][endline];
       }
       cout << endl;
    }
@@ -479,20 +484,28 @@ void example(void) {
 //
 
 void initialize(HumdrumFile& infile) {
-   infile.clear();
-   for (int k=0; k<4; k++) {
-      voices[k].setSize(100000);
-      voices[k].setAllocSize(100000);
-      voices[k].setSize(0);
-      voices[k].allowGrowth();
+   int i;
+   for (i=0; i<4; i++) {
+      voices[i].setSize(infile.getNumLines());
+      voices[i].setAllocSize(infile.getNumLines());
+      voices[i].setSize(0);
+      voices[i].allowGrowth();
    }
-   linenum.setSize(100000);
-   linenum.setAllocSize(100000);
+   linenum.setSize(infile.getNumLines());
+   linenum.setAllocSize(infile.getNumLines());
    linenum.setSize(0);
    linenum.allowGrowth();
 
-   errorList.setSize(100000);
-   errorList.setAllocSize(100000);
+   if (idQ) {
+      ids.setSize(4);
+      ids.allowGrowth(0);
+      for (i=0; i<ids.getSize(); i++) {
+         ids[i].setSize(infile.getNumLines());
+      }
+   }
+
+   errorList.setSize(infile.getNumLines());
+   errorList.setAllocSize(infile.getNumLines());
    errorList.setSize(0);
    errorList.allowGrowth();
 
@@ -620,7 +633,12 @@ void prepareVoices(void) {
 void processRecords(HumdrumFile& infile) {
    int base40pitch;
    int vcount;
-   for (int i=0; i<infile.getNumLines(); i++) {
+   Array<SigString> currentId(infile.getMaxTracks()+10);
+   currentId.allowGrowth(0);
+   PerlRegularExpression pre;
+   int i, j, k;
+   
+   for (i=0; i<infile.getNumLines(); i++) {
       if (options.getBoolean("debug")) {
          cout << "processing line " << (i+1) << " of input ..." << endl;
       }
@@ -629,8 +647,16 @@ void processRecords(HumdrumFile& infile) {
          case E_humrec_empty:
          case E_humrec_bibliography:
          case E_humrec_global_comment:
-         case E_humrec_data_comment:
          case E_humrec_data_kern_measure:
+            break;
+         case E_humrec_data_comment:
+         { 
+            for (j=0; j<infile[i].getFieldCount(); j++) {
+               if (pre.search(infile[i][j], "!ID:\\s*([^\\s]+)")) {
+                  currentId[j] = pre.getSubmatch(1);
+               }
+            }
+         }
             break;
          case E_humrec_interpretation:
          {
@@ -638,9 +664,10 @@ void processRecords(HumdrumFile& infile) {
                break;
             }
             int count = 0;
-            for (int k=0; k<infile[i].getFieldCount(); k++) {
+            for (k=0; k<infile[i].getFieldCount(); k++) {
                if (infile[i].getExInterpNum(k) == E_KERN_EXINT) {
                   voiceloc[count] = k;
+                  locvoice[k] = count;
                   count++;
                }
                if (count == 4) {
@@ -660,7 +687,7 @@ void processRecords(HumdrumFile& infile) {
             int sign; // +1 = note attack, -1 = not
             vcount = getVoiceCount(infile[i]);
             if (vcount >= voicemin) {
-               for (int k=0; k<4; k++) {
+               for (k=0; k<4; k++) {
                   if (strcmp(infile[i][voiceloc[k]], ".") == 0) {
                      datap = infile.getDotValue(i, voiceloc[k]);
                      sign = -1;
@@ -679,8 +706,13 @@ void processRecords(HumdrumFile& infile) {
                      base40pitch = sign * Convert::kernToBase40(datap);
                   }
                   voices[k].append(base40pitch);
+
+                  if (idQ) {
+                     ids[k][i] = currentId[voiceloc[k]];
+                  }
                }
                linenum.append(i);
+
             }
          }
             break;
@@ -924,20 +956,21 @@ void writeoutput(HumdrumFile& infile) {
             cout << '\n';
             errorIndex++;
          }
-         if (idQ && infile[i].isData()) {
-            for (j=0; j<infile[i].getFieldCount(); j++) {
-               cout << "!";
-               if (infile[i].isExInterp(j, "**kern")) {
-                  if (strcmp(infile[i][j], ".") != 0) {
-                     cout << "ID:" << i * 100 + j;
-                  } 
-               } 
-               if (j < infile[i].getFieldCount() - 1) {
-                  cout << "\t";
-               }
-            }
-            cout << "\n";
-         }
+//         if (idQ && infile[i].isData()) {
+//            for (j=0; j<infile[i].getFieldCount(); j++) {
+//               cout << "!";
+//               if (infile[i].isExInterp(j, "**kern")) {
+//                  if (strcmp(infile[i][j], ".") != 0) {
+//                     cout << ids[locvoice[j]][i];
+//                     // cout << "ID:" << i * 100 + j;
+//                  } 
+//               } 
+//               if (j < infile[i].getFieldCount() - 1) {
+//                  cout << "\t";
+//               }
+//            }
+//            cout << "\n";
+//         }
          cout << infile[i] << '\n';
       }
    }
@@ -1100,12 +1133,6 @@ void error2(void) {
 
       if (newsoprano != 0 && soprano != 0 && bdir == sdir && soprano != bass) {
          if ((soprano-bass+400)%40 == 0 && (newsoprano-newbass+400)%40 == 0) {
-char buffer[1024];
-cout << "bass = " << bass << Convert::base40ToKern(buffer, bass);
-cout << "\tnewbass = " << newbass << Convert::base40ToKern(buffer, newbass) << endl;
-cout << "sopr = " << soprano << Convert::base40ToKern(buffer, soprano);
-cout << "\tnewsopr = " << newsoprano << Convert::base40ToKern(buffer, newsoprano) << endl;
-cout << "diff = " << soprano - bass << "\tdiff2 = " << newsoprano - newbass << endl;
             errormessage(2, "bass", "soprano", linenum[i], linenum[i+1]);
          }
       }
