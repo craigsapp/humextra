@@ -27,12 +27,14 @@ ostream&  printExclusiveInterpretations(ostream& out, HumdrumFile& infile,
 int       afterMeasure       (HumdrumFile& infile, int line);
 
 // global variables
-Options   options;             // database for command-line arguments
-int       appendQ    = 0;       // used with -a option
-int       prependQ   = 0;       // used with -p option
-int       restQ      = 0;       // used with -r option
-int       invisibleQ = 0;       // used with -y option
-int       Count      = 0;       // used with -c option
+Options   options;            // database for command-line arguments
+int       appendQ    = 0;     // used with -a option
+int       prependQ   = 0;     // used with -p option
+int       restQ      = 0;     // used with -r option
+int       invisibleQ = 0;     // used with -y option
+int       timesigQ   = 0;     // used with -t option
+int       keysigQ    = 0;     // used with -k option
+int       Count      = 0;     // used with -c option
 Array<SigString> Exinterps;   // used with -i option
 
 ///////////////////////////////////////////////////////////////////////////
@@ -175,6 +177,12 @@ ostream& printBlanks(ostream& out, HumdrumFile& infile, int line,
          } else {
             out << string;
          }
+      } else if (timesigQ && (infile[line].isTimeSig(0)
+            || infile[line].isTempo(0) || infile[line].isMetSig(0))) {
+         out << infile[line][0];
+      } else if (keysigQ && (infile[line].isKeySig(0) 
+            || infile[line].isKey(0))) {
+         out << infile[line][0];
       } else {
          out << string;
       }
@@ -233,6 +241,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("i|x|exinterp=s:blank", "set column exclusive interpretations");
    opts.define("r|rests=b",            "put rests in **kern added spines");
    opts.define("y|invisible=b",        "added rests are made invisible");
+   opts.define("k|keysig=b",           "added key sigs to blank spines");
+   opts.define("t|timesig=b",          "added time sigs to blank spines");
 
    opts.define("debug=b");                // determine bad input line num
    opts.define("author=b");               // author of program
@@ -260,6 +270,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    restQ     = opts.getBoolean("rests");
+   timesigQ  = opts.getBoolean("timesig");
+   keysigQ   = opts.getBoolean("keysig");
    invisibleQ= opts.getBoolean("invisible");
    appendQ   = opts.getBoolean("assemble");
    prependQ  = opts.getBoolean("prepend");
@@ -308,3 +320,4 @@ void usage(const char* command) {
 
 
 // md5sum: ec5bfed5a848eeff7508e533e478fd5c blank.cpp [20131109]
+
