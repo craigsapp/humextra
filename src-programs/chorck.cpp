@@ -953,7 +953,7 @@ void writeoutput(HumdrumFile& infile) {
    sortErrorMessages(errorList.getBase(), errorList.getSize());
 
    int errorIndex = 0;
-   int i, j;
+   int i;
 
    if (options.getBoolean("warnings")) {
       for (i=0; i<errorList.getSize(); i++) {
@@ -978,6 +978,7 @@ void writeoutput(HumdrumFile& infile) {
             errorIndex++;
          }
 //         if (idQ && infile[i].isData()) {
+//            int j;
 //            for (j=0; j<infile[i].getFieldCount(); j++) {
 //               cout << "!";
 //               if (infile[i].isExInterp(j, "**kern")) {
