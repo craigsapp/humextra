@@ -1,22 +1,23 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Jun  2 23:30:21 PDT 2010
-// Last Modified: Fri Dec 24 16:48:57 PST 2010 continued implementation
-// Last Modified: Sat Feb  5 14:57:09 PST 2011 added text for lyrics
-// Last Modified: Mon Feb 28 06:30:23 PST 2011 added --footer
-// Last Modified: Mon Mar  7 19:19:44 PST 2011 added LO:N:smx/Y;bmx/Y
-// Last Modified: Fri Mar 25 11:37:46 PDT 2011 macro expansion adjustments
-// Last Modified: Fri Apr  1 07:54:48 PDT 2011 hanging tie endings 
-// Last Modified: Wed Apr  6 19:54:37 PDT 2011 added --vz
-// Last Modified: Thu Apr 14 21:44:11 PDT 2011 added *rscale processing
-// Last Modified: Thu Aug 18 14:43:25 PDT 2011 added segno sign on barlines
-// Last Modified: Wed Aug 31 16:59:11 PDT 2011 added \+ infront of # text
-// Last Modified: Sat Sep 24 19:21:17 PDT 2011 added -x option
-// Last Modified: Fri May 25 11:02:26 PDT 2012 added "P C0:x1" print suggestions
-// Last Modified: Mon Jul 16 16:21:25 PDT 2012 added unterminated tie handling
-// Last Modified: Mon Aug 20 14:18:50 PDT 2012 added -textvadd
-// Last Modified: Tue Aug 21 09:36:43 PDT 2012 added line extensions
-// Last Modified: Mon Aug 19 15:12:09 PDT 2013 added *elision controls
+// Last Modified: Fri Dec 24 16:48:57 PST 2010 Continued implementation
+// Last Modified: Sat Feb  5 14:57:09 PST 2011 Added text for lyrics
+// Last Modified: Mon Feb 28 06:30:23 PST 2011 Added --footer
+// Last Modified: Mon Mar  7 19:19:44 PST 2011 Added LO:N:smx/Y;bmx/Y
+// Last Modified: Fri Mar 25 11:37:46 PDT 2011 Macro expansion adjustments
+// Last Modified: Fri Apr  1 07:54:48 PDT 2011 Hanging tie endings 
+// Last Modified: Wed Apr  6 19:54:37 PDT 2011 Added --vz
+// Last Modified: Thu Apr 14 21:44:11 PDT 2011 Added *rscale processing
+// Last Modified: Thu Aug 18 14:43:25 PDT 2011 Added segno sign on barlines
+// Last Modified: Wed Aug 31 16:59:11 PDT 2011 Added \+ infront of # text
+// Last Modified: Sat Sep 24 19:21:17 PDT 2011 Added -x option
+// Last Modified: Fri May 25 11:02:26 PDT 2012 Added "P C0:x1" print suggestions
+// Last Modified: Mon Jul 16 16:21:25 PDT 2012 Added unterminated tie handling
+// Last Modified: Mon Aug 20 14:18:50 PDT 2012 Added -textvadd
+// Last Modified: Tue Aug 21 09:36:43 PDT 2012 Added line extensions
+// Last Modified: Mon Aug 19 15:12:09 PDT 2013 Added *elision controls
+// Last Modified: Fri Jan  3 14:34:21 PST 2014 Added RDF**kern:j tied group
 // Filename:      ...sig/examples/all/hum2muse.cpp 
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2muse.cpp
 // Syntax:        C++; museinfo
@@ -544,6 +545,7 @@ void  printPrehangTie          (MuseRecord& arecord, const char* buffer,
 void  addTextVertcialSpace     (Array<char>& ostring, HumdrumFile& infile);
 int   needsWordExtension       (HumdrumFile& infile, int row, int notecol, 
                                 int versecol, Array<char>& verse);
+void  markAllNotesInTiedGroup  (HumdrumFile& infile, char groupchar);
 
 
 Array<Array<Array<char> > > TieConditionsForward;
@@ -595,6 +597,8 @@ int hasFictaQ = 0;                // used with !!!RDF**kern: i=musica ficta
 char FictaChar = 'i';
 int hasLongQ = 0;                 // used with !!!RDF**kern: l=long note
 char LongChar = 'l';
+int tiedgroupQ = 0;               // used with !!!RDF**kern: j=single notehead
+char TiedGroupChar = 'j';
 Array<Array<Array<char> > > BeamState;
 Array<int> hasTuplet;
 Array<Array<char> > TupletState;
@@ -1494,6 +1498,74 @@ void setupMusicaFictaVariables(HumdrumFile& infile) {
             "^!!!RDF\\*\\*kern\\s*:\\s*([^\\s=])\\s*=.*long", "i")) {
          hasLongQ = 1;
          LongChar = pre.getSubmatch(1)[0];
+      }
+      if (pre.search(infile[i][0], 
+         "^!!!RDF\\*\\*kern\\s*:\\s*([^\\s=])\\s*=.*single.*notehead", "i")) {
+         tiedgroupQ = 1;
+         TiedGroupChar = pre.getSubmatch(1)[0];
+      }
+   }
+
+   if (tiedgroupQ) {
+      markAllNotesInTiedGroup(infile, TiedGroupChar);
+   }
+
+}
+
+
+
+//////////////////////////////
+//
+// markAllNotesInTiedGroup -- mark notes in tied group which should be hidden
+//     when printing.  Will currently not handle spine splits properly.
+//     Will not handle chords properly.
+//
+
+void markAllNotesInTiedGroup(HumdrumFile& infile, char groupchar) {
+   int maxtracks = infile.getMaxTracks();
+   Array<int> lastpitch(maxtracks+1);
+   lastpitch.setAll(-1);
+   int i, j, track;
+   int base40;
+   Array<char> string;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isData()) {
+         continue;
+      }
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         if (!infile[i].isExInterp(j, "**kern")) {
+            continue;
+         }
+         if (infile[i].isNullToken(j)) {
+            continue;
+         }
+         if (infile[i].isRest(j)) {
+            // not processing rests, jj=first note in group, j=secondary rest
+            continue;
+         }
+         track = infile[i].getPrimaryTrack(j);
+         if (strchr(infile[i][j], groupchar) != NULL) {
+            // found a new group starting on this note
+            base40 = Convert::kernToBase40(infile[i][j]);
+            lastpitch[track] = base40;
+            continue;
+         }
+         if ((strchr(infile[i][j], '_') != NULL) || 
+             (strchr(infile[i][j], ']') != NULL)) {
+            base40 = Convert::kernToBase40(infile[i][j]);
+            if (base40 == lastpitch[track]) {
+               // mark as part of a note tied group
+               string.setSize(strlen(infile[i][j])+3);
+               strcpy(string.getBase(), infile[i][j]);
+               string[string.getSize()-3] = groupchar;
+               string[string.getSize()-2] = groupchar;
+               string.last() = '\0';
+               infile[i].setToken(j, string.getBase());
+            }
+         } else {
+            // note in a tied group tail, so erase any memory of one.
+            lastpitch[track] = -1;
+         }
       }
    }
 }
@@ -3758,6 +3830,8 @@ int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
    int k, kk;
    int hidetieQ = 0;
    int hidetie  = 0;
+   int tiemark  = 0;
+   Array<char> temp;
 
    LayoutParameters lp;
    lp.parseLayout(infile, LayoutInfo[row][col]);
@@ -3972,6 +4046,100 @@ int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
             hideNotesAfterLong(infile, row, col);
          }
       }
+      tiemark = 0;
+      if (tiedgroupQ && (strchr(infile[row][col], TiedGroupChar) != NULL)) {
+         // hide note if not the first one in the tied note group
+         // & set the shape of the first note in the group to the duration
+         // of the group.
+         if (strchr(infile[row][col], 'r') != NULL) {
+            char doublemark[3];
+            doublemark[0] = TiedGroupChar;
+            doublemark[1] = TiedGroupChar;
+            doublemark[2] = '\0';
+            if (strstr(infile[row][col], doublemark) != NULL) {
+               // deal with starting rest of group.
+               // Set its duration to the duration of the rest group
+            } else {
+               // hide secondary rests in group
+               temp.setSize(strlen(infile[row][col]+3));
+               strcpy(temp.getBase(), infile[row][col]);
+               strcat(temp.getBase(), "yy");
+               infile[row].setToken(col, temp.getBase());
+            }
+         } else if (strchr(infile[row][col], '[') != NULL) {
+            // start of tied group: set notehead shape
+            int len = strlen(infile[row][col]);
+            temp.setSize(len+10);
+            temp.setSize(len+1);
+            strcpy(temp.getBase(), infile[row][col]);
+            PerlRegularExpression pre10;
+            pre10.sar(temp, "[[]", "[y", "g");
+            infile[row].setToken(col, temp.getBase());
+            RationalNumber tiedur = infile.getTiedDurationR(row, col);
+            // add single augmentation dots (handle simple cases only):
+            RationalNumber dotted4th(3,2);
+            RationalNumber dotted8th(3,4);
+            RationalNumber dotted16th(3,8);
+            RationalNumber dotted32nd(3,16);
+            RationalNumber dotted64th(3,32);
+            RationalNumber dotted128th(3,64);
+            RationalNumber dotted256th(3,128);
+
+            if (tiedur == 3) {      // dotted half note
+               arecord.setDots(1);
+               tiedur = 2;
+            } else if (tiedur == 6) { // dotted whole note
+               arecord.setDots(1);
+               tiedur = 4;
+            } else if (tiedur == 12) { // dotted breve note
+               arecord.setDots(1);
+               tiedur = 8;
+            } else if (tiedur == 24) { // dotted long note
+               arecord.setDots(1);
+               tiedur = 16;
+            } else if (tiedur == 48) { // dotted maxima note
+               arecord.setDots(1);
+               tiedur = 32;
+            } else if (tiedur == dotted4th) { // dotted quarter note
+               arecord.setDots(1);
+               tiedur = 1;
+            } else if (tiedur == dotted8th) { // dotted eighth note
+               arecord.setDots(1);
+               tiedur = 1; tiedur /= 2;
+            } else if (tiedur == dotted16th) {
+               arecord.setDots(1);  
+               tiedur = 1; tiedur /= 4;
+            } else if (tiedur == dotted32nd) {
+               arecord.setDots(1); 
+               tiedur = 1; tiedur /= 8;
+            } else if (tiedur == dotted64th) {
+               arecord.setDots(1);
+               tiedur = 1; tiedur /= 16;
+            } else if (tiedur == dotted128th) {
+               arecord.setDots(1);
+               tiedur = 1; tiedur /= 32;
+            } else if (tiedur == dotted256th) {
+               arecord.setDots(1);
+               tiedur = 1; tiedur /= 64;
+            }
+            if (RscaleState[row][col] != 1) {
+               RationalNumber scaling;
+               tiedur *= RscaleState[row][col];
+            }
+            // might need to deal with tuplets...
+            arecord.setNoteheadShape(tiedur);
+             
+            arecord.setTie(1); // hide tie
+            tiemark = 1;
+         } else if ((strchr(infile[row][col], '_') != NULL) || 
+                    (strchr(infile[row][col], ']') != NULL)) {
+            // tie continuation: hide note
+            temp.setSize(strlen(infile[row][col]+3));
+            strcpy(temp.getBase(), infile[row][col]);
+            strcat(temp.getBase(), "yy");
+            infile[row].setToken(col, temp.getBase());
+         }
+      }
 
       if (strchr(buffer, '/') != NULL) {   // stem up
          arecord.setStemUp();    
@@ -3980,36 +4148,38 @@ int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
          arecord.setStemDown();    
       }
 
-      if (!(hasLongQ && (strchr(infile[row][col], LongChar) != NULL))) {
-         if (strchr(buffer, '[') != NULL) {
-            // tie start
-            if ((strstr(buffer, "yy") != NULL) || (strstr(buffer, "[y") != NULL)) {
+      if (!tiemark) {
+         if (!(hasLongQ && (strchr(infile[row][col], LongChar) != NULL))) {
+            if (strchr(buffer, '[') != NULL) {
+               // tie start
+               if ((strstr(buffer, "yy") != NULL) || (strstr(buffer, "[y") != NULL)) {
+                  arecord.setTie(1);
+               } else {
+                  if (hidetieQ) {
+                     arecord.setTie(hidetie);
+                  } else {
+                     arecord.setTie(!tieQ);
+                  }
+               }
+            }
+         }
+         if (strchr(buffer, '_') != NULL) {
+            // tie continuation
+            if ((strstr(buffer, "yy") != NULL) || (strstr(buffer, "_y") != NULL)) {
                arecord.setTie(1);
             } else {
-               if (hidetieQ) {
+               if (hidetieQ) { 
                   arecord.setTie(hidetie);
                } else {
                   arecord.setTie(!tieQ);
                }
             }
          }
-      }
-      if (strchr(buffer, '_') != NULL) {
-         // tie continuation
-         if ((strstr(buffer, "yy") != NULL) || (strstr(buffer, "_y") != NULL)) {
-            arecord.setTie(1);
-         } else {
-            if (hidetieQ) { 
-               arecord.setTie(hidetie);
-            } else {
-               arecord.setTie(!tieQ);
-            }
+         if ((opentie) && (strchr(buffer, ']') != NULL)) {
+            // this closing tie has no opening, so show a tie going
+            // off to the left which is not tied to anything. 
+            printPrehangTie(arecord, buffer, infile, row, col, voice);
          }
-      }
-      if ((opentie) && (strchr(buffer, ']') != NULL)) {
-         // this closing tie has no opening, so show a tie going
-         // off to the left which is not tied to anything. 
-         printPrehangTie(arecord, buffer, infile, row, col, voice);
       }
 
       if (kk == 0) {
