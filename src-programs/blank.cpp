@@ -24,12 +24,15 @@ ostream&  printInterpretation(ostream& out, HumdrumFile& infile, int line,
 ostream&  printExclusiveInterpretations(ostream& out, HumdrumFile& infile, 
                               int line, int count, 
                               Array<SigString>& exinterps);
+int       afterMeasure       (HumdrumFile& infile, int line);
 
 // global variables
-Options   options;            // database for command-line arguments
-int       appendQ  = 0;       // used with -a option
-int       prependQ = 0;       // used with -p option
-int       Count    = 0;       // used with -c option
+Options   options;             // database for command-line arguments
+int       appendQ    = 0;       // used with -a option
+int       prependQ   = 0;       // used with -p option
+int       restQ      = 0;       // used with -r option
+int       invisibleQ = 0;       // used with -y option
+int       Count      = 0;       // used with -c option
 Array<SigString> Exinterps;   // used with -i option
 
 ///////////////////////////////////////////////////////////////////////////
@@ -55,6 +58,9 @@ int main(int argc, char* argv[]) {
 //
 
 ostream& printOutput(ostream& out, HumdrumFile& infile) {
+   if (restQ) {
+      infile.analyzeRhythm("4");
+   }
    for (int i=0; i<infile.getNumLines(); i++) {
       switch (infile[i].getType()) {
          case E_humrec_data_comment:
@@ -149,8 +155,29 @@ ostream& printBlanks(ostream& out, HumdrumFile& infile, int line,
       out << infile[line] << '\t';
    }
    int j;
+   int measureline = -1;
+   RationalNumber rn;
+   char buffer[1024] = {0};
    for (j=0; j<count; j++) {
-      out << string;
+      if (restQ && (strcmp(string, ".") == 0)) {
+         measureline = afterMeasure(infile, line);
+         if (measureline >= 0) {
+            if (measureline > 0) {
+               rn = infile[measureline].getBeatR();
+            } else if (measureline == 0) {
+               rn = infile.getPickupDurationR();
+            }
+            Convert::durationRToKernRhythm(buffer, rn);
+            cout << buffer << "r";
+            if (invisibleQ) {
+               cout << "yy";
+            }
+         } else {
+            out << string;
+         }
+      } else {
+         out << string;
+      }
       if (j < count - 1) {
          out << '\t';
       }
@@ -163,6 +190,36 @@ ostream& printBlanks(ostream& out, HumdrumFile& infile, int line,
 }
 
 
+//////////////////////////////
+//
+// afterMeasure -- Search backwards from the given line for the
+//    previous barline.  If there is another data line with a non-zero
+//    duration before the previous line, then return -1 since the entry
+//    is not at the start of a measure.
+//
+
+int afterMeasure(HumdrumFile& infile, int line) {
+   int i;
+   double duration;
+   for (i=line-1; i>=0; i--) {
+      if (i == 0) {
+         // deal with pickup measure in the calling function.
+         return 0;
+      }
+      if (infile[i].isMeasure()) {
+         return i;
+      }
+      if (infile[i].isData()) {
+         duration = infile[i].getDuration();
+         if (duration != 0.0) {
+            return -1;
+         }
+      }
+   }
+
+   return -1;
+}
+
 
 //////////////////////////////
 //
@@ -174,6 +231,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("p|prepend=b",          "new spines at start of input lines");
    opts.define("n|count=i",            "number of spines to add");
    opts.define("i|x|exinterp=s:blank", "set column exclusive interpretations");
+   opts.define("r|rests=b",            "put rests in **kern added spines");
+   opts.define("y|invisible=b",        "added rests are made invisible");
 
    opts.define("debug=b");                // determine bad input line num
    opts.define("author=b");               // author of program
@@ -200,6 +259,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       exit(0);
    }
 
+   restQ     = opts.getBoolean("rests");
+   invisibleQ= opts.getBoolean("invisible");
    appendQ   = opts.getBoolean("assemble");
    prependQ  = opts.getBoolean("prepend");
    if (appendQ) {
