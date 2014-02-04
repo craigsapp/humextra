@@ -1634,15 +1634,15 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                      }
                   }
                   midinote = Convert::kernToMidiNoteNumber(buffer1); 
+                  // skip rests 
+                  if (midinote < 0) {
+                     continue;
+                  }
                   midinote += MidiTranspose;
                   if (midinote > 127) { midinote = 127; }
                   else if (midinote < 0) { midinote = 0; }
                   // base40note will be inaccurate if MidiTranspose <> 0
                   base40note = Convert::kernToBase40(buffer1);
-                  // skip rests 
-                  if (midinote < 0) {
-                     continue;
-                  }
 
                   if (!plainQ) {
                      accentQ    = strchr(buffer1, '^')  == NULL ? 0 : 1;
@@ -2818,7 +2818,6 @@ void getStaffValues(HumdrumFile& infile, int staffline,
 
 int getMillisecondTime(HumdrumFile& infile, int line) {
    double output = -100;
-   int flag;
    int i;
 
    while ((line < infile.getNumLines()) && 
@@ -2840,7 +2839,7 @@ int getMillisecondTime(HumdrumFile& infile, int line) {
          //} else {
          //   flag = sscanf(infile[line][i], "%lf", &output);
          //}
-         flag = sscanf(infile[line][i], "%lf", &output);
+         sscanf(infile[line][i], "%lf", &output);
          break;
       }
    }
