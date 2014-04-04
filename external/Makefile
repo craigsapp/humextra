@@ -32,7 +32,7 @@ else
 endif
 
 pcre:
-ifeq ($(shell uname),Darwin)
+ifneq ($(shell uname),Darwin)
 	# only do the following if not OS X.  Needed for Cygwin, but 
 	# causes problem in OS X since the autoreconf is not installed
 	# by default in OS X and has to be installed separately.
