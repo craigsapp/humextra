@@ -41,6 +41,7 @@ class ScorePageBase {
       void           initializeTrailer (long serial = 0x50504153);
 
    public:
+
    // file reading and writing functions:
       void           readFile          (const char* filename, int verboseQ = 0);
       void           readFile          (istream& infile, int verboseQ = 0);
@@ -58,6 +59,7 @@ class ScorePageBase {
 		                        int verboseQ = 0);
       void           printAsciiWithExtraParameters(ostream& out, int roundQ, 
                                         int verboseQ);
+
    private:
       float          readLittleFloat   (istream& instream);
       int            readLittleShort   (istream& input);

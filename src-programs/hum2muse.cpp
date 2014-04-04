@@ -546,6 +546,8 @@ void  addTextVertcialSpace     (Array<char>& ostring, HumdrumFile& infile);
 int   needsWordExtension       (HumdrumFile& infile, int row, int notecol, 
                                 int versecol, Array<char>& verse);
 void  markAllNotesInTiedGroup  (HumdrumFile& infile, char groupchar);
+void  adjustRscales            (HumdrumFile& infile, int line, 
+                                Array<RationalNumber>& rscales);
 
 
 Array<Array<Array<char> > > TieConditionsForward;
@@ -7316,6 +7318,10 @@ int getTupletTop(HumdrumFile& infile, int row, int col) {
    
 
    if (rn.getNumerator() != 1) {
+      if (rn.isEqualTo(32,3)) {
+         // triplet long note
+         return 3;
+      }
       if (rn.isEqualTo(16,3)) {
          // triplet breve note
          return 3;
@@ -7424,6 +7430,9 @@ void getBeamState(Array<Array<Array<char> > >& beams,
    Array<Array<int> > beamstate;   // state of beams in tracks/layers
    Array<Array<int> > gracestate;  // independents state for grace notes
 
+   Array<RationalNumber> rscales;  // for *rscale interpretations
+   RationalNumber one(1,1);
+
    Array<char> gbinfo;
    gbinfo.setSize(100);
    gbinfo.allowGrowth(0);
@@ -7432,10 +7441,14 @@ void getBeamState(Array<Array<Array<char> > >& beams,
    gracestate.setSize(infile.getMaxTracks() + 1);
    laystate.setSize(infile.getMaxTracks() + 1);
    clefstate.setSize(infile.getMaxTracks() + 1);
+   rscales.setSize(infile.getMaxTracks() + 1);
    beamstate.allowGrowth(0);
    gracestate.allowGrowth(0);
    laystate.allowGrowth(0);
    clefstate.allowGrowth(0);
+   rscales.allowGrowth(0);
+   rscales.setAll(one);
+
    for (i=0; i<beamstate.getSize(); i++) {
       clefstate[i].i = -1;  // should already by -1, but just in case
       clefstate[i].j = -1;  // should already by -1, but just in case
@@ -7480,6 +7493,7 @@ void getBeamState(Array<Array<Array<char> > >& beams,
 
       if (infile[i].isInterpretation()) {
          adjustClefState(infile, i, clefstate);
+         adjustRscales(infile, i, rscales);
       }
 
       if (!infile[i].isData() && !infile[i].isMeasure()) {
@@ -7522,6 +7536,7 @@ void getBeamState(Array<Array<Array<char> > >& beams,
             continue;
          }         
          rn = Convert::kernToDurationR(infile[i][j]);
+         rn *= rscales[track];
          if (rn >= 1) {
             beamstate[track][curlayer[track]] = 0;
             continue;
@@ -7631,6 +7646,41 @@ void getBeamState(Array<Array<Array<char> > >& beams,
 
          }
       }
+   }
+}
+
+
+
+//////////////////////////////
+//
+// adjustRscales -- update rscale settings.
+//
+
+void adjustRscales(HumdrumFile& infile, int line, 
+      Array<RationalNumber>& rscales) {
+   PerlRegularExpression pre;
+
+   int firstnum, secnum;
+   int track;
+   RationalNumber number;
+
+   int j;
+   for (j=0; j<infile[line].getFieldCount(); j++) {
+      if (pre.search(infile[line][j], "^\\*rscale:(\\d)\\/(\\d)", "i")) {
+         firstnum = atoi(pre.getSubmatch(1));
+         secnum = atoi(pre.getSubmatch(2));
+         number = firstnum;
+         number.setDenominator(secnum);
+      } else if (pre.search(infile[line][j], "^\\*rscale:(\\d)", "i")) {
+         firstnum = atoi(pre.getSubmatch(1));
+         secnum = atoi(pre.getSubmatch(1));
+         number = firstnum;
+      } else {
+         continue;
+      }
+
+      track = infile[line].getPrimaryTrack(j);
+      rscales[track] = number;
    }
 }
 
@@ -9529,4 +9579,4 @@ getNewLine:
 
 */
 
-// md5sum: 987b0e630254b1a6f5be9d8508a27b03 hum2muse.cpp [20131108]
+// md5sum: 62fcd03de07d84c780ef4e8f4fbebb12 hum2muse.cpp [20140205]
