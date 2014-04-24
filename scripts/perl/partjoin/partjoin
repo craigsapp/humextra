@@ -1,0 +1,145 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Thu Apr 24 13:18:03 PDT 2014
+# Last Modified: Thu Apr 24 13:18:06 PDT 2014
+# Filename:      partjoin
+# Syntax:        perl 5
+#
+# Description:   Meta assemble command which preserves grace notes.
+#
+# Usage:         partjoint file1 file2 file3
+#		 where file1 is the top part on a system and file3 is 
+#		 the bottom part (opposite of the ordering than assemble).
+#
+# Example input1.krn:
+#	**kern
+#	*M3/4
+#	=1-
+#	4c
+#	g#q
+#	8a
+#	g#q
+#	8a
+#	4c
+#	==
+#	*-
+# Example input2.krn:
+#	**kern
+#	*M3/4
+#	=1-
+#	4cc\
+#	bq
+#	12ccL\
+#	bq
+#	12cc\
+#	bq
+#	12ccJ\
+#	4cc\
+#	==
+#	*-
+# Example output:
+#	**kern	**kern
+#	*M3/4	*M3/4
+#	=1-	=1-
+#	4cc\	4c
+#	bq	g#q
+#	12ccL\	8a
+#	bq	.
+#	12cc\	.
+#	.	g#q
+#	.	8a
+#	bq	.
+#	12ccJ\	.
+#	4cc\	4c
+#	==	==
+#	*-	*-
+#	
+
+use strict;
+
+my @files = @ARGV;
+
+die "Usage: $0 file1 file2 ...\n" if @files < 2;
+
+my @assemblefiles;
+my $filelist = join(" ", @files);
+my $minrhy = `minrhy $filelist`;
+
+$minrhy =~ /all:\s*(\d+)/;
+$minrhy = $1;
+
+foreach my $file (@files) {
+   my $contents = getContents($file);
+   open (PROCESS, "|timebase -t $minrhy > $file-timebase$minrhy") or die;
+   print PROCESS $contents;
+   close PROCESS;
+   $assemblefiles[@assemblefiles] = "$file-timebase$minrhy";
+}
+
+my $assemblelist = join(" ", reverse @assemblefiles);
+my $result = `assemble $assemblelist | rid -d | grep -v "^\*tb"`;
+
+printResult($result);
+`rm -f $assemblelist`;
+
+exit(0);
+
+
+###########################################################################
+
+##############################
+##
+## getContents --
+##
+
+sub getContents {
+   my ($file) = @_;
+   open (FILE, $file) or die;
+   my @contents = <FILE>;
+   for (my $i=0; $i<@contents; $i++) {
+      my $line = $contents[$i];
+      next if $line =~ /^!/;
+      next if $line =~ /^\*/;
+      if ($line =~ /q/) {
+         my @fields = split(/\t/, $line);
+         for (my $j=0; $j<@fields; $j++) {
+            $fields[$j] = "!QqQ$fields[$j]";
+         }
+         $contents[$i] = join("\t", @fields);
+      }
+   }
+   return join("", @contents);
+}
+
+
+
+##############################
+##
+## printResults --
+##
+
+sub printResult {
+   my ($result) = @_;
+   my @output = split(/\n/, $result);
+   my $line;
+   foreach $line (@output) {
+     if ($line !~ /!QqQ/) {
+        print "$line\n";
+        next;
+     }
+     my @fields = split(/\t/, $line);
+     for (my $j=0; $j<@fields; $j++) {
+        my $token = $fields[$j];
+        if ($token eq "!") {
+           print ".";
+        } else {
+           $token =~ s/^!QqQ//;
+           print $token;
+        }
+        print "\t" if $j < $#fields;
+     }
+     print "\n";
+   }
+}
+

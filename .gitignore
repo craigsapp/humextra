@@ -17,26 +17,10 @@ TIMESTAMP
 
 
 bin
-external/pcre-7.9/.deps
-external/pcre-7.9/.libs
-external/pcre-7.9/Makefile
-external/pcre-7.9/autom4te.cache
-external/pcre-7.9/config.h
-external/pcre-7.9/config.h.in~
-external/pcre-7.9/config.log
-external/pcre-7.9/config.status
-external/pcre-7.9/libpcre.pc
-external/pcre-7.9/libpcrecpp.pc
-external/pcre-7.9/libtool
-external/pcre-7.9/pcre-config
-external/pcre-7.9/pcre.h
-external/pcre-7.9/pcre_chartables.c
-external/pcre-7.9/pcre_scanner_unittest
-external/pcre-7.9/pcre_stringpiece.h
-external/pcre-7.9/pcre_stringpiece_unittest
-external/pcre-7.9/pcrecpp_unittest
-external/pcre-7.9/pcrecpparg.h
-external/pcre-7.9/pcregrep
-external/pcre-7.9/pcretest
-external/pcre-7.9/stamp-h1
+external/pcre-7.9
 makelist
+
+hum2allegro.cpp
+motive.cpp
+rebar.cpp
+updown.cpp
