@@ -3354,12 +3354,12 @@ const char* Convert::base12ToTnSetName(Array<int>& base12) {
          if (x[1]==1 && x[2]==2 && x[3]==3 && x[4]==4 && x[5]==5 && x[6]==6 && x[7]==7 && x[8]==8 && x[9]==9 && x[10]==10 && x[11]==11)	return "12-1*S1";
    }
 
-int z;
-for (z=0; z<x.getSize(); z++) {
-cout << "UNKNOWN: ";
-cout << x[z] << " ";
-}
-cout << endl;
+//int z;
+//for (z=0; z<x.getSize(); z++) {
+//cout << "UNKNOWN: ";
+//cout << x[z] << " ";
+//}
+//cout << endl;
 
    return "unknown";
 }
