@@ -1097,15 +1097,19 @@ int printCombinationModule(ostream& out, const char* filename,
       // print pitch of first bottom note
       if (filenameQ) {
          (*outp) << "file_" << filename;
+         (*outp) << " ";
       }
+     
+      (*outp) << "v_" << part1 << " v_" << part2 << " ";
+      
       if (base12Q) {
-         (*outp) << " base12_";
+         (*outp) << "base12_";
          (*outp) << Convert::base40ToMidiNoteNumber(fabs(notes[part1][startline].b40));
       } else if (base40Q) {
-         (*outp) << " base40_";
+         (*outp) << "base40_";
          (*outp) << fabs(notes[part1][startline].b40);
       } else {
-         (*outp) << " base7_";
+         (*outp) << "base7_";
          (*outp) << Convert::base40ToDiatonic(fabs(notes[part1][startline].b40));
       }
       (*outp) << " ";
