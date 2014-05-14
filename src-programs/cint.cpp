@@ -226,11 +226,12 @@ int       printCombinationsSuspensions(Array<Array<NoteNode> >& notes,
                                 HumdrumFile& infile, Array<int>& ktracks, 
                                 Array<int>& reverselookup, int n,
                                 Array<Array<SigString> >& retrospective);
-int       printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, 
+int       printCombinationModule(ostream& out, const char* filename, 
+                                Array<Array<NoteNode> >& notes, 
                                 int n, int startline, int part1, int part2,
                                 Array<Array<SigString> >& retrospective,
                                 char& notemarker, int markstate = 0);
-int       printCombinationModulePrepare(ostream& out, 
+int       printCombinationModulePrepare(ostream& out, const char* filename,
                                 Array<Array<NoteNode> >& notes, int n, 
                                 int startline, int part1, int part2,
                                 Array<Array<SigString> >& retrospective);
@@ -270,6 +271,7 @@ int       hmarkerQ     = 0;      // used with -h option
 int       mmarkerQ     = 0;      // used with -m option
 int       attackQ      = 0;      // used with --attacks option
 int       rawQ         = 0;      // used with --raw option
+int       raw2Q        = 0;      // used with --raw2 option
 int       xoptionQ     = 0;      // used with -x option
 int       octaveallQ   = 0;      // used with -O option
 int       octaveQ      = 0;      // used with -o option
@@ -562,7 +564,7 @@ int  printCombinations(Array<Array<NoteNode> >& notes,
       if (!infile[i].hasSpines()) {
          // print all lines here which do not contain spine 
          // information.
-         if (!(rawQ || markQ || retroQ || countQ)) {
+         if (!(raw2Q || rawQ || markQ || retroQ || countQ)) {
             cout << infile[i] << "\n";
          }
          continue;
@@ -593,7 +595,7 @@ int  printCombinations(Array<Array<NoteNode> >& notes,
          currentindex = printModuleCombinations(infile, i, ktracks, 
             reverselookup, n, currentindex, notes, matchcount, retrospective);
       }
-      if (!(rawQ || markQ || retroQ || countQ)) {
+      if (!(raw2Q || rawQ || markQ || retroQ || countQ)) {
             cout << "\n";
       }
    }
@@ -614,13 +616,14 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
       Array<Array<SigString> >& retrospective) {
 
    int fileline = line;
+   const char* filename = infile.getFilename();
 
    while ((currentindex < notes[0].getSize()) 
          && (fileline > notes[0][currentindex].line)) {
       currentindex++;
    }
    if (currentindex >= notes[0].getSize()) {
-      if (!(rawQ || markQ || retroQ || countQ)) {
+      if (!(raw2Q || rawQ || markQ || retroQ || countQ)) {
          cout << ".";
          printAsCombination(infile, line, ktracks, reverselookup, ".");
       }
@@ -648,7 +651,7 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
    int count = 0;
    for (j=0; j<infile[line].getFieldCount(); j++) {
       if (!infile[line].isExInterp(j, "**kern")) {
-         if (!(rawQ || markQ || retroQ || countQ)) {
+         if (!(raw2Q || rawQ || markQ || retroQ || countQ)) {
             cout << infile[line][j];
             if (j < infile[line].getFieldCount() - 1) {
                cout << "\t";
@@ -663,7 +666,7 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
          tracknext = -23525;
       }
       if (track == tracknext) {
-         if (!(rawQ || markQ || retroQ || countQ)) {
+         if (!(raw2Q || rawQ || markQ || retroQ || countQ)) {
             cout << infile[line][j];
             if (j < infile[line].getFieldCount() - 1) {
                cout << "\t";
@@ -674,24 +677,24 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
 
       // print the **kern spine, then check to see if there
       // is some **cint data to print
-      if (!(rawQ || markQ || retroQ || countQ)) {
+      if (!(raw2Q || rawQ || markQ || retroQ || countQ)) {
             cout << infile[line][j];
       }
       if ((track != ktracks.last()) && (reverselookup[track] >= 0)) {
          count = ktracks.getSize() - reverselookup[track] - 1;
          for (jj = 0; jj<count; jj++) {
-            if (!(rawQ || markQ || retroQ || countQ)) {
+            if (!(raw2Q || rawQ || markQ || retroQ || countQ)) {
                cout << "\t";
             }
             int part1 = reverselookup[track];
             int part2 = part1+1+jj;
             // cout << part1 << "," << part2;
-            matchcount += printCombinationModulePrepare(cout, notes, n, 
-                  currentindex, part1, part2, retrospective);
+            matchcount += printCombinationModulePrepare(cout, filename, 
+                  notes, n, currentindex, part1, part2, retrospective);
          }
       }
 
-      if (!(rawQ || markQ || retroQ || countQ)) {
+      if (!(raw2Q || rawQ || markQ || retroQ || countQ)) {
          if (j < infile[line].getFieldCount() - 1) {
             cout << "\t";
          }
@@ -708,17 +711,17 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
 // printCombinationModulePrepare --
 //
 
-int printCombinationModulePrepare(ostream& out, 
+int printCombinationModulePrepare(ostream& out, const char* filename,
        Array<Array<NoteNode> >& notes, int n, int startline, int part1, 
        int part2, Array<Array<SigString> >& retrospective) {
    int count = 0;
    SSTREAM tempstream;
    int match;
    char notemarker = '\0';
-   int status = printCombinationModule(tempstream, notes, n, startline, 
-                   part1, part2, retrospective, notemarker);
+   int status = printCombinationModule(tempstream, filename, notes, 
+         n, startline, part1, part2, retrospective, notemarker);
    if (status) { 
-      if (rawQ) {
+      if (raw2Q || rawQ) {
          tempstream << "\n";
       }
       tempstream << ends;
@@ -731,16 +734,17 @@ int printCombinationModulePrepare(ostream& out,
          match = SearchString.search(tempstream.CSTRING);
          if (match) {
             count++;
-            if (rawQ) {
+            if (raw2Q || rawQ) {
                out << tempstream.CSTRING;
                // newline already added somewhere previously.
                // cout << "\n";
             } else {
                // mark notes of the matched module(s) in the note array 
                // for later marking in input score.
-               status = printCombinationModule(tempstream, notes, n, startline, 
-                   part1, part2, retrospective, notemarker, MARKNOTES);
-               if (status && rawQ) {
+               status = printCombinationModule(tempstream, filename, 
+                   notes, n, startline, part1, part2, retrospective, 
+                   notemarker, MARKNOTES);
+               if (status && (raw2Q || rawQ)) {
                   tempstream << "\n";
                }
             }
@@ -755,7 +759,7 @@ int printCombinationModulePrepare(ostream& out,
          }
       }
    } else {
-      if (!(rawQ || markQ || retroQ || countQ || searchQ)) {
+      if (!(raw2Q || rawQ || markQ || retroQ || countQ || searchQ)) {
          out << ".";
       }
    }
@@ -1041,9 +1045,9 @@ int getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, int n,
 //      (--attacks will gnereate a variable length module chain).
 //
 
-int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n, 
-      int startline, int part1, int part2, 
-      Array<Array<SigString> >& retrospective, char& notemarker, 
+int printCombinationModule(ostream& out, const char* filename, 
+      Array<Array<NoteNode> >& notes, int n, int startline, int part1, 
+      int part2, Array<Array<SigString> >& retrospective, char& notemarker, 
       int markstate) {
 
    notemarker = '\0';
@@ -1087,6 +1091,24 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
    if ((notes[part1][startline].b40 <= 0) && 
        (notes[part2][startline].b40 <= 0)) {
       return 0;
+   }
+
+   if (raw2Q) { 
+      // print pitch of first bottom note
+      if (filenameQ) {
+         (*outp) << "file_" << filename;
+      }
+      if (base12Q) {
+         (*outp) << " base12_";
+         (*outp) << Convert::base40ToMidiNoteNumber(fabs(notes[part1][startline].b40));
+      } else if (base40Q) {
+         (*outp) << " base40_";
+         (*outp) << fabs(notes[part1][startline].b40);
+      } else {
+         (*outp) << " base7_";
+         (*outp) << Convert::base40ToDiatonic(fabs(notes[part1][startline].b40));
+      }
+      (*outp) << " ";
    }
 
    if (parenQ) {
@@ -1286,7 +1308,7 @@ int printCombinationModule(ostream& out, Array<Array<NoteNode> >& notes, int n,
 void printAsCombination(HumdrumFile& infile, int line, Array<int>& ktracks, 
     Array<int>& reverselookup, const char* interstring) {
 
-   if (rawQ || markQ || retroQ || countQ) {
+   if (raw2Q || rawQ || markQ || retroQ || countQ) {
       return;
    }
 
@@ -1354,7 +1376,7 @@ void printLatticeInterleaved(Array<Array<NoteNode> >& notes,
       if (!infile[i].hasSpines()) {
          // print all lines here which do not contain spine 
          // information.
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << infile[i] << "\n";
          }
          continue;
@@ -1385,7 +1407,7 @@ void printLatticeInterleaved(Array<Array<NoteNode> >& notes,
          currentindex = printInterleavedLattice(infile, i, ktracks, 
             reverselookup, n, currentindex, notes);
       }
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          cout << "\n";
       }
    }
@@ -1409,7 +1431,7 @@ int printInterleavedLattice(HumdrumFile& infile, int line, Array<int>& ktracks,
       currentindex++;
    }
    if (currentindex >= notes[0].getSize()) {
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          cout << ".";
          printInterleaved(infile, line, ktracks, reverselookup, ".");
       }
@@ -1433,7 +1455,7 @@ int printInterleavedLattice(HumdrumFile& infile, int line, Array<int>& ktracks,
    int j;
    for (j=0; j<infile[line].getFieldCount(); j++) {
       if (!infile[line].isExInterp(j, "**kern")) {
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << infile[line][j];
             if (j < infile[line].getFieldCount() - 1) {
                cout << "\t";
@@ -1448,7 +1470,7 @@ int printInterleavedLattice(HumdrumFile& infile, int line, Array<int>& ktracks,
          tracknext = -23525;
       }
       if (track == tracknext) {
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << infile[line][j];
             if (j < infile[line].getFieldCount() - 1) {
                cout << "\t";
@@ -1459,11 +1481,11 @@ int printInterleavedLattice(HumdrumFile& infile, int line, Array<int>& ktracks,
 
       // print the **kern spine, then check to see if there
       // is some **cint data to print
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          cout << infile[line][j];
       }
       if ((track != ktracks.last()) && (reverselookup[track] >= 0)) {
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << "\t";
          }
          int part1 = reverselookup[track];
@@ -1472,7 +1494,7 @@ int printInterleavedLattice(HumdrumFile& infile, int line, Array<int>& ktracks,
          printLatticeModule(cout, notes, n, currentindex, part1, part2);
       }
 
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          if (j < infile[line].getFieldCount() - 1) {
             cout << "\t";
          }
@@ -1501,7 +1523,7 @@ void printInterleaved(HumdrumFile& infile, int line, Array<int>& ktracks,
    int j;
    for (j=0; j<infile[line].getFieldCount(); j++) {
       if (!infile[line].isExInterp(j, "**kern")) {
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << infile[line][j];
             if (j < infile[line].getFieldCount() - 1) {
                cout << "\t";
@@ -1516,7 +1538,7 @@ void printInterleaved(HumdrumFile& infile, int line, Array<int>& ktracks,
          tracknext = -23525;
       }
       if (track == tracknext) {
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << infile[line][j];
             if (j < infile[line].getFieldCount() - 1) {
                cout << "\t";
@@ -1527,7 +1549,7 @@ void printInterleaved(HumdrumFile& infile, int line, Array<int>& ktracks,
 
       // print the **kern spine, then check to see if there
       // is some **cint data to print
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          cout << infile[line][j];
 
          if ((track != ktracks.last()) && (reverselookup[track] >= 0)) {
@@ -1554,17 +1576,17 @@ void printLattice(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
    int i;
    int ii = 0;
    for (i=0; i<infile.getNumLines(); i++) {
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          cout << infile[i];
       }
       if (strncmp(infile[i][0], "**", 2) == 0) {
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << "\t**cint\n";
          }
          continue;
       }
       if (infile[i].isData()) {
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << "\t";
          }
          if (rowsQ) {
@@ -1572,25 +1594,25 @@ void printLattice(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
          } else {
             ii = printLatticeItem(notes, n, ii, i);
          }
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << "\n";
          }
          continue;
       }
       if (infile[i].isBarline()) {
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << "\t" << infile[i][0] << "\n";
          }
          continue;
       }
       if (infile[i].isInterpretation()) {
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << "\t*\n";
          }
          continue;
       }
       if (infile[i].isLocalComment()) {
-         if (!rawQ) {
+         if (!(rawQ || raw2Q)) {
             cout << "\t!\n";
          }
          continue;
@@ -1699,14 +1721,14 @@ int printLatticeItemRows(Array<Array<NoteNode> >& notes, int n,
       currentindex++;
    }
    if (currentindex >= notes[0].getSize()) {
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          cout << ".";
       }
       return currentindex;
    }
    if (notes[0][currentindex].line != fileline) {
       // should never get here.
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          cout << "?";
       }
       return currentindex;
@@ -1715,7 +1737,7 @@ int printLatticeItemRows(Array<Array<NoteNode> >& notes, int n,
    // found the index into notes which matches to the current fileline.
    if (currentindex + n >= notes[0].getSize()) {
       // asking for chain longer than rest of available data.
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          cout << ".";
       }
       return currentindex;
@@ -1734,7 +1756,7 @@ int printLatticeItemRows(Array<Array<NoteNode> >& notes, int n,
       }
    }
 
-   if (!rawQ) {
+   if (!(rawQ || raw2Q)) {
       if (counter == 0) {
          cout << ".";
       } else {
@@ -1760,14 +1782,14 @@ int printLatticeItem(Array<Array<NoteNode> >& notes, int n, int currentindex,
       currentindex++;
    }
    if (currentindex >= notes[0].getSize()) {
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          cout << ".";
       }
       return currentindex;
    }
    if (notes[0][currentindex].line != fileline) {
       // should never get here.
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          cout << "??";
       }
       return currentindex;
@@ -1776,7 +1798,7 @@ int printLatticeItem(Array<Array<NoteNode> >& notes, int n, int currentindex,
    // found the index into notes which matches to the current fileline.
    if (currentindex + n >= notes[0].getSize()) {
       // asking for chain longer than rest of available data.
-      if (!rawQ) {
+      if (!(rawQ || raw2Q)) {
          cout << ".";
       }
       return currentindex;
@@ -1844,7 +1866,7 @@ int printLatticeItem(Array<Array<NoteNode> >& notes, int n, int currentindex,
       cout << ")";
    }
 
-   if (rawQ) {
+   if ((rawQ || raw2Q)) {
       cout << "\n";
    }
 
@@ -2606,6 +2628,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("r|rhythm=b", "display rhythmic positions of notes");
    opts.define("f|filename=b", "display filenames with --count");
    opts.define("raw=b", "display only modules without formatting");
+   opts.define("raw2=b", "display only modules formatted for Vishesh");
    opts.define("c|uncross=b", "uncross crossed voices when creating modules");
    opts.define("retro|retrospective=b", 
                   "Retrospective module display in the score");
@@ -2710,6 +2733,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    mmarkerQ     = opts.getBoolean("melodic-marker");
    attackQ      = opts.getBoolean("attacks");
    rawQ         = opts.getBoolean("raw");
+   raw2Q        = opts.getBoolean("raw2");
    xoptionQ     = opts.getBoolean("x");
    octaveallQ   = opts.getBoolean("octave-all");
    octaveQ      = opts.getBoolean("octave");
@@ -2744,6 +2768,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       markQ   = 0;
    }
 
+   if (raw2Q) {
+      norestsQ = 1;
+   }
 
    if (searchQ) {
       SearchString.initializeSearchAndStudy(opts.getString("search"));
