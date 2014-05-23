@@ -32,7 +32,12 @@ else
 endif
 
 pcre:
+ifneq ($(shell uname),Darwin)
+	# only do the following if not OS X.  Needed for Cygwin, but
+	# causes problems in OS X since the autoreconf program is not
+	# installed by default in OS X and has to be installed separately.
 	(cd $(PCRE); autoreconf -vi)
+endif
 	(cd $(PCRE); ./configure)
 	(cd $(PCRE); $(MAKE))
 	-mkdir ../lib
@@ -50,6 +55,4 @@ cleancenterpoint:
 
 cleanpcre:
 #	(cd $(PCRE); $(MAKE) clean)
-
-
 
