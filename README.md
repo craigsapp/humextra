@@ -291,5 +291,3 @@ For a basic tutorial on programming with the humextra library, see the webpage
     http://wiki.ccarh.org/wiki/Humdrum_Extras 
 .
 
-x
-
