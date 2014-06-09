@@ -112,6 +112,8 @@ int    removeallQ    = 0;             // used with -R option
 int    overwriteQ    = 0;             // used with -o option
 int    overwriteallQ = 0;             // used with -O option
 int    Middle        = 4;             // used with -u option
+int    Borderline    = 0;             // really used with -u option
+int    notlongQ      = 0;             // used with -L option
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -304,6 +306,16 @@ void setStemDirection(HumdrumFile& infile, int row, int col, int direction) {
    char output[len*2+tokencount];
    output[0] = '\0';
 
+   double duration;
+   if (notlongQ) {
+      // Don't print stems on whole notes and breves.
+      // Duration units are in quarter notes.
+      duration = Convert::kernToDuration(infile[row][col]);
+      if ((duration >= 4.0) && (duration < 16.0)) {
+         return;
+      }
+   }
+
    for (k=0; k<tokencount; k++) {
       infile[i].getToken(buffer, j, k, 30);
       if ((strchr(buffer, '/') == NULL) & (strchr(buffer, '\\') == NULL)) {
@@ -397,7 +409,7 @@ void setBeamDirection(Array<Array<int> >& stemdir, Array<Coord>& bnote,
 int getBeamDirection(Array<Coord>& coords, Array<Array<int> >& voice, 
       Array<Array<Array<int> > >& notepos) {
 
-   // voice values are presumbed to be 0 at the moment.
+   // voice values are presumed to be 0 at the moment.
 
    int minn = 1000;
    int maxx = -1000;
@@ -423,7 +435,7 @@ int getBeamDirection(Array<Coord>& coords, Array<Array<int> >& voice,
       }
    }
 
-   if (maxx < 0) {
+   if (maxx < 0 + Borderline) {
       // both minn and maxx are less than zero, so place stems up
       return +1;
    }
@@ -898,10 +910,9 @@ int determineChordStem(Array<Array<int> >& voice,
    }
    // voice == 0 means determine by vertical position
 
-
    if (notepos[row][col].getSize() == 1) {
       int location = notepos[row][col][0];
-      if (location >= 0) {
+      if (location >= 0 + Borderline) {
          return -1;
       } else {
          return +1;
@@ -923,7 +934,8 @@ int determineChordStem(Array<Array<int> >& voice,
       }
    }
 
-   if (maxx < 0) {
+cout << "X";
+   if (maxx < 0 + Borderline) {
       // all stems want to point upwards:
       return +1;
    }
@@ -1014,8 +1026,8 @@ void processKernTokenStemsSimpleModel(HumdrumFile& infile,
              (strchr(infile[i][j], '\\') != NULL))) {
          location = Convert::kernToDiatonicPitch(buffer) -
                baseline[row][col] - Middle;
-         if (voice == 1) {
-            addStem(buffer2, buffer, "/");
+        if (voice == 1) {
+           addStem(buffer2, buffer, "/");
          } else if (voice == 2) {
             addStem(buffer2, buffer, "\\");
          } else {
@@ -1168,6 +1180,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
    opts.define("R|removeall=b","Remove all stems including explicit beams");
    opts.define("o|overwrite|replace=b","Overwrite non-explicit stems in input");
    opts.define("O|overwriteall|replaceall=b",  "Overwrite all stems in input");
+   opts.define("L|no-long|not-long|not-longs=b", "Do not put stems one whole notes or breves");
    opts.define("u|up=b",       "Middle note on staff has stem up");
    opts.define("p|pos=b",     "Display only note vertical positions on staves");
    opts.define("v|voice=b",    "Display only voice/layer information");
@@ -1203,8 +1216,10 @@ void checkOptions(Options& opts, int argc, char** argv) {
    voiceQ        = opts.getBoolean("voice");
    overwriteQ    = opts.getBoolean("overwrite");
    overwriteallQ = opts.getBoolean("overwriteall");
+   notlongQ      = opts.getBoolean("no-long");
    if (opts.getBoolean("up")) {
       Middle = 4;
+      Borderline = 1;
    }
    removeallQ = opts.getBoolean("removeall");
    if (removeallQ) {

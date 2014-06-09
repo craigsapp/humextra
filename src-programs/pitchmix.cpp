@@ -312,11 +312,11 @@ void printNotes(Array<NoteUnit>& notes) {
 void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("debug=b",          "print debug information"); 
    opts.define("r|rests=b",        "mixup rest as well as pitches"); 
-   opts.define("s|seed=b",         "seed the random number generator"); 
+   opts.define("s|seed=i:0",       "seed the random number generator"); 
    opts.define("v|voice|track=b",  "randomize by voice"); 
    opts.define("m|mapping=b",      "display mapping of pitches"); 
    opts.define("d|distribution=s:0 1 1 1", "random mixing amount in file"); 
-   opts.define("t|transpose|neighbor=b", 
+   opts.define("t|n|transpose|neighbor=b", 
          "move random note octave to be near old note "); 
    opts.define("S|no-display-seed=b",
          "do not print seed used in random number generator");

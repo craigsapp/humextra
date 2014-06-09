@@ -273,6 +273,7 @@ char        FileBuffer[1024] = {0}; // used with !!original-filename:
 int         instrumentQ = 0;   // used with -i option
 int         dirprefixQ = 0;    // used with -d option
 Array<char> dirprefix;         // used with -d option
+int         allQ       = 0;    // used with --all option
 
 const char* bibfilter = "";    // used with -B option
 const char* istnfile= "";      // used with --istn option
@@ -341,7 +342,6 @@ int main(int argc, char** argv) {
       }
    }
 
-
    for (i=0; i<numinputs || i==0; i++) {
 
       // if no command-line arguments read data file from standard input
@@ -380,14 +380,18 @@ void processArgument(const char* path) {
    if (is_file(path)) {
       namelen = strlen(path);
       valid = 0;
-      if (strcmp(&(path[namelen-4]), ".thm") == 0) {
+      if (allQ) {
          valid = 1;
-      } else if (strcmp(&(path[namelen-4]), ".krn") == 0) {
-         valid = 1;
-      } else if (strcmp(&(path[namelen-4]), ".THM") == 0) {
-         valid = 1;
-      } else if (strcmp(&(path[namelen-4]), ".KRN") == 0) {
-         valid = 1;
+      } else {
+         if (strcmp(&(path[namelen-4]), ".thm") == 0) {
+            valid = 1;
+         } else if (strcmp(&(path[namelen-4]), ".krn") == 0) {
+            valid = 1;
+         } else if (strcmp(&(path[namelen-4]), ".THM") == 0) {
+            valid = 1;
+         } else if (strcmp(&(path[namelen-4]), ".KRN") == 0) {
+            valid = 1;
+         }
       }
       if (!valid) {
          return;
@@ -2096,6 +2100,7 @@ void extractPitchSequence(Array<int>& pitches, HumdrumFile& infile,
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("debug=b",        "print debug information"); 
+   opts.define("A|all-files=b",  "process files with any extension"); 
    opts.define("poly|moly=b",    "create polyphonic"); 
    opts.define("mono=b",         "extract only the first column of data");
    opts.define("poly2=b",        "create polyphonic, all layers"); 
@@ -2173,6 +2178,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    phraseQ     = opts.getBoolean("phrase");
    graceQ      =!opts.getBoolean("no-grace");
    quietQ      = opts.getBoolean("quiet");
+   allQ        = opts.getBoolean("all-files");
    rhythmQ     = opts.getBoolean("rhythm");
    fileQ       = opts.getBoolean("file");
    if (fileQ) {

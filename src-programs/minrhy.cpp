@@ -34,8 +34,9 @@ void uniqArray(Array<type>& array);
 
 // global variables
 Options   options;             // database for command-line arguments
-int       listQ = 0;           // used with -l option
-int       debugQ = 0;          // used with --debug
+int       listQ  = 0;          // used with -l option
+int       debugQ = 0;          // used with --debug option
+int       pathQ  = 1;          // used with -P option
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -48,15 +49,8 @@ int main(int argc, char** argv) {
 
    int i, j;
    // figure out the number of input files to process
-   int numinputs = options.getArgCount();
 
-   if (numinputs < 1) {
-      infiles.read(cin);
-   } else {
-      for (i=0; i<numinputs; i++) {
-         infiles.readAppend(options.getArg(i+1));
-      }
-   }
+   infiles.read(options);
 
    Array<RationalNumber> timebase;
    RationalNumber zeroR(0, 1);
@@ -73,7 +67,18 @@ int main(int argc, char** argv) {
    for (i=0; i<infiles.getCount(); i++) {
       infiles[i].analyzeRhythm();
       if (infiles.getCount() > 1) {
-         cout << infiles[i].getFilename() << ":\t";
+         if (pathQ) {
+            cout << infiles[i].getFilename() << ":\t";
+         } else {
+            const char* filename = infiles[i].getFilename();
+            const char* ptr = NULL;
+            ptr = strrchr(filename, '/');
+            if (ptr != NULL) {
+               cout << ++ptr << ":\t";
+            } else {
+               cout << infiles[i].getFilename() << ":\t";
+            }
+         }
       }
       if (listQ) {
          infiles[i].getRhythms(rhythms);
@@ -258,6 +263,7 @@ int GCD(int a, int b) {
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("l|list=b", "list time units used in file");  
+   opts.define("P|no-path=b", "don't show path in filename");
 
    opts.define("debug=b");              // determine bad input line num
    opts.define("author=b");             // author of program
@@ -289,8 +295,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       exit(1);
    }
 
-   listQ  = opts.getBoolean("list");
-   debugQ = opts.getBoolean("debug");
+   listQ  =  opts.getBoolean("list");
+   pathQ  = !opts.getBoolean("no-path");
+   debugQ =  opts.getBoolean("debug");
 }
 
 

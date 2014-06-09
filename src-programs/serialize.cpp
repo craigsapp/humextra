@@ -85,7 +85,8 @@ int main(int argc, char* argv[]) {
          parmax.setAll(0);
       }
       Exstart = 0;
-      if (strcmp(infiles[i].getFilename(), "") != 0) {
+      if ((infiles.getCount() > 1) && 
+          (strcmp(infiles[i].getFilename(), "") != 0)) {
          cout << "!!!!SEGMENT: " << infiles[i].getFilename() << endl;
       }
       printOutput(infiles[i]);
@@ -207,7 +208,7 @@ void printSubSpine(HumdrumFile& infile, int track, int start, int subspine) {
    for (i=start; i<infile.getNumLines(); i++) {
       if ((lastsub[track] >= subspine) && (currsub[track] < subspine)) {
          if (markerQ && markerCounter) {
-            cout << "ZZZ" << marker << endl;
+            cout << marker << endl;
          }
          markerCounter++;
       }
@@ -255,7 +256,7 @@ void printSubSpine(HumdrumFile& infile, int track, int start, int subspine) {
                   // the context command will not mix data from 
                   // different spines. (grep -v out after context is run).
                   if (track == infile[i].getPrimaryTrack(j)) {
-                     cout << "ZZZ2" << marker << "\n";                  
+                     cout << marker << "\n";                  
                   }
                }
                if ((strcmp(infile[i][0], "*-") == 0) && mergeQ) {
@@ -445,7 +446,7 @@ void printTrack(HumdrumFile& infile, int track, int start) {
                   // the context command will not mix data from 
                   // different spines. (grep -v out after context is run).
                   if (track == infile[i].getPrimaryTrack(j)) {
-                     cout << "ZZZ3" << marker << "\n";                  
+                     cout << marker << "\n";                  
                   }
                }
                if ((strcmp(infile[i][0], "*-") == 0) && (mergeQ || parsubQ)) {

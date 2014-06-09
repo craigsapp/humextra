@@ -244,9 +244,9 @@ void generateAnalysis(HumdrumFile& infile, Array<double>& durs) {
             cout << "\t";
          }
          cout << '!';
-      } else if (infile[i].isGlobalComment()) {
+      } else if (infile[i].isGlobalComment() && !appendQ) {
          cout << infile[i];
-      } else if (infile[i].isBibliographic()) {
+      } else if (infile[i].isBibliographic() && !appendQ) {
          cout << infile[i];
       }
       if (appendQ) {
@@ -400,6 +400,7 @@ void printChordInfo(const char* token,  int root,
             cout << dbuffer;
          }
          cout << Convert::base40ToKern(pbuffer, pitches[i]);
+//cout << "(" << pitches[i] << ")";
          if (strchr(token, ';') != NULL) {
             cout << ';';
          }
@@ -503,7 +504,6 @@ void getChordPitches(Array<int>& pitches, const char* token, int root,
    }
    pitches[2] = pitches[2] + offset;
 
-
    // determine the seventh
 
    if (strchr(firstpart, '7') == NULL) {
@@ -533,22 +533,20 @@ void getChordPitches(Array<int>& pitches, const char* token, int root,
       if (pitches[3] - base < 25) {
          pitches[3] += 40;
       } 
-      //if (base % 40 > 25) {
-      //   pitches[3] += 40;
-      //}
    } else {
       // minor key (harmonic minor used)
       int degrees[7] = {0, 6, 11, 17, 23, 28, 35};
       pitches[3] = (keyroot + degrees[seventhdegree]) % 40 + oct * 40;
-      if (base % 40 > 25) {
-         pitches[3] += 40;
-      }
    } 
 
    // fix the octave placement of the seventh (to be above the fifth)
    pitches[3] = pitches[3] + offset;
    if (pitches[3] - pitches[2] < 0) {
       pitches[3] += 40;
+   } else if ((pitches[3] - pitches[2] > 40) && (pitches[2]/40 > 3)) {
+      pitches[3] -= 40;
+   } else if ((pitches[3] - pitches[1] > 40) && (pitches[1]/40 > 3)) {
+      pitches[3] -= 40;
    }
 
    // put 3rd inversions in the octave below middle C

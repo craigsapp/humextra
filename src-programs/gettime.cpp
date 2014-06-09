@@ -25,7 +25,7 @@
 void   checkOptions             (Options& opts, int argc, char* argv[]);
 void   example                  (void);
 void   printAnalysis            (HumdrumFile& infile, Array<double>& timings,
-                                 Array<double>& tempo);
+                                 Array<double>& tempo, int setcount);
 void   analyzeTiming            (HumdrumFile& infile, Array<double>& timings,
                                  Array<double>& tempo);
 void   usage                    (const char* command);
@@ -33,7 +33,7 @@ void   interpolateGeometric     (HumdrumFile& infile, Array<double>& tempo,
                                  int startindex, int stopindex);
 int    getNextTempoIndex        (HumdrumFile& infile, int startindex);
 void   printtime                (const char* filename, double totaldur);
-void   doLinearInterpolation    (HumdrumFile& infile);
+void   doLinearInterpolation    (HumdrumFile& infile, int setcount);
 void   interpolateTimings       (Array<double>& timings, HumdrumFile& infile,
                                  int startindex, int endindex);
 void   fixendingtimes           (Array<double>& timings, HumdrumFile& infile);
@@ -59,36 +59,25 @@ int main(int argc, char* argv[]) {
    Array<double>  timings;
    Array<double>  tempo;
 
-   // process the command-line options
    checkOptions(options, argc, argv);
-
-   // figure out the number of input files to process
-   int numinputs = options.getArgCount();
+   infiles.read(options);
 
    double totaldur = 0.0;
 
    int i;
-   if (numinputs < 1) {
-      infiles.read(cin);
-   } else {
-      for (i=0; i<numinputs; i++) {
-         infiles.readAppend(options.getArg(i+1));
-      }
-   }
-
    for (i=0; i<infiles.getCount(); i++) {
       if (interpQ) {
-         doLinearInterpolation(infiles[i]);
+         doLinearInterpolation(infiles[i], infiles.getCount());
       } else {
          analyzeTiming(infiles[i], timings, tempo);
          if (totalQ) {
             totaldur += timings[timings.getSize()-1];
-            if (numinputs > 1) {
+            if (infiles.getCount() > 1) {
                printtime(infiles[i].getFilename(), 
                      timings[timings.getSize()-1]);
             }
          } else {
-            printAnalysis(infiles[i], timings, tempo);
+            printAnalysis(infiles[i], timings, tempo, infiles.getCount());
          }
       }
    }
@@ -116,7 +105,7 @@ int main(int argc, char* argv[]) {
 #define UNKNOWNTIME -1
 // #define UNKNOWNTIME 0
 
-void doLinearInterpolation(HumdrumFile& infile) {
+void doLinearInterpolation(HumdrumFile& infile, int setcount) {
    infile.analyzeRhythm("4");
 
    // extract the timing data using -1 for undefined
@@ -168,7 +157,9 @@ void doLinearInterpolation(HumdrumFile& infile) {
    fixendingtimes(timings, infile);
 
    // now insert the interpolated timings back into the score.
-   infile.printNonemptySegmentLabel(cout);
+   if (setcount > 1) {
+      infile.printNonemptySegmentLabel(cout);
+   }
    int tfound = 0;
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].getType() == E_humrec_data) {
@@ -267,7 +258,12 @@ void interpolateTimings(Array<double>& timings, HumdrumFile& infile,
             exit(1);
          }
          if (roundQ) {
-            timings[i] = (int)(timings[i] + 0.5);
+            if (style == 's') {
+               timings[i] = (int)(1000.0 * timings[i] + 0.5) / 1000.0;
+            } else {
+               // milliseconds
+               timings[i] = (int)(timings[i] + 0.5);
+            }
          }
       }
    }
@@ -415,7 +411,6 @@ void analyzeTiming(HumdrumFile& infile, Array<double>& timings,
    // the following code will have to be debugged (mostly for off-by-one
    // errors).
 
-/*
    // adjust the timing values
    double beatdiff;
    double increment = 1.0/32.0;
@@ -467,7 +462,7 @@ void analyzeTiming(HumdrumFile& infile, Array<double>& timings,
          timings[i] = timings[i-1] + timesum;
       }
    }
-*/
+
 }
 
 
@@ -578,7 +573,6 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    tempoQ  =  opts.getBoolean("tempo");
    changeQ = !opts.getBoolean("no-change");
    roundQ  = !opts.getBoolean("no-round");
-roundQ = 0;
    interpQ =  opts.getBoolean("interpolation");
    debugQ  =  opts.getBoolean("debug");
    offset  =  opts.getDouble("offset");
@@ -623,11 +617,13 @@ void example(void) {
 //
 
 void printAnalysis(HumdrumFile& infile, Array<double>& timings,
-      Array<double>& tempo) {
+      Array<double>& tempo, int setcount) {
    int tempomark = 0;
    int i, j;
    int m;
-   infile.printNonemptySegmentLabel(cout);
+   if (setcount > 1) {
+      infile.printNonemptySegmentLabel(cout);
+   }
    for (i=0; i<infile.getNumLines(); i++) {
       switch (infile[i].getType()) {
       case E_humrec_global_comment:
@@ -666,7 +662,11 @@ void printAnalysis(HumdrumFile& infile, Array<double>& timings,
             }
          } else {
             if (style == 's') {
-               cout << timings[i] + offset;
+               if (roundQ) {
+                  cout << (int)(1000.0 * (timings[i] + offset) + 0.5)/1000.0;
+               } else {
+                  cout << timings[i] + offset;
+               }
             } else {
                if (roundQ) {
                   cout << (int)((timings[i] + offset + 0.0005)* 1000);

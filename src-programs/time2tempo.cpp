@@ -28,7 +28,7 @@ Options      options;            // database for command-line arguments
 int          appendQ    = 0;     // used with -a option
 int          prependQ   = 0;     // used with -p option
 int          fillQ      = 0;     // used with -f option
-int          roundQ     = 0;     // used with -r option
+int          roundQ     = 0;     // used with -R option
 int          debugQ     = 0;     // used with --debug option
 
 ///////////////////////////////////////////////////////////////////////////
@@ -173,7 +173,7 @@ void getTimings(HumdrumFile& infile, Array<double>& timings,
 void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("a|append=b",   "append analysis to input data");   
    opts.define("p|prepend=b",  "prepend analysis to input data");   
-   opts.define("r|round=b",    "round output tempos to nearest integer");   
+   opts.define("R|no-round=b",  "do not round output tempos to nearest integer");   
    opts.define("f|fill=b",     "fill tempo spine removing null tokens");
 
    opts.define("debug=b",   "trace input parsing");   
@@ -201,11 +201,11 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       exit(0);
    }
 
-   debugQ   = opts.getBoolean("debug");
-   appendQ  = opts.getBoolean("append");
-   roundQ   = opts.getBoolean("round");
-   fillQ    = opts.getBoolean("fill");
-   prependQ = opts.getBoolean("prepend");
+   debugQ   =  opts.getBoolean("debug");
+   appendQ  =  opts.getBoolean("append");
+   roundQ   = !opts.getBoolean("no-round");
+   fillQ    =  opts.getBoolean("fill");
+   prependQ =  opts.getBoolean("prepend");
    if (appendQ) {   // exclusive options
       prependQ = 0;
    }

@@ -1062,6 +1062,8 @@ void printOutput(HumdrumFile& file, Array<RationalNumber>& Bfeatures,
                   cout << "**dur";
                } else if (durQ && !tickQ) {
                   cout << "**dur";
+               } else if (sumQ) {
+                  cout << "**beatsum";
                } else {
                   cout << "**beat";
                }

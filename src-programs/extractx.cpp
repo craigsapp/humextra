@@ -1092,13 +1092,14 @@ void dealWithSecondarySubspine(Array<int>& field, Array<int>& subfield,
                // remove secondary chord notes:
                pre.sar(buffer, " .*", "", "");
                // remove unnecessary characters (such as stem direction):
-               pre.sar(buffer, "[^}pPqQA-Ga-g0-9.;%#n-]", "", "g");
+               pre.sar(buffer, "[^}pPqQA-Ga-g0-9.;%#nr-]", "", "g");
                // change pitch to rest:
                pre.sar(buffer, "[A-Ga-g#n-]+", "r", "");
                // add editorial marking unless -Y option is given:
                if (strcmp(editorialInterpretation, "") != 0) {
                   if (pre.search(buffer, "rr")) {
                      pre.sar(buffer, "(?<=rr)", editorialInterpretation, "");
+                     pre.sar(buffer, "rr", "r");
                   } else {
                      pre.sar(buffer, "(?<=r)", editorialInterpretation, "");
                   }

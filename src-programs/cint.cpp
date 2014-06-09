@@ -290,6 +290,7 @@ int       idQ          = 0;      // used with --id option
 Array<SigString> Ids;            // used with --id option
 char      NoteMarker   = '\0';   // used with -N option
 PerlRegularExpression SearchString;
+Array<char> Spacer;
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1172,6 +1173,9 @@ int printCombinationModule(ostream& out, const char* filename,
          if (!toponlyQ) {
             printInterval((*outp), notes[part1][lastindex], 
                           notes[part1][i], INTERVAL_MELODIC);
+            if (mmarkerQ) {
+               (*outp) << "m";
+            }
          }
     
          // print top melodic interval here if requested
@@ -1996,7 +2000,7 @@ int printInterval(ostream& out, NoteNode& note1, NoteNode& note2,
 //
 
 void printSpacer(ostream& out) {
-   out << " ";
+   out << Spacer;
 }
 
 
@@ -2634,6 +2638,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("raw=b", "display only modules without formatting");
    opts.define("raw2=b", "display only modules formatted for Vishesh");
    opts.define("c|uncross=b", "uncross crossed voices when creating modules");
+   opts.define("C|comma=b", "separate intervals by comma rather than space");
    opts.define("retro|retrospective=b", 
                   "Retrospective module display in the score");
    opts.define("suspension|suspensions=b", "mark suspensions");
@@ -2698,6 +2703,16 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    } else if (opts.getBoolean("example")) {
       example();
       exit(0);
+   }
+
+   if (opts.getBoolean("comma")) {
+      Spacer.setSize(2);
+      Spacer[0] = ',';
+      Spacer[1] = '\0';
+   } else {
+      Spacer.setSize(2);
+      Spacer[0] = ' ';
+      Spacer[1] = '\0';
    }
 
    // dispay as base-7 by default

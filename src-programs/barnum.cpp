@@ -39,6 +39,7 @@ void      removeBarNumbers   (HumdrumFile& infile);
 void      printWithoutBarNumbers(HumdrumRecord& humrecord);
 void      printWithBarNumbers(HumdrumRecord& humrecord, int measurenum);
 void      printSingleBarNumber(const char* string, int measurenum);
+int       getEndingBarline   (HumdrumFile& infile);
 
 // global variables
 Options   options;            // database for command-line arguments
@@ -125,6 +126,25 @@ void printWithoutBarNumbers(HumdrumRecord& humrecord) {
 
 
 
+//////////////////////////////
+//
+// getEndingBarline -- Return the index of the last barline,
+//      returning -1 if none.  Ending barline is defined as the
+//      last barline after all data records.
+//
+
+int getEndingBarline(HumdrumFile& infile) {
+   int i;
+   for (i=infile.getNumLines()-1; i>=0; i--) {
+      if (infile[i].isData()) {
+         return -1;
+      } else if (infile[i].isMeasure()) {
+         return i;
+      }
+   }
+
+   return -1; 
+}
 
 
 
@@ -149,7 +169,7 @@ void processFile(HumdrumFile& infile) {
    timesigbeats.setSize(infile.getNumLines());
    timesigbeats.setSize(0);
 
-   int i;
+   int i, j;
    double timesigdur = 0.0;
    double timetop = 4;
    double timebot = 1;
@@ -160,15 +180,17 @@ void processFile(HumdrumFile& infile) {
          cout << "LINE " << i+1 << "\t" << infile[i] << endl;
       }
       if (infile[i].getType() == E_humrec_interpretation) {
-         if ((strncmp(infile[i][0], "*M", 2) == 0) 
-               && (strchr(infile[i][0], '/') != NULL)) {
-            timetop = Convert::kernTimeSignatureTop(infile[i][0]);
-            timebot = Convert::kernTimeSignatureBottomToDuration(infile[i][0]);
-            timesigdur = timetop * timebot;
-            // fix last timesigbeats value
-            if (timesigbeats.getSize() > 0) {
-               timesigbeats[timesigbeats.getSize()-1] = timesigdur;
-               measurebeats[measurebeats.getSize()-1] = lastvalue * timebot;
+         for (j=0; j<infile[i].getFieldCount(); j++) {
+            if ((strncmp(infile[i][j], "*M", 2) == 0) 
+                  && (strchr(infile[i][j], '/') != NULL)) {
+               timetop = Convert::kernTimeSignatureTop(infile[i][j]);
+               timebot = Convert::kernTimeSignatureBottomToDuration(infile[i][j]);
+               timesigdur = timetop * timebot;
+               // fix last timesigbeats value
+               if (timesigbeats.getSize() > 0) {
+                  timesigbeats[timesigbeats.getSize()-1] = timesigdur;
+                  measurebeats[measurebeats.getSize()-1] = lastvalue * timebot;
+               }
             }
          }
       } else if (infile[i].getType() == E_humrec_data_measure) {
@@ -179,6 +201,13 @@ void processFile(HumdrumFile& infile) {
          value = lastvalue;
          measurebeats.append(value);
          timesigbeats.append(timesigdur);
+      }
+   }
+
+   if (debugQ) {
+      cout << "measure beats / timesig beats" << endl;
+      for (i=0; i<measurebeats.getSize(); i++) {
+         cout << measurebeats[i] << "\t" << timesigbeats[i] << endl;
       }
    }
 
@@ -208,7 +237,7 @@ void processFile(HumdrumFile& infile) {
    control.setAll(-1);
    measurenums.setAll(-1);
 
-   // if the time signature and the number of beats in a measure
+   // If the time signature and the number of beats in a measure
    // agree, then the bar is worth numbering:
    for (i=0; i<control.getSize(); i++) {
       if (measurebeats[i] == timesigbeats[i]) {
@@ -216,8 +245,8 @@ void processFile(HumdrumFile& infile) {
       }
    }
 
-   // determine first bar (which is marked with a negative value)
-   // if there is a pickup bar
+   // Determine first bar (which is marked with a negative value
+   // if there is a pickup bar)
    if (measurebeats[0] < 0) {
       if (-measurebeats[0] == timesigbeats[0]) {
          control[0] = 1;
@@ -225,7 +254,7 @@ void processFile(HumdrumFile& infile) {
    }
 
    // Check for intermediate barlines which split one measure
-   for (i=control.getSize()-2; i>=0; i--) {
+   for (i=0; i<control.getSize()-2; i++) {
       if ((control[i] == 1) || (control[i+1] == 1)) {
          continue;
       }
@@ -233,18 +262,27 @@ void processFile(HumdrumFile& infile) {
          continue;
       }
       if ((measurebeats[i]+measurebeats[i+1]) == timesigbeats[i]) {
+         // found a barline which splits a complete measure
+         // into two pieces.
          control[i] = 1;
          control[i+1] = 0;
+         i++;
       }
    }
 
    // if two (or more) non-controlling bars occur in a row, then
    // make them controlling:
+   //for (i=0; i<control.getSize()-1; i++) {
+   //   if ((control[i] < 1) && (control[i+1] < 1)) {
+   //      while ((i < control.getSize()) && (control[i] < 1)) {
+   //         control[i++] = 1;
+   //      }
+   //   }
+   //}
+
    for (i=0; i<control.getSize()-1; i++) {
-      if ((control[i] < 1) && (control[i+1] < 1)) {
-         while ((i < control.getSize()) && (control[i] < 1)) {
-            control[i++] = 1;
-         }
+      if ((control[i] == 0) && (control[i+1] < 0)) {
+         control[i+1] = 1;
       }
    }
 
@@ -273,9 +311,41 @@ void processFile(HumdrumFile& infile) {
       }
    }
 
+   // if the last bar is incomplete, but the bar before it
+   // is not incomplete, then allow barline on last measure,
+   // excluding any ending barlines with no data after them.
+   for (i=control.getSize()-1; i>=0; i--) {
+      if (control[i] == 0) {
+         continue;
+      }
+      if ((control[i] < 0) && (i > 0) && (control[i-1] > 0)) {
+         control[i] = 1;
+      }
+      break;
+   }
+
    if (allQ) {
       control.setAll(1);
       offset = 0;
+   }
+
+   // if there is no time data, just label each barline
+   // as a new measure. 
+   if (infile[infile.getNumLines()-1].getAbsBeat() == 0.0) {
+      for (i=0; i<control.getSize(); i++) {
+         control[i] = 1;
+      }
+      // don't mark the last barline if there is no data
+      // line after it.
+      for (i=infile.getNumLines()-1; i>=0; i--) {
+         if (infile[i].isData()) {
+            break;
+         }
+         if (infile[i].isBarline()) {
+            control.last() = -1;
+            break;
+         }
+      }
    }
 
    // assign the measure numbers;
@@ -294,6 +364,7 @@ void processFile(HumdrumFile& infile) {
       }
    }
 
+   int endingbarline = getEndingBarline(infile);
 
    // ready to print the new barline numbers
    int mindex = 0;
@@ -303,7 +374,9 @@ void processFile(HumdrumFile& infile) {
          continue;
       }
 
-      if (measurenums[mindex] < 0) {
+      if (endingbarline == i) {
+         printWithoutBarNumbers(infile[i]);
+      } else if (measurenums[mindex] < 0) {
          printWithoutBarNumbers(infile[i]);
       } else {
          printWithBarNumbers(infile[i], measurenums[mindex]);
