@@ -1,0 +1,28 @@
+!!!test: Measure the time of music when a ritard mark is present.
+!!!command: gettime -a %in > %out
+**kern	**time
+*	*u=sec
+*M4/4	*
+*MM120	*MM120
+4c	0
+4c	0.5
+4c	1
+4c	1.5
+=	=
+*rit	*
+4c	2.022
+4c	2.59
+4c	3.211
+4c	3.887
+=	=
+4c	4.625
+4c	5.429
+4c	6.306
+4c	7.263
+=	=
+*MM60	*MM60
+4c	8.263
+4c	9.263
+4c	10.263
+4c	11.263
+*-	*-

@@ -1,0 +1,15 @@
+!!!test: Apply a wierd rhythmic scaling.
+!!!command: rscale -f 11/31 %in > %out
+**kern
+*M4/124%11
+124%11c
+62%11d
+124%11e
+=
+*M6/248%11
+124%11.f
+248%11g
+248%11a
+248%11b
+*-
+!!!rscale: 11/31

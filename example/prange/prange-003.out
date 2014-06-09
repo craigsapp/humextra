@@ -1,0 +1,13 @@
+**keyno	**kern	**count
+60	c	1
+62	d	0.5
+64	e	0.5
+65	f	1
+67	g	0.5
+69	a	0.5
+71	b	1
+72	cc	2
+*-	*-	*-
+!!tessitura:	12 semitones
+!!mean:	67.2857 (g)
+!!median:	67 (g)

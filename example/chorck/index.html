@@ -1,0 +1,142 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: chorck</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>chorck examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>chorck</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>chorck</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Example with four rule violations</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Example with four rule violations
+<p>The command:<pre>     chorck <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=21 cols=32>**kern	**kern	**kern	**kern
+!bass	!tenor	!alto	!soprano
+*M4/4	*M4/4	*M4/4	*M4/4
+=1-	=1-	=1-	=1-
+2AA	2E	2A	2c#
+4E	4G#	4B	4e
+4AA	4E	4c#	4c#
+=2	=2	=2	=2
+4GG#	4B	4B	4d
+4AA	4A	4c#	4e
+4D	4B	4d	4f#
+4E	4B	4e	4g#
+=3	=3	=3	=3
+4C#	4A	4e	4a
+4AA	4E	4a	4cc#
+4D	4F#	4f#	4a
+4E	4E	4B	4g#
+=4	=4	=4	=4
+1AA	1A	1c#	1a
+==	==	==	==
+*-	*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=26 cols=40>**kern	**kern	**kern	**kern
+!bass	!tenor	!alto	!soprano
+*M4/4	*M4/4	*M4/4	*M4/4
+=1-	=1-	=1-	=1-
+!! Warning: 6. Hidden octave between soprano and bass
+2AA	2E	2A	2c#
+4E	4G#	4B	4e
+4AA	4E	4c#	4c#
+=2	=2	=2	=2
+4GG#	4B	4B	4d
+!! Warning: 1. Parallel 5th between tenor and soprano
+4AA	4A	4c#	4e
+!! Warning: 2. Parallel octave between bass and alto
+4D	4B	4d	4f#
+4E	4B	4e	4g#
+=3	=3	=3	=3
+4C#	4A	4e	4a
+!! Warning: 8. Open spacing between alto and tenor
+4AA	4E	4a	4cc#
+4D	4F#	4f#	4a
+4E	4E	4B	4g#
+=4	=4	=4	=4
+1AA	1A	1c#	1a
+==	==	==	==
+*-	*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

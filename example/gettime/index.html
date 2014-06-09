@@ -1,0 +1,772 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: gettime</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>gettime examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>gettime</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>gettime</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Measure the time of music at 60 beats per minute.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Measure the time of music at 144 beats per minute.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Measure the time of music in milliseconds rather than seconds.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Measuring time in milliseconds with no rounding.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test005><b>Test&nbsp;005:</b></a></td><td width=10><td>Extract the tempo rather than the timings.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test006><b>Test&nbsp;006:</b></a></td><td width=10><td>Measure the time of music when a ritard mark is present.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test007><b>Test&nbsp;007:</b></a></td><td width=10><td>Measure the tempo of music when a ritard mark is present.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test008><b>Test&nbsp;008:</b></a></td><td width=10><td>Measure the tempo of music when a ritard mark is present with no rounding.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test009><b>Test&nbsp;009:</b></a></td><td width=10><td>Measure the time of music when an accelerando mark is present.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test010><b>Test&nbsp;010:</b></a></td><td width=10><td>Measure the time of music when an accelerando mark is present with no rounding.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test011><b>Test&nbsp;011:</b></a></td><td width=10><td>Interpolate between existing **time values to assign timings to intermediate points in the score.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Measure the time of music at 60 beats per minute.
+<p>The command:<pre>     gettime -p <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=15 cols=7>**kern
+*MM60
+4c
+4d
+=2
+4e
+4f
+=3
+8g
+8a
+4b
+=4
+2c
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=14>**time	**kern
+*u=sec	*
+*MM60	*MM60
+0	4c
+1	4d
+=2	=2
+2	4e
+3	4f
+=3	=3
+4	8g
+4.5	8a
+5	4b
+=4	=4
+6	2c
+==	==
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+Measure the time of music at 144 beats per minute.
+<p>The command:<pre>     gettime -p <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=15 cols=7>**kern
+*MM144
+4c
+4d
+=2
+4e
+4f
+=3
+8g
+8a
+4b
+=4
+2c
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=14>**time	**kern
+*u=sec	*
+*MM144	*MM144
+0	4c
+0.417	4d
+=2	=2
+0.833	4e
+1.25	4f
+=3	=3
+1.667	8g
+1.875	8a
+2.083	4b
+=4	=4
+2.5	2c
+==	==
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+Measure the time of music in milliseconds rather than seconds.
+<p>The command:<pre>     gettime -pm <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=15 cols=7>**kern
+*MM60
+4c
+4d
+=2
+4e
+4f
+=3
+8g
+8a
+4b
+=4
+2c
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=14>**time	**kern
+*u=msec	*
+*MM60	*MM60
+0	4c
+1000	4d
+=2	=2
+2000	4e
+3000	4f
+=3	=3
+4000	8g
+4500	8a
+5000	4b
+=4	=4
+6000	2c
+==	==
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test004></a><td width=80><b>Test&nbsp;004:</b></td><td width=1></td>
+<td>
+Measuring time in milliseconds with no rounding.
+<p>The command:<pre>     gettime <font color=red><i>input-file</i></font> -amR > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=15 cols=7>**kern
+*MM144
+4c
+4d
+=2
+4e
+4f
+=3
+8g
+8a
+4b
+=4
+2c
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=15>**kern	**time
+*	*u=msec
+*MM144	*MM144
+4c	0
+4d	416.667
+=2	=2
+4e	833.333
+4f	1250
+=3	=3
+8g	1666.67
+8a	1875
+4b	2083.33
+=4	=4
+2c	2500
+==	==
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test005></a><td width=80><b>Test&nbsp;005:</b></td><td width=1></td>
+<td>
+Extract the tempo rather than the timings.
+<p>The command:<pre>     gettime <font color=red><i>input-file</i></font> -at > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=15 cols=7>**kern
+*MM144
+4c
+4d
+=2
+4e
+4f
+=3
+8g
+8a
+4b
+=4
+2c
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=15>**kern	**tempo
+*	*u=sec
+*MM144	*MM144
+4c	144
+4d	144
+=2	=2
+4e	144
+4f	144
+=3	=3
+8g	144
+8a	144
+4b	144
+=4	=4
+2c	144
+==	==
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test006></a><td width=80><b>Test&nbsp;006:</b></td><td width=1></td>
+<td>
+Measure the time of music when a ritard mark is present.
+<p>The command:<pre>     gettime -a <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=25 cols=7>**kern
+*M4/4
+*MM120
+4c
+4c
+4c
+4c
+=
+*rit
+4c
+4c
+4c
+4c
+=
+4c
+4c
+4c
+4c
+=
+*MM60
+4c
+4c
+4c
+4c
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=26 cols=14>**kern	**time
+*	*u=sec
+*M4/4	*
+*MM120	*MM120
+4c	0
+4c	0.5
+4c	1
+4c	1.5
+=	=
+*rit	*
+4c	2.022
+4c	2.59
+4c	3.211
+4c	3.887
+=	=
+4c	4.625
+4c	5.429
+4c	6.306
+4c	7.263
+=	=
+*MM60	*MM60
+4c	8.263
+4c	9.263
+4c	10.263
+4c	11.263
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test007></a><td width=80><b>Test&nbsp;007:</b></td><td width=1></td>
+<td>
+Measure the tempo of music when a ritard mark is present.
+<p>The command:<pre>     gettime -at <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=25 cols=7>**kern
+*M4/4
+*MM120
+4c
+4c
+4c
+4c
+=
+*rit
+4c
+4c
+4c
+4c
+=
+4c
+4c
+4c
+4c
+=
+*MM60
+4c
+4c
+4c
+4c
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=26 cols=15>**kern	**tempo
+*	*u=sec
+*M4/4	*
+*MM120	*MM120
+4c	120
+4c	120
+4c	120
+4c	120
+=	=
+*rit	*
+4c	120
+4c	110
+4c	101
+4c	93
+=	=
+4c	85
+4c	78
+4c	71
+4c	65
+=	=
+*MM60	*MM60
+4c	60
+4c	60
+4c	60
+4c	60
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test008></a><td width=80><b>Test&nbsp;008:</b></td><td width=1></td>
+<td>
+Measure the tempo of music when a ritard mark is present with no rounding.
+<p>The command:<pre>     gettime -atR <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=25 cols=7>**kern
+*M4/4
+*MM120
+4c
+4c
+4c
+4c
+=
+*rit
+4c
+4c
+4c
+4c
+=
+4c
+4c
+4c
+4c
+=
+*MM60
+4c
+4c
+4c
+4c
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=26 cols=15>**kern	**tempo
+*	*u=sec
+*M4/4	*
+*MM120	*MM120
+4c	120
+4c	120
+4c	120
+4c	120
+=	=
+*rit	*
+4c	120
+4c	110.04
+4c	100.908
+4c	92.5326
+=	=
+4c	84.8528
+4c	77.8104
+4c	71.3524
+4c	65.4305
+=	=
+*MM60	*MM60
+4c	60
+4c	60
+4c	60
+4c	60
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test009></a><td width=80><b>Test&nbsp;009:</b></td><td width=1></td>
+<td>
+Measure the time of music when an accelerando mark is present.
+<p>The command:<pre>     gettime -a <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=25 cols=7>**kern
+*M4/4
+*MM60
+4c
+4c
+4c
+4c
+=
+*accel
+4c
+4c
+4c
+4c
+=
+4c
+4c
+4c
+4c
+=
+*MM120
+4c
+4c
+4c
+4c
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=26 cols=14>**kern	**time
+*	*u=sec
+*M4/4	*
+*MM60	*MM60
+4c	0
+4c	1
+4c	2
+4c	3
+=	=
+*accel	*
+4c	3.959
+4c	4.839
+4c	5.645
+4c	6.385
+=	=
+4c	7.063
+4c	7.685
+4c	8.256
+4c	8.779
+=	=
+*MM120	*MM120
+4c	9.279
+4c	9.779
+4c	10.279
+4c	10.779
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test010></a><td width=80><b>Test&nbsp;010:</b></td><td width=1></td>
+<td>
+Measure the time of music when an accelerando mark is present with no rounding.
+<p>The command:<pre>     gettime -aR <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=25 cols=7>**kern
+*M4/4
+*MM60
+4c
+4c
+4c
+4c
+=
+*accel
+4c
+4c
+4c
+4c
+=
+4c
+4c
+4c
+4c
+=
+*MM120
+4c
+4c
+4c
+4c
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=26 cols=15>**kern	**time
+*	*u=sec
+*M4/4	*
+*MM60	*MM60
+4c	0
+4c	1
+4c	2
+4c	3
+=	=
+*accel	*
+4c	3.9592
+4c	4.83879
+4c	5.64538
+4c	6.38502
+=	=
+4c	7.06328
+4c	7.68524
+4c	8.25559
+4c	8.7786
+=	=
+*MM120	*MM120
+4c	9.2786
+4c	9.7786
+4c	10.2786
+4c	10.7786
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test011></a><td width=80><b>Test&nbsp;011:</b></td><td width=1></td>
+<td>
+Interpolate between existing **time values to assign timings to intermediate points in the score.
+<p>The command:<pre>     gettime -i <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=23 cols=14>**time	**kern
+*u=sec	*
+*	*M4/4
+0.0	4c
+.	4c
+.	4c
+.	4c
+=	=
+1.0	4c
+.	4c
+.	4c
+.	4c
+=	=
+3.0	4c
+.	4c
+.	4c
+.	4c
+=	=
+6.0	4c
+.	4c
+.	4c
+10.0	4c
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=23 cols=14>**time	**kern
+*u=sec	*
+*	*M4/4
+0	4c
+0.25	4c
+0.5	4c
+0.75	4c
+=	=
+1	4c
+1.5	4c
+2	4c
+2.5	4c
+=	=
+3	4c
+3.75	4c
+4.5	4c
+5.25	4c
+=	=
+6	4c
+7.333	4c
+8.667	4c
+10	4c
+*-	*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

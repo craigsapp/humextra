@@ -1,0 +1,14 @@
+!!!test: Display only the chord quality of the sonority.
+!!!command: sonority -t %in > %out
+**kern
+c e g
+cc e g
+cc ee g
+g b dd
+gg b dd
+gg bb dd
+d f# a cc
+dd f# a cc
+dd ff# a cc
+dd ff# aa cc
+*-

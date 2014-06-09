@@ -1,0 +1,11 @@
+!!!test: Add termination to explicit wedges/hairpins.
+!!!command: autodynam %in > %out
+**dynam	**dynam
+>X	p >X
+.	.
+.	.
+<X	.
+.	.
+.	.
+.	pp
+*-	*-

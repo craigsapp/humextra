@@ -1,0 +1,20 @@
+!!!test: Measure the beat position in 6/8 meter, beat on the dotted quarter-note.
+!!!command: beat -u 4. %in > %out
+**beat
+*M6/8
+*MM120
+2
+3
+3.66667
+=2
+1
+2
+2.33333
+2.66667
+=3
+1
+2
+=4
+1
+==
+*-

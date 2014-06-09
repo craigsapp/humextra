@@ -1,0 +1,22 @@
+!!!test: Extract non-consecutive list of measures.
+!!!command: myank -m 2,4,5-2 %in > %out
+**kern
+*clefG2
+*k[]
+*C:
+*M4/4
+*MM120
+=2-
+1d
+=4
+1f
+=5
+1g
+=4
+1f
+=3
+1e
+=2
+1d
+=
+*-

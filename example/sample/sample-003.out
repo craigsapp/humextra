@@ -1,0 +1,19 @@
+!!!test: Sample the music every eighth-note.
+!!!command: sample -r "2 8. 16 4"  %in > %out
+**kern	**kern	**kern	**kern
+*M3/4	*M3/4	*M3/4	*M3/4
+=	=	=	=
+2G	2G	2d	2b
+8.G	8.G	8.d	8.b
+16D	16F#	16d	16b
+4E	4G	4B	4g
+=	=	=	=
+2BB	2c	2e	2g
+8.AA	8.c	8.f#	8.a
+16GG	16d	16g	16b
+=	=	=	=
+4D	4d	4f#	4a
+2GG	2d	2g	2b
+8.GG	8.d	8.g	8.b
+=	=	=	=
+*-	*-	*-	*-

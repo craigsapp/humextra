@@ -1,0 +1,11 @@
+!!!test: Extract a measure, not including ending barline.
+!!!command: myank -m 5 -B %in > %out
+**kern
+*clefG2
+*k[]
+*C:
+*M4/4
+*MM120
+=5-
+1g
+*-

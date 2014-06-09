@@ -1,0 +1,18 @@
+!!!test: Adding measure numbers to kern data plus other types of spines.
+!!!command: barnum %in > %out
+**foo	**kern	**text
+*	*k[f#]	*
+*	*M4/4	*
+*	*MM120	*
+=-	=-	=-
+42	4g	this
+.	4a	is
+13	4b	some
+.	4cc	test
+=	=	=
+25	4dd	text
+.	4ee	to
+.	4ff#	test
+.	4gg	with
+==	==	==
+*-	*-	*-

@@ -1,0 +1,28 @@
+!!!test: Measure the time of music when an accelerando mark is present with no rounding.
+!!!command: gettime -aR %in > %out
+**kern	**time
+*	*u=sec
+*M4/4	*
+*MM60	*MM60
+4c	0
+4c	1
+4c	2
+4c	3
+=	=
+*accel	*
+4c	3.9592
+4c	4.83879
+4c	5.64538
+4c	6.38502
+=	=
+4c	7.06328
+4c	7.68524
+4c	8.25559
+4c	8.7786
+=	=
+*MM120	*MM120
+4c	9.2786
+4c	9.7786
+4c	10.2786
+4c	10.7786
+*-	*-

@@ -1,0 +1,290 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: autodynam</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>autodynam examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>autodynam</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>autodynam</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Add termination to crescendo just before next dynmaics item in spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Add termination to decrescendo just before next dynmaics item in spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Add termination to crescendo on same line before next dynamics item.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Add termination to decrescendo on same line before next dynamics item.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test005><b>Test&nbsp;005:</b></a></td><td width=10><td>Add termination to explicit wedges/hairpins.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test006><b>Test&nbsp;006:</b></a></td><td width=10><td>Add termination to interpretive (hidden) wedges/hairpins.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Add termination to crescendo just before next dynmaics item in spine.
+<p>The command:<pre>     autodynam <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=8 cols=8>**dynam
+<
+.
+.
+.
+.
+p
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=8 cols=8>**dynam
+<
+(
+(
+(
+[
+p
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+Add termination to decrescendo just before next dynmaics item in spine.
+<p>The command:<pre>     autodynam <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=8 cols=8>**dynam
+>
+.
+.
+.
+.
+p
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=8 cols=8>**dynam
+>
+)
+)
+)
+]
+p
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+Add termination to crescendo on same line before next dynamics item.
+<p>The command:<pre>     autodynam <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=4 cols=8>**dynam
+<
+p
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=4 cols=8>**dynam
+< [
+p
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test004></a><td width=80><b>Test&nbsp;004:</b></td><td width=1></td>
+<td>
+Add termination to decrescendo on same line before next dynamics item.
+<p>The command:<pre>     autodynam <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=4 cols=8>**dynam
+>
+p
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=4 cols=8>**dynam
+> ]
+p
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test005></a><td width=80><b>Test&nbsp;005:</b></td><td width=1></td>
+<td>
+Add termination to explicit wedges/hairpins.
+<p>The command:<pre>     autodynam <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=9 cols=15>**dynam	**dynam
+>X	p >X
+.	.
+.	.
+<X	.
+.	.
+.	.
+.	pp
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=9 cols=15>**dynam	**dynam
+>X	p >X
+)X	)X
+]X	)X
+<X	)X
+(X	)X
+(X	]X
+[X	pp
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test006></a><td width=80><b>Test&nbsp;006:</b></td><td width=1></td>
+<td>
+Add termination to interpretive (hidden) wedges/hairpins.
+<p>The command:<pre>     autodynam <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=9 cols=15>**dynam	**dynam
+>yy	p >yy
+.	.
+.	.
+<yy	.
+.	.
+.	.
+.	pp
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=9 cols=15>**dynam	**dynam
+>yy	p >yy
+)yy	)yy
+]yy	)yy
+<yy	)yy
+(yy	)yy
+(yy	]yy
+[yy	pp
+*-	*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

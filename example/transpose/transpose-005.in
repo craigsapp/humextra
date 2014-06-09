@@ -1,0 +1,10 @@
+!!!test: Transpose only the second spine up a perfect fifth.
+!!!command: transpose -t P5 -s 2 %in > %out
+**kern	**kern
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+*-	*-

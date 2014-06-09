@@ -1,0 +1,19 @@
+!!!test: Extract diatonic musical intervals from two spines.
+!!!command: tindex -AD -E -f "INT" %in > %out
+**kern	**kern
+*M2/4	*M2/4
+*MM120	*MM120
+=1-	=1-
+4c	4gg
+4d	4ff
+=2	=2
+4e	4cc
+8.f	4b
+16g	.
+=3	=3
+4a	4a
+4b	4g
+=4	=4
+2cc	2f
+==	==
+*-	*-

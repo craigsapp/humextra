@@ -1,0 +1,18 @@
+!!!test: Measure the beat position of each point in the score.
+!!!command: beat %in > %out
+**beat
+*M2/4
+*MM120
+1
+2
+=2
+1
+2
+2.75
+=3
+1
+2
+=4
+1
+==
+*-

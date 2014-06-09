@@ -1,0 +1,950 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: serialize</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>serialize examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>serialize</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>serialize</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Serialize all spines in file.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Serialize only **a spines in file.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Serialize all spines in file, alternate parameter style.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Serialize all spines in file, including spine manipuations.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test005><b>Test&nbsp;005:</b></a></td><td width=10><td>Comments before/after spines occur only once in output.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test006><b>Test&nbsp;006:</b></a></td><td width=10><td>Comments within spines are repeated in each extracted spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test007><b>Test&nbsp;007:</b></a></td><td width=10><td>Merge all serialized spines into single data stream.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test008><b>Test&nbsp;008:</b></a></td><td width=10><td>Serialize chord notes.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test009><b>Test&nbsp;009:</b></a></td><td width=10><td>Serialize multiple-stop tokens, using non-default separator.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test010><b>Test&nbsp;010:</b></a></td><td width=10><td>Serialize subspines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test011><b>Test&nbsp;011:</b></a></td><td width=10><td>Add an end-of-spine marker.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test012><b>Test&nbsp;012:</b></a></td><td width=10><td>Extract sub-spines after primary spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test013><b>Test&nbsp;013:</b></a></td><td width=10><td>Extract only the first sub-token in each token.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test014><b>Test&nbsp;014:</b></a></td><td width=10><td>Extract only the last sub-token in each token.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test015><b>Test&nbsp;015:</b></a></td><td width=10><td>Extract the second sub-token in each token.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test016><b>Test&nbsp;016:</b></a></td><td width=10><td>Extract the second-to-last sub-token in each token.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Serialize all spines in file.
+<p>The command:<pre>     serialize <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=9 cols=19>**a	**b	**c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=27 cols=5>**a
+a
+a
+a
+a
+a
+a
+a
+*-
+**b
+b
+b
+b
+b
+b
+b
+b
+*-
+**c
+c
+c
+c
+c
+c
+c
+c
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+Serialize only **a spines in file.
+<p>The command:<pre>     serialize -i '**a' <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=9 cols=27>**a	**b	**c	**a
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+*-	*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=18 cols=5>**a
+a
+a
+a
+a
+a
+a
+a
+*-
+**a
+a2
+a2
+a2
+a2
+a2
+a2
+a2
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+Serialize all spines in file, alternate parameter style.
+<p>The command:<pre>     serialize -i a <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=9 cols=27>**a	**b	**c	**a
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+*-	*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=18 cols=5>**a
+a
+a
+a
+a
+a
+a
+a
+*-
+**a
+a2
+a2
+a2
+a2
+a2
+a2
+a2
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test004></a><td width=80><b>Test&nbsp;004:</b></td><td width=1></td>
+<td>
+Serialize all spines in file, including spine manipuations.
+<p>The command:<pre>     serialize <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=19 cols=33>**a	**b	**c
+a	b	c
+a	b	c
+*^	*	*
+a1	a2	b	c
+a1	a2	b	c
+*	*	*^	*
+a1	a2	b1	b2	c
+a1	a2	b1	b2	c
+*x	*x	*	*	*
+a2	a1	b1	b2	c
+a2	a1	b1	b2	c
+*v	*v	*	*	*
+a	b1	b2	c
+a	b1	b2	c
+*	*v	*v	*
+a	b	c
+a	b	c
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=57 cols=10>**a
+a
+a
+*^
+a1	a2
+a1	a2
+*	*
+a1	a2
+a1	a2
+*x	*x
+a2	a1
+a2	a1
+*v	*v
+a
+a
+*
+a
+a
+*-
+**b
+b
+b
+*
+b
+b
+*^
+b1	b2
+b1	b2
+*	*
+b1	b2
+b1	b2
+*	*
+b1	b2
+b1	b2
+*v	*v
+b
+b
+*-
+**c
+c
+c
+*
+c
+c
+*
+c
+c
+*
+c
+c
+*
+c
+c
+*
+c
+c
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test005></a><td width=80><b>Test&nbsp;005:</b></td><td width=1></td>
+<td>
+Comments before/after spines occur only once in output.
+<p>The command:<pre>     serialize <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=14 cols=40>!! Comment before spines start
+!!!ONB: This comment is at the start of the file
+**a	**b	**c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-
+!! Comment after spines end
+!!!ONB: This comment is at the end of the file</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=32 cols=40>!! Comment before spines start
+!!!ONB: This comment is at the start of the file
+**a
+a
+a
+a
+a
+a
+a
+a
+*-
+**b
+b
+b
+b
+b
+b
+b
+b
+*-
+**c
+c
+c
+c
+c
+c
+c
+c
+*-
+!! Comment after spines end
+!!!ONB: This comment is at the end of the file</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test006></a><td width=80><b>Test&nbsp;006:</b></td><td width=1></td>
+<td>
+Comments within spines are repeated in each extracted spine.
+<p>The command:<pre>     serialize <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=40>!! Comment before spines 
+!!!ONB: This comment is at the start of the file
+**a	**b	**c
+a	b	c
+a	b	c
+!! Comment within data
+a	b	c
+a	b	c
+!!!ONB: Reference record within data
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-
+!! Comment after spines end
+!!!ONB: This comment is at the end of the file</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=38 cols=40>!! Comment before spines 
+!!!ONB: This comment is at the start of the file
+**a
+a
+a
+!! Comment within data
+a
+a
+!!!ONB: Reference record within data
+a
+a
+a
+*-
+**b
+b
+b
+!! Comment within data
+b
+b
+!!!ONB: Reference record within data
+b
+b
+b
+*-
+**c
+c
+c
+!! Comment within data
+c
+c
+!!!ONB: Reference record within data
+c
+c
+c
+*-
+!! Comment after spines end
+!!!ONB: This comment is at the end of the file</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test007></a><td width=80><b>Test&nbsp;007:</b></td><td width=1></td>
+<td>
+Merge all serialized spines into single data stream.
+<p>The command:<pre>     serialize -m <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=9 cols=19>**a	**b	**c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=23 cols=5>**a
+a
+a
+a
+a
+a
+a
+a
+b
+b
+b
+b
+b
+b
+b
+c
+c
+c
+c
+c
+c
+c
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test008></a><td width=80><b>Test&nbsp;008:</b></td><td width=1></td>
+<td>
+Serialize chord notes.
+<p>The command:<pre>     serialize -c <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=6 cols=10>**kern
+4c 4e 4g
+4d 4f# 4a
+4e 4g# 4b
+4f 4a 4c
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=14 cols=7>**kern
+4c
+4e
+4g
+4d
+4f#
+4a
+4e
+4g#
+4b
+4f
+4a
+4c
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test009></a><td width=80><b>Test&nbsp;009:</b></td><td width=1></td>
+<td>
+Serialize multiple-stop tokens, using non-default separator.
+<p>The command:<pre>     serialize -c -s ':' <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=5 cols=6>**a
+b:c:d
+e:f:g
+h:i:j
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=11 cols=5>**a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test010></a><td width=80><b>Test&nbsp;010:</b></td><td width=1></td>
+<td>
+Serialize subspines.
+<p>The command:<pre>     serialize -S <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=10>**kern
+4c
+*^
+4d	4e
+4f	4g
+*v	*v
+4a
+4b
+4cc
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=7>**kern
+4c
+*
+4d
+4e
+4f
+4g
+*
+*
+4a
+4b
+4cc
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test011></a><td width=80><b>Test&nbsp;011:</b></td><td width=1></td>
+<td>
+Add an end-of-spine marker.
+<p>The command:<pre>     serialize -m -t X <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=14>**kern	**kern
+4c	8d
+.	8d
+4c	8d
+.	8d
+4c	8d
+.	8d
+4c	8d
+.	8d
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=20 cols=7>**kern
+4c
+.
+4c
+.
+4c
+.
+4c
+.
+X
+8d
+8d
+8d
+8d
+8d
+8d
+8d
+8d
+X
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test012></a><td width=80><b>Test&nbsp;012:</b></td><td width=1></td>
+<td>
+Extract sub-spines after primary spine.
+<p>The command:<pre>     serialize -m -p -t X <font color=red><i>input-file</i></font> | ridx -i > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=13 cols=19>**kern	**kern
+4C	4c
+*	*^
+4D	4d	4cc
+4E	4e	4dd
+*	*v	*v
+4F	4f
+*	*^
+4G	4g	4ee
+4A	4a	4ff
+*	*v	*v
+4B	4b
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=24 cols=7>**kern
+4C
+4D
+4E
+4F
+4G
+4A
+4B
+X
+4c
+4d
+4e
+4f
+4g
+4a
+4b
+X
+4cc
+4dd
+X
+4ee
+4ff
+X
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test013></a><td width=80><b>Test&nbsp;013:</b></td><td width=1></td>
+<td>
+Extract only the first sub-token in each token.
+<p>The command:<pre>     serialize -f <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=13 cols=11>**kern
+4C 4E 4G
+4D 4F# 4A
+4E 4G# 4B
+4F 4A 4c
+4G 4B 4d
+4A 4c# 4e
+4B 4d# 4f#
+4c 4e
+4d 4f#
+4e
+4f
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=7>**kern
+4C
+4D
+4E
+4F
+4G
+4A
+4B
+4c
+4d
+4e
+4f
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test014></a><td width=80><b>Test&nbsp;014:</b></td><td width=1></td>
+<td>
+Extract only the last sub-token in each token.
+<p>The command:<pre>     serialize -l <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=13 cols=11>**kern
+4C 4E 4G
+4D 4F# 4A
+4E 4G# 4B
+4F 4A 4c
+4G 4B 4d
+4A 4c# 4e
+4B 4d# 4f#
+4c 4e
+4d 4f#
+4e
+4f
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=7>**kern
+4G
+4A
+4B
+4c
+4d
+4e
+4f#
+4e
+4f#
+4e
+4f
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test015></a><td width=80><b>Test&nbsp;015:</b></td><td width=1></td>
+<td>
+Extract the second sub-token in each token.
+<p>The command:<pre>     serialize -n2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=13 cols=11>**kern
+4C 4E 4G
+4D 4F# 4A
+4E 4G# 4B
+4F 4A 4c
+4G 4B 4d
+4A 4c# 4e
+4B 4d# 4f#
+4c 4e
+4d 4f#
+4e
+4f
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=7>**kern
+4E
+4F#
+4G#
+4A
+4B
+4c#
+4d#
+4e
+4f#
+.
+.
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test016></a><td width=80><b>Test&nbsp;016:</b></td><td width=1></td>
+<td>
+Extract the second-to-last sub-token in each token.
+<p>The command:<pre>     serialize -n -2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=13 cols=11>**kern
+4C 4E 4G
+4D 4F# 4A
+4E 4G# 4B
+4F 4A 4c
+4G 4B 4d
+4A 4c# 4e
+4B 4d# 4f#
+4c 4e
+4d 4f#
+4e
+4f
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=7>**kern
+4E
+4F#
+4G#
+4A
+4B
+4c#
+4d#
+4c
+4d
+.
+.
+*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

@@ -1,0 +1,15 @@
+!!!test: Expand sections using the norep label.
+!!!command: thrux -v norep %in > %out
+**letters
+*thru
+*>C
+c
+c
+c
+*>B
+b
+b
+*>A
+a
+*-
+!! comment

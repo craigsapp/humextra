@@ -1,0 +1,15 @@
+!!!test: Trying to access a field greater than exists in the file will select the last spine.
+!!!command: zscores -f 1000 %in > %out
+**numB
+!shift=50
+!scale=25.8199
+-1.54919
+-1.1619
+-0.774597
+-0.387298
+0
+0.387298
+0.774597
+1.1619
+1.54919
+*-

@@ -1,0 +1,16 @@
+!!!test: Add a swing to the music.
+!!!command: swing %in > %out
+**kern
+*M4/4
+*MM60
+=1-
+8c
+8d
+8c
+8d
+8c
+8d
+8c
+8d
+==
+*-

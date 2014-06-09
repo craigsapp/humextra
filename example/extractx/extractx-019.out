@@ -1,0 +1,13 @@
+!!!test: Extract a complex spine, duplicating it as well as adding a blank spine between the copies to preserve valid humdrum syntax.
+!!!command: extractx -s 2,0,2 %in > %out
+**b	**blank	**b
+b	.	b
+b	.	b
+*^	*	*^
+b1	b2	.	b1	b2
+b1	b2	.	b1	b2
+b1	b2	.	b1	b2
+*v	*v	*	*v	*v
+b	.	b
+b	.	b
+*-	*-	*-

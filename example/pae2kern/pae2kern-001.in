@@ -1,0 +1,10 @@
+!!!test: Basic test of converting to **kern data.
+!!!command: pae2kern %in -s > %out
+@start:		pae2kern-001
+@clef:		C-1
+@keysig:	bBEA
+@key:		Eb
+@timesig:	3/4
+@alttimesig:	
+@data:		'2.E/G/2A4A/G--/--8.-6B/4AG-/--8-{6BG}/4FE-/
+@end:		pae2kern-001

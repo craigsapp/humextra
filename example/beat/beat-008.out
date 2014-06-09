@@ -1,0 +1,20 @@
+!!!test: Measure the beat position in 6/8 meter, beat on the eighth note.
+!!!command: beat -u 8 %in > %out
+**beat
+*M6/8
+*MM120
+1
+4
+6
+=2
+1
+4
+5
+6
+=3
+1
+4
+=4
+1
+==
+*-

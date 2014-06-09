@@ -1,0 +1,13 @@
+!!!test: Extract measure with subspines from middle of score.
+!!!command: myank -m 6 %in > %out
+**kern
+*^
+*clefF4	*clefF4
+*k[]	*k[]
+*a:	*a:
+*MM132	*MM132
+=6-	=6-
+1E	1e
+=	=
+*v	*v
+*-

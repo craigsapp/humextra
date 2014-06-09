@@ -1,0 +1,14 @@
+!!!test: Display only the inversions of chords.
+!!!command: sonority -i %in > %out
+**qual
+0
+1
+2
+0
+1
+2
+0
+1
+2
+3
+*-

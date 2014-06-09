@@ -1,0 +1,11 @@
+!!!test: Exclude the second spine from being extracted.
+!!!command: extractx -x 2 %in > %out
+**a	**b	**c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-

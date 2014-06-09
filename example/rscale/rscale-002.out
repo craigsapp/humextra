@@ -1,0 +1,23 @@
+!!!test: Increase rhythmic values to twice their original duration.
+!!!command: rscale -f 2 %in > %out
+**kern
+1%16c
+000d
+00e
+0f
+1g
+2a
+4b
+8cc
+16dd
+32ee
+64ff
+128gg
+256aa
+512bb
+1024ccc
+2048ddd
+4096eee
+8192fff
+*-
+!!!rscale: 2

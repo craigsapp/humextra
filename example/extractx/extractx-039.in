@@ -1,0 +1,14 @@
+!!!test: Expand all spines which contain a *^ manipulator.
+!!!command: extractx -e %in > %out
+**a	**b	**c
+*	*^	*
+a	b1	b2	c
+a	b1	b2	c
+*	*	*^	*
+a	b1	b21	b22	c
+a	b1	b21	b22	c
+*	*	*v	*v	*
+a	b1	b2	c
+a	b1	b2	c
+*	*v	*v	*
+*-	*-	*-

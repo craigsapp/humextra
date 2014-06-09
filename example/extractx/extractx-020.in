@@ -1,0 +1,9 @@
+!!!test: Extract a spine which uses *x will remove the "x" in the output.
+!!!command: extractx -s 2 %in > %out
+**a	**b	**c
+a	b	c
+a	b	c
+*x	*x	*
+b	a	c
+b	a	c
+*-	*-	*-

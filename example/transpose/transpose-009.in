@@ -1,0 +1,14 @@
+!!!test: Transpose without inserting a *Tr interpretation.
+!!!command: transpose -b 23 -q -s2 %in > %out
+**kern	**kern
+*k[]	*k[]
+*C:	*C:
+4c	4c
+4d	4d
+4e	4e
+4f	4f
+4g	4g
+4a	4a
+4b	4b
+4cc	4cc
+*-	*-

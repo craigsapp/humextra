@@ -1,0 +1,18 @@
+!!!test: Extract the tempo rather than the timings.
+!!!command: gettime %in -at > %out
+**kern	**tempo
+*	*u=sec
+*MM144	*MM144
+4c	144
+4d	144
+=2	=2
+4e	144
+4f	144
+=3	=3
+8g	144
+8a	144
+4b	144
+=4	=4
+2c	144
+==	==
+*-	*-

@@ -1,0 +1,23 @@
+!!!test: Don't add stems to notes which shouldn't have stems.
+!!!command: autostem -L %in > %out
+**kern	**note
+*clefG2	*
+4096c	4096th note
+2048c	2048th note
+1024c	1024th note
+256c	256th note
+128c	128th note
+64c	64th note
+32c	32nd note
+16c	16th note
+8c	8th note
+4c	quarter note
+3c	triplet half note
+2c	half note
+2.c	dotted-half note
+2..c	double dotted-half note
+2...c	triple dotted-half note
+1c	whole note (stemless)
+0c	breve note (stemless)
+00c	long note
+*-	*-

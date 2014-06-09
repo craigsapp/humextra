@@ -1,0 +1,22 @@
+!!!test: Secondary dominants.
+!!!command: harm2kern %in > %out
+**harm
+*C:
+I
+V
+V/V
+V/V/V
+V/V/V/V
+V/V/V/V/V
+=
+viio
+viio/V
+viio/VI
+=
+V7
+V7/ii
+V7/II
+V7/-VII
+V7/I
+V7/V/II
+*-

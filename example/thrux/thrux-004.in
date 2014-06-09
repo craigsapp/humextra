@@ -1,0 +1,16 @@
+!!!test: Expand the data according to a command-line realization sequence.
+!!!command: thrux -r "A,B,C,B,A" %in > %out
+**letters
+*>[C,C,B,B,A,A]
+*>norep[C,B,A]
+*>A
+a
+*>B
+b
+b
+*>C
+c
+c
+c
+*-
+!! comment

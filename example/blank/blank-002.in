@@ -1,0 +1,12 @@
+!!!test: Append a blank spine to some more complex Humdrum data.
+!!!command: blank -a %in > %out
+**foo
+!note
+a
+*^
+y	z
+.	x
+*v	*v
+b
+c
+*-

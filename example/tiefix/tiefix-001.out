@@ -1,0 +1,16 @@
+!!!test: Fix ties which are not correctly terminated.
+!!!command: tiefix %in > %out
+**kern
+4c
+[4d
+4d]
+4e
+=
+4f
+4g
+4a
+[4b
+=
+4b]
+2cc
+*-

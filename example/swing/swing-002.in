@@ -1,0 +1,16 @@
+!!!test: Add a 75% swing to the music.
+!!!command: swing -p 75 %in > %out
+**kern
+*M4/4
+*MM60
+=1-
+8c
+8d
+8c
+8d
+8c
+8d
+8c
+8d
+==
+*-

@@ -1,0 +1,21 @@
+!!!test: Serialize all spines in file, including spine manipuations.
+!!!command: serialize %in > %out
+**a	**b	**c
+a	b	c
+a	b	c
+*^	*	*
+a1	a2	b	c
+a1	a2	b	c
+*	*	*^	*
+a1	a2	b1	b2	c
+a1	a2	b1	b2	c
+*x	*x	*	*	*
+a2	a1	b1	b2	c
+a2	a1	b1	b2	c
+*v	*v	*	*	*
+a	b1	b2	c
+a	b1	b2	c
+*	*v	*v	*
+a	b	c
+a	b	c
+*-	*-	*-

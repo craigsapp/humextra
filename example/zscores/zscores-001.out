@@ -1,0 +1,15 @@
+!!!test: Basic behavior of the command: print only the processed spine.
+!!!command: zscores %in > %out
+**numA
+!shift=5
+!scale=2.58199
+-1.54919
+-1.1619
+-0.774597
+-0.387298
+0
+0.387298
+0.774597
+1.1619
+1.54919
+*-

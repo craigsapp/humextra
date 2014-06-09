@@ -1,0 +1,11 @@
+!!!test: Extract the second spine in a file.
+!!!command: extractx -s 2 %in > %out
+**a	**b	**c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-

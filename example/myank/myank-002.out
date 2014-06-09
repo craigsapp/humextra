@@ -1,0 +1,20 @@
+!!!test: Extract measure 2 to 6 from score.
+!!!command: myank -m 2-6 %in > %out
+**kern
+*clefG2
+*k[]
+*C:
+*M4/4
+*MM120
+=2-
+1d
+=3
+1e
+=4
+1f
+=5
+1g
+=6
+1a
+=
+*-

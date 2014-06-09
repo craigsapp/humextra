@@ -1,0 +1,18 @@
+!!!test: Measure the time of music in milliseconds rather than seconds.
+!!!command: gettime -pm %in > %out
+**time	**kern
+*u=msec	*
+*MM60	*MM60
+0	4c
+1000	4d
+=2	=2
+2000	4e
+3000	4f
+=3	=3
+4000	8g
+4500	8a
+5000	4b
+=4	=4
+6000	2c
+==	==
+*-	*-

@@ -1,0 +1,12 @@
+!!!test: Triads on the scale degrees of C Major.
+!!!command: harm2kern %in > %out
+**harm
+*C:
+I
+ii
+iii
+IV
+V
+vi
+viio
+*-

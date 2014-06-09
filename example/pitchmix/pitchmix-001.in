@@ -1,0 +1,12 @@
+!!!test: Mix up the order of notes in a C Major scale.
+!!!command: pitchmix -s 1 %in > %out
+**kern
+4c
+8d
+8e
+4f
+8.g
+16a
+4b
+2cc
+*-

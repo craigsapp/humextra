@@ -1,0 +1,14 @@
+!!!test: Transpose up a major third using diatonic/chromatic binomial interval.
+!!!command: transpose -d 2 -c 4 %in > %out
+**kern	**kern
+*k[]	*k[]
+*C:	*C:
+4c	4e
+4d	4f
+4e	4g
+4f	4a
+4g	4b
+4a	4cc
+4b	4dd
+4cc	4ee
+*-	*-

@@ -1,0 +1,15 @@
+X: 1
+%%abc-version 2.0
+%%abcx-abcm2ps-target-version 5.9.1 (29 Sep 2008)
+%%abc-creator hum2abc beta
+%%humdrum-veritas 3054553788
+%%humdrum-veritas-data 3885258986
+%%continueall 1
+%%barnumbers 0
+L: 1/8
+M: 6/8
+K: C clef=bass
+D,3F,3 | 
+_B,3[K:clef=C1]^C3 | 
+^F3G3 | 
+AG^F !trill!ED^C

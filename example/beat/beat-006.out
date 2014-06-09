@@ -1,0 +1,14 @@
+!!!test: Sum the number of beats in each measure.
+!!!command: beat -s %in > %out
+**beatsum
+*M2/4
+*MM120
+2
+=2
+2
+=3
+2
+=4
+2
+==
+*-

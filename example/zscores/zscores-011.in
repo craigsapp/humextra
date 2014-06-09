@@ -1,0 +1,13 @@
+!!!test: An externally specified mean and standard deviation can be given.
+!!!command: zscores -m 6 -d 5 %in > %out
+**numA
+1
+2
+3
+4
+5
+6
+6
+7
+9
+*-

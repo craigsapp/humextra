@@ -1,0 +1,28 @@
+!!!test: Measure the time of music when an accelerando mark is present.
+!!!command: gettime -a %in > %out
+**kern	**time
+*	*u=sec
+*M4/4	*
+*MM60	*MM60
+4c	0
+4c	1
+4c	2
+4c	3
+=	=
+*accel	*
+4c	3.959
+4c	4.839
+4c	5.645
+4c	6.385
+=	=
+4c	7.063
+4c	7.685
+4c	8.256
+4c	8.779
+=	=
+*MM120	*MM120
+4c	9.279
+4c	9.779
+4c	10.279
+4c	10.779
+*-	*-

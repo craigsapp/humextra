@@ -1,0 +1,7 @@
+!!!test: Serialize multiple-stop tokens, using non-default separator.
+!!!command: serialize -c -s ':' %in > %out
+**a
+b:c:d
+e:f:g
+h:i:j
+*-

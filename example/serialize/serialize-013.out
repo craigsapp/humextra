@@ -1,0 +1,15 @@
+!!!test: Extract only the first sub-token in each token.
+!!!command: serialize -f %in > %out
+**kern
+4C
+4D
+4E
+4F
+4G
+4A
+4B
+4c
+4d
+4e
+4f
+*-

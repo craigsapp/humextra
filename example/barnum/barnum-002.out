@@ -1,0 +1,29 @@
+!!!test: Removing measure numbers from **kern data.
+!!!command: barnum -r %in > %out
+**kern
+*k[f#]
+*M4/4
+*MM120
+=-
+4g
+4a
+4b
+4cc
+=
+4dd
+4ee
+4ff#
+4gg
+=
+4ff#
+8ee
+8dd
+8cc
+8b
+8a
+8g
+=
+2f#
+2g
+==
+*-

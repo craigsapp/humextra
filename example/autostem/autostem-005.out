@@ -1,0 +1,18 @@
+!!!test: Add stems to notes, overwriting any which already exist.
+!!!command: autostem -o %in > %out
+**kern
+*clefG2
+c/
+d/
+e/
+f/
+g/
+a/
+b\
+cc\
+dd\
+ee\
+ff\
+gg\
+aa\
+*-

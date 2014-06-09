@@ -1,0 +1,18 @@
+!!!test: Sum the number of beats in each measure and append analysis to input data.
+!!!command: beat -sa %in > %out
+**kern	**beatsum
+*M2/4	*M2/4
+*MM120	*MM120
+4c	2
+4d	.
+=2	=2
+4e	2
+8.f	.
+16g	.
+=3	=3
+4a	2
+4b	.
+=4	=4
+2cc	2
+==	==
+*-	*-

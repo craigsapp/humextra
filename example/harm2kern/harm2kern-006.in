@@ -1,0 +1,20 @@
+!!!test: Seventh chords and their inversions in C Major.
+!!!command: harm2kern %in > %out
+**harm
+*C:
+I7
+ii7
+iii7
+IV7
+V7
+vi7
+viio7
+=
+I7a
+ii7b
+iii7c
+IV7d
+V7a
+vi7b
+viio7c
+*-

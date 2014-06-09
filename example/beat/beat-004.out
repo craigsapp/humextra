@@ -1,0 +1,18 @@
+!!!test: Append output data to input lines.
+!!!command: beat -a %in > %out
+**kern	**beat
+*M2/4	*M2/4
+*MM120	*MM120
+4c	1
+4d	2
+=2	=2
+4e	1
+8.f	2
+16g	2.75
+=3	=3
+4a	1
+4b	2
+=4	=4
+2cc	1
+==	==
+*-	*-

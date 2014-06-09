@@ -1,0 +1,11 @@
+!!!test: Extract music in different clefs.
+!!!command: myank -m 2,5 %in > %out
+**kern
+*clefG2
+=2-
+1A
+=5
+*clefF4
+1E
+=
+*-

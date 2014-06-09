@@ -1,0 +1,22 @@
+!!!test: Secondary dominants.
+!!!command: harm2kern %in > %out
+**kern
+*C:
+C e g
+G b dd
+D f# a
+A cc# ee
+E g# b
+B dd# ff#
+=
+B dd ff
+F# a cc
+G# b dd
+=
+G b dd ff
+A cc# ee gg
+A cc# ee gg
+F a cc ee-
+G b dd ff
+E g# b dd
+*-

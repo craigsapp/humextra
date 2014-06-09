@@ -1,0 +1,6 @@
+!!!test: Mark harmonic intervals with "h".
+!!!command: cint -h %in > %out
+**kern	**cint	**kern
+E	10h -2 12h	g
+D	.	a
+*-	*-	*-

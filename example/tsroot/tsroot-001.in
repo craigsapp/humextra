@@ -1,0 +1,35 @@
+!!!test: Basic root analysis of music prepended to input data.
+!!!command: tsroot -p %in > %out
+**kern	**kern
+*k[b-]	*k[b-]
+*F:	*F:
+*M4/4	*M4/4
+*MM120	*MM120
+=1-	=1-
+4.F	8r
+.	8c 8f 8a
+.	8c 8f 8a
+8A	8r
+4.c	8r
+.	8f 8a 8cc
+.	8f 8a 8cc
+8A	8r
+=2	=2
+8B-	8r
+8d	8f 8b- 8dd
+8f	8b- 8dd
+8d	8r
+4.c	8r
+.	8f 8a 8cc
+.	8f 8a 8cc
+8A	8r
+=3	=3
+8B-	8r
+8G	8e 8b- 8cc
+8C	4e 4b- 4cc
+8B-	.
+8A	8r
+8F	8c 8f 8a
+8C	4c 4f 4a
+8A	.
+*-	*-

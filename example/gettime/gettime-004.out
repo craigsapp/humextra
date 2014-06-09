@@ -1,0 +1,18 @@
+!!!test: Measuring time in milliseconds with no rounding.
+!!!command: gettime %in -amR > %out
+**kern	**time
+*	*u=msec
+*MM144	*MM144
+4c	0
+4d	416.667
+=2	=2
+4e	833.333
+4f	1250
+=3	=3
+8g	1666.67
+8a	1875
+4b	2083.33
+=4	=4
+2c	2500
+==	==
+*-	*-

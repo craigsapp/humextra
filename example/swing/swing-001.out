@@ -1,0 +1,17 @@
+!!!test: Add a swing to the music.
+!!!command: swing %in > %out
+**time	**kern
+*u=msec	*
+*M4/4	*M4/4
+*MM60	*MM60
+=1-	=1-
+0	8c
+600	8d
+1000	8c
+1600	8d
+2000	8c
+2600	8d
+3000	8c
+3500	8d
+==	==
+*-	*-

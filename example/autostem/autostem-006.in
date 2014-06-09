@@ -1,0 +1,18 @@
+!!!test: Set the default direction of the middle staff line to point upwards.
+!!!command: autostem -o -u %in > %out
+**kern
+*clefG2
+c/
+d/
+e/
+f/
+g/
+a/
+b\
+cc\
+dd\
+ee\
+ff\
+gg\
+aa\
+*-

@@ -1,0 +1,21 @@
+!!!test: Chord qualities with a root on C.
+!!!command: harm2kern %in > %out
+**kern
+*C:
+!
+C e g
+!
+C e- g
+!
+C e- g-
+!
+C e g#
+=
+!
+!
+C e g b
+!
+C e- g b
+!
+C e g b-
+*-

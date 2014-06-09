@@ -1,0 +1,15 @@
+!!!test: Extract the second sub-token in each token.
+!!!command: serialize -n2 %in > %out
+**kern
+4C 4E 4G
+4D 4F# 4A
+4E 4G# 4B
+4F 4A 4c
+4G 4B 4d
+4A 4c# 4e
+4B 4d# 4f#
+4c 4e
+4d 4f#
+4e
+4f
+*-

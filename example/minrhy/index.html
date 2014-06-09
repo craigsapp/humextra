@@ -1,0 +1,201 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: minrhy</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>minrhy examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>minrhy</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>minrhy</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>If all notes are the same length, then that is the minimum rhythmic unit.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>All notes in the file are multiples of the smallest-duration note.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Two against three polyrhythm.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Three against five polyrhythm.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+If all notes are the same length, then that is the minimum rhythmic unit.
+<p>The command:<pre>     minrhy <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=7 cols=7>**kern
+4c
+4d
+4e
+4f
+4g
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=1 cols=5>4</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+All notes in the file are multiples of the smallest-duration note.
+<p>The command:<pre>     minrhy <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=9 cols=7>**kern
+1A
+2B
+4c
+8d
+16e
+32f
+64g
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=1 cols=5>64</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+Two against three polyrhythm.
+<p>The command:<pre>     minrhy <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=8 cols=14>**kern	**kern
+4c	4cc
+8d	12dd
+.	12ee
+8e	.
+.	12ff
+4f	4gg
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=1 cols=5>24</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test004></a><td width=80><b>Test&nbsp;004:</b></td><td width=1></td>
+<td>
+Three against five polyrhythm.
+<p>The command:<pre>     minrhy <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=14>**kern	**kern
+1d	1d
+3c	5c
+.	5c
+3c	.
+.	5c
+.	5c
+3c	.
+.	5c
+1d	1d
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=1 cols=5>15</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

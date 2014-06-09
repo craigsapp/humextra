@@ -1,0 +1,11 @@
+!!!test: Add termination to interpretive (hidden) wedges/hairpins.
+!!!command: autodynam %in > %out
+**dynam	**dynam
+>yy	p >yy
+)yy	)yy
+]yy	)yy
+<yy	)yy
+(yy	)yy
+(yy	]yy
+[yy	pp
+*-	*-

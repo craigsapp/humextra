@@ -1,0 +1,17 @@
+!!!test: Remove all data records.
+!!!command: ridx -D %in > %out
+!!
+!! global comment
+**a
+*bb
+! local comment
+*^
+!	!
+!x	!y
+!	!z
+*	*
+*v	*v
+*
+!
+*-
+!!!bib: bibliographic record

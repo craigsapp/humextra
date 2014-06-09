@@ -1,0 +1,15 @@
+!!!test: Process time signature tandem interpretations.
+!!!command: rscale -f 1/2 %in > %out
+**kern
+*M4/8
+8c
+4d
+8e
+=
+*M6/16
+8.f
+16g
+16a
+16b
+*-
+!!!rscale: 1/2

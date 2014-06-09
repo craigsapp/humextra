@@ -1,0 +1,18 @@
+
+%%%test: D major scale with mixed rhythms.
+
+{ [ \staff<1> 
+	\systemFormat<dx=1.0cm> 
+	\barFormat<style="system"> 
+	\set<autoEndBar="off"> 
+	\meter<"4/4"> 
+	\key<2> 
+		d1/4 d/4. f#/8 g/4 
+	\bar a/2 b/4 c#2 
+	\bar d1 _/2. 
+	\endBar 
+] } 
+
+
+
+

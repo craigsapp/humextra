@@ -14,7 +14,7 @@
 ##
 
 # targets which don't actually refer to files
-.PHONY : src-programs lib src-library include bin scripts update libupdate updatelib libup uplib
+.PHONY : src-programs lib src-library include bin scripts update libupdate updatelib libup uplib regression test tests regression-fails-only test-fail tests-fail
 
 ###########################################################################
 #                                                                         #
@@ -77,6 +77,16 @@ programs:
 	@echo compiling file $@
 	$(MAKE) -f Makefile.programs $@
 	
+
+test: regression
+tests: regression
+regression:
+	(cd example; $(MAKE) regression)
+
+test-fail: regression-fails-only
+tests-fail: regression-fails-only
+regression-fails-only:
+	(cd example; $(MAKE) regression-fails)
 
 #                                                                         #
 #                                                                         #

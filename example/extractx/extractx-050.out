@@ -1,0 +1,20 @@
+!!!test: Extract co-spine information for the third spine of music.
+!!!command: extractx -s '3,$c' %in > %out
+**kern	**serial
+*M4/4	*
+=1-	=1-
+4e	3
+.	.
+4e	10
+4.e	14
+.	.
+.	.
+8f#	20
+=2	=2
+4g#	23
+4a	27
+.	.
+4g#;	32
+8aL	36
+8g#J	39
+*-	*-

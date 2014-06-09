@@ -1,0 +1,18 @@
+!!!test: Convert **time data in seconds format into **tempo data, tempo given for each line.
+!!!command: time2tempo -af %in > %out
+**kern	**time	**tempo
+*	*u=sec	*
+*M3/4	*	*
+*MM144	*	*MM144
+4c	0	144
+4d	0.416667	144
+4e	0.833333	144
+=	=	=
+8d	1.25	144
+8f	1.45833	144
+8.a	1.66667	144
+16b	1.97917	144
+=	=	=
+2.cc	2.08333	144
+==	==	==
+*-	*-	*-

@@ -1,0 +1,7 @@
+!!!test: Reverse spines grouped by **num spines.
+!!!command: extractx -R '**num' %in > %out
+**num	**kern	**num	**kern	**num	**kern
+1	1c	2	1d	3	1e
+1	1c	2	1d	3	1e
+1	1c	2	1d	3	1e
+*-	*-	*-	*-	*-	*-

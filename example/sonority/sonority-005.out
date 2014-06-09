@@ -1,0 +1,14 @@
+!!!test: Display only the root of chords.
+!!!command: sonority -r %in > %out
+**qual
+C
+C
+C
+G
+G
+G
+D
+D
+D
+D
+*-

@@ -1,0 +1,15 @@
+!!!test: If first spines are <tt>**kern</tt> data, they skip if no spine indicated.
+!!!command: zscores %in > %out
+**numA
+!shift=5
+!scale=2.58199
+-1.54919
+-1.1619
+-0.774597
+-0.387298
+0
+0.387298
+0.774597
+1.1619
+1.54919
+*-

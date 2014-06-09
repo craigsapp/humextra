@@ -1,0 +1,15 @@
+!!!test: Transpose up a major 2nd from F lydian to G lydian.
+!!!command: transpose -k g -s 2 %in > %out
+**kern	**kern
+*	*Trd1c2
+*k[]	*k[f#c#]
+*F:lyd	*G:lyd
+4f	4g
+4g	4a
+4a	4b
+4b	4cc#
+4cc	4dd
+4dd	4ee
+4ee	4ff#
+4ff	4gg
+*-	*-

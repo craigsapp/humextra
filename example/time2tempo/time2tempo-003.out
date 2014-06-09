@@ -1,0 +1,18 @@
+!!!test: Converting millisecond data to tempo, with rounding of output tempo.
+!!!command: time2tempo -af %in > %out
+**kern	**time	**tempo
+*	*u=msec	*
+*M3/4	*	*
+*MM144	*	*MM144
+4c	0	144
+4d	417	144
+4e	833	144
+=	=	=
+8d	1250	144
+8f	1458	144
+8.a	1667	144
+16b	1979	144
+=	=	=
+2.cc	2083	144
+==	==	==
+*-	*-	*-

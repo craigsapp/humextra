@@ -1,0 +1,11 @@
+!!!test: Duplicate an extracted spine.
+!!!command: extractx -s 1,1-2,2-3,3 %in > %out
+**a	**b	**c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-

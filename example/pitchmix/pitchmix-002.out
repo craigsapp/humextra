@@ -1,0 +1,13 @@
+!!!test: Mix up the order of notes, transposing pitch-classes near original contour.
+!!!command: pitchmix -s 1 -n %in > %out
+**kern
+4A
+8b
+8d
+4cc
+8.e
+16ff
+4cc
+2gg
+*-
+!!!seed: 1

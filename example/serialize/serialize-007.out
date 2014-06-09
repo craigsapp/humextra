@@ -1,0 +1,25 @@
+!!!test: Merge all serialized spines into single data stream.
+!!!command: serialize -m %in > %out
+**a
+a
+a
+a
+a
+a
+a
+a
+b
+b
+b
+b
+b
+b
+b
+c
+c
+c
+c
+c
+c
+c
+*-

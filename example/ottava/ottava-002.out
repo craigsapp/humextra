@@ -1,0 +1,13 @@
+!!!test: Convert a sounding score into printed pitch.
+!!!command: ottava -v %in > %out
+**kern
+*8va/V
+4C
+4D
+4E
+4F
+4G
+4A
+4B
+*X8va/V
+*-

@@ -1,0 +1,12 @@
+!!!test: Transpose up a perfect 5th from C major to G major.
+!!!command: transpose -k g -s 2 -o 1 %in > %out
+**kern	**kern
+*k[]	*k[]
+*c:	*c:
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+*-	*-

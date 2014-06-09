@@ -1,0 +1,676 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: beat</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>beat examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>beat</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>beat</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Measure the beat position of each point in the score.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Measure the beat position of each point in the score, using fractions.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Measure the beat position of each point in the score, using ticks.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Append output data to input lines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test005><b>Test&nbsp;005:</b></a></td><td width=10><td>Prepend output data to input lines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test006><b>Test&nbsp;006:</b></a></td><td width=10><td>Sum the number of beats in each measure.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test007><b>Test&nbsp;007:</b></a></td><td width=10><td>Sum the number of beats in each measure and append analysis to input data.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test008><b>Test&nbsp;008:</b></a></td><td width=10><td>Measure the beat position in 6/8 meter, beat on the eighth note.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test009><b>Test&nbsp;009:</b></a></td><td width=10><td>Measure the beat position in 6/8 meter, beat on the dotted quarter-note.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test010><b>Test&nbsp;010:</b></a></td><td width=10><td>Start counting beats at 0 rather than 1.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test011><b>Test&nbsp;011:</b></a></td><td width=10><td>Analyze music in a compound meter, displaying as fractions.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Measure the beat position of each point in the score.
+<p>The command:<pre>     beat <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**kern
+*M2/4
+*MM120
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**beat
+*M2/4
+*MM120
+1
+2
+=2
+1
+2
+2.75
+=3
+1
+2
+=4
+1
+==
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+Measure the beat position of each point in the score, using fractions.
+<p>The command:<pre>     beat -f <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**kern
+*M2/4
+*MM120
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**beat
+*M2/4
+*MM120
+1
+2
+=2
+1
+2
+2+3/4
+=3
+1
+2
+=4
+1
+==
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+Measure the beat position of each point in the score, using ticks.
+<p>The command:<pre>     beat -t <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**kern
+*M2/4
+*MM120
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**beat
+*M2/4
+*MM120
+4
+8
+=2
+4
+8
+11
+=3
+4
+8
+=4
+4
+==
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test004></a><td width=80><b>Test&nbsp;004:</b></td><td width=1></td>
+<td>
+Append output data to input lines.
+<p>The command:<pre>     beat -a <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**kern
+*M2/4
+*MM120
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=14>**kern	**beat
+*M2/4	*M2/4
+*MM120	*MM120
+4c	1
+4d	2
+=2	=2
+4e	1
+8.f	2
+16g	2.75
+=3	=3
+4a	1
+4b	2
+=4	=4
+2cc	1
+==	==
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test005></a><td width=80><b>Test&nbsp;005:</b></td><td width=1></td>
+<td>
+Prepend output data to input lines.
+<p>The command:<pre>     beat -p <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**kern
+*M2/4
+*MM120
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=14>**beat	**kern
+*M2/4	*M2/4
+*MM120	*MM120
+1	4c
+2	4d
+=2	=2
+1	4e
+2	8.f
+2.75	16g
+=3	=3
+1	4a
+2	4b
+=4	=4
+1	2cc
+==	==
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test006></a><td width=80><b>Test&nbsp;006:</b></td><td width=1></td>
+<td>
+Sum the number of beats in each measure.
+<p>The command:<pre>     beat -s <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**kern
+*M2/4
+*MM120
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=12 cols=10>**beatsum
+*M2/4
+*MM120
+2
+=2
+2
+=3
+2
+=4
+2
+==
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test007></a><td width=80><b>Test&nbsp;007:</b></td><td width=1></td>
+<td>
+Sum the number of beats in each measure and append analysis to input data.
+<p>The command:<pre>     beat -sa <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**kern
+*M2/4
+*MM120
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=17>**kern	**beatsum
+*M2/4	*M2/4
+*MM120	*MM120
+4c	2
+4d	.
+=2	=2
+4e	2
+8.f	.
+16g	.
+=3	=3
+4a	2
+4b	.
+=4	=4
+2cc	2
+==	==
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test008></a><td width=80><b>Test&nbsp;008:</b></td><td width=1></td>
+<td>
+Measure the beat position in 6/8 meter, beat on the eighth note.
+<p>The command:<pre>     beat -u 8 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=18 cols=7>**kern
+*M6/8
+*MM120
+4.c
+4d
+8e
+=2
+4.f
+8g
+8a
+8b
+=3
+4.cc
+4.dd
+=4
+2.ee
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=18 cols=7>**beat
+*M6/8
+*MM120
+1
+4
+6
+=2
+1
+4
+5
+6
+=3
+1
+4
+=4
+1
+==
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test009></a><td width=80><b>Test&nbsp;009:</b></td><td width=1></td>
+<td>
+Measure the beat position in 6/8 meter, beat on the dotted quarter-note.
+<p>The command:<pre>     beat -u 4. <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=18 cols=7>**kern
+*M6/8
+*MM120
+4.c
+4d
+8e
+=2
+4.f
+8g
+8a
+8b
+=3
+4.cc
+4.dd
+=4
+2.ee
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=18 cols=8>**beat
+*M6/8
+*MM120
+2
+3
+3.66667
+=2
+1
+2
+2.33333
+2.66667
+=3
+1
+2
+=4
+1
+==
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test010></a><td width=80><b>Test&nbsp;010:</b></td><td width=1></td>
+<td>
+Start counting beats at 0 rather than 1.
+<p>The command:<pre>     beat -z <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**kern
+*M2/4
+*MM120
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=7>**beat
+*M2/4
+*MM120
+0
+1
+=2
+0
+1
+1.75
+=3
+0
+1
+=4
+0
+==
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test011></a><td width=80><b>Test&nbsp;011:</b></td><td width=1></td>
+<td>
+Analyze music in a compound meter, displaying as fractions.
+<p>The command:<pre>     beat -f -u 4. <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=18 cols=7>**kern
+*M6/8
+*MM120
+4.c
+4d
+8e
+=2
+4.f
+8g
+8a
+8b
+=3
+4.cc
+4.dd
+=4
+2.ee
+==
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=18 cols=7>**beat
+*M6/8
+*MM120
+2
+3
+3+2/3
+=2
+1
+2
+2+1/3
+2+2/3
+=3
+1
+2
+=4
+1
+==
+*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

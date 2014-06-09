@@ -1,0 +1,11 @@
+!!!test: Serialize only **a spines in file.
+!!!command: serialize -i '**a' %in > %out
+**a	**b	**c	**a
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+*-	*-	*-	*-

@@ -1,0 +1,739 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: zscores</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>zscores examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>zscores</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>zscores</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Basic behavior of the command: print only the processed spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>By default, the first spine will be processed. Other spines can be selected with <nobr><tt>-f</tt></nobr> option.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>If first spines are <tt>**kern</tt> data, they skip if no spine indicated.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Trying to access a field greater than exists in the file will select the last spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test005><b>Test&nbsp;005:</b></a></td><td width=10><td>The analysis data can be appended to the input data.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test006><b>Test&nbsp;006:</b></a></td><td width=10><td>The analysis data can be prepended to the input data.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test007><b>Test&nbsp;007:</b></a></td><td width=10><td>The input data can be extracted from the input file contents.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test008><b>Test&nbsp;008:</b></a></td><td width=10><td>Summary statistics of the input data can be extracted.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test009><b>Test&nbsp;009:</b></a></td><td width=10><td>The shift (mean) and scale (standard deviation) comments can be suppressed.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test010><b>Test&nbsp;010:</b></a></td><td width=10><td>The original data can replace corresponding data from input.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test011><b>Test&nbsp;011:</b></a></td><td width=10><td>An externally specified mean and standard deviation can be given.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test012><b>Test&nbsp;012:</b></a></td><td width=10><td>The original values can be reconstituted from the scale and shift values.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test013><b>Test&nbsp;013:</b></a></td><td width=10><td>Input data can be extracted with complete location description in input.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test014><b>Test&nbsp;014:</b></a></td><td width=10><td>Output data can also be extracted with complete location description in input.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test015><b>Test&nbsp;015:</b></a></td><td width=10><td>Using <i>sample standard deviation</i> rather than <i>population standard deviation</i>.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Basic behavior of the command: print only the processed spine.
+<p>The command:<pre>     zscores <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=14>**numA	**numB
+1	10
+2	20
+3	30
+4	40
+5	50
+6	60
+7	70
+8	80
+9	90
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=15>**numA
+!shift=5
+!scale=2.58199
+-1.54919
+-1.1619
+-0.774597
+-0.387298
+0
+0.387298
+0.774597
+1.1619
+1.54919
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+By default, the first spine will be processed. Other spines can be selected with <nobr><tt>-f</tt></nobr> option.
+<p>The command:<pre>     zscores -f 2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=14>**numA	**numB
+1	10
+2	20
+3	30
+4	40
+5	50
+6	60
+7	70
+8	80
+9	90
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=15>**numB
+!shift=50
+!scale=25.8199
+-1.54919
+-1.1619
+-0.774597
+-0.387298
+0
+0.387298
+0.774597
+1.1619
+1.54919
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+If first spines are <tt>**kern</tt> data, they skip if no spine indicated.
+<p>The command:<pre>     zscores <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=22>**kern	**numA	**numB
+4c	1	10
+4d	2	20
+4e	3	30
+4f	4	40
+4g	5	50
+4a	6	60
+4b	7	70
+4cc	8	80
+4dd	9	90
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=15>**numA
+!shift=5
+!scale=2.58199
+-1.54919
+-1.1619
+-0.774597
+-0.387298
+0
+0.387298
+0.774597
+1.1619
+1.54919
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test004></a><td width=80><b>Test&nbsp;004:</b></td><td width=1></td>
+<td>
+Trying to access a field greater than exists in the file will select the last spine.
+<p>The command:<pre>     zscores -f 1000 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=22>**kern	**numA	**numB
+4c	1	10
+4d	2	20
+4e	3	30
+4f	4	40
+4g	5	50
+4a	6	60
+4b	7	70
+4cc	8	80
+4dd	9	90
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=15>**numB
+!shift=50
+!scale=25.8199
+-1.54919
+-1.1619
+-0.774597
+-0.387298
+0
+0.387298
+0.774597
+1.1619
+1.54919
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test005></a><td width=80><b>Test&nbsp;005:</b></td><td width=1></td>
+<td>
+The analysis data can be appended to the input data.
+<p>The command:<pre>     zscores -a <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=7>**numA
+1
+2
+3
+4
+5
+6
+7
+8
+9
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=22>**numA	**numA
+!	!shift=5
+!	!scale=2.58199
+1	-1.54919
+2	-1.1619
+3	-0.774597
+4	-0.387298
+5	0
+6	0.387298
+7	0.774597
+8	1.1619
+9	1.54919
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test006></a><td width=80><b>Test&nbsp;006:</b></td><td width=1></td>
+<td>
+The analysis data can be prepended to the input data.
+<p>The command:<pre>     zscores -p <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=7>**numA
+1
+2
+3
+4
+5
+6
+7
+8
+9
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=17>**numA	**numA
+!shift=5	!
+!scale=2.58199	!
+-1.54919	1
+-1.1619	2
+-0.774597	3
+-0.387298	4
+0	5
+0.387298	6
+0.774597	7
+1.1619	8
+1.54919	9
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test007></a><td width=80><b>Test&nbsp;007:</b></td><td width=1></td>
+<td>
+The input data can be extracted from the input file contents.
+<p>The command:<pre>     zscores -i <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=14>**numA	**numB
+1	10
+2 3	20
+.	30
+4	40
+5	50
+6 7 8	60
+.	70
+.	80
+9	90
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=9 cols=5>1
+2
+3
+4
+5
+6
+7
+8
+9</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test008></a><td width=80><b>Test&nbsp;008:</b></td><td width=1></td>
+<td>
+Summary statistics of the input data can be extracted.
+<p>The command:<pre>     zscores -s <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=7>**numA
+1
+2 3
+.
+4
+5
+6 7 8
+.
+.
+9
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=2 cols=15>Mean:	5
+SD:	2.58199</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test009></a><td width=80><b>Test&nbsp;009:</b></td><td width=1></td>
+<td>
+The shift (mean) and scale (standard deviation) comments can be suppressed.
+<p>The command:<pre>     zscores -a -S <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=7>**numA
+1
+2
+3
+4
+5
+6
+7
+8
+9
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=11 cols=17>**numA	**numA
+1	-1.54919
+2	-1.1619
+3	-0.774597
+4	-0.387298
+5	0
+6	0.387298
+7	0.774597
+8	1.1619
+9	1.54919
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test010></a><td width=80><b>Test&nbsp;010:</b></td><td width=1></td>
+<td>
+The original data can replace corresponding data from input.
+<p>The command:<pre>     zscores -S -f 3 <font color=red><i>input-file</i></font> --replace > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=22>**kern	**numA	**numB
+4c	1	10
+4d	2	20
+4e	3	30
+4f	4	40
+4g	5	50
+4a	6	60
+4b	7	70
+4cc	8	80
+4dd	9	90
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=11 cols=25>**kern	**numA	**numB
+4c	1	-1.54919
+4d	2	-1.1619
+4e	3	-0.774597
+4f	4	-0.387298
+4g	5	0
+4a	6	0.387298
+4b	7	0.774597
+4cc	8	1.1619
+4dd	9	1.54919
+*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test011></a><td width=80><b>Test&nbsp;011:</b></td><td width=1></td>
+<td>
+An externally specified mean and standard deviation can be given.
+<p>The command:<pre>     zscores -m 6 -d 5 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=7>**numA
+1
+2
+3
+4
+5
+6
+6
+7
+9
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=9>**numA
+!shift=6
+!scale=5
+-1
+-0.8
+-0.6
+-0.4
+-0.2
+0
+0
+0.2
+0.6
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test012></a><td width=80><b>Test&nbsp;012:</b></td><td width=1></td>
+<td>
+The original values can be reconstituted from the scale and shift values.
+<p>The command:<pre>     zscores -S -m 6 -d 5 --reverse <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=13 cols=9>**numA
+!shift=6
+!scale=5
+-1
+-0.8
+-0.6
+-0.4
+-0.2
+0
+0
+0.2
+0.6
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=9>**numA
+!shift=6
+!scale=5
+1
+2
+3
+4
+5
+6
+6
+7
+9
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test013></a><td width=80><b>Test&nbsp;013:</b></td><td width=1></td>
+<td>
+Input data can be extracted with complete location description in input.
+<p>The command:<pre>     zscores <font color=red><i>input-file</i></font> -f 2 -i --full > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=26>**numA	**numB
+1 2	10
+.	20
+3 4 5	30 40 50
+6	60
+*^	*^
+7	8	70	80
+*v	*v	*	*
+*	*v	*v
+9	90
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=9 cols=25>10	1	1	0
+20	2	1	0
+30	3	1	0
+40	3	1	1
+50	3	1	2
+60	4	1	0
+70	6	2	0
+80	6	3	0
+90	9	1	0</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test014></a><td width=80><b>Test&nbsp;014:</b></td><td width=1></td>
+<td>
+Output data can also be extracted with complete location description in input.
+<p>The command:<pre>     zscores <font color=red><i>input-file</i></font> -f 2 --raw --full > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=26>**numA	**numB
+1 2	10
+.	20
+3 4 5	30 40 50
+6	60
+*^	*^
+7	8	70	80
+*v	*v	*	*
+*	*v	*v
+9	90
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=9 cols=33>-1.54919	1	1	0
+-1.1619	2	1	0
+-0.774597	3	1	0
+-0.387298	3	1	1
+0	3	1	2
+0.387298	4	1	0
+0.774597	6	2	0
+1.1619	6	3	0
+1.54919	9	1	0</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test015></a><td width=80><b>Test&nbsp;015:</b></td><td width=1></td>
+<td>
+Using <i>sample standard deviation</i> rather than <i>population standard deviation</i>.
+<p>The command:<pre>     zscores <font color=red><i>input-file</i></font> --sample > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=6>**num
+1
+2
+3
+4
+5
+6
+7
+8
+9
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=15>**num
+!shift=5
+!scale=2.73861
+-1.46059
+-1.09545
+-0.730297
+-0.365148
+0
+0.365148
+0.730297
+1.09545
+1.46059
+*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

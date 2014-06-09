@@ -1,0 +1,23 @@
+!!!test: Test of basic chord types in first inversion.
+!!!command: sonority %in > %out
+**kern
+r
+cc
+cc e
+cc e-
+cc e g
+cc e- g
+cc e- g-
+cc e g#
+cc e g b
+cc e g b-
+cc e- g b
+cc e- g b-
+cc e- g- b-
+cc e- g- b--
+cc e- b-
+cc e b-
+cc e f# a#
+cc e g a#
+cc e a#
+*-

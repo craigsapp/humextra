@@ -1,0 +1,21 @@
+!!!test: Chord qualities with a root on C.
+!!!command: harm2kern %in > %out
+**harm
+*C:
+!major:
+I
+!minor:
+i
+!diminished:
+io
+!augmented
+I+
+=
+! seventh chords
+! major major
+I7
+! minor major
+i7
+! major minor
+V7/IV
+*-

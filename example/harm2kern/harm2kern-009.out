@@ -1,0 +1,12 @@
+!!!test: Extracting only the root of the chord.
+!!!command: harm2kern -r %in > %out
+**root
+*C:
+CC
+DD
+EE
+FF
+GG
+AA
+BB
+*-

@@ -1,0 +1,18 @@
+!!!test: Start numbering measures with a number other than 1.
+!!!command: barnum -s 88 %in > %out
+**kern
+*k[f#]
+*M4/4
+*MM120
+=88-
+1g
+=89
+1dd
+=90
+1ff#
+=91
+1f#
+=92
+2g
+==
+*-

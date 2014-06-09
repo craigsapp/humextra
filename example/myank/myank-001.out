@@ -1,0 +1,12 @@
+!!!test: Extract measure 5 from score.
+!!!command: myank -m 5 %in > %out
+**kern
+*clefG2
+*k[]
+*C:
+*M4/4
+*MM120
+=5-
+1g
+=
+*-

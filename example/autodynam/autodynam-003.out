@@ -1,0 +1,6 @@
+!!!test: Add termination to crescendo on same line before next dynamics item.
+!!!command: autodynam %in > %out
+**dynam
+< [
+p
+*-

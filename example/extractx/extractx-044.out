@@ -1,0 +1,13 @@
+!!!test: Extract a non-existant secondary sub-spine using rests without interpretation marking "yy".
+!!!command: extractx -Y -s 1,2b,3 -mr %in > %out
+**num	**kern	**dynam
+1	{4r	p
+.	.	.
+1	4r	p
+1	4r	p
+1	4r;}	p
+1	{4r	p
+1	4r	p
+1	4r	p
+1	4r;}	p
+*-	*-	*-

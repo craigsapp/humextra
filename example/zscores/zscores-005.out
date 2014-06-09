@@ -1,0 +1,15 @@
+!!!test: The analysis data can be appended to the input data.
+!!!command: zscores -a %in > %out
+**numA	**numA
+!	!shift=5
+!	!scale=2.58199
+1	-1.54919
+2	-1.1619
+3	-0.774597
+4	-0.387298
+5	0
+6	0.387298
+7	0.774597
+8	1.1619
+9	1.54919
+*-	*-

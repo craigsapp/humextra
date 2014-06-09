@@ -1,0 +1,39 @@
+!!!test: Comments within spines are repeated in each extracted spine.
+!!!command: serialize %in > %out
+!! Comment before spines 
+!!!ONB: This comment is at the start of the file
+**a
+a
+a
+!! Comment within data
+a
+a
+!!!ONB: Reference record within data
+a
+a
+a
+*-
+**b
+b
+b
+!! Comment within data
+b
+b
+!!!ONB: Reference record within data
+b
+b
+b
+*-
+**c
+c
+c
+!! Comment within data
+c
+c
+!!!ONB: Reference record within data
+c
+c
+c
+*-
+!! Comment after spines end
+!!!ONB: This comment is at the end of the file

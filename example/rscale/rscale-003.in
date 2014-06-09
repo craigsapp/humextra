@@ -1,0 +1,9 @@
+!!!test: Return rhythms to original states using stored inverse factor.
+!!!command: rscale -o %in > %out
+**kern
+4c
+8d
+16e
+32f
+*-
+!!!rscale: 1/4

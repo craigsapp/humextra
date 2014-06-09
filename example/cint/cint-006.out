@@ -1,0 +1,6 @@
+!!!test: Enclose melodic intervals in curly braces.
+!!!command: cint -ty %in > %out
+**kern	**cint	**kern
+E	10 {-2 2} 12	g
+D	.	a
+*-	*-	*-

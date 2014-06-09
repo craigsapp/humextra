@@ -1,0 +1,16 @@
+!!!test: Convert an instrumental written part without transposition information into concert pitch form.
+!!!command: transpose -I -s2 -b-6 %in > %out
+**kern	**kern
+*	*ITrd1c2
+*Iflute	*Iclars
+*k[]	*k[]
+*C:	*C:
+4c	4c
+4d	4d
+4e	4e
+4f	4f
+4g	4g
+4a	4a
+4b	4b
+4cc	4cc
+*-	*-

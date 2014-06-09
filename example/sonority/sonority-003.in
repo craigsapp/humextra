@@ -1,0 +1,11 @@
+!!!test: Moving the root to different pitch classes.
+!!!command: sonority %in > %out
+**kern
+c e g
+d f# a
+e g# b
+f a cc
+g b dd
+a cc# ee
+b dd# ff#
+*-

@@ -1,0 +1,12 @@
+Reference test: Translate a simple example into melisma data.
+Reference command: kern2melisma %in > %out
+Info keysig no accidentals
+Info Tempo 60 MM per quarter note
+Note	0	1000	60
+Note	1000	2000	62
+Note	2000	3000	64
+Note	3000	4000	65
+Note	4000	4500	67
+Note	4500	5000	69
+Note	5000	6000	71
+Note	6000	8000	60

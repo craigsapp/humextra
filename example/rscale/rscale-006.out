@@ -1,0 +1,9 @@
+!!!test: Use a non-power-of-two scaling (convert to tripets).
+!!!command: rscale -f 2/3 %in > %out
+**kern
+3%2c
+3d
+6e
+12f
+*-
+!!!rscale: 2/3

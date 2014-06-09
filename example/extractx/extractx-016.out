@@ -1,0 +1,11 @@
+!!!test: Extract first and last spine in file.
+!!!command: extractx -s '1,$' %in > %out
+**a	**c
+a	c
+a	c
+a	c
+a	c
+a	c
+a	c
+a	c
+*-	*-

@@ -1,0 +1,18 @@
+!!!test: Adding measure numbers to non-**kern data.
+!!!command: barnum -s2 %in > %out
+**foo
+a
+.
+.
+=
+b
+=
+c
+c
+.
+c
+=
+d
+.
+==
+*-

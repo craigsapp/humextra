@@ -1,0 +1,236 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: time2tempo</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>time2tempo examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>time2tempo</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>time2tempo</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Convert **time data in seconds format into **tempo data, tempo given for each line.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Converting millisecond data to tempo, not rounding tempo values.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Converting millisecond data to tempo, with rounding of output tempo.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Convert **time data in seconds format into **tempo data, tempo given for each line.
+<p>The command:<pre>     time2tempo -af <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=16>**kern	**time
+*	*u=sec
+*M3/4	*
+*MM144	*
+4c	0
+4d	0.416667
+4e	0.833333
+=	=
+8d	1.25
+8f	1.45833
+8.a	1.66667
+16b	1.97917
+=	=
+2.cc	2.08333
+==	==
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=27>**kern	**time	**tempo
+*	*u=sec	*
+*M3/4	*	*
+*MM144	*	*MM144
+4c	0	144
+4d	0.416667	144
+4e	0.833333	144
+=	=	=
+8d	1.25	144
+8f	1.45833	144
+8.a	1.66667	144
+16b	1.97917	144
+=	=	=
+2.cc	2.08333	144
+==	==	==
+*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+Converting millisecond data to tempo, not rounding tempo values.
+<p>The command:<pre>     time2tempo -Ra <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=15>**kern	**time
+*	*u=msec
+*M3/4	*
+*MM144	*
+4c	0
+4d	417
+4e	833
+=	=
+8d	1250
+8f	1458
+8.a	1667
+16b	1979
+=	=
+2.cc	2083
+==	==
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=23>**kern	**time	**tempo
+*	*u=msec	*
+*M3/4	*	*
+*MM144	*	*MM144
+4c	0	143.885
+4d	417	144.231
+4e	833	143.885
+=	=	=
+8d	1250	144.231
+8f	1458	143.541
+8.a	1667	144.231
+16b	1979	.
+=	=	=
+2.cc	2083	.
+==	==	==
+*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+Converting millisecond data to tempo, with rounding of output tempo.
+<p>The command:<pre>     time2tempo -af <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=15>**kern	**time
+*	*u=msec
+*M3/4	*
+*MM144	*
+4c	0
+4d	417
+4e	833
+=	=
+8d	1250
+8f	1458
+8.a	1667
+16b	1979
+=	=
+2.cc	2083
+==	==
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=23>**kern	**time	**tempo
+*	*u=msec	*
+*M3/4	*	*
+*MM144	*	*MM144
+4c	0	144
+4d	417	144
+4e	833	144
+=	=	=
+8d	1250	144
+8f	1458	144
+8.a	1667	144
+16b	1979	144
+=	=	=
+2.cc	2083	144
+==	==	==
+*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

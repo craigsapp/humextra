@@ -1,0 +1,13 @@
+!!!test: Convert octave down markings into sounding pitch.
+!!!command: ottava -s %in > %out
+**kern
+*8ba
+4C
+4D
+4E
+4F
+4G
+4A
+4B
+*X8ba
+*-

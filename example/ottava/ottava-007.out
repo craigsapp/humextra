@@ -1,0 +1,13 @@
+!!!test: Music notated two octaves above printed pitch converted to sounding score.
+!!!command: ottava -s %in > %out
+**kern
+*15ma
+4ccc
+4ddd
+4eee
+4fff
+4ggg
+4aaa
+4bbb
+*X15ma
+*-

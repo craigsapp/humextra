@@ -1,0 +1,14 @@
+!!!test: Expand sections using the default thru label.
+!!!command: thrux %in > %out
+**letters
+*>[A,A,B,B]
+*>A
+a
+a
+a
+*>B
+b
+b
+b
+*-
+!! comment

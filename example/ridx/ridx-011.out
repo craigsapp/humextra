@@ -1,0 +1,21 @@
+!!!test: Remove all comments except for bibliographic records.
+!!!command: ridx -c %in > %out
+**a
+*bb
+a1
+.
+*^
+a2	a3
+.	.
+=	=
+a4	.
+.	a5
+*	*
+*v	*v
+a6
+*
+.
+=
+.
+*-
+!!!bib: bibliographic record

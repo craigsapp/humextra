@@ -1,0 +1,7 @@
+!!!test: Reverse the spine order in a Humdrum file
+!!!command: mvspine -r %in > %out
+**kern	**kern	**kern
+4cc	4c	4C
+4ee	4e	4E
+4gg	4g	4G
+*-	*-	*-

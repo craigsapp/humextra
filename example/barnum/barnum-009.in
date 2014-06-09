@@ -1,0 +1,18 @@
+!!!test: Removing measure numbers from non-**kern data.
+!!!command: barnum -r %in > %out
+**foo
+a
+.
+.
+=2
+b
+=3
+c
+c
+.
+c
+=4
+d
+.
+==
+*-

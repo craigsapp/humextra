@@ -1,0 +1,14 @@
+!!!test: Process timebase tandem interpretations.
+!!!command: rscale -f 2 %in > %out
+**kern
+*tb4
+2c
+.
+4d
+4e
+1f
+.
+.
+.
+*-
+!!!rscale: 2

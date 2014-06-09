@@ -1,0 +1,28 @@
+!!!test: Measure the tempo of music when a ritard mark is present with no rounding.
+!!!command: gettime -atR %in > %out
+**kern	**tempo
+*	*u=sec
+*M4/4	*
+*MM120	*MM120
+4c	120
+4c	120
+4c	120
+4c	120
+=	=
+*rit	*
+4c	120
+4c	110.04
+4c	100.908
+4c	92.5326
+=	=
+4c	84.8528
+4c	77.8104
+4c	71.3524
+4c	65.4305
+=	=
+*MM60	*MM60
+4c	60
+4c	60
+4c	60
+4c	60
+*-	*-

@@ -1,0 +1,15 @@
+!!!test: Extract sub-spines after primary spine.
+!!!command: serialize -m -p -t X %in | ridx -i > %out
+**kern	**kern
+4C	4c
+*	*^
+4D	4d	4cc
+4E	4e	4dd
+*	*v	*v
+4F	4f
+*	*^
+4G	4g	4ee
+4A	4a	4ff
+*	*v	*v
+4B	4b
+*-	*-

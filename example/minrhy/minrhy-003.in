@@ -1,0 +1,10 @@
+!!!test: Two against three polyrhythm.
+!!!command: minrhy %in > %out
+**kern	**kern
+4c	4cc
+8d	12dd
+.	12ee
+8e	.
+.	12ff
+4f	4gg
+*-	*-

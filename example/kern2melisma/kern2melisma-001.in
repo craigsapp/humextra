@@ -1,0 +1,20 @@
+!!!test: Translate a simple example into melisma data.
+!!!command: kern2melisma %in > %out
+**kern
+*clefG2
+*k[]
+*M2/4
+*MM60
+4c
+4d
+=2
+4e
+4f
+=3
+8g
+8a
+4b
+=4
+2c
+==
+*-

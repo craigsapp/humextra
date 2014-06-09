@@ -1,0 +1,21 @@
+!!!test: Measure the beat position of each point in the score.
+!!!command: hum2muse %in | grep -v TIMESTAMP > %out
+**kern
+*M4/4
+*clefG2
+=1-
+0e
+1e
+2e
+4e
+8e
+16e
+32e
+64e
+128e
+256e
+==
+*-
+!!!ENC: Craig Stuart Sapp
+!!!END: 2011/01/22
+!!muse2ps: =z21j^TMuseData Rhythmic Levels^

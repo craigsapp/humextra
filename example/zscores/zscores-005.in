@@ -1,0 +1,13 @@
+!!!test: The analysis data can be appended to the input data.
+!!!command: zscores -a %in > %out
+**numA
+1
+2
+3
+4
+5
+6
+7
+8
+9
+*-

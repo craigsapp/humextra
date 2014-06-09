@@ -1,0 +1,12 @@
+!!!test: Extract a spine which splits into subspines.
+!!!command: extractx -s 2 %in > %out
+**b
+b
+b
+*^
+b1	b2
+b1	b2
+b1	b2
+b1	b2
+b1	b2
+*-	*-

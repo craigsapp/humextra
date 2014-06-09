@@ -1,0 +1,22 @@
+!!!test: Numbering measures with repeat bars in the middle of the measure.
+!!!command: barnum %in > %out
+**kern
+*k[f#]
+*M4/4
+*MM120
+=-
+1g
+=
+2dd
+=!|:
+2ee
+=
+1ff#
+=
+2f#
+=:|!
+2e
+=
+2g
+==
+*-

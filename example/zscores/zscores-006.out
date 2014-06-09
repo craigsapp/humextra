@@ -1,0 +1,15 @@
+!!!test: The analysis data can be prepended to the input data.	!!!test: The analysis data can be prepended to the input data.
+!!!command: zscores -p %in > %out	!!!command: zscores -p %in > %out
+**numA	**numA
+!shift=5	!
+!scale=2.58199	!
+-1.54919	1
+-1.1619	2
+-0.774597	3
+-0.387298	4
+0	5
+0.387298	6
+0.774597	7
+1.1619	8
+1.54919	9
+*-	*-

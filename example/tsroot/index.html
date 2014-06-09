@@ -1,0 +1,251 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: tsroot</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>tsroot examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>tsroot</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>tsroot</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Basic root analysis of music prepended to input data.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Roman-numeral analysis of music prepended to input data.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Basic root analysis of music prepended to input data.
+<p>The command:<pre>     tsroot -p <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=33 cols=18>**kern	**kern
+*k[b-]	*k[b-]
+*F:	*F:
+*M4/4	*M4/4
+*MM120	*MM120
+=1-	=1-
+4.F	8r
+.	8c 8f 8a
+.	8c 8f 8a
+8A	8r
+4.c	8r
+.	8f 8a 8cc
+.	8f 8a 8cc
+8A	8r
+=2	=2
+8B-	8r
+8d	8f 8b- 8dd
+8f	8b- 8dd
+8d	8r
+4.c	8r
+.	8f 8a 8cc
+.	8f 8a 8cc
+8A	8r
+=3	=3
+8B-	8r
+8G	8e 8b- 8cc
+8C	4e 4b- 4cc
+8B-	.
+8A	8r
+8F	8c 8f 8a
+8C	4c 4f 4a
+8A	.
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=33 cols=30>**tsroot	**kern	**kern
+*k[b-]	*k[b-]	*k[b-]
+*	*F:	*F:
+*M4/4	*M4/4	*M4/4
+*MM120	*MM120	*MM120
+=1-	=1-	=1-
+F	4.F	8r
+F	.	8c 8f 8a
+F	.	8c 8f 8a
+F	8A	8r
+F	4.c	8r
+F	.	8f 8a 8cc
+F	.	8f 8a 8cc
+F	8A	8r
+=2	=2	=2
+B-	8B-	8r
+B-	8d	8f 8b- 8dd
+B-	8f	8b- 8dd
+B-	8d	8r
+F	4.c	8r
+F	.	8f 8a 8cc
+F	.	8f 8a 8cc
+F	8A	8r
+=3	=3	=3
+C	8B-	8r
+C	8G	8e 8b- 8cc
+C	8C	4e 4b- 4cc
+C	8B-	.
+F	8A	8r
+F	8F	8c 8f 8a
+F	8C	4c 4f 4a
+F	8A	.
+*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+Roman-numeral analysis of music prepended to input data.
+<p>The command:<pre>     tsroot -rp <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=33 cols=18>**kern	**kern
+*k[b-]	*k[b-]
+*F:	*F:
+*M4/4	*M4/4
+*MM120	*MM120
+=1-	=1-
+4.F	8r
+.	8c 8f 8a
+.	8c 8f 8a
+8A	8r
+4.c	8r
+.	8f 8a 8cc
+.	8f 8a 8cc
+8A	8r
+=2	=2
+8B-	8r
+8d	8f 8b- 8dd
+8f	8b- 8dd
+8d	8r
+4.c	8r
+.	8f 8a 8cc
+.	8f 8a 8cc
+8A	8r
+=3	=3
+8B-	8r
+8G	8e 8b- 8cc
+8C	4e 4b- 4cc
+8B-	.
+8A	8r
+8F	8c 8f 8a
+8C	4c 4f 4a
+8A	.
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=34 cols=38>**tshrm	**tsroot	**kern	**kern
+*k[b-]	*k[b-]	*k[b-]	*k[b-]
+*	*	*F:	*F:
+*M4/4	*M4/4	*M4/4	*M4/4
+*MM120	*MM120	*MM120	*MM120
+=1-	=1-	=1-	=1-
+*F:	*F:	*	*
+I	F	4.F	8r
+.	F	.	8c 8f 8a
+.	F	.	8c 8f 8a
+.	F	8A	8r
+.	F	4.c	8r
+.	F	.	8f 8a 8cc
+.	F	.	8f 8a 8cc
+.	F	8A	8r
+=2	=2	=2	=2
+IV	B-	8B-	8r
+.	B-	8d	8f 8b- 8dd
+.	B-	8f	8b- 8dd
+.	B-	8d	8r
+Ic	F	4.c	8r
+.	F	.	8f 8a 8cc
+.	F	.	8f 8a 8cc
+.	F	8A	8r
+=3	=3	=3	=3
+V7c	C	8B-	8r
+.	C	8G	8e 8b- 8cc
+.	C	8C	4e 4b- 4cc
+.	C	8B-	.
+I	F	8A	8r
+.	F	8F	8c 8f 8a
+.	F	8C	4c 4f 4a
+.	F	8A	.
+*-	*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

@@ -1,0 +1,18 @@
+!!!test: Add stems to notes in the bass clef
+!!!command: autostem %in > %out
+**kern
+*clefF4
+EE/
+FF/
+GG/
+AA/
+BB/
+C/
+D\
+E\
+F\
+G\
+A\
+B\
+c\
+*-

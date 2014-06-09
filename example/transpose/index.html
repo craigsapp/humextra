@@ -1,0 +1,698 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: transpose</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>transpose examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>transpose</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>transpose</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Transpose a C Major scale up a minor third.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Transpose a C Major scale to E Major.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Transpose a C Minor phrase up a major second.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Transpose a C Minor phrase to D Minor.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test005><b>Test&nbsp;005:</b></a></td><td width=10><td>Transpose only the second spine up a perfect fifth.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test006><b>Test&nbsp;006:</b></a></td><td width=10><td>Transpose up a perfect 5th from C major to G major.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test007><b>Test&nbsp;007:</b></a></td><td width=10><td>Transpose up a major 2nd from F lydian to G lydian.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test008><b>Test&nbsp;008:</b></a></td><td width=10><td>Transpose up a major third using diatonic/chromatic binomial interval.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test009><b>Test&nbsp;009:</b></a></td><td width=10><td>Transpose without inserting a *Tr interpretation.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test010><b>Test&nbsp;010:</b></a></td><td width=10><td>Transposing only one spine, printing *Tr indication only in that spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test011><b>Test&nbsp;011:</b></a></td><td width=10><td>Adding multiple *Tr transposition actions.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test012><b>Test&nbsp;012:</b></a></td><td width=10><td>Convert an instrumental written part without transposition information into concert pitch form.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Transpose a C Major scale up a minor third.
+<p>The command:<pre>     transpose -t m3 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**kern
+4c
+4d
+4e
+4f
+4g
+4a
+4b
+4cc
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=11 cols=8>**kern
+*Trd2c3
+4e-
+4f
+4g
+4a-
+4b-
+4cc
+4dd
+4ee-
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+Transpose a C Major scale to E Major.
+<p>The command:<pre>     transpose -k E <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=7>**kern
+*C:
+4c
+4d
+4e
+4f
+4g
+4a
+4b
+4cc
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=12 cols=8>**kern
+*Trd2c4
+*E:
+4e
+4f#
+4g#
+4a
+4b
+4cc#
+4dd#
+4ee
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+Transpose a C Minor phrase up a major second.
+<p>The command:<pre>     transpose -t M2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=31 cols=11>**kern
+*clefF4
+*k[b-e-a-]
+*c:
+*M3/4
+{(8Gu
+8E-)
+8BBn
+8C
+4AA-
+=2
+(8c
+8A-)
+8En
+8F
+4BBn
+=3
+(8d
+8A-)
+8En
+8F
+8GG
+8G
+=4
+(8F
+8E-)
+8BBn
+8C
+4CC}
+=
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=32 cols=8>**kern
+*Trd1c2
+*clefF4
+*k[b-]
+*d:
+*M3/4
+{(8Au
+8F)
+8C#
+8D
+4BB-
+=2
+(8d
+8B-)
+8F#
+8G
+4C#
+=3
+(8e
+8B-)
+8F#
+8G
+8AA
+8A
+=4
+(8G
+8F)
+8C#
+8D
+4DD}
+=
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test004></a><td width=80><b>Test&nbsp;004:</b></td><td width=1></td>
+<td>
+Transpose a C Minor phrase to D Minor.
+<p>The command:<pre>     transpose -k d <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=31 cols=11>**kern
+*clefF4
+*k[b-e-a-]
+*c:
+*M3/4
+{(8Gu
+8E-)
+8BBn
+8C
+4AA-
+=2
+(8c
+8A-)
+8En
+8F
+4BBn
+=3
+(8d
+8A-)
+8En
+8F
+8GG
+8G
+=4
+(8F
+8E-)
+8BBn
+8C
+4CC}
+=
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=32 cols=8>**kern
+*Trd1c2
+*clefF4
+*k[b-]
+*d:
+*M3/4
+{(8Au
+8F)
+8C#
+8D
+4BB-
+=2
+(8d
+8B-)
+8F#
+8G
+4C#
+=3
+(8e
+8B-)
+8F#
+8G
+8AA
+8A
+=4
+(8G
+8F)
+8C#
+8D
+4DD}
+=
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test005></a><td width=80><b>Test&nbsp;005:</b></td><td width=1></td>
+<td>
+Transpose only the second spine up a perfect fifth.
+<p>The command:<pre>     transpose -t P5 -s 2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=8 cols=14>**kern	**kern
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=9 cols=15>**kern	**kern
+*	*Trd4c7
+4c	4g
+4c	4g
+4c	4g
+4c	4g
+4c	4g
+4c	4g
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test006></a><td width=80><b>Test&nbsp;006:</b></td><td width=1></td>
+<td>
+Transpose up a perfect 5th from C major to G major.
+<p>The command:<pre>     transpose -k g -s 2 -o 1 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=14>**kern	**kern
+*k[]	*k[]
+*c:	*c:
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+4c	4c
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=11 cols=15>**kern	**kern
+*	*Trd4c7
+*k[]	*k[f#]
+*c:	*g:
+4c	4g
+4c	4g
+4c	4g
+4c	4g
+4c	4g
+4c	4g
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test007></a><td width=80><b>Test&nbsp;007:</b></td><td width=1></td>
+<td>
+Transpose up a major 2nd from F lydian to G lydian.
+<p>The command:<pre>     transpose -k g -s 2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=12 cols=14>**kern	**kern
+*k[]	*k[]
+*F:lyd	*F:lyd
+4f	4f
+4g	4g
+4a	4a
+4b	4b
+4cc	4cc
+4dd	4dd
+4ee	4ee
+4ff	4ff
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=16>**kern	**kern
+*	*Trd1c2
+*k[]	*k[f#c#]
+*F:lyd	*G:lyd
+4f	4g
+4g	4a
+4a	4b
+4b	4cc#
+4cc	4dd
+4dd	4ee
+4ee	4ff#
+4ff	4gg
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test008></a><td width=80><b>Test&nbsp;008:</b></td><td width=1></td>
+<td>
+Transpose up a major third using diatonic/chromatic binomial interval.
+<p>The command:<pre>     transpose -d 2 -c 4 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=12 cols=14>**kern	**kern
+*k[]	*k[]
+*C:	*C:
+4c	4e
+4d	4f
+4e	4g
+4f	4a
+4g	4b
+4a	4cc
+4b	4dd
+4cc	4ee
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=28>**kern	**kern
+*Trd2c4	*Trd2c4
+*k[f#c#g#d#]	*k[f#c#g#d#]
+*E:	*E:
+4e	4g#
+4f#	4a
+4g#	4b
+4a	4cc#
+4b	4dd#
+4cc#	4ee
+4dd#	4ff#
+4ee	4gg#
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test009></a><td width=80><b>Test&nbsp;009:</b></td><td width=1></td>
+<td>
+Transpose without inserting a *Tr interpretation.
+<p>The command:<pre>     transpose -b 23 -q -s2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=12 cols=14>**kern	**kern
+*k[]	*k[]
+*C:	*C:
+4c	4c
+4d	4d
+4e	4e
+4f	4f
+4g	4g
+4a	4a
+4b	4b
+4cc	4cc
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=12 cols=14>**kern	**kern
+*k[]	*k[f#]
+*C:	*G:
+4c	4g
+4d	4a
+4e	4b
+4f	4cc
+4g	4dd
+4a	4ee
+4b	4ff#
+4cc	4gg
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test010></a><td width=80><b>Test&nbsp;010:</b></td><td width=1></td>
+<td>
+Transposing only one spine, printing *Tr indication only in that spine.
+<p>The command:<pre>     transpose -b 17 -s2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=12 cols=14>**kern	**kern
+*k[]	*k[]
+*C:	*C:
+4c	4c
+4d	4d
+4e	4e
+4f	4f
+4g	4g
+4a	4a
+4b	4b
+4cc	4cc
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=15>**kern	**kern
+*	*Trd3c5
+*k[]	*k[b-]
+*C:	*F:
+4c	4f
+4d	4g
+4e	4a
+4f	4b-
+4g	4cc
+4a	4dd
+4b	4ee
+4cc	4ff
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test011></a><td width=80><b>Test&nbsp;011:</b></td><td width=1></td>
+<td>
+Adding multiple *Tr transposition actions.
+<p>The command:<pre>     transpose -b 6 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=13 cols=15>**kern	**kern
+*	*Trd3c5
+*k[]	*k[b-]
+*C:	*F:
+4c	4f
+4d	4g
+4e	4a
+4f	4b-
+4g	4cc
+4a	4dd
+4b	4ee
+4cc	4ff
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=22>**kern	**kern
+*Trd1c2	*Trd4c7
+*k[f#c#]	*k[f#]
+*D:	*G:
+4d	4g
+4e	4a
+4f#	4b
+4g	4cc
+4a	4dd
+4b	4ee
+4cc#	4ff#
+4dd	4gg
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test012></a><td width=80><b>Test&nbsp;012:</b></td><td width=1></td>
+<td>
+Convert an instrumental written part without transposition information into concert pitch form.
+<p>The command:<pre>     transpose -I -s2 -b-6 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=13 cols=16>**kern	**kern
+*Iflute	*Iclars
+*k[]	*k[f#c#]
+*C:	*D:
+4c	4d
+4d	4e
+4e	4f#
+4f	4g
+4g	4a
+4a	4b
+4b	4cc#
+4cc	4dd
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=14 cols=16>**kern	**kern
+*	*ITrd1c2
+*Iflute	*Iclars
+*k[]	*k[]
+*C:	*C:
+4c	4c
+4d	4d
+4e	4e
+4f	4f
+4g	4g
+4a	4a
+4b	4b
+4cc	4cc
+*-	*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

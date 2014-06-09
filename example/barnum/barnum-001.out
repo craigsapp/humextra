@@ -1,0 +1,29 @@
+!!!test: Basic test adding measure numbers to **kern data.
+!!!command: barnum %in > %out
+**kern
+*k[f#]
+*M4/4
+*MM120
+=1-
+4g
+4a
+4b
+4cc
+=2
+4dd
+4ee
+4ff#
+4gg
+=3
+4ff#
+8ee
+8dd
+8cc
+8b
+8a
+8g
+=4
+2f#
+2g
+==
+*-

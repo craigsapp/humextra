@@ -1,0 +1,18 @@
+!!!test: Only add stems to notes which do not have them.
+!!!command: autostem %in > %out
+**kern
+*clefG2
+c\
+d\
+e/
+f/
+g/
+a/
+b\
+cc\
+dd\
+ee\
+ff\
+gg/
+aa/
+*-

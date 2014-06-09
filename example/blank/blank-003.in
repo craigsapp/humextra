@@ -1,0 +1,12 @@
+!!!test: Generate a blank spine from some more complex Humdrum data.
+!!!command: blank %in > %out
+**foo
+!note
+a
+*^
+y	z
+.	x
+*v	*v
+b
+c
+*-

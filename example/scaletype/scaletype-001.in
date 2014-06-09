@@ -1,0 +1,20 @@
+!!!test: Measure the scale of a pentatonic example.
+!!!command: scaletype %in > %out
+**kern
+*clefG2
+*k[]
+*M2/4
+*MM60
+4c
+4d
+=2
+4f
+4g
+=3
+8a
+8cc
+4dd
+=4
+2ff
+==
+*-

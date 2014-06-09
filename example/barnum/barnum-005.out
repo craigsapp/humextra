@@ -1,0 +1,17 @@
+!!!test: Numbering measures when the initial barline is not indicated.
+!!!command: barnum %in > %out
+**kern
+*k[f#]
+*M4/4
+*MM120
+1g
+=2
+1dd
+=3
+1ff#
+=4
+1f#
+=5
+2g
+==
+*-

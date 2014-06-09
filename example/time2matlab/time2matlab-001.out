@@ -1,0 +1,20 @@
+%%%test: Basic test of converting to matlab data.
+%%%command: time2matlab %in > %out
+%% Data column information:
+%%%col01: abstime	(average absolute time in milliseconds of human beats)
+%%%col02: duration	(expected duration in ms based on score duration)
+%%%col03: note		(MIDI note number of pitch)
+%%%col04: metlev	(metric level: 1 = downbeat; 0 = beat; -1 = offbeat)
+%%%col05: measure	(measure number in which note occurs)
+%%%col06: absbeat	(absolute beat from starting beat at 0)
+%%%col07: trackno	(hand which plays the note: 1 = left; 2=right)
+%%%col08: mintime	(minimum absolute time of human beat for this note)
+%%%col09: maxtime	(maximum absolute time of human beat for this note)
+%%%col10: sd		(standard deviation of human beat time in ms.)
+1300	6700	36	1	3	0	1	0
+1300	400	60	1	3	0	2	0
+1700	700	61	-1	3	0.5	2	1
+2400	600	62	0	3	1	2	0
+3000	1000	64	0	3	2	2	0
+4000	4000	65	1	3	3	2	0
+8000	16000	67	0	4	4	2	0

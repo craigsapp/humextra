@@ -1,0 +1,8 @@
+!!!test: Serialize chord notes.
+!!!command: serialize -c %in > %out
+**kern
+4c 4e 4g
+4d 4f# 4a
+4e 4g# 4b
+4f 4a 4c
+*-

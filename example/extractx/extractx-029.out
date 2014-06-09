@@ -1,0 +1,6 @@
+!!!test: Extract a spine which does not start/stop at the same time as other spines.
+!!!command: extractx -i '**c' %in > %out
+**c
+c
+c
+*-

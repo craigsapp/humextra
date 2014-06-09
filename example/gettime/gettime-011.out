@@ -1,0 +1,25 @@
+!!!test: Interpolate between existing **time values to assign timings to intermediate points in the score.
+!!!command: gettime -i %in > %out
+**time	**kern
+*u=sec	*
+*	*M4/4
+0	4c
+0.25	4c
+0.5	4c
+0.75	4c
+=	=
+1	4c
+1.5	4c
+2	4c
+2.5	4c
+=	=
+3	4c
+3.75	4c
+4.5	4c
+5.25	4c
+=	=
+6	4c
+7.333	4c
+8.667	4c
+10	4c
+*-	*-

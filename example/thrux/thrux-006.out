@@ -1,0 +1,7 @@
+!!>[A,B,B,C]
+!!>norep[A,B,C]
+**label	**sline	**eline	**sbeat	**ebeat	**dur	**bar
+A	6	9	0	4	4	1
+B	10	13	4	8	4	2
+C	14	20	8	12	4	3
+*-	*-	*-	*-	*-	*-	*-

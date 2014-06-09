@@ -1,0 +1,33 @@
+!!!test: Transpose a C Minor phrase up a major second.
+!!!command: transpose -t M2 %in > %out
+**kern
+*clefF4
+*k[b-e-a-]
+*c:
+*M3/4
+{(8Gu
+8E-)
+8BBn
+8C
+4AA-
+=2
+(8c
+8A-)
+8En
+8F
+4BBn
+=3
+(8d
+8A-)
+8En
+8F
+8GG
+8G
+=4
+(8F
+8E-)
+8BBn
+8C
+4CC}
+=
+*-

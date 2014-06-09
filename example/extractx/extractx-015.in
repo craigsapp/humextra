@@ -1,0 +1,11 @@
+!!!test: Extract all **b spines.
+!!!command: extractx -i '**b' %in > %out
+**a	**b	**c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-

@@ -1,0 +1,23 @@
+!!!test: Example with four rule violations
+!!!command: chorck %in > %out
+**kern	**kern	**kern	**kern
+!bass	!tenor	!alto	!soprano
+*M4/4	*M4/4	*M4/4	*M4/4
+=1-	=1-	=1-	=1-
+2AA	2E	2A	2c#
+4E	4G#	4B	4e
+4AA	4E	4c#	4c#
+=2	=2	=2	=2
+4GG#	4B	4B	4d
+4AA	4A	4c#	4e
+4D	4B	4d	4f#
+4E	4B	4e	4g#
+=3	=3	=3	=3
+4C#	4A	4e	4a
+4AA	4E	4a	4cc#
+4D	4F#	4f#	4a
+4E	4E	4B	4g#
+=4	=4	=4	=4
+1AA	1A	1c#	1a
+==	==	==	==
+*-	*-	*-	*-

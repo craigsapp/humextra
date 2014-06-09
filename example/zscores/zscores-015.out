@@ -1,0 +1,15 @@
+!!!test: Using <i>sample standard deviation</i> rather than <i>population standard deviation</i>.
+!!!command: zscores %in --sample > %out
+**num
+!shift=5
+!scale=2.73861
+-1.46059
+-1.09545
+-0.730297
+-0.365148
+0
+0.365148
+0.730297
+1.09545
+1.46059
+*-

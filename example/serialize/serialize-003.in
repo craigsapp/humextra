@@ -1,0 +1,11 @@
+!!!test: Serialize all spines in file, alternate parameter style.
+!!!command: serialize -i a %in > %out
+**a	**b	**c	**a
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+a	b	c	a2
+*-	*-	*-	*-

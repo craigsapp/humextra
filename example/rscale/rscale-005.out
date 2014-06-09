@@ -1,0 +1,9 @@
+!!!test: Return rhtyhms to original encoding, coming from alternate states.
+!!!command: rscale -o %in > %out
+**kern
+00c
+0d
+1e
+2f
+*-
+!!!rscale-alt: 1/4

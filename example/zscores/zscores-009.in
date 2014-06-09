@@ -1,0 +1,13 @@
+!!!test: The shift (mean) and scale (standard deviation) comments can be suppressed.
+!!!command: zscores -a -S %in > %out
+**numA
+1
+2
+3
+4
+5
+6
+7
+8
+9
+*-

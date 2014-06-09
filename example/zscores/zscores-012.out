@@ -1,0 +1,15 @@
+!!!test: The original values can be reconstituted from the scale and shift values.
+!!!command: zscores -S -m 6 -d 5 --reverse %in > %out
+**numA
+!shift=6
+!scale=5
+1
+2
+3
+4
+5
+6
+6
+7
+9
+*-

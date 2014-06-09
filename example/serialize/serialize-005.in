@@ -1,0 +1,15 @@
+!!!test: Comments before/after spines occur only once in output.
+!!!command: serialize %in > %out
+!! Comment before spines start
+!!!ONB: This comment is at the start of the file
+**a	**b	**c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-
+!! Comment after spines end
+!!!ONB: This comment is at the end of the file

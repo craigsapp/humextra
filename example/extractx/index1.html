@@ -1,0 +1,967 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: extractx</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>extractx examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>extractx</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>extractx</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=index.html#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Extract the second spine in a file.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Extract the first two spines in a file.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Extract the first two spines in a file using a spine range.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Extract the last two spines in a file.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test005><b>Test&nbsp;005:</b></a></td><td width=10><td>Extract the last two spines in a file by range.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test006><b>Test&nbsp;006:</b></a></td><td width=10><td>Extract the first two spines in data, but reverse their ordering in output.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test007><b>Test&nbsp;007:</b></a></td><td width=10><td>Extract the first two spines in reverse using range.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test008><b>Test&nbsp;008:</b></a></td><td width=10><td>Extract the first two spines in reverse using range.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test009><b>Test&nbsp;009:</b></a></td><td width=10><td>Duplicate an extracted spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test010><b>Test&nbsp;010:</b></a></td><td width=10><td>Extract the penultimate spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test011><b>Test&nbsp;011:</b></a></td><td width=10><td>Extract the penultimate spine using alternate notation.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test012><b>Test&nbsp;012:</b></a></td><td width=10><td>Extract the spine before the penultimate spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test013><b>Test&nbsp;013:</b></a></td><td width=10><td>Exclude the second spine from being extracted.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test014><b>Test&nbsp;014:</b></a></td><td width=10><td>Remove all except the last two spines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test015><b>Test&nbsp;015:</b></a></td><td width=10><td>Extract all **b spines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test016><b>Test&nbsp;016:</b></a></td><td width=10><td>Extract first and last spine in file.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test017><b>Test&nbsp;017:</b></a></td><td width=10><td>Extract a spine which splits into subspines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test018><b>Test&nbsp;018:</b></a></td><td width=10><td>Extract a spine which splits into subspines, also duplicating it.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test019><b>Test&nbsp;019:</b></a></td><td width=10><td>Extract a complex spine, duplicating it as well as adding a blank spine between the copies to preserve valid humdrum syntax.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index.html#test020><b>Test&nbsp;020:</b></a></td><td width=10><td>Extract a spine which uses *x will remove the "x" in the output.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test021><b>Test&nbsp;021:</b></a></td><td width=10><td>Extracting a pair of spines with mutual *x manipulators will preserver *x markers.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test022><b>Test&nbsp;022:</b></a></td><td width=10><td>Extracting a pair of spines in reverse with mutual *x manipulators will preserver *x markers.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test023><b>Test&nbsp;023:</b></a></td><td width=10><td>Multiple copies of spines with *x manipulators will only preserve them if all repetitons of spines are paired to the left.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test024><b>Test&nbsp;024:</b></a></td><td width=10><td>Extract pair of *x spines and an extra copy of only one of the spines will cause the *x in the extra copy to be removed.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test025><b>Test&nbsp;025:</b></a></td><td width=10><td>Extracting spines which don't have matching *x will remove unmatched *x's.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test026><b>Test&nbsp;026:</b></a></td><td width=10><td>Reversing spines will always preserve *x manipulators.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test027><b>Test&nbsp;027:</b></a></td><td width=10><td>Extract two spines with splits and joins.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test028><b>Test&nbsp;028:</b></a></td><td width=10><td>Extract two spines with splits and joins which are not strictly allowed.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test029><b>Test&nbsp;029:</b></a></td><td width=10><td>Extract a spine which does not start/stop at the same time as other spines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test030><b>Test&nbsp;030:</b></a></td><td width=10><td>Extracting two partial spines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test031><b>Test&nbsp;031:</b></a></td><td width=10><td>Extracting two partial spines, preserving their relative positions.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test032><b>Test&nbsp;032:</b></a></td><td width=10><td>Reverse spines grouped by **kern data.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test033><b>Test&nbsp;033:</b></a></td><td width=10><td>Reverse spines grouped by **kern data, with the first spine not a **kern spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test034><b>Test&nbsp;034:</b></a></td><td width=10><td>Reverse spines grouped by **num spines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test035><b>Test&nbsp;035:</b></a></td><td width=10><td>Extract only the "a" portion of a spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test036><b>Test&nbsp;036:</b></a></td><td width=10><td>Extract only the "b" portion of a spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test037><b>Test&nbsp;037:</b></a></td><td width=10><td>Extract both the "a" and "b" sections into separate spines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test038><b>Test&nbsp;038:</b></a></td><td width=10><td>Extract both the "a" and "b" sections in reverse order.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test039><b>Test&nbsp;039:</b></a></td><td width=10><td>Expand all spines which contain a *^ manipulator.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test040><b>Test&nbsp;040:</b></a></td><td width=10><td>Extract a secondary sub-spine, duplicating primary spine data when no sub-spines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index2.html#test041><b>Test&nbsp;041:</b></a></td><td width=10><td>Extract a secondary sub-spine, using null tokens when no sub-spines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index2.html#test042><b>Test&nbsp;042:</b></a></td><td width=10><td>Extract a secondary sub-spine, using rests when no sub-spines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index2.html#test043><b>Test&nbsp;043:</b></a></td><td width=10><td>Extract a non-existant secondary sub-spine using rests.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index2.html#test044><b>Test&nbsp;044:</b></a></td><td width=10><td>Extract a non-existant secondary sub-spine using rests without interpretation marking "yy".</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index2.html#test045><b>Test&nbsp;045:</b></a></td><td width=10><td>Extract co-spine information along with a spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index2.html#test046><b>Test&nbsp;046:</b></a></td><td width=10><td>Extract co-spine information along with a spine.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index2.html#test047><b>Test&nbsp;047:</b></a></td><td width=10><td>Extract co-spine information along with a spine and its duplicate.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index2.html#test048><b>Test&nbsp;048:</b></a></td><td width=10><td>Extract co-spine information along with a spines in reverse order.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index2.html#test049><b>Test&nbsp;049:</b></a></td><td width=10><td>Extract co-spine information, ignoring rests in **kern data.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=index2.html#test050><b>Test&nbsp;050:</b></a></td><td width=10><td>Extract co-spine information for the third spine of music.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test021></a><td width=80><b>Test&nbsp;021:</b></td><td width=1></td>
+<td>
+Extracting a pair of spines with mutual *x manipulators will preserver *x markers.
+<p>The command:<pre>     extractx -s 1,2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=7 cols=19>**a	**b	**c
+a	b	c
+a	b	c
+*x	*x	*
+b	a	c
+b	a	c
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=7 cols=11>**a	**b
+a	b
+a	b
+*x	*x
+a	b
+a	b
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test022></a><td width=80><b>Test&nbsp;022:</b></td><td width=1></td>
+<td>
+Extracting a pair of spines in reverse with mutual *x manipulators will preserver *x markers.
+<p>The command:<pre>     extractx -s 2,1 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=7 cols=19>**a	**b	**c
+a	b	c
+a	b	c
+*x	*x	*
+b	a	c
+b	a	c
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=7 cols=11>**b	**a
+b	a
+b	a
+*x	*x
+b	a
+b	a
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test023></a><td width=80><b>Test&nbsp;023:</b></td><td width=1></td>
+<td>
+Multiple copies of spines with *x manipulators will only preserve them if all repetitons of spines are paired to the left.
+<p>The command:<pre>     extractx -s 2,1,1,1,2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=7 cols=19>**a	**b	**c
+a	b	c
+a	b	c
+*x	*x	*
+b	a	c
+b	a	c
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=7 cols=35>**b	**a	**a	**a	**b
+b	a	a	a	b
+b	a	a	a	b
+*x	*x	*	*	*
+b	a	a	a	b
+b	a	a	a	b
+*-	*-	*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test024></a><td width=80><b>Test&nbsp;024:</b></td><td width=1></td>
+<td>
+Extract pair of *x spines and an extra copy of only one of the spines will cause the *x in the extra copy to be removed.
+<p>The command:<pre>     extractx -s 2,1,2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=7 cols=19>**a	**b	**c
+a	b	c
+a	b	c
+*x	*x	*
+b	a	c
+b	a	c
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=7 cols=19>**b	**a	**b
+b	a	b
+b	a	b
+*x	*x	*
+b	a	b
+b	a	b
+*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test025></a><td width=80><b>Test&nbsp;025:</b></td><td width=1></td>
+<td>
+Extracting spines which don't have matching *x will remove unmatched *x's.
+<p>The command:<pre>     extractx -s 1,2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=19>**a	**b	**c
+a	b	c
+a	b	c
+*x	*x	*
+b	a	c
+b	a	c
+*x	*x	*
+a	b	c
+a	b	c
+*	*x	*x
+a	c	b
+a	c	b
+*	*x	*x
+a	b	c
+a	b	c
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=11>**a	**b
+a	b
+a	b
+*x	*x
+a	b
+a	b
+*x	*x
+a	b
+a	b
+*	*
+a	b
+a	b
+*	*
+a	b
+a	b
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test026></a><td width=80><b>Test&nbsp;026:</b></td><td width=1></td>
+<td>
+Reversing spines will always preserve *x manipulators.
+<p>The command:<pre>     extractx -s '$0-1' <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=19>**a	**b	**c
+a	b	c
+a	b	c
+*x	*x	*
+b	a	c
+b	a	c
+*x	*x	*
+a	b	c
+a	b	c
+*	*x	*x
+a	c	b
+a	c	b
+*	*x	*x
+a	b	c
+a	b	c
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=19>**c	**b	**a
+c	b	a
+c	b	a
+*	*x	*x
+c	b	a
+c	b	a
+*	*x	*x
+c	b	a
+c	b	a
+*x	*x	*
+c	b	a
+c	b	a
+*x	*x	*
+c	b	a
+c	b	a
+*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test027></a><td width=80><b>Test&nbsp;027:</b></td><td width=1></td>
+<td>
+Extract two spines with splits and joins.
+<p>The command:<pre>     extractx -s 2,4 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=13 cols=40>**a	**b	**c	**d
+a	b	c	d
+a	b	c	d
+*	*^	*	*^
+a	b1	b2	c	d1	d2
+a	b1	b2	c	d1	d2
+a	b1	b2	c	d1	d2
+*	*v	*v	*	*	*
+*	*	*	*v	*v
+a	b	c	d
+a	b	c	d
+*-	*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=12 cols=26>**b	**d
+b	d
+b	d
+*^	*^
+b1	b2	d1	d2
+b1	b2	d1	d2
+b1	b2	d1	d2
+*v	*v	*	*
+*	*v	*v
+b	d
+b	d
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test028></a><td width=80><b>Test&nbsp;028:</b></td><td width=1></td>
+<td>
+Extract two spines with splits and joins which are not strictly allowed.
+<p>The command:<pre>     extractx -s 2,4 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=12 cols=40>**a	**b	**c	**d
+a	b	c	d
+a	b	c	d
+*	*^	*	*^
+a	b1	b2	c	d1	d2
+a	b1	b2	c	d1	d2
+a	b1	b2	c	d1	d2
+*	*v	*v	*	*v	*v
+a	b	c	d
+a	b	c	d
+*-	*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=12 cols=26>**b	**d
+b	d
+b	d
+*^	*^
+b1	b2	d1	d2
+b1	b2	d1	d2
+b1	b2	d1	d2
+*v	*v	*	*
+*	*v	*v
+b	d
+b	d
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test029></a><td width=80><b>Test&nbsp;029:</b></td><td width=1></td>
+<td>
+Extract a spine which does not start/stop at the same time as other spines.
+<p>The command:<pre>     extractx -i '**c' <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=19>**a	**b
+a	b
+a	b
+*	*+
+*	*	**c
+a	b	c
+a	b	c
+*	*	*-
+a	b
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=4 cols=5>**c
+c
+c
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test030></a><td width=80><b>Test&nbsp;030:</b></td><td width=1></td>
+<td>
+Extracting two partial spines.
+<p>The command:<pre>     extractx -s 3,4 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=18 cols=19>**a	**b
+a	b
+a	b
+*	*+
+*	*	**c
+a	b	c
+a	b	c
+*	*	*-
+a	b
+a	b
+*	*+
+*	*	**d
+a	b	d
+a	b	d
+*	*	*-
+a	b
+a	b
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=8 cols=5>**c
+c
+c
+*-
+**d
+d
+d
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test031></a><td width=80><b>Test&nbsp;031:</b></td><td width=1></td>
+<td>
+Extracting two partial spines, preserving their relative positions.
+<p>The command:<pre>     extractx -s 0,3,4 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=18 cols=19>**a	**b
+a	b
+a	b
+*	*+
+*	*	**c
+a	b	c
+a	b	c
+*	*	*-
+a	b
+a	b
+*	*+
+*	*	**d
+a	b	d
+a	b	d
+*	*	*-
+a	b
+a	b
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=18 cols=11>**blank
+.
+.
+*
+*	**c
+.	c
+.	c
+*	*-
+.
+.
+*
+*	**d
+.	d
+.	d
+*	*-
+.
+.
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test032></a><td width=80><b>Test&nbsp;032:</b></td><td width=1></td>
+<td>
+Reverse spines grouped by **kern data.
+<p>The command:<pre>     extractx -r <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=5 cols=29>**kern	**num	**kern	**num
+1c	2	1d	3
+1c	2	1d	3
+1c	2	1d	3
+*-	*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=5 cols=29>**kern	**num	**kern	**num
+1d	3	1c	2
+1d	3	1c	2
+1d	3	1c	2
+*-	*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test033></a><td width=80><b>Test&nbsp;033:</b></td><td width=1></td>
+<td>
+Reverse spines grouped by **kern data, with the first spine not a **kern spine.
+<p>The command:<pre>     extractx -r <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=5 cols=37>**num	**kern	**num	**kern	**num
+1	1c	2	1d	3
+1	1c	2	1d	3
+1	1c	2	1d	3
+*-	*-	*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=5 cols=37>**num	**kern	**num	**kern	**num
+1	1d	3	1c	2
+1	1d	3	1c	2
+1	1d	3	1c	2
+*-	*-	*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test034></a><td width=80><b>Test&nbsp;034:</b></td><td width=1></td>
+<td>
+Reverse spines grouped by **num spines.
+<p>The command:<pre>     extractx -R '**num' <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=6 cols=40>**num	**kern	**num	**kern	**num	**kern
+1	1c	2	1d	3	1e
+1	1c	2	1d	3	1e
+1	1c	2	1d	3	1e
+*-	*-	*-	*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=6 cols=40>**num	**kern	**num	**kern	**num	**kern
+3	1e	2	1d	1	1c
+3	1e	2	1d	1	1c
+3	1e	2	1d	1	1c
+*-	*-	*-	*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test035></a><td width=80><b>Test&nbsp;035:</b></td><td width=1></td>
+<td>
+Extract only the "a" portion of a spine.
+<p>The command:<pre>     extractx -s 2a <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=8 cols=25>**a	**b	**c
+*	*^	*
+a	b1	b2	c
+a	b1	b2	c
+a	b1	b2	c
+a	b1	b2	c
+*	*v	*v	*
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=8 cols=5>**b
+*
+b1
+b1
+b1
+b1
+*
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test036></a><td width=80><b>Test&nbsp;036:</b></td><td width=1></td>
+<td>
+Extract only the "b" portion of a spine.
+<p>The command:<pre>     extractx -s 2b <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=8 cols=25>**a	**b	**c
+*	*^	*
+a	b1	b2	c
+a	b1	b2	c
+a	b1	b2	c
+a	b1	b2	c
+*	*v	*v	*
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=8 cols=5>**b
+*
+b2
+b2
+b2
+b2
+*
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test037></a><td width=80><b>Test&nbsp;037:</b></td><td width=1></td>
+<td>
+Extract both the "a" and "b" sections into separate spines.
+<p>The command:<pre>     extractx -s 1,2a,2b,3 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=8 cols=25>**a	**b	**c
+*	*^	*
+a	b1	b2	c
+a	b1	b2	c
+a	b1	b2	c
+a	b1	b2	c
+*	*v	*v	*
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=8 cols=27>**a	**b	**b	**c
+*	*	*	*
+a	b1	b2	c
+a	b1	b2	c
+a	b1	b2	c
+a	b1	b2	c
+*	*	*	*
+*-	*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test038></a><td width=80><b>Test&nbsp;038:</b></td><td width=1></td>
+<td>
+Extract both the "a" and "b" sections in reverse order.
+<p>The command:<pre>     extractx -s 2b,2a <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=8 cols=25>**a	**b	**c
+*	*^	*
+a	b1	b2	c
+a	b1	b2	c
+a	b1	b2	c
+a	b1	b2	c
+*	*v	*v	*
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=8 cols=11>**b	**b
+*	*
+b2	b1
+b2	b1
+b2	b1
+b2	b1
+*	*
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test039></a><td width=80><b>Test&nbsp;039:</b></td><td width=1></td>
+<td>
+Expand all spines which contain a *^ manipulator.
+<p>The command:<pre>     extractx -e <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=12 cols=33>**a	**b	**c
+*	*^	*
+a	b1	b2	c
+a	b1	b2	c
+*	*	*^	*
+a	b1	b21	b22	c
+a	b1	b21	b22	c
+*	*	*v	*v	*
+a	b1	b2	c
+a	b1	b2	c
+*	*v	*v	*
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=12 cols=33>**a	**b	**b	**c
+*	*	*	*
+a	b1	b2	c
+a	b1	b2	c
+*	*	*^	*
+a	b1	b21	b22	c
+a	b1	b21	b22	c
+*	*	*v	*v	*
+a	b1	b2	c
+a	b1	b2	c
+*	*	*	*
+*-	*-	*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test040></a><td width=80><b>Test&nbsp;040:</b></td><td width=1></td>
+<td>
+Extract a secondary sub-spine, duplicating primary spine data when no sub-spines.
+<p>The command:<pre>     extractx -s 2b <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=16 cols=33>**a	**b	**c
+a	b	c
+a	b	c
+*	*^	*
+a	b1	b2	c
+a	b1	b2	c
+*	*	*^	*
+a	b1	b21	b22	c
+a	b1	b21	b22	c
+*	*	*v	*v	*
+a	b1	b2	c
+a	b1	b2	c
+*	*v	*v	*
+a	b	c
+a	b	c
+*-	*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=16 cols=11>**b
+b
+b
+*
+b2
+b2
+*^
+b21	b22
+b21	b22
+*v	*v
+b2
+b2
+*
+b
+b
+*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

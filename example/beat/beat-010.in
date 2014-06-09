@@ -1,0 +1,18 @@
+!!!test: Start counting beats at 0 rather than 1.
+!!!command: beat -z %in > %out
+**kern
+*M2/4
+*MM120
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-

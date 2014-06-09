@@ -1,0 +1,20 @@
+!!!test: Extracting two partial spines, preserving their relative positions.
+!!!command: extractx -s 0,3,4 %in > %out
+**blank
+.
+.
+*
+*	**c
+.	c
+.	c
+*	*-
+.
+.
+*
+*	**d
+.	d
+.	d
+*	*-
+.
+.
+*-

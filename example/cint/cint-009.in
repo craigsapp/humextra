@@ -1,0 +1,6 @@
+!!!test: Place harmonic intervals in square brackets.
+!!!command: cint -q %in > %out
+**kern	**kern
+E	g
+D	a
+*-	*-

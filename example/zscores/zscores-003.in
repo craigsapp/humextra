@@ -1,0 +1,13 @@
+!!!test: If first spines are <tt>**kern</tt> data, they skip if no spine indicated.
+!!!command: zscores %in > %out
+**kern	**numA	**numB
+4c	1	10
+4d	2	20
+4e	3	30
+4f	4	40
+4g	5	50
+4a	6	60
+4b	7	70
+4cc	8	80
+4dd	9	90
+*-	*-	*-

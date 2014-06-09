@@ -1,0 +1,18 @@
+!!!test: Reversing spines will always preserve *x manipulators.
+!!!command: extractx -s '$0-1' %in > %out
+**c	**b	**a
+c	b	a
+c	b	a
+*	*x	*x
+c	b	a
+c	b	a
+*	*x	*x
+c	b	a
+c	b	a
+*x	*x	*
+c	b	a
+c	b	a
+*x	*x	*
+c	b	a
+c	b	a
+*-	*-	*-

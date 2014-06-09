@@ -1,0 +1,13 @@
+!!!test: Extract two spines with splits and joins which are not strictly allowed.
+!!!command: extractx -s 2,4 %in > %out
+**a	**b	**c	**d
+a	b	c	d
+a	b	c	d
+*	*^	*	*^
+a	b1	b2	c	d1	d2
+a	b1	b2	c	d1	d2
+a	b1	b2	c	d1	d2
+*	*v	*v	*	*v	*v
+a	b	c	d
+a	b	c	d
+*-	*-	*-	*-

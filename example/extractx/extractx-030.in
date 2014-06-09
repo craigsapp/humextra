@@ -1,0 +1,20 @@
+!!!test: Extracting two partial spines.
+!!!command: extractx -s 3,4 %in > %out
+**a	**b
+a	b
+a	b
+*	*+
+*	*	**c
+a	b	c
+a	b	c
+*	*	*-
+a	b
+a	b
+*	*+
+*	*	**d
+a	b	d
+a	b	d
+*	*	*-
+a	b
+a	b
+*-	*-

@@ -1,0 +1,34 @@
+!!!test: Transpose a C Minor phrase to D Minor.
+!!!command: transpose -k d %in > %out
+**kern
+*Trd1c2
+*clefF4
+*k[b-]
+*d:
+*M3/4
+{(8Au
+8F)
+8C#
+8D
+4BB-
+=2
+(8d
+8B-)
+8F#
+8G
+4C#
+=3
+(8e
+8B-)
+8F#
+8G
+8AA
+8A
+=4
+(8G
+8F)
+8C#
+8D
+4DD}
+=
+*-

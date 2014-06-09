@@ -1,0 +1,12 @@
+!!!test: Adding duration information to the **kern output.
+!!!command: harm2kern %in > %out
+**kern
+*C:
+4C 4e 4g
+8D 8f 8a
+8E 8g 8b
+4.F 4.a 4.cc
+8G 8b 8dd
+2A 2cc 2ee
+1B 1dd 1ff
+*-

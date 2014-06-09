@@ -1,0 +1,13 @@
+!!!test: Transpose a C Major scale to E Major.
+!!!command: transpose -k E %in > %out
+**kern
+*C:
+4c
+4d
+4e
+4f
+4g
+4a
+4b
+4cc
+*-

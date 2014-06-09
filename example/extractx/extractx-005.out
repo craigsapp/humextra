@@ -1,0 +1,11 @@
+!!!test: Extract the last two spines in a file by range.
+!!!command: extractx -s '$-1-$' %in > %out
+**b	**c
+b	c
+b	c
+b	c
+b	c
+b	c
+b	c
+b	c
+*-	*-

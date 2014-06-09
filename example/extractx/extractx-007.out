@@ -1,0 +1,11 @@
+!!!test: Extract the first two spines in reverse using range.
+!!!command: extractx -s 2-1 %in > %out
+**b	**a
+b	a
+b	a
+b	a
+b	a
+b	a
+b	a
+b	a
+*-	*-

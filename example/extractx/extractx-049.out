@@ -1,0 +1,8 @@
+!!!test: Extract co-spine information, ignoring rests in **kern data.
+!!!command: extractx -s '2,$,$c' -Mr %in > %out
+**kern	**cos	**cos
+4r	C E	.
+4f 4g	F G	F G
+4r	.	.
+4b	A B	B
+*-	*-	*-

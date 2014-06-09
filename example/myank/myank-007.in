@@ -1,0 +1,30 @@
+!!!test: Extract music with sub-spine changes.
+!!!command: myank -m 2,5 %in > %out
+**kern
+*clefG2
+*k[]
+*a:
+*MM120
+=1=
+1c
+=2
+1B
+=2
+1A
+=3
+*^
+1G	1g
+=4	=4
+2F#	2f#
+*MM132	*MM132
+*clefF4	*clefF4
+2F	2f
+=5	=5
+1E	1e
+=6	=6
+1D	1d
+*v	*v
+=7
+1C
+==
+*-

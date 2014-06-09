@@ -1,0 +1,18 @@
+!!!test: Override fixed stem directions
+!!!command: autostem -O %in > %out
+**kern
+*clefF4
+EE/
+FF/
+GG/
+AA/
+BB/
+C/
+D\
+E\
+F\
+G\
+A\
+B\
+c\
+*-

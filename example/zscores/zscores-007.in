@@ -1,0 +1,13 @@
+!!!test: The input data can be extracted from the input file contents.
+!!!command: zscores -i %in > %out
+**numA	**numB
+1	10
+2 3	20
+.	30
+4	40
+5	50
+6 7 8	60
+.	70
+.	80
+9	90
+*-	*-

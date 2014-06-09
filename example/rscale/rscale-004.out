@@ -1,0 +1,10 @@
+!!!test: Apply stored alternate scaling.
+!!!command: rscale -a %in > %out
+**kern
+1c
+2d
+4e
+8f
+*-
+!!!rscale-alt: 1/4
+!!!rscale: 1/4

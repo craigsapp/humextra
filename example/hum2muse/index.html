@@ -1,0 +1,152 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: hum2muse</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>hum2muse examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>hum2muse</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>hum2muse</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Measure the beat position of each point in the score.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Measure the beat position of each point in the score.
+<p>The command:<pre>     hum2muse <font color=red><i>input-file</i></font> | grep -v TIMESTAMP > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=20 cols=40>**kern
+*M4/4
+*clefG2
+=1-
+0e
+1e
+2e
+4e
+8e
+16e
+32e
+64e
+128e
+256e
+==
+*-
+!!!ENC: Craig Stuart Sapp
+!!!END: 2011/01/22
+!!muse2ps: =z21j^TMuseData Rhythmic Levels^</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=38 cols=40>@muse2psv1==z21j^TMuseData Rhythmic Levels^
+Header Record 1: optional copyright notice
+Header Record 2: optional file identification
+01/22/2011 Craig Stuart Sapp
+WK#:1 MV#:1
+Header Record 6: source
+Header Record 7: work title
+Header Record 8: movement title
+
+Header Record 10
+Group memberships: score
+score: part 1 of 1
+$  Q:64   T:4/4   C:4
+E4   512      1 B
+E4   256      1 w
+E4   128      1 h
+E4    64      1 q
+E4    32      1 e
+E4    16      1 s
+E4     8      1 t
+E4     4      1 x
+E4     2      1 y
+E4     1      1 z
+mheavy2
+@@START: HUMDRUMREFERENCE
+@@TOP
+@!!!test: Measure the beat position of each point in the score.
+@@BOTTOM
+@!!!ENC: Craig Stuart Sapp
+@!!!END: 2011/01/22
+@@EXTRA
+@!!!VTS: 1929973808
+@!!!VTS-data: 1493593985
+@@END: HUMDRUMREFERENCE
+/END
+/eof
+//</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

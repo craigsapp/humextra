@@ -1,0 +1,6 @@
+!!!test: Separate intervals by commas.
+!!!command: cint -C %in > %out
+**kern	**cint	**kern
+E	10,-2,12	g
+D	.	a
+*-	*-	*-

@@ -1,0 +1,10 @@
+!!!test: Extract both the "a" and "b" sections in reverse order.
+!!!command: extractx -s 2b,2a %in > %out
+**b	**b
+*	*
+b2	b1
+b2	b1
+b2	b1
+b2	b1
+*	*
+*-	*-

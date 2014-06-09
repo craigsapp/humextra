@@ -1,0 +1,9 @@
+!!!test: If all notes are the same length, then that is the minimum rhythmic unit.
+!!!command: minrhy %in > %out
+**kern
+4c
+4d
+4e
+4f
+4g
+*-

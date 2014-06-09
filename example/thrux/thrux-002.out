@@ -1,0 +1,24 @@
+!!!test: Expand sections using the default label extracted in reverse order.
+!!!command: thrux %in > %out
+**letters
+*thru
+*>C
+c
+c
+c
+*>C
+c
+c
+c
+*>B
+b
+b
+*>B
+b
+b
+*>A
+a
+*>A
+a
+*-
+!! comment

@@ -1,0 +1,18 @@
+!!!test: Extract a secondary sub-spine, duplicating primary spine data when no sub-spines.
+!!!command: extractx -s 2b %in > %out
+**b
+b
+b
+*
+b2
+b2
+*^
+b21	b22
+b21	b22
+*v	*v
+b2
+b2
+*
+b
+b
+*-

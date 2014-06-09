@@ -1,0 +1,15 @@
+!!!test: Extract multiple measures, not including ending barline.
+!!!command: myank -m 2,4,6 -B %in > %out
+**kern
+*clefG2
+*k[]
+*C:
+*M4/4
+*MM120
+=2-
+1d
+=4
+1f
+=6
+1a
+*-

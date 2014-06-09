@@ -1,0 +1,18 @@
+!!!test: Extracting spines which don't have matching *x will remove unmatched *x's.
+!!!command: extractx -s 1,2 %in > %out
+**a	**b
+a	b
+a	b
+*x	*x
+a	b
+a	b
+*x	*x
+a	b
+a	b
+*	*
+a	b
+a	b
+*	*
+a	b
+a	b
+*-	*-

@@ -1,0 +1,11 @@
+!!!test: Extract the first two spines in a file using a spine range.
+!!!command: extractx -s 1-2 %in > %out
+**a	**b	**c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-

@@ -1,0 +1,907 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: ridx</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>ridx examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>ridx</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>ridx</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Remove all data records.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Remove all null data records.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Remove all global comments.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Remove all null global comments.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test005><b>Test&nbsp;005:</b></a></td><td width=10><td>Remove all interpretation records.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test006><b>Test&nbsp;006:</b></a></td><td width=10><td>Remove all null interpretation records.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test007><b>Test&nbsp;007:</b></a></td><td width=10><td>Remove all local comments.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test008><b>Test&nbsp;008:</b></a></td><td width=10><td>Remove all null local comments.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test009><b>Test&nbsp;009:</b></a></td><td width=10><td>Remove all tandem interpretations.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test010><b>Test&nbsp;010:</b></a></td><td width=10><td>Remove all comments.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test011><b>Test&nbsp;011:</b></a></td><td width=10><td>Remove all comments except for bibliographic records.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test012><b>Test&nbsp;012:</b></a></td><td width=10><td>Remove all data lines containing measures.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Remove all data records.
+<p>The command:<pre>     ridx -D <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=15 cols=29>!!
+!! global comment
+**a
+*bb
+! local comment
+*^
+!	!
+!x	!y
+!	!z
+*	*
+*v	*v
+*
+!
+*-
+!!!bib: bibliographic record</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+Remove all null data records.
+<p>The command:<pre>     ridx -d <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=22 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+! local comment
+*^
+a2	a3
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+=
+!
+*-
+!!!bib: bibliographic record</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+Remove all global comments.
+<p>The command:<pre>     ridx -G <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=23 cols=16>**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test004></a><td width=80><b>Test&nbsp;004:</b></td><td width=1></td>
+<td>
+Remove all null global comments.
+<p>The command:<pre>     ridx -g <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=25 cols=29>!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test005></a><td width=80><b>Test&nbsp;005:</b></td><td width=1></td>
+<td>
+Remove all interpretation records.
+<p>The command:<pre>     ridx -I <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=19 cols=29>!!
+!! global comment
+a1
+.
+! local comment
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+a6
+.
+=
+!
+.
+!!!bib: bibliographic record</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test006></a><td width=80><b>Test&nbsp;006:</b></td><td width=1></td>
+<td>
+Remove all null interpretation records.
+<p>The command:<pre>     ridx -i <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=24 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*v	*v
+a6
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test007></a><td width=80><b>Test&nbsp;007:</b></td><td width=1></td>
+<td>
+Remove all local comments.
+<p>The command:<pre>     ridx -L <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=21 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+*^
+a2	a3
+.	.
+=	=
+a4	.
+.	a5
+*	*
+*v	*v
+a6
+*
+.
+=
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test008></a><td width=80><b>Test&nbsp;008:</b></td><td width=1></td>
+<td>
+Remove all null local comments.
+<p>The command:<pre>     ridx -l <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=24 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test009></a><td width=80><b>Test&nbsp;009:</b></td><td width=1></td>
+<td>
+Remove all tandem interpretations.
+<p>The command:<pre>     ridx -T <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=23 cols=29>!!
+!! global comment
+**a
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*v	*v
+a6
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test010></a><td width=80><b>Test&nbsp;010:</b></td><td width=1></td>
+<td>
+Remove all comments.
+<p>The command:<pre>     ridx -C <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=18 cols=10>**a
+*bb
+a1
+.
+*^
+a2	a3
+.	.
+=	=
+a4	.
+.	a5
+*	*
+*v	*v
+a6
+*
+.
+=
+.
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test011></a><td width=80><b>Test&nbsp;011:</b></td><td width=1></td>
+<td>
+Remove all comments except for bibliographic records.
+<p>The command:<pre>     ridx -c <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=19 cols=29>**a
+*bb
+a1
+.
+*^
+a2	a3
+.	.
+=	=
+a4	.
+.	a5
+*	*
+*v	*v
+a6
+*
+.
+=
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test012></a><td width=80><b>Test&nbsp;012:</b></td><td width=1></td>
+<td>
+Remove all data lines containing measures.
+<p>The command:<pre>     ridx -M <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=26 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+=	=
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+=
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=24 cols=29>!!
+!! global comment
+**a
+*bb
+a1
+.
+! local comment
+*^
+a2	a3
+.	.
+!	!
+!x	!y
+a4	.
+.	a5
+!	!z
+*	*
+*v	*v
+a6
+*
+.
+!
+.
+*-
+!!!bib: bibliographic record</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

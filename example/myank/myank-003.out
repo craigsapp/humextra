@@ -1,0 +1,20 @@
+!!!test: Extract a range of measures in reversed order.
+!!!command: myank -m 6-2 %in > %out
+**kern
+*clefG2
+*k[]
+*C:
+*M4/4
+*MM120
+=6-
+1a
+=5
+1g
+=4
+1f
+=3
+1e
+=2
+1d
+=
+*-

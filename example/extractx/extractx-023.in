@@ -1,0 +1,9 @@
+!!!test: Multiple copies of spines with *x manipulators will only preserve them if all repetitons of spines are paired to the left.
+!!!command: extractx -s 2,1,1,1,2 %in > %out
+**a	**b	**c
+a	b	c
+a	b	c
+*x	*x	*
+b	a	c
+b	a	c
+*-	*-	*-

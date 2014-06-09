@@ -1,0 +1,14 @@
+!!!test: Recover original rhythms from exotice rhythmic values.
+!!!command: rscale -o %in > %out
+**kern
+*M4/4
+4c
+2d
+4e
+=
+*M6/8
+4.f
+8g
+8a
+8b
+*-

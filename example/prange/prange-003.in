@@ -1,0 +1,12 @@
+!!!test: Count pitches with duration weighting
+!!!command: prange -d %in > %out
+**kern
+4c
+8d
+8e
+4f
+8g
+8a
+4b
+2cc
+*-

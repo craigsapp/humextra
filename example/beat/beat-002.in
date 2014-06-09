@@ -1,0 +1,18 @@
+!!!test: Measure the beat position of each point in the score, using fractions.
+!!!command: beat -f %in > %out
+**kern
+*M2/4
+*MM120
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-

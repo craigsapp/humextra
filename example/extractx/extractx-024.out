@@ -1,0 +1,9 @@
+!!!test: Extract pair of *x spines and an extra copy of only one of the spines will cause the *x in the extra copy to be removed.
+!!!command: extractx -s 2,1,2 %in > %out
+**b	**a	**b
+b	a	b
+b	a	b
+*x	*x	*
+b	a	b
+b	a	b
+*-	*-	*-

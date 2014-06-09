@@ -1,0 +1,648 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: rscale</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>rscale examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>rscale</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>rscale</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Reduce the rhythmic values by 1/2 of their duration.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Increase rhythmic values to twice their original duration.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Return rhythms to original states using stored inverse factor.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Apply stored alternate scaling.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test005><b>Test&nbsp;005:</b></a></td><td width=10><td>Return rhtyhms to original encoding, coming from alternate states.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test006><b>Test&nbsp;006:</b></a></td><td width=10><td>Use a non-power-of-two scaling (convert to tripets).</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test007><b>Test&nbsp;007:</b></a></td><td width=10><td>Process timebase tandem interpretations.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test008><b>Test&nbsp;008:</b></a></td><td width=10><td>Process time signature tandem interpretations.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test009><b>Test&nbsp;009:</b></a></td><td width=10><td>Apply a wierd rhythmic scaling.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test010><b>Test&nbsp;010:</b></a></td><td width=10><td>Recover original rhythms from exotice rhythmic values.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test011><b>Test&nbsp;011:</b></a></td><td width=10><td>Scale rhythms in **recip spines.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test012><b>Test&nbsp;012:</b></a></td><td width=10><td>Recover original rhythms in **recip spines.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Reduce the rhythmic values by 1/2 of their duration.
+<p>The command:<pre>     rscale -f 1/2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=20 cols=9>**kern
+000c
+00d
+0e
+1f
+2g
+4a
+8b
+16cc
+32dd
+64ee
+128ff
+256gg
+512aa
+1024bb
+2048ccc
+4096ddd
+8192eee
+16384fff
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=21 cols=15>**kern
+00c
+0d
+1e
+2f
+4g
+8a
+16b
+32cc
+64dd
+128ee
+256ff
+512gg
+1024aa
+2048bb
+4096ccc
+8192ddd
+16384eee
+32768fff
+*-
+!!!rscale: 1/2</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+Increase rhythmic values to twice their original duration.
+<p>The command:<pre>     rscale -f 2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=20 cols=9>**kern
+000c
+00d
+0e
+1f
+2g
+4a
+8b
+16cc
+32dd
+64ee
+128ff
+256gg
+512aa
+1024bb
+2048ccc
+4096ddd
+8192eee
+16384fff
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=21 cols=13>**kern
+1%16c
+000d
+00e
+0f
+1g
+2a
+4b
+8cc
+16dd
+32ee
+64ff
+128gg
+256aa
+512bb
+1024ccc
+2048ddd
+4096eee
+8192fff
+*-
+!!!rscale: 2</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+Return rhythms to original states using stored inverse factor.
+<p>The command:<pre>     rscale -o <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=7 cols=15>**kern
+4c
+8d
+16e
+32f
+*-
+!!!rscale: 1/4</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=6 cols=7>**kern
+1c
+2d
+4e
+8f
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test004></a><td width=80><b>Test&nbsp;004:</b></td><td width=1></td>
+<td>
+Apply stored alternate scaling.
+<p>The command:<pre>     rscale -a <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=7 cols=19>**kern
+00c
+0d
+1e
+2f
+*-
+!!!rscale-alt: 1/4</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=8 cols=19>**kern
+1c
+2d
+4e
+8f
+*-
+!!!rscale-alt: 1/4
+!!!rscale: 1/4</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test005></a><td width=80><b>Test&nbsp;005:</b></td><td width=1></td>
+<td>
+Return rhtyhms to original encoding, coming from alternate states.
+<p>The command:<pre>     rscale -o <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=8 cols=19>**kern
+1c
+2d
+4e
+8f
+*-
+!!!rscale-alt: 1/4
+!!!rscale: 1/4</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=7 cols=19>**kern
+00c
+0d
+1e
+2f
+*-
+!!!rscale-alt: 1/4</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test006></a><td width=80><b>Test&nbsp;006:</b></td><td width=1></td>
+<td>
+Use a non-power-of-two scaling (convert to tripets).
+<p>The command:<pre>     rscale -f 2/3 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=6 cols=7>**kern
+1c
+2d
+4e
+8f
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=7 cols=15>**kern
+3%2c
+3d
+6e
+12f
+*-
+!!!rscale: 2/3</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test007></a><td width=80><b>Test&nbsp;007:</b></td><td width=1></td>
+<td>
+Process timebase tandem interpretations.
+<p>The command:<pre>     rscale -f 2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=11 cols=7>**kern
+*tb8
+4c
+.
+8d
+8e
+2f
+.
+.
+.
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=12 cols=13>**kern
+*tb4
+2c
+.
+4d
+4e
+1f
+.
+.
+.
+*-
+!!!rscale: 2</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test008></a><td width=80><b>Test&nbsp;008:</b></td><td width=1></td>
+<td>
+Process time signature tandem interpretations.
+<p>The command:<pre>     rscale -f 1/2 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=12 cols=7>**kern
+*M4/4
+4c
+2d
+4e
+=
+*M6/8
+4.f
+8g
+8a
+8b
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=15>**kern
+*M4/8
+8c
+4d
+8e
+=
+*M6/16
+8.f
+16g
+16a
+16b
+*-
+!!!rscale: 1/2</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test009></a><td width=80><b>Test&nbsp;009:</b></td><td width=1></td>
+<td>
+Apply a wierd rhythmic scaling.
+<p>The command:<pre>     rscale -f 11/31 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=12 cols=7>**kern
+*M4/4
+4c
+2d
+4e
+=
+*M6/8
+4.f
+8g
+8a
+8b
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=13 cols=17>**kern
+*M4/124%11
+124%11c
+62%11d
+124%11e
+=
+*M6/248%11
+124%11.f
+248%11g
+248%11a
+248%11b
+*-
+!!!rscale: 11/31</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test010></a><td width=80><b>Test&nbsp;010:</b></td><td width=1></td>
+<td>
+Recover original rhythms from exotice rhythmic values.
+<p>The command:<pre>     rscale -o <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=13 cols=17>**kern
+*M4/124%11
+124%11c
+62%11d
+124%11e
+=
+*M6/248%11
+124%11.f
+248%11g
+248%11a
+248%11b
+*-
+!!!rscale: 11/31</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=12 cols=7>**kern
+*M4/4
+4c
+2d
+4e
+=
+*M6/8
+4.f
+8g
+8a
+8b
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test011></a><td width=80><b>Test&nbsp;011:</b></td><td width=1></td>
+<td>
+Scale rhythms in **recip spines.
+<p>The command:<pre>     rscale -f 4 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=18 cols=9>**recip
+64
+32
+16
+12
+8
+6
+4
+3
+2
+8.
+8..
+8...
+8....
+8.....
+8......
+8.......
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=19 cols=13>**recip
+16
+8
+4
+3
+2
+3%2
+1
+3%4
+0
+2.
+2..
+2...
+2....
+2.....
+2......
+2.......
+*-
+!!!rscale: 4</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test012></a><td width=80><b>Test&nbsp;012:</b></td><td width=1></td>
+<td>
+Recover original rhythms in **recip spines.
+<p>The command:<pre>     rscale -o <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=19 cols=13>**recip
+16
+8
+4
+3
+2
+3%2
+1
+3%4
+0
+2.
+2..
+2...
+2....
+2.....
+2......
+2.......
+*-
+!!!rscale: 4</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=18 cols=9>**recip
+64
+32
+16
+12
+8
+6
+4
+3
+2
+8.
+8..
+8...
+8....
+8.....
+8......
+8.......
+*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

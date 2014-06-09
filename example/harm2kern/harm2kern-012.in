@@ -1,0 +1,12 @@
+!!!test: Preventing duration information from being added to the **kern output.
+!!!command: harm2kern --RR %in > %out
+**harm	**kern
+*C:	*
+I	4
+ii	8
+iii	8
+IV	4.
+V	8
+vi	2
+viio	1
+*-	*-

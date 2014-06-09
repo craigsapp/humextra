@@ -1,0 +1,27 @@
+!!!test: Measure the tempo of music when a ritard mark is present.
+!!!command: gettime -at %in > %out
+**kern
+*M4/4
+*MM120
+4c
+4c
+4c
+4c
+=
+*rit
+4c
+4c
+4c
+4c
+=
+4c
+4c
+4c
+4c
+=
+*MM60
+4c
+4c
+4c
+4c
+*-

@@ -1,0 +1,6 @@
+!!!test: Calculate counterpoint module triplet from two pairs of notes, interleaved with input data.
+!!!command: cint %in > %out
+**kern	**cint	**kern
+E	10 -2 12	g
+D	.	a
+*-	*-	*-

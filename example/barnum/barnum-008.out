@@ -1,0 +1,18 @@
+!!!test: Renumber measures.
+!!!command: barnum -s 333 %in > %out
+**kern
+*k[f#]
+*M4/4
+*MM120
+=333-
+1g
+=334
+1dd
+=335
+1ff#
+=336
+1f#
+=337
+2g
+==
+*-

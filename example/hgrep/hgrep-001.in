@@ -1,0 +1,19 @@
+!!!test: Search for "16g" only in data records, printing measure/beat where a match is found.
+!!!command: hgrep -mbd 16g %in > %out
+**kern
+*M2/4
+*MM120
+=1-
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-

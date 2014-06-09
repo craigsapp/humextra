@@ -1,0 +1,23 @@
+!!!test: Mixed initial octave specifications into visual score format.
+!!!command: ottava -v %in > %out
+**kern
+*8va/V
+4c
+4d
+4e
+4f
+4g
+4a
+4b
+*X8va/V
+=
+*8va/V
+4c
+4d
+4e
+4f
+4g
+4a
+4b
+*X8va/V
+*-

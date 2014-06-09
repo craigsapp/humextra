@@ -1,0 +1,674 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: harm2kern</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>harm2kern examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>harm2kern</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>harm2kern</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Triads on the scale degrees of C Major.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Triads on the scale degrees of C Minor.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Appending **kern data to original **harm data.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Triads in first inversion.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test005><b>Test&nbsp;005:</b></a></td><td width=10><td>Triads in second inversion.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test006><b>Test&nbsp;006:</b></a></td><td width=10><td>Seventh chords and their inversions in C Major.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test007><b>Test&nbsp;007:</b></a></td><td width=10><td>Chord qualities with a root on C.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test008><b>Test&nbsp;008:</b></a></td><td width=10><td>Example of the octave option.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test009><b>Test&nbsp;009:</b></a></td><td width=10><td>Extracting only the root of the chord.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test010><b>Test&nbsp;010:</b></a></td><td width=10><td>Extracting only the base line of the chord.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test011><b>Test&nbsp;011:</b></a></td><td width=10><td>Adding duration information to the **kern output.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test012><b>Test&nbsp;012:</b></a></td><td width=10><td>Preventing duration information from being added to the **kern output.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test013><b>Test&nbsp;013:</b></a></td><td width=10><td>Secondary dominants.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Triads on the scale degrees of C Major.
+<p>The command:<pre>     harm2kern <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**harm
+*C:
+I
+ii
+iii
+IV
+V
+vi
+viio
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=10 cols=8>**kern
+*C:
+C e g
+D f a
+E g b
+F a cc
+G b dd
+A cc ee
+B dd ff
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+Triads on the scale degrees of C Minor.
+<p>The command:<pre>     harm2kern <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**harm
+*c:
+i
+iio
+III
+iv
+v
+VI
+VII
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=10 cols=10>**kern
+*c:
+C e- g
+D f a-
+E- g b-
+F a- cc
+G b- dd
+A- cc ee-
+B dd# ff#
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+Appending **kern data to original **harm data.
+<p>The command:<pre>     harm2kern -a <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**harm
+*D:
+I
+ii
+iii
+IV
+V
+vi
+viio
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=10 cols=16>**harm	**kern
+*D:	*D:
+I	D f# a
+ii	E g b
+iii	F# a cc#
+IV	G b dd
+V	A cc# ee
+vi	B dd ff#
+viio	C# e g
+*-	*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test004></a><td width=80><b>Test&nbsp;004:</b></td><td width=1></td>
+<td>
+Triads in first inversion.
+<p>The command:<pre>     harm2kern <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**harm
+*C:
+Ib
+iib
+iiib
+IVb
+Vb
+vib
+viiob
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**kern
+*C:
+c E g
+d F a
+e G b
+f A cc
+g B dd
+a C ee
+b D ff
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test005></a><td width=80><b>Test&nbsp;005:</b></td><td width=1></td>
+<td>
+Triads in second inversion.
+<p>The command:<pre>     harm2kern <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**harm
+*C:
+Ic
+iic
+iiic
+IVc
+Vc
+vic
+viioc
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**kern
+*C:
+c e G
+d f A
+e g B
+f a C
+g b D
+a cc E
+b dd F
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test006></a><td width=80><b>Test&nbsp;006:</b></td><td width=1></td>
+<td>
+Seventh chords and their inversions in C Major.
+<p>The command:<pre>     harm2kern <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=18 cols=7>**harm
+*C:
+I7
+ii7
+iii7
+IV7
+V7
+vi7
+viio7
+=
+I7a
+ii7b
+iii7c
+IV7d
+V7a
+vi7b
+viio7c
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=18 cols=11>**kern
+*C:
+C e g b
+D f a cc
+E g b dd
+F a cc ee
+G b dd ff
+A cc ee gg
+B dd ff aa
+=
+C e g b
+d F a cc
+e g B dd
+f a cc E
+G b dd ff
+a C ee gg
+b dd F aa
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test007></a><td width=80><b>Test&nbsp;007:</b></td><td width=1></td>
+<td>
+Chord qualities with a root on C.
+<p>The command:<pre>     harm2kern <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=19 cols=17>**harm
+*C:
+!major:
+I
+!minor:
+i
+!diminished:
+io
+!augmented
+I+
+=
+! seventh chords
+! major major
+I7
+! minor major
+i7
+! major minor
+V7/IV
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=19 cols=9>**kern
+*C:
+!
+C e g
+!
+C e- g
+!
+C e- g-
+!
+C e g#
+=
+!
+!
+C e g b
+!
+C e- g b
+!
+C e g b-
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test008></a><td width=80><b>Test&nbsp;008:</b></td><td width=1></td>
+<td>
+Example of the octave option.
+<p>The command:<pre>     harm2kern -o 1 <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**harm
+*C:
+I
+ii
+iii
+IV
+V
+vi
+viio
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**kern
+*C:
+CC E G
+DD F A
+EE G B
+FF A c
+GG B d
+AA c e
+BB d f
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test009></a><td width=80><b>Test&nbsp;009:</b></td><td width=1></td>
+<td>
+Extracting only the root of the chord.
+<p>The command:<pre>     harm2kern -r <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**harm
+*C:
+I
+iib
+iiic
+IVa
+Vb
+vic
+viio
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**root
+*C:
+CC
+DD
+EE
+FF
+GG
+AA
+BB
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test010></a><td width=80><b>Test&nbsp;010:</b></td><td width=1></td>
+<td>
+Extracting only the base line of the chord.
+<p>The command:<pre>     harm2kern -b <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=7>**harm
+*C:
+I
+iib
+iiic
+IVa
+Vb
+vic
+viio
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=10 cols=8>**kern
+*C:
+C e g
+d F a
+e g B
+F a cc
+g B dd
+a cc E
+B dd ff
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test011></a><td width=80><b>Test&nbsp;011:</b></td><td width=1></td>
+<td>
+Adding duration information to the **kern output.
+<p>The command:<pre>     harm2kern <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=14>**harm	**kern
+*C:	*
+I	4
+ii	8
+iii	8
+IV	4.
+V	8
+vi	2
+viio	1
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=10 cols=13>**kern
+*C:
+4C 4e 4g
+8D 8f 8a
+8E 8g 8b
+4.F 4.a 4.cc
+8G 8b 8dd
+2A 2cc 2ee
+1B 1dd 1ff
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test012></a><td width=80><b>Test&nbsp;012:</b></td><td width=1></td>
+<td>
+Preventing duration information from being added to the **kern output.
+<p>The command:<pre>     harm2kern --RR <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=10 cols=14>**harm	**kern
+*C:	*
+I	4
+ii	8
+iii	8
+IV	4.
+V	8
+vi	2
+viio	1
+*-	*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=10 cols=8>**kern
+*C:
+C e g
+D f a
+E g b
+F a cc
+G b dd
+A cc ee
+B dd ff
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test013></a><td width=80><b>Test&nbsp;013:</b></td><td width=1></td>
+<td>
+Secondary dominants.
+<p>The command:<pre>     harm2kern <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=20 cols=10>**harm
+*C:
+I
+V
+V/V
+V/V/V
+V/V/V/V
+V/V/V/V/V
+=
+viio
+viio/V
+viio/VI
+=
+V7
+V7/ii
+V7/II
+V7/-VII
+V7/I
+V7/V/II
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=20 cols=12>**kern
+*C:
+C e g
+G b dd
+D f# a
+A cc# ee
+E g# b
+B dd# ff#
+=
+B dd ff
+F# a cc
+G# b dd
+=
+G b dd ff
+A cc# ee gg
+A cc# ee gg
+F a cc ee-
+G b dd ff
+E g# b dd
+*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

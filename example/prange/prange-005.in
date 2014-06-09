@@ -1,0 +1,12 @@
+!!!test: Find average pitch considering duration.
+!!!command: prange -d -p 50 %in > %out
+**kern
+4c
+8d
+8e
+4f
+8g
+8a
+4b
+2cc
+*-

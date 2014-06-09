@@ -1,0 +1,6 @@
+!!!test: Calculate counterpoint module, replacing bottom melodic interval with top one.
+!!!command: cint -T %in > %out
+**kern	**kern
+E	g
+D	a
+*-	*-

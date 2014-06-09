@@ -1,0 +1,382 @@
+<!---------------------------------------------------------------------------->
+<html>
+<head>
+<title> Tests for Humdrum Extras Command: sonority</title>
+<meta name="Document-Owner" content="Craig Sapp (craig@ccrma.stanford.edu)"> 
+<meta name="Author" content="Craig Stuart Sapp (craig@ccrma.stanford.edu)">
+<meta name="Creation-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<meta name="Revision-Date" content=" Wed Mar  9 15:11:34 PST 2005 ">
+<style type="text/css">
+<!-- 
+.commandname { font-weight: bold;
+            text-decoration: none; 
+            font-size: 125%;
+            color: #000000}
+.indexitem { text-decoration: none; }
+   a {text-decoration:none}
+            
+-->
+</style>
+</head>
+</head>
+<!---------------------------------------------------------------------------->
+<!body topmargin="15" leftmargin="5" alink="#ff8080" bgcolor="#e2dfc7" link="#dd0000" marginheight="5" marginwidth="5" text="#321e04" vlink="#118dcc">    
+<body topmargin="15" leftmargin="5" alink="#bb9966" bgcolor="#e2dfc7" link="#bb9966" marginheight="5" marginwidth="5" text="#321e04" vlink="#bb9966">
+<center>
+<table width=600>
+<tr><td>
+
+<center>
+<table width=600>
+<tr valign=center><td>
+<a href=http://extras.humdrum.org><img src=../../img/humdrumextras.gif alt="Humdrum Extras" border=0></a>
+</td><td><h1>sonority examples</h1></td></table>
+</center>
+<hr noshade>
+<p>
+This page gives example input and output data for the <i>sonority</i> program.
+The output data from these tests can be compared to output on your platform
+using the same input file in order to determine if there is a problem
+with the <i>sonority</i> program.  If the output you generate is not the
+same as the output listed in the individual tests, then something may be wrong
+with the compiled program or your computing environment (or a bug added to
+the program after the example output was generated).
+
+
+<p>
+<hr noshade>
+<b>Test Index</b>
+<p>
+<ul>
+<table cellpadding=0 cellspacing=0>
+<tr valign=top><td><a class=indexitem href=#test001><b>Test&nbsp;001:</b></a></td><td width=10><td>Test of basic chord types in root position.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test002><b>Test&nbsp;002:</b></a></td><td width=10><td>Test of basic chord types in first inversion.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test003><b>Test&nbsp;003:</b></a></td><td width=10><td>Moving the root to different pitch classes.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test004><b>Test&nbsp;004:</b></a></td><td width=10><td>Display only the inversions of chords.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test005><b>Test&nbsp;005:</b></a></td><td width=10><td>Display only the root of chords.</td></tr>
+
+<tr valign=top><td><a class=indexitem href=#test006><b>Test&nbsp;006:</b></a></td><td width=10><td>Display only the chord quality of the sonority.</td></tr>
+</table>
+</ul>
+<pre>
+
+</pre>
+<hr noshade>
+
+
+
+<table width=600>
+<tr valign=top><a name=test001></a><td width=80><b>Test&nbsp;001:</b></td><td width=1></td>
+<td>
+Test of basic chord types in root position.
+<p>The command:<pre>     sonority <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=22 cols=14>**kern
+r
+c
+c e
+c e-
+c e g
+c e- g
+c e- g-
+c e g#
+c e g b
+c e g b-
+c e- g b
+c e- g b-
+c e- g- b-
+c e- g- b--
+c e- b-
+c e b-
+c e f# a#
+c e g a#
+c e a#
+c d e f g a b
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=22 cols=13>**qual
+::
+note::C
+incmaj:0:C
+incmin:0:C
+maj:0:C
+min:0:C
+dim:0:C
+aug:0:C
+majmaj:0:C
+domsev:0:C
+minmaj:0:C
+minmin:0:C
+halfdim:0:C
+fullydim:0:C
+minminx5:0:C
+domsevx5:0:C
+french:0:C
+german:0:C
+italian:0:C
+X
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test002></a><td width=80><b>Test&nbsp;002:</b></td><td width=1></td>
+<td>
+Test of basic chord types in first inversion.
+<p>The command:<pre>     sonority <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=21 cols=13>**kern
+r
+cc
+cc e
+cc e-
+cc e g
+cc e- g
+cc e- g-
+cc e g#
+cc e g b
+cc e g b-
+cc e- g b
+cc e- g b-
+cc e- g- b-
+cc e- g- b--
+cc e- b-
+cc e b-
+cc e f# a#
+cc e g a#
+cc e a#
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=21 cols=13>**qual
+::
+note::C
+incmaj:1:C
+incmin:1:C
+maj:1:C
+min:1:C
+dim:1:C
+aug:1:C
+majmaj:1:C
+domsev:1:C
+minmaj:1:C
+minmin:1:C
+halfdim:1:C
+fullydim:1:C
+minminx5:1:C
+domsevx5:1:C
+french:1:C
+german:1:C
+italian:1:C
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test003></a><td width=80><b>Test&nbsp;003:</b></td><td width=1></td>
+<td>
+Moving the root to different pitch classes.
+<p>The command:<pre>     sonority <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=9 cols=10>**kern
+c e g
+d f# a
+e g# b
+f a cc
+g b dd
+a cc# ee
+b dd# ff#
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=9 cols=8>**qual
+maj:0:C
+maj:0:D
+maj:0:E
+maj:0:F
+maj:0:G
+maj:0:A
+maj:0:B
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test004></a><td width=80><b>Test&nbsp;004:</b></td><td width=1></td>
+<td>
+Display only the inversions of chords.
+<p>The command:<pre>     sonority -i <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=12 cols=13>**kern
+c e g
+cc e g
+cc ee g
+g b dd
+gg b dd
+gg bb dd
+d f# a cc
+dd f# a cc
+dd ff# a cc
+dd ff# aa cc
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=12 cols=7>**qual
+0
+1
+2
+0
+1
+2
+0
+1
+2
+3
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test005></a><td width=80><b>Test&nbsp;005:</b></td><td width=1></td>
+<td>
+Display only the root of chords.
+<p>The command:<pre>     sonority -r <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=12 cols=13>**kern
+c e g
+cc e g
+cc ee g
+g b dd
+gg b dd
+gg bb dd
+d f# a cc
+dd f# a cc
+dd ff# a cc
+dd ff# aa cc
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=12 cols=7>**qual
+C
+C
+C
+G
+G
+G
+D
+D
+D
+D
+*-</textarea>
+</td></tr>
+</table>
+
+<table width=600>
+<tr valign=top><a name=test006></a><td width=80><b>Test&nbsp;006:</b></td><td width=1></td>
+<td>
+Display only the chord quality of the sonority.
+<p>The command:<pre>     sonority -t <font color=red><i>input-file</i></font> > <font color=red><i>output-file</i></font></pre>
+using the following input, will generate the following output:
+
+</td>
+</tr><tr><td align=center colspan=3>
+<br>
+<table><tr valign=top><td>
+
+<center>
+<font color=red><i>input-file:</i></font><br>
+<textarea wrap=off rows=12 cols=13>**kern
+c e g
+cc e g
+cc ee g
+g b dd
+gg b dd
+gg bb dd
+d f# a cc
+dd f# a cc
+dd ff# a cc
+dd ff# aa cc
+*-</textarea>
+</td><td width=10></td><td>
+<center>
+<font color=red><i>output-file:</i></font><br>
+<textarea wrap=off rows=12 cols=7>**qual
+maj
+maj
+maj
+maj
+maj
+maj
+domsev
+domsev
+domsev
+domsev
+*-</textarea>
+</td></tr>
+</table>
+
+
+
+<pre>
+
+
+
+</pre>
+<hr noshade>
+</td></tr>
+</table>
+</center>
+
+</body>
+</html>
+

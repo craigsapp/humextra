@@ -1,0 +1,37 @@
+@muse2psv1==z21j^TMuseData Rhythmic Levels^
+Header Record 1: optional copyright notice
+Header Record 2: optional file identification
+01/22/2011 Craig Stuart Sapp
+WK#:1 MV#:1
+Header Record 6: source
+Header Record 7: work title
+Header Record 8: movement title
+
+Header Record 10
+Group memberships: score
+score: part 1 of 1
+$  Q:64   T:4/4   C:4
+E4   512      1 B
+E4   256      1 w
+E4   128      1 h
+E4    64      1 q
+E4    32      1 e
+E4    16      1 s
+E4     8      1 t
+E4     4      1 x
+E4     2      1 y
+E4     1      1 z
+mheavy2
+@@START: HUMDRUMREFERENCE
+@@TOP
+@!!!test: Measure the beat position of each point in the score.
+@@BOTTOM
+@!!!ENC: Craig Stuart Sapp
+@!!!END: 2011/01/22
+@@EXTRA
+@!!!VTS: 1929973808
+@!!!VTS-data: 1493593985
+@@END: HUMDRUMREFERENCE
+/END
+/eof
+//

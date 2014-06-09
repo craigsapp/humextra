@@ -1,0 +1,13 @@
+!!!test: List variants and labels in a file.
+!!!command: thrux -l %in > %out
+**kern
+*>[A,B,B,C]
+*>norep[A,B,C]
+*>A
+1a
+*>B
+2b
+*>C
+4c
+*-
+!! comment

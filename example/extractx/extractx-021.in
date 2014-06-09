@@ -1,0 +1,9 @@
+!!!test: Extracting a pair of spines with mutual *x manipulators will preserver *x markers.
+!!!command: extractx -s 1,2 %in > %out
+**a	**b	**c
+a	b	c
+a	b	c
+*x	*x	*
+b	a	c
+b	a	c
+*-	*-	*-

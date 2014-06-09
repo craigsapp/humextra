@@ -1,0 +1,17 @@
+!!!test: Numbering measures when there is a pickup measure.
+!!!command: barnum %in > %out
+**kern
+*k[f#]
+*M4/4
+*MM120
+2g
+=
+1dd
+=
+1ff#
+=
+1f#
+=
+2g
+==
+*-

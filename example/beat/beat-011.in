@@ -1,0 +1,20 @@
+!!!test: Analyze music in a compound meter, displaying as fractions.
+!!!command: beat -f -u 4. %in > %out
+**kern
+*M6/8
+*MM120
+4.c
+4d
+8e
+=2
+4.f
+8g
+8a
+8b
+=3
+4.cc
+4.dd
+=4
+2.ee
+==
+*-

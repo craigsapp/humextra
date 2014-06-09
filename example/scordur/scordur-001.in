@@ -1,0 +1,12 @@
+!!!test: Measure the duration in quarter notes of a short example
+!!!command: scordur %in > %out
+**kern
+4c
+8d
+8e
+4f
+8.g
+16a
+4b
+2cc
+*-

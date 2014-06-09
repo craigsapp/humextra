@@ -1,0 +1,20 @@
+!!!test: Sample the music every quater-note.
+!!!command: sample %in > %out
+**kern	**kern	**kern	**kern
+*M3/4	*M3/4	*M3/4	*M3/4
+=	=	=	=
+4G	4G	2d	4.b
+4D	4F#	.	.
+.	.	.	8a
+4E	4G	4B	4g
+=	=	=	=
+4C	8c	8e	4.g
+.	8B	8d	.
+8BB	4c	8e	.
+8AA	.	8f#	8a
+4GG	4d	4g	4b
+=	=	=	=
+2D	2d	2f#	2a
+4GG	4d	4g	4b
+=	=	=	=
+*-	*-	*-	*-

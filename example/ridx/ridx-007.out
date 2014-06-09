@@ -1,0 +1,23 @@
+!!!test: Remove all local comments.
+!!!command: ridx -L %in > %out
+!!
+!! global comment
+**a
+*bb
+a1
+.
+*^
+a2	a3
+.	.
+=	=
+a4	.
+.	a5
+*	*
+*v	*v
+a6
+*
+.
+=
+.
+*-
+!!!bib: bibliographic record

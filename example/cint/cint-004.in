@@ -1,0 +1,6 @@
+!!!test: Calculate counterpoint module, suppressing harmonic intervals.
+!!!command: cint -Ht %in > %out
+**kern	**kern
+E	g
+D	a
+*-	*-

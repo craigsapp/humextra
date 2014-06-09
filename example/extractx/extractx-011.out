@@ -1,0 +1,11 @@
+!!!test: Extract the penultimate spine using alternate notation.
+!!!command: extractx -s '$1' %in > %out
+**b
+b
+b
+b
+b
+b
+b
+b
+*-

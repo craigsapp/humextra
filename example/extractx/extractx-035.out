@@ -1,0 +1,10 @@
+!!!test: Extract only the "a" portion of a spine.
+!!!command: extractx -s 2a %in > %out
+**b
+*
+b1
+b1
+b1
+b1
+*
+*-

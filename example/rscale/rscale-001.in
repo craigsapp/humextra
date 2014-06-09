@@ -1,0 +1,22 @@
+!!!test: Reduce the rhythmic values by 1/2 of their duration.
+!!!command: rscale -f 1/2 %in > %out
+**kern
+000c
+00d
+0e
+1f
+2g
+4a
+8b
+16cc
+32dd
+64ee
+128ff
+256gg
+512aa
+1024bb
+2048ccc
+4096ddd
+8192eee
+16384fff
+*-

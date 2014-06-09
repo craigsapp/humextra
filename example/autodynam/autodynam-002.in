@@ -1,0 +1,10 @@
+!!!test: Add termination to decrescendo just before next dynmaics item in spine.
+!!!command: autodynam %in > %out
+**dynam
+>
+.
+.
+.
+.
+p
+*-

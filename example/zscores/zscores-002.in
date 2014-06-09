@@ -1,0 +1,13 @@
+!!!test: By default, the first spine will be processed. Other spines can be selected with <nobr><tt>-f</tt></nobr> option.
+!!!command: zscores -f 2 %in > %out
+**numA	**numB
+1	10
+2	20
+3	30
+4	40
+5	50
+6	60
+7	70
+8	80
+9	90
+*-	*-

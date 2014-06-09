@@ -1,0 +1,13 @@
+!!!test: Three against five polyrhythm.
+!!!command: minrhy %in > %out
+**kern	**kern
+1d	1d
+3c	5c
+.	5c
+3c	.
+.	5c
+.	5c
+3c	.
+.	5c
+1d	1d
+*-	*-

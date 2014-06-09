@@ -1,0 +1,6 @@
+!!!test: Mark melodic intervals with "m".
+!!!command: cint -tm %in > %out
+**kern	**kern
+E	g
+D	a
+*-	*-

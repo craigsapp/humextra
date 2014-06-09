@@ -1,0 +1,8 @@
+!!!test: Extract co-spine information along with a spine.
+!!!command: extractx -s '2,$c' -c "**a" %in > %out
+**a	**cospine
+3	C
+2 3	B C
+3 4	C D
+2	B
+*-	*-

@@ -1,0 +1,12 @@
+!!!test: Example of the octave option.
+!!!command: harm2kern -o 1 %in > %out
+**harm
+*C:
+I
+ii
+iii
+IV
+V
+vi
+viio
+*-

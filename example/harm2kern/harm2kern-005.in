@@ -1,0 +1,12 @@
+!!!test: Triads in second inversion.
+!!!command: harm2kern %in > %out
+**harm
+*C:
+Ic
+iic
+iiic
+IVc
+Vc
+vic
+viioc
+*-

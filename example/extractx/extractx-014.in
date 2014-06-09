@@ -1,0 +1,11 @@
+!!!test: Remove all except the last two spines.
+!!!command: extractx -x '1-$2' %in > %out
+**a	**b	**c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-

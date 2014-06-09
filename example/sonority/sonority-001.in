@@ -1,0 +1,24 @@
+!!!test: Test of basic chord types in root position.
+!!!command: sonority %in > %out
+**kern
+r
+c
+c e
+c e-
+c e g
+c e- g
+c e- g-
+c e g#
+c e g b
+c e g b-
+c e- g b
+c e- g b-
+c e- g- b-
+c e- g- b--
+c e- b-
+c e b-
+c e f# a#
+c e g a#
+c e a#
+c d e f g a b
+*-

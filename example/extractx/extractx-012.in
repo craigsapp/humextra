@@ -1,0 +1,11 @@
+!!!test: Extract the spine before the penultimate spine.
+!!!command: extractx -s '$2' %in > %out
+**a	**b	**c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+a	b	c
+*-	*-	*-

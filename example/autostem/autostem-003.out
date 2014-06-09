@@ -1,0 +1,18 @@
+!!!test: Remove stems from notes
+!!!command: autostem -r %in > %out
+**kern
+*clefG2
+c
+d
+e
+f
+g
+a
+b
+cc
+dd
+ee
+ff
+gg
+aa
+*-

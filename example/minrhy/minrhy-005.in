@@ -1,0 +1,9 @@
+!!!test: Multiple file inputs.
+!!!command: minrhy -P %in %in.2 > %out
+**kern
+4c
+4d
+4e
+4f
+4g
+*-

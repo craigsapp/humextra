@@ -1,0 +1,12 @@
+!!!test: Appending **kern data to original **harm data.
+!!!command: harm2kern -a %in > %out
+**harm
+*D:
+I
+ii
+iii
+IV
+V
+vi
+viio
+*-

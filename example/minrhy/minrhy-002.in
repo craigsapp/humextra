@@ -1,0 +1,11 @@
+!!!test: All notes in the file are multiples of the smallest-duration note.
+!!!command: minrhy %in > %out
+**kern
+1A
+2B
+4c
+8d
+16e
+32f
+64g
+*-

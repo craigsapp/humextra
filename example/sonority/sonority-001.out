@@ -1,0 +1,24 @@
+!!!test: Test of basic chord types in root position.
+!!!command: sonority %in > %out
+**qual
+::
+note::C
+incmaj:0:C
+incmin:0:C
+maj:0:C
+min:0:C
+dim:0:C
+aug:0:C
+majmaj:0:C
+domsev:0:C
+minmaj:0:C
+minmin:0:C
+halfdim:0:C
+fullydim:0:C
+minminx5:0:C
+domsevx5:0:C
+french:0:C
+german:0:C
+italian:0:C
+X
+*-

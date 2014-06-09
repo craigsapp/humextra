@@ -1,0 +1,18 @@
+!!!test: Extract a pitch sequence only.
+!!!command: tindex -AD -E -f "PCH" %in > %out
+**kern
+*M2/4
+*MM120
+4c
+4d
+=2
+4e
+8.f
+16g
+=3
+4a
+4b
+=4
+2cc
+==
+*-

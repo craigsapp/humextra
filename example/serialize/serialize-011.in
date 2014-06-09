@@ -1,0 +1,12 @@
+!!!test: Add an end-of-spine marker.
+!!!command: serialize -m -t X %in > %out
+**kern	**kern
+4c	8d
+.	8d
+4c	8d
+.	8d
+4c	8d
+.	8d
+4c	8d
+.	8d
+*-	*-

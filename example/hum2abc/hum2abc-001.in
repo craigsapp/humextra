@@ -1,0 +1,22 @@
+!!!test: Converting a melody into ABC plus.
+!!!command: hum2abc %in | grep -v "^%%abcx-conversion-date" > %out
+**kern
+*clefF4
+*M6/8
+4.D
+4.F
+=
+4.B-
+*clefC1
+4.c#
+=
+4.f#
+4.g
+=
+8aL
+8g
+8f#J
+8eTL
+8d
+8c#J
+*-

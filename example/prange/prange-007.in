@@ -1,0 +1,14 @@
+!!!test: Count pitches in a range of music
+!!!command: prange -c 62-67 %in > %out
+**kern
+4c
+4d
+4e
+4f
+4g
+4a
+4b
+4cc
+4dd
+4ee
+*-

@@ -1,0 +1,18 @@
+!!!test: Measure the time of music at 60 beats per minute.
+!!!command: gettime -p %in > %out
+**time	**kern
+*u=sec	*
+*MM60	*MM60
+0	4c
+1	4d
+=2	=2
+2	4e
+3	4f
+=3	=3
+4	8g
+4.5	8a
+5	4b
+=4	=4
+6	2c
+==	==
+*-	*-

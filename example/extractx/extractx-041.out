@@ -1,0 +1,18 @@
+!!!test: Extract a secondary sub-spine, using null tokens when no sub-spines.
+!!!command: extractx -s 2b -mn %in > %out
+**b
+.
+.
+*
+b2
+b2
+*^
+b21	b22
+b21	b22
+*v	*v
+b2
+b2
+*
+.
+.
+*-

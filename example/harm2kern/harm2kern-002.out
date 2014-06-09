@@ -1,0 +1,12 @@
+!!!test: Triads on the scale degrees of C Minor.
+!!!command: harm2kern %in > %out
+**kern
+*c:
+C e- g
+D f a-
+E- g b-
+F a- cc
+G b- dd
+A- cc ee-
+B dd# ff#
+*-

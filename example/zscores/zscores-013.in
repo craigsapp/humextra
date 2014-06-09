@@ -1,0 +1,13 @@
+**numA	**numB
+1 2	10
+.	20
+3 4 5	30 40 50
+6	60
+*^	*^
+7	8	70	80
+*v	*v	*	*
+*	*v	*v
+9	90
+*-	*-
+!!!test: Input data can be extracted with complete location description in input.
+!!!command: zscores %in -f 2 -i --full > %out

@@ -1,0 +1,15 @@
+!!!test: Adding multiple *Tr transposition actions.
+!!!command: transpose -b 6 %in > %out
+**kern	**kern
+*	*Trd3c5
+*k[]	*k[b-]
+*C:	*F:
+4c	4f
+4d	4g
+4e	4a
+4f	4b-
+4g	4cc
+4a	4dd
+4b	4ee
+4cc	4ff
+*-	*-

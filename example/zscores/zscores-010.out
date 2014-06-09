@@ -1,0 +1,13 @@
+!!!test: The original data can replace corresponding data from input.
+!!!command: zscores -S -f 3 %in --replace > %out
+**kern	**numA	**numB
+4c	1	-1.54919
+4d	2	-1.1619
+4e	3	-0.774597
+4f	4	-0.387298
+4g	5	0
+4a	6	0.387298
+4b	7	0.774597
+4cc	8	1.1619
+4dd	9	1.54919
+*-	*-	*-

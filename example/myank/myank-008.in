@@ -1,0 +1,30 @@
+!!!test: Extract measure with subspines from middle of score.
+!!!command: myank -m 6 %in > %out
+**kern
+*clefG2
+*k[]
+*a:
+*MM120
+=1-
+1c
+=2
+1B
+=3
+1A
+=4
+*^
+1G	1g
+=5	=5
+2F#	2f#
+*MM132	*MM132
+*clefF4	*clefF4
+2F	2f
+=6	=6
+1E	1e
+=7	=7
+1D	1d
+*v	*v
+=8
+1C
+==
+*-

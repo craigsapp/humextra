@@ -1,0 +1,12 @@
+!!!test: Extracting only the base line of the chord.
+!!!command: harm2kern -b %in > %out
+**kern
+*C:
+C e g
+d F a
+e g B
+F a cc
+g B dd
+a cc E
+B dd ff
+*-

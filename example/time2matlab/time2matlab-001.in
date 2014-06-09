@@ -1,0 +1,14 @@
+!!!test: Basic test of converting to matlab data.
+!!!command: time2matlab %in > %out
+**time	**kern	**kern
+*	*	*M4/4
+=3	=3	=3
+1300	1CC	8c
+1700	.	8c#
+2400	.	4d
+3000	.	4e
+4000	.	4f
+=4	=4	=4
+8000	1r	1g
+==	==	==
+*-	*-	*-

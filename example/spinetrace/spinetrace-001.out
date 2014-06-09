@@ -1,0 +1,15 @@
+!!!test: Examine the spine labels with a spine splits and joins.
+!!!command: spinetrace %in > %out
+**foo
+1
+1
+1
+*^
+(1)a	(1)b
+(1)a	(1)b
+(1)a	(1)b
+*v	*v
+1
+1
+1
+*-

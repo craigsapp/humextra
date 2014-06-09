@@ -1,0 +1,14 @@
+!!!test: Display only the chord quality of the sonority.
+!!!command: sonority -t %in > %out
+**qual
+maj
+maj
+maj
+maj
+maj
+maj
+domsev
+domsev
+domsev
+domsev
+*-

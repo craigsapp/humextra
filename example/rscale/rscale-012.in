@@ -1,0 +1,21 @@
+!!!test: Recover original rhythms in **recip spines.
+!!!command: rscale -o %in > %out
+**recip
+16
+8
+4
+3
+2
+3%2
+1
+3%4
+0
+2.
+2..
+2...
+2....
+2.....
+2......
+2.......
+*-
+!!!rscale: 4
