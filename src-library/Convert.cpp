@@ -1506,49 +1506,50 @@ char*  Convert::base40ToMuse(int base40, char* buffer) {
 //
 
 char* Convert::base40ToKern(char* output, int aPitch) {
-   int octave = aPitch / 40;
-   if (octave > 12 || octave < -1) {
+   int octave     = aPitch / 40;
+   int accidental = Convert::base40ToAccidental(aPitch);
+   int diatonic   = Convert::base40ToDiatonic(aPitch) % 7;
+   char base = 'a';
+   switch (diatonic) {
+      case 0: base = 'c'; break;
+      case 1: base = 'd'; break;
+      case 2: base = 'e'; break;
+      case 3: base = 'f'; break;
+      case 4: base = 'g'; break;
+      case 5: base = 'a'; break;
+      case 6: base = 'b'; break;
+   }
+   if (octave < 4) {
+      base = std::toupper(base);
+   }
+   int repeat = 0;
+   if (octave > 4) {
+      repeat = octave - 4;
+   } else if (octave < 3) {
+      repeat = 3 - octave;
+   }
+   if (repeat > 12) {
       cerr << "Error: unreasonable octave value: " << octave << endl;
       exit(1);
    }
-   int chroma = aPitch % 40;
-
-   strcpy(output, kernPitchClass.getName(chroma));
-   if (octave >= 4) {
-      output[0] = std::tolower(output[0]);
-   } else {
-      output[0] = std::toupper(output[0]);
+   output[0] = base;
+   output[1] = '\0';
+   char temp[2] = {0};
+   strcpy(temp, output);
+   int i;
+   for (i=0; i<repeat; i++) {
+      strcat(output, temp);
    }
-   int repeat = 0;
-   switch (octave) {
-      case 4:  repeat = 0; break;
-      case 5:  repeat = 1; break;
-      case 6:  repeat = 2; break;
-      case 7:  repeat = 3; break;
-      case 8:  repeat = 4; break;
-      case 9:  repeat = 5; break;
-      case 3:  repeat = 0; break;
-      case 2:  repeat = 1; break;
-      case 1:  repeat = 2; break;
-      case 0:  repeat = 3; break;
-      case -1: repeat = 4; break;
-      default:
-         cerr << "Error: unknown octave value: " << octave << endl;
-         cerr << "for base-40 pitch: " << aPitch << endl;
-         exit(1);
-   }
-   if (repeat == 0) {
+   if (accidental == 0) {
       return output;
    }
-
-   int length = strlen(output);
-   output[length + repeat] = '\0';
-   int i; 
-   for (i=length-1; i>=0; i--) {
-      output[i+repeat] = output[i];
+   if (accidental > 0) {
+      temp[0] = '#';
+   } else {
+      temp[0] = '-';
    }
-   for (i=0; i<repeat; i++) {
-      output[i+1] = output[0];
+   for (i=0; i<abs(accidental); i++) {
+      strcat(output, temp);
    }
 
    return output;
@@ -3360,7 +3361,7 @@ const char* Convert::base12ToTnSetName(Array<int>& base12) {
 //cout << x[z] << " ";
 //}
 //cout << endl;
-
+//
    return "unknown";
 }
 

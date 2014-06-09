@@ -15,6 +15,7 @@ TIMESTAMP
 *.la
 *.a
 
+.make
 
 bin
 external/pcre-7.9

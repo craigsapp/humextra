@@ -2819,7 +2819,25 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
    for (i=0; i<rhythmsR.getSize(); i++) {
       localrhythms[i] = rhythmsR[i];
    }
+
    // spaceEmptyLines();
+
+   // adjust the duration markers for each measure
+   RationalNumber lastbeat = (*this)[getNumLines()-1].getAbsBeatR();
+   RationalNumber curbeat(0,1);
+   for (i=getNumLines()-1; i>=0; i--) {
+      if ((*this)[i].getType() == E_humrec_data_measure) {
+         curbeat = (*this)[i].getAbsBeatR(); 
+         (*this)[i].setBeatR(lastbeat - curbeat);
+         lastbeat = curbeat;
+         // mark pickup-beats with a negative duration
+         if ((*this)[i].getAbsBeatR() < (*this)[i].getBeatR()) {
+            if (!(*this)[i].getAbsBeatR().isZero()) {
+               (*this)[i].setBeatR((*this)[i].getBeatR() * -1);
+            }
+         }
+      }
+   }
 
    // add offset of +1 if there are no barlines present in the file
    //if (measurecount == 0) {
@@ -3224,6 +3242,7 @@ void HumdrumFile::fixIncompleteBarMeterR(
          pickupdur = file[barlocs[0]].getAbsBeatR();
       }
    }
+// ggg
    if (pickupdur > 0) {
       // int dataQ = 0;
       for (i=0; i<barlocs[0]; i++) {
