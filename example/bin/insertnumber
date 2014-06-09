@@ -1,0 +1,90 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+# Creation Date: Fri Mar 11 20:29:43 PST 2005
+# Last Modified: Fri Mar 11 23:12:51 PST 2005
+# Filename:      insertnumber
+# Syntax:        PERL 5
+#
+# Description:   Create a hole in the number sequence for a given
+#                test directory.  This allows for similar tests to
+#                be numbered sequentially.  For example, if there are
+#                41 tests in a directory, this program can move tests
+#                25-41 to tests 26-42 so that a new test 25 can be
+#                added.
+#
+use strict;
+
+my $directory = $ARGV[1];
+if ($directory =~ /^\s*$/) {
+   $directory = ".";
+}
+$directory =~ s/\/$//;
+
+my $insertval = $ARGV[0];
+
+my $MAX = "000";
+my $BASE = "";
+($MAX, $BASE) = getFileInfo($directory);
+
+die if $BASE =~ /^\s*$/;
+
+
+print "BASE is $BASE MAX is $MAX\n";
+
+
+my $start = int($MAX + 1);
+my $stop = int($insertval);
+
+print "start is $start\n";
+my $numhi;
+my $numlow;
+
+my $i;
+for ($i=$start; $i> $stop; $i--) {
+   $numhi = int($i);
+   if ($numhi < 10) { $numhi = "00$numhi"; }
+   elsif ($numhi < 100) { $numhi = "0$numhi"; }
+   $numlo = int($i-1);
+   if ($numlo < 10) { $numlo = "00$numlo"; }
+   elsif ($numlo < 100) { $numlo = "0$numlo"; }
+
+   print "Moving $BASE$numlo... to $BASE$numhi...\n";
+   #`mv -i $directory/$BASE$numlo.in  $directory/$BASE$numhi.in`;
+   #`mv -i $directory/$BASE$numlo.out $directory/$BASE$numhi.out`;
+}
+
+
+
+
+##############################
+##
+## getFileInfo --
+##
+
+sub getFileInfo {
+   my ($dir) = @_;
+   my @output;
+   opendir(DIR, $dir) or die;
+   my $value;  
+   my $maximum = "000";
+   my $base = "";
+   my $file;
+   while ($file = readdir(DIR)) {
+      if ($file =~ /^([a-zA-Z-\d]+)(\d\d\d)\.(in|out)/) {
+         $value = $2;
+         if ($base eq "") {
+            $base = $1;
+         } elsif ($base ne $1) {
+            die("Unexpected base: $base versus $1\n");
+         }
+         $maximum = $value if $value > $maximum;
+         # $output[@output] = $file;
+      }
+   }
+
+    return ($maximum, $base);
+}
+
+
+

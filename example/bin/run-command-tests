@@ -1,0 +1,214 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Fri Mar 11 17:12:52 PST 2005
+# Last Modified: Thu Jun  5 13:27:41 PDT 2014
+# Filename:      run-regression-tests
+# Syntax:        perl 5
+#
+# Description:   Run regression tests on Humdrum Extras example inputs
+#                and outputs.
+#
+
+use strict;
+use Getopt::Long;
+
+my $TESTOUT = "/tmp/temp-output";
+
+my $verboseQ = 0;
+my $quietQ   = 0;
+my $notitleQ = 0;
+my $diffQ    = 0;
+my $failQ    = 0;
+
+Getopt::Long::Configure("bundling");
+GetOptions (
+   'v|verbose'		=> \$verboseQ,
+   't|T|no-title'	=> \$notitleQ,
+   'd|diff'		=> \$diffQ,
+   'f|fail'		=> \$failQ,
+   'q|quiet'		=> \$quietQ
+);
+
+my $basedir = shift @ARGV;
+$basedir = "." if $basedir eq "";
+
+my @commands;
+if (@ARGV > 0) {
+   @commands = @ARGV;
+} else {
+   @commands = getCommandDirectories($basedir);
+}
+
+my $command;
+foreach $command (@commands) {
+   runRegressionTests($command, $basedir);
+}
+
+
+###########################################################################
+
+##############################
+##
+## runRegressionTests --
+##
+
+sub runRegressionTests {
+   my ($command, $basedir) = @_;
+   my $directory = "$basedir/$command";
+   my @inputs = getTestInputs($directory);
+   my $testinput;
+   foreach $testinput (@inputs) {
+      runTest($testinput, $command, $basedir);
+   }
+}
+
+
+
+##############################
+##
+## runTest --
+##
+
+sub runTest {
+   my ($inputfile, $commandname, $basedir) = @_;
+   my $dir = "$basedir/$commandname";
+   my $outputfile = $inputfile;
+   $outputfile =~ s/\.in$/.out/;
+   if (!-r "$dir/$outputfile") {
+      print "Warning: $dir/$outputfile does not exist.\n";
+      return;
+   }
+   my $command = `egrep "!!+command\s*:\s*[^\s]" $dir/$inputfile | head -n 1`;
+   my $title;
+   if (!$notitleQ) {
+      $title = `egrep "!!+test\s*:\s*[^\s]" $dir/$inputfile | head -n 1`;
+      chomp $title;
+      $title =~ s/.*!!+test\s*:\s*//;
+      $title =~ s/test:END.*//;
+      $title =~ s/<[a-z]+>//g;
+      $title =~ s/<\/[a-z]+>//g;
+      $title =~ s/\s+$//;
+   }
+   chomp $command;
+   $command =~ s/.*!!+command\s*:\s*//;
+   $command =~ s/command:END.*//;
+   $command =~ s/\s+$//;
+   if ($command =~ /^\s*$/) {
+      print "Warning: $dir/$inputfile has no command line\n";
+      return;
+   }
+   $command =~ s/%in/$dir\/$inputfile/g;
+   $command =~ s/%out/$TESTOUT/g;
+   print "$command\n" if $verboseQ;
+   `$command`;
+   my $diff = `diff $dir/$outputfile $TESTOUT`;
+   $inputfile =~ /(\d\d\d)\.in$/;
+   my $testnumber = $1;
+   if ($quietQ) {
+      if ($diff !~ /^\s*$/) {
+         print "$commandname\t";
+         print "test $testnumber ";
+         print "\t" if length($commandname) < 8;
+         print "FAILED";
+	 if (!$notitleQ) {
+            print "\t$title";
+         }
+         my $cn = $commandname;
+         #$cn .= "\t" if length($commandname) < 8;
+         print "\n";
+         print "** $cn-$testnumber DIFF: ****************************************\n";
+         $diff =~ s/^/** /gm;
+         print $diff;
+         print "***************************************************************\n";
+      }
+   } else {
+      if ($diff !~ /^\s*$/) {
+         print "$commandname\t";
+         print "\t" if length($commandname) < 8;
+         print "test $testnumber ";
+         print "FAILED";
+         if (!$notitleQ) {
+            print "\t$title";
+         }
+      print "\n";
+      } elsif (!$failQ) {
+         print "$commandname\t";
+         print "\t" if length($commandname) < 8;
+         print "test $testnumber ";
+         print "OK";
+         if (!$notitleQ) {
+            print "\t$title";
+         }
+         print "\n";
+      }
+      if ($diffQ && ($diff !~ /^\s*$/)) {
+         my $cn = $commandname;
+         #$cn .= "\t" if length($commandname) < 8;
+         print "** $cn-$testnumber DIFF: ****************************************\n";
+         $diff =~ s/^/** /gm;
+         print $diff;
+         print "***************************************************************\n";
+      }
+   }
+   unlink $TESTOUT;
+}
+
+
+
+##############################
+##
+## getTestInputs --  Return all files in the form
+##    .*-\d\d\d\.in$
+##
+
+sub getTestInputs {
+   my ($directory) = @_;
+   my @output;
+   opendir (DIR, $directory) or die "Cannot open $directory to read.";
+   my $file;
+   while ($file = readdir(DIR)) {
+      if ($file =~ /.*-\d\d\d\.in$/) {
+        $output[@output] = $file;
+      }
+   }
+   closedir(DIR);
+   return sort @output;
+}
+
+
+
+##############################
+##
+## getCommandDirectories -- get all subdirectories of the given
+##     base directory which contain any files in the form xxxx-ddd.in,
+##     where xxxx is a command name, and ddd is a test number.
+
+sub getCommandDirectories {
+   my ($basedir) = @_;
+   opendir(DIR, $basedir) or die "Cannot open $basedir to read";
+   my @output;
+   my $file;
+   my $file2;
+   my $which;
+   while ($file = readdir(DIR)) {
+      next if $file =~ /^\./;
+      next if !-d "$basedir/$file";
+      $which = `which $file 2> /dev/null`;
+      next if $which =~ /^\s*$/;
+      # directory is the same name as a command, so see if it has data:
+      opendir(SDIR, "$basedir/$file") or die "Cannot open $basedir/$file";
+      while ($file2 = readdir(SDIR)) {
+         if ($file2 =~ /.*-\d\d\d\.in$/) {
+            $output[@output] = $file;
+            last;
+         }
+      }
+      close(SDIR);
+   }
+   closedir(DIR);
+   return sort @output;
+}
+
+
+

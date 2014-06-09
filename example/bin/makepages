@@ -1,0 +1,46 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+# Creation Date: Fri Mar 11 23:29:43 PST 2005
+# Last Modified: Fri Mar 11 23:29:43 PST 2005
+# Filename:      makepages
+# Syntax:        PERL 5
+#
+# Description:   Enter each command's example directory and create
+#                an index.html for the command's examples.
+#
+
+use strict;
+
+my $basedir = $ARGV[0];
+
+opendir (CDIR, $basedir) || die;
+my $file;
+while ($file = readdir(CDIR)) {
+   next if $file =~ /^\./;
+   next if !-d "$basedir/$file";
+   next if !-r "$basedir/$file/$file-001.in";
+   createIndex($file);
+}
+closedir(CDIR);
+
+exit(0);
+
+##########################################################################
+
+##############################
+##
+## createIndex --
+##
+
+sub createIndex {
+   my ($file) = @_;
+
+   print "Making index.html for $file\n";
+
+   my $status = `bin/maketestindex Template.html $file`;
+   print $status;
+}
+
+
+

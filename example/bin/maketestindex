@@ -1,0 +1,295 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+# Creation Date: Wed Mar  9 22:06:53 PST 2005
+# Last Modified: Sat Sep  5 17:56:28 PDT 2009
+# Filename:      maketestindex
+# Syntax:        perl 5
+#
+# Description:   Helper program for makepages script.
+#
+
+use strict;
+
+my $template   = $ARGV[0];
+my $workingdir = $ARGV[1];
+
+# maximum examples on a page is about 30 in Firefox 3 before
+# Firefox has problems displaying multiple textareas.
+my $examplecount = 20;
+
+my $maxtextlen = 30; # maximum textarea file contents line count before wrapping
+
+open (TFILE, $template) || die;
+my @template = <TFILE>;
+close TFILE;
+
+$workingdir =~ s/\/$//;
+$workingdir =~ /([^\/]+)$/;
+my $commandname = $1;
+my $TESTINDEX = "";
+my $ii;
+my $j;
+my @testlist;
+my $testtext;
+my $outputfilename;
+
+@testlist = getInputList($workingdir);
+@testlist = sort @testlist;
+
+my $pagecount = @testlist / $examplecount;
+if ($pagecount - int($pagecount) > 0) {
+   $pagecount = int($pagecount) + 1;
+}
+print "Page count is $pagecount\n";
+my @tcopy;
+
+for ($ii=0; $ii<$pagecount; $ii++) {
+   print "Processing page $ii\n";
+   $testtext = getTextText($workingdir, $ii, $examplecount, @testlist);
+   @tcopy = @template;
+   for ($j=0; $j<@tcopy; $j++) {
+      $tcopy[$j] =~ s/<<commandname>>/$commandname/g;
+      $tcopy[$j] =~ s/<<testlist>>/$testtext/;
+      $tcopy[$j] =~ s/<<testindex>>/<table cellpadding=0 cellspacing=0>$TESTINDEX<\/table>/;
+   }
+   $outputfilename = "index";
+   if ($ii > 0) {
+      $outputfilename .= "$ii";
+   }
+   $outputfilename .= ".html";
+   print "Writing $outputfilename...\n";
+   open (IFILE, ">$workingdir/$outputfilename") || die;
+   for ($j=0; $j<@tcopy; $j++) {
+      print IFILE $tcopy[$j];
+   }
+   close IFILE;
+}
+
+# print "TESTS: @testlist\n";
+
+exit(0);
+
+
+##########################################################################
+
+##############################
+##
+## getInputList --
+##
+
+sub getInputList {
+   my ($workingdir) = @_;
+   my @output;
+   opendir(WDIR, $workingdir);
+   my $file;
+   while ($file = readdir(WDIR)) {
+      next if $file =~ /^\./;
+      next if -d "$workingdir/$file";
+      next if !-r "$workingdir/$file";
+      next if $file !~ /$commandname-\d+\.in/;
+      $output[@output] = $file;
+   }
+   closedir WDIR;
+   return @output;
+}
+
+
+
+##############################
+##
+## getTextText --
+##
+
+sub getTextText {
+   my ($workingdir, $page, $maxonpage, @testlist) = @_;
+
+   my $output = "";
+   if (@testlist < 1) {
+      $output = "No tests available for this command.";
+      return $output;
+   }
+
+   my $base;
+   my $file;
+   my $number;
+   my $testtitle;
+   my $xtesttitle;
+   my $xcommand;
+   my $command;
+   my $inwidth;
+   my $outwidth;
+   my $inheight;
+   my $outheight;
+   my @incontents;
+   my @outcontents;
+   my $currentpage;
+   my $linkname;
+   my $i;
+
+   $TESTINDEX = "";
+
+   for ($i=0; $i<@testlist; $i++) {
+      $file = $testlist[$i];
+      $currentpage = int($i / $maxonpage);
+
+      $file =~ /(.*)\.in$/;
+      $base = $1;
+      $base =~ /.*-(\d+)$/;
+      $number = $1;
+  
+      $linkname = "";
+      if ($currentpage != $page) {
+         $linkname = "index";
+         if ($currentpage > 0) {
+            $linkname .= $currentpage;
+         }
+         $linkname .= ".html";
+      }
+      $linkname .= "#test$number";
+
+      ($testtitle, $command, $inwidth, $inheight, @incontents) = getTestInfo("$workingdir/$base.in");
+      ($xtesttitle, $xcommand, $outwidth, $outheight, @outcontents) = getTestInfo("$workingdir/$base.out");
+
+      $TESTINDEX .= "\n<tr valign=top><td><a class=indexitem href=$linkname>";
+      $TESTINDEX .= "<b>Test&nbsp;$number:</b></a></td><td width=10><td>";
+      $TESTINDEX .= "$testtitle</td></tr>\n";
+
+      next if $currentpage != $page;
+
+      $output .= "\n<table width=600>";
+      $output .= "\n<tr valign=top><a name=test$number></a><td width=80><b>Test&nbsp;$number:</b></td><td width=1></td>";
+      $output .= "\n<td>";
+      $output .= "\n$testtitle";
+      $output .= "\n<p>The command:<pre>     $command</pre>\n";
+      $output .= "using the following input, will generate the following output:\n";
+      $output .= "\n</td>";
+      $output .= "\n</tr><tr><td align=center colspan=3>";
+      $output .= "\n<br>";
+      $output .= "\n<table><tr valign=top><td>\n";
+      $output .= displayFileContents($inwidth, $inheight, "<font color=red><i>input-file:</i></font>", @incontents);
+      $output .= "\n</td><td width=10></td><td>";
+      $output .= displayFileContents($outwidth, $outheight, "<font color=red><i>output-file:</i></font>", @outcontents);
+      $output .= "\n</td></tr>";
+      $output .= "\n</table>\n";
+   }
+
+   return $output;
+}
+
+
+
+##############################
+##
+## getTestInfo --
+##
+
+sub getTestInfo {
+   my ($file) = @_;
+   my $testtitlex = "No description available for this test.";
+   my $commandx = "No command available for this test.";
+   my $maxwidth = "5";
+   my $width;
+   my @contents;
+   
+   my @tempcontents;
+   if (!open (XFILE, $file)) {
+      print "Cannot open $file for reading\n";
+      die;
+   }
+   @tempcontents = <XFILE>;
+   close XFILE;
+
+   my $i;
+   for ($i=0; $i<@tempcontents; $i++) {
+      if ($tempcontents[$i] =~ /^\!\!\!test:\s+(.*)\s*$/) {
+         $testtitlex = $1;
+         next;
+      }
+      if ($tempcontents[$i] =~ /^\!\!\!command:\s+(.*)\s*$/) {
+         $commandx = $1;
+         $commandx =~ s/\%in/<font color=red><i>input-file<\/i><\/font>/g;
+         $commandx =~ s/\%out/<font color=red><i>output-file<\/i><\/font>/g;
+         next;
+      }
+      $width = getlength($tempcontents[$i]);
+      $maxwidth = $width if $width > $maxwidth;
+      $contents[@contents] = $tempcontents[$i];
+   }
+
+   my $maxheight = @contents;
+   if ($maxwidth > 40) {
+      $maxwidth = 40;
+      $maxheight += 1;
+
+   }
+
+   # +2 on maxwidth is needed so that Micro$oft Internet Explorer does not
+   # place a horizontal slider bar  on the textarea.
+   return ($testtitlex, $commandx, $maxwidth, $maxheight, @contents);
+}
+
+
+
+##############################
+##
+## getlength -- take tabs into account (tab = 8 spaces)
+##
+
+sub getlength {
+   my ($line) = @_;
+   my $leng = 0;
+
+   if ($line !~ /\t/) {
+      $leng = length($line);
+      return $leng;
+   }
+
+   my @chars = split(//, $line);
+   my $i;
+   for ($i=0; $i<@chars; $i++) {
+     next if $chars[$i] eq "";
+     next if $chars[$i] eq "\n";
+     if ($chars[$i] eq "\t") {
+        $leng += 8 - ($leng % 8);
+     } else {
+        $leng = $leng + 1;
+     }
+   }
+
+   return $leng;
+}
+
+
+
+##############################
+##
+## displayFileContents --
+##
+
+sub displayFileContents {
+   my ($width, $height, $title, @contents) = @_;
+   my $output;
+
+   # my $filelength = @contents;
+   my $filelength = $height;
+   $filelength = $maxtextlen if $filelength > $maxtextlen;
+   #$filelength++;
+   # $filelength = $filelength + 2 if $filelength < 10;
+   $filelength--;
+
+   $output .= "\n<center>";
+   $output .= "\n$title<br>";
+   $output .= "\n<textarea wrap=off rows=$height cols=$width>";
+   my $i;
+   chomp $contents[$#contents];
+   for ($i=0; $i<@contents; $i++) {
+      $output .= $contents[$i];
+   }
+   $output .= "</textarea>";
+
+   return $output;
+}
+
+
+

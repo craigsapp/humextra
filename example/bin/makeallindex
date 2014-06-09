@@ -1,0 +1,115 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+# Creation Date: Fri Mar 11 20:19:23 PST 2005
+# Last Modified: Fri Mar 11 22:03:14 PST 2005
+# Filename:      makeallindex
+# Syntax:        PERL 5
+#
+# Description:   Create index.html file for example base directory.
+#
+use strict;
+
+my $basedir     = $ARGV[0];
+my $template    = $ARGV[1];
+my $databasedir = $ARGV[2];
+my %summary;
+
+opendir (CDIR, $basedir) || die;
+my $file;
+while ($file = readdir(CDIR)) {
+   next if $file =~ /^\./;
+   next if !-d "$basedir/$file";
+   next if !-r "$databasedir/$file/index.dat";
+   storeEntry($file, $databasedir);
+}
+closedir(CDIR);
+
+my $contents = "<table>\n";
+my $key;
+foreach $key (sort keys %summary) {
+   $contents .= "<tr><td><b><a href=$key>$key</a></b></td>\n";
+   $contents .= "<td>$summary{$key}</td></tr>\n";
+}
+$contents .= "\n</table>\n";
+
+open (TFILE, $template) || die;
+my @tfile = <TFILE>;
+close TFILE;
+
+my $i;
+
+for ($i=0; $i<@tfile; $i++) {
+   $tfile[$i] =~ s/<<contents>>/$contents/;
+   print $tfile[$i];
+}
+
+exit(0);
+
+##########################################################################
+
+##############################
+##
+## storeEntry --
+##
+
+sub storeEntry {
+   my ($command, $basedir) = @_;
+   my %data = getManData("$basedir/$command/index.dat");
+
+   $summary{$command} = $data{'SUMMARY'};
+}
+
+
+##############################
+##
+## getManData --
+##
+
+sub getManData {
+   my ($datafile) = @_;
+   my %output;
+
+   my $key = "";
+   my $newkey = "";
+   my $value = "";
+   my $newvalue = "";
+   my $line;
+   my $counter = 1;
+   my $counter2 = 1;
+
+   open (DFILE, "$datafile") || die;
+   while ($line = <DFILE>) {
+      if ($line =~ /^\@([^:]+):\s*(.*)/) {
+         $newkey = $1;
+         $newvalue = $2;
+         if ($key eq "OPTIONNAME") {
+            $counter = int($counter);
+            $counter = "0$counter" if $counter < 10;
+            $key = "OPTIONNAME$counter";
+            $counter++;
+         }
+
+         if ($key eq "OPTIONINFO") {
+            $counter2 = int($counter2);
+            $counter2 = "0$counter2" if $counter2 < 10;
+            $key = "OPTIONINFO$counter2";
+            $counter2++;
+         }
+
+         if ($key !~ /^\s*$/) {
+            $output{$key} = $value;
+         }
+         $key = $newkey;
+         $value = $newvalue;
+
+      } else {
+         $value .= " $line";
+      }
+   }
+   close DFILE;
+
+   return %output;
+}
+
+
