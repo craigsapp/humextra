@@ -2794,7 +2794,7 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
    }
 
    if (barcount > 0) {
-      fixIncompleteBarMeterR(meterbeats, timebaseC);
+      fixIncompleteBarMeterR(meterbeats, timebaseC, base);
    }
 
    // Fix cases where the first barline is not given in the data
@@ -2815,8 +2815,12 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
       }
    }
    if (barlineindex >= 0) {
-      for (i=dataline; i<barlineindex; i++) {
-         infile[i].setBeatR(infile[i].getBeatR() + 1);
+      if (dataline >= 0) {
+         if (infile[dataline].getBeatR() == 0) {
+            for (i=dataline; i<barlineindex; i++) {
+               infile[i].setBeatR(infile[i].getBeatR() + 1);
+            }
+         }
       }
    }
 
@@ -3132,7 +3136,7 @@ void HumdrumFile::initializeTracers(
 
 void HumdrumFile::fixIncompleteBarMeterR(
       SigCollection<RationalNumber>& meterbeats,
-      SigCollection<RationalNumber>& timebase) {
+      SigCollection<RationalNumber>& timebase, const char* base) {
 
    HumdrumFile& file = *this;
   
@@ -3157,6 +3161,7 @@ void HumdrumFile::fixIncompleteBarMeterR(
        file[file.getNumLines()-1].getAbsBeatR() -
        file[barlocs.last()].getAbsBeatR()
    );
+
  
    Array<RationalNumber> timedur;  // timesig dur at each bar
    timedur.setSize(barlocs.getSize());
@@ -3260,13 +3265,19 @@ void HumdrumFile::fixIncompleteBarMeterR(
       return;
    }
 
-   pickupdur = 0;
-   if (file[barlocs[0]].getAbsBeatR() > 0) {
-      if (file[barlocs[0]].getAbsBeatR() < timedur[0]) {
-         pickupdur = file[barlocs[0]].getAbsBeatR();
+   // Only handle pickup measures for quarter note beats for now.
+   // Pickups in other time bases are being messed up by the line
+   //      file[i].setBeat(timedur[0]-pickupdur+file[i].getBeatR()+1);      
+   // Probably because of a mixture of "4" and non "4" timebase in
+   // calculation.  
+   if (strcmp(base, "4") == 0) {
+      pickupdur = 0;
+      if (file[barlocs[0]].getAbsBeatR() > 0) {
+         if (file[barlocs[0]].getAbsBeatR() < timedur[0]) {
+            pickupdur = file[barlocs[0]].getAbsBeatR();
+         }
       }
    }
-// ggg
    if (pickupdur > 0) {
       // int dataQ = 0;
       for (i=0; i<barlocs[0]; i++) {

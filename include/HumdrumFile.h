@@ -265,7 +265,7 @@ class HumdrumFile : public HumdrumFileBasic {
                          SigCollection<double>& timebase);
       void       fixIncompleteBarMeterR(
 		         SigCollection<RationalNumber>& meterbeats, 
-                         SigCollection<RationalNumber>& timebase);
+                         SigCollection<RationalNumber>& timebase, const char* base);
       void       fixIrritatingPickupProblem(void);
       void       initializeTracers(SigCollection<RationalNumber>& lastduration,
                          SigCollection<RationalNumber>& runningstatus, 

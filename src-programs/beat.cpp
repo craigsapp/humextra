@@ -133,6 +133,7 @@ int       tpwQ     = 0;        // used with --tpw option
 int       tpqQ     = 0;        // used with --tpq option
 const char* beatbase = "4";    // used with --beatsize option
 int       uQ       = 0;        // used for -f and -u interactions
+int       debugQ   = 0;        // used with --debug option
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -181,6 +182,13 @@ int main(int argc, char* argv[]) {
 
       fillAttackArray(infile, Attacks);
       extractBeatFeatures(infile, Blines, Bfeatures);
+      if (debugQ) {
+         cout << "BEAT FEATURES ====================" << endl;
+         for (int ii=0; ii<Bfeatures.getSize(); ii++) {
+            cout << Bfeatures[ii].getFloat() << endl;
+         }
+         cout << "==================================" << endl;
+      }
       extractDurFeatures(infile, Dlines, Dfeatures);
 
       if (Bsearch.getSize() > 0 || Dsearch.getSize() > 0) {
@@ -1306,6 +1314,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    Rvalue    = opts.getDouble("R");
    beatbase  = opts.getString("beatsize");
    uQ        = opts.getBoolean("beatsize");
+   debugQ    = opts.getBoolean("debug");
 
    if (rationalQ) {
       tickQ = 1;
