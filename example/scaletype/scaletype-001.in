@@ -1,5 +1,5 @@
 !!!test: Measure the scale of a pentatonic example.
-!!!command: scaletype -D %in > %out
+!!!command: scaletype -DF %in > %out
 **kern
 *clefG2
 *k[]
