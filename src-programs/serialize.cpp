@@ -203,6 +203,7 @@ void printSubSpine(HumdrumFile& infile, int track, int start, int subspine) {
    Array<int> lastsub;
    lastsub.setSize(infile.getMaxTracks()+1);
    lastsub.allowGrowth(0);
+   lastsub.setAll(1241324);
    int markerCounter = 0;
 
    for (i=start; i<infile.getNumLines(); i++) {
