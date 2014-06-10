@@ -2797,6 +2797,30 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
       fixIncompleteBarMeterR(meterbeats, timebaseC);
    }
 
+   // Fix cases where the first barline is not given in the data
+   // Currently, the measure will be labeled as 0, and the beats 
+   // will be offset from 0 rather than 1.
+   int dataline = -1;
+   int barlineindex = -1;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if ((dataline == -1) && (infile[i].isData())) {
+         dataline = i;
+         continue;
+      }
+      if (infile[i].isBarline()) {
+         if (dataline >= 0) {
+            barlineindex = i;
+         }
+         break;
+      }
+   }
+   if (barlineindex >= 0) {
+      for (i=dataline; i<barlineindex; i++) {
+         infile[i].setBeatR(infile[i].getBeatR() + 1);
+      }
+   }
+
+
    rhythms.setSize(rhythmsR.getSize());
    for (i=0; i<rhythms.getSize(); i++) {
       // cout << "XRHYTHM = " << rhythmsR[i] << endl;

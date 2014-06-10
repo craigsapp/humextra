@@ -38,16 +38,17 @@ void getNoteArray(Array<int>& notes, HumdrumFile& infile, int line, int spine);
 
 // user interface variables
 Options      options;            // database for command-line arguments
+int debugQ   = 0;                // used with --debug option
 
 // other variables:
-int key = -1;      // for storing the key  (base 40 number)
-int nameinit = 0;
-char name[128] = {0};
-int bar = 0;       // bar number
-int mode = -1;     // for storing the mode (0 = major, 1 = minor)
-float metronome = -1.0;  // 
-int start = -1;
-int terminus = -1;
+int   key       = -1;   // for storing the key  (base 40 number)
+int   nameinit  = 0;
+char name[128]  = {0};
+int   bar       = 0;    // bar number
+int   mode      = -1;   // for storing the mode (0 = major, 1 = minor)
+float metronome = -1.0; 
+int   start     = -1;
+int   terminus  = -1;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -119,6 +120,9 @@ void processTrack(HumdrumFile& infile, int track) {
    int status;
    int i, j;
    for (i=0; i<infile.getNumLines(); i++) {
+      if (debugQ) {
+         cout << "Processing line " << i+1 << ": " << infile[i] << endl;
+      }
       if (start > i && track != infile.getMaxTracks()) {
          // skip over global comments after the first time:
          i = start;
@@ -151,6 +155,9 @@ void processTrack(HumdrumFile& infile, int track) {
             }
             break;
          case E_humrec_data_measure:
+            if (sscanf(infile[i][0], "=%d", &bar)) {
+               cout << "\n (bar " << bar << ") ";
+            }
             break;
          case E_humrec_interpretation:
             status = parseInterpretation(infile, i, track);
@@ -243,10 +250,10 @@ void convertKernNoteToDM(HumdrumFile& infile, int line, int spine, int track) {
    if (infile[line].getExInterpNum(spine) != E_KERN_EXINT) {
       return;
    }
-   if (infile[line].getBeat() == 1.0) {
-      bar++;
-      cout << "\n (bar " << bar << ") ";
-   }
+//   if (infile[line].getBeat() == 1.0) {
+//      bar++;
+//      cout << "\n (bar " << bar << ") ";
+//   }
    duration = Convert::kernToDuration(infile[line][spine]);
    if (strchr(element, 'r') != NULL) {
       cout << " ";
@@ -427,6 +434,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    } else if (opts.getBoolean("example")) {
       example();
       exit(0);
+   }
+
+   if (opts.getBoolean("debug")) {
+      debugQ = 1;
    }
 }
 

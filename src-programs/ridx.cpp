@@ -30,7 +30,7 @@
 void      checkOptions          (Options& opts, int argc, char** argv);
 void      example               (void);
 void      usage                 (const char* command);
-void      processFile           (HumdrumFile& infile);
+void      processFile           (HumdrumFile& infile, int setcount);
 
 
 // User interface variables:
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
    }
 
    for (i=0; i<infiles.getCount(); i++) {
-      processFile(infiles[i]);
+      processFile(infiles[i], infiles.getCount());
    }
 
    return 0;
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 // processFile --
 //
 
-void processFile(HumdrumFile& infile) {
+void processFile(HumdrumFile& infile, int setcount) {
    int i;
    PerlRegularExpression pre;
 
@@ -94,7 +94,7 @@ void processFile(HumdrumFile& infile) {
 
    // if bibliographic/reference records are not suppressed
    // print the !!!!SEGMENT: marker if present.
-   if (!option_G) {
+   if ((setcount > 1) && (!option_G)) {
       infile.printNonemptySegmentLabel(cout);
    }
 

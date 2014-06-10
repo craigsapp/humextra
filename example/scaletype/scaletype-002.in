@@ -1,5 +1,5 @@
 !!!test: Measure the scale of a pentatonic example and list pitch classes used.
-!!!command: scaletype -p %in > %out
+!!!command: scaletype -D -p %in > %out
 **kern
 *clefG2
 *k[]

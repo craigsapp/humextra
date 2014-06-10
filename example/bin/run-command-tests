@@ -2,7 +2,7 @@
 #
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Fri Mar 11 17:12:52 PST 2005
-# Last Modified: Thu Jun  5 13:27:41 PDT 2014
+# Last Modified: Mon Jun  9 19:52:26 PDT 2014
 # Filename:      run-regression-tests
 # Syntax:        perl 5
 #
@@ -191,12 +191,32 @@ sub getCommandDirectories {
    my $file;
    my $file2;
    my $which;
+   my $skip;
+
+
+
    while ($file = readdir(DIR)) {
       next if $file =~ /^\./;
       next if !-d "$basedir/$file";
       $which = `which $file 2> /dev/null`;
       next if $which =~ /^\s*$/;
       # directory is the same name as a command, so see if it has data:
+
+      # don't include any directories which have a file called .regression-ignore files
+      # with the content "all" anywhere in them.
+      $skip = 0;
+      if (-r "$basedir/$file/.regression-ignore") {
+         open(RFILE, "$basedir/$file/.regression-ignore") or die;
+         my $line;
+         while ($line = <RFILE>) {
+            if ($line =~ /^\s*all\s*$/) {
+               $skip = 1;         
+               last;
+            }
+         }
+         close RFILE;
+      }
+      next if $skip;
       opendir(SDIR, "$basedir/$file") or die "Cannot open $basedir/$file";
       while ($file2 = readdir(SDIR)) {
          if ($file2 =~ /.*-\d\d\d\.in$/) {

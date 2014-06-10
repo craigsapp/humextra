@@ -79,7 +79,9 @@ int main(int argc, char* argv[]) {
       }
 
       // analyze the input file according to command-line options
-      infiles[i].printNonemptySegmentLabel(cout);
+      if (infiles.getCount() > 1) {
+         infiles[i].printNonemptySegmentLabel(cout);
+      }
       processData(infiles[i]);
 
    }

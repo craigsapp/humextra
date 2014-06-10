@@ -39,16 +39,16 @@ void getNoteArray(Array<int>& notes, HumdrumFile& infile, int line, int spine);
 Options      options;            // database for command-line arguments
 
 // other variables:
-int key = -1;      // for storing the key  (base 40 number)
-int nameinit = 0;
-char name[128] = {0};
-int bar = 0;       // bar number
-int mode = -1;     // for storing the mode (0 = major, 1 = minor)
-float metronome = -1.0;  // 
-int metertop = -1;  // 
-int meterbottom = -1; //
-int start = -1;
-int terminus = -1;
+int   key         = -1;   // for storing the key  (base 40 number)
+int   nameinit    = 0;
+char  name[128]   = {0};
+int   bar         = 0;    // bar number
+int   mode        = -1;   // for storing the mode (0 = major, 1 = minor)
+float metronome   = -1.0;
+int   metertop    = -1;
+int   meterbottom = -1;
+int   start       = -1;
+int   terminus    = -1;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -119,6 +119,11 @@ void convertToDM(HumdrumFile& infile) {
 void processTrack(HumdrumFile& infile, int track) {
    int status;
    int i, j;
+   if (infile.getPickupDuration() > 0) {
+     bar = 0;
+   } else {
+     bar = 1;
+   }
    for (i=0; i<infile.getNumLines(); i++) {
       if (start > i && track != infile.getMaxTracks()) {
          // skip over global comments after the first time:
@@ -243,8 +248,8 @@ void convertKernNoteToDM(HumdrumFile& infile, int line, int spine, int track) {
    }
    cout << " (";
    if (infile[line].getBeat() == 1.0) {
-      bar++;
       cout << "bar " << bar << " ";
+      bar++;
    }
    duration = Convert::kernToDuration(infile[line][spine]);
    if (strchr(element, 'r') != NULL) {
