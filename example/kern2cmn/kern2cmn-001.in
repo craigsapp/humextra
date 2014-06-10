@@ -1,11 +1,20 @@
-(cmn
-;!!!test: Translate a simple example into CMN data.
-;!!!command: kern2cmn %in > %out
- staff
- treble
- (meter 2 4)
- (c4 q) (d4 q)
- (bar 2)  (e4 q) (f4 q)
- (bar 3)  (g4 e) (a4 e) (b4 q)
- (bar 4)  (c4 h)
-)
+!!!test: Translate a simple example into CMN data.
+!!!command: kern2cmn %in > %out
+**kern
+*clefG2
+*k[]
+*M2/4
+*MM60
+4c
+4d
+=2
+4e
+4f
+=3
+8g
+8a
+4b
+=4
+2c
+==
+*-

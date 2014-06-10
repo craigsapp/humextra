@@ -5,7 +5,7 @@
  treble
  (meter 2 4)
  (c4 q) (d4 q)
- (bar 1)  (e4 q) (f4 q)
- (bar 2)  (g4 e) (a4 e) (b4 q)
- (bar 3)  (c4 h)
+ (bar 2)  (e4 q) (f4 q)
+ (bar 3)  (g4 e) (a4 e) (b4 q)
+ (bar 4)  (c4 h)
 )
