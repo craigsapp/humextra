@@ -1,6 +1,6 @@
 (cmn
-;;;test: Translate a simple example into CMN data.
-;;;command: kern2cmn %in > %out
+;!!!test: Translate a simple example into CMN data.
+;!!!command: kern2cmn %in > %out
  staff
  treble
  (meter 2 4)
