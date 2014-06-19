@@ -934,7 +934,6 @@ int determineChordStem(Array<Array<int> >& voice,
       }
    }
 
-cout << "X";
    if (maxx < 0 + Borderline) {
       // all stems want to point upwards:
       return +1;

@@ -166,7 +166,8 @@ SigString& NoteNode::getId(void) {
 void      checkOptions         (Options& opts, int argc, char* argv[]);
 void      example              (void);
 void      usage                (const char* command);
-int       processFile          (HumdrumFile& infile, const char* filename);
+int       processFile          (HumdrumFile& infile, const char* filename,
+                                Options& opts);
 void      getKernTracks        (Array<int>& ktracks, HumdrumFile& infile);
 int       validateInterval     (Array<Array<NoteNode> >& notes, 
                                 int i, int j, int k);
@@ -245,6 +246,7 @@ void      markNote             (HumdrumFile& infile, int line, int col);
 void      initializeRetrospective(Array<Array<SigString> >& retrospective, 
                                 HumdrumFile& infile, Array<int>& ktracks);
 int       getTriangleIndex     (int number, int num1, int num2);
+void      adjustKTracks        (Array<int>& ktracks, const char* koption);
 
 // global variables
 Options   options;             // database for command-line arguments
@@ -265,6 +267,7 @@ int       topQ         = 0;      // used with -t option
 int       toponlyQ     = 0;      // used with -T option
 int       hparenQ      = 0;      // used with -h option
 int       mparenQ      = 0;      // used with -y option
+int       koptionQ     = 0;      // used with -k option
 int       parenQ       = 0;      // used with -p option
 int       rowsQ        = 0;      // used with --rows option
 int       hmarkerQ     = 0;      // used with -h option
@@ -304,7 +307,7 @@ int main(int argc, char** argv) {
    int count = 0;
    int totalcount = 0;
    while (streamer.read(infile)) {
-      count = processFile(infile, infile.getFileName());
+      count = processFile(infile, infile.getFileName(), options);
       totalcount += count;
       if (countQ) {
          if (filenameQ && (count > 0)) {
@@ -332,7 +335,7 @@ int main(int argc, char** argv) {
 // processFile -- Do requested analysis on a given file.
 //
 
-int processFile(HumdrumFile& infile, const char* filename) {
+int processFile(HumdrumFile& infile, const char* filename, Options& options) {
 
    Array<Array<NoteNode> > notes;
    Array<Array<char> >     names;
@@ -340,6 +343,9 @@ int processFile(HumdrumFile& infile, const char* filename) {
    Array<int>              reverselookup;
 
    infile.getTracksByExInterp(ktracks, "**kern");
+   if (koptionQ) {
+      adjustKTracks(ktracks, options.getString("koption"));
+   }
    notes.setSize(ktracks.getSize());
    reverselookup.setSize(infile.getMaxTracks()+1);
    reverselookup.setAll(-1);
@@ -409,6 +415,51 @@ int processFile(HumdrumFile& infile, const char* filename) {
    }
 
    return count;
+}
+
+
+
+//////////////////////////////
+//
+// adjustKTracks -- Select only two spines to do analysis on.
+//
+
+void adjustKTracks(Array<int>& ktracks, const char* koption) {
+   PerlRegularExpression pre;
+   if (!pre.search(koption, "(\\$|\\$?\\d*)[^\\$\\d]+(\\$|\\$?\\d*)")) {
+      return;
+   }
+   int number1 = 0;
+   int number2 = 0;
+   PerlRegularExpression pre2;
+
+   if (pre2.search(pre.getSubmatch(1), "\\d+")) { 
+      number1 = atoi(pre.getSubmatch(1));
+      if (strchr(pre.getSubmatch(), '$') != NULL) {
+         number1 = ktracks.getSize() - number1;
+      }
+   } else {
+      number1 = ktracks.getSize();
+   }
+
+   if (pre2.search(pre.getSubmatch(2), "\\d+")) { 
+      number2 = atoi(pre.getSubmatch(2));
+      if (strchr(pre.getSubmatch(), '$') != NULL) {
+         number2 = ktracks.getSize() - number2;
+      }
+   } else {
+      number2 = ktracks.getSize();
+   }
+
+   number1--;
+   number2--;
+
+   int track1 = ktracks[number1];
+   int track2 = ktracks[number2];
+
+   ktracks.setSize(2);
+   ktracks[0] = track1;
+   ktracks[1] = track2;
 }
 
 
@@ -631,8 +682,10 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
       return currentindex;
    }
    if (notes[0][currentindex].line != fileline) {
-      // should never get here.
-      printAsCombination(infile, line, ktracks, reverselookup, "?");
+      // This section occurs when two voices are both sustaining
+      // at the start of the module.  Print a "." to indicate that
+      // the counterpoint module is continuing from a previous line.
+      printAsCombination(infile, line, ktracks, reverselookup, ".");
       return currentindex;
    }
 
@@ -2364,6 +2417,9 @@ void extractNoteArray(Array<Array<NoteNode> >& notes, HumdrumFile& infile,
          }
          track = infile[i].getPrimaryTrack(j);
          index = reverselookup[track];
+         if (index < 0) {
+            continue;
+         }
          if (idQ) {
             current[index].getId() = Ids[track];
             Ids[track] = "";  // don't assign to next item;
@@ -2597,6 +2653,9 @@ void getNames(Array<Array<char> >& names, Array<int>& reverselookup,
          continue;
       }
       for (j=0; j<infile[i].getFieldCount(); j++) {
+         if (reverselookup[infile[i].getPrimaryTrack(j)] < 0) {
+            continue;
+         }
          if (!infile[i].isExInterp(j, "**kern")) {
             continue;
          }
@@ -2638,6 +2697,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("raw=b", "display only modules without formatting");
    opts.define("raw2=b", "display only modules formatted for Vishesh");
    opts.define("c|uncross=b", "uncross crossed voices when creating modules");
+   opts.define("k|koption=s:", "Select only two spines to analyze");
    opts.define("C|comma=b", "separate intervals by comma rather than space");
    opts.define("retro|retrospective=b", 
                   "Retrospective module display in the score");
@@ -2704,6 +2764,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       example();
       exit(0);
    }
+   
+   koptionQ = opts.getBoolean("koption");
 
    if (opts.getBoolean("comma")) {
       Spacer.setSize(2);

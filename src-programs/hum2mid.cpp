@@ -784,7 +784,9 @@ double checkForTempo(HumdrumRecord& record) {
       // C2          = 75 bpm
       // O|          = 76 bpm
       // C|3, 3, 3/2 = 110 bpm
+      // C2/3        = 1.5 * 72 = 108 bpm
       // C3          = 110 bpm
+      // O3/2        = 58 * 1.5 = 87 bpm
       // O/3         = 110 bpm
       // C|2, Cr     = 220 bpm
       char mensuration[1024] = {0};
@@ -818,6 +820,8 @@ double checkForTempo(HumdrumRecord& record) {
          return (double)metQ * 1.8965517;
       } else if (strcmp(mensuration, "C3") == 0) {
          return (double)metQ * 1.8965517;
+      } else if (strcmp(mensuration, "C2/3") == 0) {
+         return (double)metQ * 1.8;
       } else if (strcmp(mensuration, "3") == 0) {
          return (double)metQ * 1.8965517;
       } else if (strcmp(mensuration, "3/2") == 0) {
@@ -826,6 +830,8 @@ double checkForTempo(HumdrumRecord& record) {
          return (double)metQ * 1.8965517;
       } else if (strcmp(mensuration, "O2") == 0) {
          return (double)metQ * 1.25;
+      } else if (strcmp(mensuration, "O3/2") == 0) {
+         return (double)metQ * 1.5;
       } else if (strcmp(mensuration, "C2") == 0) {
          return (double)metQ * 1.25;
       } else if (strcmp(mensuration, "C|2") == 0) {
