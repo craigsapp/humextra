@@ -266,7 +266,7 @@ void HumdrumFileSet::appendHumdrumFileContent(const char* filename,
 // Example:
 // maps: humdrum://osu/classical/haydn/london/sym099a.krn 
 // into:
-// http://kern.humdrum.org/cgi-bin/ksdata?file=sym099a.krn&l=/osu/classical/haydn/london&format=kern
+// http://kern.ccarh.org/cgi-bin/ksdata?file=sym099a.krn&l=/osu/classical/haydn/london&format=kern
 //
 
 void HumdrumFileSet::readAppendFromHumdrumURI(SSTREAM& inputstream, 
@@ -306,7 +306,7 @@ void HumdrumFileSet::readAppendFromHumdrumURI(SSTREAM& inputstream,
    }
 
    SSTREAM httprequest;
-   httprequest << "http://" << "kern.humdrum.org";
+   httprequest << "http://" << "kern.ccarh.org";
    httprequest << "/cgi-bin/ksdata?";
    if (strstr(filename.getBase(), ".krn") != NULL) {
       httprequest << "l=" << location.getBase();
@@ -344,7 +344,7 @@ void HumdrumFileSet::readAppendFromJrpURI(SSTREAM& inputstream,
    }
 
    SSTREAM httprequest;
-   httprequest << "http://" << "jrp.humdrum.org";
+   httprequest << "http://" << "jrp.ccarh.org";
    httprequest << "/cgi-bin/jrp?a=humdrum&f=";
    httprequest << ptr;
    httprequest << ends;

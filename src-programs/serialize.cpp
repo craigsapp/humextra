@@ -63,17 +63,9 @@ int main(int argc, char* argv[]) {
    checkOptions(options, argc, argv);
 
    // figure out the number of input files to process
-   int numinputs = options.getArgCount();
+   infiles.read(options);
 
    int i;
-   if (numinputs < 1) {
-      infiles.read(cin);
-   } else {
-      for (i=0; i<numinputs; i++) {
-         infiles.readAppend(options.getArg(i+1));
-      }
-   }
-
    for (i=0; i<infiles.getCount(); i++) {
       infiles[i].analyzeRhythm();
 

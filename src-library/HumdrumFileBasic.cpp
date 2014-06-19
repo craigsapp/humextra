@@ -268,6 +268,7 @@ HumdrumFileBasic::HumdrumFileBasic(const char* filename) {
 }
 
 
+
 ////////////////////////////////////////
 //
 // HumdrumFileBasic::setAllocation -- set the expected number of 
@@ -1755,7 +1756,7 @@ char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
       }
    
       SSTREAM httprequest;
-      httprequest << "http://" << "kern.humdrum.org";
+      httprequest << "http://" << "kern.ccarh.org";
       if (strchr(filename.getBase(), '.') != NULL) {
          httprequest << "/cgi-bin/ksdata?file=";
          if (filename.getSize() > 0) {
@@ -1790,7 +1791,7 @@ char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
       }
    
       SSTREAM httprequest;
-      httprequest << "http://" << "jrp.humdrum.org";
+      httprequest << "http://" << "jrp.ccarh.org";
       httprequest << "/cgi-bin/jrp?a=humdrum&f=";
       httprequest << ptr;
       httprequest << ends;
@@ -1815,7 +1816,7 @@ char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
 // Example:
 // maps: humdrum://osu/classical/haydn/london/sym099a.krn 
 // into:
-// http://kern.humdrum.org/cgi-bin/ksdata?file=sym099a.krn&l=/osu/classical/haydn/london&format=kern
+// http://kern.ccarh.org/cgi-bin/ksdata?file=sym099a.krn&l=/osu/classical/haydn/london&format=kern
 //
 
 void HumdrumFileBasic::readFromHumdrumURI(const char* humdrumaddress) {
@@ -1854,7 +1855,7 @@ void HumdrumFileBasic::readFromHumdrumURI(const char* humdrumaddress) {
    }
 
    SSTREAM httprequest;
-   httprequest << "http://" << "kern.humdrum.org";
+   httprequest << "http://" << "kern.ccarh.org";
    httprequest << "/cgi-bin/ksdata?file=";
    if (filename.getSize() > 0) {
       httprequest << filename.getBase();
@@ -1892,7 +1893,7 @@ void HumdrumFileBasic::readFromJrpURI(const char* jrpaddress) {
    }
 
    SSTREAM httprequest;
-   httprequest << "http://" << "jrp.humdrum.org";
+   httprequest << "http://" << "jrp.ccarh.org";
    httprequest << "/cgi-bin/jrp?a=humdrum&f=";
    httprequest << ptr;
    httprequest << ends;
