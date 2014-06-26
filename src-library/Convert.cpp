@@ -428,11 +428,25 @@ RationalNumber Convert::kernToDurationR(const char* aKernString) {
        strchr(aKernString, '7') == NULL && 
        strchr(aKernString, '8') == NULL && 
        strchr(aKernString, '9') == NULL    ) {
-      if (strstr(aKernString, "000") != NULL) {
+      if (strstr(aKernString, "0000000000") != NULL) { // exotic rhythm
+         oduration = 4096;
+      } else if (strstr(aKernString, "000000000") != NULL) { // exotic rhythm
+         oduration = 2048;
+      } else if (strstr(aKernString, "00000000") != NULL) { // exotic rhythm
+         oduration = 1024;
+      } else if (strstr(aKernString, "0000000") != NULL) { // exotic rhythm
+         oduration = 512;
+      } else if (strstr(aKernString, "000000") != NULL) { // exotic rhythm
+         oduration = 256;
+      } else if (strstr(aKernString, "00000") != NULL) { // exotic rhythm
+         oduration = 128;
+      } else if (strstr(aKernString, "0000") != NULL) { // exotic rhythm
+         oduration = 64;
+      } else if (strstr(aKernString, "000") != NULL) { // 000 = maxima
          oduration = 32;
-      } else if (strstr(aKernString, "00") != NULL) {
+      } else if (strstr(aKernString, "00") != NULL) {  // 00 = long
          oduration = 16;
-      } else {
+      } else { // 0 == breve
          oduration = 8;
       }
 

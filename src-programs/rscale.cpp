@@ -65,37 +65,22 @@ int       rebeamQ    = 0;      // used with -B option
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile;
-
-   // process the command-line options
    checkOptions(options, argc, argv);
+   HumdrumFileSet infiles;
+   infiles.read(options);
 
-   // figure out the number of input files to process
-   int numinputs = options.getArgCount();
-
-   for (int i=0; i<numinputs || i==0; i++) {
-      infile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
-      }
-      // analyze the input file according to command-line options
-      infile.analyzeRhythm("4");
- 
+   for (int i=0; i<infiles.getCount(); i++) {
+      infiles[i].analyzeRhythm("4");
       if (originalQ) {
-         getOriginalFactor(infile, factor);
+         getOriginalFactor(infiles[i], factor);
       } else if (alternateQ) {
-         getAlternateFactor(infile, factor);
+         getAlternateFactor(infiles[i], factor);
       }
 
-      printOutput(infile, factor);
-   }
-
-   if ((!originalQ) && (!FoundRef) && (factor != 1)) {
-      cout << "!!!rscale: " << factor << endl;
+      printOutput(infiles[i], factor);
+      if ((!originalQ) && (!FoundRef) && (factor != 1)) {
+         cout << "!!!rscale: " << factor << endl;
+      }
    }
 
    return 0;

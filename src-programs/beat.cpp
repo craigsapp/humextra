@@ -138,50 +138,39 @@ int       debugQ   = 0;        // used with --debug option
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile;
+   checkOptions(options, argc, argv);
+   HumdrumFileSet infiles;
+   infiles.read(options);
 
    Array<RationalNumber> Bfeatures; // used to extract beat data from input
    Array<RationalNumber> Dfeatures; // used to extract duration data from input
    Array<int>    Blines;            // used to extract beat data from input
    Array<int>    Dlines;            // used to extract duration data from input
 
-   // process the command-line options
-   checkOptions(options, argc, argv);
+   for (int i=0; i<infiles.getCount(); i++) {
 
-   // figure out the number of input files to process
-   int numinputs = options.getArgCount();
-
-   for (int i=0; i<numinputs || i==0; i++) {
-      infile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
-      }
       // analyze the input file according to command-line options
-      infile.analyzeRhythm(beatbase);
+      infiles[i].analyzeRhythm(beatbase);
 
       Array<int> tickanalysis;
-      tickanalysis.setSize(infile.getNumLines());
+      tickanalysis.setSize(infiles[i].getNumLines());
       tickanalysis.setAll(0);
       int tickfactor = 1;
 
       if (tickQ) {
-         tickfactor = doTickAnalysis(tickanalysis, infile);
+         tickfactor = doTickAnalysis(tickanalysis, infiles[i]);
       }
 
       if (tpwQ) {
-         cout << infile.getMinTimeBase() * tickfactor << endl;
+         cout << infiles[i].getMinTimeBase() * tickfactor << endl;
          exit(0);
       } else if (tpqQ) {
-         cout << infile.getMinTimeBase() * tickfactor /4.0 << endl;
+         cout << infiles[i].getMinTimeBase() * tickfactor /4.0 << endl;
          exit(0);
       }
 
-      fillAttackArray(infile, Attacks);
-      extractBeatFeatures(infile, Blines, Bfeatures);
+      fillAttackArray(infiles[i], Attacks);
+      extractBeatFeatures(infiles[i], Blines, Bfeatures);
       if (debugQ) {
          cout << "BEAT FEATURES ====================" << endl;
          for (int ii=0; ii<Bfeatures.getSize(); ii++) {
@@ -189,12 +178,12 @@ int main(int argc, char* argv[]) {
          }
          cout << "==================================" << endl;
       }
-      extractDurFeatures(infile, Dlines, Dfeatures);
+      extractDurFeatures(infiles[i], Dlines, Dfeatures);
 
       if (Bsearch.getSize() > 0 || Dsearch.getSize() > 0) {
-         printSearchResults(infile, Bfeatures, Blines, Dfeatures, Dlines);
+         printSearchResults(infiles[i], Bfeatures, Blines, Dfeatures, Dlines);
       } else {
-         printOutput(infile, Bfeatures, Blines, Dfeatures, Dlines, 
+         printOutput(infiles[i], Bfeatures, Blines, Dfeatures, Dlines, 
                tickanalysis);
       }
    }
