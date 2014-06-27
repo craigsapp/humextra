@@ -174,6 +174,22 @@ void createTable(ostream& out, HumdrumFile& infile) {
 
    int i;
    for (i=0; i<infile.getNumLines(); i++) {
+      if (infile[i].isData()) {
+         printFields(out, infile, i);
+         continue;
+      }
+      if (infile[i].isMeasure()) {
+         printFields(out, infile, i);
+         continue;
+      }
+      if (infile[i].isInterpretation()) {
+         printFields(out, infile, i);
+         continue;
+      }
+      if (infile[i].isLocalComment()) {
+         printFields(out, infile, i);
+         continue;
+      }
       if (infile[i].isGlobalComment()) {
          printGlobalComment(out, infile, i);
          continue;
@@ -181,15 +197,6 @@ void createTable(ostream& out, HumdrumFile& infile) {
       if (infile[i].isBibliographic()) {
          printReferenceRecord(out, infile, i);
          continue;
-      }
-      if (infile[i].isData()) {
-         printFields(out, infile, i);
-      }
-      if (infile[i].isMeasure()) {
-         printFields(out, infile, i);
-      }
-      if (infile[i].isInterpretation()) {
-         printFields(out, infile, i);
       }
    }
 

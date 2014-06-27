@@ -45,33 +45,23 @@ int       rootQ        = 1;  // used with -r option
 int       recip        = -1; // used with -R option
 int       recipField   = -1; // used with -R option
 const char *instrument = ""; // used with -I option
+const char *Prefix     = ""; // used with -P option
+int        prefixQ     = 0;  // used with -P option
 
 ///////////////////////////////////////////////////////////////////////////
 
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile;
-
-   // process the command-line options
    checkOptions(options, argc, argv);
+   HumdrumFileSet infiles;
+   infiles.read(options);
 
-   // figure out the number of input files to process
-   int numinputs = options.getArgCount();
+   Array<double> durs;
 
-   for (int i=0; i<numinputs || i==0; i++) {
-      infile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
-      }
-
-      Array<double> durs;
+   for (int i=0; i<infiles.getCount(); i++) {
       durs.setSize(0);
-      doRhythmAnalysis(infile, durs);
-      generateAnalysis(infile, durs);
+      doRhythmAnalysis(infiles[i], durs);
+      generateAnalysis(infiles[i], durs);
    }
 
    return 0;
@@ -385,22 +375,26 @@ int getRecipField(int line, HumdrumFile& infile, int recip) {
 void printChordInfo(const char* token,  int root, 
       int keyroot, int keymode, double duration) {
    int i;
-   char dbuffer[128] = {0};
-   char pbuffer[128] = {0};
-   Convert::durationToKernRhythm(dbuffer, duration);
+   char dbuffer[1024] = {0};
+   char pbuffer[1024] = {0};
+   if (duration > 0) {
+      Convert::durationToKernRhythm(dbuffer, duration);
+   }
    if (!rhythmQ) {
       dbuffer[0] = '\0';
+   }
+
+   if (prefixQ) {
+      strcat(dbuffer, Prefix);
    }
 
    Array<int> pitches;
    if (root >= 0) {
       getChordPitches(pitches, token, root, keyroot, keymode);
       for (i=0; i<pitches.getSize(); i++) {
-         if (duration > 0) {
-            cout << dbuffer;
-         }
+         cout << dbuffer;
          cout << Convert::base40ToKern(pbuffer, pitches[i]);
-//cout << "(" << pitches[i] << ")";
+         //cout << "(" << pitches[i] << ")";
          if (strchr(token, ';') != NULL) {
             cout << ';';
          }
@@ -734,6 +728,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("a|append=b",         "append analysis data to input");
    opts.define("o|octave=i:2",       "octave to output root pitch");
    opts.define("RR|no-rhythm=b",     "don't try to do any rhythm analysis");
+   opts.define("P|prefix=s",         "prefix string for each chordtone (such as rhythm)");
    opts.define("R|recip=i:-1",       "use **recip column for rhythm");
    opts.define("r|root=b",           "extract only root information");
    opts.define("b|bass|bass-line=b", "extract only bass-line information");
@@ -771,6 +766,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    rootQ      =  opts.getBoolean("root");
    instrument =  opts.getString("instrument");
    recip      =  opts.getInteger("recip");
+   Prefix     =  opts.getString("prefix");
+   prefixQ    =  opts.getBoolean("prefix");
 }
 
 
