@@ -3,6 +3,7 @@
 // Creation Date: Tue Mar  8 17:05:00 PST 2011
 // Last Modified: Sun Mar 27 13:36:19 PDT 2011 added label hyperlinks
 // Last Modified: Sun Mar 27 17:34:54 PDT 2011 added ref record tooltips
+// Last Modified: Thu Jun 26 16:07:42 PDT 2014 generalized CSS class markup
 // Filename:      ...sig/examples/all/humtable.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/humtable.cpp
 // Syntax:        C++; museinfo
@@ -18,14 +19,11 @@
 
 #ifndef OLDCPP
    #include <iostream>
+   #include <sstream>
 #else
    #include <iostream.h>
+   #include <strstream.h>
 #endif
-
-
-#define C0C0 "cellpadding=\"0\" cellspacing=\"0\""
-#define TDSEP 10
-#define TOKENWIDTH 70
 
 // function declarations
 void     checkOptions         (Options& opts, int argc, char* argv[]);
@@ -48,6 +46,10 @@ void     getMarks             (HumdrumFile& infile, Array<char>& chars,
 ostream& printMarkStyle       (ostream& out, HumdrumFile& infile, int line, 
                                int track, Array<char>& chars, 
                                Array<SigString>& colors);
+void     markupKernToken      (Array<char>& strang, HumdrumFile& infile, 
+                               int line, int field);
+void     printHtmlCharacter   (ostream& out, char ch);
+void     markNullToken        (Array<char>& strang);
 
 // global variables
 Options      options;            // database for command-line arguments
@@ -56,6 +58,8 @@ int          classQ    = 1;      // used with -C option
 int          cssQ      = 0;      // used with --css option
 int          textareaQ = 0;      // used with --textarea option
 int          markQ     = 1;	 // used with -M option
+int          kernQ     = 0;      // used with -k option
+const char*  prefix    = "hum";  // used with --prefix option
 
 Array<char>      Markchar;
 Array<SigString> Markcolor;
@@ -97,32 +101,23 @@ int main(int argc, char* argv[]) {
 //
 
 ostream& printCss(ostream& out) {
-   out << ".humhi:hover {background:#d0d0ff}\n";
-
-   out << "\n/* add a spacing after each cell so that the never touch */\n";
-   out << ".humtd {padding-right:10px; }\n";
-
-   out << "\n/* Humdrum data tokens */\n";
-   out << ".humdat { color:black; }\n";
-
-   out << "\n/* Humdrum barlines*/\n";
-   out << ".humbar { background-color:#eeeeee; }\n";
- 
-   out << "\n/* Humdrum interpretations */\n";
-   out << "\n/* Exclusive interpretations */\n";
-   out << ".humexinterp { color:magenta; }\n";
-   out << "\n/* Spine manipulators */\n";
-   out << ".hummanip { color:#f62217; }\n";
-   out << "\n/* other interpretations*/\n";
-   out << ".huminterp { color:#9f000f; }\n";
-
-   out << "\n/* Humdrum Comments */\n";
-   out << "\n/* Reference records*/\n";
-   out << ".humref { color:green; }\n";
-   out << "\n/* Global comments*/\n";
-   out << ".humgcom { color:blue; }\n";
-   out << "\n/* Local comments*/\n";
-   out << ".humlcom { color:#7d1b7e; }\n";
+   out << "." << prefix << "Div        { width:100%; padding:10px; background:#ffffff; align:center; border: 1px solid #e1e4e5; }\n";
+   out << "." << prefix << "Table      { padding:0; border-spacing:0; }\n";
+   out << "." << prefix << "Subtable   { padding:0; border-spacing:0; }\n";
+   out << "." << prefix << "Line:hover { background:#d0d0ff; }\n";
+   out << "." << prefix << "Null       { color:#aaaaaa; }\n";
+   out << "." << prefix << "KernToken  { color:#aaaaaa; }\n";
+   out << "." << prefix << "KernPitch  { color:#000000; }\n";
+   out << "." << prefix << "KernRhythm { color:#000000; }\n";
+   out << "." << prefix << "Trackpad   { padding-right:30px; }\n";
+   out << "." << prefix << "Subtrackpad{ padding-right:20px; }\n";
+   out << "." << prefix << "Bar        { color:#555555; background-color:#eeeeee; }\n";
+   out << "." << prefix << "Exinterp   { color:magenta; }\n";
+   out << "." << prefix << "Manip      { color:#f62217; }\n";
+   out << "." << prefix << "Interp     { color:#9f000f; }\n";
+   out << "." << prefix << "Ref        { color:#007700; }\n";
+   out << "." << prefix << "Gcom       { color:#1100aa; }\n";
+   out << "." << prefix << "Lcom       { color:#7d1b7e; }\n";
 
    return out;
 }
@@ -147,15 +142,15 @@ ostream& printHtmlPageFooter(ostream& out) {
 //
 
 ostream& printHtmlPageHeader(ostream& out) {
-   out << "<html><head><title>full page</title>\n";
+   out << "<html>\n<head>\n<title>full page</title>\n";
 
    if (cssQ) {
-      out << "<style type=\"text/css\">\n";
+      out << "\n<style type=\"text/css\">\n";
       out << "a {text-decoration:none}\n";
       printCss(out);
       out << "</style>\n";
    }
-   out << "</head><body>\n";
+   out << "\n</head>\n<body>\n";
    return out;
 }
 
@@ -174,7 +169,8 @@ void createTable(ostream& out, HumdrumFile& infile) {
       Markcolor.setSize(0);;
    }
 
-   out << "<table " << C0C0 << ">\n";
+   out << "<div class=\"" << prefix << "Div\">\n";
+   out << "<table class=\"" << prefix << "Table\">\n";
 
    int i;
    for (i=0; i<infile.getNumLines(); i++) {
@@ -198,6 +194,7 @@ void createTable(ostream& out, HumdrumFile& infile) {
    }
 
    out << "</table>\n";
+   out << "</div>\n";
 
    if (textareaQ) {
       out << "<textarea wrap=off rows=10 cols=70>";
@@ -272,19 +269,19 @@ int getSubTracks(HumdrumFile& infile, int line, int track) {
 
 ostream& printClassInfo(ostream& out, HumdrumFile& infile, int line) {
    if (infile[line].isBarline()) {
-      out << " class=\"humhi humbar\"";
+      out << " class=\"" << prefix << "Line " << prefix << "Bar\"";
    } else if (infile[line].isData()) {
-      out << " class=\"humhi humdat\"";
+      out << " class=\"" << prefix << "Line " << prefix << "Dat\"";
    } else if (infile[line].isInterpretation()) {
       if (strncmp(infile[line][0], "**", 2) == 0) {
-         out << " class=\"humhi humexinterp\"";
+         out << " class=\"" << prefix << "Line " << prefix << "Exinterp\"";
       } else if (infile[line].isSpineManipulator()) {
-         out << " class=\"humhi hummanip\"";
+         out << " class=\"" << prefix << "Line " << prefix << "Manip\"";
       } else {
-         out << " class=\"humhi huminterp\"";
+         out << " class=\"" << prefix << "Line " << prefix << "Interp\"";
       }
    } else if (infile[line].isLocalComment()) {
-      out << " class=\"humhi humlcom\"";
+      out << " class=\"" << prefix << "Line " << prefix << "Lcom\"";
    }
    return out;
 }
@@ -318,11 +315,22 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
          printMarkStyle(out, infile, line, track, Markchar, Markcolor);
       }
       if (classQ) {
-         out << " class=\"humtd\"";
+         out << " class=\"";
+         if (subtracks == 1) {
+            out << " " << prefix << "Tok ";
+            out << " " << prefix << "SS";
+            out << infile.getTrackExInterp(track)+2;
+         }
+         out << " " << prefix << "Tr" << track;
+         if (track < infile.getMaxTracks()) {
+            out << " " << prefix << "Trackpad";
+         }
+         out << "\"";
       }
       out << ">";
       if (subtracks > 1) {
-         out << "<table " << C0C0 << "><tr valign=baseline";
+         out << "<table width=\"100%\" class=\"" << prefix << "Subtable\">";
+         out << "<tr valign=baseline";
          if (classQ) {
             printClassInfo(out, infile, line);
          }
@@ -330,49 +338,68 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
          counter = 0;
          for (j=0; j<infile[i].getFieldCount(); j++) {
             if (infile[i].getPrimaryTrack(j) == track) {
-               strang.setSize(strlen(infile[i][j])+1);
-               strcpy(strang.getBase(), infile[i][j]); 
-               pre.sar(strang, " ", "&nbsp;", "g");
 
-               // deal with HTML entities, just < and > for now:
-               pre.sar(strang, ">", "&gt;", "g");
-               pre.sar(strang, "<", "&lt;", "g");
-
-               if (pre.search(strang, "^\\*>.*\\[", "")) {
-                  addLabelHyperlinks(strang);
-               } else if (pre.search(strang, "^\\*>", "")) {
-                  addLabelHyperlinkName(strang);
+               if (strcmp(infile[i][j], ".") == 0) {
+                  markNullToken(strang);
+               } else if (kernQ && infile[i].isData() && 
+                   (strcmp(infile.getTrackExInterp(track), "**kern")==0)) {
+                 markupKernToken(strang, infile, i, j);
+               } else {
+                  strang.setSize(strlen(infile[i][j])+1);
+                  strcpy(strang.getBase(), infile[i][j]); 
+                  pre.sar(strang, " ", "&nbsp;", "g");
+                  // deal with HTML entities, just < and > for now:
+                  pre.sar(strang, ">", "&gt;", "g");
+                  pre.sar(strang, "<", "&lt;", "g");
+                  if (pre.search(strang, "^\\*>.*\\[", "")) {
+                     addLabelHyperlinks(strang);
+                  } else if (pre.search(strang, "^\\*>", "")) {
+                     addLabelHyperlinkName(strang);
+                  }
                }
-               out << "<td ";
+
+               out << "<td width=\"" << 100.0/subtracks << "%\"";
+               if (classQ) {
+                  out << " class=\"";
+                  out << " " << prefix << "Tok ";
+                  out << " " << prefix << "SS";
+                  out << infile.getTrackExInterp(track)+2;
+                  if (counter < subtracks - 1) {
+                     out << " " << prefix << "Subtrackpad";
+                  }
+                  out << "\"";
+               }
                if (markQ && (subtracks == 1)) {
                   printMarkStyle(out, infile, line, track, Markchar, Markcolor);
                }
-               out << " width=" << TOKENWIDTH << ">" << strang << "</td>";
+               out << ">" << strang << "</td>";
                counter++;
-               // maybe get rid of this if statement since separation
-               // is not being handled by CSS:
-               if (counter < subtracks) {
-                  out << "<td width=" << TDSEP << "></td>";
-               }
             }
          }
-         out << "</tr></table>\n";
+         out << "</tr></table>";
       } else {
          for (j=0; j<infile[i].getFieldCount(); j++) {
             if (infile[i].getPrimaryTrack(j) == track) {
-               strang.setSize(strlen(infile[i][j])+1);
-               strcpy(strang.getBase(), infile[i][j]); 
-               pre.sar(strang, " ", "&nbsp;", "g");
 
-               // deal with HTML entities, just < and > for now:
-               pre.sar(strang, ">", "&gt;", "g");
-               pre.sar(strang, "<", "&lt;", "g");
-
-               if (pre.search(strang, "^\\*>.*\\[", "")) {
-                  addLabelHyperlinks(strang);
-               } else if (pre.search(strang, "^\\*>", "")) {
-                  addLabelHyperlinkName(strang);
+               if (strcmp(infile[i][j], ".") == 0) {
+                  markNullToken(strang);
+               } else if (kernQ && infile[i].isData() && 
+                   (strcmp(infile.getTrackExInterp(track), "**kern")==0)) {
+                 markupKernToken(strang, infile, i, j);
+               } else {
+                  strang.setSize(strlen(infile[i][j])+1);
+                  strcpy(strang.getBase(), infile[i][j]); 
+                  pre.sar(strang, " ", "&nbsp;", "g");
+                  // deal with HTML entities, just < and > for now:
+                  pre.sar(strang, ">", "&gt;", "g");
+                  pre.sar(strang, "<", "&lt;", "g");
+                  if (pre.search(strang, "^\\*>.*\\[", "")) {
+                     addLabelHyperlinks(strang);
+                  } else if (pre.search(strang, "^\\*>", "")) {
+                     addLabelHyperlinkName(strang);
+                  }
                }
+
                out << strang;
             }
          }
@@ -382,6 +409,127 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
    out << "</tr>\n";
 }
 
+
+
+//////////////////////////////
+//
+// markNullToken --
+//
+
+void markNullToken(Array<char>& strang) {
+   stringstream buffer;
+   buffer << "<span class=\"" << prefix << "Null\">";
+   buffer << ".";
+   buffer << "</span>";
+   buffer << ends;
+   int len = strlen(buffer.str().c_str());
+   strang.setSize(len+1);
+   strcpy(strang.getBase(), buffer.str().c_str());
+}
+
+
+
+//////////////////////////////
+//
+// markupKernToken --
+//
+
+void markupKernToken(Array<char>& strang, HumdrumFile& infile, 
+      int line, int field) {
+
+   stringstream buffer;
+   const char* token = infile[line][field];
+   int len = strlen(token);
+   Array<int> states(len);
+   states.setAll(0);
+   char ch;
+   int i;
+   for (i=0; i<len; i++) {
+      if (std::isdigit(token[i])) {
+         states[i] = 2;  // part of rhythm
+         continue;
+      }
+      ch = std::tolower(token[i]);
+      if ((ch >= 'a') && (ch <= 'g')) {
+         states[i] = 1;  // part of pitch
+         continue;
+      }
+      switch (ch) {
+         case '#': 
+         case '-': 
+         case 'n': 
+         case 'r': 
+            states[i] = 1;   // pitch
+            break;
+         case '%': 
+         case '.': 
+            states[i] = 2;   // rhythm
+            break;
+      }
+   }
+
+   int lstate = 0;
+   buffer << "<span class=\""  << prefix << "KernToken\">";
+   if (strcmp(token, ".") == 0) {
+      buffer << ".";
+   } else {
+      for (i=0; i<len; i++) {
+         if (states[i] == lstate) {
+            // nothing new to markup.
+            printHtmlCharacter(buffer, token[i]);
+            continue;
+         }
+         if ((i > 0) && (lstate > 0)) {
+            // turn off old span
+            buffer << "</span>";
+         }
+         if (states[i] == 0) {
+            printHtmlCharacter(buffer, token[i]);
+            lstate = states[i];
+            continue;
+         }
+         // turn on new span:
+         buffer << "<span class=\"";
+         switch (states[i]) {
+            case 1:    // pitch
+               buffer << prefix << "KernPitch";
+               break;
+            case 2:    // rhythm
+               buffer << prefix << "KernRhythm";
+               break;
+         }
+         buffer << "\">";
+         printHtmlCharacter(buffer, token[i]);
+         lstate = states[i];
+      }
+   }
+   buffer << "</span>";
+   buffer << ends;
+
+   int len2 = strlen(buffer.str().c_str());
+   strang.setSize(len2+1);
+   strcpy(strang.getBase(), buffer.str().c_str());
+}
+
+
+
+//////////////////////////////
+//
+// printHtmlCharacter --
+//
+
+void printHtmlCharacter(ostream& out, char ch) {
+   switch (ch) {
+      case '>' : out << "&gt;"; break;
+      case '<' : out << "&lt;"; break;
+      case '&' : out << "&lt;"; break;
+      case ' ' : out << "&nbsp;"; break;
+      case '\'': out << "&apos;"; break;
+      case '"' : out << "&quot;"; break;
+      default  : out << ch;
+   }
+}
+      
 
 
 //////////////////////////////
@@ -485,6 +633,7 @@ void addLabelHyperlinks(Array<char>& strang) {
 }
 
 
+
 //////////////////////////////
 //
 // printReferenceRecord --
@@ -497,10 +646,10 @@ void printReferenceRecord(ostream& out, HumdrumFile& infile, int line) {
    if (!pre.search(infile[line][0], "^!!!([^!:]+):(.*)$", "")) {
       out << "<tr valign=\"baseline\"";
       if (classQ) {
-         out << " class=\"humhi humgcom\"";
+         out << " class=\"" << prefix << "Line " << prefix << "Gcom\"";
       }
       out << "><td colspan=" << infile.getMaxTracks() << ">";
-      out << infile[i] << "</font></td></tr>";
+      out << infile[i] << "</font></td></tr>\n";
       return;
    } 
 
@@ -512,16 +661,17 @@ void printReferenceRecord(ostream& out, HumdrumFile& infile, int line) {
 
    out << "<tr valign=\"baseline\"";
    if (classQ) {
-      out << " class=\"humhi humref\"";
+      out << " class=\"" << prefix << "Line " << prefix  << "Ref\"";
    }
    out << "><td colspan=" << infile.getMaxTracks() << ">";
-   out << "<span class=\"key\" title=\"" << description << "\">";
+   out << "<span class=\"" << prefix << "Key\" title=\"";
+   out << description << "\">";
    out << "!!!";
    out << pre.getSubmatch(1);
    out << ":";
    out << pre.getSubmatch(2);
    out << "</span>";
-   out << "</td></tr>";
+   out << "</td></tr>\n";
 
 }
 
@@ -536,10 +686,10 @@ void printGlobalComment(ostream& out, HumdrumFile& infile, int line) {
    int& i = line;
    out << "<tr valign=\"baseline\"";
    if (classQ) {
-      out << " class=\"humhi humgcom\"";
+      out << " class=\"" << prefix << "Line " << prefix << "Gcom\"";
    }
    out << "><td colspan=" << infile.getMaxTracks() << ">";
-   out << infile[i] << "</font></td></tr>";
+   out << infile[i] << "</font></td></tr>\n";
 }
 
 
@@ -555,6 +705,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("css=b",           "Print an example CSS ");
    opts.define("textarea|ta|t=b", "print data in a textarea after main table");
    opts.define("M|no-marks=b",    "don't highlight marked notes");
+   opts.define("P|prefix=s:hum",  "prefix for CSS classes");
+   opts.define("k|kern=b",        "markup kern data with spans");
 
    opts.define("author=b",          "author of program");
    opts.define("version=b",         "compilation info");
@@ -568,7 +720,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
            << "craig@ccrma.stanford.edu, March 2011" << endl;
       exit(0);
    } else if (opts.getBoolean("version")) {
-      cout << argv[0] << ", version: March 2011" << endl;
+      cout << argv[0] << ", version: June 2014" << endl;
       cout << "compiled: " << __DATE__ << endl;
       cout << MUSEINFO_VERSION << endl;
       exit(0);
@@ -585,6 +737,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    cssQ      =  opts.getBoolean("css");
    textareaQ =  opts.getBoolean("textarea");
    markQ     = !opts.getBoolean("no-marks");
+   kernQ     =  opts.getBoolean("kern");
+   prefix    =  opts.getString("prefix");
 
    Markchar.setSize(0);;
    Markcolor.setSize(0);;
