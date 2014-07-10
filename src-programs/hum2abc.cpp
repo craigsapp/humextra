@@ -523,37 +523,42 @@ int stemlessQ = 0;         // used with -p "%%nostems" spoofing
 //////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv) {
-   HumdrumFile hfile;
+   HumdrumFileSet infiles;
+   options.process(argc, argv);
+   infiles.read(options);
 
    // initial processing of the command-line options
-   checkOptions(options, argc, argv, 1, hfile);
+   checkOptions(options, argc, argv, 1, infiles[0]);
 
    int i = 0;
+   int j;
    if (directoryQ) {
       Array<Array<char> > filelist;
       getFileListing(filelist, directoryname, filemask);
 
       for (i=0; i<filelist.getSize(); i++) {
-         hfile.read(filelist[i].getBase());
-         checkMarks(hfile);
-         checkOptions(options, argc, argv, i+1, hfile);
-         convertHumdrumToAbc(cout, hfile, i+1, filelist[i].getBase());
+         infiles.read(filelist[i].getBase());
+         for (j=0; j<infiles.getCount(); j++) {
+            checkMarks(infiles[j]);
+            checkOptions(options, argc, argv, i+1, infiles[j]);
+            convertHumdrumToAbc(cout, infiles[j], i+1, filelist[i].getBase());
+            if (j<infiles.getCount()-1) {
+               if (i < filelist.getSize() - 1) {
+                  cout << "\n\n\n";
+               }
+            }
+         }
          if (i < filelist.getSize() - 1) {
             cout << "\n\n\n";
          }
       }
-
-   } else if (options.getArgumentCount() == 0) {
-      checkMarks(hfile);
-      convertHumdrumToAbc(cout, hfile, 1, "");
    } else {
-      for (i=1; i<=options.getArgumentCount(); i++) {
+      for (i=0; i<infiles.getCount(); i++) {
          // process the command-line options
-         checkOptions(options, argc, argv, i, hfile);
-         hfile.read(options.getArg(i));
-         checkMarks(hfile);
-         convertHumdrumToAbc(cout, hfile, i, options.getArg(i));
-         if (i < options.getArgumentCount()) {
+         // checkOptions(options, argc, argv, i, infiles[i]);
+         checkMarks(infiles[i]);
+         convertHumdrumToAbc(cout, infiles[i], i, options.getArg(i));
+         if (i < infiles.getCount()-1) {
             cout << "\n\n\n";
          }
       }
@@ -5837,11 +5842,10 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    debugQ = opts.getBoolean("debug"); // needed before final processing
    int tdirectoryQ = opts.getBoolean("directory");
 
-   HumdrumFile tempfile;
+   HumdrumFileSet tempfile;
    if (opts.getArgumentCount() == 0) {
       if (!tdirectoryQ) {
-         cinfile.read(std::cin);
-         tempfile = cinfile;
+         tempfile.read(std::cin);
       }
    } else {
       tempfile.read(opts.getArg(fcount));
@@ -5857,13 +5861,13 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    opts.setOptions(1, argv); // store only the command name
 
    if (!tdirectoryQ) {
-      for (i=0; i<tempfile.getNumLines(); i++) {
-         if (tempfile[i].getType() == E_humrec_bibliography) {
-            if (strncmp(tempfile[i][0], "!!!hum2abc:", strlen("!!!hum2abc:"))==0) {
-               if (tempfile[i].getFieldCount() > 1) {	
-                  getBibPieces(tempfile[i][0], tempfile[i][1], marker,  contents);
+      for (i=0; i<tempfile[0].getNumLines(); i++) {
+         if (tempfile[0][i].getType() == E_humrec_bibliography) {
+            if (strncmp(tempfile[0][i][0], "!!!hum2abc:", strlen("!!!hum2abc:"))==0) {
+               if (tempfile[0][i].getFieldCount() > 1) {	
+                  getBibPieces(tempfile[0][i][0], tempfile[0][i][1], marker,  contents);
                } else {
-                  getBibPieces(tempfile[i][0], "", marker,  contents);
+                  getBibPieces(tempfile[0][i][0], "", marker,  contents);
                }
 	        
 
