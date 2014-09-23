@@ -689,4 +689,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 9a3b495e8792b2bea564efc01107589f rscale.cpp [20140902]
+// md5sum: 7e9b37e1d63336143d119d217bd1c9be rscale.cpp [20140817]

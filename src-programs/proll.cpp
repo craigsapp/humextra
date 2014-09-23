@@ -168,6 +168,12 @@ void createJsonProll(HumdrumFile& infile) {
             if (strchr(buffer, 'r') != NULL) {
                continue;
             }
+            if (strchr(buffer, ']') != NULL) {
+               continue;
+            }
+            if (strchr(buffer, '_') != NULL) {
+               continue;
+            }
             if (strcmp(buffer, ".") == 0) {
                continue;
             }
@@ -203,9 +209,10 @@ void createJsonProll(HumdrumFile& infile) {
    pi(cout, 2);
    cout << "{\n";
 
-   for (i=0; i<ktracks.getSize(); i++) {
+   int pindex = 0;
+   for (i=ktracks.getSize()-1; i>=0; i--) {
       pi(cout, 3);
-      cout << "\"partindex\"\t:\t" << i << ",\n";
+      cout << "\"partindex\"\t:\t" << pindex++ << ",\n";
 
       pi(cout, 3);
       cout << "\"notedata\"\t:\t" << "\n";
@@ -221,7 +228,7 @@ void createJsonProll(HumdrumFile& infile) {
       pi(cout, 4);
       cout << "]\n";
   
-      if (i < ktracks.getSize() - 1) {
+      if (i > 0) {
          pi(cout, 2);
          cout << "},\n";
          pi(cout, 2);
@@ -286,9 +293,9 @@ void printPartNames(HumdrumFile& infile) {
    }
 
    cout << "[";
-   for (i=0; i<names.getSize(); i++) {
+   for (i=names.getSize()-1; i>=0; i--) {
       cout << "\"" << names[i] << "\"";
-      if (i < names.getSize() - 1) {
+      if (i > 0) {
          cout << ", ";
       }
    }
@@ -311,7 +318,7 @@ void printJsonHeader(HumdrumFile& infile, int indent, Array<int>& ktracks,
    cout << "\t\"dataformat\"\t:\t\"pianoroll\",\n";
 
    pi(cout, indent);
-   cout << "\t\"version\"\t:\t\"1.0\",\n";
+   cout << "\t\"version\"\t:\t\"2.0\",\n";
 
    pi(cout, indent);
    cout << "\t\"creationdate\"\t:\t\"";
@@ -379,13 +386,13 @@ void printJsonHeader(HumdrumFile& infile, int indent, Array<int>& ktracks,
    pi(cout, indent);
    cout << "\t\"rangemin\"\t:\t";
    cout << "[";
-   for (i=0; i<partmin.getSize(); i++) {
+   for (i=partmin.getSize()-1; i>=0; i--) {
       if (abs(partmin[i] >= 1000)) {
          cout << "null";
       } else {
          printPitch(cout, partmin[i], "");
       }
-      if (i < partmin.getSize() - 1) {
+      if (i > 0) {
          cout << ", ";
       }
    }
@@ -394,13 +401,13 @@ void printJsonHeader(HumdrumFile& infile, int indent, Array<int>& ktracks,
    pi(cout, indent);
    cout << "\t\"rangemax\"\t:\t";
    cout << "[";
-   for (i=0; i<partmax.getSize(); i++) {
+   for (i=partmax.getSize()-1; i>=0; i--) {
       if (abs(partmax[i] >= 1000)) {
          cout << "null";
       } else {
          printPitch(cout, partmax[i], "");
       }
-      if (i < partmax.getSize() - 1) {
+      if (i > 0) {
          cout << ", ";
       }
    }
@@ -410,10 +417,6 @@ void printJsonHeader(HumdrumFile& infile, int indent, Array<int>& ktracks,
 
    pi(cout, indent);
    cout << "\t\"partdata\"\t:\n";
-
-
-
-
 }
 
 
@@ -1211,4 +1214,4 @@ void getMarkChars(Array<char>& marks, HumdrumFile& infile) {
 
 
 
-// md5sum: 7533d5ec2df9efc21e8d8466afa4a42d proll.cpp [20140902]
+// md5sum: f1eb5e4fc53a7db30a30f66059645f4a proll.cpp [20131118]
