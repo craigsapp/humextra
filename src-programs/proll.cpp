@@ -6,6 +6,7 @@
 // Last Modified: Sun Feb 27 15:09:29 PST 2011 Added fixed vocal colors
 // Last Modified: Thu Nov 14 12:17:29 PST 2013 Added choice of P3/P6 image 
 // Last Modified: Thu Nov 14 14:01:01 PST 2013 Changed P3 to default output
+// Last Modified: Wed Aug 20 11:16:46 PDT 2014 Added JSON output
 // Filename:      ...sig/examples/all/proll.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/proll.cpp
 // Syntax:        C++; museinfo
@@ -43,6 +44,19 @@ PixelColor makeColor            (HumdrumFile& infile, int line, int spine,
 void   getMarkChars             (Array<char>& marks, HumdrumFile& infile);
 int    isMatch                  (Array<char>& marks, const char* buffer);
 const char* getInstrument       (HumdrumFile& infile, int spine);
+void   createJsonProll          (HumdrumFile& infile);
+void   printJsonNote            (ostream& out, int b40, RationalNumber& duration, 
+                                 const char* kern, HumdrumFile& infile, int line, 
+                                 int field, int token);
+void   printRationalNumber      (ostream& out, RationalNumber& rat);
+void   pi                       (ostream& out, int count);
+void   printJsonHeader          (HumdrumFile& infile, int indent, Array<int>& ktracks,
+                                 Array<int>& partmin, Array<int>& partmax);
+void   printPartNames           (HumdrumFile& infile);
+void   printPitch               (ostream& out, int b40, const char* kern);
+void   printBarlines            (ostream& out, HumdrumFile& infile, int indent);
+void   printSectionLabel        (ostream& out, HumdrumFile& infile, int line);
+void   printMensuration         (ostream& out, HumdrumFile& infile, int index);
 
 // global variables
 Options   options;                   // database for command-line arguments
@@ -60,6 +74,8 @@ int       keyboardQ = 1;              // used with the -K option
 int       style     = 'H';            // used with the -s option
 int       P3Q       = 1;              // used with -3 option
 int       P6Q       = 0;              // used with -6 option
+int       jsonQ     = 0;
+const char* optionfilename = "";      // used with -f option
 const char* keyboardcolor = "151515"; // used with the -k option
 
 ///////////////////////////////////////////////////////////////////////////
@@ -79,16 +95,615 @@ int main(int argc, char* argv[]) {
       infile.read(cin);
    }
 
-   int rfactor = generatePicture(infile, picturedata, style);
-   generateBackground(infile, rfactor, picturedata, background);
-   printPicture(picturedata, background, rfactor, cfactor, 
-         gminpitch, gmaxpitch, infile);
+   if (strcmp(infile.getFilename(), "") == 0) {
+      infile.setFilename(optionfilename);
+   }
+
+   if (jsonQ) {
+      createJsonProll(infile);
+   } else {
+      int rfactor = generatePicture(infile, picturedata, style);
+      generateBackground(infile, rfactor, picturedata, background);
+      printPicture(picturedata, background, rfactor, cfactor, 
+            gminpitch, gmaxpitch, infile);
+   }
 
    return 0;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////
+//
+// createJsonProll -- Create Proll data for display in 
+//
+
+void createJsonProll(HumdrumFile& infile) {
+   infile.analyzeRhythm("4");
+   Array<int> ktracks;
+   infile.getTracksByExInterp(ktracks, "**kern");
+   Array<int> rktracks(infile.getMaxTracks()+1);
+   rktracks.allowGrowth(0);
+   rktracks.setAll(-1);
+   int i, j, k;
+   for (i=0; i<ktracks.getSize(); i++) {
+      rktracks[ktracks[i]] = i;
+   }
+
+   stringstream staves[ktracks.getSize()];
+
+   char buffer[1024] = {0};
+   int b40;
+   RationalNumber duration;
+   int track;
+   int tcount;
+
+   Array<Array<char> > partnames(ktracks.getSize());
+
+   Array<int> partmax(ktracks.getSize());
+   Array<int> partmin(ktracks.getSize());
+   partmax.setAll(-10000);
+   partmin.setAll(+10000);
+
+   Array<int> noteinit(ktracks.getSize());
+   noteinit.setAll(0);
+
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isData()) {
+         continue;
+      }
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         if (!infile[i].isExInterp(j, "**kern")) {
+            continue;
+         }
+         if (strcmp(infile[i][j], ".") == 0) {
+            continue;
+         }
+         tcount = infile[i].getTokenCount(j);
+         track = infile[i].getPrimaryTrack(j);
+         for (k=0; k<tcount; k++) {
+            infile[i].getToken(buffer, j, k);
+            if (strchr(buffer, 'r') != NULL) {
+               continue;
+            }
+            if (strcmp(buffer, ".") == 0) {
+               continue;
+            }
+            b40 = Convert::kernToBase40(buffer);
+            duration = infile.getTiedDurationR(i, j, k);
+            if (noteinit[rktracks[track]] == 0) {
+               noteinit[rktracks[track]] = 1;
+               pi(staves[rktracks[track]], 4);
+               staves[rktracks[track]] << "{\n";
+            } else {
+               pi(staves[rktracks[track]], 4);
+               staves[rktracks[track]] << "},\n";
+               pi(staves[rktracks[track]], 4);
+               staves[rktracks[track]] << "{\n";
+            }
+            printJsonNote(staves[rktracks[track]], b40, duration, buffer, infile, i, j, k);
+
+            if (b40 > partmax[rktracks[track]]) {
+               partmax[rktracks[track]] = b40;
+            }
+            if (b40 < partmin[rktracks[track]]) {
+               partmin[rktracks[track]] = b40;
+            }
+         }
+      }
+   }
+
+   printJsonHeader(infile, 0, ktracks, partmin, partmax);
+
+   pi(cout, 2);
+   cout << "[\n";
+
+   pi(cout, 2);
+   cout << "{\n";
+
+   for (i=0; i<ktracks.getSize(); i++) {
+      pi(cout, 3);
+      cout << "\"partindex\"\t:\t" << i << ",\n";
+
+      pi(cout, 3);
+      cout << "\"notedata\"\t:\t" << "\n";
+
+      pi(cout, 4);
+      cout << "[\n";
+     
+      cout << staves[i].str();
+
+      pi(cout, 4);
+      cout << "}\n";
+
+      pi(cout, 4);
+      cout << "]\n";
+  
+      if (i < ktracks.getSize() - 1) {
+         pi(cout, 2);
+         cout << "},\n";
+         pi(cout, 2);
+         cout << "{\n";
+      } else {
+         pi(cout, 2);
+         cout << "}\n";
+      }
+   }
+
+   pi(cout, 2);
+   cout << "]\n";
+
+   pi(cout, 0);
+   cout << "}\n";
+
+}
+
+
+
+//////////////////////////////
+//
+// printPartNames --
+//
+
+void printPartNames(HumdrumFile& infile) {
+   int i, j;
+   Array<Array<char> > names;
+   Array<int> ktracks;
+   infile.getTracksByExInterp(ktracks, "**kern");
+   names.setSize(ktracks.getSize());
+   char buffer[1024] = {0};
+   for (i=0; i<names.getSize(); i++) {
+      sprintf(buffer, "part %ld", names.getSize() - i);
+      names[i] = buffer;
+   }
+   Array<int> rkern;
+   rkern.setSize(infile.getMaxTracks()+1);
+   rkern.setAll(-1);
+   for (i=0; i<ktracks.getSize(); i++) {
+      rkern[ktracks[i]] = i;
+   }
+   int track;
+
+
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (infile[i].isData()) {
+         break;
+      }
+      if (!infile[i].isInterpretation()) {
+         continue;
+      }
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         if (!infile[i].isExInterp(j, "**kern")) {
+            continue;
+         }
+         if (strncmp(infile[i][j], "*I\"", 3) == 0) {
+            track = infile[i].getPrimaryTrack(j);
+            names[rkern[track]] = &(infile[i][j][3]);
+         }
+      }
+   }
+
+   cout << "[";
+   for (i=0; i<names.getSize(); i++) {
+      cout << "\"" << names[i] << "\"";
+      if (i < names.getSize() - 1) {
+         cout << ", ";
+      }
+   }
+   cout << "]";
+}
+
+
+
+//////////////////////////////
+//
+// printJsonHeader --
+//
+
+void printJsonHeader(HumdrumFile& infile, int indent, Array<int>& ktracks,
+      Array<int>& partmin, Array<int>& partmax) {
+   pi(cout, indent);
+   cout << "{\n";
+
+   pi(cout, indent);
+   cout << "\t\"dataformat\"\t:\t\"pianoroll\",\n";
+
+   pi(cout, indent);
+   cout << "\t\"version\"\t:\t\"1.0\",\n";
+
+   pi(cout, indent);
+   cout << "\t\"creationdate\"\t:\t\"";
+
+   int minpitch = partmin[0];
+   int maxpitch = partmax[0];
+   int i;
+   for (i=1; i<partmin.getSize(); i++) {
+      if (minpitch > partmin[i]) {
+         minpitch = partmin[i];
+      }
+      if (maxpitch < partmax[i]) {
+         maxpitch = partmax[i];
+      }
+   }
+
+   struct tm *current;
+   time_t now;
+   time(&now);
+   current = localtime(&now);
+   int year = current->tm_year + 1900;
+   int month = current->tm_mon + 1;
+   int day = current->tm_mday;
+   cout << year;
+   if (month < 10) {
+      cout << "0";
+   } 
+   cout << month;
+   if (day < 10) {
+      cout << "0";
+   } 
+   cout << day;
+   cout << "\",\n";
+
+   pi(cout, indent);
+   cout << "\t\"filename\"\t:\t\"" << infile.getFilename() << "\",\n";
+
+   pi(cout, indent);
+   cout << "\t\"scorelength\"\t:\t";
+   RationalNumber value = infile[infile.getNumLines()-1].getAbsBeatR();
+   printRationalNumber(cout, value);
+   cout << ",\n";
+
+   pi(cout, indent);
+   cout << "\t\"partcount\"\t:\t";
+   cout << ktracks.getSize();
+   cout << ",\n";
+
+   pi(cout, indent);
+   cout << "\t\"partnames\"\t:\t";
+   printPartNames(infile);
+   cout << ",\n";
+
+   pi(cout, indent);
+   cout << "\t\"minpitch\"\t:\t";
+   printPitch(cout, minpitch, "");
+   cout << ",\n";
+
+   pi(cout, indent);
+   cout << "\t\"maxpitch\"\t:\t";
+   printPitch(cout, maxpitch, "");
+   cout << ",\n";
+   
+
+   pi(cout, indent);
+   cout << "\t\"rangemin\"\t:\t";
+   cout << "[";
+   for (i=0; i<partmin.getSize(); i++) {
+      if (abs(partmin[i] >= 1000)) {
+         cout << "null";
+      } else {
+         printPitch(cout, partmin[i], "");
+      }
+      if (i < partmin.getSize() - 1) {
+         cout << ", ";
+      }
+   }
+   cout << "],\n";
+
+   pi(cout, indent);
+   cout << "\t\"rangemax\"\t:\t";
+   cout << "[";
+   for (i=0; i<partmax.getSize(); i++) {
+      if (abs(partmax[i] >= 1000)) {
+         cout << "null";
+      } else {
+         printPitch(cout, partmax[i], "");
+      }
+      if (i < partmax.getSize() - 1) {
+         cout << ", ";
+      }
+   }
+   cout << "],\n";
+
+   printBarlines(cout, infile, indent);
+
+   pi(cout, indent);
+   cout << "\t\"partdata\"\t:\n";
+
+
+
+
+}
+
+
+
+//////////////////////////////
+//
+// printBarlines --
+//
+
+void printBarlines(ostream& out, HumdrumFile& infile, int indent) {
+   int i;
+   pi(out, indent);
+   out << "\t\"barlines\"\t:\n";
+   
+   pi(out, indent);
+   out << "\t\t[\n";
+
+   indent++;
+   indent++;
+   
+   int barinit = 0;
+   int number;
+   int terminal;
+   int invisible;
+   PerlRegularExpression pre;
+   RationalNumber timeval;
+   RationalNumber measuredur;
+
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isBarline()) {
+         continue;
+      }
+      if (pre.search(infile[i][0], "=(\\d+)")) {
+         number = atoi(pre.getSubmatch(1));
+      } else {
+         number = -1;
+      }
+      terminal = 0;
+      if (strstr(infile[i][0], "||") != NULL) {
+         terminal = 1;
+      } else if (strstr(infile[i][0], "==") != NULL) {
+         terminal = 1;
+      }
+      invisible = 0;
+      if (strchr(infile[i][0], '-') != NULL) {
+         invisible = 1;
+      }
+
+      if ((invisible) && (number < 0)) {
+         continue;
+      }
+
+
+      if (barinit) {
+         out << ",\n";
+      } else {
+         barinit = 1;
+      }
+   
+      pi(out, indent);
+      out << "{\"time\":";
+      timeval = infile[i].getAbsBeatR();
+      printRationalNumber(out, timeval);
+      if (number >= 0) {
+         out << ", \"label\":\"" << number << "\"";
+      }
+      
+      if (terminal) {
+         out << ", \"terminal\":\"" << "true" << "\"";
+      }
+
+      printSectionLabel(out, infile, i);
+      printMensuration(out, infile, i);
+      out << "}";
+   }
+
+   out << "\n\t\t],\n";
+}
+
+
+
+//////////////////////////////
+//
+// printMensuration --
+//
+
+void printMensuration(ostream& out, HumdrumFile& infile, int index) {
+   int i;
+   PerlRegularExpression pre;
+
+   for (i=index; i<infile.getNumLines(); i++) {
+      if (infile[i].isData()) {
+         break;
+      }
+      if (!infile[i].isGlobalComment()) {
+         continue;
+      }
+      if (pre.search(infile[i][0], 
+            "^!!primary-mensuration:\\s*met\\(([^)]+)\\)")) {
+         out << ", \"mensuration\":\"" << pre.getSubmatch(1) << "\"";
+         return;
+      }
+   }
+
+   for (i=index; i<infile.getNumLines(); i++) {
+      if (infile[i].isData()) {
+         break;
+      }
+      if (!infile[i].isInterpretation()) {
+         continue;
+      }
+      if (pre.search(infile[i][0], "^\\*met\\(([^)]+)\\)")) {
+         out << ", \"mensuration\":\"" << pre.getSubmatch(1) << "\"";
+         return;
+      }
+   }
+
+   for (i=index-1; i>=0; i--) {
+      if (infile[i].isData()) {
+         break;
+      }
+      if (!infile[i].isGlobalComment()) {
+         continue;
+      }
+      if (pre.search(infile[i][0], 
+            "^!!primary-mensuration:\\s*met\\(([^)]+)\\)")) {
+         out << ", \"mensuration\":\"" << pre.getSubmatch(1) << "\"";
+         return;
+      }
+   }
+
+   for (i=index-1; i>=0; i--) {
+      if (infile[i].isData()) {
+         break;
+      }
+      if (!infile[i].isInterpretation()) {
+         continue;
+      }
+      if (pre.search(infile[i][0], "^\\*met\\(([^)]+)\\)")) {
+         out << ", \"mensuration\":\"" << pre.getSubmatch(1) << "\"";
+         return;
+      }
+   }
+
+}
+
+
+
+//////////////////////////////
+//
+// printSectionLabel --
+//
+
+void printSectionLabel(ostream& out, HumdrumFile& infile, int line) {
+   int i;
+   char buffer[1024] = {0};
+
+   for (i=line; i<infile.getNumLines(); i++) {
+      if (infile[i].isData()) {
+         break;
+      }
+      if (!infile[i].isBibliographic()) {
+         continue;
+      }
+      if (strcmp(infile[i].getBibKey(buffer, 1000), "OMD") == 0) {
+         infile[i].getBibValue(buffer, 1000);
+         out << ", \"sectionlabel\":\"" << buffer << "\"";
+         return;
+      }
+   }
+
+   for (i=line-1; i>=0;  i--) {
+      if (infile[i].isData()) {
+         break;
+      }
+      if (!infile[i].isBibliographic()) {
+         continue;
+      }
+      if (strcmp(infile[i].getBibKey(buffer, 1000), "OMD") == 0) {
+         infile[i].getBibValue(buffer, 1000);
+         out << ", \"sectionlabel\":\"" << buffer << "\"";
+         return;
+      }
+   }
+}
+
+
+
+//////////////////////////////
+//
+// printJsonNote --
+//
+
+void printJsonNote(ostream& out, int b40, RationalNumber& duration, const char* kern, 
+      HumdrumFile& infile, int line, int field, int token) {
+   int indent = 4;
+
+   RationalNumber metpos    = infile[line].getBeatR();
+   RationalNumber starttime = infile[line].getAbsBeatR();
+
+//   pi(out, indent); 
+//   out << "{\n";
+
+   pi(out, indent); 
+   out << "\t\"pitch\"\t\t:\t";
+   printPitch(out, b40, kern);
+   out << ",\n";
+
+   pi(out, indent); 
+   out << "\t\"starttime\"\t:\t";
+   printRationalNumber(out, starttime);
+   out << ",\n";
+
+   pi(out, indent); 
+   out << "\t\"duration\"\t:\t";
+   printRationalNumber(out, duration);
+   out << ",\n";
+
+   pi(out, indent); 
+   out << "\t\"metpos\"\t:\t";
+   printRationalNumber(out, metpos);
+   out << "\n";
+
+//   pi(out, indent); 
+//   out << "}\n";
+
+}
+
+
+
+//////////////////////////////
+//
+// printPitch --
+//
+
+void printPitch(ostream& out, int b40, const char* kern) {
+   int b12   = Convert::base40ToMidiNoteNumber(b40);
+   int b7    = Convert::base40ToDiatonic(b40);
+   int accid = Convert::base40ToAccidental(b40);
+   char buffer[32] = {0};
+
+   Convert::base40ToKern(buffer, b40 % 40 + 120);
+   
+   if ((accid == 0) && (strchr(kern, 'n') == NULL)) {
+      accid = -100000;
+   }
+
+   out << "{";
+   out << "\"name\":\"" << buffer << b40/40 << "\", ";
+   out << "\"b7\":"    << b7;
+   out << ", \"b12\":" << b12;
+//    out << ", \"b40\":" << b40;  // can be calculated from b7 and b12.
+   if (accid > -1000) {
+      out << ", \"accid\":" << accid;
+   }
+   out << "}";
+}
+
+
+
+//////////////////////////////
+//
+// printRationalNumber --  
+//
+
+void printRationalNumber(ostream& out, RationalNumber& rat) {
+   double floatpart = rat.getFloat();
+   int intpart = (int)floatpart;
+   RationalNumber fraction;
+   fraction = rat - intpart;
+   out << "[" << floatpart;
+   if (fraction.getNumerator() != 0) {
+      out << ", " << fraction.getNumerator();
+      out << ", " << fraction.getDenominator();
+   }
+   out << "]";
+}
+
+
+//////////////////////////////
+//
+// pi -- print an indent amount.
+//
+
+void pi(ostream& out, int count) {
+   for (int i=0; i<count; i++) {
+      out << '\t';
+   }
+}
+
 
 
 //////////////////////////////
@@ -487,11 +1102,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("h|height=i:400",      "maximum height allowable for image");   
    opts.define("M|no-measure=b",      "do not display measure lines on image");
    opts.define("K|no-keyboard=b",     "do not display keyboard in background");
+   opts.define("f|filename=s",        "used to label file with standard input");
    opts.define("k|keyboard=s:151515", "keyboard white keys color");
    opts.define("s|style=s:H",         "Coloring style");
-   opts.define("mark=b",              "Highlight marked/matched notes");
-   opts.define("3|p3|P3=b",           "Output as P3 (ASCII) Portable anymap");
-   opts.define("6|p6|P6=b",           "Output as P6 (binary) Portable anymap");
+   opts.define("mark=b",              "highlight marked/matched notes");
+   opts.define("3|p3|P3=b",           "output as P3 (ASCII) Portable anymap");
+   opts.define("6|p6|P6=b",           "output as P6 (binary) Portable anymap");
+   opts.define("j|json=b",            "output proll data in JSON format");
 
    opts.define("debug=b",          "trace input parsing");   
    opts.define("author=b",         "author of the program");   
@@ -518,21 +1135,22 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       exit(0);
    }
 
-
-   debugQ    =  opts.getBoolean("debug");
-   markQ     =  opts.getBoolean("mark");
-   P6Q       =  opts.getBoolean("p6");
+   debugQ         =  opts.getBoolean("debug");
+   markQ          =  opts.getBoolean("mark");
+   maxwidth       =  opts.getInteger("width");
+   maxheight      =  opts.getInteger("height");
+   measureQ       = !opts.getBoolean("no-measure");
+   keyboardQ      = !opts.getBoolean("no-keyboard");
+   keyboardcolor  =  opts.getString("keyboard");
+   style          =  opts.getString("style")[0];
+   jsonQ          =  opts.getBoolean("json");
+   optionfilename =  opts.getString("filename");
+   P6Q            =  opts.getBoolean("p6");
    if (opts.getBoolean("p6")) {
       P3Q = 0;
    } else {
       P3Q = 1;
    }
-   maxwidth  =  opts.getInteger("width");
-   maxheight =  opts.getInteger("height");
-   measureQ  = !opts.getBoolean("no-measure");
-   keyboardQ = !opts.getBoolean("no-keyboard");
-   keyboardcolor = opts.getString("keyboard");
-   style     = opts.getString("style")[0];
 }
 
 
@@ -593,4 +1211,4 @@ void getMarkChars(Array<char>& marks, HumdrumFile& infile) {
 
 
 
-// md5sum: f1eb5e4fc53a7db30a30f66059645f4a proll.cpp [20131118]
+// md5sum: 7533d5ec2df9efc21e8d8466afa4a42d proll.cpp [20140902]

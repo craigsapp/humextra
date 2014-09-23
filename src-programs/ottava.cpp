@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
 void processFile(HumdrumFile& infile) {
    Array<int> octavestate;
    int maxtracks = infile.getMaxTracks();
-   octavestate.setSize(maxtracks);
+   octavestate.setSize(maxtracks+1);
    octavestate.allowGrowth(0);
    octavestate.setAll(0);
 
@@ -189,7 +189,7 @@ void printDataLine(HumdrumFile& infile, int line, Array<int>& octavestate,
       if (strcmp(infile[line][i], ".") == 0) {
          cout << ".";
       } else if (strcmp(infile[line].getExInterp(i), "**kern") == 0) {
-         ptrack = infile[line].getPrimaryTrack(i) - 1;
+         ptrack = infile[line].getPrimaryTrack(i);
          transpose = octavestate[ptrack] * direction;
          printNoteData(infile[line], i, transpose);
       } else {
@@ -278,49 +278,49 @@ void checkLineForOttavas(HumdrumFile& infile, int index, Array<int>& states) {
       if (direction == TOSOUND) {
 
          if (strcmp(infile[index][j], "*8va/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = +1;
+            states[infile[index].getPrimaryTrack(j)] = +1;
          } else if (strcmp(infile[index][j], "*X8va/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = 0;
+            states[infile[index].getPrimaryTrack(j)] = 0;
          } else if (strcmp(infile[index][j], "*8ba/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = -1;
+            states[infile[index].getPrimaryTrack(j)] = -1;
          } else if (strcmp(infile[index][j], "*X8ba/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = 0;
+            states[infile[index].getPrimaryTrack(j)] = 0;
          } else if (strcmp(infile[index][j], "*15ma/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = +2;
+            states[infile[index].getPrimaryTrack(j)] = +2;
          } else if (strcmp(infile[index][j], "*X15ma/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = 0;
+            states[infile[index].getPrimaryTrack(j)] = 0;
          } else if (strcmp(infile[index][j], "*15va/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = +2;
+            states[infile[index].getPrimaryTrack(j)] = +2;
          } else if (strcmp(infile[index][j], "*X15va/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = 0;
+            states[infile[index].getPrimaryTrack(j)] = 0;
          } else if (strcmp(infile[index][j], "*15ba/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = -2;
+            states[infile[index].getPrimaryTrack(j)] = -2;
          } else if (strcmp(infile[index][j], "*X15ba/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = 0;
+            states[infile[index].getPrimaryTrack(j)] = 0;
          }
 
       } else if (direction == TOVISUAL) {
 
          if (strcmp(infile[index][j], "*8va") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = +1;
+            states[infile[index].getPrimaryTrack(j)] = +1;
          } else if (strcmp(infile[index][j], "*X8va") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = 0;
+            states[infile[index].getPrimaryTrack(j)] = 0;
          } else if (strcmp(infile[index][j], "*8ba") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = -1;
+            states[infile[index].getPrimaryTrack(j)] = -1;
          } else if (strcmp(infile[index][j], "*X8ba") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = 0;
+            states[infile[index].getPrimaryTrack(j)] = 0;
          } else if (strcmp(infile[index][j], "*15ma") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = +2;
+            states[infile[index].getPrimaryTrack(j)] = +2;
          } else if (strcmp(infile[index][j], "*X15ma") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = 0;
+            states[infile[index].getPrimaryTrack(j)] = 0;
          } else if (strcmp(infile[index][j], "*15va") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = +2;
+            states[infile[index].getPrimaryTrack(j)] = +2;
          } else if (strcmp(infile[index][j], "*X15va") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = 0;
+            states[infile[index].getPrimaryTrack(j)] = 0;
          } else if (strcmp(infile[index][j], "*15ba") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = -2;
+            states[infile[index].getPrimaryTrack(j)] = -2;
          } else if (strcmp(infile[index][j], "*X15ba") == 0) {
-            states[infile[index].getPrimaryTrack(j)-1] = 0;
+            states[infile[index].getPrimaryTrack(j)] = 0;
          }
 
       }
@@ -406,4 +406,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: c4481c6932f208dde76d06b4c1d8ae0e ottava.cpp [20110215]
+// md5sum: 535e76e00b50550d3d1e68f411ce04f1 ottava.cpp [20140731]

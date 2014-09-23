@@ -150,7 +150,7 @@ int HumdrumFileSet::readAppend(const char* filename) {
       } 
       if (strncmp(filename, "jrp://", strlen("jrp://")) == 0) {
          readAppendFromJrpURI(instream, filename);
-         return readAppend(instream);
+         return readAppend(instream, filename);
       } 
       if (strncmp(filename, "humdrum://", strlen("humdrum://")) == 0) {
          readAppendFromHumdrumURI(instream, filename);
@@ -198,6 +198,9 @@ int HumdrumFileSet::readAppend(istream& inStream, const char* filename) {
    char line[1123123] = {0};
    SSTREAM* inbuffer;
    char tfilename[123123] = {0};
+   if (strrchr(filename, '/') != NULL) {
+      filename = strrchr(filename, '/') + 1;
+   }
    strcpy(tfilename, filename);
    inbuffer = new SSTREAM;
    while (!inStream.eof()) {
@@ -211,6 +214,9 @@ int HumdrumFileSet::readAppend(istream& inStream, const char* filename) {
       }
       if (pre.search(line, "^!!!!SEGMENT:\\s*(.*)\\s*$", "")) {
          if (contentQ != 0) {
+            if ((tfilename == NULL) || (strlen(tfilename) == 0)) {
+               strcpy(tfilename, filename);
+            }
             appendHumdrumFileContent(tfilename, *inbuffer);
             delete inbuffer;
             inbuffer = new SSTREAM;
@@ -349,7 +355,8 @@ void HumdrumFileSet::readAppendFromJrpURI(SSTREAM& inputstream,
    httprequest << ptr;
    httprequest << ends;
 
-   readAppendFromHttpURI(inputstream, httprequest.CSTRING);
+   const char* filename = jrpaddress;
+   readAppendFromHttpURI(inputstream, httprequest.CSTRING, filename);
 }
 
 
@@ -357,17 +364,17 @@ void HumdrumFileSet::readAppendFromJrpURI(SSTREAM& inputstream,
 //////////////////////////////
 //
 // readAppendFromHttpURI -- Read a Humdrum file from an http:// web address
+//    Default value: filename = NULL.
 //
 
 void HumdrumFileSet::readAppendFromHttpURI(SSTREAM& inputstream, 
-      const char* webaddress) {
+      const char* webaddress, const char* filename) {
    Array<char> hostname;
 
    Array<char> location;
    location.setSize(0);
 
    const char* ptr = webaddress;
-   const char* filename = NULL;
 
    if (strncmp(webaddress, "http://", strlen("http://")) == 0) {
       // remove the "http://" portion of the webaddress
@@ -380,17 +387,25 @@ void HumdrumFileSet::readAppendFromHttpURI(SSTREAM& inputstream,
    char* pot;
    if ((pot = strchr(hostname.getBase(), '/')) != NULL) {
       *pot = '\0';
+      hostname.setSize(strlen(hostname.getBase())+1);
    }
 
-   if ((filename = strchr(ptr, '/')) != NULL) {
-      location.setSize(strlen(filename)+1);
-      strcpy(location.getBase(), filename);
+   const char* ptr3;
+   if ((ptr3 = strchr(ptr, '/')) != NULL) {
+      location.setSize(strlen(ptr3)+1);
+      strcpy(location.getBase(), ptr3);
       location.allowGrowth(0);
    }
    if (location.getSize() == 0) {
       location.setSize(2);
       location.allowGrowth(0);
       strcpy(location.getBase(), "/");
+   }
+
+   const char* ptr2 = NULL;
+   const char* newfilename = filename;
+   if ((filename != NULL) && ((ptr2 = strrchr(filename, '/')) != NULL)) {
+      newfilename = ptr2+1;
    }
 
    char newline[3] = {0x0d, 0x0a, 0};

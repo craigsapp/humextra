@@ -1638,6 +1638,22 @@ RationalNumber HumdrumFile::getBeatR(int index) {
 
 //////////////////////////////
 //
+// HumdrumFile::getMeasureDuration -- returns the duration of the current
+//      measure if the current line is a barline.
+//
+
+double HumdrumFile::getMeasureDuration(int index) {
+   return (*this)[index].getMeasureDuration();
+}
+
+RationalNumber HumdrumFile::getMeasureDurationR(int index) {
+   return (*this)[index].getMeasureDurationR();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFile::getAbsBeat -- returns the duration of the current
 //      humdrum file line.
 //

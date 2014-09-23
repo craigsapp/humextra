@@ -367,6 +367,11 @@ void getNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
             //       break;
             // }
          }
+         if (style == STYLE_BASE7) {
+            baseval = Convert::base40ToDiatonic(baseval);
+         } else if (style == STYLE_BASE12) {
+            baseval = Convert::base40ToMidiNoteNumber(baseval);
+         }
          baseval = attack * baseval;
          templist.append(baseval);
       }

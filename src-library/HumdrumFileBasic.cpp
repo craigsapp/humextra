@@ -1059,7 +1059,7 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
          if (init == 0) {
             cout << (*this);
             cout << "Error on line " << n+1 
-                 << "of data: no starting interpretation" << endl;
+                 << " of data: no starting interpretation" << endl;
             exit(1);
          } 
          ((*this)[n]).copySpineInfo(spineinfo, n+1);

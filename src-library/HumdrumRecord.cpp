@@ -600,6 +600,33 @@ RationalNumber HumdrumRecord::getBeatR(void) const {
 
 //////////////////////////////
 //
+// HumdrumRecord::getMeasureDuration -- returns the duration of a measure in
+//    terms of quarter notes.  This value is by default 0, but can be set
+//    manally with the setBeat() function, or by calling
+//    HumdrumFile::analyzeRhythm().  Returns 0 if the HumdrumRecord is not
+//    a barline.
+//
+
+double HumdrumRecord::getMeasureDuration(void) const { 
+   if (!isBarline()) {
+      return 0;
+   }
+   return meterlocR.getFloat();
+}
+
+
+RationalNumber HumdrumRecord::getMeasureDurationR(void) const { 
+   RationalNumber zero(0,1);
+   if (!isBarline()) {
+      return zero;
+   }
+   return meterlocR;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumRecord::getDuration -- returns the duration of the current
 //    HumdrumRecord line in a HumdrumFile.  This value is by default 0, 
 //    but can be set manally with the setAbsBeat() function, or by 

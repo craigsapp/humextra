@@ -327,4 +327,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 2e2081f3c9c269c9e012127aba61ec02 minrhy.cpp [20111004]
+// md5sum: b90575a9c4443896d33ba24075d74061 minrhy.cpp [20140731]

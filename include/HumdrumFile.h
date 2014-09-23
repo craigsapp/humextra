@@ -117,6 +117,8 @@ class HumdrumFile : public HumdrumFileBasic {
       RationalNumber         getAbsBeatR      (int index);
       double                 getBeat          (int index);
       RationalNumber         getBeatR         (int index);
+      double                 getMeasureDuration(int index);
+      RationalNumber         getMeasureDurationR(int index);
       double                 getDuration      (int index);
       int                    getMeasureNumber (int line);
       int                    hasNoteAttack    (int line);

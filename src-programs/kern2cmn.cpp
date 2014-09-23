@@ -468,4 +468,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 63e49b70e46d53bf367ffb6f879b7321 kern2cmn.cpp [20131108]
+// md5sum: 9fac423c8b2aeb0b9a44dcfc8ff9e61b kern2cmn.cpp [20140731]

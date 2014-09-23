@@ -82,6 +82,7 @@ int         dispMeasureQ = 1;     // used with -M option
 int         dispQBeatQ   = 0;     // used with -q option
 int         dispBeatQ    = 1;     // used with -B option
 int         rationalQ    = 0;     // used with -r option
+int         dispFracQ    = 0;     // used with -f option
 int         markQ        = 0;     // used with --mark option
 int         matchlistQ   = 0;     // used with --matchlist option
 int         mark2Q       = 0;     // used with --mark2 option
@@ -372,7 +373,7 @@ void processDataLine(HumdrumFile& infile, const char* inputline,
 
 void printDash(void) {
    if (dispNoteQ || dispLineQ || dispColumnQ || dispAbsBeatQ || dispMeasureQ ||
-         dispBeatQ || percentQ || dispQBeatQ) {
+         dispBeatQ || dispFracQ || percentQ || dispQBeatQ) {
       cout << "-";  
    }
 }
@@ -433,6 +434,9 @@ void displayNoteLocationInfo(HumdrumFile& infile, int num, int row, int col,
       } else {
          cout << "Q" << infile[row].getBeat();
       }
+   }
+   if (dispFracQ) {
+      cout << "F";
    }
 }
 
@@ -936,6 +940,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("q|qbeat=b", "display quarter note duration for start of bar");
    opts.define("B|nobeat=b", "don't display beat of start of match");
    opts.define("r|rational=b", "display metric info as rational numbers");
+   opts.define("f|fraction=b", "display fractional position of match");
    opts.define("m|mark=b", "mark matches in first input file");
    opts.define("mstart|double=b", "double-mark first note in match");
    opts.define("G|no-grace|nograce=b", "do not count grace notes");
@@ -978,6 +983,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    dispMeasureQ=!opts.getBoolean("nomeasure");
    dispQBeatQ  = opts.getBoolean("qbeat");
    dispBeatQ   =!opts.getBoolean("nobeat");
+   dispFracQ   = opts.getBoolean("fraction");
    rationalQ   = opts.getBoolean("rational");
    dirdropQ    = opts.getBoolean("nodir");
    debugQ      = opts.getBoolean("debug");
@@ -1077,4 +1083,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 964b0c692a0188b02222267b966e494e theloc.cpp [20130420]
+// md5sum: f4ffb3a801a860267c563233e3fd0c55 theloc.cpp [20140902]

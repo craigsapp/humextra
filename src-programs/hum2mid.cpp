@@ -163,6 +163,7 @@ int     stdoutQ          =   0;    // used with --stdout option
 int     starttick        =   0;    // used with --no-rest option
 int     bendQ            =   0;    // used with --bend option
 int     metQ             =   0;    // used with --met option
+int     met2Q            =   0;    // used with --met2 option
 int     infoQ            =   0;    // used with --info option
 int     timbresQ         =   0;    // used with --timbres option
 Array<SigString> TimbreName;       // used with --timbres option
@@ -677,7 +678,7 @@ void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
 
    int nextChannel = 0;        // next midi channel available to assign
 
-   if (instcount < 15) {
+   if (instcount < 14) {
       // have enough space to store each instrument on a separate channel
       // regardless of instrumentation
       nextChannel = 1;        // channel 0 is for undefined instrument spines
@@ -685,6 +686,10 @@ void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
          if (instruments[i] == -1) {
             trackchannel[i] = 0;
          } else {
+	    if (nextChannel == 9) {
+              // avoid percussion channel
+               nextChannel++;
+            }
             trackchannel[i] = nextChannel++;
          }
 
@@ -710,11 +715,15 @@ void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
          } else if (foundDup != -1) {
             trackchannel[i] = trackchannel[foundDup];
          } else {
+	    if (nextChannel == 10) {
+               // avoid percussion channel
+               nextChannel++;
+            }
             trackchannel[i] = nextChannel++;
          }
 
          // avoid General MIDI percussion track.
-         if (nextChannel == 9) {
+         if (nextChannel == 10) {
             nextChannel++;
          }
       }
@@ -737,7 +746,7 @@ void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
    if (kerntracks.getSize() < 13) { 
       for (i=0; i<kerntracks.getSize(); i++) {
          trackchannel[kerntracks[i]] = i;
-         if (i>9) {   // avoid general midi drum track channel
+         if (i>8) {   // avoid general midi drum track channel
             trackchannel[kerntracks[i]] = i+1;
          }
       }
@@ -813,7 +822,11 @@ double checkForTempo(HumdrumRecord& record) {
       } else if (strcmp(mensuration, "O.") == 0) {
          return (double)metQ * 1.0;
       } else if (strcmp(mensuration, "C") == 0) {
-         return (double)metQ * 0.8;
+         if (met2Q) {
+            return (double)metQ * 1.241793;
+         } else {
+            return (double)metQ * 0.8;
+         }
       } else if (strcmp(mensuration, "O|") == 0) {
          return (double)metQ * 1.310448;
       } else if (strcmp(mensuration, "C|3") == 0) {
@@ -878,6 +891,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("p|plain=b",        "Play with articulation interpretation");
    opts.define("P|nopad=b",        "Do not pad ending with spacer note");
    opts.define("met=d:232",        "Tempo control from metrical symbols");
+   opts.define("met2=d:336",       "Tempo control from metrical symbols, older era");
    opts.define("hv|humanvolume=i:5","Apply a random adjustment to volumes");
    opts.define("mv|metricvolume=i:3","Apply metric accentuation to volumes");
    opts.define("fs|sforzando=i:20","Increase sforzandos by specified amount");
@@ -931,6 +945,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       metQ = int(opts.getDouble("met")+0.5);
    } else {
       metQ = 0;
+   }
+   if (opts.getBoolean("met2")) {
+      met2Q = int(opts.getDouble("met2")+0.5);
+      metQ  = met2Q;
+   } else {
+      met2Q = 0;
    }
 
    storeTextQ = opts.getBoolean("notext");
@@ -3228,4 +3248,4 @@ void getKernTracks(Array<int>& tracks, HumdrumFile& infile) {
 
 
 
-// md5sum: d1d649efc39453542577d388512f7864 hum2mid.cpp [20140205]
+// md5sum: 79043a25925ca3aeb687f7f408ccd7f3 hum2mid.cpp [20140817]

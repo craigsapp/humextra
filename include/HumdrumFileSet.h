@@ -64,7 +64,8 @@ class HumdrumFileSet {
       void                   readAppendFromJrpURI(SSTREAM& inputstream, 
                                                 const char* jrpaddress);
       void                   readAppendFromHttpURI(SSTREAM& inputstream,
-                                                const char* webaddress);
+                                                const char* webaddress,
+                                                const char* filename = NULL);
       int                    getChunk          (int socket_id, 
                                                 SSTREAM& inputstream, 
                                                 char* buffer, int bufsize);

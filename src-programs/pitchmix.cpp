@@ -610,4 +610,4 @@ int throwDice(double piecefraction) {
 
 
 
-// md5sum: c327acd28436adb7b3fe8009978bdc8a pitchmix.cpp [20131118]
+// md5sum: 467b359db9c49a41edd8738808910d43 pitchmix.cpp [20140731]

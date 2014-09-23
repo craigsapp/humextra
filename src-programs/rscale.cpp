@@ -61,6 +61,7 @@ int       originalQ  = 0;      // used with --original
 int       alternateQ = 0;      // used with --alternate
 int       longQ      = 0;      // used with -r option
 int       rebeamQ    = 0;      // used with -B option
+int       autoQ      = 0;      // used with -F option
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -97,8 +98,20 @@ int main(int argc, char* argv[]) {
 
 void printOutput(HumdrumFile& infile, RationalNumber& rnum) {
    int i, j;
-   
+   PerlRegularExpression pre;
+
    for (i=0; i<infile.getNumLines(); i++) {
+      if (autoQ) {
+         if (pre.search(infile[i][0], "^!+RSCALE:\\s*(\\d+)/(\\d+)")) {
+            rnum = atoi(pre.getSubmatch(1));
+            rnum /= atoi(pre.getSubmatch(2));
+            continue;
+         } else if (pre.search(infile[i][0], "^!+RSCALE:\\s*(\\d+)")) {
+            rnum = atoi(pre.getSubmatch(1));
+            continue;
+         }
+      }
+   
       if (infile[i].isBibliographic()) {
          handleBibliographic(infile, i, rnum);
          continue;
@@ -583,6 +596,7 @@ void printSpecialRational(RationalNumber& value) {
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("d|f|factor=s:1/1", "Factor to multiply durations by");
+   opts.define("F=b", "Read rscale factors from !!!RSCALE: lines");
    opts.define("M|T|nometer=b", "Do not alter time signatures");
    opts.define("o|original=b", "Revert to original rhythms");
    opts.define("a|alternate=b", "Change to alternate rhythm set");
@@ -639,6 +653,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cerr << "Scaling factor set to " << factor << endl;
    }
 
+   autoQ       =  opts.getBoolean("F");
    meterQ      = !opts.getBoolean("nometer");
    originalQ   =  opts.getBoolean("original");
    alternateQ  =  opts.getBoolean("alternate");
@@ -674,4 +689,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 2257c7799a9606009bf8cd5663342c1b rscale.cpp [20120727]
+// md5sum: 9a3b495e8792b2bea564efc01107589f rscale.cpp [20140902]

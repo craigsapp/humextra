@@ -70,6 +70,8 @@ class HumdrumRecord {
       RationalNumber    getAbsBeatR        (void) const;
       double            getBeat            (void) const;
       RationalNumber    getBeatR           (void) const;
+      double            getMeasureDuration (void) const;
+      RationalNumber    getMeasureDurationR(void) const;
       int               getDotLine         (int index);
       int               getDotSpine        (int index);
       int               getDotField        (int index) 
