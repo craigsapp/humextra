@@ -625,7 +625,7 @@ Array<int> DashState;               // used for turning off dashed lines
 Array<Array<RationalNumber> > RscaleState;  // used for *rscale processing
 Array<int> KernTracks;
 
-Array<Array<int>> TacetState;
+Array<Array<int> > TacetState;
 int    autoTacetQ = 1;
 
 
@@ -1164,7 +1164,7 @@ void getReferenceValue(Array<char>& value, Array<char>& refkey,
    int i;
    char buffer[1024] = {0};
    value.setSize(1);
-   value = '\0';
+   value[0] = '\0';
 
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isBibliographic()) {
