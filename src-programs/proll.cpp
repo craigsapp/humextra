@@ -7,6 +7,7 @@
 // Last Modified: Thu Nov 14 12:17:29 PST 2013 Added choice of P3/P6 image 
 // Last Modified: Thu Nov 14 14:01:01 PST 2013 Changed P3 to default output
 // Last Modified: Wed Aug 20 11:16:46 PDT 2014 Added JSON output
+// Last Modified: Mon Feb  2 00:13:08 PST 2015 Fixed due to new comp. restr.
 // Filename:      ...sig/examples/all/proll.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/proll.cpp
 // Syntax:        C++; museinfo
@@ -132,7 +133,9 @@ void createJsonProll(HumdrumFile& infile) {
       rktracks[ktracks[i]] = i;
    }
 
-   stringstream staves[ktracks.getSize()];
+   int ksize = ktracks.getSize();
+   stringstream* staves;
+   staves = new stringstream[ksize];
 
    char buffer[1024] = {0};
    int b40;
@@ -189,7 +192,8 @@ void createJsonProll(HumdrumFile& infile) {
                pi(staves[rktracks[track]], 4);
                staves[rktracks[track]] << "{\n";
             }
-            printJsonNote(staves[rktracks[track]], b40, duration, buffer, infile, i, j, k);
+            printJsonNote(staves[rktracks[track]], b40, duration, buffer, 
+                  infile, i, j, k);
 
             if (b40 > partmax[rktracks[track]]) {
                partmax[rktracks[track]] = b40;
@@ -245,6 +249,7 @@ void createJsonProll(HumdrumFile& infile) {
    pi(cout, 0);
    cout << "}\n";
 
+   delete [] staves;
 }
 
 

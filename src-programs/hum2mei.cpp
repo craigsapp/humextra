@@ -1,11 +1,11 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Aug  7 15:07:31 PDT 2009
-// Last Modified: Tue Aug 11 17:06:33 PDT 2009
-// Last Modified: Sat Aug 29 05:42:04 PDT 2009 (added meter/key changes)
-// Last Modified: Tue Mar 16 03:58:41 PST 2010 (Update to MEI 1.9.1b)
-// Last Modified: Thu Jan  6 09:13:15 PST 2011 (Update to MEI 2010-05)
-// Last Modified: Sun Jul 10 00:20:04 PDT 2011 (avoid language duplicates)
+// Last Modified: Sat Aug 29 05:42:04 PDT 2009 Added meter/key changes
+// Last Modified: Tue Mar 16 03:58:41 PST 2010 Update to MEI 1.9.1b
+// Last Modified: Thu Jan  6 09:13:15 PST 2011 Update to MEI 2010-05
+// Last Modified: Sun Jul 10 00:20:04 PDT 2011 Avoid language duplicates
+// Last Modified: Wed Nov 12 14:40:01 PST 2014 Update for MEI 2013
 //
 // Filename:      ...sig/examples/all/hum2mei.cpp 
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2mei.cpp
@@ -125,11 +125,11 @@ void      Indent               (SSTREAM& out, int indent,
 void      printHeadFiledesc    (int indent, SSTREAM& out, HumdrumFile& infile);
 void      printMeiheadProfiledesc(int indent, SSTREAM& out, 
                                 HumdrumFile& infile);
-void      printTitlestmtRespstmt(int indent, SSTREAM& out, 
+void      printTitleStmtRespStmt(int indent, SSTREAM& out, 
                                 HumdrumFile& infile);
-void      printFiledescTitlestmt(int indent, SSTREAM& out, 
+void      printFiledescTitleStmt(int indent, SSTREAM& out, 
                                 HumdrumFile& infile);
-void      printTitlestmtTitle  (int indent, SSTREAM& out, HumdrumFile& infile);
+void      printTitleStmtTitle  (int indent, SSTREAM& out, HumdrumFile& infile);
 void      printAsCdata         (SSTREAM& out, const char* string);
 void      printMdivScoreScoredef(int indent, SSTREAM& out, 
 		                HumdrumFile& infile);
@@ -217,7 +217,7 @@ Array<MeasureInfo> MINFO;           // used to create <measure> attributes
 const char*        IDMARKER = "sc"; // used for @id value generation
 int                DATASTART = 0;   // first line of actual data
 const char*        INDENT = "\t";   // indenting string
-Array<const char*> LANGS;           // for list of languages used in meihead
+Array<const char*> LANGS;           // for list of languages used in meiHead
 const char*        DTDLOCATION  = "/DTD/mei19b-full.dtd"; 
 
 
@@ -392,16 +392,16 @@ void convertHumdrumToMei(int indent, SSTREAM& out, HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// createMeiHeader -- Fill in the <meihead> section of <mei>
-//     <mei/meihead>
+// createMeiHeader -- Fill in the <meiHead> section of <mei>
+//     <mei/meiHead>
 // 
-// <meihead> 	(altmeiid*, filedesc, (encodingdesc?, profiledesc?), 
+// <meiHead> 	(altmeiid*, filedesc, (encodingdesc?, profiledesc?), 
 //               revisiondesc?)
 //
 
 void createMeiHeader(int indent, SSTREAM& out, HumdrumFile& infile) {
    Indent(out, indent);
-   out << "<meihead>\n";
+   out << "<meiHead>\n";
 
    // altmeiid*
 
@@ -421,7 +421,7 @@ void createMeiHeader(int indent, SSTREAM& out, HumdrumFile& infile) {
    printBibliographicRecords(indent+1, out, infile);
 
    Indent(out, indent);
-   out << "</meihead>\n";
+   out << "</meiHead>\n";
 }
 
 
@@ -557,69 +557,69 @@ void printBibliographicRecords(int indent, SSTREAM& out,
 
 //////////////////////////////
 //
-// printHeadFiledesc -- Fill in the <filedesc> section of <meihead>
-//      <mei/meihead/filedesc>
+// printHeadFiledesc -- Fill in the <filedesc> section of <meiHead>
+//      <mei/meiHead/filedesc>
 // 
-// <filedesc> 		(titlestmt, editionstmt?, extent?, fingerprint?, 
-//                       pubstmt, seriesstmt?, notesstmt?, sourcedesc?)
+// <filedesc> 		(titleStmt, editionStmt?, extent?, fingerprint?, 
+//                       pubStmt, seriesStmt?, notesStmt?, sourceDesc?)
 //
 
 void printHeadFiledesc(int indent, SSTREAM& out, HumdrumFile& infile) {
    Indent(out, indent);
-   out << "<filedesc>\n";
+   out << "<fileDesc>\n";
 
-   printFiledescTitlestmt(indent+1, out, infile);
-   // editionstmt?
+   printFiledescTitleStmt(indent+1, out, infile);
+   // editionStmt?
    // extent?
    // fingerprint?
   
-   // pubstmt: just empty for now
+   // pubStmt: just empty for now
    Indent(out, indent+1);
-   out << "<pubstmt/>\n";
+   out << "<pubStmt/>\n";
 
-   // seriesstmt
-   // notesstmt
+   // seriesStmt
+   // notesStmt
    // sourcedesc
 
    Indent(out, indent);
-   out << "</filedesc>\n";
+   out << "</fileDesc>\n";
 }
 
 
 
 //////////////////////////////
 //
-// printFiledescTitlestmt -- Fill in the <titlestmt> section of <filedesc>
-//      <mei/meihead/filedesc/titlestmt>
+// printFiledescTitleStmt -- Fill in the <titleStmt> section of <filedesc>
+//      <mei/meiHead/filedesc/titleStmt>
 // 
-// <titlestmt> 		(title+, respstmt?)
+// <titleStmt> 		(title+, respStmt?)
 //
 // Container for title and responsibility meta-data. 
 //
 
-void printFiledescTitlestmt(int indent, SSTREAM& out, HumdrumFile& infile) {
+void printFiledescTitleStmt(int indent, SSTREAM& out, HumdrumFile& infile) {
    Indent(out, indent);
-   out << "<titlestmt>\n";
+   out << "<titleStmt>\n";
 
    // title+
-   printTitlestmtTitle(indent+1, out, infile);
+   printTitleStmtTitle(indent+1, out, infile);
 
-   // respstmt?
-   printTitlestmtRespstmt(indent+1, out, infile);
+   // respStmt?
+   printTitleStmtRespStmt(indent+1, out, infile);
 
    Indent(out, indent);
-   out << "</titlestmt>\n";
+   out << "</titleStmt>\n";
 }
 
 
 
 //////////////////////////////
 //
-// printTitlestmtRespstmt --
-//      <mei/meihead/filedesc/titlestmt/respstmt>
+// printTitleStmtRespStmt --
+//      <mei/meiHead/filedesc/titleStmt/respStmt>
 //
 
-void printTitlestmtRespstmt(int indent, SSTREAM& out, HumdrumFile& infile) {
+void printTitleStmtRespStmt(int indent, SSTREAM& out, HumdrumFile& infile) {
 
 
 }
@@ -649,8 +649,8 @@ void addToLANGS(const char* lang) {
 
 //////////////////////////////
 //
-// printTitlestmtTitle -- Fill in the <titlestmt> section of <filedesc>
-//      <mei/meihead/filedesc/titlestmt/title>
+// printTitleStmtTitle -- Fill in the <titleStmt> section of <filedesc>
+//      <mei/meiHead/filedesc/titleStmt/title>
 // 
 // <title>		(#PCDATA | extptr | extref | ptr | ref | address |
 //              annot | bibl | abbr | expan | name | corpname | persname |
@@ -691,7 +691,7 @@ void addToLANGS(const char* lang) {
 //  type    	NMTOKEN 	   #IMPLIED
 //
 
-void printTitlestmtTitle(int indent, SSTREAM& out, HumdrumFile& infile) {
+void printTitleStmtTitle(int indent, SSTREAM& out, HumdrumFile& infile) {
    int i;
    char keybuffer[128] = {0};
    const char* ptr = "";
@@ -1069,14 +1069,14 @@ void calculateLayerInformation(Array<MeasureInfo>& minfo,
 // createMeiMusicBodyMdivScore --
 //      <mei/music/body/mdiv/score>
 //
-//	<score>		((app | div | pb | sb | scoredef | staffdef |
-//                      staffgrp | annot | curve | line | symbol
-//                      | anchoredtext | choice | handshift | gap |
+//	<score>		((app | div | pb | sb | scoreDef | staffDef |
+//                      staffGrp | annot | curve | line | symbol
+//                      | anchoredText | choice | handShift | gap |
 //                      subst | add | corr | damage | del | orig | reg |
 //                      restore | sic | supplied | unclear)*, ((section
-//                      | ending), (app | div | pb | sb | scoredef |
-//                      staffdef | staffgrp | annot | curve | line |
-//                      symbol | anchoredtext | choice | handshift |
+//                      | ending), (app | div | pb | sb | scoreDef |
+//                      staffDef | staffGrp | annot | curve | line |
+//                      symbol | anchoredText | choice | handShift |
 //                      gap | subst | add | corr | damage | del | orig |
 //                      reg | restore | sic | supplied | unclear)*)*)
 //
@@ -1092,7 +1092,7 @@ void createMeiMusicBodyMdivScore(int indent, SSTREAM& out,
    Indent(out, indent);
    out << "<score>\n";
 
-   // <scoredef>
+   // <scoreDef>
    printMdivScoreScoredef(indent+1, out, infile);
 
    // sections
@@ -1268,7 +1268,7 @@ void checkForTimeAndOrKeyChange(int indent, SSTREAM& out, HumdrumFile& infile,
    }
 
    Indent(out, indent);
-   out << "<scoredef";
+   out << "<scoreDef";
 
    if (keysigline >= 0) {
       printMeiKeySignatureAttributes(out, infile[keysigline][keysigspine]);
@@ -2127,10 +2127,10 @@ void getSectionInfo(Array<int>& sections, HumdrumFile& infile) {
 //////////////////////////////
 //
 // printMdivScoreScoredef --
-//      <mei/music/body/div/score/scoredef>
+//      <mei/music/body/div/score/scoreDef>
 //
-// <scoredef> 	(timeline*, chordtable?, symboltable?, keysig?, pghead1?, 
-//               pghead2?, pgfoot1?, pgfoot2?, (staffgrp? | staffdef?))
+// <scoreDef> 	(timeline*, chordTable?, symbolTable?, keysig?, pghead1?, 
+//               pghead2?, pgfoot1?, pgfoot2?, (staffGrp? | staffDef?))
 //
 // Container for score meta-information.
 // 
@@ -2194,7 +2194,7 @@ void getSectionInfo(Array<int>& sections, HumdrumFile& infile) {
 
 void printMdivScoreScoredef(int indent, SSTREAM& out, HumdrumFile& infile) {
    Indent(out, indent);
-   out << "<scoredef";
+   out << "<scoreDef";
 
    // @key.sig
    printInitialKeySignature(out, infile);
@@ -2217,7 +2217,7 @@ void printMdivScoreScoredef(int indent, SSTREAM& out, HumdrumFile& infile) {
    printTempExpandRules(indent+1, out, infile);
 
    Indent(out, indent);
-   out << "</scoredef>\n";
+   out << "</scoreDef>\n";
 }
 
 
@@ -2271,9 +2271,9 @@ void printTempExpandRules(int indent, SSTREAM& out, HumdrumFile& infile) {
 //////////////////////////////
 //
 // printScoredefStaffgrp -- list of staves found in the music.
-//   staffgrp/@barthru    = true if a barline goes through all staves
-//   staffgrp/@symbol     = brace
-//   staffgrp/@lable.full = string to place to left of first staff on
+//   staffGrp/@barthru    = true if a barline goes through all staves
+//   staffGrp/@symbol     = brace
+//   staffGrp/@lable.full = string to place to left of first staff on
 //       first system.
 //
 
@@ -2284,7 +2284,7 @@ void printScoredefStaffgrp(int indent, SSTREAM& out, HumdrumFile& infile) {
    }
 
    Indent(out, indent);
-   out << "<staffgrp";
+   out << "<staffGrp";
    out << ">\n";
 
    int i;
@@ -2293,7 +2293,7 @@ void printScoredefStaffgrp(int indent, SSTREAM& out, HumdrumFile& infile) {
    }
 
    Indent(out, indent);
-   out << "</staffgrp>\n";
+   out << "</staffGrp>\n";
 }
 
 
@@ -2342,7 +2342,7 @@ void getStaffCount(Array<int>& primarytracks, HumdrumFile& infile) {
 void printStaffgrpStaffdef(int indent, SSTREAM& out, HumdrumFile& infile, 
       Array<int>& tracks, int index) {
    Indent(out, indent);
-   out << "<staffdef";
+   out << "<staffDef";
 
    out << " n=\"" << index+1 << "\"";
 
@@ -2474,7 +2474,7 @@ int getMidiTicksPerQuarterNote(HumdrumFile& infile) {
 //
 // printInitialKeySignature --
 //
-// score/scoredef/@key.sig, @key.mode
+// score/scoreDef/@key.sig, @key.mode
 //
 // @key.sig:  1f = 1 flat, 0 = no sharp/flat, 2s = two sharps
 // @key.mode: major|minor|dorian|phrygian|lydian|mixolydian|aeolian|locrian
@@ -2523,7 +2523,7 @@ void printInitialKeySignature(SSTREAM& out, HumdrumFile& infile) {
 //   (such as whether the music is in C major, or D minor, etc.
 //   This is not the key signature which indicates which notes
 //   in the music are to be played with sharps or flats.
-//   These attributes are stored in <scoredef>.
+//   These attributes are stored in <scoreDef>.
 //   Attributes which describe the musical key are:
 //      @pname = diatonic pitch name
 //      @accid = accidental to apply to pitch name

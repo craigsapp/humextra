@@ -548,6 +548,9 @@ int   needsWordExtension       (HumdrumFile& infile, int row, int notecol,
 void  markAllNotesInTiedGroup  (HumdrumFile& infile, char groupchar);
 void  adjustRscales            (HumdrumFile& infile, int line, 
                                 Array<RationalNumber>& rscales);
+void  getNoteState             (Array<int>& states, HumdrumFile& infile, 
+                               int startline, int endline);
+void  analyzeTacet             (Array<Array<int> >& tacet, HumdrumFile& infile);
 
 
 Array<Array<Array<char> > > TieConditionsForward;
@@ -622,6 +625,9 @@ Array<int> DashState;               // used for turning off dashed lines
 Array<Array<RationalNumber> > RscaleState;  // used for *rscale processing
 Array<int> KernTracks;
 
+Array<Array<int>> TacetState;
+int    autoTacetQ = 1;
+
 
 // muse2ps =k options: Display alternative options
 unsigned int kflag = 0;
@@ -664,7 +670,8 @@ int main(int argc, char** argv) {
    DashState.setAll(0);
    getKernTracks(KernTracks, infile);
 
-   setupTextAssignments(infile, textQ, TextAssignment, TextElisions, TextSpines);
+   setupTextAssignments(infile, textQ, TextAssignment, TextElisions, 
+      TextSpines);
    setupMusicaFictaVariables(infile);
    getBeamState(BeamState, LayoutInfo, GlobalLayoutInfo, ClefState, infile);
    getTupletState(hasTuplet, TupletState, TupletTopNum, TupletBotNum, infile);
@@ -680,6 +687,9 @@ int main(int argc, char** argv) {
 
    getPartNames(infile, PartNames);
    analyzeForwardTieConditions(TieConditionsForward, infile);
+   if (autoTacetQ) {
+      analyzeTacet(TacetState, infile);
+   }
    convertData(outfiles, infile);
    printMuse2PsOptions(infile);     // must come after convertData()
    // eventual the footer should go here, but it is not currently
@@ -706,6 +716,105 @@ int main(int argc, char** argv) {
 
 
 //////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////
+//
+// analyzeTacet -- Search each voice between double barlines.  If it
+//     is always resting, then force it to be hidden.
+//
+
+void analyzeTacet(Array<Array<int> >& tacet, HumdrumFile& infile) {
+   int maxtrack = infile.getMaxTracks();
+   tacet.setSize(infile.getNumLines());   
+   int i;
+   for (i=0; i<tacet.getSize(); i++) {
+      tacet[i].setSize(maxtrack+1);
+      tacet[i].setAll(5);
+   }
+
+   int ii, jj;
+   int startline = 0;
+   int endline   = 0;
+   Array<int> tacetState(maxtrack+1);
+   tacetState.setAll(0);
+
+
+   PerlRegularExpression pre;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isBarline()) {
+         continue;
+      }
+		if ((infile[i][0][0] == '=') && (strstr(infile[i][0], "||") != NULL)) {
+         endline = i;
+         getNoteState(tacetState, infile, startline, endline);
+         for (ii=startline; ii<endline; ii++) {
+            for (jj=0; jj<tacetState.getSize(); jj++) {
+               tacet[ii][jj] = !tacetState[jj];
+            }
+         }
+			startline = endline;
+      } 
+   }
+	endline = infile.getNumLines();
+   getNoteState(tacetState, infile, startline, endline);
+   for (ii=startline; ii<endline; ii++) {
+      for (jj=0; jj<tacetState.getSize(); jj++) {
+         tacet[ii][jj] = !tacetState[jj];
+      }
+   }
+
+//	for (ii=0; ii<tacet.getSize(); ii++) {
+//		cout << "@";
+//		for (jj=0; jj<tacet[ii].getSize(); jj++) {
+//			cout << tacet[ii][jj] << "\t";
+//		}
+//		cout << endl;
+//	}
+
+}
+
+
+
+
+//////////////////////////////
+//
+// getNoteState -- returns 0 if all notes in part are rests; >=1 if there
+//     is at least one note.  Don't need to keep track of >1, but no
+//     easy way to check with this implementation.
+//
+
+void getNoteState(Array<int>& states, HumdrumFile& infile, int startline,
+      int endline) {
+   int i, j;
+	int track;
+   states.setAll(0);
+   for (i=startline; i<endline; i++) {
+      if (!infile[i].isData()) {
+         continue;
+      }
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         if (!infile[i].isExInterp(j, "**kern")) {
+            continue;
+         }
+         if (strcmp(infile[i][j], ".") == 0) {
+            continue;
+         }
+         if (strchr(infile[i][j], 'r') == NULL) {
+            track = infile[i].getPrimaryTrack(j);
+            states[track] += 1;
+         }
+      }
+   }
+
+   cout << "@TS s=" << startline << "\t" << endline << ":";
+   for (i=1; i<states.getSize(); i++) {
+      cout << "\t" << states[i];
+   }
+   cout << endl;
+
+}
+
 
 
 //////////////////////////////
@@ -2405,6 +2514,16 @@ void convertTrackToMuseData(MuseData& musedata, int track,
       musedata.append(arecord);
    }
 
+   if (autoTacetQ) {
+      MuseRecord arecord2;
+      if (TacetState[0][track]) {
+         arecord2.insertString(1, "P C0:x1");
+      } else {
+         arecord2.insertString(1, "P C0:x0");
+      }
+      musedata.append(arecord2);
+   }
+
    int founddataQ = 0;  // needed to suppress first $ record from being
                        // reprinted (the first one was needed above
                        // with the Q: field added).
@@ -3448,7 +3567,8 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
    }
 
    if ((!ignoreTickError) && (tickpos != starttick)) {
-      cerr << "Error: tick mismatch: " << tickpos << " " << starttick << NEWLINE;
+      cerr << "Error: tick mismatch: " << tickpos 
+           << " " << starttick << NEWLINE;
       cerr << "on line " << startline + 1 << NEWLINE;
       exit(1);
    }
@@ -3995,7 +4115,25 @@ int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
                if (rn * RscaleState[i][j] == 4) {
                   arecord.getColumn(17) = 'w';
                } else if (rn * RscaleState[i][j] == 8) {
-                  arecord.getColumn(17) = 'B';
+/* 
+1. to get a centered whole measure rest, either a whole-note or a breve
+rest, depending on the length of the measure. YOU SHOULD LAVE A " "
+(BLANK) IN COLUMN 17, NOT A "B".
+
+2. the correct way to ask mskpage to remove a line that is empty is to
+use the P  C0:x1  print suggestion.  Turn it off with   P  C0:x0  when
+you want this feature to stop.  These are "inline" suggestions and apply
+only to the part in question.  The /END  command automatically turns
+off this feature.
+
+3. Putting a "B" in column 17 SHOULD ONLY BE DONE WHEN YOU WANT A
+DOWN-BEAT ALIGNED BREVE REST, AND YOU ALSO WANT THIS MEASURE REMOVED
+IN THE CASE WHERE THE  LINE IS EMPTY.   If you simply want a down-beat
+aligned full measure breve rest without this other complication, use
+"b" instead of "B".
+*/
+                  // for rests   b = 
+                  arecord.getColumn(17) = ' ';
                }
             } else {
                if (strlen(visual_display) > 0) {
@@ -6723,6 +6861,7 @@ void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line,
 
    arecord.insertString(1, buffer);
 
+   int tacetMarkerQ = 0;
 
    // #define MDOUBLE "measure"
    #define MDOUBLE "mdouble"
@@ -6755,6 +6894,7 @@ void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line,
       arecord.addMeasureFlag("|:");
    } else if (pre.search(infile[line][col], "\\|\\|", "")) {
       arecord.insertString(1, MDOUBLE);
+		tacetMarkerQ = 1;
    } else if (pre.search(infile[line][col], "\\|:", "")) {
       arecord.addMeasureFlag("|:");
    }
@@ -6832,6 +6972,18 @@ void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line,
    }
 
    tempdata.append(arecord);
+
+   if (tacetMarkerQ) {
+      MuseRecord arecord2;
+      int track = infile[line].getPrimaryTrack(col);
+      if (TacetState[line][track]) {
+         arecord2.insertString(1, "P C0:x1");
+      } else {
+         arecord2.insertString(1, "P C0:x0");
+      }
+      tempdata.append(arecord2);
+   }
+
    processMeasureLayout(tempdata, infile, line, col, lp, glp);
 
 }

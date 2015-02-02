@@ -787,7 +787,7 @@ double checkForTempo(HumdrumRecord& record) {
       // O           = 58 bpm
       // O.          = 58 bpm
       // C.          = 58 bpm
-      // C           = 48 bpm
+      // C           = 58 bpm
       // C|          = 72 bpm
       // O2          = 75 bpm
       // C2          = 75 bpm
@@ -797,7 +797,7 @@ double checkForTempo(HumdrumRecord& record) {
       // C3          = 110 bpm
       // O3/2        = 58 * 1.5 = 87 bpm
       // O/3         = 110 bpm
-      // C|2, Cr     = 220 bpm
+      // C|2, Cr     = 144 bpm (previously 220 bpm but too fast)
       char mensuration[1024] = {0};
       if (record.isGlobalComment() && pre.search(record[0], 
             "^\\!+primary-mensuration:.*met\\((.*?)\\)\\s*$")) {
@@ -825,14 +825,14 @@ double checkForTempo(HumdrumRecord& record) {
          if (met2Q) {
             return (double)metQ * 1.241793;
          } else {
-            return (double)metQ * 0.8;
+            return (double)metQ * 1.0;
          }
       } else if (strcmp(mensuration, "O|") == 0) {
          return (double)metQ * 1.310448;
       } else if (strcmp(mensuration, "C|3") == 0) {
          return (double)metQ * 1.8965517;
       } else if (strcmp(mensuration, "C3") == 0) {
-         return (double)metQ * 1.8965517;
+         return (double)metQ * 1.2413793;
       } else if (strcmp(mensuration, "C2/3") == 0) {
          return (double)metQ * 1.8;
       } else if (strcmp(mensuration, "3") == 0) {
@@ -848,9 +848,9 @@ double checkForTempo(HumdrumRecord& record) {
       } else if (strcmp(mensuration, "C2") == 0) {
          return (double)metQ * 1.25;
       } else if (strcmp(mensuration, "C|2") == 0) {
-         return (double)metQ * 3.791034;
+         return (double)metQ * 2.48276;
       } else if (strcmp(mensuration, "Cr") == 0) {
-         return (double)metQ * 3.791034;
+         return (double)metQ * 2.48276;
       }
 
    }
