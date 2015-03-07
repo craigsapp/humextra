@@ -2,7 +2,7 @@
 #
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Thu Apr 24 13:18:03 PDT 2014
-# Last Modified: Thu Apr 24 13:18:06 PDT 2014
+# Last Modified: Sat Mar  7 01:06:09 PST 2015 Added error check feedback.
 # Filename:      partjoin
 # Syntax:        perl 5
 #
@@ -64,10 +64,32 @@ die "Usage: $0 file1 file2 ...\n" if @files < 2;
 
 my @assemblefiles;
 my $filelist = join(" ", @files);
-my $minrhy = `minrhy $filelist`;
 
+my $minrhytest = `which minrhy`;
+if ($minrhytest =~ /^\s*$/) {
+   print STDERR "Cannot find minrhy program.  Are Humdrum Extras installed?\n";
+   exit(1);
+}
+my $timebasetest = `which timebase`;
+if ($timebasetest =~ /^\s*$/) {
+   print STDERR "Cannot find timebase program.  ";
+   print STDERR "Is the Humdrum Toolkit installed?\n";
+   exit(1);
+}
+
+my $minrhy = `minrhy $filelist`;
 $minrhy =~ /all:\s*(\d+)/;
 $minrhy = $1;
+if ($minrhy =~ /^\s*/) {
+   print STDERR "Problem determining smallest time unit in input files.\n";
+   exit(1);
+}
+if ($minrhy == 0) {
+   # 
+   print STDERR "Minimum rhythmic unit could not be found in input files.\n";
+   print STDERR "Perhaps there are no **kern or **recip spines in files?\n";
+   exit(1);
+}
 
 foreach my $file (@files) {
    my $contents = getContents($file);

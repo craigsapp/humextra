@@ -2,9 +2,10 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Mar 13 21:37:28 PST 2004
 // Last Modified: Sat Mar 13 21:37:30 PST 2004
-// Last Modified: Thu May  6 00:42:02 PDT 2004 (added measure renumbering)
-// Last Modified: Thu Jun  3 18:01:43 PDT 2004 (added -p option)
-// Last Modified: Sat Jun 26 16:49:06 PDT 2010 (added middle syllable markers)
+// Last Modified: Thu May  6 00:42:02 PDT 2004 added measure renumbering
+// Last Modified: Thu Jun  3 18:01:43 PDT 2004 added -p option
+// Last Modified: Sat Jun 26 16:49:06 PDT 2010 added middle syllable markers
+// Last Modified: Thu Mar  5 21:19:58 PST 2015 Added --split option
 // Filename:      ...sig/examples/all/xml2hum.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/xml2hum.cpp
 // Syntax:        C++; museinfo
@@ -18,25 +19,30 @@
 #include "PerlRegularExpression.h"
 
 #include <iostream>
+#include <fstream>
 
 // user interface variables
 Options options;
-int     debugQ   = 0;       // used with --debug option
-int     infoQ    = 0;       // used with -i option
-int     midifixQ = 0;       // used with -x option
-int     staff    = -1;      // used with -t option
-int     stemQ    = 1;       // used with -S option
-int     beamQ    = 1;       // used with -B option
-int     dynamicsQ= 1;       // used with -D option
-int     mfixQ    = 1;       // used with -M option
-int     printQ   = 0;       // used with -p option
-int     textQ    = 1;       // used with -T option
+int         debugQ   = 0;    // used with --debug option
+int         infoQ    = 0;    // used with -i option
+int         midifixQ = 0;    // used with -x option
+int         staff    = -1;   // used with -t option
+int         stemQ    = 1;    // used with -S option
+int         beamQ    = 1;    // used with -B option
+int         dynamicsQ= 1;    // used with -D option
+int         mfixQ    = 1;    // used with -M option
+int         printQ   = 0;    // used with -p option
+int         textQ    = 1;    // used with -T option
+int         splitQ   = 0;    // used with --parts
+const char* SplitBase= "s";  // used with --parts
 
 // function declarations:
 void      checkOptions      (Options& opts, int argc, char** argv);
 void      example           (void);
 void      usage             (const char* command);
 void      printTextString   (const char* string);
+void      printHumdrumPart  (HumdrumFile& hfile, const char* filebase, 
+                              int index, int max);
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -59,6 +65,7 @@ int main(int argc, char* argv[]) {
    xmlfile.setOption("lyric", textQ);        // set text encoding option
    xmlfile.setOption("dynamics", dynamicsQ); // set dynamics encoding option
 
+   int i, j;
    HumdrumFile  hfile;
 
    if (debugQ) {
@@ -80,13 +87,21 @@ int main(int argc, char* argv[]) {
       xmlfile.fixMeasureNumbers();
    }
 
+   if (splitQ) {
+      int partcount = xmlfile.getStaffCount();
+      for (i=0; i<partcount; i++) {
+         xmlfile.humdrumPart(hfile, i, debugQ);
+         printHumdrumPart(hfile, SplitBase, i, partcount);
+      }
+      return 0;
+   }
+
    if (staff <= 0) {
       xmlfile.createHumdrumFile(hfile); 
    } else if (staff <= xmlfile.getStaffCount()) {
       xmlfile.humdrumPart(hfile, staff-1, debugQ);
    }
 
-   int i, j;
    for (i=0; i<hfile.getNumLines(); i++) {
       // prevent blank lines from occuring:
       if (hfile[i].getFieldCount() > 0) {
@@ -172,6 +187,40 @@ void printTextString(const char* string) {
 
 
 
+//////////////////////////////
+//
+// printHumdrumPart -- print a humdrum part into a specific file.
+//
+
+void printHumdrumPart(HumdrumFile& hfile, const char* filebase, int index, 
+   int max) {
+   char buffer[1024] = {0};
+   char num[32] = {0};
+   strcpy(buffer, filebase); 
+   if ((index+1 < 10) && (max >= 10)) {
+      strcat(buffer, "0");
+   }
+   if ((index+1 < 100) && (max >= 100)) {
+      strcat(buffer, "0");
+   }
+   if ((index+1 < 1000) && (max >= 1000)) {
+      strcat(buffer, "0");
+   }
+   sprintf(num, "%d", index+1);
+   strcat(buffer, num);
+   char* filename = buffer;
+   ofstream outputfile;
+   outputfile.open(filename);
+   if (!outputfile.is_open()) {
+      cerr << "Could not open " << filename << endl;
+      exit(1);
+   }
+   outputfile << hfile;
+   outputfile.close();
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////
 
 
@@ -192,6 +241,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("N|no-notation=b", "do not print notation-specific information");
    opts.define("M|no-measure-number-fix=b", "do not renumber measures");
    opts.define("T|no-text=b", "do not convert lyrics to humdrum spines");
+   opts.define("parts|part=s:p", "Extract parts into files based on pattern");
 
    opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
@@ -231,6 +281,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    mfixQ     = !opts.getBoolean("no-measure-number-fix");
    printQ    =  opts.getBoolean("print");
    textQ     = !opts.getBoolean("no-text");
+   splitQ    =  opts.getBoolean("parts");
+   SplitBase =  opts.getString("parts");
    if (opts.getBoolean("no-notation")) {
       stemQ     = 0;
       beamQ     = 0;
