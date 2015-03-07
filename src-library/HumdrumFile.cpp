@@ -2746,6 +2746,7 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
                   continue;
                }
                if ((strcmp(infile[i].getExInterp(jj), "**kern") != 0) &&
+                   (strcmp(infile[i].getExInterp(jj), "**recip") != 0) &&
                    (strcmp(infile[i].getExInterp(jj), "**koto") != 0)) {
                   continue;                  
                }
@@ -2763,9 +2764,10 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
                break;
             }
 
-            if (infile[i].equalFieldsQ("**kern", ".") &&
-               infile[i].equalFieldsQ("**koto", ".")) {
-            }
+//            if (infile[i].equalFieldsQ("**kern", ".") &&
+//               infile[i].equalFieldsQ("**recip", ".") &&
+//               infile[i].equalFieldsQ("**koto", ".")) {
+//            }
 
 //            duration = (determineDurationR(infile[i], init,
 //               lastdurations, runningstatus, rhythms, ignore) * timebase) / 4;
@@ -3132,7 +3134,8 @@ void HumdrumFile::initializeTracers(
    int i;
    for (i=0; i<currRecord.getFieldCount(); i++) {
       if (currRecord.getExInterpNum(i) == E_KERN_EXINT ||
-          strcmp(currRecord.getExInterp(i), "**koto") == 0) {
+          (strcmp(currRecord.getExInterp(i), "**recip") == 0) ||
+          (strcmp(currRecord.getExInterp(i), "**koto") == 0)) {
          lastdurations.append(zero);
          runningstatus.append(zero);
       }
@@ -3333,7 +3336,8 @@ void HumdrumFile::adjustForRhythmMarker(HumdrumRecord& aRecord,
    newstatus.allowGrowth();
 
    if (aRecord.getExInterpNum(spine) != E_KERN_EXINT &&
-      strcmp(aRecord.getExInterp(spine), "**koto") != 0) {
+      (strcmp(aRecord.getExInterp(spine), "**recip") != 0) &&
+      (strcmp(aRecord.getExInterp(spine), "**koto") != 0)) {
       return;
    }
 
@@ -3356,7 +3360,9 @@ void HumdrumFile::adjustForRhythmMarker(HumdrumRecord& aRecord,
       } else if (ignore[aRecord.getPrimaryTrack(i) - 1] != 0) {
          continue;
       } else if (aRecord.getExInterpNum(i) != E_KERN_EXINT &&
-          strcmp(aRecord.getExInterp(i), "**koto") != 0) {
+          (strcmp(aRecord.getExInterp(i), "**recip") != 0) &&
+          (strcmp(aRecord.getExInterp(i), "**koto") != 0)
+            ) {
          continue;
       }
       
@@ -3413,6 +3419,7 @@ void HumdrumFile::adjustForSpinePaths(HumdrumRecord& aRecord,
          continue;
       }
       if ((aRecord.getExInterpNum(i) != E_KERN_EXINT) &&
+          (strcmp(aRecord.getExInterp(i), "**recip") != 0) &&
           (strcmp(aRecord.getExInterp(i), "**koto") != 0)) {
          continue;
       }
@@ -3518,6 +3525,7 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
    if (init) {
       init = 0;
       int size = aRecord.getFieldCount("**kern");
+      size += aRecord.getFieldCount("**recip");
       size += aRecord.getFieldCount("**koto");
       lastdurations.setSize(size);
       runningstatus.setSize(size);
@@ -3549,6 +3557,8 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
          stype = 1;
       } else if (strcmp(aRecord.getExInterp(i), "**koto") == 0) {
          stype = 2;
+      } else if (strcmp(aRecord.getExInterp(i), "**recip") == 0) {
+         stype = 1; // **recip is same rhythm as **kern
       } else {
          stype = 0;
       }
@@ -3699,6 +3709,7 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
    if (init) {
       init = 0;
       int size = aRecord.getFieldCount("**kern");
+      size += aRecord.getFieldCount("**recip");
       size += aRecord.getFieldCount("**koto");
       lastdurations.setSize(size);
       runningstatus.setSize(size);
@@ -3730,6 +3741,8 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
          stype = 1;
       } else if (strcmp(aRecord.getExInterp(i), "**koto") == 0) {
          stype = 2;
+      } else if (strcmp(aRecord.getExInterp(i), "**recip") == 0) {
+         stype = 1;
       } else {
          stype = 0;
       }
