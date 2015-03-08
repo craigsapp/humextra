@@ -263,7 +263,7 @@ class MusicXmlFile {
                                            CSL::XML::CXMLElement* rootelement);
       void      printDynamic              (ostream& out, int staffno, 
                                            int index);
-      void      printInstrument           (ostream& out, int staffno, 
+      int       printInstrument           (ostream& out, int staffno, 
                                            int index);
       void      printText                 (ostream& out, int staffno, 
                                            int index);

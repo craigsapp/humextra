@@ -2354,6 +2354,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
       return;
    }
 
+   int status;
    partvoiceticktime2 = -1;
    partvoiceticktime1 = -1;
    
@@ -2484,8 +2485,10 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
             (*tempstream) << "\n"; humline++;
             break;
          case MXI_instrument:
-            printInstrument(*tempstream, staffno, i);
-            (*tempstream) << "\n"; humline++;
+            status = printInstrument(*tempstream, staffno, i);
+            if (status) {
+               (*tempstream) << "\n"; humline++;
+            }
             break;
          case MXI_dynamic:
             if (humdrumDynamics && partdynamics[staffno]) {
@@ -2870,7 +2873,7 @@ int MusicXmlFile::isGraceNote(CXMLObject* object) {
 // MusicXmlFile::printInstrument --
 //
 
-void MusicXmlFile::printInstrument(ostream& out, int staffno, int index) {
+int MusicXmlFile::printInstrument(ostream& out, int staffno, int index) {
    // start with <score-part> element for the correct part:
    CXMLObject* object = partdata[staffno][index].obj;
 
@@ -2889,9 +2892,11 @@ void MusicXmlFile::printInstrument(ostream& out, int staffno, int index) {
          // This statement disabled for now because multiple spines
          // are not compensated for.
          // out << "*I\"" << buffer;
-         return;
+         // return 1;
+         return 0;
       }
    }
+   return 0;
 }
 
 
