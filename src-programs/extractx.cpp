@@ -13,6 +13,9 @@
 //
 // Description:   C++ implementation of the Humdrum Toolkit extract command.
 //
+// To do:         Allow *x records to be echoed when using -s 0 insertion
+//                Currently spines with *x are unwrapped and the *x is changed
+//                to *.
 
 #include "humdrum.h"
 #include "PerlRegularExpression.h"
@@ -743,7 +746,7 @@ void excludeFields(HumdrumFile& infile, Array<int>& field,
 
 //////////////////////////////
 //
-// extractFields -- print all spines except the ones in the list of fields.
+// extractFields -- print all spines in the list of fields.
 //
 
 void extractFields(HumdrumFile& infile, Array<int>& field,
@@ -778,7 +781,7 @@ void extractFields(HumdrumFile& infile, Array<int>& field,
             start = 0;
             for (t=0; t<field.getSize(); t++) {
                target = field[t];
-	       subtarget = subfield[t];
+               subtarget = subfield[t];
                modeltarget = model[t];
                if (modeltarget == 0) {
                   switch (subtarget) {
@@ -795,14 +798,19 @@ void extractFields(HumdrumFile& infile, Array<int>& field,
                      cout << '\t';
                   }
                   start = 1;
-                  switch (infile[i].getType()) {
-                     case E_humrec_data_comment:
-                        cout << "!"; break;
-                     case E_humrec_data_kern_measure:
-                        cout << infile[i][0]; break;
-                     case E_humrec_data:
-                        cout << "."; break;
-                     // interpretations handled in dealwithSpineManipulators()
+                  if (!infile[i].hasSpineManip()) {
+                     switch (infile[i].getType()) {
+                        case E_humrec_data_comment:
+                           cout << "!"; break;
+                        case E_humrec_data_kern_measure:
+                           cout << infile[i][0]; break;
+                        case E_humrec_data:
+                           cout << "."; break;
+                        // interpretations handled in dealWithSpineManipulators()
+                        // [obviously not, so adding a blank one here
+                        case E_humrec_interpretation:
+                           cout << "*"; break;
+                     }
                   }
                } else {
                   for (j=0; j<infile[i].getFieldCount(); j++) {
@@ -1021,7 +1029,7 @@ void printCotokenInfo(int& start, HumdrumFile& infile, int line, int spine,
          } else {
             cout << ".";
          }
-	 found = 1;
+      found = 1;
       }
    }
    if (!found) {
@@ -1283,15 +1291,15 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
             if (infile[line].getPrimaryTrack(j) != target) {
                continue;
             }
-	    // filter by subfield
-	    if (subtarget == 'a') {
+       // filter by subfield
+       if (subtarget == 'a') {
                getSearchPat(spat, target, "b");
-	       if (pre.search(infile[line].getSpineInfo(j), spat.getBase())) {
+          if (pre.search(infile[line].getSpineInfo(j), spat.getBase())) {
                   continue;
-               }
-	    } else if (subtarget == 'b') {
+          }
+       } else if (subtarget == 'b') {
                getSearchPat(spat, target, "a");
-	       if (pre.search(infile[line].getSpineInfo(j), spat.getBase())) {
+          if (pre.search(infile[line].getSpineInfo(j), spat.getBase())) {
                   continue;
                }
             }
@@ -1307,12 +1315,12 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
                   }
                } else {
                   getSearchPat(spat, target, "a");
-		  spinepat.setSize(strlen(infile[line].getSpineInfo(j))+1);
-		  strcpy(spinepat.getBase(), infile[line].getSpineInfo(j));
-		  pre.sar(spinepat, "\\(", "\\(", "g");
-		  pre.sar(spinepat, "\\)", "\\)", "g");
+                  spinepat.setSize(strlen(infile[line].getSpineInfo(j))+1);
+                  strcpy(spinepat.getBase(), infile[line].getSpineInfo(j));
+                  pre.sar(spinepat, "\\(", "\\(", "g");
+                  pre.sar(spinepat, "\\)", "\\)", "g");
 
-		  if ((strcmp(infile[line][j], "*v") == 0) &&
+        if ((strcmp(infile[line][j], "*v") == 0) &&
                         (strcmp(spinepat.getBase(), spat.getBase()) == 0)) {
                      storeToken(tempout, "*");
                   } else {
@@ -1320,7 +1328,7 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
                      if ((strcmp(spinepat.getBase(), spat.getBase())==0) && 
                            (strcmp(infile[line][j], "*v") == 0)) {
                         // do nothing
-			suppress = 1;
+                        suppress = 1;
                      } else {
                         storeToken(tempout, infile[line][j]);
                      }
@@ -1338,12 +1346,12 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
                   }
                } else {
                   getSearchPat(spat, target, "b");
-		  spinepat.setSize(strlen(infile[line].getSpineInfo(j))+1);
-		  strcpy(spinepat.getBase(), infile[line].getSpineInfo(j));
-		  pre.sar(spinepat, "\\(", "\\(", "g");
-		  pre.sar(spinepat, "\\)", "\\)", "g");
+                  spinepat.setSize(strlen(infile[line].getSpineInfo(j))+1);
+                  strcpy(spinepat.getBase(), infile[line].getSpineInfo(j));
+                  pre.sar(spinepat, "\\(", "\\(", "g");
+                  pre.sar(spinepat, "\\)", "\\)", "g");
 
-		  if ((strcmp(infile[line][j], "*v") == 0) &&
+                  if ((strcmp(infile[line][j], "*v") == 0) &&
                         (strcmp(spinepat.getBase(), spat.getBase()) == 0)) {
                      storeToken(tempout, "*");
                   } else {

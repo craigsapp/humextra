@@ -160,6 +160,8 @@ class HumdrumRecord {
       int               isTandem           (void) const;
       int               isSpineManipulator (int index);
       int               isSpineManipulator (void);
+      int               isSpineManip       (void) { return isSpineManipulator(); }
+      int               hasSpineManip      (void) { return isSpineManipulator(); }
 
       int               isClef             (int index);
       int               isOriginalClef     (int index);

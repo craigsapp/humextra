@@ -730,7 +730,7 @@ void analyzeTacet(Array<Array<int> >& tacet, HumdrumFile& infile) {
    int i;
    for (i=0; i<tacet.getSize(); i++) {
       tacet[i].setSize(maxtrack+1);
-      tacet[i].setAll(5);
+      tacet[i].setAll(0);
    }
 
    int ii, jj;
@@ -739,6 +739,7 @@ void analyzeTacet(Array<Array<int> >& tacet, HumdrumFile& infile) {
    Array<int> tacetState(maxtrack+1);
    tacetState.setAll(0);
 
+   int tacetcount = 0;
 
    PerlRegularExpression pre;
    for (i=0; i<infile.getNumLines(); i++) {
@@ -748,6 +749,7 @@ void analyzeTacet(Array<Array<int> >& tacet, HumdrumFile& infile) {
 		if ((infile[i][0][0] == '=') && (strstr(infile[i][0], "||") != NULL)) {
          endline = i;
          getNoteState(tacetState, infile, startline, endline);
+         tacetcount++;
          for (ii=startline; ii<endline; ii++) {
             for (jj=0; jj<tacetState.getSize(); jj++) {
                tacet[ii][jj] = !tacetState[jj];
@@ -758,11 +760,19 @@ void analyzeTacet(Array<Array<int> >& tacet, HumdrumFile& infile) {
    }
 	endline = infile.getNumLines();
    getNoteState(tacetState, infile, startline, endline);
-   for (ii=startline; ii<endline; ii++) {
-      for (jj=0; jj<tacetState.getSize(); jj++) {
-         tacet[ii][jj] = !tacetState[jj];
+   tacetcount++;
+
+   // If there is only one tacet region, then don't apply auto taceting.  
+   // This is typically for an incipit, and muse2ps will otherwise 
+   // hide the fully tacet part in this case.
+   if ((startline != 0) || (tacetcount > 1)) {
+      for (ii=startline; ii<endline; ii++) {
+         for (jj=0; jj<tacetState.getSize(); jj++) {
+            tacet[ii][jj] = !tacetState[jj];
+         }
       }
    }
+
 
 //	for (ii=0; ii<tacet.getSize(); ii++) {
 //		cout << "@";
@@ -806,13 +816,6 @@ void getNoteState(Array<int>& states, HumdrumFile& infile, int startline,
          }
       }
    }
-
-   cout << "@TS s=" << startline << "\t" << endline << ":";
-   for (i=1; i<states.getSize(); i++) {
-      cout << "\t" << states[i];
-   }
-   cout << endl;
-
 }
 
 

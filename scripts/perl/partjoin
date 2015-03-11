@@ -80,7 +80,7 @@ if ($timebasetest =~ /^\s*$/) {
 my $minrhy = `minrhy $filelist`;
 $minrhy =~ /all:\s*(\d+)/;
 $minrhy = $1;
-if ($minrhy =~ /^\s*/) {
+if ($minrhy =~ /^\s*$/) {
    print STDERR "Problem determining smallest time unit in input files.\n";
    exit(1);
 }
