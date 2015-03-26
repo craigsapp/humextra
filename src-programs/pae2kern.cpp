@@ -188,7 +188,8 @@ int main(int argc, char** argv) {
    }
 
    // output file variables
-   int i = 0; // number of converted incipits used for filenames when not supplied
+   int i = 0; // number of converted incipits used for 
+              // filenames when not supplied
    char outfilename[1024] = {0};
    ofstream outfile;
 
@@ -210,6 +211,9 @@ int main(int argc, char** argv) {
             // add extention
             strcat(outfilename, "." );  
             strcat(outfilename, extension );        
+            if (debugQ) {
+               cout << "Processing file: " << outfilename << endl;
+            }
             #ifndef OLDCPP
                outfile.open(outfilename);
             #else
@@ -789,9 +793,17 @@ void getKey(const char* key_str, string *output) {
       sout << "*A-:";
    } else if (strcmp(key_str, "f#") == 0) {
       sout << "*f#:";
+   } else if (strcmp(key_str, "fx") == 0) {
+      sout << "*f#:";
+   } else if (strcmp(key_str, "fs") == 0) {
+      sout << "*f#:";
    } else if (strcmp(key_str, "B") == 0) {
       sout << "*B:";
    } else if (strcmp(key_str, "c#") == 0) {
+      sout << "*c#:";
+   } else if (strcmp(key_str, "cx") == 0) {
+      sout << "*c#:";
+   } else if (strcmp(key_str, "cs") == 0) {
       sout << "*c#:";
    } else if (strcmp(key_str, "Bb") == 0) {
       sout << "*B-:";
@@ -799,7 +811,15 @@ void getKey(const char* key_str, string *output) {
       sout << "*E-:";
    } else if (strcmp(key_str, "D>") == 0) {
       sout << "*D-:";
+   } else if (strcmp(key_str, "Db") == 0) {
+      sout << "*D-:";
    } else if (strcmp(key_str, "F#") == 0) {
+      sout << "*F#:";
+   } else if (strcmp(key_str, "ab") == 0) {
+      sout << "*a-:";
+   } else if (strcmp(key_str, "Fx") == 0) {
+      sout << "*F#:";
+   } else if (strcmp(key_str, "Fs") == 0) {
       sout << "*F#:";
    } else if (strcmp(key_str, "eb") == 0) {
       sout << "*e-:";
@@ -807,10 +827,50 @@ void getKey(const char* key_str, string *output) {
       sout << "*b-:";
    } else if (strcmp(key_str, "g#") == 0) {
       sout << "*g#:";
+   } else if (strcmp(key_str, "gx") == 0) {
+      sout << "*g#:";
+   } else if (strcmp(key_str, "gs") == 0) {
+      sout << "*g#:";
    } else if (strcmp(key_str, "G#") == 0) {
+      sout << "*G#:";
+   } else if (strcmp(key_str, "Gx") == 0) {
+      sout << "*G#:";
+   } else if (strcmp(key_str, "Gs") == 0) {
       sout << "*G#:";
    } else if (strcmp(key_str, "Gb") == 0) {
       sout << "*G-:";
+   } else if (strcmp(key_str, "Cb") == 0) {
+      sout << "*C-:";
+   } else if (strcmp(key_str, "1t") == 0) {
+      sout << "*d:dor";
+   } else if (strcmp(key_str, "2t") == 0) {
+      sout << "*d:dorH";
+   } else if (strcmp(key_str, "3t") == 0) {
+      sout << "*e:phr";
+   } else if (strcmp(key_str, "4t") == 0) {
+      sout << "*e:phrH";
+   } else if (strcmp(key_str, "5t") == 0) {
+      sout << "*F:lyd";
+   } else if (strcmp(key_str, "6t") == 0) {
+      sout << "*F:lydH";
+   } else if (strcmp(key_str, "7t") == 0) {
+      sout << "*G:mix";
+   } else if (strcmp(key_str, "8t") == 0) {
+      sout << "*G:mixH";
+   } else if (strcmp(key_str, "9t") == 0) {
+      sout << "*a:aeo";
+   } else if (strcmp(key_str, "10t") == 0) {
+      sout << "*a:aeoH";
+   } else if (strcmp(key_str, "11t") == 0) {
+      sout << "*C:ion";
+   } else if (strcmp(key_str, "12t") == 0) {
+      sout << "*C:ionH";
+   } else if (strcmp(key_str, "f:dor") == 0) {
+      sout << "*f:dor";
+   } else if (strcmp(key_str, "g:dor") == 0) {
+      sout << "*g:dor";
+   } else if (strcmp(key_str, "f:dor") == 0) {
+      sout << "*f:dor";
    }  else {
       sout << "!! unknown key";
       cout << "Warning: unknown key: " << key_str << endl;
