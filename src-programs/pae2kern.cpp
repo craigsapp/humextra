@@ -2,7 +2,8 @@
 // Programmer:    Laurent Pugin <puginl@ccrma.stanford.edu>
 // Creation Date: Lun 13 oct 2008 11:51:41 PDT
 // Last Modified: Mer  5 nov 2008 15:40:54 PST
-// Last Modified: Tue Dec  2 19:19:27 PST 2008 (added -q and -Q options)
+// Last Modified: Tue Dec  2 19:19:27 PST 2008 Added -q and -Q options.
+// Last Modified: Wed Mar 25 23:16:07 PDT 2015 Use STL vector class.
 // Filename:      ...sig/examples/all/pae2kern.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/pae2kern.cpp
 // Syntax:        C++; museinfo
@@ -41,19 +42,14 @@
 #include <math.h>
 #include <regex.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-   #include <sstream>
-   using namespace std;
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-   #include <sstream.h>
-#endif
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 
+using namespace std;
 
-typedef Array<char> ArrayChar;
+typedef vector<char> ArrayChar;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -86,19 +82,23 @@ class MeasureObject {
    public:
              MeasureObject(void) { clear(); };
       void   clear(void) {
-                a_timeinfo.setSize(2);
-                a_key.setSize(7);
-                a_timeinfo.setAll(0);
-                a_key.setAll(0);
-                durations.setSize(1);
-                dots.setSize(1);
-                durations.setAll(1.0);
-                dots.setAll(0);
+                //a_timeinfo.resize(2);
+                //a_timeinfo.setAll(0);
+                a_timeinfo.assign(2, 0);
+                //a_key.resize(7);
+                //a_key.setAll(0);
+                a_key.assign(7, 0);
+                //durations.resize(1);
+                //durations.setAll(1.0);
+                durations.assign(1, 1.0);
+                //dots.resize(1);
+                //dots.setAll(0);
+                dots.assign(1, 0);
                 durations_offset = 0;
                 reset();
              };
       void   reset(void) {
-                notes.setSize(0);
+                notes.resize(0);
                 clef = s_key = s_timeinfo = barline = "";
                 wholerest = 0; 
                 measure_duration = 0.0;
@@ -106,13 +106,13 @@ class MeasureObject {
              };
       string    clef;
       double measure_duration;
-      Array<NoteObject> notes;
-      Array<int> a_key;
+      vector<NoteObject> notes;
+      vector<int> a_key;
       string s_key;
-      Array<double> a_timeinfo;   
+      vector<double> a_timeinfo;   
       string s_timeinfo; 
-      Array<double> durations;
-      Array<int> dots; // use the same offset as durations, they are used in parallel
+      vector<double> durations;
+      vector<int> dots; // use same offset as durs, they are used in parallel
       int durations_offset;
       string barline;
       int    abbreviation_offset;  
@@ -127,26 +127,39 @@ void      checkOptions        (Options& opts, int argc, char** argv);
 void      example             (void);
 void      usage               (const char* command);
 
-void      convertPlainAndEasyToKern( istream &infile, ostream &outfile);
+void      convertPlainAndEasyToKern(istream &infile, ostream &outfile);
 
 // parsing functions
-int       getKeyInfo          (const char* incipit, Array<int>& key, string *output, int index = 0);
-int       getTimeInfo         (const char* incipit, Array<double>& timeinfo, string *output, int index = 0);
-int       getClefInfo         (const char* incipit, string *output, int index = 0 );
-int       getBarline          (const char* incipit, string *output, int index = 0 );
-int       getAccidental       (const char* incipit, int *accident, int index = 0);
-int       getOctave           (const char* incipit, int *octave, int index = 0 );
-int       getDurations        (const char* incipit, MeasureObject *measure, int index = 0);
-int       getTupletFermata    (const char* incipit, double current_duration, NoteObject *note, int index = 0);
-int       getTupletFermataEnd (const char* incipit, NoteObject *note, int index = 0);
-int       getGraceNote        (const char* incipit, NoteObject *note, int index = 0);
-int       getWholeRest        (const char* incipit, int *wholerest, int index );
-int       getAbbreviation     (const char* incipit, MeasureObject *measure, int index = 0 ); 
-int       getNote             (const char* incipit, NoteObject *note, MeasureObject *measure, int index = 0 );
+int       getKeyInfo          (const char* incipit, vector<int>& key, 
+                               string *output, int index = 0);
+int       getTimeInfo         (const char* incipit, vector<double>& timeinfo, 
+                               string *output, int index = 0);
+int       getClefInfo         (const char* incipit, string *output, 
+                               int index = 0);
+int       getBarline          (const char* incipit, string *output, 
+                               int index = 0);
+int       getAccidental       (const char* incipit, int *accident, 
+                               int index = 0);
+int       getOctave           (const char* incipit, int *octave, 
+                               int index = 0);
+int       getDurations        (const char* incipit, MeasureObject *measure, 
+                               int index = 0);
+int       getTupletFermata    (const char* incipit, double current_duration, 
+                               NoteObject *note, int index = 0);
+int       getTupletFermataEnd (const char* incipit, NoteObject *note, 
+                               int index = 0);
+int       getGraceNote        (const char* incipit, NoteObject *note, 
+                               int index = 0);
+int       getWholeRest        (const char* incipit, int *wholerest, int index);
+int       getAbbreviation     (const char* incipit, MeasureObject *measure, 
+                               int index = 0); 
+int       getNote             (const char* incipit, NoteObject *note, 
+                               MeasureObject *measure, int index = 0);
 
-int       getPitch            (char c_note, int octave, int accidental, Array<int>& a_key );
+int       getPitch            (char c_note, int octave, int accidental, 
+                               vector<int>& a_key);
 double    getDurationWithDot  (double duration, int dot);
-double    getMeasureDur       (Array<double>& timeinfo);
+double    getMeasureDur       (vector<double>& timeinfo);
 void      getKey              (const char* key_str, string *output);
 
 
@@ -154,7 +167,8 @@ void      getKey              (const char* key_str, string *output);
 void      printMeasure        (ostream& out, MeasureObject *measure);
 
 // input functions
-void      getAtRecordKeyValue (Array<char>& key, Array<char>& value, const char* input);
+void      getAtRecordKeyValue (vector<char>& key, vector<char>& value, 
+                               const char* input);
 
 
 // User interface variables:
@@ -169,8 +183,8 @@ int       quiet2Q = 0;               // used with -Q option
 
 // Global variables:
 char data_line[10001] = {0};
-Array<char> data_key;
-Array<char> data_value;
+vector<char> data_key;
+vector<char> data_value;
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -200,17 +214,17 @@ int main(int argc, char** argv) {
       }
       //std::cout << "LINE: " << line << endl;
       getAtRecordKeyValue(data_key, data_value, data_line);
-      if (strcmp(data_key.getBase(),"start")==0) {
+      if (strcmp(data_key.data(),"start")==0) {
       
          if (!stdoutQ) {
-            if (strlen(data_value.getBase())==0) {
-               sprintf( outfilename, "%s%015d", outdir, i );
+            if (strlen(data_value.data())==0) {
+               sprintf(outfilename, "%s%015d", outdir, i);
             } else {
-               sprintf( outfilename, "%s%s", outdir, data_value.getBase() );
+               sprintf(outfilename, "%s%s", outdir, data_value.data());
             }
             // add extention
-            strcat(outfilename, "." );  
-            strcat(outfilename, extension );        
+            strcat(outfilename, ".");  
+            strcat(outfilename, extension);        
             if (debugQ) {
                cout << "Processing file: " << outfilename << endl;
             }
@@ -222,14 +236,14 @@ int main(int argc, char** argv) {
             if (!outfile.is_open()) {
                cout << "Error: cannot write to file: " << outfilename << endl;
             }
-            convertPlainAndEasyToKern( infile, outfile);
+            convertPlainAndEasyToKern(infile, outfile);
             outfile.close();
          } else {
-            convertPlainAndEasyToKern( infile, cout);
+            convertPlainAndEasyToKern(infile, cout);
          }
 
-         //std::cout << "\tKEY:   " << key.getBase()   << endl;
-         //std::cout << "\tVALUE: " << value.getBase() << endl;
+         //std::cout << "\tKEY:   " << key.data()   << endl;
+         //std::cout << "\tVALUE: " << value.data() << endl;
          i++;
       }
    }
@@ -259,12 +273,14 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
    string s_key;
    MeasureObject current_measure;
    NoteObject current_note;
-   Array<int> current_key; // not the measure one, which will be altered by temporary alterations
-   current_key.setSize(7);
-   current_key.setAll(0);
+   vector<int> current_key; // Not measure one, which will be affected by 
+                            // temporary alterations.
+   //current_key.resize(7);
+   //current_key.setAll(0);
+   current_key.assign(7, 0);
    
-   Array<MeasureObject> staff;
-   staff.setSize(0);
+   vector<MeasureObject> staff;
+   staff.resize(0);
 
    // read values
    while (!infile.eof()) {
@@ -274,20 +290,20 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
          exit(1);
       }
       getAtRecordKeyValue(data_key, data_value, data_line);
-      if (strcmp(data_key.getBase(),"end")==0) {   
+      if (strcmp(data_key.data(),"end")==0) {   
          break;
-      } else if (strcmp(data_key.getBase(),"clef")==0) { 
-         strcpy( c_clef, data_value.getBase() );
-      } else if (strcmp(data_key.getBase(),"key")==0) { 
-         strcpy( c_key, data_value.getBase() );
-      } else if (strcmp(data_key.getBase(),"keysig")==0) { 
-         strcpy( c_keysig, data_value.getBase() );
-      } else if (strcmp(data_key.getBase(),"timesig")==0) { 
-         strcpy( c_timesig, data_value.getBase() );
-      } else if (strcmp(data_key.getBase(),"alttimesig")==0) { 
-         strcpy( c_alttimesig, data_value.getBase() );
-      } else if (strcmp(data_key.getBase(),"data")==0) { 
-         strcpy( incipit, data_value.getBase() );
+      } else if (strcmp(data_key.data(),"clef")==0) { 
+         strcpy(c_clef, data_value.data());
+      } else if (strcmp(data_key.data(),"key")==0) { 
+         strcpy(c_key, data_value.data());
+      } else if (strcmp(data_key.data(),"keysig")==0) { 
+         strcpy(c_keysig, data_value.data());
+      } else if (strcmp(data_key.data(),"timesig")==0) { 
+         strcpy(c_timesig, data_value.data());
+      } else if (strcmp(data_key.data(),"alttimesig")==0) { 
+         strcpy(c_alttimesig, data_value.data());
+      } else if (strcmp(data_key.data(),"data")==0) { 
+         strcpy(incipit, data_value.data());
       } else if (strncmp(data_line,"!!", 2) == 0) { 
             out << data_line << "\n";
       }
@@ -305,18 +321,22 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
 
    
    if (strlen(c_clef)) {
-      getClefInfo(c_clef, &current_measure.clef );    // do we need to put a default clef?
+      // do we need to put a default clef?
+      getClefInfo(c_clef, &current_measure.clef);    
    }
    if (strlen(c_key)) {
-      getKey(c_key, &s_key); // key is not stored in the measure, only for the entire piece
+      // key is not stored in the measure, only for the entire piece
+      getKey(c_key, &s_key); 
    }
    if (strlen(c_keysig)) {
-      getKeyInfo( c_keysig, current_measure.a_key, &current_measure.s_key);
+      getKeyInfo(c_keysig, current_measure.a_key, &current_measure.s_key);
       current_key = current_measure.a_key;
    }
    if (strlen(c_timesig)) {
-      getTimeInfo( c_timesig, current_measure.a_timeinfo, &current_measure.s_timeinfo);
-      current_measure.measure_duration = getMeasureDur(current_measure.a_timeinfo);
+      getTimeInfo(c_timesig, current_measure.a_timeinfo, 
+            &current_measure.s_timeinfo);
+      current_measure.measure_duration = 
+            getMeasureDur(current_measure.a_timeinfo);
    }   
    
    // read the incipit string
@@ -332,17 +352,17 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
       
       // octaves
       if ((incipit[i] == '\'') || (incipit[i] == ',')) {
-         i += getOctave( incipit, &current_note.octave, i );
+         i += getOctave(incipit, &current_note.octave, i);
       }
       
       // rhythmic values
       else if (std::isdigit(incipit[i]) != 0) {
-         i += getDurations( incipit, &current_measure, i );
+         i += getDurations(incipit, &current_measure, i);
       }
 
       //accidentals (1 = n; 2 = x; 3 = xx; 4 = b; 5 = bb)    
       else if (incipit[i] == 'n' || incipit[i] == 'x' || incipit[i] == 'b') {
-         i += getAccidental( incipit, &current_note.accident, i );
+         i += getAccidental(incipit, &current_note.accident, i);
       }
       
       // beaming starts
@@ -361,12 +381,14 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
       
 		// beginning tuplets & fermatas
 		else if (incipit[i] == '(') {
-         i += getTupletFermata( incipit, getDurationWithDot( current_measure.durations[0], current_measure.dots[0]), &current_note, i );
+         i += getTupletFermata(incipit, getDurationWithDot(
+               current_measure.durations[0], current_measure.dots[0]), 
+               &current_note, i);
 		}
       
       // end of tuplets
 		else if ((incipit[i] == ';') || (incipit[i] == ')')) {
-         i += getTupletFermataEnd( incipit, &current_note, i );
+         i += getTupletFermataEnd(incipit, &current_note, i);
 		}
 
 		// trills are read when adding the note
@@ -375,36 +397,37 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
 
 		//grace notes
 		else if ((incipit[i] == 'g') || (incipit[i] == 'q')) {
-			i += getGraceNote( incipit, &current_note, i );
+			i += getGraceNote(incipit, &current_note, i);
 		}
 		
       
       // end of appogiatura
 		else if (incipit[i] == 'r') {
-			current_note.appoggiatura = 0; // should not have to be done, but just in case
+			current_note.appoggiatura = 0; // just in case
 		}
       
       //note and rest
-      else if (((incipit[i]-'A'>=0) && (incipit[i]-'A'<7)) || (incipit[i]=='-')) {
-         i += getNote( incipit, &current_note, &current_measure, i );
+      else if (((incipit[i]-'A'>=0) && (incipit[i]-'A'<7))||(incipit[i]=='-')) {
+         i += getNote(incipit, &current_note, &current_measure, i);
       }
       
   		// whole rest
 		else if (incipit[i] == '=') {
-         i += getWholeRest( incipit, &current_measure.wholerest, i );		
+         i += getWholeRest(incipit, &current_measure.wholerest, i);		
 		} 
       
 		// abbreviation
       else if (incipit[i] == '!') {
-         i += getAbbreviation( incipit, &current_measure, i );
+         i += getAbbreviation(incipit, &current_measure, i);
       }
       
       // measure repetition
-      else if ((incipit[i] == 'i') && staff.getSize()) {
-         MeasureObject last_measure = staff[staff.getSize()-1];
+      else if ((incipit[i] == 'i') && staff.size()) {
+         MeasureObject last_measure = staff[staff.size()-1];
          current_measure.notes = last_measure.notes;
          current_measure.a_timeinfo = last_measure.a_timeinfo;
-         current_measure.measure_duration = getMeasureDur(last_measure.a_timeinfo);
+         current_measure.measure_duration = 
+               getMeasureDur(last_measure.a_timeinfo);
          current_measure.a_key = current_key;
       }
       
@@ -412,10 +435,11 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
       else if ((incipit[i] == ':') || (incipit[i] == '/')) {
          i += getBarline(incipit, &current_measure.barline, i);
          current_measure.abbreviation_offset = 0; // just in case...
-         staff.append( current_measure );
+         staff.push_back(current_measure);
          current_measure.reset();
          current_measure.a_key = current_key;
-         current_measure.measure_duration = getMeasureDur(current_measure.a_timeinfo);
+         current_measure.measure_duration = 
+               getMeasureDur(current_measure.a_timeinfo);
       }
       
 		//clef change
@@ -425,13 +449,16 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
 
 		//time signature change
 		else if ((incipit[i] == '@') && (i+1 < length)) {
-         i += getTimeInfo( incipit, current_measure.a_timeinfo, &current_measure.s_timeinfo, i + 1);
-         current_measure.measure_duration = getMeasureDur(current_measure.a_timeinfo);
+         i += getTimeInfo(incipit, current_measure.a_timeinfo, 
+               &current_measure.s_timeinfo, i + 1);
+         current_measure.measure_duration = 
+               getMeasureDur(current_measure.a_timeinfo);
       } 
    
   		//key signature change
 		else if ((incipit[i] == '$') && (i+1 < length)) {
-         i += getKeyInfo( incipit, current_measure.a_key, &current_measure.s_key, i + 1);
+         i += getKeyInfo(incipit, current_measure.a_key, 
+               &current_measure.s_key, i + 1);
          current_key = current_measure.a_key;
 		} 
       
@@ -439,21 +466,21 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
    }
    
    // we need to add the last measure if it has no barline at the end
-   if (current_measure.notes.getSize() != 0) {
+   if (current_measure.notes.size() != 0) {
          //current_measure.barline = "=-";
-         staff.append( current_measure );
+         staff.push_back(current_measure);
    }
    
 
    // output
    out << "**kern\n";
    out << "*MM120\n";
-   if ( s_key.length() ) {
+   if (s_key.length()) {
       out << s_key << "\n";
    }
    int j = 0;
-   for (j = 0; j < staff.getSize(); j++) {
-      printMeasure( out, &staff[j] );
+   for (j = 0; j < (int)staff.size(); j++) {
+      printMeasure(out, &staff[j]);
    }
    out << "*-\n\n";
 
@@ -469,7 +496,7 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
 // getOctave --
 //
 
-int getOctave (const char* incipit, int *octave, int index ) {
+int getOctave (const char* incipit, int *octave, int index) {
 
    int i = index;
    int length = strlen(incipit);
@@ -514,7 +541,7 @@ int getOctave (const char* incipit, int *octave, int index ) {
 // getDuration --
 //
 
-int getDuration(const char* incipit, double *duration, int *dot, int index ) {
+int getDuration(const char* incipit, double *duration, int *dot, int index) {
 
    int i = index;
    int length = strlen(incipit);
@@ -546,7 +573,8 @@ int getDuration(const char* incipit, double *duration, int *dot, int index ) {
    // neumatic notation
       *duration = 1.0;
       *dot = 0;
-      cout << "Warning: found a note in neumatic notation (7.), using quarter note instead" << endl;				
+      cout << "Warning: found a note in neumatic notation (7.), ";
+      cout << "using quarter note instead" << endl;				
    }
    
    return i - index;
@@ -559,7 +587,7 @@ int getDuration(const char* incipit, double *duration, int *dot, int index ) {
 // getDurations --
 //
 
-int getDurations(const char* incipit, MeasureObject* measure, int index ) {
+int getDurations(const char* incipit, MeasureObject* measure, int index) {
 
    int i = index;
    int length = strlen(incipit);
@@ -568,16 +596,16 @@ int getDurations(const char* incipit, MeasureObject* measure, int index ) {
 
    int j = 0;
    do {
-      measure->durations.setSize(j+1);
-      measure->dots.setSize(j+1);
-      i += getDuration(incipit, &measure->durations[j], &measure->dots[j], i );
+      measure->durations.resize(j+1);
+      measure->dots.resize(j+1);
+      i += getDuration(incipit, &measure->durations[j], &measure->dots[j], i);
       j++;
       if ((i+1 < length) && std::isdigit(incipit[i+1])) {
          i++;
       } else {
          break;
       }
-   } while ( 1 );
+   } while (1);
    //cout << "duration count:" << j << endl;
       
    return i - index;
@@ -590,7 +618,7 @@ int getDurations(const char* incipit, MeasureObject* measure, int index ) {
 // getAccidental --
 //
 
-int getAccidental(const char* incipit, int *accident, int index ) {
+int getAccidental(const char* incipit, int *accident, int index) {
 
    int i = index;
    int length = strlen(incipit);
@@ -620,7 +648,8 @@ int getAccidental(const char* incipit, int *accident, int index ) {
 // getTupletOrFermata --
 //
 
-int getTupletFermata(const char* incipit, double current_duration, NoteObject *note, int index ) {
+int getTupletFermata(const char* incipit, double current_duration, 
+      NoteObject *note, int index) {
 
    int i = index;
    int length = strlen(incipit);
@@ -633,30 +662,46 @@ int getTupletFermata(const char* incipit, double current_duration, NoteObject *n
    
    if (is_tuplet == 0) {
       int t = i;
-      double note_duration = current_duration; // just in case the duration is missing in the tuplet
-      bool is_triplet = false; // in triplets, there is no duration given before the tuplet.
-      bool is_first_event = false; // we use the first duration if there is one (they should be one)
-      int note_count = 0; // we need to count notes for triplets as sometimes in the data several triplets appear together
-                          // we need to change the tuplet duration in consequence
+      // just in case the duration is missing in the tuplet:
+      double note_duration = current_duration; 
+
+      // in triplets, there is no duration given before the tuplet:
+      bool is_triplet = false; 
+
+      // we use the first duration if there is one (they should be one):
+      bool is_first_event = false; 
+
+      // we need to count notes for triplets as sometimes in the data 
+      // several triplets appear together:
+      int note_count = 0; 
+
+      // we need to change the tuplet duration in consequence
       int note_dot = 0;
-      // the duration for the tuplet given before it, or by the first duration value in triplets
+      // the duration for the tuplet given before it, 
+      // or by the first duration value in triplets
+
       if ((index == 0) || (std::isdigit(incipit[index-1]) == 0)) {
-         is_triplet = true; // this means that we have to keep the first value for triplets
-         current_duration *= 2; // in case there is no value, use the current value
-                                // this is wrong syntax wise but it appears in the data
+         // this means that we have to keep the first value for triplets:
+         is_triplet = true; 
+
+         // in case there is no value, use the current value.
+         // this is wrong syntax wise but it appears in the data
+         current_duration *= 2; 
+
          is_first_event = true;
       }
       
       double tuplet_duration = 0.0;
       while ((t < length) && (incipit[t] != ')') && (incipit[t] != ';')) {
          if (std::isdigit(incipit[t]) != 0) { // new duration in the tuplet
-            t += getDuration( incipit, &note_duration, &note_dot, t );
+            t += getDuration(incipit, &note_duration, &note_dot, t);
             note_duration = getDurationWithDot(note_duration, note_dot);
             if (is_triplet && is_first_event) { // it is a triplet
                current_duration = note_duration * 2;
                is_first_event = false; // we don't need to get the value again
             }
-         } else if (((incipit[t]-'A'>=0) && (incipit[t]-'A'<7)) || (incipit[t]=='-')) { // note or rest
+         } else if (((incipit[t]-'A'>=0) && (incipit[t]-'A'<7)) 
+               || (incipit[t]=='-')) { // note or rest
             //cout << "tuplet note:" << incipit[t] << endl;
             tuplet_duration += note_duration;
             is_first_event = false;
@@ -670,13 +715,16 @@ int getTupletFermata(const char* incipit, double current_duration, NoteObject *n
          note->tuplet = tuplet_duration / current_duration;
       } else {
          // how many triplets we have is given by the note_count
-         // several triplet in one tuplet is wrong syntax wise but it appears in the data
-         note->tuplet = tuplet_duration / (current_duration * ceil(double(note_count)/3));
+         // several triplet in one tuplet is wrong syntax wise but 
+         // it appears in the data
+         note->tuplet = tuplet_duration / 
+               (current_duration * ceil(double(note_count)/3));
       }
       
    } else {
-      if ( note->tuplet != 1.0 ) {
-         cout << "Warning: fermata within a tuplet. Won't be handled correctly" << endl;
+      if (note->tuplet != 1.0) {
+         cout << "Warning: fermata within a tuplet. ";
+         cout << "Won't be handled correctly" << endl;
       }
       note->fermata = true;
    }
@@ -692,7 +740,7 @@ int getTupletFermata(const char* incipit, double current_duration, NoteObject *n
 // getTupletFermataEnd --
 //
 
-int getTupletFermataEnd(const char* incipit, NoteObject *note, int index ) {
+int getTupletFermataEnd(const char* incipit, NoteObject *note, int index) {
 
    int i = index;
    int length = strlen(incipit);
@@ -719,7 +767,7 @@ int getTupletFermataEnd(const char* incipit, NoteObject *note, int index ) {
 // getGraceNote --
 //
 
-int getGraceNote(const char* incipit, NoteObject *note, int index ) {
+int getGraceNote(const char* incipit, NoteObject *note, int index) {
 
    int i = index;
    int length = strlen(incipit);
@@ -888,10 +936,12 @@ void getKey(const char* key_str, string *output) {
 // getPitch --
 //
 
-int getPitch( char c_note, int octave, int accidental, Array<int>& a_key ) {
+int getPitch(char c_note, int octave, int accidental, vector<int>& a_key) {
 
    int pitch = 1000;
-   //cout << "note " << c_note << "; octave " << octave << "; accidental " << accidental << endl;
+   //cout << "note " << c_note << "; 
+   //octave " << octave << "; 
+   //accidental " << accidental << endl;
    int natural = 0;
    if (accidental == 100) {
       //accidental = 0;
@@ -1007,7 +1057,8 @@ int getPitch( char c_note, int octave, int accidental, Array<int>& a_key ) {
 
 //////////////////////////////
 //
-// getDurationWithDot -- return the duration note given the note duration and the dot
+// getDurationWithDot -- return the duration note given the note duration 
+//      and the dot
 //
 
 double getDurationWithDot(double duration, int dot) {
@@ -1027,7 +1078,7 @@ double getDurationWithDot(double duration, int dot) {
 // getMeasureDur -- return the duration of the full measure
 //
 
-double getMeasureDur(Array<double>& timeinfo) {
+double getMeasureDur(vector<double>& timeinfo) {
    return timeinfo[0] * timeinfo[1];
 }
 
@@ -1038,7 +1089,7 @@ double getMeasureDur(Array<double>& timeinfo) {
 // getTimeInfo -- read the key signature.
 //
 
-int getTimeInfo( const char* incipit, Array<double>& timeinfo, string *output, int index) {
+int getTimeInfo(const char* incipit, vector<double>& timeinfo, string *output, int index) {
 
    int i = index;
    int length = strlen(incipit);
@@ -1049,19 +1100,21 @@ int getTimeInfo( const char* incipit, Array<double>& timeinfo, string *output, i
    // find the end of time signature end
    i++; // the time signature length is a least 1
    while (i < length) {
-      if (!std::isdigit(incipit[i]) && (incipit[i] != '/') && (incipit[i] != '.')) {
+      if (!std::isdigit(incipit[i]) && (incipit[i] != '/') && 
+            (incipit[i] != '.')) {
          break;
       }
       i++;
    }
    
-   timeinfo.setAll(0);
+   // timeinfo.setAll(0);
+   timeinfo.assign(timeinfo.size(), 0);
    
    // use a substring for the time signature 
    char timesig_str[1024];
-   memset( timesig_str, 0, 1024 );
+   memset(timesig_str, 0, 1024);
    // strncpy not always put the \0 in the end!
-   strncpy( timesig_str, incipit + index, i - index); 
+   strncpy(timesig_str, incipit + index, i - index); 
       
    ostringstream sout;
    regex_t re;
@@ -1074,7 +1127,7 @@ int getTimeInfo( const char* incipit, Array<double>& timeinfo, string *output, i
    int is_one_number = regexec(&re, timesig_str, 0, NULL, 0);
    regfree(&re);
    
-   if ( is_standard == 0) {
+   if (is_standard == 0) {
       char buf_str[1024];
       strcpy(buf_str, timesig_str);
       int beats = atoi(strtok(buf_str, "/"));
@@ -1082,7 +1135,7 @@ int getTimeInfo( const char* incipit, Array<double>& timeinfo, string *output, i
       timeinfo[0] = (double)beats; timeinfo[1] = 4.0/(double)note_value;
       sout << "*M" << beats << "/" << note_value;
       //cout << output << endl;
-   } else if ( is_one_number == 0) {
+   } else if (is_one_number == 0) {
       int beats = atoi(timesig_str);
       timeinfo[0] = (double)beats; timeinfo[1] = 4.0/1.0;
       sout << "*M" << beats << "/1\n*met(" << beats << ")";
@@ -1119,7 +1172,7 @@ int getTimeInfo( const char* incipit, Array<double>& timeinfo, string *output, i
 // getClefInfo -- read the key signature.
 //
 
-int getClefInfo( const char *incipit, string *output, int index ) {
+int getClefInfo(const char *incipit, string *output, int index) {
 
    // a clef is maximum 3 character length
    // go through the 3 character and retrieve the letter (clef) and the line
@@ -1153,7 +1206,7 @@ int getClefInfo( const char *incipit, string *output, int index ) {
 // getWholeRest -- read the getWholeRest.
 //
 
-int getWholeRest( const char *incipit, int *wholerest, int index ) {
+int getWholeRest(const char *incipit, int *wholerest, int index) {
 
    int length = strlen(incipit);
    int i = index;
@@ -1162,9 +1215,9 @@ int getWholeRest( const char *incipit, int *wholerest, int index ) {
    if ((i+1 < length) && std::isdigit(incipit[i+1])) {
       sscanf(&(incipit[i+1]), "%d", wholerest);
       char buf[10];
-      memset( buf, 0, 10 );
-      sprintf( buf, "%d", *wholerest );
-      i += strlen( buf );
+      memset(buf, 0, 10);
+      sprintf(buf, "%d", *wholerest);
+      i += strlen(buf);
    }
    return i - index;
 }
@@ -1176,7 +1229,7 @@ int getWholeRest( const char *incipit, int *wholerest, int index ) {
 // getBarline -- read the barline.
 //
 
-int getBarline( const char *incipit, string *output, int index ) {
+int getBarline(const char *incipit, string *output, int index) {
 
    regex_t re;
    regcomp(&re, "^://:", REG_EXTENDED);
@@ -1219,25 +1272,25 @@ int getBarline( const char *incipit, string *output, int index ) {
 // getAbbreviation -- read abbreviation
 //
 
-int getAbbreviation(const char* incipit, MeasureObject *measure, int index ) {
+int getAbbreviation(const char* incipit, MeasureObject *measure, int index) {
 
    int length = strlen(incipit);
    int i = index;
    int j;
 
    if (measure->abbreviation_offset == -1) { // start
-      measure->abbreviation_offset = measure->notes.getSize();
+      measure->abbreviation_offset = measure->notes.size();
    } else { //
-      int abbreviation_stop = measure->notes.getSize();
+      int abbreviation_stop = measure->notes.size();
       while ((i+1 < length) && (incipit[i+1]=='f')) {
          i++;
-         for(j=measure->abbreviation_offset; j<abbreviation_stop; j++) {
-            measure->notes.append( measure->notes[j] );
+         for (j=measure->abbreviation_offset; j<abbreviation_stop; j++) {
+            measure->notes.push_back(measure->notes[j]);
          }
       }
       measure->abbreviation_offset = -1;   
    }
-   
+
    return i - index;
 }
 
@@ -1248,11 +1301,13 @@ int getAbbreviation(const char* incipit, MeasureObject *measure, int index ) {
 // getKeyInfo -- read the key signature.
 //
 
-int getKeyInfo(const char *incipit, Array<int>& key, string *output, int index ) {
+int getKeyInfo(const char *incipit, vector<int>& key, string *output, 
+      int index) {
 
    //const char* keyline = getField("112D", hfile, incipitnum);
    
-   key.setAll(0);
+   //key.setAll(0);
+   key.assign(key.size(), 0);
    
    // at the key information line, extract data
    int type  = 1;  		 // 1 = sharps, -1 = flats
@@ -1265,7 +1320,8 @@ int getKeyInfo(const char *incipit, Array<int>& key, string *output, int index )
       switch (incipit[i]) {
          case 'b': type  = -1; break;
          case 'x': type  =  1; break;
-         case '[': paren =  1; break; // change to 2 to enable paren. Meaning is unclear, though
+         // change to 2 to enable paren. Meaning is unclear, though:
+         case '[': paren =  1; break; 
          case ']': paren =  1; break;
          case 'F': key[0] = type * paren; break;
          case 'C': key[1] = type * paren; break;
@@ -1277,9 +1333,10 @@ int getKeyInfo(const char *incipit, Array<int>& key, string *output, int index )
          default:
             end_of_keysig = true;
             //if (debugQ) {
-            //  cout << "Warning: unknown character: " << keysig_str[i] << " in key signature " << keysig_str
+            //  cout << "Warning: unknown character: " 
+            //       << keysig_str[i] << " in key signature " << keysig_str
             //       << endl;
-               //exit(1);
+            //  exit(1);
             //}
             break;
       }
@@ -1319,7 +1376,8 @@ int getKeyInfo(const char *incipit, Array<int>& key, string *output, int index )
 // getNote --
 //
 
-int getNote( const char* incipit, NoteObject *note, MeasureObject *measure, int index ) {
+int getNote(const char* incipit, NoteObject *note, MeasureObject *measure, 
+      int index) {
 
    regex_t re;
    
@@ -1327,11 +1385,12 @@ int getNote( const char* incipit, NoteObject *note, MeasureObject *measure, int 
    
    note->duration = measure->durations[measure->durations_offset];
    note->dot = measure->dots[measure->durations_offset];
-   if ( note->tuplet != 1.0 ) {
+   if (note->tuplet != 1.0) {
       note->duration /= note->tuplet;
       //cout << durations[0] << ":" << note->tuplet << endl;
    }
-   note->pitch = getPitch( incipit[i], note->octave, note->accident, measure->a_key );
+   note->pitch = getPitch(incipit[i], note->octave, note->accident, 
+         measure->a_key);
    
    // beaming
    // detect if it is a fermata or a tuplet
@@ -1340,7 +1399,7 @@ int getNote( const char* incipit, NoteObject *note, MeasureObject *measure, int 
       int is_not_last_note = regexec(&re, incipit + i + 1, 0, NULL, 0);
       regfree(&re);
       //cout << "regexp " << is_not_last_note << endl;
-      if ( is_not_last_note != 0 ) {
+      if (is_not_last_note != 0) {
          note->beam = -1; // close the beam
       }
    }
@@ -1349,7 +1408,7 @@ int getNote( const char* incipit, NoteObject *note, MeasureObject *measure, int 
    regcomp(&re, "^[^ABCDEFG]*t", REG_EXTENDED);
    int has_trill = regexec(&re, incipit + i + 1, 0, NULL, 0);
    regfree(&re);
-   if ( has_trill == 0 ) {
+   if (has_trill == 0) {
       note->trill = true;
    }
 
@@ -1358,11 +1417,11 @@ int getNote( const char* incipit, NoteObject *note, MeasureObject *measure, int 
    int has_tie = regexec(&re, incipit + i + 1, 0, NULL, 0);
    regfree(&re);
    //cout << "regexp " << has_tie << endl;
-   if ( has_tie == 0 ) {
+   if (has_tie == 0) {
       note->tie = 1; // 1 for the first note, 2 for the second one
    }
    
-   measure->notes.append( *note );
+   measure->notes.push_back(*note);
    
    // reset values
    // beam
@@ -1385,9 +1444,9 @@ int getNote( const char* incipit, NoteObject *note, MeasureObject *measure, int 
       note->appoggiatura_multiple = false;
    }
    // durations
-   if (measure->durations.getSize()) {
+   if (measure->durations.size()) {
       measure->durations_offset++;
-      if (measure->durations_offset >= measure->durations.getSize()) {
+      if (measure->durations_offset >= (int)measure->durations.size()) {
          measure->durations_offset = 0;
       }
    }
@@ -1406,27 +1465,28 @@ int getNote( const char* incipit, NoteObject *note, MeasureObject *measure, int 
 // printMeasure --
 //
 
-void printMeasure(ostream& out, MeasureObject *measure ) {
+void printMeasure(ostream& out, MeasureObject *measure) {
 
-   if ( measure->clef.length() ) {
+   if (measure->clef.length()) {
       out << measure->clef << "\n";
    }
-   if ( measure->s_key.length() ) {
+   if (measure->s_key.length()) {
       out << measure->s_key << "\n";
    }   
-   if ( measure->s_timeinfo.length() ) {
+   if (measure->s_timeinfo.length()) {
       out << measure->s_timeinfo << "\n";
    }
    
    char buffer[1024] = {0};
    int i,j;
    
-   if ( measure->wholerest > 0 ) {
+   if (measure->wholerest > 0) {
       out << Convert::durationToKernRhythm(buffer, measure->measure_duration);
       out << "rr\n";
       for (i=1; i<measure->wholerest; i++) {
          out << "=\n";
-         out << Convert::durationToKernRhythm(buffer, measure->measure_duration);
+         out << Convert::durationToKernRhythm(buffer, 
+               measure->measure_duration);
          out << "rr\n";
       }
          
@@ -1435,13 +1495,14 @@ void printMeasure(ostream& out, MeasureObject *measure ) {
       //}
    }
 
-   for (i=0; i<measure->notes.getSize(); i++) {
+   for (i=0; i<(int)measure->notes.size(); i++) {
       if (measure->notes[i].pitch < 0) {
          if (measure->notes[i].tie == 1) {
             out << "[";
          }
-         out << Convert::durationToKernRhythm(buffer, measure->notes[i].duration);
-         for(j=0; j<measure->notes[i].dot; j++) {
+         out << Convert::durationToKernRhythm(buffer, 
+               measure->notes[i].duration);
+         for (j=0; j<measure->notes[i].dot; j++) {
             out << ".";
          }
          out << "r";
@@ -1466,8 +1527,9 @@ void printMeasure(ostream& out, MeasureObject *measure ) {
             out << "[";
          }
          if (!measure->notes[i].acciaccatura) {
-            out << Convert::durationToKernRhythm(buffer, measure->notes[i].duration);
-            for(j=0; j<measure->notes[i].dot; j++) {
+            out << Convert::durationToKernRhythm(buffer, 
+                  measure->notes[i].duration);
+            for (j=0; j<measure->notes[i].dot; j++) {
                out << ".";
             }
          }
@@ -1501,7 +1563,7 @@ void printMeasure(ostream& out, MeasureObject *measure ) {
       }
       out << "\n";
    }
-   if ( measure->barline.length() ) {
+   if (measure->barline.length()) {
       out << measure->barline << "\n";
    }
 }
@@ -1519,7 +1581,7 @@ void printMeasure(ostream& out, MeasureObject *measure ) {
 //   only one per line
 //
 
-void getAtRecordKeyValue(Array<char>& key, Array<char>& value,
+void getAtRecordKeyValue(vector<char>& key, vector<char>& value,
      const char* input) {
 
   #define SKIPSPACE while((index<length)&&isspace(input[index])){index++;}
@@ -1532,8 +1594,8 @@ void getAtRecordKeyValue(Array<char>& key, Array<char>& value,
 
 
   if (length == 0) {
-     key.setSize(1);
-     value.setSize(1);
+     key.resize(1);
+     value.resize(1);
      key[0] = EMPTY;
      value[0] = EMPTY;
      return;
@@ -1541,12 +1603,12 @@ void getAtRecordKeyValue(Array<char>& key, Array<char>& value,
 
   // pre-allocate storage space in character arrays to avoid
   // additional allocation will appending data:
-  key.setSize(length);
-  value.setSize(length);
+  key.resize(length);
+  value.resize(length);
   key[0] = EMPTY;
   value[0] = EMPTY;
-  key.setSize(0);
-  value.setSize(0);
+  key.resize(0);
+  value.resize(0);
 
   char ch;
   int index = 0;
@@ -1566,25 +1628,25 @@ void getAtRecordKeyValue(Array<char>& key, Array<char>& value,
         continue;
         index++;
      }
-     ch = input[index]; key.append(ch);
+     ch = input[index]; key.push_back(ch);
      index++;
   }
   // check to see if valid format: (:) must be the current character
   if (input[index] != SEPARATOR) {
      key[0] = EMPTY;
-     key.setSize(0);
+     key.resize(0);
      return;
   }
-  key.append(EMPTY); // terminate the string for regular C use of char*
+  key.push_back(EMPTY); // terminate the string for regular C use of char*
   index++;
   SKIPSPACE
-  value.setSize(length - index + 1);
-  strcpy(value.getBase(), &input[index]);
+  value.resize(length - index + 1);
+  strcpy(value.data(), &input[index]);
   int i;
-  for (i=value.getSize()-2; i>0; i--) {
+  for (i=value.size()-2; i>0; i--) {
      if (isspace(value[i])) {
         value[i] = EMPTY;
-        value.setSize(value.getSize()-1);
+        value.resize(value.size()-1);
         continue;
      }
      break;
@@ -1674,11 +1736,11 @@ void usage(const char* command) {
 // getLineIndex -- get the index location of the given string.
 //
 
-int getLineIndex(Array<ArrayChar>& pieces, const char* string) {
+int getLineIndex(vector<ArrayChar>& pieces, const char* string) {
    int index = -1;
    int i;
-   for (i=0; i<pieces.getSize(); i++) {
-      if (strstr(pieces[i].getBase(), string) != NULL) {
+   for (i=0; i<(int)pieces.size(); i++) {
+      if (strstr(pieces[i].data(), string) != NULL) {
          index = i;
          break;
       }
