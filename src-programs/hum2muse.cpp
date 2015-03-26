@@ -2787,6 +2787,40 @@ int appendClef(char* buffer, HumdrumFile& infile, int line, int track) {
 // specified primary track.  If there is a *met() code, then use that instead
 // of the *M attribute.
 //
+// MuseData mensural signs [201402]
+//
+//          Mensural sign      Humdrum    (modern)   MuseData    Tranlated?
+//          -------------      -------    --------   --------    ----------
+//          circle             *met(O)       3/1      T:11/0        Y
+//          circle w/colon     *met(O:)      3/1      T:12/0        Y
+//          circle w/dot       *met(O.)      9/2      T:21/0        Y
+//          circle w/dots(2+1) *met(O:.)     9/2      T:22/0        Y
+//          C                  *met(C)       2/1      T:31/0        Y
+//          C w/dot            *met(C.)      6/2      T:41/0        Y
+//          C w/dot + 3/2      *met(C.3/2)   6/2      T:42/0        Y
+//          C w/dot + 3/8      *met(C.3/8)   3/1      T:43/0        Y
+//          reverse C          *met(Cr)    2/0(4/1)   T:51/0        y
+//          reverse C w/cut    *met(Cr|)     4/1      T:52/0        y
+//          C w/cut            *met(C|)      2/1      T:61/0        Y
+//          C w/cut over 2     *met(C|/2)    2/1      T:62/0        Y
+//          C w/cut and dot    *met(C|.)     3/1      T:63/0        Y
+//          C+2                *met(C2)    2/0(4/1)   T:71/0        Y
+//          C + 2/3            *met(C2/3     2/1      T:72/0        Y
+//          circle + 2         *met(O2)    3/0(6/1)   T:81/0        Y
+//          circle + 3/2       *met(O3/2)    3/1      T:82/0        Y
+//          circle w/cut       *met(O|)      3/1      T:91/0        Y
+//          circle w/cut + 3   *met(O|3)     3/1      T:92/0        Y
+//          circle w/cut + 3/2 *met(O|3/2)   3/1      T:93/0        Y
+//          C w/cut + 3        *met(C|3)     3/1      T:101/0       Y
+//          simple 3           *met(3)       3/1      T:102/0       Y
+//          3 over 2           *met(3/2)     3/1      T:103/0       Y
+//          C w/cut over 3     *met(C|/3)    3/1      T:104/0       Y
+//          C+3                *met(C3)      3/1      T:105/0       Y
+//          circle over 3      *met(O/3)     3/1      T:106/0       Y
+//          C w/cut + 2        *met(C|2)   2/0(4/1)   T:111/0       Y
+//          simple 2           *met(2)     2/0(4/1)   T:112/0       Y
+//          circle w/small-o   *met(Oo)      3/1      T:121/0       Y
+//
 
 int appendTimeSignature(char* buffer, HumdrumFile& infile, int line, 
       int track, int tpq) {
@@ -2854,26 +2888,50 @@ int appendTimeSignature(char* buffer, HumdrumFile& infile, int line,
          strcat(buffer, "T:31/0");   return 1;
       } else if (strcmp(infile[metrow][metcol], "*met(C.)") == 0) {
          strcat(buffer, "T:41/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(C.3/2)") == 0) {
+         strcat(buffer, "T:42/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(C.3/8)") == 0) {
+         strcat(buffer, "T:43/0");   return 1;
       } else if (strcmp(infile[metrow][metcol], "*met(Cr)") == 0) {
          strcat(buffer, "T:51/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(Cr|)") == 0) {
+         strcat(buffer, "T:52/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(C|r)") == 0) {
+         strcat(buffer, "T:52/0");   return 1;
       } else if (strcmp(infile[metrow][metcol], "*met(C|)") == 0) {
          strcat(buffer, "T:61/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(C|/2)") == 0) {
+         strcat(buffer, "T:62/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(C|.)") == 0) {
+         strcat(buffer, "T:63/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(C.|)") == 0) {
+         strcat(buffer, "T:63/0");   return 1;
       } else if (strcmp(infile[metrow][metcol], "*met(C2)") == 0) {
          strcat(buffer, "T:71/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(C2/3)") == 0) {
+         strcat(buffer, "T:72/0");   return 1;
       } else if (strcmp(infile[metrow][metcol], "*met(O2)") == 0) {
          strcat(buffer, "T:81/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(O3/2)") == 0) {
+         strcat(buffer, "T:82/0");   return 1;
       } else if (strcmp(infile[metrow][metcol], "*met(O|)") == 0) {
          strcat(buffer, "T:91/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(O|3)") == 0) {
+         strcat(buffer, "T:92/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(O|3/2)") == 0) {
+         strcat(buffer, "T:93/0");   return 1;
       } else if (strcmp(infile[metrow][metcol], "*met(C|3)") == 0) {
          strcat(buffer, "T:101/0");   return 1;
       } else if (strcmp(infile[metrow][metcol], "*met(3)") == 0) {
          strcat(buffer, "T:102/0");   return 1;
-      } else if (strcmp(infile[metrow][metcol], "*met(O/3)") == 0) {
-         // eventually O/3 should generate a new mensural sign in
-         // musedata.  O/3 has the same function as 3.
-         strcat(buffer, "T:102/0");   return 1;
       } else if (strcmp(infile[metrow][metcol], "*met(3/2)") == 0) {
          strcat(buffer, "T:103/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(C|/3)") == 0) {
+         strcat(buffer, "T:104/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(C3)") == 0) {
+         strcat(buffer, "T:105/0");   return 1;
+      } else if (strcmp(infile[metrow][metcol], "*met(O/3)") == 0) {
+         strcat(buffer, "T:106/0");   return 1;
       } else if (strcmp(infile[metrow][metcol], "*met(C|2)") == 0) {
          strcat(buffer, "T:111/0");   return 1;
       } else if (strcmp(infile[metrow][metcol], "*met(2)") == 0) {
@@ -7509,6 +7567,20 @@ int getTupletTop(HumdrumFile& infile, int row, int col) {
       }
       if (rn.isEqualTo(3,4)) {
          return 4;
+      }
+
+
+      if (rn.isEqualTo(8,9)) {
+         return 8;
+      }
+      if (rn.isEqualTo(8,7)) {
+         return 8;
+      }
+      if (rn.isEqualTo(4,7)) {
+         return 4;
+      }
+      if (rn.isEqualTo(16,7)) {
+         return 16;
       }
 
 
