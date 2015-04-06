@@ -52,14 +52,15 @@ ARCH =
 # "10.4" in Apple OS X to compile for OS X 10.4 and later (for example,
 # you can compile for OS X 10.4 computers even if you are using a 10.6
 # computer).
-ENV = MACOSX_DEPLOYMENT_TARGET=10.6
+ENV = 
 
 # if OSTYPE is not defined, then this if statement will be run:
 ifeq ($(origin OSTYPE), undefined)
    ifeq ($(shell uname),Darwin)
       OSTYPE = OSXPC
-      ENV = MACOSX_DEPLOYMENT_TARGET=10.6
-      # use the following to compile for 32-bit architecture on 64-bit comps:
+      # Use the following to compile for a particular version of OS X:
+      # ENV = MACOSX_DEPLOYMENT_TARGET=10.6
+      # Use the following to compile for 32-bit architecture on 64-bit comps:
       #ARCH = -m32 -arch i386
    else 
       OSTYPE = LINUX
