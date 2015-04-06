@@ -36,7 +36,6 @@
 #      SUN    = Sun SPARCstations                                         #
 #      VISUAL = Windows 95/NT using Microsoft Visual C++ 6.0              #
 #      OSXPC  = Apple Macintosh OS 10.x, Intel CPU                        #
-#      OSXOLD = Apple Macintosh OS 10.x, PowerPC CPU                      #
 #                                                                         #
 # Look at the sigConfiguration.h file for various things which need       #
 # to be defined specifically for each OS.  Only one of these defines      #
@@ -52,7 +51,6 @@
 
 #OSTYPE = LINUX
 #OSTYPE = OSXPC
-#OSTYPE = OSXOLD
 ARCH = 
 
 # Set the environmental variable $MACOSX_DEPLOYMENT_TARGET to
@@ -215,9 +213,7 @@ ifneq ($(origin IMPROV),undefined)
    # On Apple OS X computers, include MIDI related libraries:
    ifeq ($(OSTYPE),OSXPC)
       POSTFLAGS += -framework CoreMIDI -framework CoreServices
-   endif
-   ifeq ($(OSTYPE),OSXOLD)
-      POSTFLAGS += -framework CoreMIDI -framework CoreServices
+      POSTFLAGS += -framework AudioUnit -framework AudioToolbox
    endif
    
    # On Linux computers, include MIDI related libraries:
