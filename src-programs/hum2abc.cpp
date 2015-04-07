@@ -524,6 +524,7 @@ int stemlessQ = 0;         // used with -p "%%nostems" spoofing
 
 int main(int argc, char** argv) {
    HumdrumFileSet infiles;
+   storeOptionSet(options);
    options.process(argc, argv);
    infiles.read(options);
 

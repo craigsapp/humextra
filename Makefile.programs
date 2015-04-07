@@ -36,7 +36,6 @@
 #      SUN    = Sun SPARCstations                                         #
 #      VISUAL = Windows 95/NT using Microsoft Visual C++ 6.0              #
 #      OSXPC  = Apple Macintosh OS 10.x, Intel CPU                        #
-#      OSXOLD = Apple Macintosh OS 10.x, PowerPC CPU                      #
 #                                                                         #
 # Look at the sigConfiguration.h file for various things which need       #
 # to be defined specifically for each OS.  Only one of these defines      #
@@ -47,25 +46,22 @@
 # You can set the OSTYPE variable by uncommenting one of the lines below;
 # otherwise, it will be set automatically in the next section of the
 # Makefile if the configuration should be OSXPC or LINUX.  For example,
-# if you need to compile for OSXOLD (OS X on a PowerPC), then you would
-# need to uncomment out the OSTYPE = OSXOLD line below.
 
 #OSTYPE = LINUX
 #OSTYPE = OSXPC
-#OSTYPE = OSXOLD
 ARCH = 
 
 # Set the environmental variable $MACOSX_DEPLOYMENT_TARGET to
 # "10.4" in Apple OS X to compile for OS X 10.4 and later (for example,
 # you can compile for OS X 10.4 computers even if you are using a 10.6
 # computer).
-ENV = MACOSX_DEPLOYMENT_TARGET=10.6
+ENV = 
 
 # if OSTYPE is not defined, then this if statement will be run:
 ifeq ($(origin OSTYPE), undefined)
    ifeq ($(shell uname),Darwin)
       OSTYPE = OSXPC
-      ENV = MACOSX_DEPLOYMENT_TARGET=10.6
+      # ENV = MACOSX_DEPLOYMENT_TARGET=10.6
       # use the following to compile for 32-bit architecture on 64-bit comps:
       #ARCH = -m32 -arch i386
    else 
@@ -157,15 +153,10 @@ COMPILER  = LANG=C $(ENV) g++ $(ARCH)
 #POSTFLAGS = -Wl,--export-all-symbols -Wl,--enable-auto-import \
 #            -Wl,--no-whole-archive -lmingw32 -L$(LIBDIR) -l$(LIBFILE)
 
-
-
 DEFINES   = $(addprefix -D,$(OSTYPE))
 DEFINES  += $(addprefix -D,$(OSSUBTYPE))
 
 PREFLAGS  = -O3 -Wall -I$(INCDIR) $(DEFINES)
-
-# Add -DOLDCPP if using an older C++ compiler
-#PREFLAGS += -DOLDCPP
 
 # Add -static flag to compile without dynamics libraries for better portability:
 # (-static flag doesn't work well with gethostbyname() used in Humdrum parser)
@@ -214,9 +205,7 @@ ifneq ($(origin IMPROV),undefined)
    # On Apple OS X computers, include MIDI related libraries:
    ifeq ($(OSTYPE),OSXPC)
       POSTFLAGS += -framework CoreMIDI -framework CoreServices
-   endif
-   ifeq ($(OSTYPE),OSXOLD)
-      POSTFLAGS += -framework CoreMIDI -framework CoreServices
+      POSTFLAGS += -framework AudioUnit -framework AudioToolbox
    endif
    
    # On Linux computers, include MIDI related libraries:
