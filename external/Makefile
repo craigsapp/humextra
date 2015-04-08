@@ -15,7 +15,7 @@
 ## parent directory's Makefile.
 ##
 
-PCRE = $(wildcard pcre-*.*)
+PCRE = $(wildcard pcre-8.35)
 
 .PHONY: centerpoint $(PCRE)
 
