@@ -1138,10 +1138,10 @@ int noteEndMarker(Array<Array<int> >& notes, int line, int column) {
 
    int pitch = notes[line][column];
    int nextpitch = -1;
-   int lastpitch = -1;
+   // int lastpitch = -1;
 
    if ((line > start) && (notes.getSize() > 1+start)) {
-      lastpitch = notes[line-1][column];
+      // lastpitch = notes[line-1][column];
    }
    if ((notes.getSize() > start+1) && (line < notes.getSize() - 1)) {
       nextpitch = notes[line+1][column];

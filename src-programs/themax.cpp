@@ -1726,7 +1726,7 @@ void getSeparatorLocationFET(Array<int>& positions, string& line,
       pokey.initializeSearchAndStudy(feature.getBase());
       const char* str = line.c_str();
       int location = 0;
-      int lastpos = 0;
+      //int lastpos = 0;
       i = startindex;
       int targetindex = 0;
       int tsize = checklocs.getSize();
@@ -1759,7 +1759,7 @@ void getSeparatorLocationFET(Array<int>& positions, string& line,
             for (j=0; j<checklocs.getSize(); j++) {
                if (location == checklocs[j]) {
                   positions.append(location);
-                  lastpos = j;
+                  // lastpos = j;
                   break;
                }
                if (location < checklocs[j]) {

@@ -268,12 +268,12 @@ restarting:
    // overwrite the old universal comments here.
   
    int addedFilename = 0;
-   int searchName = 0;
+   //int searchName = 0;
    int dataFoundQ = 0;
    int starstarFoundQ = 0;
    int starminusFoundQ = 0;
    if (newfilebuffer.getSize() < 4) {
-      searchName = 1;
+      //searchName = 1;
    }
    char templine[123123] = {0};
 

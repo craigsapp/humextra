@@ -165,8 +165,8 @@ class ScorePageBase {
       // converting/calculating bitmap images, since the origin for
       // PostScript is the bottom left corner of the page, while for bitmaps
       // the origin is the top left corner.
-      int pageWidth;
-      int pageHeight;
+      double pageWidth;
+      double pageHeight;
 
       // The left margin setting in the SCORE print menu (parameter 4, 
       // first number).  This is the distance from the left margin of the
@@ -222,10 +222,14 @@ class ScorePageBase {
       // editor, so they are preserved here as constantns.
       //
 
-      static const double Lbuffer  = 0.025;
-      static const double Bbuffer  = 0.0625;
-      static const double StaffLen = 7.5;
-      static const int    sDPI     = 4000;
+      static double Lbuffer;  // = 0.025;
+      static double Bbuffer;  // = 0.0625;
+      static double StaffLen; // = 7.5;
+      // Newer compilers:
+      // static constexpr double Lbuffer;  // = 0.025;
+      // static constexpr double Bbuffer;  // = 0.0625;
+      // static constexpr double StaffLen; // = 7.5;
+      static const int    sDPI = 4000;
 
       //////////////////////////////
       //

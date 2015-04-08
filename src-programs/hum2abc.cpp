@@ -1770,13 +1770,13 @@ void separateCountsByBeams(Array<TupletInfo>& tupletstuff,
      Array<BeamInfo>& beaminfo, Array<Coordinate>& nogracelist,
      HumdrumFile& infile) {
    int i, j;
-   int counter;
+   // int counter;
    Array<int> rests;
    getRestInfo(rests, nogracelist, infile);
    for (i=0; i<tupletstuff.getSize(); i++) {
       if ((tupletstuff[i].count > 0) && 
           ((beaminfo[i].right > 0) || rests[i])) {
-         counter = 1;
+         // counter = 1;
          for (j=1; j<tupletstuff[i].count; j++) {
             if ((beaminfo[i+j].left == 0) && (!rests[i+j-1])) {
                tupletstuff[i+j].count = tupletstuff[i].count - j;
@@ -2271,7 +2271,7 @@ void getNoGraceDurs(Array<double>& nogracedurs, Array<double>& notedurs,
       Array<Array<Coordinate> >& address, int layer) {
    int i;
    int row;
-   int col;
+   // int col;
    double tdur;
    int ilayer = layer - 1;
    int counter = 0;
@@ -2279,7 +2279,7 @@ void getNoGraceDurs(Array<double>& nogracedurs, Array<double>& notedurs,
 
    for (i=0; i<address[ilayer].getSize(); i++) {
       row = address[ilayer][i].row;
-      col = address[ilayer][i].col;
+      // col = address[ilayer][i].col;
       if (row >= 0) {
          if (notedurs[counter] > 0) {
             tdur = notedurs[counter];

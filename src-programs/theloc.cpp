@@ -711,7 +711,8 @@ void getFileAndPath(Array<char>& fileandpath, Array<char>& filename,
       // either a URL or a URI, so no path.
       fileandpath = filename;
       paths.setSize(1);
-      paths[0] = '\0';
+      paths[0].setSize(1);
+      paths[0][0] = '\0';
       return;
    }
 

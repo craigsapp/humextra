@@ -1761,12 +1761,12 @@ void displayHTMLText(const char* buffer) {
 
    int length = strlen(tbuf.getBase());
    for (int i=0; i<length; i++) {
-      switch (tbuf[i]) {
-         case 'ä':  cout << "&auml;"; break;
-         case 'ë':  cout << "&euml;"; break;
-         case 'ï':  cout << "&iuml;"; break;
-         case 'ö':  cout << "&ouml;"; break;
-         case 'ü':  cout << "&uuml;"; break;
+      switch ((unsigned char)tbuf[i]) {
+         case 0xe4: cout << "&auml;"; break; // 'ä'
+         case 0xeb: cout << "&euml;"; break; // 'ë'
+         case 0xef: cout << "&iuml;"; break; // 'ï'
+         case 0xf6: cout << "&ouml;"; break; // 'ö'
+         case 0xfc: cout << "&uuml;"; break; // 'ü'
          case '<':  cout << "&lt;"; break;
          case '>':  cout << "&gt;"; break;
          case '"':  cout << "&quot;"; break;

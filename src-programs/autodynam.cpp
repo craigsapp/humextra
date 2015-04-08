@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
       infile.read(cin);
    } else {
       filename = options.getArg(1);
-      infile.read(options.getArg(1));
+      infile.read(filename);
    }
    processFile(infile);
    cout << infile;

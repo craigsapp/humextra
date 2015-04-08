@@ -1117,8 +1117,8 @@ int printCombinationModule(ostream& out, const char* filename,
 
    SSTREAM idstream;
 
-   int crossing =  0;
-   int oldcrossing =  0;
+   // int crossing =  0;
+   //int oldcrossing =  0;
 
    int octaveadjust = 0;   // used for -o option
    if (octaveQ) {
@@ -1261,9 +1261,11 @@ int printCombinationModule(ostream& out, const char* filename,
             notes[part1][i].mark = 1;
             notes[part2][i].mark = 1;
          } else {
-            oldcrossing = crossing;
-            crossing = printInterval((*outp), notes[part1][i], notes[part2][i], 
-                  INTERVAL_HARMONIC, octaveadjust);
+            // oldcrossing = crossing;
+            //crossing = printInterval((*outp), notes[part1][i], 
+            //      notes[part2][i], INTERVAL_HARMONIC, octaveadjust);
+            printInterval((*outp), notes[part1][i], 
+                  notes[part2][i], INTERVAL_HARMONIC, octaveadjust);
          }
 
          if (durationQ) {

@@ -1584,7 +1584,7 @@ void printLegend(int legendheight, int legendwidth) {
 	 if (!((v==1)||(v==3)||(v==6)||(v==8)||(v==10))) {
             continue;
          }
-	 if ((i==blackend)) {
+	 if (i == blackend) {
             legend[i][j] = 24;
          } else if (i > (blackend + startrow)/2) {  // major keys
             legend[i][j] = v;

@@ -35,6 +35,10 @@
 
 typedef long TEMP64BITFIX;
 
+// Static class variables:
+double ScorePageBase::Lbuffer  = 0.025;
+double ScorePageBase::Bbuffer  = 0.0625;
+double ScorePageBase::StaffLen = 7.5;
 
 //////////////////////////////
 //

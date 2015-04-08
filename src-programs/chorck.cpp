@@ -1547,9 +1547,11 @@ void error7(void) {
 
 void error8(void) { 
    int i;
-   int bass, tenor, alto, soprano, temp;
+   // int bass;
+   int tenor, alto, soprano;
+   // int temp;
    for (i=0; i<voices[0].getSize(); i++) {
-      bass = abs(voices[0][i]);
+      // bass = abs(voices[0][i]);
       tenor = abs(voices[1][i]);
       alto = abs(voices[2][i]);
       soprano = abs(voices[3][i]);
@@ -1558,7 +1560,7 @@ void error8(void) {
          if (alto - tenor > 40) {
             errormessage(8, "alto", "tenor", linenum[i], linenum[i+1]);
          } else if (alto - tenor < 0) {
-            temp = alto;
+            // temp = alto;
 	    alto = tenor;
             tenor = alto;
          }

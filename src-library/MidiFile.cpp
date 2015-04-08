@@ -1199,7 +1199,7 @@ int MidiFile::read(const char* aFile) {
    uchar runningCommand = 0;
    MFEvent event;
    int absticks;
-   int barline;
+   // int barline;
    
    for (int i=0; i<tracks; i++) {
       // cout << "\nReading Track: " << i + 1 << flush;
@@ -1251,7 +1251,7 @@ int MidiFile::read(const char* aFile) {
 
       // process the track
       absticks = 0;
-      barline = 1;
+      // barline = 1;
       while (!inputfile.eof()) {
          longdata = extractVlvTime(inputfile);
          //cout << "ticks = " << longdata << endl;

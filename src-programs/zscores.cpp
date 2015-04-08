@@ -594,7 +594,7 @@ void printDataSingle(Array<Datum>& data, int field, HumdrumFile& infile,
    int scount;
 
    int i, j, k;
-   int interp;
+   // int interp;
    int counter = 0;
    for (i=0; i<infile.getNumLines(); i++) {
       switch (infile[i].getType()) {
@@ -605,7 +605,7 @@ void printDataSingle(Array<Datum>& data, int field, HumdrumFile& infile,
             cout << infile[i];
             break;
          case E_humrec_interpretation:
-            interp = 0;
+            // interp = 0;
             counter = 0;
 	    for (j=0; j<infile[i].getFieldCount(); j++) {
                if (infile[i].getPrimaryTrack(j) == field) {

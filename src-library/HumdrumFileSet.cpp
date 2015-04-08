@@ -403,9 +403,9 @@ void HumdrumFileSet::readAppendFromHttpURI(SSTREAM& inputstream,
    }
 
    const char* ptr2 = NULL;
-   const char* newfilename = filename;
+   // const char* newfilename = filename;
    if ((filename != NULL) && ((ptr2 = strrchr(filename, '/')) != NULL)) {
-      newfilename = ptr2+1;
+      // newfilename = ptr2+1;
    }
 
    char newline[3] = {0x0d, 0x0a, 0};

@@ -1368,12 +1368,12 @@ void printExtras(Array<Thing>& things, Array<Extra>& extras, int index,
       ostream& out) {
 
    double currentloc = things[index].absbeat;
-   double nextloc = 0.0;
+   // double nextloc = 0.0;
    double lastloc = 0.0;
    if (index < things.getSize()-1) {
-      nextloc = things[index+1].absbeat;
+      // nextloc = things[index+1].absbeat;
    } else {
-      nextloc = 999999.0;
+      // nextloc = 999999.0;
    }
    if (index > 0) {
       lastloc = things[index-1].absbeat;

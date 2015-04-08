@@ -771,7 +771,7 @@ istream& operator>>(istream& input, RationalNumber &p ) {
    input >> buff;
    char *str = buff;
    int is_fraction = false;
-   int is_rational = true;
+   //int is_rational = true;
    int i = 0;
    // search "/" operator in "str" and retriving numerator
    while (*str) {
@@ -785,7 +785,7 @@ istream& operator>>(istream& input, RationalNumber &p ) {
    }
    tmp[i] = 0;
    if (!RationalNumber::isNumber(tmp)) {
-      is_rational = false;
+      // is_rational = false;
    }
    RationalNumber::verify_number(tmp, is_fraction);
    RationalNumber P, Q(1,1); 

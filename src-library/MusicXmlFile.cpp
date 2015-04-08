@@ -4013,7 +4013,7 @@ void MusicXmlFile::getKernNoteProperties(_NoteState& ns, CXMLObject* object,
       if (element->GetName() == "notations") {
          // could be a slur or an articulation/technical
          int type = -1;   // 0 = slur start, 1 = slur stop
-         int number = 0;  // the slur level
+         // int number = 0;  // the slur level
          obj2 = object->Zoom();
          while (obj2 != NULL) {
             if (obj2->GetType() != xmlElement) {
@@ -4034,9 +4034,9 @@ void MusicXmlFile::getKernNoteProperties(_NoteState& ns, CXMLObject* object,
                      }
                   } else if (elem2->GetAttributes().GetName(i) == "number") {
                      if (elem2->GetAttributes().GetValue(i) == "1") {
-                        number = 1;
+                        // number = 1;
                      } else if (elem2->GetAttributes().GetValue(i) == "2") {
-                        number = 2;
+                        // number = 2;
                      }
                      // ignoring slurs of more than level 2 for now...
                   }

@@ -1159,11 +1159,11 @@ void getMeasureInfoForSection(Array<int>& measures, HumdrumFile& infile,
       }
    }
 
-   int backdata = 0;
+   // int backdata = 0;
    if (barinsection == 0) {
       for (i=startline-1; i>=0; i--) {
          if (infile[i].isData()) {
-            backdata = 1;
+            // backdata = 1;
          }
          if (infile[i].isMeasure()) {
             barinsection = i - startline;
@@ -1507,7 +1507,7 @@ void printLayerItems(int indent, SSTREAM& out, Array<Array<int> >& layeritems,
 
    int oldbeamstate = 0;
    int newbeamstate = 0;
-   int oldgracebeamstate = 0;
+   // int oldgracebeamstate = 0;
    int newgracebeamstate = 0;
 
    int graceQ = 0;               // true if a grace note rhythm
@@ -1540,7 +1540,7 @@ void printLayerItems(int indent, SSTREAM& out, Array<Array<int> >& layeritems,
 
             if (graceQ) {
                // grace note or rest
-               oldgracebeamstate = newgracebeamstate;
+               // oldgracebeamstate = newgracebeamstate;
                newgracebeamstate += getBeamAdjustment(infile[i][j]);
                if (newgracebeamstate < 0) {
                   newgracebeamstate = 0;
@@ -1914,9 +1914,9 @@ void getLayerItems(Array<Array<int> >& layeritems, HumdrumFile& infile,
    PerlRegularExpression pre;
 
    int i, j;
-   int lcounter;
+   // int lcounter;
    for (i=start; i<=stop; i++) {
-      lcounter = 0;
+      // lcounter = 0;
 
       // global comments stored only in first staff, first layer
       if (infile[i].isGlobalComment() && (layerindex == 0)

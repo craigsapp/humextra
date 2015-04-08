@@ -215,7 +215,8 @@ endif
 
 
 %.o : %.cpp
-	$(COMPILER) $(PREFLAGS) -o $(OBJDIR)/$(notdir $@) $(POSTFLAGS) $<
+	@echo [CC] $@
+	@$(COMPILER) $(PREFLAGS) -o $(OBJDIR)/$(notdir $@) $(POSTFLAGS) $<
 
 #                                                                         #
 ###########################################################################

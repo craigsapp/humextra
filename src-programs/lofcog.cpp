@@ -155,10 +155,13 @@ void printXfig(HumdrumFile& infile, Array<double>& fifthmean) {
          plotdata.addPoint(infile[i].getAbsBeat(), fifthmean[i]);
       } else if (infile[i].getType() == E_humrec_data_measure) {
          count = sscanf(infile[i][0], "=%d", &mnum);
-         sprintf(buffer, "%d", mnum);
-         plot.addVLine(infile[i].getAbsBeat(), "");
-         if ((mnum > 0) && (mnum % 10 == 0)) {
-            plot.addText(buffer, infile[i].getAbsBeat(), ymin-0.75, 14, 0, 0);
+         if (count == 1) {
+            sprintf(buffer, "%d", mnum);
+            plot.addVLine(infile[i].getAbsBeat(), "");
+            if ((mnum > 0) && (mnum % 10 == 0)) {
+               plot.addText(buffer, infile[i].getAbsBeat(), 
+                     ymin-0.75, 14, 0, 0);
+            }
          }
       }
    }
@@ -260,7 +263,7 @@ double getFifthMean(HumdrumFile& infile, int line, double beats,
    int tnote;
    int base12;
    double bias;
-   double tbeat;
+   // double tbeat;
    int base40;
    int linenum;
    int tlinenum;
@@ -337,7 +340,7 @@ double getFifthMean(HumdrumFile& infile, int line, double beats,
          while (infile[line].getAbsBeat() - absbeat[absbeat.getCount()-1] > 
                beats) {
             tnote = notes.extract();
-            tbeat = absbeat.extract();
+            // tbeat = absbeat.extract();
             meansum -= tnote;
          }
       }

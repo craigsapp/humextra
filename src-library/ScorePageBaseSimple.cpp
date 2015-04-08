@@ -257,8 +257,8 @@ void ScorePageBaseSimple::readAscii(const char* filename, int verboseQ) {
    data.setSize(data.getSize()-1);
    data.allowGrowth(0);
 
-   union { long i; float f; } u;
-   u.i = 0x50504153;
+   // union { long i; float f; } u;
+   // u.i = 0x50504153;
 
    initializeTrailer();
    infile.close();
