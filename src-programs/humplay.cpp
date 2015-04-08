@@ -121,6 +121,7 @@ void description(void) {
 }
 
 
+
 //////////////////////////////
 //
 // initialization -- This function is called at the start of the program.
@@ -153,6 +154,7 @@ void initialization(void) {
 }
 
 
+
 //////////////////////////////
 //
 // finishup -- This function is called just before exiting the program.
@@ -160,8 +162,13 @@ void initialization(void) {
 
 void finishup(void) {
    eventBuffer.off();
+   if (markers.getSize() > 0) {
+      printAllMarkers (cout, markers, data);
+      markers.setSize(0);
+   }
    colormessage(cout, COLOR_RESET, colormode, colorQ);
 }
+
 
 /*-------------------- main loop algorithms -----------------------------*/
 
@@ -180,6 +187,11 @@ void mainloopalgorithms(void) {
    if (timer.expired()) {
       playdata(data, linenum, timer);
       if (linenum >= data.getNumLines()) {
+         if (markers.getSize() > 0) {
+cout << "MARKERS SIZE = " << markers.getSize() << endl;
+            printAllMarkers (cout, markers, data);
+            markers.setSize(0);
+         }
          inputNewFile();
       }
    }
@@ -235,8 +247,8 @@ void keyboardchar(int key) {
    // case 'f': break;
    // case 'g': break;
 
+      case 'h':               // hide/unhide non-kern spine (remove later)
       case 'k':               // hide/unhide non-kern spine
-      case 'h':               // hide/unhide non-kern spine
          hideQ = !hideQ;
          if (hideQ) {
             cout << "!! Hiding non-kern spines" << endl;

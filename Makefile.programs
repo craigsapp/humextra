@@ -154,6 +154,8 @@ COMPILER  = LANG=C $(ENV) g++ $(ARCH)
 #POSTFLAGS = -Wl,--export-all-symbols -Wl,--enable-auto-import \
 #            -Wl,--no-whole-archive -lmingw32 -L$(LIBDIR) -l$(LIBFILE)
 
+
+
 DEFINES   = $(addprefix -D,$(OSTYPE))
 DEFINES  += $(addprefix -D,$(OSSUBTYPE))
 
