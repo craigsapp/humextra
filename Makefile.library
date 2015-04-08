@@ -120,8 +120,8 @@ ifneq ($(wildcard external/centerpoint),)
 endif
 
 # Needed for compiling PerlRegularExpression class:
-ifneq ($(wildcard external/pcre-*.*),)
-   PREFLAGS    += -I$(wildcard external/pcre-*.*)
+ifneq ($(wildcard external/pcre-8.35),)
+   PREFLAGS    += -I$(wildcard external/pcre-8.35)
    PCRE        := yes
 endif
 

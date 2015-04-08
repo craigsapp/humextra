@@ -182,8 +182,8 @@ endif
 
 # The following setup is for PERL-Compatible Regular Expression library
 # linking (for themax2 in particular).
-ifneq ($(wildcard external/pcre-*.*),)
-   PREFLAGS    += -I$(wildcard external/pcre-*.*)
+ifneq ($(wildcard external/pcre-8.35),)
+   PREFLAGS    += -I$(wildcard external/pcre-8.35)
    POSTFLAGS   += -lpcre
    PCRE        := yes
 endif
