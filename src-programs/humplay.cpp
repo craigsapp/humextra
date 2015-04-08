@@ -17,6 +17,7 @@
 
 #include "synthImprov.h"
 #include "HumdrumFile.h"
+#include "HumdrumStream.h"
 #include "Convert.h"
 #include <string.h>
 
@@ -45,6 +46,7 @@ double tempo = 120.0;     // current metronome tempo
 SigTimer timer;           // for playing the humdrum file
 EventBuffer eventBuffer;  // for storing note offs when playing notes
 
+HumdrumStream streamer;   // for inputting multiple Humdrum files/segments
 HumdrumFile data;         // humdrum file to play
 int linenum       = 0;    // for keeping track of current line in file
 double tempoScale = 1.0;  // for global adjustment of tempo
@@ -114,9 +116,9 @@ void description(void) {
    psl("   t = increase tab size         T = decrease tab size                     ");
    psl("   n = toggle notes only        #o = set tempo to #                        ");
    psl("  #r = return to marker #        R = list markers                          ");
-   psl("  #( = go back # measures       #) = go forward # measures                 ");
    psl("   ^ = go to start of file      space = insert marker                      ");
-   psl("   x = clear screen                                                        ");
+   psl("   x = clear screen              $ = go to end of file                     ");
+   psl("  #( = go back # measures       #) = go forward # measures                 ");
    printboxbottom();
 }
 
@@ -137,10 +139,10 @@ void initialization(void) {
    if (colorQ) {
       colormessage(cout, COLOR_INIT, colormode, colorQ);
       colormessage(cout, COLOR_CLEAR_SCREEN, colormode, colorQ);
-      if (!options.getBoolean("Q")) {
-         print_commands();
-      }
-      sleep(1);
+      //if (!options.getBoolean("Q")) {
+      //   print_commands();
+      //}
+      //sleep(1);
    }
    trackmute.setSize(1000); // maximum track in humdrum file assumed to be 1000
                             // space 1000-10 is used for a special purpose.
@@ -162,10 +164,8 @@ void initialization(void) {
 
 void finishup(void) {
    eventBuffer.off();
-   if (markers.getSize() > 0) {
-      printAllMarkers (cout, markers, data);
-      markers.setSize(0);
-   }
+   printAllMarkers(cout, markers, data);
+   markers.setAll(0);
    colormessage(cout, COLOR_RESET, colormode, colorQ);
 }
 
@@ -187,11 +187,8 @@ void mainloopalgorithms(void) {
    if (timer.expired()) {
       playdata(data, linenum, timer);
       if (linenum >= data.getNumLines()) {
-         if (markers.getSize() > 0) {
-cout << "MARKERS SIZE = " << markers.getSize() << endl;
-            printAllMarkers (cout, markers, data);
-            markers.setSize(0);
-         }
+         printAllMarkers(cout, markers, data);
+         markers.setAll(0);
          inputNewFile();
       }
    }
@@ -456,6 +453,11 @@ void keyboardchar(int key) {
          linenum = 0;
          cout << "!! Going to start of file" << endl;
          break;
+
+      case '$':    // go to the end of the file
+         linenum = data.getNumLines() - 1;
+         cout << "!! Going to end of file" << endl;
+         break;
    }
 
    if (!isdigit(key)) {
@@ -475,6 +477,18 @@ void keyboardchar(int key) {
 
 void printAllMarkers(ostream& out, Array<int>& markers, HumdrumFile& infile) {
    int i;
+
+   int mcount = 0;
+   for (i=1; i<markers.getSize(); i++) {
+      if (markers[i] > 0) {
+         mcount++;
+         break;
+      }
+   }
+   if (mcount == 0) {
+      return;
+   }
+
    colormessage(cout, COLOR_MARKS, colormode, colorQ);
    out << "**mark\t**line\t**abeat\t**bar\t**beat\n";
    for (i=1; i<markers.getSize(); i++) {
@@ -726,11 +740,12 @@ void checkOptions(void) {
       echoTextQ = 0;
    }
 
-   if (options.getArgCount() < 1) {
-      data.read(cin);
-   } else {
-      inputNewFile();
-   }
+   //if (options.getArgCount() < 1) {
+   //   data.read(cin);
+   //} else {
+   //   inputNewFile();
+   //}
+   streamer.setFileList(options.getArgList());
 
    mine = options.getInteger("min");
    if (mine < 0) {
@@ -756,14 +771,11 @@ void checkOptions(void) {
 void inputNewFile(void) {
    data.clear();
    linenum = 0;
-
-   int count = options.getArgCount();
-   if (fileNumber > count) {
+   if (!streamer.read(data)) {
       finishup();
       exit(0);
    }
 
-   data.read(options.getArg(fileNumber));
    data.analyzeRhythm("4");
 
    if (fileNumber > 1) {
@@ -783,6 +795,12 @@ void inputNewFile(void) {
 
 void playdata(HumdrumFile& data, int& linenum, SigTimer& timer) {
    double duration = 0;     // duration of the current line;
+
+   if (data.getNumLines() == 0) {
+      // ignore empty files.
+      return;
+   }
+
    int type = data[linenum].getType();
 
    while (linenum < data.getNumLines() && duration == 0.0) {
@@ -1179,3 +1197,4 @@ ostream& colormessage(ostream& out, int messagetype, int mode, int status) {
 
 
 // md5sum: cea522f0a889b56a2e92d7b301ffc6a6 humplay.cpp [20090615]
+
