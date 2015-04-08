@@ -4439,7 +4439,7 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
       newlineQ = 1;  // no grace chords allowed at this time.
                      // allow in multiple voices later ...
    } else if (index+1 < partdata[staffno].getSize()) {
-      if ((partdata[staffno][index+1].type == MXI_note)) {
+      if (partdata[staffno][index+1].type == MXI_note) {
          if (partdata[staffno][index+1].ticktime == 
                partdata[staffno][index].ticktime) {
             if (partdata[staffno][index+1].voice == 

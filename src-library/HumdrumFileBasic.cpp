@@ -1472,7 +1472,7 @@ int HumdrumFileBasic::predictNewSpineCount(HumdrumRecord& aRecord) {
          output += 2;
       } else if (strcmp("*-", aRecord[i]) == 0) {
          // should this be something else?:
-         output = output;
+         //output = output;
       } else if (strcmp("*+", aRecord[i]) == 0) {
          output += 2;
       } else if (strcmp("*x", aRecord[i]) == 0) {
