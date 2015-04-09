@@ -33,7 +33,6 @@ INCDIR   = include
 LIBDIR   = lib
 OBJDIR   = obj
 ARCH     = 
-ENV      = MACOSX_DEPLOYMENT_TARGET=10.6
 ifeq ($(origin OSTYPE), undefined)
    ifeq ($(shell uname),Darwin)
       # use the following to compile for 32-bit architecture on 64-bit comps:
@@ -105,17 +104,24 @@ $(LIB_DEBUG_STATIC): $(foreach o,$(objects),$(OBJDIR_DEBUG_STATIC)/$(o).o)
 	$(RANLIB) $@
 
 $(LIB_RELEASE_STATIC): $(foreach o,$(objects),$(OBJDIR_RELEASE_STATIC)/$(o).o)
-	$(LIB) $@ $^
-	$(RANLIB) $@
+	@$(LIB) $@ $^ >& /dev/null
+	@$(RANLIB) $@ >& /dev/null
 		
 $(OBJDIR_DEBUG_STATIC)/%.o: $(SRCDIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(DEBUGOPT) -c $< -o $@
+	@echo [CXX] $@
+	@$(CXX) $(CXXFLAGS) $(DEBUGOPT) -c $< -o $@
 
 $(OBJDIR_RELEASE_STATIC)/%.o: $(SRCDIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(RELEASEOPT) -c $< -o $@
+	@echo [CXX] $@
+	@$(CXX) $(CXXFLAGS) $(RELEASEOPT) -c $< -o $@
 
 $(OBJDIR_DEBUG_STATIC)/%.o: $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) $(DEBUGOPT) -c $< -o $@
+	@echo [CC] $@
+	@$(CC) $(CFLAGS) $(DEBUGOPT) -c $< -o $@
 
 $(OBJDIR_RELEASE_STATIC)/%.o: $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) $(RELEASEOPT) -c $< -o $@
+	@echo [CC] $@
+	@$(CC) $(CFLAGS) $(RELEASEOPT) -c $< -o $@
+
+
+
