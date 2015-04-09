@@ -490,8 +490,6 @@ XMLObjectType CXMLAttribute::GetType() const
 
 void CXMLAttribute::Dump(ostream* pStr) const
 {
-// g++ 4.2.1 (Based on Apple build 5658) (LLVM build 2336.11.00) does not
-// like the use of static class members used here:
 	*pStr
 		<< "<Attribute Name=\"" << CXMLUtils::XMLToAscii(m_name) << "\" "
 		<< "Type=\"" << CXMLUtils::XMLToAscii(m_type) << "\" "

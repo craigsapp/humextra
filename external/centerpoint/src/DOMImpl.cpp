@@ -1199,7 +1199,8 @@ unsigned long CharacterData::getLength() const
 
 XMLString CharacterData::substringData(unsigned long offset, unsigned long count) const
 {
-	if (offset < 0 || offset >= m_data.length() || count < 0)
+	// if (offset < 0 || offset >= m_data.length() || count < 0)
+	if (offset >= m_data.length())
 	{
 		throw DOMException(DOMException::INDEX_SIZE_ERR);
 	}
@@ -1217,7 +1218,7 @@ void CharacterData::appendData(const XMLString& arg)
 
 void CharacterData::insertData(unsigned long offset, const XMLString& arg)
 {
-	if (offset < 0 || offset >= m_data.length())
+	if (offset >= m_data.length())
 	{
 		throw DOMException(DOMException::INDEX_SIZE_ERR);
 	}
@@ -1229,7 +1230,7 @@ void CharacterData::insertData(unsigned long offset, const XMLString& arg)
 
 void CharacterData::deleteData(unsigned long offset, unsigned long count)
 {
-	if (offset < 0 || offset >= m_data.length() || count < 0)
+	if (offset >= m_data.length())
 	{
 		throw DOMException(DOMException::INDEX_SIZE_ERR);
 	}
@@ -1241,7 +1242,7 @@ void CharacterData::deleteData(unsigned long offset, unsigned long count)
 
 void CharacterData::replaceData(unsigned long offset, unsigned long count, const XMLString& arg)
 {
-	if (offset < 0 || offset >= m_data.length() || count < 0)
+	if (offset >= m_data.length())
 	{
 		throw DOMException(DOMException::INDEX_SIZE_ERR);
 	}
@@ -2619,14 +2620,14 @@ bool DOMImplementation::hasFeature(const XMLString& feature, const XMLString& ve
 {
 	return (feature == CXMLUtils::AsciiToXML("XML")  || 
 	        feature == CXMLUtils::AsciiToXML("xml")  ||
-		    feature == CXMLUtils::AsciiToXML("Xml")) && 
-		    version == CXMLUtils::AsciiToXML("1.0")  ||
-			feature == CXMLUtils::AsciiToXML("Core") &&
-			version == CXMLUtils::AsciiToXML("2.0")  ||
-			feature == CXMLUtils::AsciiToXML("Events") &&
-			version == CXMLUtils::AsciiToXML("2.0")  ||
-			feature == CXMLUtils::AsciiToXML("MutationEvents") &&
-			version == CXMLUtils::AsciiToXML("2.0");
+		    (feature == CXMLUtils::AsciiToXML("Xml")) && 
+		    version == CXMLUtils::AsciiToXML("1.0"))  ||
+			(feature == CXMLUtils::AsciiToXML("Core") &&
+			version == CXMLUtils::AsciiToXML("2.0"))  ||
+			(feature == CXMLUtils::AsciiToXML("Events") &&
+			version == CXMLUtils::AsciiToXML("2.0"))  ||
+			(feature == CXMLUtils::AsciiToXML("MutationEvents") &&
+			version == CXMLUtils::AsciiToXML("2.0"));
 }
 
 		

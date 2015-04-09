@@ -237,37 +237,37 @@ public:
 		}
 		else if (chr <= 0x7FF)
 		{
-			target.push_back((unsigned char) ((chr >> 6) & 0x1F | 0xC0));
+			target.push_back((unsigned char) (((chr >> 6) & 0x1F) | 0xC0));
 			target.push_back((unsigned char) ((chr & 0x3F) | 0x80));
 		}
 		else if (chr <= 0xFFFF)
 		{
-			target.push_back((unsigned char) ((chr >> 12) & 0x0F | 0xE0));
-			target.push_back((unsigned char) ((chr >> 6) & 0x3F | 0x80));
+			target.push_back((unsigned char) (((chr >> 12) & 0x0F) | 0xE0));
+			target.push_back((unsigned char) (((chr >> 6) & 0x3F) | 0x80));
 			target.push_back((unsigned char) ((chr & 0x3F) | 0x80));
 		}
 		else if (chr <= 0x1FFFFF)
 		{
-			target.push_back((unsigned char) ((chr >> 18) & 0x07 | 0xF0));
-			target.push_back((unsigned char) ((chr >> 12) & 0x3F | 0x80));
-			target.push_back((unsigned char) ((chr >> 6) & 0x3F | 0x80));
+			target.push_back((unsigned char) (((chr >> 18) & 0x07) | 0xF0));
+			target.push_back((unsigned char) (((chr >> 12) & 0x3F) | 0x80));
+			target.push_back((unsigned char) (((chr >> 6) & 0x3F) | 0x80));
 			target.push_back((unsigned char) ((chr & 0x3F) | 0x80));
 		}
 		else if (chr <= 0x3FFFFFF)
 		{
-			target.push_back((unsigned char) ((chr >> 24) & 0x03 | 0xF8));
-			target.push_back((unsigned char) ((chr >> 18) & 0x3F | 0x80));
-			target.push_back((unsigned char) ((chr >> 12) & 0x3F | 0x80));
-			target.push_back((unsigned char) ((chr >> 6) & 0x3F | 0x80));
+			target.push_back((unsigned char) (((chr >> 24) & 0x03) | 0xF8));
+			target.push_back((unsigned char) (((chr >> 18) & 0x3F) | 0x80));
+			target.push_back((unsigned char) (((chr >> 12) & 0x3F) | 0x80));
+			target.push_back((unsigned char) (((chr >> 6) & 0x3F) | 0x80));
 			target.push_back((unsigned char) ((chr & 0x3F) | 0x80));
 		}
 		else if (chr <= 0x7FFFFFFF)
 		{
-			target.push_back((unsigned char) ((chr >> 30) & 0x01 | 0xFC));
-			target.push_back((unsigned char) ((chr >> 24) & 0x3F | 0x80));
-			target.push_back((unsigned char) ((chr >> 18) & 0x3F | 0x80));
-			target.push_back((unsigned char) ((chr >> 12) & 0x3F | 0x80));
-			target.push_back((unsigned char) ((chr >> 6) & 0x3F | 0x80));
+			target.push_back((unsigned char) (((chr >> 30) & 0x01) | 0xFC));
+			target.push_back((unsigned char) (((chr >> 24) & 0x3F) | 0x80));
+			target.push_back((unsigned char) (((chr >> 18) & 0x3F) | 0x80));
+			target.push_back((unsigned char) (((chr >> 12) & 0x3F) | 0x80));
+			target.push_back((unsigned char) (((chr >> 6) & 0x3F) | 0x80));
 			target.push_back((unsigned char) ((chr & 0x3F) | 0x80));
 		}
 	}
@@ -550,7 +550,9 @@ void CXMLWriter2::EndElement(const XMLString& uri, const XMLString& localName, c
 	{
 		throw CXMLException(CXMLException::EXMLSyntax, "EndElement() has no matching StartElement()");
 	}
-	if (!(qname == m_elemStack.back().m_qname || uri == m_elemStack.back().m_uri && localName == m_elemStack.back().m_localName))
+	if (!(qname == m_elemStack.back().m_qname || 
+      (uri == m_elemStack.back().m_uri && 
+      localName == m_elemStack.back().m_localName)))
 	{
 		throw CXMLException(CXMLException::EXMLTagMismatch);
 	}

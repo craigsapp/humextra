@@ -212,6 +212,8 @@ void CSAXDocumentParser::Process(const CXMLObject* pObj) const
 	case xmlContainer:
 		Traverse(pObj->Zoom());
 		break;
+	default:
+		break;
 	}
 }
 
