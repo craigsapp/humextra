@@ -295,7 +295,7 @@ public:
 		}
 		else
 		{
-			target.push_back((unsigned char) ((chr >> 6) & 0x1F | 0xC0));
+			target.push_back((unsigned char) (((chr >> 6) & 0x1F) | 0xC0));
 			target.push_back((unsigned char) ((chr & 0x3F) | 0x80));
 		}
 	}

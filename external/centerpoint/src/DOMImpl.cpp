@@ -2618,9 +2618,9 @@ NodeList::~NodeList()
 
 bool DOMImplementation::hasFeature(const XMLString& feature, const XMLString& version) const
 {
-	return (feature == CXMLUtils::AsciiToXML("XML")  || 
+	return feature == CXMLUtils::AsciiToXML("XML")  || 
 	        feature == CXMLUtils::AsciiToXML("xml")  ||
-		    (feature == CXMLUtils::AsciiToXML("Xml")) && 
+		    (feature == CXMLUtils::AsciiToXML("Xml") && 
 		    version == CXMLUtils::AsciiToXML("1.0"))  ||
 			(feature == CXMLUtils::AsciiToXML("Core") &&
 			version == CXMLUtils::AsciiToXML("2.0"))  ||
