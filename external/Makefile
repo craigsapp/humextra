@@ -2,7 +2,7 @@
 ##
 ## Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 ## Creation Date: Mon Jun 29 18:12:35 PDT 2009
-## Last Modified: Wed Sep  9 23:57:43 PDT 2009
+## Last Modified: Thu Apr  9 06:24:42 PDT 2015
 ## Filename:      ...humextra/external/Makefile
 ##
 ## Description: This Makefile compiles external libraries used in
@@ -32,12 +32,10 @@ else
 endif
 
 pcre:
-ifneq ($(shell uname),Darwin)
-	# only do the following if not OS X.  Needed for Cygwin, but
-	# causes problems in OS X since the autoreconf program is not
-	# installed by default in OS X and has to be installed separately.
-	#(cd $(PCRE); autoreconf -vi)
-endif
+	# The following command helps to avoid having autoreconf or
+	# aclocal or other stupid non-installed configuration tools
+	# from being triggered to run.
+	(cd $(PCRE);  touch *)
 	(cd $(PCRE); ./configure)
 	(cd $(PCRE); $(MAKE))
 	-mkdir ../lib
