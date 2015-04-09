@@ -61,7 +61,7 @@ RANLIB = ranlib
 
 # Flags
 CFLAGS      = -I$(INCDIR)
-CXXFLAGS    = -I$(INCDIR) -Wno-non-virtual-dtor
+CXXFLAGS    = -I$(INCDIR) -Wno-delete-non-virtual-dtor
 DEBUGOPT    = -g -D_DEBUG
 RELEASEOPT  = -O2 -DNDEBUG
 #RELEASEOPT = +O2 -DNDEBUG
