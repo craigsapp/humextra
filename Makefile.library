@@ -159,18 +159,11 @@ library: $(OBJS)
 	$(RANLIB) $(LIBDIR)/$(LIBFILE)
    endif
 
-   ifeq ($(OSTYPE),OSXOLD)
-	@echo "Creating humextra library file for OSX (PowerPC)..."
-	-rm -f $(LIBDIR)/$(LIBFILE)
-	$(AR) r $(LIBDIR)/$(LIBFILE) $(OBJDIR)/*.o 
-	$(RANLIB) $(LIBDIR)/$(LIBFILE)
-   endif
-
    ifeq ($(OSTYPE),OSXPC)
 	@echo "Creating humextra library file for OSX (Intel)..."
 	-rm -f $(LIBDIR)/$(LIBFILE)
 	$(AR) r $(LIBDIR)/$(LIBFILE) $(OBJDIR)/*.o 
-	$(RANLIB) $(LIBDIR)/$(LIBFILE)
+	# $(RANLIB) $(LIBDIR)/$(LIBFILE)
    endif
 
    ifeq ($(OSTYPE),VISUAL)

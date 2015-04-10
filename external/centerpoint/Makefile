@@ -104,8 +104,8 @@ $(LIB_DEBUG_STATIC): $(foreach o,$(objects),$(OBJDIR_DEBUG_STATIC)/$(o).o)
 	$(RANLIB) $@
 
 $(LIB_RELEASE_STATIC): $(foreach o,$(objects),$(OBJDIR_RELEASE_STATIC)/$(o).o)
-	@$(LIB) $@ $^ >& /dev/null
-	@$(RANLIB) $@ >& /dev/null
+	@$(LIB) $@ $^ &> /dev/null
+	@$(RANLIB) $@ &> /dev/null
 		
 $(OBJDIR_DEBUG_STATIC)/%.o: $(SRCDIR)/%.cpp
 	@echo [CXX] $@
