@@ -970,7 +970,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -993,7 +993,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    doubleQ     = opts.getBoolean("mstart");
    fileQ       = opts.getBoolean("file");
    if (fileQ) {
-      Filename = opts.getString("file");
+      Filename = opts.getString("file").data();
    }
    markQ       = opts.getBoolean("fixedmark");
    matchlen    = opts.getInteger("fixedmark");
@@ -1009,8 +1009,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    if (!markQ) {
       matchlistQ = 1;
    }
-   marker =  opts.getString("markchar");
-   graceQ = !opts.getString("no-grace");
+   marker =  opts.getString("markchar").data();
+   graceQ = !opts.getString("no-grace").data();
 
    if (opts.getBoolean("all")) {
       dispLineQ    = 1;  // used with -l option
@@ -1023,7 +1023,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       dispBeatQ    = 1;  // used with -B option
    }
    
-   prepareSearchPaths(paths, opts.getString("path"));
+   prepareSearchPaths(paths, opts.getString("path").data());
 }
 
 

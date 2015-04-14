@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 
    int numinputs = options.getArgCount();
    if (numinputs > 0) {
-      char* filenameIn  = options.getArg(1);
+      const char* filenameIn  = options.getArg(1).data();
       infile.read(filenameIn);
    } else {
       infile.read(cin);
@@ -1136,7 +1136,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1149,10 +1149,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    maxheight      =  opts.getInteger("height");
    measureQ       = !opts.getBoolean("no-measure");
    keyboardQ      = !opts.getBoolean("no-keyboard");
-   keyboardcolor  =  opts.getString("keyboard");
-   style          =  opts.getString("style")[0];
+   keyboardcolor  =  opts.getString("keyboard").data();
+   style          =  opts.getString("style").data()[0];
    jsonQ          =  opts.getBoolean("json");
-   optionfilename =  opts.getString("filename");
+   optionfilename =  opts.getString("filename").data();
    P6Q            =  opts.getBoolean("p6");
    if (opts.getBoolean("p6")) {
       P3Q = 0;

@@ -232,7 +232,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -244,12 +244,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    extractNum     = opts.getInteger("extract");
    segmentLabelQ  = opts.getBoolean("segment");
    directoryQ     = opts.getBoolean("directory");
-   Directory      = opts.getString("directory");
+   Directory      = opts.getString("directory").data();
    overwriteQ     = opts.getBoolean("overwrite");
    extensionQ     = opts.getBoolean("extension");
-   Extension      = opts.getString("extension");
+   Extension      = opts.getString("extension").data();
    prefixQ        = opts.getBoolean("prefix");
-   Prefix         = opts.getString("prefix");
+   Prefix         = opts.getString("prefix").data();
    Width          = opts.getInteger("width");
    Start          = opts.getInteger("number");
 }

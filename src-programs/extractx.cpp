@@ -1913,7 +1913,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1922,24 +1922,24 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
    excludeQ    = opts.getBoolean("x");
    interpQ     = opts.getBoolean("i");
-   interps     = opts.getString("i");
+   interps     = opts.getString("i").data();
    interpstate = 1;
    if (!interpQ) {
       interpQ = opts.getBoolean("I");
       interpstate = 0;
-      interps = opts.getString("I");
+      interps = opts.getString("I").data();
    }
 	     
    fieldQ      = opts.getBoolean("f");
    debugQ      = opts.getBoolean("debug");
    countQ      = opts.getBoolean("count");
    traceQ      = opts.getBoolean("trace");
-   tracefile   = opts.getString("trace");
+   tracefile   = opts.getString("trace").data();
    reverseQ    = opts.getBoolean("reverse");
    expandQ     = opts.getBoolean("expand") || opts.getBoolean("E");
-   submodel    = opts.getString("model")[0];
-   cointerp    = opts.getString("cointerp");
-   comodel     = opts.getString("cospine-model")[0];
+   submodel    = opts.getString("model").data()[0];
+   cointerp    = opts.getString("cointerp").data();
+   comodel     = opts.getString("cospine-model").data()[0];
 
    if (opts.getBoolean("no-editoral-rests")) {
       editorialInterpretation = "";
@@ -1951,13 +1951,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	    
    if (expandQ) {
       fieldQ = 1;
-      expandInterp = opts.getString("expand-interp");
+      expandInterp = opts.getString("expand-interp").data();
    }
 
    if (!reverseQ) {
       reverseQ = opts.getBoolean("R");
       if (reverseQ) {
-         reverseInterp = opts.getString("R");
+         reverseInterp = opts.getString("R").data();
       }
    }
 
@@ -1966,13 +1966,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (excludeQ) {
-      fieldstring = opts.getString("x");
+      fieldstring = opts.getString("x").data();
    } else if (fieldQ) {
-      fieldstring = opts.getString("f");
+      fieldstring = opts.getString("f").data();
    }
 
    grepQ = opts.getBoolean("grep");
-   grepString = opts.getString("grep");
+   grepString = opts.getString("grep").data();
 
 }
 

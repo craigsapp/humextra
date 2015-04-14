@@ -24,14 +24,10 @@
 #include "HumdrumFile.h"
 #include "Options.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <istream>
-   using namespace std;
-#else
-   #include <iostream.h>
-   #include <istream.h>
-#endif
+#include <iostream>
+#include <istream>
+#include <string>
+using namespace std;
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -46,9 +42,11 @@ class HumdrumFileSet {
       int                    getCount         (void) { return getSize(); }
       HumdrumFile&           operator[]       (int index);
       int                    read             (const char* filename);
+      int                    read             (const string& filename);
       int                    read             (istream& inStream);
       int                    read             (Options& options);
       int                    readAppend       (const char* filename);
+      int                    readAppend       (const string& filename);
       int                    readAppend       (istream& inStream, 
                                                const char* filename = "");
 

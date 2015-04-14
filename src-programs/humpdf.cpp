@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
    int fcounter = 0;
    for (i=0; i<numinputs; i++) {
       infile.clear();
-      filename = options.getArg(i+1);
+      filename = options.getArg(i+1).data();
       infile.read(filename);
       nextobject = createFileEntry(*filesegments[fcounter], infile, 
             filename, nextobject, objectindex, offsetindex, initialoffset);
@@ -1121,7 +1121,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1129,7 +1129,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (opts.getBoolean("pdf")) {
-      pdffilename = opts.getString("pdf");
+      pdffilename = opts.getString("pdf").data();
    } else {
       //// No -p option is now allowed.  It means that the PDF will be
       //// coming into the program from standard input.
@@ -1142,7 +1142,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    keepdirQ = opts.getBoolean("keep-directory");
    prefixQ  = opts.getBoolean("prefix");
    if (prefixQ) {
-      prefix = opts.getString("prefix");
+      prefix = opts.getString("prefix").data();
       keepdirQ = 0;
    }
 }

@@ -351,7 +351,7 @@ int main(int argc, char** argv) {
             createIndex(infiles[j], infiles[j].getFilename());
          }
       } else {
-         processArgument(options.getArg(i+1));
+         processArgument(options.getArg(i+1).data());
       }
    }
 
@@ -2152,7 +2152,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -2182,7 +2182,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    rhythmQ     = opts.getBoolean("rhythm");
    fileQ       = opts.getBoolean("file");
    if (fileQ) {
-      Filename = opts.getString("file");
+      Filename = opts.getString("file").data();
    }
    pitchQ  = 1;
    rhythmQ = 1;
@@ -2197,13 +2197,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    limit       = opts.getInteger("limit");
    istnQ       = opts.getBoolean("istn");
    bibQ        = opts.getBoolean("bib");
-   istnfile    = opts.getString("istn");
+   istnfile    = opts.getString("istn").data();
    dirprefixQ  = opts.getBoolean("dir-prefix");
    verboseQ    = opts.getBoolean("verbose");
 
    if (dirprefixQ) {
-      dirprefix.setSize(strlen(opts.getString("dir-prefix")) + 1);
-      strcpy(dirprefix.getBase(), opts.getString("dir-prefix"));
+      dirprefix.setSize(strlen(opts.getString("dir-prefix").data()) + 1);
+      strcpy(dirprefix.getBase(), opts.getString("dir-prefix").data());
       if (dirprefix[dirprefix.getSize()-2] != '/') {
          dirprefix.increase(1);
          strcat(dirprefix.getBase(), "/");
@@ -2214,7 +2214,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (opts.getBoolean("bibfilter")) {
-      bibfilter = opts.getString("bibfilter");
+      bibfilter = opts.getString("bibfilter").data();
    }
 
    if (istnQ) {
@@ -2237,7 +2237,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    if (opts.getBoolean("features")) {
       pitchQ = 0;    // no need to turn off, but just in case
       rhythmQ = 0;   // no need to turn off, but just in case
-      extractFeatureSet(opts.getString("features"));
+      extractFeatureSet(opts.getString("features").data());
    } else if (opts.getBoolean("duration")) {
       pitchQ = 0;    // no need to turn off, but just in case
       rhythmQ = 0;   // no need to turn off, but just in case

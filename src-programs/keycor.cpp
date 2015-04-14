@@ -951,7 +951,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -992,7 +992,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       majorKey = majorKeyKostkaPayne;
       minorKey = minorKeyKostkaPayne;
    } else if (opts.getBoolean("weights")) {
-      readWeights(opts.getString("weights"));
+      readWeights(opts.getString("weights").data());
       majorKey = majorKeyUser;
       minorKey = minorKeyUser;
    } else {

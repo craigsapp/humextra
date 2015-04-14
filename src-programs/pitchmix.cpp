@@ -337,7 +337,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -345,7 +345,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
    
    if (opts.getBoolean("distribution")) {
-      distring.setEnvelope(opts.getString("distribution"));
+      distring.setEnvelope(opts.getString("distribution").data());
       distQ = 1;
    } else {
       distQ = 0;

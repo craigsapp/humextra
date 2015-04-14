@@ -155,7 +155,7 @@ int main(int argc, char* argv[]) {
          infile.read(cin);
          FILENAME = "<STDIN>";
       } else {
-         FILENAME = options.getArg(i+1);
+         FILENAME = options.getArg(i+1).data();
          infile.read(FILENAME);
       }
 
@@ -1086,7 +1086,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1099,7 +1099,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    blockQ       = opts.getBoolean("block");
-   BlockString  = opts.getString("block");
+   BlockString  = opts.getString("block").data();
    typeQ        = opts.getBoolean("type");
    listblocksQ  = opts.getBoolean("list");
    listunknownQ = opts.getBoolean("unknown");
@@ -1109,10 +1109,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    warnQ        = opts.getBoolean("warn");
    debugQ       = opts.getBoolean("debug");
    searchQ      = opts.getBoolean("search");
-   SearchString = opts.getString("search");
-   FirstString  = opts.getString("first");
+   SearchString = opts.getString("search").data();
+   FirstString  = opts.getString("first").data();
    searchlistQ  = opts.getBoolean("list-search");
-   ListString   = opts.getString("list-search");
+   ListString   = opts.getString("list-search").data();
 
 }
 

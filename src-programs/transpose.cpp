@@ -948,7 +948,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -957,11 +957,11 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
    transval     = opts.getInteger("base40");
    ssetkeyQ     = opts.getBoolean("setkey");
-   ssetkey      = Convert::kernToBase40(opts.getString("setkey"));
+   ssetkey      = Convert::kernToBase40(opts.getString("setkey").data());
    autoQ        = opts.getBoolean("auto");
    debugQ       = opts.getBoolean("debug");
    spineQ       = opts.getBoolean("spines");
-   spinestring  = opts.getString("spines");
+   spinestring  = opts.getString("spines").data();
    octave       = opts.getInteger("octave");
    concertQ     = opts.getBoolean("concert");
    writtenQ     = opts.getBoolean("written");
@@ -985,7 +985,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    ssetkey = ssetkey % 40;
 
    if (opts.getBoolean("transpose")) {
-      transval = getBase40ValueFromInterval(opts.getString("transpose"));
+      transval = getBase40ValueFromInterval(opts.getString("transpose").data());
    }
 
    transval += 40 * octave;

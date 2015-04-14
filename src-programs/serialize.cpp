@@ -657,7 +657,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -681,7 +681,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       chordQ = 1;
    }
 
-   const char* ptr = opts.getString("interp");
+   const char* ptr = opts.getString("interp").data();
    int length = strlen(ptr);
    interp.setSize(length+1);
    if (length == 0) {
@@ -693,12 +693,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    } else {
       strcpy(interp.getBase(), ptr);
    }
-   if (strlen(opts.getString("separator")) >= 1) {
-      Separator = opts.getString("separator")[0];
+   if (strlen(opts.getString("separator").data()) >= 1) {
+      Separator = opts.getString("separator").data()[0];
    }
    if (opts.getBoolean("marker")) {
       markerQ = 1;
-      marker = opts.getString("marker");
+      marker = opts.getString("marker").data();
    }
    parsubQ    = opts.getBoolean("parsub");
   

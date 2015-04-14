@@ -1279,7 +1279,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1301,7 +1301,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    tpwQ      = opts.getBoolean("tpw");
    tpqQ      = opts.getBoolean("tpq");
    Rvalue    = opts.getDouble("R");
-   beatbase  = opts.getString("beatsize");
+   beatbase  = opts.getString("beatsize").data();
    uQ        = opts.getBoolean("beatsize");
    debugQ    = opts.getBoolean("debug");
 
@@ -1318,10 +1318,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    Dsearch.setSize(0);
 
    if (opts.getBoolean("B")) {
-      fillSearchString(Bsearch, opts.getString("B"));
+      fillSearchString(Bsearch, opts.getString("B").data());
    } 
    if (opts.getBoolean("D")) {
-      fillSearchString(Dsearch, opts.getString("D"));
+      fillSearchString(Dsearch, opts.getString("D").data());
    }
 
    if (prependQ && appendQ) {

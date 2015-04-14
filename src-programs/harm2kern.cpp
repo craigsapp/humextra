@@ -752,7 +752,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -764,9 +764,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    rhythmQ    = !opts.getBoolean("no-rhythm");
    octave     =  opts.getInteger("octave");
    rootQ      =  opts.getBoolean("root");
-   instrument =  opts.getString("instrument");
+   instrument =  opts.getString("instrument").data();
    recip      =  opts.getInteger("recip");
-   Prefix     =  opts.getString("prefix");
+   Prefix     =  opts.getString("prefix").data();
    prefixQ    =  opts.getBoolean("prefix");
 }
 

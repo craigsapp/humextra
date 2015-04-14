@@ -312,9 +312,9 @@ int main(int argc, char* argv[]) {
             perfviz[0] << "info(scoreFileName,'STDIN').\n";
          } else {
             perfviz[0] << "info(scoreFileName,'";
-	    filename = strrchr(options.getArg(i+1), '/');
+	    filename = strrchr(options.getArg(i+1).data(), '/');
             if (filename == NULL) {
-               filename = options.getArg(i+1);
+               filename = options.getArg(i+1).data();
             } else {
                filename = filename + 1;
             }
@@ -323,9 +323,9 @@ int main(int argc, char* argv[]) {
          }
          if (options.getBoolean("output")) {
             perfviz[0] << "info(midiFileName,'";
-	    filename = strrchr(options.getString("output"), '/');
+	    filename = strrchr(options.getString("output").data(), '/');
             if (filename == NULL) {
-               filename = options.getString("output");
+               filename = options.getString("output").data();
             } else {
                filename = filename + 1;
             }
@@ -397,7 +397,7 @@ int main(int argc, char* argv[]) {
       if (perfvizQ) {
          // currently you cannot create multiple PerfViz files from
          // multiple inputs.
-         writePerfVizMatchFile(options.getString("perfviz"), perfviz[0]);
+         writePerfVizMatchFile(options.getString("perfviz").data(), perfviz[0]);
          delete [] perfviz;
       }
    }
@@ -924,7 +924,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -932,7 +932,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (opts.getBoolean("instruments")) {
-      reviseInstrumentMidiNumbers(opts.getString("instruments"));
+      reviseInstrumentMidiNumbers(opts.getString("instruments").data());
    }
 
    if (opts.getBoolean("nocomments")) {
@@ -998,7 +998,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (opts.getBoolean("output")) {
-      outlocation = opts.getString("output");
+      outlocation = opts.getString("output").data();
    } else {
       outlocation = NULL;
    }
@@ -1048,17 +1048,17 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    if (bendpcQ) {
       bendQ = 0;   // disable other type of bending (but keep bendamt)
       forcedQ = 1; // force a timber setting for all channels (piano default)
-      getBendByPcData(bendbypc, opts.getString("temperament"));
+      getBendByPcData(bendbypc, opts.getString("temperament").data());
       // for different method, see: http://www.xs4all.nl/~huygensf/scala
    } else if (monotuneQ) {
       bendQ = 0;
-      getBendByPcData(bendbypc, opts.getString("monotune"));
+      getBendByPcData(bendbypc, opts.getString("monotune").data());
    }
 
    timbresQ = opts.getBoolean("timbres");
    if (timbresQ) {
       storeTimbres(TimbreName, TimbreValue, TimbreVolume, 
-            opts.getString("timbres"));
+            opts.getString("timbres").data());
    } else {
       TimbreName.setSize(0);
       TimbreValue.setSize(0);
@@ -1337,7 +1337,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
    }
 
    if (options.getBoolean("comment")) {
-      storeMetaText(outfile, 0, options.getString("comment"), 0);
+      storeMetaText(outfile, 0, options.getString("comment").data(), 0);
    }
 
    if (perfvizQ) {

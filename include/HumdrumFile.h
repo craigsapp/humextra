@@ -165,6 +165,7 @@ class HumdrumFile : public HumdrumFileBasic {
       RationalNumber         getTotalDurationR(void);
       HumdrumFile&           operator=        (const HumdrumFile& aFile);
       void                   read             (const char* filename);
+      void                   read             (const string& filename);
       void                   read             (istream& inStream);
 
       // analyses that generate internal data

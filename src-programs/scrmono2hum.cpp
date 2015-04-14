@@ -174,10 +174,10 @@ int main(int argc, char** argv) {
    const char* globalfilename = "";
    const char* localfilename  = "";
    if (options.getBoolean("global-ref")) {
-      globalfilename = options.getString("global-ref");
+      globalfilename = options.getString("global-ref").data();
    }
    if (options.getBoolean("local-ref")) {
-      localfilename = options.getString("local-ref");
+      localfilename = options.getString("local-ref").data();
    }
    Array<char1024> header;    // header bibliographic records
    Array<char1024> trailer;   // trailer bibliographic records
@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
    int i;
    for (i=1; i<=options.getArgCount(); i++) {
       score.clear();
-      score.readFile(options.getArg(i), verboseQ); 
+      score.readFile(options.getArg(i).data(), verboseQ); 
       getThings(score, things);
       assignMeasure(score, things);
       applySlurs(score, things);
@@ -213,9 +213,9 @@ int main(int argc, char** argv) {
          fstream outfile("/tmp/scrmono2hum-temp", ios::out);
          printKern(outfile, score, things, header, trailer, extras, thruinfo);
          outfile.close();
-         system("chmod 0666 /tmp/scrmono2hum-temp");
-         system("cksum /tmp/scrmono2hum-temp | sed 's/ .*//' > /tmp/scrmono2hum-temp2");
-         system("chmod 0666 /tmp/scrmono2hum-temp2");
+         int status = system("chmod 0666 /tmp/scrmono2hum-temp");
+         status = system("cksum /tmp/scrmono2hum-temp | sed 's/ .*//' > /tmp/scrmono2hum-temp2");
+         status = system("chmod 0666 /tmp/scrmono2hum-temp2");
          #ifndef OLDCPP
             fstream infile("/tmp/scrmono2hum-temp2", ios::in);
          #else
@@ -225,8 +225,12 @@ int main(int argc, char** argv) {
          infile >> value; 
          cout << "!!!VTS: " << value << endl;
          infile.close();
-         system("rm /tmp/scrmono2hum-temp2");
-         system("rm /tmp/scrmono2hum-temp");
+         status = system("rm /tmp/scrmono2hum-temp2");
+         status = system("rm /tmp/scrmono2hum-temp");
+         if (status < 0) {
+            // avoid compiler warning
+            status--;
+         } 
       }
 #endif /* VISUAL */
    }

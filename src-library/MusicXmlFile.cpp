@@ -123,7 +123,7 @@ MusicXmlFile::MusicXmlFile(void) {
 }
 
 
-MusicXmlFile::MusicXmlFile(char* aFile) { 
+MusicXmlFile::MusicXmlFile(const char* aFile) { 
    xmldocument = NULL;
    parts.setSize(100);
    parts.setGrowth(100);
@@ -715,7 +715,7 @@ ostream& MusicXmlFile::printCharacterData(ostream& out,
 // MusicXmlFile::read --
 //
 
-void MusicXmlFile::read(char* aFile) { 
+void MusicXmlFile::read(const char* aFile) { 
    CXMLFactory         factory;
    CXMLDocumentBuilder builder;
 

@@ -14,7 +14,7 @@
 ##
 
 # targets which don't actually refer to files
-.PHONY : src-programs lib src-library include bin scripts update libupdate updatelib libup uplib regression test tests regression-fails-only test-fail tests-fail
+.PHONY : src-programs lib src-library include bin scripts update libupdate updatelib libup uplib regression test tests regression-fails-only test-fail tests-fail clear clean
 
 ###########################################################################
 #                                                                         #
@@ -60,6 +60,7 @@ library-update:
 scripts:
 	$(MAKE) -f Makefile.programs scripts
 
+clear: clean
 clean:
 	$(MAKE) -f Makefile.library clean
 	-rm -rf bin

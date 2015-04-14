@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
    Array<int> datalines;
 
    if ((options.getArgCount() < 1) || (options.getArgCount() > 2)) {
-      usage(options.getCommand());
+      usage(options.getCommand().data());
       exit(1);
    }
 
@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
    
    if (options.getArgCount() == 2) {
       infile.read(options.getArg(sourcearg));
-      readTemplateContents(templatedata, options.getArg(templatearg));
+      readTemplateContents(templatedata, options.getArg(templatearg).data());
 
    } else {
       // read second file from standard input
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
 	 readTemplateContents(templatedata, cin);
       } else {
          infile.read(cin);
-	 readTemplateContents(templatedata, options.getArg(1));
+	 readTemplateContents(templatedata, options.getArg(1).data());
       }
    }
 
@@ -400,7 +400,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -412,7 +412,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    scalingQ  = !options.getBoolean("n");
    interp    =  NULL;
    if (options.getBoolean("i")) {
-      interp =  options.getString("i");
+      interp =  options.getString("i").data();
    }
    debugQ    =  options.getBoolean("debug");
    rawQ      =  options.getBoolean("raw");
@@ -425,7 +425,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    threshold =  options.getDouble("threshold");
 
    if (options.getBoolean("weight-file")) {
-      readEditWeights(options.getString("weight-file"));
+      readEditWeights(options.getString("weight-file").data());
    }
 
    if (options.getBoolean("R1")) { weight_R1 = options.getDouble("R1"); }

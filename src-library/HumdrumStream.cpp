@@ -14,24 +14,13 @@
 #include "HumdrumStream.h"
 #include "PerlRegularExpression.h"
 
-#ifndef OLDCPP
-   #include <fstream>
-   #include <iostream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <fstream.h>
-   #include <iostream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#define SSTREAM stringstream
+#define CSTRING str().c_str()
+using namespace std;
 
 #ifdef USING_URI
    #include <sys/types.h>   /* socket, connect */
@@ -57,6 +46,15 @@ HumdrumStream::HumdrumStream(void) {
 }
 
 HumdrumStream::HumdrumStream(char** list) {
+   filelist.setSize(0);   
+   curfile = -1;
+   universals.setSize(0);
+   newfilebuffer.setSize(0);
+
+   setFileList(list);
+}
+
+HumdrumStream::HumdrumStream(const vector<string>& list) {
    filelist.setSize(0);   
    curfile = -1;
    universals.setSize(0);
@@ -95,6 +93,23 @@ int HumdrumStream::setFileList(char** list) {
    while (list[i] != NULL) {
       filelist.increase(1);
       filelist.last() = list[i];
+      i++;
+   }
+
+   return i;
+}
+
+
+int HumdrumStream::setFileList(const vector<string>& list) {
+   filelist.setSize(1000);
+   filelist.setGrowth(10000);
+   filelist.setSize(0);
+
+   int i = 0;
+   // The current version of the list includes the command at index 0.
+   for (i=1; i<(int)list.size(); i++) {
+      filelist.increase(1);
+      filelist.last() = list[i].data();
       i++;
    }
 

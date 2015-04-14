@@ -479,6 +479,21 @@ MidiFile::MidiFile(void) {
    timemapvalid = 0;
 }
 
+MidiFile::MidiFile(const string& aFile) { 
+   ticksPerQuarterNote = 48;             // time base of file
+   trackCount = 1;                       // # of tracks in file
+   theTrackState = TRACK_STATE_SPLIT;    // joined or split
+   theTimeState = TIME_STATE_DELTA;      // absolute or delta
+   events.setSize(1);
+   events[0] = new SigCollection<MFEvent>;
+   events[0]->setSize(0);
+   events[0]->allowGrowth(1);
+   readFileName.setSize(1);
+   readFileName[0] = '\0';
+   read(aFile);
+   timemap.setSize(0);
+   timemapvalid = 0;
+}
 
 MidiFile::MidiFile(const char* aFile) { 
    ticksPerQuarterNote = 48;             // time base of file
@@ -1062,6 +1077,11 @@ void MidiFile::mergeTracks(int aTrack1, int aTrack2) {
 //
 // MidiFile::read -- read a MIDI file and store its contents.
 //
+
+int MidiFile::read(const string& aFile) {
+   return read(aFile.data());
+}
+
 
 int MidiFile::read(const char* aFile) { 
    timemapvalid = 0;

@@ -78,10 +78,10 @@ int main(int argc, char* argv[]) {
       if (options.getArgCount() < 1) {
          infile.read(cin);
       } else {
-         infile.read(options.getArg(i));
-         CurrentFile = options.getArg(i);
-         if (strrchr(options.getArg(i), '/') != NULL) {
-            CurrentFile = strrchr(options.getArg(i), '/') + 1;
+         infile.read(options.getArg(i).data());
+         CurrentFile = options.getArg(i).data();
+         if (strrchr(options.getArg(i).data(), '/') != NULL) {
+            CurrentFile = strrchr(options.getArg(i).data(), '/') + 1;
          }
       }
      
@@ -630,7 +630,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();

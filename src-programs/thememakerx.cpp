@@ -76,10 +76,10 @@ int main(int argc, char** argv) {
          hfile.read(cin);
          createIncipit(hfile, "", sourcebase, limit);
       } else {
-         if (is_directory(options.getArg(i+1))) {
-            strcpy(sourcebase, options.getArg(i+1));
+         if (is_directory(options.getArg(i+1).data())) {
+            strcpy(sourcebase, options.getArg(i+1).data());
          }
-         processArgument(options.getArg(i+1));
+         processArgument(options.getArg(i+1).data());
       }
    }
 
@@ -503,7 +503,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -514,7 +514,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    limitQ      = opts.getBoolean("limit");
    limit       = opts.getInteger("limit");
    minval      = opts.getInteger("min");
-   target      = opts.getString("target");
+   target      = opts.getString("target").data();
 
    if (!is_directory(target)) {
       cout << "Error: target directory does not exist: " << target << endl;

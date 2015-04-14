@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
       cout << "Error: you must supply at least one input fileme" << endl;
       exit(1);
    } else {
-      filename = options.getArg(1);
+      filename = options.getArg(1).data();
       infile.read(options.getArg(1));
    }
    processFile(filename, infile);
@@ -804,7 +804,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -812,9 +812,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    debugQ   = opts.getBoolean("debug");
-   tmpdir   = opts.getString("tmpdir");
-   meldir   = opts.getString("meldir");
-   midir    = opts.getString("midir");
+   tmpdir   = opts.getString("tmpdir").data();
+   meldir   = opts.getString("meldir").data();
+   midir    = opts.getString("midir").data();
    appendQ  = opts.getBoolean("append");
    prependQ = opts.getBoolean("prepend");
    harmonyQ = opts.getBoolean("roman");

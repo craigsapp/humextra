@@ -292,7 +292,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -303,15 +303,15 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    
    timebaseQ = opts.getBoolean("timebase");
 
-   if (strchr(opts.getString("timebase"), '/') != NULL) {
+   if (strchr(opts.getString("timebase").data(), '/') != NULL) {
       int top = 1;
       int bottom = 4;
-      sscanf(opts.getString("timebase"), "%d/%d", &bottom, &top);
+      sscanf(opts.getString("timebase").data(), "%d/%d", &bottom, &top);
       Sampledur = top;
       Sampledur /= bottom;
       Sampledur *= 4; // convert from whole note units to quarter notes
    } else {
-      Sampledur = Convert::kernToDurationR(opts.getString("timebase"));
+      Sampledur = Convert::kernToDurationR(opts.getString("timebase").data());
    }
 
 }
