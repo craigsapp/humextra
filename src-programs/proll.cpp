@@ -392,7 +392,7 @@ void printJsonHeader(HumdrumFile& infile, int indent, Array<int>& ktracks,
    cout << "\t\"rangemin\"\t:\t";
    cout << "[";
    for (i=partmin.getSize()-1; i>=0; i--) {
-      if (abs(partmin[i] >= 1000)) {
+      if (abs(partmin[i]) >= 1000) {
          cout << "null";
       } else {
          printPitch(cout, partmin[i], "");
@@ -407,7 +407,7 @@ void printJsonHeader(HumdrumFile& infile, int indent, Array<int>& ktracks,
    cout << "\t\"rangemax\"\t:\t";
    cout << "[";
    for (i=partmax.getSize()-1; i>=0; i--) {
-      if (abs(partmax[i] >= 1000)) {
+      if (abs(partmax[i]) >= 1000) {
          cout << "null";
       } else {
          printPitch(cout, partmax[i], "");

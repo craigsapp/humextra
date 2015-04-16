@@ -214,7 +214,7 @@ int HumdrumFileSet::readAppend(istream& inStream, const char* filename) {
       }
       if (pre.search(line, "^!!!!SEGMENT:\\s*(.*)\\s*$", "")) {
          if (contentQ != 0) {
-            if ((tfilename == NULL) || (strlen(tfilename) == 0)) {
+            if (strlen(tfilename) == 0) {
                strcpy(tfilename, filename);
             }
             appendHumdrumFileContent(tfilename, *inbuffer);
