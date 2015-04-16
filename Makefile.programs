@@ -161,6 +161,9 @@ DEFINES  += $(addprefix -D,$(OSSUBTYPE))
 
 PREFLAGS  = -O3 -Wall -I$(INCDIR) $(DEFINES)
 
+# Options class uses C++11 standard, so need to compile all code using C++11:
+PREFLAGS += -std=c++11
+
 # Add -static flag to compile without dynamics libraries for better portability:
 # (-static flag doesn't work well with gethostbyname() used in Humdrum parser)
 #PREFLAGS += -static

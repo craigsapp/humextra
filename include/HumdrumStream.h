@@ -19,24 +19,13 @@
 #include "HumdrumFile.h"
 #include "Array.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#define SSTREAM stringstream
+#define CSTRING str().c_str()
+using namespace std;
 
 // the following define is for compiling/not compiling the automatic
 // downloading of data from the web inside of the read() functions.
@@ -58,8 +47,10 @@ class HumdrumStream {
    public:
                       HumdrumStream      (void);
                       HumdrumStream      (char** list);
+                      HumdrumStream      (const vector<string>& list);
 
       int             setFileList        (char** list);
+      int             setFileList        (const vector<string>& list);
 
       void            clear              (void);
       int             eof                (void);

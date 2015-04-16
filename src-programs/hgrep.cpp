@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
       infiles.read(cin);
    } else {
       for (i=1; i<numinputs+1; i++) {
-         infiles.readAppend(options.getArg(i+1));
+         infiles.readAppend(options.getArg(i+1).data());
       }
    }
 
@@ -662,7 +662,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -673,7 +673,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cerr << "Error: you must supply a search string\n";
       exit(1);
     }
-   searchstring  =  opts.getArg(1);
+   searchstring  =  opts.getArg(1).data();
    basicQ        =  opts.getBoolean("basic-regexp");
    fileQ         =  opts.getBoolean("with-filename");
    matchfilesQ   =  opts.getBoolean("files-with-match");
@@ -702,9 +702,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    datastopQ     =  opts.getBoolean("data-stop");
    markQ         =  opts.getBoolean("mark");
    exinterpQ     =  opts.getBoolean("exinterp");
-   exinterps     =  opts.getString("exinterp");
+   exinterps     =  opts.getString("exinterp").data();
    char tempbuffer[1024] = {0};
-   searchAndReplace(tempbuffer, "[\\]t", "	", opts.getString("separator"));
+   searchAndReplace(tempbuffer, "[\\]t", "	", opts.getString("separator").data());
    searchAndReplace(separator, "[\\]n", "\n", tempbuffer);
 
    if (matchfilesQ && nomatchfilesQ) {
@@ -714,7 +714,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    Andlist.setSize(0);
    Andexinterp.setSize(0);
    if (opts.getBoolean("and")) {
-      fillAndSearches(Andlist, Andexinterp, opts.getString("and"));
+      fillAndSearches(Andlist, Andexinterp, opts.getString("and").data());
    }
 }
 

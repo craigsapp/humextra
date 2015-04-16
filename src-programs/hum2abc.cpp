@@ -558,7 +558,7 @@ int main(int argc, char** argv) {
          // process the command-line options
          // checkOptions(options, argc, argv, i, infiles[i]);
          checkMarks(infiles[i]);
-         convertHumdrumToAbc(cout, infiles[i], i, options.getArg(i));
+         convertHumdrumToAbc(cout, infiles[i], i, options.getArg(i).data());
          if (i < infiles.getCount()-1) {
             cout << "\n\n\n";
          }
@@ -5895,7 +5895,7 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -5915,12 +5915,12 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    int length;
    for (i=0; i<26; i++) {
       optchar[0] = char('A'+i);
-      length = strlen(opts.getString(optchar));
+      length = strlen(opts.getString(optchar).data());
       if (length > 0) {
          delete [] Header[i];
          Header[i] = new char[length+1];
       }
-      storeHeaderRecord(Header, char('A'+i), opts.getString(optchar));
+      storeHeaderRecord(Header, char('A'+i), opts.getString(optchar).data());
    }
 
    debugQ =  opts.getBoolean("debug");
@@ -5931,7 +5931,7 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    }
 
    barnumberingstyle = opts.getInteger("barnums");
-   if (strcmp(opts.getString("barnums"), "none") == 0) {
+   if (strcmp(opts.getString("barnums").data(), "none") == 0) {
       barnumberingstyle = -1;
    }
 
@@ -5939,10 +5939,10 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    footerQ   = opts.getBoolean("footer");
    headerQ   = opts.getBoolean("header");
    if (footerQ) {
-      footer = opts.getString("footer");
+      footer = opts.getString("footer").data();
    }
    if (headerQ) {
-      header = opts.getString("header");
+      header = opts.getString("header").data();
    }
 
    labelQ     =  opts.getBoolean("label");
@@ -5955,7 +5955,7 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    commentbarnumQ = opts.getBoolean("comment-barnum");
    keyQ        = opts.getBoolean("key");
 
-   if (strchr(opts.getString("barnums"), 'b') != NULL) {
+   if (strchr(opts.getString("barnums").data(), 'b') != NULL) {
       // the presence of a b after the measure number option
       // indicates that the user wants the bar numbers enclosed
       // in a box.
@@ -5970,21 +5970,21 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    }
 
    directoryQ      = opts.getBoolean("directory");
-   directoryname   = opts.getString("directory");
-   filemask        = opts.getString("mask");
+   directoryname   = opts.getString("directory").data();
+   filemask        = opts.getString("mask").data();
 
    landscapeQ      = opts.getBoolean("landscape");
    musicscaleQ     = opts.getBoolean("scale");
    musicscale      = opts.getDouble("scale");
-   parameterstring = opts.getString("p");
+   parameterstring = opts.getString("p").data();
    if (strstr(parameterstring, "nostems") != NULL) {
       stemlessQ = 1;
    }
    filenumQ        = opts.getBoolean("filenum");
-   filenumstring   = opts.getString("filenum");
+   filenumstring   = opts.getString("filenum").data();
    filenametitleQ  = opts.getBoolean("filetitle");
    titleexpansionQ = opts.getBoolean("TT");
-   titleexpansion  = opts.getString("TT");
+   titleexpansion  = opts.getString("TT").data();
    nonaturalQ      = opts.getBoolean("no-auto-natural");
 
    linebreakQ      = opts.getBoolean("linebreak");

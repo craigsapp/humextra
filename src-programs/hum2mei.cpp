@@ -2719,7 +2719,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -2728,7 +2728,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
 
    debugQ   = opts.getBoolean("debug");
    verboseQ = opts.getBoolean("verbose");
-   INDENT   = opts.getString("indent");
+   INDENT   = opts.getString("indent").data();
 
    // tab character in option is being eaten (probably by the 
    // option parser, so if the INDENT string is empty, force it

@@ -390,7 +390,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -403,11 +403,11 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    invisibleQ= opts.getBoolean("invisible");
    appendQ   = opts.getBoolean("assemble");
    spineQ    = opts.getBoolean("spines");
-   fieldstring = opts.getString("spines");
+   fieldstring = opts.getString("spines").data();
 
    if (opts.getBoolean("not-spines")) {
       spineQ = 1;
-      fieldstring = opts.getString("not-spines");
+      fieldstring = opts.getString("not-spines").data();
       inverseQ = 1;
    }
 
@@ -425,7 +425,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       Count = 1000;
    }
    PerlRegularExpression pre;
-   pre.getTokens(Exinterps, "[\\s,\\*]+", opts.getString("exinterp"));
+   pre.getTokens(Exinterps, "[\\s,\\*]+", opts.getString("exinterp").data());
 }
   
 

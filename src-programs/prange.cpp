@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
       if (numinputs < 1) {
          infiles.read(cin);
       } else {
-         FILENAME = options.getArg(i+1);
+         FILENAME = options.getArg(i+1).data();
          infiles.read(FILENAME);
       }
       for (j=0; j<infiles.getCount(); j++) {
@@ -1558,7 +1558,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1579,7 +1579,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    durationQ    = opts.getBoolean("duration");
    percentileQ  = opts.getBoolean("percentile");
    rangeQ       = opts.getBoolean("range");
-   getRange(rangeL, rangeH, opts.getString("range"));
+   getRange(rangeL, rangeH, opts.getString("range").data());
    addfractionQ = opts.getBoolean("fraction");
    percentile   = opts.getDouble("percentile");
    hoverQ       = opts.getBoolean("hover");

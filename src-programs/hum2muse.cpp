@@ -662,7 +662,7 @@ int main(int argc, char** argv) {
    if (options.getArgCount() < 1) {
       infile.read(cin);
    } else {
-      infile.read(options.getArg(1));
+      infile.read(options.getArg(1).data());
    }
    infile.analyzeRhythm("4");
    setColorCharacters(infile, Colorchar, Colorout);
@@ -8106,7 +8106,7 @@ void verifyMuseDataFiles(Options& options) {
       verifyMuseDataFile(std::cin);
    } else {
       for (i=0; i<options.getArgCount(); i++) {
-         verifyMuseDataFile(options.getArg(i+1));
+         verifyMuseDataFile(options.getArg(i+1).data());
       }
    }
 }
@@ -8326,7 +8326,7 @@ void updateMuseDataFileTimeStamps(Options& options) {
    } else {
       int i;
       for (i=0; i<options.getArgCount(); i++) {
-         updateFileTimeStamps(options.getArg(i+1), options);
+         updateFileTimeStamps(options.getArg(i+1).data(), options);
       }
    }
 }
@@ -8456,7 +8456,7 @@ void doUpdateWork(MuseDataSet& mds) {
    MuseRecord arecord;
    MuseRecord rrecord;
    if (options.getBoolean("reason")) {
-      rrecord.append("ss", "@REASON: ", options.getString("reason"));
+      rrecord.append("ss", "@REASON: ", options.getString("reason").data());
    }
 
    for (i=0; i<mds.getPartCount(); i++) {
@@ -8783,7 +8783,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
       cout << MUSEINFO_VERSION << NEWLINE;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -8817,24 +8817,24 @@ void checkOptions(Options& opts, int argc, char** argv) {
    titleQ        = !opts.getBoolean("no-title");
    referenceQ    = !opts.getBoolean("no-reference-records");
    textQ         = !opts.getBoolean("no-text");
-   TextSpines    =  opts.getString("text");
+   TextSpines    =  opts.getString("text").data();
    beamQ         = !opts.getBoolean("no-beams");
    tieQ          = !opts.getBoolean("no-ties");
    excludeQ      =  opts.getBoolean("exclude");
-   excludeString = opts.getString("exclude");
+   excludeString = opts.getString("exclude").data();
    noinvisibleQ  = opts.getBoolean("no-invisible");
    textvaddQ     = opts.getBoolean("textvadd");
 
    if (opts.getBoolean("work")) {
-      workNumber = opts.getString("work");
+      workNumber = opts.getString("work").data();
    }
    if (opts.getBoolean("movement")) {
-      movementNumber = opts.getString("movement");
+      movementNumber = opts.getString("movement").data();
    }
 
    footerQ    =  opts.getBoolean("footer");
    if (footerQ) {
-      footertext = opts.getString("footer");
+      footertext = opts.getString("footer").data();
    }
    tupletQ    = !opts.getBoolean("no-tuplets");
    vzQ        =  opts.getBoolean("vz");
@@ -8842,19 +8842,19 @@ void checkOptions(Options& opts, int argc, char** argv) {
       // only draw explicit tuplets
       tupletQ = 0;
    }
-   defaultDur =  opts.getString("default-duration");
+   defaultDur =  opts.getString("default-duration").data();
    verselimit =  opts.getInteger("verse-limit");
    if (opts.getBoolean("encoder")) {
       encoderQ = 1;
-      Encoder  = opts.getString("encoder");
+      Encoder  = opts.getString("encoder").data();
    }
    if (opts.getBoolean("copyright")) {
       copyrightQ = 1;
-      Copyright = opts.getString("copyright");
+      Copyright = opts.getString("copyright").data();
    }
    sfzQ = dynamicsQ;
-   muse2psoptionstring = opts.getString("muse2ps-options");
-   LyricSpines  = opts.getString("lyrics-spines");
+   muse2psoptionstring = opts.getString("muse2ps-options").data();
+   LyricSpines  = opts.getString("lyrics-spines").data();
 
    if (opts.getBoolean("unix")) {
       NEWLINE.setSize(2);

@@ -1686,7 +1686,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1695,9 +1695,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    
    debugQ = opts.getBoolean("debug");
    stdoutQ = opts.getBoolean("stdout");
-   strcpy(outdir, opts.getString("outdir"));
-   strcpy(extension, opts.getString("extension"));
-   strcpy(hum2abc, opts.getString("hum2abc"));
+   strcpy(outdir, opts.getString("outdir").data());
+   strcpy(extension, opts.getString("extension").data());
+   strcpy(hum2abc, opts.getString("hum2abc").data());
    quiet2Q = opts.getBoolean("Quiet");
    quietQ  = opts.getBoolean("quiet");
    if (quiet2Q) {

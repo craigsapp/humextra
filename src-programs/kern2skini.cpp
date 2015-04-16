@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
    skini.setSize(0);
    skini.allowGrowth(1);
 
-   HumdrumFile hfile(options.getArg(1));
+   HumdrumFile hfile(options.getArg(1).data());
    hfile.analyzeRhythm();
    generateSkini(hfile, skini);
    printSkini(skini);
@@ -143,7 +143,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();

@@ -16,24 +16,12 @@
 #include <stdlib.h>
 #include "PerlRegularExpression.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#define SSTREAM stringstream
+#define CSTRING str().c_str()
+using namespace std;
 
 #define EMPTY_ID ""
 #define REST 0
@@ -344,7 +332,7 @@ int processFile(HumdrumFile& infile, const char* filename, Options& options) {
 
    infile.getTracksByExInterp(ktracks, "**kern");
    if (koptionQ) {
-      adjustKTracks(ktracks, options.getString("koption"));
+      adjustKTracks(ktracks, options.getString("koption").data());
    }
    notes.setSize(ktracks.getSize());
    reverselookup.setSize(infile.getMaxTracks()+1);
@@ -2760,7 +2748,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -2835,7 +2823,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    retroQ       = opts.getBoolean("retrospective");
    NoteMarker   = 0;
    if (opts.getBoolean("note-marker")) {
-      NoteMarker = opts.getString("note-marker")[0];
+      NoteMarker = opts.getString("note-marker").data()[0];
    }
    if (Chaincount < 1) {
       Chaincount = 1;
@@ -2856,7 +2844,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (searchQ) {
-      SearchString.initializeSearchAndStudy(opts.getString("search"));
+      SearchString.initializeSearchAndStudy(opts.getString("search").data());
    }
 
 }

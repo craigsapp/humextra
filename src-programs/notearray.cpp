@@ -1421,7 +1421,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1433,7 +1433,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       // beatbase  = "1";  // beat is the whole note.
       doubleQ   = 1;
    } else {
-      beatbase  = opts.getString("beat");
+      beatbase  = opts.getString("beat").data();
       doubleQ   = opts.getBoolean("double");
    }
 
@@ -1463,7 +1463,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    mathQ     =  opts.getBoolean("mathematica");
-   mathvar   =  opts.getString("mathematica");
+   mathvar   =  opts.getString("mathematica").data();
    commentStart = "(* ";
    commentStop  = " *)";
 

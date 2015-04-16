@@ -49,7 +49,7 @@ void      printHumdrumPart  (HumdrumFile& hfile, const char* filebase,
 int main(int argc, char* argv[]) {
    checkOptions(options, argc, argv);
 
-   MusicXmlFile xmlfile(options.getArg(1));
+   MusicXmlFile xmlfile(options.getArg(1).data());
 
    if (printQ) {
       xmlfile.print();
@@ -259,7 +259,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << "compiled: " << __DATE__ << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -282,7 +282,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    printQ    =  opts.getBoolean("print");
    textQ     = !opts.getBoolean("no-text");
    splitQ    =  opts.getBoolean("parts");
-   SplitBase =  opts.getString("parts");
+   SplitBase =  opts.getString("parts").data();
    if (opts.getBoolean("no-notation")) {
       stemQ     = 0;
       beamQ     = 0;

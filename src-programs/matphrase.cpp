@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 
    int i;
    for (i=0; i<options.getArgCount(); i++) {
-      processFile(i+1, options.getArg(i+1));
+      processFile(i+1, options.getArg(i+1).data());
    }
 
    return 0;
@@ -231,14 +231,14 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
       exit(0);
    }
    
-   defaultregion = opts.getString("region");
+   defaultregion = opts.getString("region").data();
 }
 
 

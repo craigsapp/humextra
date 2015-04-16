@@ -99,7 +99,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -112,7 +112,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    PerlRegularExpression pre;
    charQ    = opts.getBoolean("char");
    if (charQ) {
-      charString = opts.getString("char");
+      charString = opts.getString("char").data();
       if (!pre.search(charString, "^\\[")) {
          pre.sar(charString, "^", "[");
          pre.sar(charString, "$", "]");
@@ -122,7 +122,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
    xcharQ    = opts.getBoolean("xchar");
    if (xcharQ) {
-      xcharString = opts.getString("xchar");
+      xcharString = opts.getString("xchar").data();
       if (!pre.search(xcharString, "^\\[")) {
          pre.sar(xcharString, "^", "[");
          pre.sar(xcharString, "$", "]");

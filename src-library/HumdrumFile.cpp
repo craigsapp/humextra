@@ -2535,6 +2535,12 @@ HumdrumFile& HumdrumFile::operator=(const HumdrumFile& aFile) {
 // HumdrumFile::read -- read in a humdrum file.
 //
 
+
+void HumdrumFile::read(const string& filename) {
+   read(filename.data());
+}
+
+
 void HumdrumFile::read(const char* filename) {
    HumdrumFileBasic::read(filename);
    rhythmcheck = 0;

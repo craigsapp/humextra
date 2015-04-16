@@ -266,8 +266,8 @@ void processFile(HumdrumFile& infile, int segmentCount) {
    getMeasureStartStop(MeasureInList, infile);
 
    Array<char> measurestring;
-   measurestring.setSize(strlen(options.getString("measure"))+1);
-   strcpy(measurestring.getBase(), options.getString("measure"));
+   measurestring.setSize(strlen(options.getString("measure").data())+1);
+   strcpy(measurestring.getBase(), options.getString("measure").data());
    SSTREAM mstring;
    if (markQ) {
       getMarkString(mstring, infile); 
@@ -2288,7 +2288,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();

@@ -174,7 +174,7 @@ class _NoteState {  // used in MusicXmlFile::printKernNote()
 class MusicXmlFile {
    public:
                  MusicXmlFile             (void);
-                 MusicXmlFile             (char* aFile);
+                 MusicXmlFile             (const char* aFile);
                 ~MusicXmlFile             ();
 
       int        getPartCount             (void);
@@ -185,7 +185,7 @@ class MusicXmlFile {
       int        getPartNumberFromId      (const char* buffer);
       ostream&   print                    (ostream& out = cout);
       ostream&   info                     (ostream& out = cout);
-      void       read                     (char* aFile);
+      void       read                     (const char* aFile);
       static int staffcompare             (const void* A, const void* B);
       static int getMeasureNumber         (CSL::XML::CXMLObject* object);
       static int isGraceNote              (CSL::XML::CXMLObject* object);

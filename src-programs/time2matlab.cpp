@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
    // process the command-line options
    checkOptions(options, argc, argv);
 
-   HumdrumFile hfile(options.getArg(1));
+   HumdrumFile hfile(options.getArg(1).data());
    hfile.analyzeRhythm("4");
    printOutput(hfile);
    return 0;
@@ -98,7 +98,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();

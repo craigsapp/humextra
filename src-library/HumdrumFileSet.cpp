@@ -15,25 +15,12 @@
 #include "HumdrumFileSet.h"
 #include "PerlRegularExpression.h"
 
-#ifndef OLDCPP
-   #include <fstream>
-   #include <iostream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <fstream.h>
-   #include <iostream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#define SSTREAM stringstream
+#define CSTRING str().c_str()
+using namespace std;
 
 
 //////////////////////////////
@@ -104,6 +91,10 @@ HumdrumFile& HumdrumFileSet::operator[](int index) {
 // HumdrumFileSet::read -- Returns the total number of segments
 //
 
+int HumdrumFileSet::read(const string& filename) {
+   return read(filename.data());
+}
+
 int HumdrumFileSet::read(const char* filename) {
    clear();
    return readAppend(filename);
@@ -138,6 +129,11 @@ int HumdrumFileSet::read(Options& options) {
 // HumdrumFileSet::readAppend -- Returns the total number of segments
 //    Adds each new HumdrumFile segment to the end of the current data.
 //
+
+int HumdrumFileSet::readAppend(const string& filename) {
+   return readAppend(filename.data());
+}
+
 
 int HumdrumFileSet::readAppend(const char* filename) {
 

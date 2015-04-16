@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
    if (numinputs < 1) {
       infile.read(cin);
    } else {
-      filename = options.getArg(1);
+      filename = options.getArg(1).data();
       infile.read(filename);
    }
    processFile(infile);
@@ -397,7 +397,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand());
+      usage(opts.getCommand().data());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();

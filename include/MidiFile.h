@@ -93,6 +93,7 @@ class MidiFile {
    public:
                 MidiFile                  (void);
                 MidiFile                  (const char* aFile);
+                MidiFile                  (const string& aFile);
                ~MidiFile                  ();
 
       void      absoluteTime              (void);
@@ -125,6 +126,7 @@ class MidiFile {
       void      joinTracks                (void);
       void      mergeTracks               (int aTrack1, int aTrack2);
       int       read                      (const char* aFile);
+      int       read                      (const string& aFile);
 
       void      setTicksPerQuarterNote    (int ticks);
       void      setMillisecondDelta       (void);
