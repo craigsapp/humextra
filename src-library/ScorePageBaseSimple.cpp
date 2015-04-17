@@ -315,7 +315,7 @@ void ScorePageBaseSimple::printAscii(ostream& out, int roundQ, int verboseQ) {
       data[i].printAscii(buffer1, buffer2, 10000, roundQ, verboseQ);
       index = buffers.getSize();
       buffers.setSize(buffers.getSize()+1);
-      length = strlen(buffer1);
+      length = (int)strlen(buffer1);
       buffers[index].setSize(length+1);
       strcpy(buffers[index].getBase(), buffer1);
       for (j=0; j<length; j++) {
@@ -324,7 +324,7 @@ void ScorePageBaseSimple::printAscii(ostream& out, int roundQ, int verboseQ) {
          }
       }
       
-      length = strlen(buffer2);
+      length = (int)strlen(buffer2);
       if (length > 0) {
          index = buffers.getSize();
          buffers.setSize(buffers.getSize()+1);
@@ -782,7 +782,7 @@ void ScorePageBaseSimple::readAsciiScoreLine(istream& infile, ScoreRecord& recor
             cout << "Read text line: " << buffer << endl;
          }
          record.setTextData(buffer);
-         int length = strlen(buffer);
+         int length = (int)strlen(buffer);
          record.setPValue(12, (float)length);
       } else {
          // non-text parameter

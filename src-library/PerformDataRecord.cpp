@@ -209,7 +209,7 @@ int PerformDataRecord::getType(void) {
 int PerformDataRecord::match(const char* matchString) {
    #ifdef VISUAL
       int i=0;
-      int length = strlen(matchString);
+      int length = (int)strlen(matchString);
       char* stringToSearch = getData();
       int found = 0;
       while (stringToSearch[i] != '\0' && stringToSearch[i] != matchString[0]) {
@@ -418,7 +418,7 @@ void PerformDataRecord::setClear(int aTime) {
 void PerformDataRecord::setMeasure(int aTime, const char* measureData, 
       int length) { 
    if (length == -1) {
-      length = strlen(measureData);
+      length = (int)strlen(measureData);
    }
 
    data.setSize(length + 2);
@@ -452,7 +452,7 @@ void PerformDataRecord::setMeasure(int aTime, int aMeasure) {
 void PerformDataRecord::setTempo(int aTime, const char* tempoData, 
       int length) { 
    if (length == -1) {
-      length = strlen(tempoData);
+      length = (int)strlen(tempoData);
    }
 
    data.setSize(length + 2);
@@ -508,7 +508,7 @@ void PerformDataRecord::setMidi(int aTime, const char* someData,
 void PerformDataRecord::setText(int aTime, const char* someText,
        int length) { 
    if (length == -1) {
-      length = strlen(someText);
+      length = (int)strlen(someText);
    }
 
    data.setSize(length + 2);

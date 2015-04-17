@@ -1170,7 +1170,7 @@ int MuseData::getLineTickDuration(int lindex) {
 //
 
 void MuseData::setFilename(const char* filename) {
-   int len = strlen(filename);
+   int len = (int)strlen(filename);
    name.setSize(len+1);
    strcpy(name.getBase(), filename);
 }
@@ -1202,7 +1202,7 @@ const char* MuseData::getPartName(char* buffer, int maxx) {
       return buffer;
    }
    PerlRegularExpression pre;
-   output.setSize(strlen(data[line]->getLine())+1);
+   output.setSize((int)strlen(data[line]->getLine())+1);
    strcpy(output.getBase(), data[line]->getLine());
    pre.sar(output, "^\\s+", "", "");
    pre.sar(output, "\\s+$", "", "");
@@ -1210,7 +1210,7 @@ const char* MuseData::getPartName(char* buffer, int maxx) {
 
 
    Array<char> instrument;
-   instrument.setSize(strlen(buffer)+1);
+   instrument.setSize((int)strlen(buffer)+1);
    strcpy(instrument.getBase(), buffer);
    pre.sar(instrument, "^\\s*", "", "");
    pre.sar(instrument, "\\s*$", "", "");

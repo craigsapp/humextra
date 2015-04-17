@@ -1,0 +1,11 @@
+!!!test: Extract from multiple segments
+!!!command: extractx -s 1 %in > %out
+**kern
+1c
+*-
+**kern
+1d
+*-
+**kern
+1e
+*-

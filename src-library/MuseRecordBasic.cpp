@@ -363,7 +363,7 @@ char& MuseRecordBasic::operator[](int index) {
 //
 
 void MuseRecordBasic::setLine(const char* aLine) {
-   int len = strlen(aLine);
+   int len = (int)strlen(aLine);
    recordString.setSize(len+1);
    strcpy(recordString.getBase(), aLine);
    // hide the null character:
@@ -437,7 +437,7 @@ void MuseRecordBasic::shrink(void) {
 //
 
 void MuseRecordBasic::insertString(int column, const char* string) {
-   int len = strlen(string);
+   int len = (int)strlen(string);
    int index = column - 1;
    // make sure that record has text data up to the end of sring in
    // final location by preallocating the end location of string:
@@ -457,7 +457,7 @@ void MuseRecordBasic::insertString(int column, const char* string) {
 //
 
 void MuseRecordBasic::insertStringRight(int column, const char* string) {
-   int len = strlen(string);
+   int len = (int)strlen(string);
    int index = column - 1;
    // make sure that record has text data up to the end of sring in
    // final location by preallocating the end location of string:

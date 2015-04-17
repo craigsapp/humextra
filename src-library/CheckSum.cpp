@@ -128,7 +128,7 @@ unsigned long CheckSum::crc32(const char* buf, int length) {
 /*
 int main (void) {
    char* mystring = "This is a test.\n";
-   int length = strlen(mystring);
+   int length = (int)strlen(mystring);
 	   
    long value = string_cksum(mystring, length);
    printf("Checksum = %u\n", value);
@@ -487,7 +487,7 @@ void CheckSum::getMD5Sum(Array<char>& md5sum, Array<char>& data) {
       outvalue << hex << (int)digest[i] << dec;
    }
    outvalue << ends;
-   md5sum.setSize(strlen(outvalue.CSTRING) + 1);
+   md5sum.setSize((int)strlen(outvalue.CSTRING) + 1);
    strcpy(md5sum.getBase(), outvalue.CSTRING);
 }
 

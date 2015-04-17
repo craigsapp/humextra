@@ -511,7 +511,7 @@ PixelColor PixelColor::getColor(const char* colorstring) {
    int i = 0;
    int start = 0;
    int hasdigit  = 0;
-   int length = strlen(colorstring);
+   int length = (int)strlen(colorstring);
    if (length > 128) {
       cout << "ERROR: color string too long: " << colorstring << endl;
       exit(1);
@@ -579,7 +579,7 @@ PixelColor PixelColor::getColor(const char* colorstring) {
    // color string
    char buffer[128] = {0};
    strncpy(buffer, colorstring, 100);
-   length = strlen(buffer);
+   length = (int)strlen(buffer);
    for (i=0; i<length; i++) {
       buffer[i] = std::tolower(buffer[i]);
    }

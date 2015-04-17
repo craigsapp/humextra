@@ -66,7 +66,7 @@ SigString::SigString(int aSize, const char *cstring) {
 
 SigString::SigString(const char *cstring) { 
    Array<char>& data = *this;
-   int aSize = ::strlen(cstring);
+   int aSize = (int)::strlen(cstring);
    data.setSize(aSize);
    memcpy(data.getBase(), cstring, aSize);
 }
@@ -229,7 +229,7 @@ SigString& SigString::operator=(Array<char>& aString) {
 
 SigString& SigString::operator=(const char* cstring) {
    Array<char>& data = *this;
-   int aSize = ::strlen(cstring);
+   int aSize = (int)::strlen(cstring);
    setSize(aSize);
    memcpy(data.getBase(), cstring, aSize);
    return (*this);
@@ -267,7 +267,7 @@ SigString& SigString::operator+=(Array<char>& aString) {
 SigString& SigString::operator+=(const char* cstring) { 
    Array<char>& data = *this;
    int oldsize = getSize();
-   int aSize = ::strlen(cstring);
+   int aSize = (int)::strlen(cstring);
    setSize(oldsize + aSize);
    memcpy(data.getBase()+oldsize, cstring, aSize);
    return (*this);
@@ -304,7 +304,7 @@ SigString& SigString::operator-=(Array<char>& aString) {
 
 SigString& SigString::operator-=(const char* cstring) { 
    int oldsize = getSize();
-   int aSize = ::strlen(cstring);
+   int aSize = (int)::strlen(cstring);
    setSize(oldsize + aSize);
    memmove(getBase() + aSize, getBase(), aSize);
    memcpy(getBase(), cstring, aSize);

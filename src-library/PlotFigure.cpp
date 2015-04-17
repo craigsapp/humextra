@@ -142,7 +142,7 @@ void PlotFigure::read(const char* filename) {
       } else if (commandEqual("@START:", buffer) ||
             commandEqual("@BEGIN:", buffer)) {
          if (strstr(buffer, "PLOTDATA") != NULL) {
-            index = plotdata.getSize();
+            index = (int)plotdata.getSize();
             plotdata.setSize(index+1);
             plotdata[index].read(infile);
          } else if (strstr(buffer, "POINTS") != NULL) {
@@ -169,9 +169,9 @@ void PlotFigure::read(const char* filename) {
          yticksdelta  = strtod(&(buffer[8]), &cptr);
          yticksoffset = strtod(cptr, NULL);
       } else if (commandEqual("@XSUBTICKS:", buffer)) {
-         xminorticks = strtol(&(buffer[11]), NULL, 10);
+         xminorticks = (int)strtol(&(buffer[11]), NULL, 10);
       } else if (commandEqual("@YSUBTICKS:", buffer)) {
-         yminorticks = strtol(&(buffer[11]), NULL, 10);
+         yminorticks = (int)strtol(&(buffer[11]), NULL, 10);
       } else {
          // unknown line
       }
@@ -362,7 +362,7 @@ void PlotFigure::yTicksOff(void) {
 //
 
 void PlotFigure::allocatePoints(int aSize) {
-   int oldSize = xpoint.getSize();
+   int oldSize = (int)xpoint.getSize();
 
    xpoint.setSize(aSize);     // x-axis point locations
    ypoint.setSize(aSize);     // y-axis point locations
@@ -1321,7 +1321,7 @@ void PlotFigure::setXLabel(const char* string) {
       delete [] xlabel;
       xlabel = NULL;
    }
-   int length = strlen(string);
+   int length = (int)strlen(string);
    xlabel = new char[length+1];
    strcpy(xlabel, string);
 }
@@ -1338,7 +1338,7 @@ void PlotFigure::setYLabel(const char* string) {
       delete [] ylabel;
       ylabel = NULL;
    }
-   int length = strlen(string);
+   int length = (int)strlen(string);
    ylabel = new char[length+1];
    strcpy(ylabel, string);
 }
@@ -1355,7 +1355,7 @@ void PlotFigure::setTitle(const char* string) {
       delete [] figuretitle;
       figuretitle = NULL;
    }
-   int length = strlen(string);
+   int length = (int)strlen(string);
    figuretitle = new char[length+1];
    strcpy(figuretitle, string);
 }
@@ -1370,7 +1370,7 @@ void PlotFigure::setTitle(const char* string) {
 int PlotFigure::addPlot(PlotData& aPlot) {
    plotdata.setSize(plotdata.getSize()+1);
    plotdata.last() = aPlot;
-   return plotdata.getSize() - 1;
+   return (int)(plotdata.getSize() - 1);
 }
 
 
@@ -1408,7 +1408,7 @@ void PlotFigure::addHLine(double position, const char* label) {
 void PlotFigure::addText(const char* textstring, double xpos, double ypos, 
       double aSize, double angle, int orientation) {
    Array<char> teststring;
-   int length = strlen(textstring);
+   int length = (int)strlen(textstring);
    teststring.setSize(length+1);
    strcpy(teststring.getBase(), textstring);
    text.append(teststring);
@@ -1427,7 +1427,7 @@ void PlotFigure::addText(const char* textstring, double xpos, double ypos,
 //
 
 void PlotFigure::pointAllocation(int aSize) {
-   int psize = xpoint.getSize();
+   int psize = (int)xpoint.getSize();
    if (psize >= aSize) {
       return;
    }

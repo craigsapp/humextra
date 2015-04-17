@@ -132,7 +132,7 @@ double EnvelopeString::getLength(void) const {
 
 int EnvelopeString::getNumPoints(void) const {
    if (points != NULL) {
-      return points[0].getSize();
+      return (int)points[0].getSize();
    } else {
       return 0;
    }
@@ -488,7 +488,7 @@ ostream& operator<<(ostream& out, EnvelopeString& aString) {
 //
 
 int EnvelopeString::determineType(const char* aString) {
-   int length = strlen(aString);
+   int length = (int)strlen(aString);
    int index;
 
    // if the first non-space character is a '[' then a MusicKit envelope
@@ -660,7 +660,7 @@ void EnvelopeString::makeCLMenv(void) {
 
    newString << ends;
    const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = (int)strlen(temp);
    if (envelope != NULL) {
       delete [] envelope;
    }
@@ -702,7 +702,7 @@ void EnvelopeString::makeLISPenv(void) {
 
    newString << ends;
    const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = (int)strlen(temp);
    if (envelope != NULL) {
       delete [] envelope;
    }
@@ -747,7 +747,7 @@ void EnvelopeString::makeMKenv(void) {
 
    newString << ends;
    const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = (int)strlen(temp);
    if (envelope != NULL) {
       delete [] envelope;
    }
@@ -793,7 +793,7 @@ void EnvelopeString::makeMMAenv(void) {
 
    newString << ends;
    const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = (int)strlen(temp);
    if (envelope != NULL) {
       delete [] envelope;
    }
@@ -834,7 +834,7 @@ void EnvelopeString::makePLAINenv(void) {
 
    newString << ends;
    const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = (int)strlen(temp);
    if (envelope != NULL) {
       delete [] envelope;
    }
@@ -894,7 +894,7 @@ void EnvelopeString::makeSIGenv(void) {
 
    newString << ends;
    const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = (int)strlen(temp);
    if (envelope != NULL) {
       delete [] envelope;
    }
@@ -916,7 +916,7 @@ void EnvelopeString::makeSIGenv(void) {
 
 void EnvelopeString::processCLMenv(const char* aString, int aDimension) {
 
-   int length = strlen(aString);
+   int length = (int)strlen(aString);
    int i, j, index;
    stickIndex = -1;
 
@@ -964,8 +964,8 @@ void EnvelopeString::processCLMenv(const char* aString, int aDimension) {
            << "dimension : " << aString << endl;
       exit(1);
    }
-   int pointCount = tempData.getSize() / getDimension();
-   setLength(tempData[tempData.getSize()-getDimension()]);
+   int pointCount = (int)(tempData.getSize() / getDimension());
+   setLength((int)tempData[tempData.getSize()-getDimension()]);
 
    if (points != NULL) {
       delete [] points;
@@ -1003,7 +1003,7 @@ void EnvelopeString::processCLMenv(const char* aString, int aDimension) {
 //
 
 void EnvelopeString::processLISPenv(const char* aString) {
-   int length = strlen(aString);
+   int length = (int)strlen(aString);
    int i, j, index;
    stickIndex = -1;
 
@@ -1207,7 +1207,7 @@ void EnvelopeString::processLISPenv(const char* aString) {
 //
 
 void EnvelopeString::processMKenv(const char* aString) {
-   int length = strlen(aString);
+   int length = (int)strlen(aString);
    int i, j, index;
    stickIndex = -1;
 
@@ -1410,7 +1410,7 @@ void EnvelopeString::processMKenv(const char* aString) {
 //
 
 void EnvelopeString::processMMAenv(const char* aString) {
-   int length = strlen(aString);
+   int length = (int)strlen(aString);
    int i, j, index;
    stickIndex = -1;
 
@@ -1614,7 +1614,7 @@ void EnvelopeString::processMMAenv(const char* aString) {
 //
 
 void EnvelopeString::processPLAINenv(const char* aString, int aDimension) {
-   int length = strlen(aString);
+   int length = (int)strlen(aString);
    int i, j, index;
    stickIndex = -1;
 
@@ -1656,8 +1656,8 @@ void EnvelopeString::processPLAINenv(const char* aString, int aDimension) {
            << aString << endl;
       exit(1);
    }
-   int pointCount = tempData.getSize() / getDimension();
-   setLength(tempData[tempData.getSize()-getDimension()]);
+   int pointCount = (int)(tempData.getSize() / getDimension());
+   setLength(tempData[(int)tempData.getSize()-getDimension()]);
 
    if (points != NULL) {
       delete [] points;
@@ -1695,7 +1695,7 @@ void EnvelopeString::processPLAINenv(const char* aString, int aDimension) {
 //
 
 void EnvelopeString::processSIGenv(const char* aString) {
-   int length = strlen(aString);
+   int length = (int)strlen(aString);
    stickIndex = -1;                // global class value
    int tempStickIndex = -1;
    int i, j, k, index;
@@ -1953,8 +1953,8 @@ void EnvelopeString::adjustForStick(void) {
 
    int i = 0;
    int j;
-   if (pointInterp[i] == pointInterp[pointInterp.getSize()-1]) {
-      i = pointInterp.getSize()-1;
+   if (pointInterp[i] == pointInterp[(int)pointInterp.getSize()-1]) {
+      i = (int)pointInterp.getSize()-1;
       while (i>0 && pointInterp[i] <= 0) {
          pointInterp[i+1] = pointInterp[i];
          pointParameter[i+1] = pointInterp[i];
@@ -1979,7 +1979,7 @@ void EnvelopeString::adjustForStick(void) {
 
 void EnvelopeString::skipSpace(const char* string, int& index, 
       const char* spaceString) {
-   int length = strlen(spaceString);
+   int length = (int)strlen(spaceString);
    int foundSpace;
    int i;
 

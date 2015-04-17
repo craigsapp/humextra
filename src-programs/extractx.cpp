@@ -47,7 +47,7 @@ void    getInterpretationFields (Array<int>& field, Array<int>& subfield,
 void    example                 (void);
 void    usage                   (const char* command);
 void    fillFieldData           (Array<int>& field, Array<int>& subfield, 
-                                 Array<int>& model, const char* fieldstring, 
+                                 Array<int>& model, string& fieldstring, 
                                  HumdrumFile& infile);
 void    processFieldEntry       (Array<int>& field, Array<int>& subfield, 
                                  Array<int>& model, const char* string, 
@@ -102,7 +102,7 @@ int          interpQ  = 0;       // used with -i option
 const char*  interps  = "";      // used with -i option
 int          debugQ   = 0;       // used with --debug option
 int          fieldQ   = 0;       // used with -f or -p option
-const char*  fieldstring = "";   // used with -f or -p option
+string       fieldstring = "";   // used with -f or -p option
 Array<int>   field;              // used with -f or -p option
 Array<int>   subfield;           // used with -f or -p option
 Array<int>   model;              // used with -p, or -e options and similar
@@ -510,7 +510,7 @@ void reverseSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
 //
 
 void fillFieldData(Array<int>& field, Array<int>& subfield, Array<int>& model,
-      const char* fieldstring, HumdrumFile& infile) {
+      string& fieldstring, HumdrumFile& infile) {
 
    int maxtrack = infile.getMaxTracks();
 
@@ -526,8 +526,8 @@ void fillFieldData(Array<int>& field, Array<int>& subfield, Array<int>& model,
 
    PerlRegularExpression pre;
    Array<char> buffer;
-   buffer.setSize(strlen(fieldstring)+1);
-   strcpy(buffer.getBase(), fieldstring);
+   buffer.setSize(fieldstring.size()+1);
+   strcpy(buffer.getBase(), fieldstring.data());
    pre.sar(buffer, "\\s", "", "gs");
    int start = 0;
    int value = 0;
@@ -1697,7 +1697,8 @@ void getTraceData(Array<int>& startline, Array<Array<int> >& fields,
          continue;
       }
       startline.append(linenum);
-      fillFieldData(field, subfield, model, temps.getBase(), infile);
+      string ttemp = temps.getBase();
+      fillFieldData(field, subfield, model, ttemp, infile);
       fields.append(field);
       input.getline(buffer, 1024);
    }

@@ -283,7 +283,7 @@ void HumdrumFileSet::readAppendFromHumdrumURI(SSTREAM& inputstream,
       ptr += strlen("h://");
    }
    Array<char> location;
-   location.setSize(strlen(ptr)+1);
+   location.setSize((int)strlen(ptr)+1);
    location.allowGrowth(0);
    strcpy(location.getBase(), ptr);
 
@@ -298,7 +298,7 @@ void HumdrumFileSet::readAppendFromHumdrumURI(SSTREAM& inputstream,
    if ((pot = strrchr(location.getBase(), '/')) != NULL) {
       *pot = '\0';
       pot++;
-      filename.setSize(strlen(pot)+1);
+      filename.setSize((int)strlen(pot)+1);
       strcpy(filename.getBase(), pot);
       filename.allowGrowth(0);
    } else {
@@ -461,7 +461,7 @@ void HumdrumFileSet::readAppendFromHttpURI(SSTREAM& inputstream,
    // cout << header.CSTRING << endl;
    // cout << "-------------------------------------------------" << endl;
    while (header.getline(buffer, URI_BUFFER_SIZE)) {
-      int len = strlen(buffer);
+      int len = (int)strlen(buffer);
       for (i=0; i<len; i++) {
          buffer[i] = std::tolower(buffer[i]);
       }

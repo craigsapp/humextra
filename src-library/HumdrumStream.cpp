@@ -255,7 +255,7 @@ restarting:
       PerlRegularExpression pre;
       if (pre.search(newfilebuffer, 
             "^!!!!SEGMENT\\s*([+-]?\\d+)?\\s*:\\s*(.*)\\s*$", "i")) {
-         if (strlen(pre.getSubmatch(1)) > 0) {
+         if ((int)strlen(pre.getSubmatch(1)) > 0) {
             infile.setSegmentLevel(atoi(pre.getSubmatch()));
          } else {
             infile.setSegmentLevel(0);
@@ -381,7 +381,7 @@ restarting:
             continue;
          }
       }
-      int len = strlen(templine);
+      int len = (int)strlen(templine);
       if ((len > 4) && (strncmp(templine, "!!!!", 4) == 0) && 
             (templine[4] != '!') && (dataFoundQ == 0)) {
          // This is a universal comment.  Should it be appended 
@@ -495,7 +495,7 @@ void HumdrumStream::fillUrlBuffer(SSTREAM& inputdata, const char* uriname) {
       ptr += strlen("http://");
    }
 
-   hostname.setSize(strlen(ptr)+1);
+   hostname.setSize((int)strlen(ptr)+1);
    hostname.setGrowth(0);
    strcpy(hostname.getBase(), ptr);
    char* pot;
@@ -504,7 +504,7 @@ void HumdrumStream::fillUrlBuffer(SSTREAM& inputdata, const char* uriname) {
    }
 
    if ((filename = strchr(ptr, '/')) != NULL) {
-      location.setSize(strlen(filename)+1);
+      location.setSize((int)strlen(filename)+1);
       strcpy(location.getBase(), filename);
       location.allowGrowth(0);
    }
@@ -572,7 +572,7 @@ void HumdrumStream::fillUrlBuffer(SSTREAM& inputdata, const char* uriname) {
    // cout << header.CSTRING << endl;
    // cout << "-------------------------------------------------" << endl;
    while (header.getline(buffer, URI_BUFFER_SIZE)) {
-      int len = strlen(buffer);
+      int len = (int)strlen(buffer);
       for (i=0; i<len; i++) {
          buffer[i] = std::tolower(buffer[i]);
       }

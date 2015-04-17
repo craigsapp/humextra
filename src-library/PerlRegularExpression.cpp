@@ -235,7 +235,7 @@ PerlRegularExpression::~PerlRegularExpression() {
 //
 
 void PerlRegularExpression::setReplaceString(const char* replacestring) {
-   int len = strlen(replacestring);
+   int len = (int)strlen(replacestring);
    replace_string.setSize(len+1);
    strcpy(replace_string.getBase(), replacestring);
 }
@@ -333,7 +333,7 @@ const char* PerlRegularExpression::getSubmatch(void) {
 void PerlRegularExpression::setSearchString(const char* searchstring) {
    if (strcmp(searchstring, search_string.getBase()) != 0) {
       valid = 0;
-      int len = strlen(searchstring);
+      int len = (int)strlen(searchstring);
       search_string.setSize(len+1);
       strcpy(search_string.getBase(), searchstring);
    }
@@ -735,7 +735,7 @@ int PerlRegularExpression::searchAndReplace(Array<char>& output,
    SSTREAM tempdata;
    int counter = 0;
    int i;
-   int len    = strlen(ptr);
+   int len    = (int)strlen(ptr);
    int status;
    if (studyQ) {
       status = pcre_exec(pre, pe, ptr, len, 0, 0, 
@@ -773,7 +773,7 @@ int PerlRegularExpression::searchAndReplace(Array<char>& output,
       tempdata << ptr;   // store the piece of input after last replace.
    }
    tempdata << ends;
-   len = strlen(tempdata.CSTRING);
+   len = (int)strlen(tempdata.CSTRING);
    output.setSize(len+1);
    strcpy(output.getBase(), tempdata.CSTRING);
    return counter;
@@ -845,7 +845,7 @@ int PerlRegularExpression::search(const char* input) {
       initializeSearch();
    }
 
-   int len = strlen(input);
+   int len = (int)strlen(input);
    input_string.setSize(len+1);
    strcpy(input_string.getBase(), input);
 
@@ -908,7 +908,7 @@ int PerlRegularExpression::getTokens(Array<Array<char> >& output,
    }
 
    Array<char> spat;
-   spat.setSize(strlen("(..*?)()") + strlen(separator) + 1);
+   spat.setSize((int)strlen("(..*?)()") + (int)strlen(separator) + 1);
    strcpy(spat.getBase(), "(..*?)(");
    strcat(spat.getBase(), separator);
    strcat(spat.getBase(), ")");
@@ -941,7 +941,7 @@ int PerlRegularExpression::getTokens(Array<Array<char> >& output,
    if (ptr[0] != '\0') {
       oindex = output.getSize();
       output.setSize(oindex+1);
-      strsize = strlen(ptr);
+      strsize = (int)strlen(ptr);
       output[oindex].setSize(strsize + 1);
       strcpy(output[oindex].getBase(), ptr);
    }
@@ -988,7 +988,7 @@ int PerlRegularExpression::getTokensWithEmpties(Array<Array<char> >& output,
    }
 
    Array<char> spat;
-   spat.setSize(strlen("(.*?)()") + strlen(separator) + 1);
+   spat.setSize((int)strlen("(.*?)()") + (int)strlen(separator) + 1);
    strcpy(spat.getBase(), "(.*?)(");
    strcat(spat.getBase(), separator);
    strcat(spat.getBase(), ")");
@@ -1021,7 +1021,7 @@ int PerlRegularExpression::getTokensWithEmpties(Array<Array<char> >& output,
    if (ptr[0] != '\0') {
       oindex = output.getSize();
       output.setSize(oindex+1);
-      strsize = strlen(ptr);
+      strsize = (int)strlen(ptr);
       output[oindex].setSize(strsize + 1);
       strcpy(output[oindex].getBase(), ptr);
    }

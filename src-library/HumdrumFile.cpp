@@ -2188,7 +2188,7 @@ void HumdrumFile::convertKernStringToArray(Array<int>& array,
    array.setSize(0);
    int note;
    char* buffer;
-   int size = strlen(string);
+   int size = (int)strlen(string);
    if (size == 0) {
       return;
    }
@@ -3598,7 +3598,7 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
                // Convert::durationRToKernRhythm(rbuff, sss);
                RationalNumber rbase = sss.getInversion() * 4;
                // int rbase  = atoi(rbuff);
-               // int length = strlen(rbuff);
+               // int length = (int)strlen(rbuff);
                int z;
                // for (z=length-1; z>0; z--) {
                //    if (rbuff[z] == '.') {
@@ -3781,7 +3781,7 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
                RationalNumber sss = lastdurations[count];
                Convert::durationRToKernRhythm(rbuff, sss);
                int rbase  = atoi(rbuff);
-               int length = strlen(rbuff);
+               int length = (int)strlen(rbuff);
                int z;
                for (z=length-1; z>0; z--) {
                   if (rbuff[z] == '.') {

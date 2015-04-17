@@ -758,7 +758,7 @@ HumdrumFileBasic& HumdrumFileBasic::operator=(const HumdrumFileBasic& aFile) {
    trackexinterp.allowGrowth(0);
    int length;
    for (i=0; i<aFile.trackexinterp.getSize(); i++) {
-      length = strlen(aFile.trackexinterp[i]);
+      length = (int)strlen(aFile.trackexinterp[i]);
       trackexinterp[i] = new char[length+1];
       strcpy(trackexinterp[i], aFile.trackexinterp[i]);
    }
@@ -1084,13 +1084,13 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
                if (strncmp("**", getRecord(n)[i], 2) != 0) {
                   cout << "Error on line " << n+1 << ": nonexclusive" << endl;
                }
-               tlen = strlen(getRecord(n)[i]);
+               tlen = (int)strlen(getRecord(n)[i]);
                tptr = new char[tlen + 1];
                strcpy(tptr, getRecord(n)[i]); 
                trackexinterp.append(tptr);
                spineid++;
                sprintf(buffer, "%d", spineid);
-               length = strlen(buffer);
+               length = (int)strlen(buffer);
                bp = new char[length + 1];
                strcpy(bp, buffer);
                spineinfo.append(bp);
@@ -1313,7 +1313,7 @@ void HumdrumFileBasic::makeNewSpineInfo(SigCollection<char*>&spineinfo,
    // copy the new spine path indicators
    int length;
    for (i=0; i<spineinfo.getSize(); i++) {
-      length = strlen(newinfo[i]);
+      length = (int)strlen(newinfo[i]);
       spineinfo[i] = new char[length + 1];
       strcpy(spineinfo[i], newinfo[i]);
       delete [] newinfo[i];
@@ -1332,7 +1332,7 @@ void HumdrumFileBasic::makeNewSpineInfo(SigCollection<char*>&spineinfo,
 //
 
 void HumdrumFileBasic::simplifySpineString(char* spinestring) {
-   int length = strlen(spinestring);
+   int length = (int)strlen(spinestring);
    if (spinestring[length-1] == ' ') {
       spinestring[length-1] = '\0';
    }
@@ -1362,7 +1362,7 @@ void HumdrumFileBasic::simplifySpineString(char* spinestring) {
    char* ptr = strtok(buffer, " ");
    while (ptr != NULL) {
       ptrs.append(ptr);
-      length = strlen(ptr);
+      length = (int)strlen(ptr);
       lengths.append(length);
       ptr = strtok(NULL, " ");
    }
@@ -1393,7 +1393,7 @@ void HumdrumFileBasic::simplifySpineString(char* spinestring) {
    }
 
 endofspinefunction:
-   length = strlen(spinestring);
+   length = (int)strlen(spinestring);
    if (spinestring[length-1] == ' ') {
       spinestring[length-1] = '\0';
    }
@@ -1418,7 +1418,7 @@ void HumdrumFileBasic::simplifySpineInfo(SigCollection<char*>& info,
       int index) {
    char* temp;
    int length;
-   length = strlen(info[index]);
+   length = (int)strlen(info[index]);
    temp = new char[length + 1];
    strcpy(temp, info[index]);
    int count = 0;
@@ -1438,8 +1438,8 @@ void HumdrumFileBasic::simplifySpineInfo(SigCollection<char*>& info,
       p1 += 1;
       p2 += 1;
 
-      int len1 = strlen(p1);
-      int len2 = strlen(p2);
+      int len1 = (int)strlen(p1);
+      int len2 = (int)strlen(p2);
     
       if (len1 > 2 && len2 > 2) {
          p1[len1-2] = '\0';
@@ -1731,7 +1731,7 @@ char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
          ptr += strlen("h://");
       }
       Array<char> location;
-      location.setSize(strlen(ptr)+1);
+      location.setSize((int)strlen(ptr)+1);
       location.allowGrowth(0);
       strcpy(location.getBase(), ptr);
    
@@ -1746,7 +1746,7 @@ char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
       if ((pot = strrchr(location.getBase(), '/')) != NULL) {
          *pot = '\0';
          pot++;
-         filename.setSize(strlen(pot)+1);
+         filename.setSize((int)strlen(pot)+1);
          strcpy(filename.getBase(), pot);
          filename.allowGrowth(0);
       } else {
@@ -1830,7 +1830,7 @@ void HumdrumFileBasic::readFromHumdrumURI(const char* humdrumaddress) {
       ptr += strlen("h://");
    }
    Array<char> location;
-   location.setSize(strlen(ptr)+1);
+   location.setSize((int)strlen(ptr)+1);
    location.allowGrowth(0);
    strcpy(location.getBase(), ptr);
 
@@ -1845,7 +1845,7 @@ void HumdrumFileBasic::readFromHumdrumURI(const char* humdrumaddress) {
    if ((pot = strrchr(location.getBase(), '/')) != NULL) {
       *pot = '\0';
       pot++;
-      filename.setSize(strlen(pot)+1);
+      filename.setSize((int)strlen(pot)+1);
       strcpy(filename.getBase(), pot);
       filename.allowGrowth(0);
    } else {
@@ -1922,7 +1922,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
       ptr += strlen("http://");
    }
 
-   hostname.setSize(strlen(ptr)+1);
+   hostname.setSize((int)strlen(ptr)+1);
    hostname.setGrowth(0);
    strcpy(hostname.getBase(), ptr);
    char* pot;
@@ -1932,7 +1932,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
 
 
    if ((filename = strchr(ptr, '/')) != NULL) {
-      location.setSize(strlen(filename)+1);
+      location.setSize((int)strlen(filename)+1);
       strcpy(location.getBase(), filename);
       location.allowGrowth(0);
    }
@@ -2000,7 +2000,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
    // cout << header.CSTRING << endl;
    // cout << "-------------------------------------------------" << endl;
    while (header.getline(buffer, URI_BUFFER_SIZE)) {
-      int len = strlen(buffer);
+      int len = (int)strlen(buffer);
       for (i=0; i<len; i++) {
          buffer[i] = std::tolower(buffer[i]);
       }
@@ -2274,11 +2274,11 @@ void HumdrumFileBasic::makeVts(Array<char>& vtsstring,
       tstream << infile[i] << (char)0x0a;
    }
    tstream << ends;
-   int len = strlen(tstream.CSTRING);
+   int len = (int)strlen(tstream.CSTRING);
    unsigned long checksum = CheckSum::crc32(tstream.CSTRING, len);
    char buffer[128] = {0};
    sprintf(buffer, "!!!VTS: %lu", checksum);
-   vtsstring.setSize(strlen(buffer) + 1);
+   vtsstring.setSize((int)strlen(buffer) + 1);
    strcpy(vtsstring.getBase(), buffer);
 }
 
@@ -2305,11 +2305,11 @@ void HumdrumFileBasic::makeVtsData(Array<char>& vtsstring,
       tstream << infile[i] << (char)0x0a;
    }
    tstream << ends;
-   int len = strlen(tstream.CSTRING);
+   int len = (int)strlen(tstream.CSTRING);
    unsigned long checksum = CheckSum::crc32(tstream.CSTRING, len);
    char buffer[128] = {0};
    sprintf(buffer, "!!!VTS-data: %lu", checksum);
-   vtsstring.setSize(strlen(buffer) + 1);
+   vtsstring.setSize((int)strlen(buffer) + 1);
    strcpy(vtsstring.getBase(), buffer);
 }
 

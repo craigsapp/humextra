@@ -218,7 +218,7 @@ void MuseDataSet::analyzePartSegments(Array<int>& startindex,
    Array<int> groupmemberships(1000);
    groupmemberships.setSize(0);
    groupmemberships.setGrowth(1000);
-   int len = strlen("Group memberships:");
+   int len = (int)strlen("Group memberships:");
    for (i=0; i<lines.getSize(); i++) {
       if (strncmp("Group memberships:", lines[i].c_str(), len) == 0) {
          if (types[i] != E_muserec_comment_line) {

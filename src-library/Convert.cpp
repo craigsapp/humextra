@@ -675,7 +675,7 @@ double Convert::kernTimeSignatureTop (const char* aKernString) {
            << " yet." << endl;
       exit(1);
    } else {
-      int len = strlen(aKernString);
+      int len = (int)strlen(aKernString);
       if (len > 2) {
          return (double)atoi(&aKernString[2]);  // used to be 1
       } else {
@@ -725,7 +725,7 @@ const char* Convert::keyNumberToKern(int number) {
 int Convert::kernKeyToNumber(const char* aKernString) {
    int count = 0;
    int i;
-   int length = strlen(aKernString);
+   int length = (int)strlen(aKernString);
    int start = 0;
    int sign = 1;
 
@@ -2330,7 +2330,7 @@ SigCollection<int> Convert::keyToScaleDegrees(int aKey, int aMode) {
 
 int Convert::museToBase40(const char* pitchString) {
    char *temp;
-   int length = strlen(pitchString);
+   int length = (int)strlen(pitchString);
    temp = new char[length+1];
    strcpy(temp, pitchString);
    int octave;
@@ -2487,7 +2487,7 @@ char* Convert::base12ToKern(char* output, int aPitch) {
       return output;
    }
 
-   int length = strlen(output);
+   int length = (int)strlen(output);
    output[length + repeat] = '\0';
    int i; 
    for (i=length-1; i>=0; i--) {
@@ -2566,7 +2566,7 @@ int Convert::freq2midi(double freq, double a440) {
 //
 
 double Convert::kotoToDuration(const char* aKotoString) {
-   int length = strlen(aKotoString);
+   int length = (int)strlen(aKotoString);
    int bars   = 0;
    int dashes = 0;
    int dots   = 0;
@@ -2610,7 +2610,7 @@ double Convert::kotoToDuration(const char* aKotoString) {
 //
 
 RationalNumber Convert::kotoToDurationR(const char* aKotoString) {
-   int length = strlen(aKotoString);
+   int length = (int)strlen(aKotoString);
    int bars   = 0;
    int dashes = 0;
    int dots   = 0;

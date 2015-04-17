@@ -887,8 +887,8 @@ int PDFFile::getPreviousOffset(istream& file) {
    char prevstate[128] = {0};
    strcpy(eofstate, "%%EOF");
    strcpy(prevstate, "/Prev");
-   int prevtarget = strlen(prevstate);
-   int eoftarget = strlen(eofstate);
+   int prevtarget = (int)strlen(prevstate);
+   int eoftarget = (int)strlen(eofstate);
 
    file.get(ch);
    while (!file.eof()) {
@@ -1150,7 +1150,7 @@ void PDFFile::makeEmbeddedFileList(void) {
    int rlevel = 0;
    slevel = 0;
    int value;
-   for (i=i+strlen("Names"); i<embedlisting.getSize(); i++) {
+   for (i=i+(int)strlen("Names"); i<embedlisting.getSize(); i++) {
       if (embedlisting[i] == '(') {
          slevel++;
       } else if (embedlisting[i] == ')') {

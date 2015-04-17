@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Array.h"
 #include "SigString.h"
-#include <pcre.h>
+#include "pcre.h"
 
 
 class PerlRegularExpression {

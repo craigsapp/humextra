@@ -423,7 +423,7 @@ char* MusicXmlFile::getPartName(char* buffer, int partnum) {
 //
 
 void MusicXmlFile::removeBorderSpaces(char* buffer) {
-   int length = strlen(buffer);
+   int length = (int)strlen(buffer);
    int i;
    for (i=length-1; i>=0; i--) {
       if (std::isspace(buffer[i])) {
@@ -3015,7 +3015,7 @@ void MusicXmlFile::printText(ostream& out, int staffno, int index) {
    }
    out << "t=";
    Array<char> tbuffer;
-   tbuffer.setSize(strlen(buffer)+1);
+   tbuffer.setSize((int)strlen(buffer)+1);
    strcpy(tbuffer.getBase(), buffer);
    PerlRegularExpression pre;
    pre.sar(tbuffer, ":", "&colon;", "g");
@@ -3169,15 +3169,15 @@ void MusicXmlFile::processSpineChanges(SSTREAM& newstream, SSTREAM& oldstream,
             ptr[0] = '\0';
             dynamics.append(ptr);
          } else {
-            length = strlen(ptr2);
+            length = (int)strlen(ptr2);
             ptr = new char[length+1];
             strcpy(ptr, ptr2);
             dynamics.append(ptr);
             ptr2[0] = '\0';
-            length = strlen(buffer);
+            length = (int)strlen(buffer);
          }
       } 
-      length = strlen(buffer);
+      length = (int)strlen(buffer);
       ptr = new char[length+1];
       strcpy(ptr, buffer);
       strings.append(ptr);
@@ -3208,7 +3208,7 @@ void MusicXmlFile::processSpineChanges(SSTREAM& newstream, SSTREAM& oldstream,
             strcpy(buffer, strings[i]);
             strcat(buffer, "\t");
             strcat(buffer, strings[i]);
-            length = strlen(buffer);
+            length = (int)strlen(buffer);
             delete [] strings[i];
             strings[i] = new char[length+1];
             strcpy(strings[i], buffer);
