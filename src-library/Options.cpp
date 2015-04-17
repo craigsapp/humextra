@@ -491,7 +491,7 @@ int Options::getArgumentCount(void) {
 
 vector<string>& Options::getArgList(vector<string>& output) {
    output.resize(argument.size());
-   for (int i=0; i<argument.size(); i++) {
+   for (int i=0; i<(int)argument.size(); i++) {
       output[i] = *argument[i];
    }
    return output;
@@ -690,7 +690,7 @@ void Options::reset(void) {
    }
    optionRegister.clear();
 
-   for (i=0; i<argument.size(); i++) {
+   for (i=0; i<(int)argument.size(); i++) {
       delete argument[i];
       argument[i] = NULL;
    }
@@ -972,7 +972,7 @@ void Options::xverify(int error_check, int suppress) {
    // if calling xverify again, must remove previous argument list.
    int i;
    if (argument.size() != 0) {
-      for (i=0; i<argument.size(); i++) {
+      for (i=0; i<(int)argument.size(); i++) {
          delete argument[i];
       }
       argument.resize(0);

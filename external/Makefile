@@ -2,7 +2,7 @@
 ##
 ## Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 ## Creation Date: Mon Jun 29 18:12:35 PDT 2009
-## Last Modified: Wed Sep  9 23:57:43 PDT 2009
+## Last Modified: Fri Apr 17 11:50:02 PDT 2015
 ## Filename:      ...humextra/external/Makefile
 ##
 ## Description: This Makefile compiles external libraries used in
@@ -22,14 +22,17 @@ PCRE = $(wildcard pcre-8.35)
 all: centerpoint pcre improv
 
 centerpoint:
-	(cd centerpoint; $(MAKE) static_release)
-	-mkdir ../lib
+	(cd centerpoint && $(MAKE) static_release)
+	mkdir -p ../lib
+	# Sleep needed in Ubuntu on virtual box so that library
+	# file finished writing from previous command.
+	sleep 1
 	cp centerpoint/lib/libcslxml.a ../lib
-ifneq ($(wildcard ../lib),)
-	(cd ../lib; ranlib libcslxml.a)
-else
-	@echo Error trying to copy static library for centerpoint
-endif
+#ifneq ($(wildcard ../lib),)
+#	(cd ../lib; ranlib libcslxml.a)
+#else
+#	@echo Error trying to copy static library for centerpoint
+#endif
 
 pcre:
 	# The following command helps to avoid having autoreconf or
@@ -68,16 +71,17 @@ cleanpcre:
 improv: improv-library
 improv-library: improv-clone
 	-(cd improv && make clean && make library)
-	-rm -rf ../lib/improv
-	-rm ../lib/libimprov.a
-	mkdir -p ../lib/improv
-	(cd ../lib/improv && ar -x ../../external/improv/lib/libimprov.a)
-	(cd ../lib/improv && rm -f Options.o)
-	(cd ../lib/improv && \
-	   for i in *.o; do if [[ -z `nm $$i 2> /dev/null` ]]; then rm $$i; \
-	   fi; done)
-	(cd ../lib/improv && libtool -static *.o -o ../libimprov.a)
-	-rm -rf ../lib/improv
+	-cp improv/lib/libimprov.a ../lib/
+#	-rm -rf ../lib/improv
+#	-rm ../lib/libimprov.a
+#	mkdir -p ../lib/improv
+#	(cd ../lib/improv && ar -x ../../external/improv/lib/libimprov.a)
+#	(cd ../lib/improv && rm -f Options.o)
+#	(cd ../lib/improv && \
+#	   for i in *.o; do if [[ -z `nm $$i 2> /dev/null` ]]; then rm $$i; \
+#	   fi; done)
+#	(cd ../lib/improv && libtool -static *.o -o ../libimprov.a)
+#	-rm -rf ../lib/improv
 
 
 improv-clean:
