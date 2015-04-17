@@ -30,7 +30,7 @@ void      example             (void);
 void      processData         (HumdrumFile& infile);
 void      usage               (const char* command);
 void      getLabelSequence    (Array<Array<char> >& labelsequence, 
-                               const char* string);
+                               const string& astring);
 int       getLabelIndex       (Array<Array<char> >& labels, Array<char>& key);
 void      printLabelList      (HumdrumFile& infile);
 void      printLabelInfo      (HumdrumFile& infile);
@@ -40,11 +40,11 @@ int       adjustFirstBarline  (HumdrumFile& infile);
 
 // global variables
 Options      options;            // database for command-line arguments
-const char*  variation = "";     // used with -v option
+string       variation = "";     // used with -v option
 int          listQ = 0;          // used with -l option
 int          infoQ = 0;          // used with -i option
 int          keepQ = 0;          // used with -k option
-const char*  realization = "";   // used with -r option
+string       realization = "";   // used with -r option
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -323,8 +323,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       exit(0);
    }
 
-   variation   = opts.getString("variation").data();
-   realization = opts.getString("realization").data();
+   variation   = opts.getString("variation");
+   realization = opts.getString("realization");
    listQ       = opts.getBoolean("list");
    infoQ       = opts.getBoolean("info");
    keepQ       = opts.getBoolean("keep");
@@ -377,23 +377,25 @@ void processData(HumdrumFile& infile) {
    int footer = -1;
    char labelsearch[1024] = {0};
    strcpy(labelsearch, "*>");
-   strcat(labelsearch, variation);
+   strcat(labelsearch, variation.data());
    strcat(labelsearch, "[");
    int length = strlen(labelsearch);
 
    // check for label to expand
    int i;
    int foundlabel = 0;
-   if (realization[0]  == '\0') {
+   string tempseq;
+   if (realization.size()  == 0) {
       for (i=0; i<infile.getNumLines(); i++) {
          if (infile[i].getType() != E_humrec_interpretation) {
             continue;
          }
          if (strncmp(labelsearch, infile[i][0], length) != 0) {
             continue;
-      }
+         }
 
-         getLabelSequence(labelsequence, &(infile[i][0][length]));
+         tempseq = &(infile[i][0][length]);
+         getLabelSequence(labelsequence, tempseq);
          foundlabel = 1;
          break;
       }
@@ -576,10 +578,11 @@ int getLabelIndex(Array<Array<char> >& labels, Array<char>& key) {
 // getLabelSequence --
 //
 
-void getLabelSequence(Array<Array<char> >& labelsequence, const char* string) {
-   int slength = strlen(string);
+void getLabelSequence(Array<Array<char> >& labelsequence, 
+      const string& astring) {
+   int slength = astring.size();
    char* sdata = new char[slength+1];
-   strcpy(sdata, string);
+   strcpy(sdata, astring.data());
    const char* ignorecharacters = ", [] ";
    int length = 0;
    int index;

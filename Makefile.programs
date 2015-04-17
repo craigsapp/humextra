@@ -5,19 +5,19 @@
 ## Last Modified: Wed Aug 25 14:29:18 PDT 2010
 ## Filename:      ...humextra/Makefile.programs
 ##
-## Description:   This Makefile creates the Humdrum Extras library 
+## Description:   This Makefile creates the Humdrum Extras library
 ##                lib/libhumextra.a for linux, using gcc 2.7.2.1 or higher
-##                Also, gives basic guidelines of how to compile for Windows 
+##                Also, gives basic guidelines of how to compile for Windows
 ##                using MinGW.
 ##
 ## To run this makefile, type (without quotes) "make -f Makefile.programs"
-## (or "gmake -f Makefile.programs" on FreeBSD computers), although it 
-## is intended to be used the file "Makefile" which runs this makefile 
+## (or "gmake -f Makefile.programs" on FreeBSD computers), although it
+## is intended to be used the file "Makefile" which runs this makefile
 ## with the command "make programs".  Note that you have to first
-## create the library file with the makefile "Makefile.library". 
+## create the library file with the makefile "Makefile.library".
 ##
 ## Without arguments, this makefile will compile all programs.
-## If you give a program name as an argument, it will compile 
+## If you give a program name as an argument, it will compile
 ## just that program. E.g.: "make -f Makefile.programs blank" or used
 ## in conjunction with "Makefile", type "make blank", which will
 ## compile the "blank" program and place it in the ./bin directory.
@@ -49,13 +49,13 @@
 
 #OSTYPE = LINUX
 #OSTYPE = OSXPC
-ARCH = 
+ARCH =
 
 # Set the environmental variable $MACOSX_DEPLOYMENT_TARGET to
 # "10.4" in Apple OS X to compile for OS X 10.4 and later (for example,
 # you can compile for OS X 10.4 computers even if you are using a 10.6
 # computer).
-ENV = 
+ENV =
 
 # if OSTYPE is not defined, then this if statement will be run:
 ifeq ($(origin OSTYPE), undefined)
@@ -65,11 +65,11 @@ ifeq ($(origin OSTYPE), undefined)
       # ENV = MACOSX_DEPLOYMENT_TARGET=10.6
       # Use the following to compile for 32-bit architecture on 64-bit comps:
       #ARCH = -m32 -arch i386
-   else 
+   else
       OSTYPE = LINUX
       # use the following to compile for 32-bit architecture on 64-bit comps:
       # (you will need 32-bit libraries in order to do this)
-      # ARCH = -m32 
+      # ARCH = -m32
    endif
 endif
 # Next if statement needed for some versions of make which already set OSTYPE:
@@ -77,7 +77,7 @@ ifeq ($(OSTYPE),linux)
    OSTYPE = LINUX
    # use the following to compile for 32-bit architecture on 64-bit comps:
    # (you will need 32-bit libraries in order to do this)
-   # ARCH = -m32 
+   # ARCH = -m32
 endif
 
 # Cygwin (and MinGW?) adds the string ".exe" to the end of compiled programs.
@@ -112,18 +112,18 @@ endif
 
 #OSSUBTYPE = ALSA
 #OSSUBTYPE = OSS
-#OSSUBTYPE = 
+#OSSUBTYPE =
 
 # If OSSUBTYPE is not set manually above, then automatically determine
 # what the value should be (only works for LINUX and OSXPC).
 ifeq ($(origin OSSUBTYPE), undefined)
    ifeq ($(OSTYPE),OSXPC)
-      OSSUBTYPE = 
+      OSSUBTYPE =
    endif
    ifeq ($(OSTYPE),LINUX)
       ifneq ($(wildcard /proc/asound/version),)
          OSSUBTYPE = ALSA
-      else 
+      else
          OSSUBTYPE = OSS
       endif
    endif
@@ -172,7 +172,7 @@ POSTFLAGS ?= -L$(LIBDIR) -l$(LIBFILE)
 
 # Thread library needed for MIDI input programs in Linux:
 ifeq ($(OSTYPE),LINUX)
-   POSTFLAGS += -lpthread 
+   POSTFLAGS += -lpthread
 endif
 
 # The following setup is for compiling XML parsing code
@@ -191,18 +191,19 @@ ifneq ($(wildcard external/pcre-8.35),)
    PCRE        := yes
 endif
 
+
 ###################################
 #
 # Interactive MIDI program compiling setup
 #
 
-# for compiling programs with interactive MIDI (such as humplay), you 
+# for compiling programs with interactive MIDI (such as humplay), you
 # first need to compile the improv library which can be downloaded
 # from http://improv.sapp.org
 
-ifneq ($(wildcard ../improv/lib/libimprov.a),)
-   PREFLAGS  += -I../improv/include
-   POSTFLAGS += -L../improv/lib -limprov
+ifneq ($(wildcard external/improv),)
+   PREFLAGS  += -Iexternal/improv/include
+   POSTFLAGS += -limprov
    IMPROV    := yes
 endif
 
@@ -213,7 +214,7 @@ ifneq ($(origin IMPROV),undefined)
       POSTFLAGS += -framework CoreMIDI -framework CoreServices
       POSTFLAGS += -framework AudioUnit -framework AudioToolbox
    endif
-   
+
    # On Linux computers, include MIDI related libraries:
    ifeq ($(OSTYPE),LINUX)
       # include pthread library for MIDI input parsing:
@@ -263,12 +264,12 @@ ifeq ($(wildcard $(TARGDIR)),)
 endif
 
 # link all scripts into the bin directory
-scripts: 
+scripts:
 	-for i in $(SCRIPTS); do ln -s ../$$i bin/`basename $$i`; done
 
 
 ###########################################################################
-# 
+#
 # Exceptions to the default rules found a the bottom of the Makefile
 #
 

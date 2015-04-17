@@ -39,11 +39,11 @@ void    excludeFields           (HumdrumFile& infile, Array<int>& field,
                                  Array<int>& subfield, Array<int>& model);
 void    extractFields           (HumdrumFile& infile, Array<int>& field, 
                                  Array<int>& subfield, Array<int>& model);
-void    extractTrace            (HumdrumFile& infile, const char* tracefile);
+void    extractTrace            (HumdrumFile& infile, const string& tracefile);
 void    getInterpretationFields (Array<int>& field, Array<int>& subfield,
                                  Array<int>& model, HumdrumFile& infile,
-                                 const char* interps, int state);
-//void    extractInterpretations  (HumdrumFile& infile, const char* interps);
+                                 string& interps, int state);
+//void    extractInterpretations  (HumdrumFile& infile, string& interps);
 void    example                 (void);
 void    usage                   (const char* command);
 void    fillFieldData           (Array<int>& field, Array<int>& subfield, 
@@ -56,7 +56,7 @@ void    removeDollarsFromString (Array<char>& buffer, int maxtrack);
 int     isInList                (int number, Array<int>& listofnum);
 void    getTraceData            (Array<int>& startline, 
                                  Array<Array<int> >& fields, 
-                                 const char* tracefile, HumdrumFile& infile);
+                                 const string& tracefile, HumdrumFile& infile);
 void    printTraceLine          (HumdrumFile& infile, int line, 
                                  Array<int>& field);
 void    dealWithSpineManipulators(HumdrumFile& infile, int line, 
@@ -70,12 +70,12 @@ void    printMultiLines         (Array<int>& vsplit, Array<int>& vserial,
                                  Array<Array<char> >& tempout);
 void    reverseSpines           (Array<int>& field, Array<int>& subfield, 
                                  Array<int>& model, HumdrumFile& infile, 
-                                 const char* exinterp);
+                                 const string& exinterp);
 void    getSearchPat            (Array<char>& spat, int target, 
                                  const char* modifier);
 void    expandSpines            (Array<int>& field, Array<int>& subfield, 
                                  Array<int>& model, HumdrumFile& infile, 
-                                 const char* interp);
+                                 string& interp);
 void    dealWithSecondarySubspine(Array<int>& field, Array<int>& subfield, 
                                  Array<int>& model, int targetindex, 
                                  HumdrumFile& infile, int line, int spine, 
@@ -84,22 +84,22 @@ void    dealWithCospine         (Array<int>& field, Array<int>& subfield,
                                  Array<int>& model, int targetindex, 
                                  HumdrumFile& infile, int line, int cospine, 
                                  int comodel, int submodel, 
-                                 const char* cointerp);
+                                 const string& cointerp);
 void    printCotokenInfo        (int& start, HumdrumFile& infile, int line, 
                                  int spine, Array<Array<char> >& cotokens, 
                                  Array<int>& spineindex, 
                                  Array<int>& subspineindex);
 void    fillFieldDataByGrep     (Array<int>& field, Array<int>& subfield, 
-                                 Array<int>& model, const char* grepString, 
+                                 Array<int>& model, const string& grepString, 
                                  HumdrumFile& infile, int state);
 
 // global variables
 Options      options;            // database for command-line arguments
 int          excludeQ = 0;       // used with -x option
 int          expandQ  = 0;       // used with -e option
-const char*  expandInterp = "";  // used with -E option
+string       expandInterp = "";  // used with -E option
 int          interpQ  = 0;       // used with -i option
-const char*  interps  = "";      // used with -i option
+string       interps  = "";      // used with -i option
 int          debugQ   = 0;       // used with --debug option
 int          fieldQ   = 0;       // used with -f or -p option
 string       fieldstring = "";   // used with -f or -p option
@@ -108,9 +108,9 @@ Array<int>   subfield;           // used with -f or -p option
 Array<int>   model;              // used with -p, or -e options and similar
 int          countQ   = 0;       // used with -C option
 int          traceQ   = 0;       // used with -t option
-const char*  tracefile = "";     // used with -t option
+string       tracefile = "";     // used with -t option
 int          reverseQ = 0;       // used with -r option
-const char*  reverseInterp = "**kern"; // used with -r and -R options.
+string       reverseInterp = "**kern"; // used with -r and -R options.
 // sub-spine "b" expansion model: how to generate data for a secondary
 // spine if the primary spine is not divided.  Models are:
 //    'd': duplicate primary spine (or "a" subspine) data (default)
@@ -119,12 +119,12 @@ const char*  reverseInterp = "**kern"; // used with -r and -R options.
 //         data.  'n' will be used for non-kern spines when 'r' is used.
 int          submodel = 'd';     // used with -m option
 const char* editorialInterpretation = "yy";
-const char* cointerp = "**kern";   // used with -c option
+string      cointerp = "**kern";   // used with -c option
 int         comodel  = 0;          // used with -M option
 const char* subtokenseparator = " "; // used with a future option
 int         interpstate = 0;       // used -I or with -i
 int         grepQ       = 0;       // used with -g option
-const char* grepString  = "";      // used with -g option
+string      grepString  = "";      // used with -g option
 
 
 
@@ -133,7 +133,7 @@ const char* grepString  = "";      // used with -g option
 
 int main(int argc, char* argv[]) {
    checkOptions(options, argc, argv);
-   HumdrumStream streamer(options.getArgList());
+   HumdrumStream streamer(options);
    HumdrumFile infile;
 
    while (streamer.read(infile)) {
@@ -212,7 +212,7 @@ void processFile(HumdrumFile& infile) {
 //
 
 void fillFieldDataByGrep(Array<int>& field, Array<int>& subfield, 
-      Array<int>& model, const char* searchstring, HumdrumFile& infile, 
+      Array<int>& model, const string& searchstring, HumdrumFile& infile, 
       int state) {
 
    field.setSize(infile.getMaxTracks()+1);
@@ -234,7 +234,7 @@ void fillFieldDataByGrep(Array<int>& field, Array<int>& subfield,
          continue;
       }
       for (j=0; j<infile[i].getFieldCount(); j++) {
-         if (pre.search(infile[i][j], searchstring, "")) {
+         if (pre.search(infile[i][j], searchstring.data(), "")) {
             track = infile[i].getPrimaryTrack(j);
             tracks[track] = 1;
          }
@@ -262,8 +262,7 @@ void fillFieldDataByGrep(Array<int>& field, Array<int>& subfield,
 //
 
 void getInterpretationFields(Array<int>& field, Array<int>& subfield, 
-      Array<int>& model, HumdrumFile& infile, const char* interps, 
-      int state) {
+      Array<int>& model, HumdrumFile& infile, string& interps, int state) {
    Array<Array<char> > sstrings; // search strings
    sstrings.setSize(100);
    sstrings.setSize(0);
@@ -271,8 +270,8 @@ void getInterpretationFields(Array<int>& field, Array<int>& subfield,
 
    int i, j, k;
    Array<char> buffer;
-   buffer.setSize(strlen(interps)+1);
-   strcpy(buffer.getBase(), interps);
+   buffer.setSize(interps.size()+1);
+   strcpy(buffer.getBase(), interps.data());
 
    PerlRegularExpression pre;
    pre.sar(buffer, "\\s+", "", "g");  // remove spaces from the search string.
@@ -341,7 +340,7 @@ void getInterpretationFields(Array<int>& field, Array<int>& subfield,
 //
 
 void expandSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
-      HumdrumFile& infile, const char* interp) {
+      HumdrumFile& infile, string& interp) {
 
    Array<int> splits;
    splits.setSize(infile.getMaxTracks()+1);
@@ -371,7 +370,7 @@ void expandSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
    model.setSize(0);
    model.allowGrowth(1);
    int allQ = 0;
-   if (strcmp(interp, "") == 0) {
+   if (interp.size() == 0) {
       allQ = 1;
    }
 
@@ -436,7 +435,7 @@ void expandSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
 //
 
 void reverseSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
-      HumdrumFile& infile, const char* exinterp) {
+      HumdrumFile& infile, const string& exinterp) {
 
    Array<int> target;
    target.setSize(infile.getMaxTracks()+1);
@@ -446,7 +445,7 @@ void reverseSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
    int t;
 
    for (t=1; t<=infile.getMaxTracks(); t++) {
-      if (strcmp(infile.getTrackExInterp(t), exinterp) == 0) {
+      if (strcmp(infile.getTrackExInterp(t), exinterp.data()) == 0) {
          target[t] = 1;
       }
    }
@@ -891,7 +890,7 @@ void extractFields(HumdrumFile& infile, Array<int>& field,
 
 void dealWithCospine(Array<int>& field, Array<int>& subfield, Array<int>& model,
       int targetindex, HumdrumFile& infile, int line, int cospine, 
-      int comodel, int submodel, const char* cointerp) {
+      int comodel, int submodel, const string& cointerp) {
 
    Array<Array<char> > cotokens;
    cotokens.setSize(50);
@@ -936,7 +935,7 @@ void dealWithCospine(Array<int>& field, Array<int>& subfield, Array<int>& model,
    subspineindex.setGrowth(1000);
 
    for (j=0; j<infile[line].getFieldCount(); j++) {
-      if (strcmp(infile[line].getExInterp(j), cointerp) != 0) {
+      if (strcmp(infile[line].getExInterp(j), cointerp.data()) != 0) {
          continue;
       }
       if (strcmp(infile[line][j], ".") == 0) {
@@ -974,7 +973,7 @@ void dealWithCospine(Array<int>& field, Array<int>& subfield, Array<int>& model,
 
    int start = 0;
    for (i=0; i<field.getSize(); i++) {
-      if (strcmp(infile.getTrackExInterp(field[i]), cointerp) != 0) {
+      if (strcmp(infile.getTrackExInterp(field[i]), cointerp.data()) != 0) {
          continue;
       }
 
@@ -1654,7 +1653,7 @@ int isInList(int number, Array<int>& listofnum) {
 //
 
 void getTraceData(Array<int>& startline, Array<Array<int> >& fields, 
-      const char* tracefile, HumdrumFile& infile) {
+      const string& tracefile, HumdrumFile& infile) {
    char buffer[1024] = {0};
    PerlRegularExpression pre;
    int linenum;
@@ -1666,7 +1665,7 @@ void getTraceData(Array<int>& startline, Array<Array<int> >& fields,
    fields.setSize(0);
 
    ifstream input;
-   input.open(tracefile);
+   input.open(tracefile.data());
    if (!input.is_open()) {
       cerr << "Error: cannot open file for reading: " << tracefile << endl;
       exit(1);
@@ -1712,7 +1711,7 @@ void getTraceData(Array<int>& startline, Array<Array<int> >& fields,
 // extractTrace --
 //
 
-void extractTrace(HumdrumFile& infile, const char* tracefile) {
+void extractTrace(HumdrumFile& infile, const string& tracefile) {
    Array<int> startline;
    Array<Array<int> > fields;
    getTraceData(startline, fields, tracefile, infile);
@@ -1815,7 +1814,7 @@ void printTraceLine(HumdrumFile& infile, int line, Array<int>& field) {
 //    other interpretation matching other than exclusive interpretations.
 //
 
-void extractInterpretations(HumdrumFile& infile, const char* interps) {
+void extractInterpretations(HumdrumFile& infile, string& interps) {
    int i;
    int j;
    int column = 0;
@@ -1847,8 +1846,8 @@ void extractInterpretations(HumdrumFile& infile, const char* interps) {
                buffer.setSize(buffer.getSize()+strlen("\\b"));
                strcat(buffer.getBase(), "\\b"); // word boundary marker
 	       pre.sar(buffer, "\\*", "\\\\*", "g");
-               if (pre.search(interps, buffer.getBase()) == 0) {
-               // if (strstr(interps, infile[i].getExInterp(j)) == NULL) {
+               if (pre.search(interps.data(), buffer.getBase()) == 0) {
+               // if (strstr(interps.data(), infile[i].getExInterp(j)) == NULL) {
                   continue;
                }
                if (column != 0) {
@@ -1923,23 +1922,24 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
    excludeQ    = opts.getBoolean("x");
    interpQ     = opts.getBoolean("i");
-   interps     = opts.getString("i").data();
+   interps     = opts.getString("i");
+
    interpstate = 1;
    if (!interpQ) {
       interpQ = opts.getBoolean("I");
       interpstate = 0;
-      interps = opts.getString("I").data();
+      interps = opts.getString("I");
    }
 	     
    fieldQ      = opts.getBoolean("f");
    debugQ      = opts.getBoolean("debug");
    countQ      = opts.getBoolean("count");
    traceQ      = opts.getBoolean("trace");
-   tracefile   = opts.getString("trace").data();
+   tracefile   = opts.getString("trace");
    reverseQ    = opts.getBoolean("reverse");
    expandQ     = opts.getBoolean("expand") || opts.getBoolean("E");
    submodel    = opts.getString("model").data()[0];
-   cointerp    = opts.getString("cointerp").data();
+   cointerp    = opts.getString("cointerp");
    comodel     = opts.getString("cospine-model").data()[0];
 
    if (opts.getBoolean("no-editoral-rests")) {
@@ -1952,13 +1952,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	    
    if (expandQ) {
       fieldQ = 1;
-      expandInterp = opts.getString("expand-interp").data();
+      expandInterp = opts.getString("expand-interp");
    }
 
    if (!reverseQ) {
       reverseQ = opts.getBoolean("R");
       if (reverseQ) {
-         reverseInterp = opts.getString("R").data();
+         reverseInterp = opts.getString("R");
       }
    }
 
@@ -1967,13 +1967,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (excludeQ) {
-      fieldstring = opts.getString("x").data();
+      fieldstring = opts.getString("x");
    } else if (fieldQ) {
-      fieldstring = opts.getString("f").data();
+      fieldstring = opts.getString("f");
    }
 
    grepQ = opts.getBoolean("grep");
-   grepString = opts.getString("grep").data();
+   grepString = opts.getString("grep");
 
 }
 

@@ -158,7 +158,7 @@ int MuseRecord::getPitch(void) {
 
 char* MuseRecord::getPitch(char* output) {
    getNoteField(output);
-   int length = (int)strlen(output);
+   int length = strlen(output);
    int index = length-1;
    while (index >= 0 && output[index] == ' ') {
       output[index] = '\0';
@@ -365,7 +365,7 @@ void MuseRecord::setPitch(const char* pitchname) {
 
 
 void MuseRecord::setPitchAtIndex(int index, const char* pitchname) {
-   int len = (int)strlen(pitchname);
+   int len = strlen(pitchname);
    if ((len > 4) && (strcmp(pitchname, "irest")!= 0)) {
       cerr << "Error in MuseRecord::setPitchAtIndex: " << pitchname << endl;
       exit(1);
@@ -419,7 +419,7 @@ char* MuseRecord::getTickDurationField(char* output) {
 
 char* MuseRecord::getTickDuration(char* output) {
    getTickDurationField(output);
-   int length = (int)strlen(output);
+   int length = strlen(output);
    int i = length - 1;
    while (i>0 && (output[i] == '-' || output[i] == ' ')) {
       output[i] = '\0';
@@ -869,7 +869,7 @@ void MuseRecord::setTicks(int value) {
    }
    char buffer[8] = {0};
    sprintf(buffer, "%d", value);
-   int len = (int)strlen(buffer);
+   int len = strlen(buffer);
    insertString(5+3-len+1, buffer);
 }
 
@@ -970,7 +970,7 @@ int MuseRecord::addAdditionalNotation(char symbol) {
 // add a multi-character additional notation (such as a dynamic like mf):
 
 int MuseRecord::addAdditionalNotation(const char* symbol) {
-   int len = (int)strlen(symbol);
+   int len = strlen(symbol);
    // search columns 32 to 43 for the specific symbol.
    // if it is found, then don't add.  If it is not found,
    // then do add.
@@ -2296,7 +2296,7 @@ int MuseRecord::addEditorialLevelQ(void) {
 //
 
 int MuseRecord::findField(const char* key) {
-   int length = (int)strlen(key);
+   int length = strlen(key);
    char notations[128];
    int output = 0;
    getAdditionalNotationsField(notations);
@@ -2752,7 +2752,7 @@ int MuseRecord::measureFermataQ(void) {
 
 int MuseRecord::measureFlagQ(const char* key) {
    int output = 0;
-   int length = (int)strlen(key);
+   int length = strlen(key);
    for (int i=17; i<=80-length && i<getLength(); i++) {
       if (getColumn(i) == key[0]) {
          output = 1;
@@ -2786,7 +2786,7 @@ void MuseRecord::addMeasureFlag(const char* strang) {
    Array<char> flags;
    getColumns(flags, 17, 80);
    Array<char> flag;
-   flag.setSize((int)strlen(strang)+1);
+   flag.setSize(strlen(strang)+1);
    PerlRegularExpression pre;
    // pre.setBasicSyntax();
    strcpy(flag.getBase(), strang);
@@ -2798,7 +2798,7 @@ void MuseRecord::addMeasureFlag(const char* strang) {
    }
 
    pre.sar(flags, "\\s+$", "", "");
-   flags.setSize(flags.getSize() + (int)strlen(strang) + 1);
+   flags.setSize(flags.getSize() + strlen(strang) + 1);
    strcat(flags.getBase(), " ");
    strcat(flags.getBase(), strang);
    setColumns(flags, 17, 80);
@@ -2930,8 +2930,8 @@ int MuseRecord::attributeQ(const char* attribute) {
    getAttributeList(attributelist);
 
    int output = 0;
-   int attstrlength = (int)strlen(attributelist);
-   int attlength = (int)strlen(attribute);
+   int attstrlength = strlen(attributelist);
+   int attlength = strlen(attribute);
 
    for (int i=0; i<attstrlength-attlength+1; i++) {
       if (attributelist[i] == attribute[0]) {
@@ -3463,7 +3463,7 @@ int MuseRecord::getAddElementIndex(int& index, char* output, char* input) {
 //
  
 char* MuseRecord::zerase(char* output, int num) {
-   int length = (int)strlen(output);
+   int length = strlen(output);
    if (num >= length) {
       output[0] = '\0';
    } else {

@@ -44,7 +44,7 @@ double    tdefault  = 60.0;   // used with the -t option
 int main(int argc, char** argv) {
    // process the command-line options
    checkOptions(options, argc, argv);
-   HumdrumStream streamer(options.getArgList());
+   HumdrumStream streamer(options);
    HumdrumFile hfile;
    if (!streamer.read(hfile)) {
       // no data could be read

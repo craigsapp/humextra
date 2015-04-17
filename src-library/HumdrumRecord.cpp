@@ -417,7 +417,7 @@ char* HumdrumRecord::getBibKey(char* buffer, int maxsize) {
       strcpy(buffer, recordFields[0]+3);
    }
    int i;
-   int length = (int)strlen(buffer);
+   int length = strlen(buffer);
    for (i=0; i<length; i++) {
       if (buffer[i] == ':') {
          buffer[i] = '\0';
@@ -441,7 +441,7 @@ char* HumdrumRecord::getBibKey(Array<char>& buffer) {
      return buffer.getBase();
    }
 
-   int length = (int)strlen(recordFields[0]+3);
+   int length = strlen(recordFields[0]+3);
 
    buffer.setSize(length+1);
 
@@ -479,7 +479,7 @@ char* HumdrumRecord::getBibValue(char* buffer, int maxsize) {
    }
 
 /*
-   int length = (int)strlen(recordString);
+   int length = strlen(recordString);
    int i;
    int j;
 
@@ -490,7 +490,7 @@ char* HumdrumRecord::getBibValue(char* buffer, int maxsize) {
             i++;
          }
          strncpy(buffer, recordString + i, maxsize);
-         length = (int)strlen(buffer);
+         length = strlen(buffer);
          for (j=length-1; j>=0; j++) {
             if (std::isspace(buffer[j])) {
                buffer[j] = '\0';
@@ -522,7 +522,7 @@ char* HumdrumRecord::getBibValue(Array<char>& buffer) {
    PerlRegularExpression pre;
    int length;
    if (pre.search(recordString, "^!!![^:]+:\\s*(.*)\\s*$", "")) {
-      length = (int)strlen(pre.getSubmatch(1));
+      length = strlen(pre.getSubmatch(1));
       buffer.setSize(length+1);
       strcpy(buffer.getBase(), pre.getSubmatch());
       return buffer.getBase();
@@ -1039,7 +1039,7 @@ char* HumdrumRecord::getToken(char* buffer, int fieldIndex, int tokenIndex,
       return buffer;
    }
 
-   int length = (int)strlen(current);
+   int length = strlen(current);
    if (length > buffersize) {
       length = buffersize - 1;
    }
@@ -1056,11 +1056,11 @@ char* HumdrumRecord::getToken(char* buffer, int fieldIndex, int tokenIndex,
 char* HumdrumRecord::getToken(Array<char>& buffer, int fieldIndex, 
       int tokenIndex, int buffersize, char separator) {
    HumdrumRecord& arecord = *this;
-   int len = (int)strlen(arecord[fieldIndex]) + 1 + 4;
+   int len = strlen(arecord[fieldIndex]) + 1 + 4;
    buffer.setSize(len);
    arecord.getToken(buffer.getBase(), fieldIndex, tokenIndex, 
       len, separator);
-   len = (int)strlen(buffer.getBase()) + 1;
+   len = strlen(buffer.getBase()) + 1;
    buffer.setSize(len);
    return buffer.getBase();
 }
@@ -2031,7 +2031,7 @@ HumdrumRecord& HumdrumRecord::operator=(const HumdrumRecord& aRecord) {
       if (interpretation.getSize() > 0) {
           interpretation[i] = aRecord.interpretation[i];
       }
-      allocSize = (int)strlen(aRecord.recordFields[i]) + 1;
+      allocSize = strlen(aRecord.recordFields[i]) + 1;
 
       recordFields[i] = new char[allocSize];
       strcpy(recordFields[i], aRecord.recordFields[i]);
@@ -2247,7 +2247,7 @@ void HumdrumRecord::setExInterp(int index, const char* interpString) {
 
 void HumdrumRecord::setToken(int index, const char* aString) {
    delete [] recordFields[index];
-   int len = (int)strlen(aString);
+   int len = strlen(aString);
    recordFields[index] = new char[len+1];
    strcpy(recordFields[index], aString);
    modifiedQ = 1;
@@ -2265,7 +2265,7 @@ void HumdrumRecord::setLine(const char* aLine) {
       delete [] recordString;
       recordString = NULL;
    }
-   int length = (int)strlen(aLine);
+   int length = strlen(aLine);
    recordString = new char[length+1];
    strcpy(recordString, aLine);
    if (recordString[length-1] == 0x0d || recordString[length-1] == 0x0a) {
@@ -2417,7 +2417,7 @@ const char* HumdrumRecord::getBibliographicMeaning(Array<char>& output,
    char keybuf[128] = {0};
 
    // check for @ signs which indicate language of bibliographic value.
-   int len = (int)strlen(code);
+   int len = strlen(code);
    if (len > 100) {
       return "ERROR: Bibliographic key is too long.";
    }
@@ -2428,7 +2428,7 @@ const char* HumdrumRecord::getBibliographicMeaning(Array<char>& output,
    strcpy(langbuf, pre.getSubmatch(4));
    strcpy(keybuf, pre.getSubmatch(1));
 
-   atcount = (int)strlen(pre.getSubmatch(3));
+   atcount = strlen(pre.getSubmatch(3));
 
    int numberfound = 0;
    float number = 2357911.131719;
@@ -2824,7 +2824,7 @@ const char* HumdrumRecord::getBibliographicMeaning(Array<char>& output,
 
    description << ends;
 
-   len = (int)strlen(description.CSTRING);
+   len = strlen(description.CSTRING);
    output.setSize(len+1);
    strcpy(output.getBase(), description.CSTRING);
 
@@ -2842,7 +2842,7 @@ const char* HumdrumRecord::getBibliographicMeaning(Array<char>& output,
 const char* HumdrumRecord::getLanguageName(const char* code) {
    char string[8] = {0};
    strncpy(string, code, 3);
-   int len = (int)strlen(string);
+   int len = strlen(string);
    int i;
    for (i=0; i<len; i++) {
       string[i] = std::tolower(string[i]);
@@ -3571,7 +3571,7 @@ const char* HumdrumRecord::getBibLangIso639_2(const char* string) {
       ptr++;
    }
 
-   int len = (int)strlen(ptr);
+   int len = strlen(ptr);
    if ((len > 3) || (len < 2)) {
       // don't know what to do with a long code, since 2 or three letter
       // code is expected
@@ -4432,7 +4432,7 @@ void HumdrumRecord::setSize(int asize) {
       recordFields[i] = new char[2];
       strcpy(recordFields[i], ".");
       sprintf(buffer, "%d", i+1);
-      len = (int)strlen(buffer);
+      len = strlen(buffer);
       spineids[i] = new char[len+1];
       strcpy(spineids[i], buffer);
    }

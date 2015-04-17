@@ -816,7 +816,7 @@ istream& operator>>(istream& input, RationalNumber &p ) {
 //
 
 void RationalNumber::verify_number(char *strNum, int is_fraction) { 
-   int len = (int)strlen(strNum); 
+   int len = strlen(strNum); 
    if (is_fraction && (len == 0 || !isNumber(strNum))) { 
       _error_msg("this is not a rational number."); 
       assert(isNumber(strNum)); 
@@ -835,7 +835,7 @@ void RationalNumber::verify_number(char *strNum, int is_fraction) {
 //
 
 int RationalNumber::isNumber(char *number) {
-   int len = (int)strlen(number);
+   int len = strlen(number);
    int isnumber = true;
    int i = 0;
    

@@ -73,8 +73,8 @@ class Options {
       const string&   getArgument       (int index);
       int             getArgCount       (void);
       int             getArgumentCount  (void);
-      const vector<string>& getArgList  (void);
-      const vector<string>& getArgumentList (void);
+      vector<string>& getArgList        (vector<string>& output);
+      vector<string>& getArgumentList   (vector<string>& output);
       int             getBoolean        (const string& optionName);
       string          getCommand        (void);
       const string&   getCommandLine    (void);
@@ -117,7 +117,7 @@ class Options {
       vector<string>           oargv;
       string                   commandString;
       char                     optionFlag;
-      vector<string>           argument;
+      vector<string*>          argument;
 
       vector<Option_register*> optionRegister;
       map<string, int>         optionList;

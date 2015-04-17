@@ -168,7 +168,7 @@ void ScoreRecordSimple::printAscii(ostream& out, int roundQ, int verboseQ) {
          strcpy(buffer, "0.00000");
       }
 
-      bufflen = (int)strlen(buffer);
+      bufflen = strlen(buffer);
 
       switch (i) {
          case P1: 
@@ -281,7 +281,7 @@ void ScoreRecordSimple::printAscii(char* buffer1, char* buffer2, int max,
    printAscii(stream, roundQ, verboseQ);
    stream << ends;
 
-   int length = (int)strlen(stream.CSTRING);
+   int length = strlen(stream.CSTRING);
    if (length > max) {
       cerr << "ERROR: Score Record too long" << endl;
       exit(1);
@@ -295,7 +295,7 @@ void ScoreRecordSimple::printAscii(char* buffer1, char* buffer2, int max,
       buffer2[0] = '\0';
    }
 
-   //length = (int)strlen(buffer1);
+   //length = strlen(buffer1);
    //if (!isprint(buffer1[length-1])) {
    //   buffer1[length-1] = '\0';
    //}
@@ -328,8 +328,8 @@ int ScoreRecordSimple::writeBinary(ostream& out) {
    int i;
    if (getValue(0) == P1_Text) {
       // set the length of the text in P12
-      int textlen = (int)strlen(getTextData());
-      int fontlen = (int)strlen(getTextFont());
+      int textlen = strlen(getTextData());
+      int fontlen = strlen(getTextFont());
       int totaltextlen = textlen + fontlen;
 
       setPValue(12, totaltextlen);
@@ -488,7 +488,7 @@ float ScoreRecordSimple::readLittleEndian(istream& instream) {
 //
 
 void ScoreRecordSimple::adjustBuffer(char *buffer) {
-   int len = (int)strlen(buffer);
+   int len = strlen(buffer);
    int i;
    for (i=len-1; i>0; i--) {
       if (buffer[i] == '0') {
@@ -529,7 +529,7 @@ const char* ScoreRecordSimple::getTextData(void) {
 //
 
 void ScoreRecordSimple::setTextData(const char* buffer) {
-   int length = (int)strlen(buffer);
+   int length = strlen(buffer);
    textdata.setSize(length+1);
    strcpy(textdata.getBase(), buffer);
 }
@@ -558,7 +558,7 @@ const char* ScoreRecordSimple::getTextFont(void) {
 //
 
 void ScoreRecordSimple::setTextFont(const char* buffer) {
-   int length = (int)strlen(buffer);
+   int length = strlen(buffer);
    textfont.setSize(length+1);
    strcpy(textfont.getBase(), buffer);
 }

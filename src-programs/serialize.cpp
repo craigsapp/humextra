@@ -46,7 +46,7 @@ int         chordQ  = 0;     // extract chord notes serially as well
 int         Exstart = 0;     // used for -m -i option interaction
 int         Separator = ' '; // used with -c option and -s option
 int         subspineQ = 0;   // used with -S option
-const char* marker = ".";    // used with -e option
+string      marker = ".";    // used with -e option
 int         markerQ = 0;     // used with -e option
 int         parsubQ = 0;     // used with -p option
 Array<int>  parmax;          // used with -p option
@@ -698,7 +698,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
    if (opts.getBoolean("marker")) {
       markerQ = 1;
-      marker = opts.getString("marker").data();
+      marker = opts.getString("marker");
    }
    parsubQ    = opts.getBoolean("parsub");
   

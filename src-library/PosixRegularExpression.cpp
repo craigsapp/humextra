@@ -67,7 +67,7 @@ PosixRegularExpression::~PosixRegularExpression() {
 //
 
 void PosixRegularExpression::setReplaceString(const char* replacestring) {
-   int len = (int)strlen(replacestring);
+   int len = strlen(replacestring);
    replace_string.setSize(len+1);
    strcpy(replace_string.getBase(), replacestring);
 }
@@ -82,7 +82,7 @@ void PosixRegularExpression::setReplaceString(const char* replacestring) {
 void PosixRegularExpression::setSearchString(const char* searchstring) {
    if (strcmp(searchstring, search_string.getBase()) != 0) {
       valid = 0;
-      int len = (int)strlen(searchstring);
+      int len = strlen(searchstring);
       search_string.setSize(len+1);
       strcpy(search_string.getBase(), searchstring);
    }
@@ -407,7 +407,7 @@ int PosixRegularExpression::searchAndReplace(Array<char>& output,
 
    tempdata << input;   // store the piece of input after last replace.
    tempdata << ends;
-   int len = (int)strlen(tempdata.CSTRING);
+   int len = strlen(tempdata.CSTRING);
    output.setSize(len+1);
    strcpy(output.getBase(), tempdata.CSTRING);
    return counter;

@@ -1080,7 +1080,7 @@ Array<char*>* PerformData::segment(const char* line) {
    strncpy(buffer, line, 1023);
    char* field = strtok(buffer, "\t"); 
    while (field != NULL) {
-      length = (int)strlen(field);
+      length = strlen(field);
       temp = new char[length + 1];
       strcpy(temp, field);
       output.append(temp);      

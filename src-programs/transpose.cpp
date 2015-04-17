@@ -100,9 +100,9 @@ void      doTranspositionAnalysis(Array<Array<Array<double> > >& analysis);
 int       calculateTranspositionFromKey(int targetkey, HumdrumFile& infile);
 
 // spine list parsing functions:
-void      processFieldEntry      (Array<int>& field, const char* string, 
+void      processFieldEntry      (Array<int>& field, const char* astring, 
                                   HumdrumFile& infile);
-void      fillFieldData          (Array<int>& field, const char* fieldstring, 
+void      fillFieldData          (Array<int>& field, const string& fieldstring, 
                                   HumdrumFile& infile);
 void      removeDollarsFromString(Array<char>& buffer, int maxtrack);
 
@@ -116,7 +116,7 @@ int         currentkey   = 0;
 int         autoQ        = 0;    // used with --auto option
 int         debugQ       = 0;    // used with --debug option
 int         spineQ       = 0;    // used with -s option
-const char* spinestring  = "";   // used with -s option
+string      spinestring  = "";   // used with -s option
 int         octave       = 0;    // used with -o option
 int         concertQ     = 0;    // used with -C option
 int         writtenQ     = 0;    // used with -W option
@@ -961,7 +961,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    autoQ        = opts.getBoolean("auto");
    debugQ       = opts.getBoolean("debug");
    spineQ       = opts.getBoolean("spines");
-   spinestring  = opts.getString("spines").data();
+   spinestring  = opts.getString("spines");
    octave       = opts.getInteger("octave");
    concertQ     = opts.getBoolean("concert");
    writtenQ     = opts.getBoolean("written");
@@ -1654,7 +1654,7 @@ void addToHistogramDouble(Array<Array<double> >& histogram, int pc,
 // fillFieldData --
 //
 
-void fillFieldData(Array<int>& field, const char* fieldstring, 
+void fillFieldData(Array<int>& field, const string& fieldstring, 
       HumdrumFile& infile) {
 
    int maxtrack = infile.getMaxTracks();
@@ -1669,8 +1669,8 @@ void fillFieldData(Array<int>& field, const char* fieldstring,
 
    PerlRegularExpression pre;
    Array<char> buffer;
-   buffer.setSize(strlen(fieldstring)+1);
-   strcpy(buffer.getBase(), fieldstring);
+   buffer.setSize(fieldstring.size()+1);
+   strcpy(buffer.getBase(), fieldstring.data());
    pre.sar(buffer, "\\s", "", "gs");
    int start = 0;
    int value = 0;
@@ -1698,15 +1698,15 @@ void fillFieldData(Array<int>& field, const char* fieldstring,
 //   $-1 expands to maximum spine track minus 1, etc.
 //
 
-void processFieldEntry(Array<int>& field, const char* string, 
+void processFieldEntry(Array<int>& field, const char* astring, 
       HumdrumFile& infile) {
 
    int maxtrack = infile.getMaxTracks();
 
    PerlRegularExpression pre;
    Array<char> buffer;
-   buffer.setSize(strlen(string)+1);
-   strcpy(buffer.getBase(), string);
+   buffer.setSize(strlen(astring)+1);
+   strcpy(buffer.getBase(), astring);
 
    // remove any comma left at end of input string (or anywhere else)
    pre.sar(buffer, ",", "", "g");
@@ -1719,25 +1719,25 @@ void processFieldEntry(Array<int>& field, const char* string,
       int lastone  = strtol(pre.getSubmatch(2), NULL, 10);
 
       if ((firstone < 1) && (firstone != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\"" 
               << " contains too small a number at start: " << firstone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if ((lastone < 1) && (lastone != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\"" 
               << " contains too small a number at end: " << lastone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if (firstone > maxtrack) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\"" 
               << " contains number too large at start: " << firstone << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);
       }
       if (lastone > maxtrack) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\"" 
               << " contains number too large at end: " << lastone << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);
@@ -1756,13 +1756,13 @@ void processFieldEntry(Array<int>& field, const char* string,
    } else if (pre.search(buffer.getBase(), "^(\\d+)")) {
       int value = strtol(pre.getSubmatch(1), NULL, 10);
       if ((value < 1) && (value != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\"" 
               << " contains too small a number at end: " << value << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if (value > maxtrack) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\"" 
               << " contains number too large at start: " << value << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);

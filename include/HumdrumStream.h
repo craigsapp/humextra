@@ -18,6 +18,7 @@
 
 #include "HumdrumFile.h"
 #include "Array.h"
+#include "Options.h"
 
 #include <vector>
 #include <iostream>
@@ -48,6 +49,7 @@ class HumdrumStream {
                       HumdrumStream      (void);
                       HumdrumStream      (char** list);
                       HumdrumStream      (const vector<string>& list);
+                      HumdrumStream      (Options& options);
 
       int             setFileList        (char** list);
       int             setFileList        (const vector<string>& list);

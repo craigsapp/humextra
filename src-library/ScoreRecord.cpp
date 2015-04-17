@@ -256,7 +256,7 @@ void ScoreRecord::printAscii(ostream& out, int roundQ, int verboseQ,
          strcpy(buffer, "0.00000");
       }
 
-      bufflen = (int)strlen(buffer);
+      bufflen = strlen(buffer);
 
       switch (i) {
          case P1: 
@@ -372,7 +372,7 @@ void ScoreRecord::printAscii(char* buffer1, char* buffer2, int max,
    printAscii(stream, roundQ, verboseQ, indent);
    stream << ends;
 
-   int length = (int)strlen(stream.CSTRING);
+   int length = strlen(stream.CSTRING);
    if (length > max) {
       cerr << "ERROR: Score Record too long" << endl;
       exit(1);
@@ -386,7 +386,7 @@ void ScoreRecord::printAscii(char* buffer1, char* buffer2, int max,
       buffer2[0] = '\0';
    }
 
-   //length = (int)strlen(buffer1);
+   //length = strlen(buffer1);
    //if (!isprint(buffer1[length-1])) {
    //   buffer1[length-1] = '\0';
    //}
@@ -465,7 +465,7 @@ int ScoreRecord::writeBinary(ostream& out) {
    int i;
    if (getValue(0) == P1_Text) {
       // set the length of the text in P12
-      int textlen = (int)strlen(getTextData());
+      int textlen = strlen(getTextData());
       int totaltextlen = textlen;
 
       setPValue(12, totaltextlen);
@@ -604,7 +604,7 @@ double ScoreRecord::readLittleEndian(istream& instream) {
 //
 
 void ScoreRecord::adjustBuffer(char *buffer) {
-   int len = (int)strlen(buffer);
+   int len = strlen(buffer);
    int i;
    for (i=len-1; i>0; i--) {
       if (buffer[i] == '0') {
@@ -1425,7 +1425,7 @@ int ScoreRecord::isWordMiddle(void) {
 
 Array<char>& ScoreRecord::getTextDataWithoutFonts(Array<char>& textdata) {
    PerlRegularExpression pre;
-   textdata.setSize((int)strlen(getTextData())+1);
+   textdata.setSize(strlen(getTextData())+1);
    strcpy(textdata.getBase(), getTextData());
    pre.sar(textdata, "_\\d\\d", "", "g");
    return textdata;

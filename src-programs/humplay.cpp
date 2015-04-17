@@ -745,7 +745,9 @@ void checkOptions(void) {
    //} else {
    //   inputNewFile();
    //}
-   streamer.setFileList(options.getArgList());
+   vector<string> list;
+   options.getArgList(list);
+   streamer.setFileList(list);
 
    mine = options.getInteger("min");
    if (mine < 0) {

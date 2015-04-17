@@ -62,7 +62,7 @@ void      printOutput        (HumdrumFile& file,
 			      Array<RationalNumber>& Dfeatures, 
 			      Array<int>& Dlines, Array<int>& tickanalysis);
 RationalNumber getPickupDuration (HumdrumFile& file);
-void      fillSearchString   (Array<double>& searcher, const char* string);
+void      fillSearchString   (Array<double>& searcher, const string& astring);
 void      printSearchResults (HumdrumFile& infile, 
 		              Array<RationalNumber>& Bfeatures,
                               Array<int>& Blines, 
@@ -131,7 +131,7 @@ int       tickQ    = 0;        // used with -t option
 int       rationalQ= 0;        // used with -r option
 int       tpwQ     = 0;        // used with --tpw option
 int       tpqQ     = 0;        // used with --tpq option
-const char* beatbase = "4";    // used with --beatsize option
+string    beatbase = "4";      // used with --beatsize option
 int       uQ       = 0;        // used for -f and -u interactions
 int       debugQ   = 0;        // used with --debug option
 
@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
    for (int i=0; i<infiles.getCount(); i++) {
 
       // analyze the input file according to command-line options
-      infiles[i].analyzeRhythm(beatbase);
+      infiles[i].analyzeRhythm(beatbase.data());
 
       Array<int> tickanalysis;
       tickanalysis.setSize(infiles[i].getNumLines());
@@ -1301,7 +1301,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    tpwQ      = opts.getBoolean("tpw");
    tpqQ      = opts.getBoolean("tpq");
    Rvalue    = opts.getDouble("R");
-   beatbase  = opts.getString("beatsize").data();
+   beatbase  = opts.getString("beatsize");
    uQ        = opts.getBoolean("beatsize");
    debugQ    = opts.getBoolean("debug");
 
@@ -1318,10 +1318,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    Dsearch.setSize(0);
 
    if (opts.getBoolean("B")) {
-      fillSearchString(Bsearch, opts.getString("B").data());
+      fillSearchString(Bsearch, opts.getString("B"));
    } 
    if (opts.getBoolean("D")) {
-      fillSearchString(Dsearch, opts.getString("D").data());
+      fillSearchString(Dsearch, opts.getString("D"));
    }
 
    if (prependQ && appendQ) {
@@ -1346,11 +1346,11 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 // fillSearchString --
 //
 
-void fillSearchString(Array<double>& searcher, const char* string) {
-   int len = strlen(string);
+void fillSearchString(Array<double>& searcher, const string& astring) {
+   int len = astring.size();
    char* tempstr;
    tempstr = new char[len+1];
-   strcpy(tempstr, string);
+   strcpy(tempstr, astring.data());
    char* ptr;
    ptr = strtok(tempstr, " \t\n:;,");
    double value;

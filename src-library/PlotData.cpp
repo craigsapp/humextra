@@ -470,7 +470,7 @@ void PlotData::setData(Array<double>& xvals, Array<double>& yvals,
 
 void PlotData::setComment(const char* aComment) {
    if (aComment != NULL) {
-      int csize = (int)strlen(aComment);
+      int csize = strlen(aComment);
       comment.setSize(csize+1);
       strcpy(comment.getBase(), aComment);
    } else {

@@ -289,7 +289,7 @@ Array<char> Spacer;
 
 int main(int argc, char** argv) {
    checkOptions(options, argc, argv);
-   HumdrumStream streamer(options.getArgList());
+   HumdrumStream streamer(options);
    HumdrumFile infile;
 
    int count = 0;

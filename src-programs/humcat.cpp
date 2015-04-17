@@ -49,7 +49,7 @@ int       segmentQ = 0;         // used with -s option
 int main(int argc, char** argv) {
    // process the command-line options
    checkOptions(options, argc, argv);
-   HumdrumStream streamer(options.getArgList());
+   HumdrumStream streamer(options);
 
    Array<Array<char> > idtags;
    int idtagQ = 0;

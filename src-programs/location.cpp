@@ -69,7 +69,7 @@ RationalNumber absFactor = 1;  // used with -q, -h, -w, -e, -x options
 
 int main(int argc, char** argv) {
    checkOptions(options, argc, argv);
-   HumdrumStream streamer(options.getArgList());
+   HumdrumStream streamer(options);
    HumdrumFile infile;
 
    while (streamer.read(infile)) {

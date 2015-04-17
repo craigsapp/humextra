@@ -56,7 +56,7 @@ int          Start         = 1;  // used with -n option
 int main(int argc, char* argv[]) {
    checkOptions(options, argc, argv);
 
-   HumdrumStream streamer(options.getArgList());
+   HumdrumStream streamer(options);
    HumdrumFile infile;
 
    if (countQ) {

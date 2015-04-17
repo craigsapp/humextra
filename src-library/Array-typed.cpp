@@ -133,7 +133,7 @@ Array<char>& Array<char>::operator=(const char* string) {
       object[0] = '\0';
       return object;
    }
-   object.setSize((int)strlen(string)+1);
+   object.setSize(strlen(string)+1);
    strcpy(object.getBase(), string);
    return object;
 }

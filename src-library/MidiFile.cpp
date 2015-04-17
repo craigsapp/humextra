@@ -545,11 +545,11 @@ void MidiFile::setFilename(const char* aname) {
    const char* ptr = strrchr(aname, '/');
    int len;
    if (ptr != NULL) {
-     len = (int)strlen(ptr+1);
+     len = strlen(ptr+1);
      readFileName.setSize(len+1);
      strncpy(readFileName.getBase(), ptr+1, len);
    } else {
-      len = (int)strlen(aname);
+      len = strlen(aname);
       readFileName.setSize(len+1);
       strncpy(readFileName.getBase(), aname, len);
    }
@@ -681,7 +681,7 @@ int MidiFile::addMetaEvent(int aTrack, int aTime, int aType,
 int MidiFile::addMetaEvent(int aTrack, int aTime, int aType, 
       const char* metaData) {
 
-   int length = (int)strlen(metaData);
+   int length = strlen(metaData);
    Array<uchar> buffer;
    buffer.setSize(length);
    int i;

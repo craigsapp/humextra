@@ -105,7 +105,7 @@ double ScoreNamedParameter::getValue(void) {
 //
 
 void ScoreNamedParameter::setNameAndValue(const char* string, double aValue) {
-   int len = (int)strlen(string);
+   int len = strlen(string);
    name.setSize(len+1);
    strcpy(name.getBase(), string);
    value = aValue;
@@ -119,7 +119,7 @@ void ScoreNamedParameter::setNameAndValue(const char* string, double aValue) {
 //
 
 void ScoreNamedParameter::setName(const char* aName) {
-   int len = (int)strlen(aName);
+   int len = strlen(aName);
    name.setSize(len+1);
    strcpy(name.getBase(), aName);
 }
@@ -269,7 +269,7 @@ const char* ScoreParameters::getTextData(void) {
 //
 
 void ScoreParameters::setText(const char* aString) {
-   int len = (int)strlen(aString);
+   int len = strlen(aString);
    text.setSize(len+1);
    strcpy(text.getBase(), aString);
 }

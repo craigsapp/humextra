@@ -232,7 +232,7 @@ void ScoreParametersSimple::clearKeyParams(void) {
 //
 
 void ScoreParametersSimple::appendKeyParameter(const char* string) {
-    int length = (int)strlen(string);
+    int length = strlen(string);
     int index = keyParameters.getSize();
     keyParameters.setSize(keyParameters.getSize()+1);
     keyParameters[index].setSize(length+1);

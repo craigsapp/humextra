@@ -59,7 +59,7 @@ int       SEGMENTS     = 0;    // used if there are more than one segment.
 
 int main(int argc, char** argv) {
    checkOptions(options, argc, argv);
-   HumdrumStream streamer(options.getArgList());
+   HumdrumStream streamer(options);
    HumdrumFile infile;
 
    if (summaryQ) {

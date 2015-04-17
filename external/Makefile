@@ -19,7 +19,7 @@ PCRE = $(wildcard pcre-8.35)
 
 .PHONY: centerpoint $(PCRE)
 
-all: centerpoint pcre
+all: centerpoint pcre improv
 
 centerpoint:
 	(cd centerpoint; $(MAKE) static_release)
@@ -47,11 +47,59 @@ else
 	@echo Error trying to copy static library for pcre
 endif
 
-clean: cleancenterpoint cleanpcre
+clean: cleancenterpoint cleanpcre improv-clean
+
+superclean: cleancenterpoint cleanpcre remove-improv
+
 
 cleancenterpoint:
 	(cd centerpoint; $(MAKE) clean)
 
 cleanpcre:
 #	(cd $(PCRE); $(MAKE) clean)
+
+
+###########################################################################
+##
+## Improv library is for compiling humplay.
+##
+
+
+improv: improv-library
+improv-library: improv-clone
+	-(cd improv && make clean && make library)
+	-rm -rf ../lib/improv
+	-rm ../lib/libimprov.a
+	mkdir -p ../lib/improv
+	(cd ../lib/improv && ar -x ../../external/improv/lib/libimprov.a)
+	(cd ../lib/improv && rm -f Options.o)
+	(cd ../lib/improv && \
+	   for i in *.o; do if [[ -z `nm $$i 2> /dev/null` ]]; then rm $$i; \
+	   fi; done)
+	(cd ../lib/improv && libtool -static *.o -o ../libimprov.a)
+	-rm -rf ../lib/improv
+
+
+improv-clean:
+ifneq ($(wildcard improv),)
+	(cd improv && make superclean)
+endif
+
+
+improv-clone:
+ifeq ($(wildcard improv),)
+	git clone https://github.com/craigsapp/improv
+endif
+
+
+update: improv-update
+improv-update:
+ifeq ($(wildcard improv),)
+	git pull https://github.com/craigsapp/improv
+endif
+
+
+remove-improv:
+	-rm -rf improv
+
 

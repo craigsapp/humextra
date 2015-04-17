@@ -478,7 +478,7 @@ void  addUnDash                (MuseData& tempdata, HumdrumFile& infile,
 void  setupTextAssignments     (HumdrumFile& infile, int& textQ, 
                                 Array<Array<int> >& TextAssignment,
                                 Array<Array<int> >& TextElisions,
-                                const char* textspines);
+                                string& textspines);
 void  track2column             (Array<int>& trackcol, HumdrumFile& infile, 
                                 int row);
 void  addLyrics                (MuseRecord& arecord, HumdrumFile& infile, 
@@ -563,7 +563,7 @@ int    slurQ        = 1;          // used with --no-slurs option
 int    dynamicsQ    = 1;          // used with --no-dynamics option
 int    sfzQ         = 1;          // used with --no-dynamics option
 int    textQ        = 1;          // used with --no-text option
-const char* TextSpines = "";      // used with --text option
+string TextSpines   = "";         // used with --text option
 int    metQ         = 1;          // used with --no-met option
 int    verselimit   = 5;          // used with --vl option
 int    mensuralQ    = 0;          // used with --mensural option
@@ -1418,7 +1418,7 @@ void printWithMd5sum(MuseData& datafile) {
 void setupTextAssignments(HumdrumFile& infile, int& textQ, 
       Array<Array<int> >& TextAssignment, 
       Array<Array<int> >& TextElisions, 
-      const char* textspines) {
+      string& textspines) {
    int i, j, track;
    TextAssignment.setSize(infile.getMaxTracks()+1);
    TextElisions.setSize(infile.getMaxTracks()+1);
@@ -1437,7 +1437,7 @@ void setupTextAssignments(HumdrumFile& infile, int& textQ,
 
 
    // print **text spines if --ls is not used and textspines is empty.
-   if (strlen(textspines) == 0) {
+   if (textspines.size() == 0) {
       textspines = "**text";
    }
 
@@ -1472,7 +1472,7 @@ void setupTextAssignments(HumdrumFile& infile, int& textQ,
             exinterp = "\\b";
             exinterp += (infile[i].getExInterp(j)+2);
             exinterp += "\\b";
-            if (pre.search(textspines, exinterp.getBase(), "")) {
+            if (pre.search(textspines.data(), exinterp.getBase(), "")) {
                track = infile[i].getPrimaryTrack(j);
                foundtext = 1;
                TextAssignment[lastkern].append(track);
@@ -8817,7 +8817,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
    titleQ        = !opts.getBoolean("no-title");
    referenceQ    = !opts.getBoolean("no-reference-records");
    textQ         = !opts.getBoolean("no-text");
-   TextSpines    =  opts.getString("text").data();
+   TextSpines    =  opts.getString("text");
    beamQ         = !opts.getBoolean("no-beams");
    tieQ          = !opts.getBoolean("no-ties");
    excludeQ      =  opts.getBoolean("exclude");

@@ -63,6 +63,17 @@ HumdrumStream::HumdrumStream(const vector<string>& list) {
    setFileList(list);
 }
 
+HumdrumStream::HumdrumStream(Options& options) {
+   filelist.setSize(0);   
+   curfile = -1;
+   universals.setSize(0);
+   newfilebuffer.setSize(0);
+
+   vector<string> list;
+   options.getArgList(list);
+   setFileList(list);
+}
+
 
 
 //////////////////////////////

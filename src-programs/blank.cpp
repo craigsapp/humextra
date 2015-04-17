@@ -28,7 +28,7 @@ int       afterMeasure       (HumdrumFile& infile, int line);
 void      blankSpines        (HumdrumFile& infile, Array<int>& trackstates);
 void      addRests           (HumdrumFile& infile, Array<int>& trackstates);
 void      fillFieldData      (Array<int>& field, Array<int>& subfield, 
-                              Array<int>& model, const char* fieldstring, 
+                              Array<int>& model, string& fieldstring, 
                               HumdrumFile& infile);
 void      processFieldEntry  (Array<int>& field, Array<int>& subfield, 
                               Array<int>& model, const char* string, 
@@ -46,7 +46,7 @@ int       keysigQ    = 0;     // used with -k option
 int       Count      = 0;     // used with -c option
 int       spineQ     = 0;     // used with -s/-S options
 int       inverseQ   = 0;     // used with -S option
-const char* fieldstring = ""; // used with -s/-S options
+string    fieldstring = "";   // used with -s/-S options
 Array<SigString> Exinterps;   // used with -i option
 
 ///////////////////////////////////////////////////////////////////////////
@@ -403,11 +403,11 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    invisibleQ= opts.getBoolean("invisible");
    appendQ   = opts.getBoolean("assemble");
    spineQ    = opts.getBoolean("spines");
-   fieldstring = opts.getString("spines").data();
+   fieldstring = opts.getString("spines");
 
    if (opts.getBoolean("not-spines")) {
       spineQ = 1;
-      fieldstring = opts.getString("not-spines").data();
+      fieldstring = opts.getString("not-spines");
       inverseQ = 1;
    }
 
@@ -465,7 +465,7 @@ void usage(const char* command) {
 //
 
 void fillFieldData(Array<int>& field, Array<int>& subfield, Array<int>& model,
-      const char* fieldstring, HumdrumFile& infile) {
+      string& fieldstring, HumdrumFile& infile) {
 
    int maxtrack = infile.getMaxTracks();
 
@@ -481,8 +481,8 @@ void fillFieldData(Array<int>& field, Array<int>& subfield, Array<int>& model,
 
    PerlRegularExpression pre;
    Array<char> buffer;
-   buffer.setSize(strlen(fieldstring)+1);
-   strcpy(buffer.getBase(), fieldstring);
+   buffer.setSize(fieldstring.size()+1);
+   strcpy(buffer.getBase(), fieldstring.data());
    pre.sar(buffer, "\\s", "", "gs");
    int start = 0;
    int value = 0;
