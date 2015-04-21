@@ -110,6 +110,7 @@ class HumdrumFileBasic {
                              HumdrumFileBasic (const HumdrumFileBasic& 
                                                  aHumdrumFileBasic);
                              HumdrumFileBasic (const char* filename);
+                             HumdrumFileBasic (const string& filename);
                             ~HumdrumFileBasic ();
 
       void                   appendLine       (const char* aLine);
@@ -146,6 +147,7 @@ class HumdrumFileBasic {
                                                HumdrumFileBasic& infile);
       HumdrumFileBasic&      operator=        (const HumdrumFileBasic& aFile);
       void                   read             (const char* filename);
+      void                   read             (const string& filename);
       void                   read             (istream& inStream);
       HumdrumFileBasic       removeNullRecords(void);
       HumdrumRecord&         operator[]       (int index);

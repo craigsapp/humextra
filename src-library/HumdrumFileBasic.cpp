@@ -269,6 +269,46 @@ HumdrumFileBasic::HumdrumFileBasic(const char* filename) {
 
 
 
+HumdrumFileBasic::HumdrumFileBasic(const string& filename) {
+   records.setSize(100000);          // initial storage size 100000 lines
+   records.setSize(0);
+   records.allowGrowth();          
+   records.setAllocSize(1000000);    // grow in increments of 1000000 lines
+   maxtracks = 0;
+   fileName.setSize(1); fileName[0] = '\0';
+   segmentLevel = 0;
+   trackexinterp.setSize(0);
+   trackexinterp.allowGrowth(0);
+
+   #ifndef OLDCPP
+      ifstream infile(filename.data(), ios::in);
+   #else
+      ifstream infile(filename.data(), ios::in | ios::nocreate);
+   #endif
+
+   if (!infile) {
+      cerr << "Error: cannot open file: " << filename << endl;
+      exit(1);
+   }
+
+   read(filename);
+   /*
+   char templine[4096];
+   while (!infile.eof()) {
+      infile.getline(templine, 4096);
+      if (infile.eof() && (strcmp(templine, "") == 0)) {
+         break;
+      } else {
+         appendLine(templine);
+      }
+   }
+   analyzeSpines();
+   analyzeDots();
+   */
+}
+
+
+
 ////////////////////////////////////////
 //
 // HumdrumFileBasic::setAllocation -- set the expected number of 
@@ -769,8 +809,13 @@ HumdrumFileBasic& HumdrumFileBasic::operator=(const HumdrumFileBasic& aFile) {
 
 //////////////////////////////
 //
-// HumdrumFileBasic::read -- read in a humdrum file.
+// HumdrumFileBasic::read -- read in a Humdrum file.
 //
+
+void HumdrumFileBasic::read(const string& filename) {
+   read(filename.data());
+}
+
 
 void HumdrumFileBasic::read(const char* filename) {
 #ifdef USING_URI
