@@ -78,6 +78,7 @@ int       P6Q       = 0;              // used with -6 option
 int       jsonQ     = 0;
 const char* optionfilename = "";      // used with -f option
 const char* keyboardcolor = "151515"; // used with the -k option
+const char* bgcolor = "000000";       // used with the -b option
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -742,6 +743,7 @@ void printPicture(Array<PixelRow>& picturedata, Array<PixelRow>& background,
    }
    PixelColor temp;
    PixelColor black(0,0,0);
+   PixelColor backcolor(bgcolor);
    height = cfactor * height;
    if (P3Q) {
       cout << "P3\n" << width << " " << height << "\n255\n";
@@ -751,7 +753,7 @@ void printPicture(Array<PixelRow>& picturedata, Array<PixelRow>& background,
    for (i=maxp; i>=minp; i--) {
       for (m=0; m<cfactor; m++) {
          for (j=0; j<picturedata[i].getSize(); j++) {
-            if (picturedata[i][j] == black) {
+            if (picturedata[i][j] == backcolor) {
                if (P3Q) {
                   background[i][j].writePpm3(cout);
                } else {
@@ -818,12 +820,14 @@ int generatePicture(HumdrumFile& infile, Array<PixelRow>& picture, int
    // with the background later.
    picture.setSize(128);
    int i, j, k;
+   PixelColor backcolor(bgcolor);
    for (i=0; i<picture.getSize(); i++) {
       picture[i].setSize(columns * factor);
       for (j=0; j<picture[i].getSize(); j++) {
-         picture[i][j].setRed(0);
-         picture[i][j].setGreen(0);
-         picture[i][j].setBlue(0);
+         picture[i][j] = backcolor;
+         // picture[i][j].setRed(0);
+         // picture[i][j].setGreen(0);
+         // picture[i][j].setBlue(0);
       }
    }
 
@@ -974,6 +978,14 @@ PixelColor makeColor(HumdrumFile& infile, int line, int spine, int style,
          output.setHue(((int)infile[line].getTrack(spine))/(double)trackCount);
    }
 
+   PixelColor bcolor(bgcolor);
+   double csum = (bcolor.Red + bcolor.Green + bcolor.Blue)/(255*3);
+   if (csum > 0.5) {
+      output.Red = output.Red / 2;
+      output.Green = output.Green / 2;
+      output.Blue = output.Blue / 2;
+   }
+
    return output;
 }
 
@@ -1062,10 +1074,11 @@ void generateBackground(HumdrumFile& infile, int rfactor,
    background.setSize(picturedata.getSize());
    int i, j;
 
+   PixelColor backcolor(bgcolor);
    for (i=0; i<picturedata.getSize(); i++) {
       background[i].setSize(picturedata[i].getSize());
       for (j=0; j<picturedata[i].getSize(); j++) {
-         background[i][j] = 0;
+         background[i][j] = backcolor;
       }
    }
 
@@ -1112,6 +1125,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("K|no-keyboard=b",     "do not display keyboard in background");
    opts.define("f|filename=s",        "used to label file with standard input");
    opts.define("k|keyboard=s:151515", "keyboard white keys color");
+   opts.define("b|background=s:000000", "background color");
    opts.define("s|style=s:H",         "Coloring style");
    opts.define("mark=b",              "highlight marked/matched notes");
    opts.define("3|p3|P3=b",           "output as P3 (ASCII) Portable anymap");
@@ -1154,6 +1168,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    jsonQ          =  opts.getBoolean("json");
    optionfilename =  opts.getString("filename").data();
    P6Q            =  opts.getBoolean("p6");
+   bgcolor        =  opts.getString("background").data();
    if (opts.getBoolean("p6")) {
       P3Q = 0;
    } else {

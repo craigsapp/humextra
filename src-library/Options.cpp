@@ -690,7 +690,7 @@ void Options::reset(void) {
    }
    optionRegister.clear();
 
-   for (i=0; i<(int)argument.size(); i++) {
+   for (i=0; i<argument.size(); i++) {
       delete argument[i];
       argument[i] = NULL;
    }
