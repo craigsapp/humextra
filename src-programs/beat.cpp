@@ -9,8 +9,8 @@
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/beat.cpp
 // Syntax:        C++; museinfo
 //
-// Description:   Generates metrical location data for **kern entries
-//                Test functions for the built-in rhythmic analysis
+// Description:   Generates metrical location data for **kern or **recip
+//                entries.  Test functions for the built-in rhythmic analysis
 //                in the HumdrumFile class.  Should give the same
 //                output as the beat program.
 //
@@ -269,8 +269,8 @@ void fillAttackArray(HumdrumFile& infile, Array<int>& attacks) {
 //////////////////////////////
 //
 // getCountForLine -- return the number of note attacks on the given
-//   line in the Humdrum File.  Only **kern data is examined.  Rests
-//   and tied notes are ignored when counting attacks.
+//   line in the Humdrum File.  Only **kern and **recip spines are examined.  
+//   Rests and tied notes are ignored when counting attacks.
 //
 
 int getCountForLine(HumdrumFile& infile, int line) {
@@ -279,7 +279,8 @@ int getCountForLine(HumdrumFile& infile, int line) {
    int output = 0;
    int tcount;
    for (j=0; j<infile[line].getFieldCount(); j++) {
-      if (!infile[line].isExInterp(j, "**kern")) {
+      if (!(infile[line].isExInterp(j, "**kern") ||
+            infile[line].isExInterp(j, "**recip"))) {
          continue;
       }
       tcount = infile[line].getTokenCount(j);
