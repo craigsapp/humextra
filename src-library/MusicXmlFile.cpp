@@ -24,23 +24,23 @@
 //
 // Filename:      ...sig/include/sigInfo/MusicXmlFile.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/MusicXmlFile.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A class which parses a MusicXML File.
 //
-// Todo:          
+// Todo:
 //                implicit/explicit accidental marks indications
 //                logical repeat marks
-//                first, second endings 
-//                preserve hard-coded system breaks 
-//                some more articulations 
+//                first, second endings
+//                preserve hard-coded system breaks
+//                some more articulations
 //                general solution to multiple voices in a part.
 //                generalize **kern data extraction for more than two voices
 //                figure out how beaming is indicated with chords.
 //                fix dynamic spine syntax when dynamic comes between notes
 //                fix assemble code so that grace notes are aligned correctly
 //
-// Done:	  
+// Done:
 //                lyrics (convert to spines to right of music spine)
 //                fixed stacattissimo
 //                explicit natural sign
@@ -93,7 +93,7 @@ void printArray(const char* title, Array<int>& partoffset) {
 // MusicXmlFile::MusicXmlFile --
 //
 
-MusicXmlFile::MusicXmlFile(void) { 
+MusicXmlFile::MusicXmlFile(void) {
    xmldocument = NULL;
    parts.setSize(100);
    parts.setGrowth(100);
@@ -123,7 +123,7 @@ MusicXmlFile::MusicXmlFile(void) {
 }
 
 
-MusicXmlFile::MusicXmlFile(const char* aFile) { 
+MusicXmlFile::MusicXmlFile(const char* aFile) {
    xmldocument = NULL;
    parts.setSize(100);
    parts.setGrowth(100);
@@ -151,7 +151,7 @@ MusicXmlFile::MusicXmlFile(const char* aFile) {
    setOption("renumber",1);
    lastchordhead = NULL;
 
-   read(aFile);   
+   read(aFile);
 }
 
 
@@ -161,7 +161,7 @@ MusicXmlFile::MusicXmlFile(const char* aFile) {
 // MusicXmlFile::~MusicXmlFile --
 //
 
-MusicXmlFile::~MusicXmlFile() { 
+MusicXmlFile::~MusicXmlFile() {
    // do nothing
 }
 
@@ -193,7 +193,7 @@ int MusicXmlFile::getStaffCount(void) {
 
 //////////////////////////////
 //
-// MusicXmlFile::getGraceNoteRhythm(ostream& out, 
+// MusicXmlFile::getGraceNoteRhythm(ostream& out,
 //
 
 ostream& MusicXmlFile::printGraceNoteRhythm(ostream& out, _MusicXmlItem& item) {
@@ -249,7 +249,7 @@ ostream& MusicXmlFile::printGraceNoteRhythm(ostream& out, _MusicXmlItem& item) {
                }
                current = current->GetNext();
 	    }
-         } 
+         }
       }
       entry = entry->GetNext();
    }
@@ -321,11 +321,11 @@ ostream& MusicXmlFile::info(ostream& out) {
    } else {
       out << "are ";
    }
-   out << getPartCount() 
+   out << getPartCount()
        << " part";
    if (getPartCount() != 1) {
       out << "s ";
-   } 
+   }
    out << " in the MusicXml File:" << endl;
    int i;
    char buffer[1024] = {0};
@@ -340,11 +340,11 @@ ostream& MusicXmlFile::info(ostream& out) {
    for (i=0; i<partdata.getSize(); i++) {
       cout << "\nStaff " << i+1 << " ---------------------------------" << endl;
       for (j=0; j<partdata[i].getSize(); j++) {
-         cout << "i=" << i << "\tj=" << j 
-              << "\ttick=" << partdata[i][j].ticktime  
-              << "\ttdur=" << partdata[i][j].tickdur  
-              << "\tvoice=" << partdata[i][j].voice  
-              << "\tserial=" << partdata[i][j].serialnum  
+         cout << "i=" << i << "\tj=" << j
+              << "\ttick=" << partdata[i][j].ticktime
+              << "\ttdur=" << partdata[i][j].tickdur
+              << "\tvoice=" << partdata[i][j].voice
+              << "\tserial=" << partdata[i][j].serialnum
               << "\tname=" << ((CXMLElement*)(partdata[i][j].obj))->GetName();
          if (((CXMLElement*)(partdata[i][j].obj))->GetName() == "measure") {
             cout << " (" << partdata[i][j].measureno << ")";
@@ -447,7 +447,7 @@ void MusicXmlFile::removeBorderSpaces(char* buffer) {
    }
 
    for (i=0; i<length-count; i++) {
-      buffer[i] = buffer[i+count]; 
+      buffer[i] = buffer[i+count];
    }
 }
 
@@ -469,7 +469,7 @@ char* MusicXmlFile::getPartId(char* buffer, int partnum) {
    XMLString string;
    for (i=0; i<element->GetAttributes().GetLength(); i++) {
       if (element->GetAttributes().GetName(i) == "id") {
-         string = element->GetAttributes().GetValue(i); 
+         string = element->GetAttributes().GetValue(i);
          strncpy(buffer, string.c_str(), 1024);
          break;
       }
@@ -484,7 +484,7 @@ char* MusicXmlFile::getPartId(char* buffer, int partnum) {
 // MusicXmlFile::print --
 //
 
-ostream& MusicXmlFile::print(ostream& out) { 
+ostream& MusicXmlFile::print(ostream& out) {
    CXMLObject* entry = xmldocument;
    printTraverse(out, entry);
    out << "\n";
@@ -498,7 +498,7 @@ ostream& MusicXmlFile::print(ostream& out) {
 // MusicXmlFile::printTraverse --
 //
 
-ostream& MusicXmlFile::printTraverse(ostream& out, CXMLObject* entry) { 
+ostream& MusicXmlFile::printTraverse(ostream& out, CXMLObject* entry) {
    while (entry != NULL) {
       printEntry(out, entry);
       entry = entry->GetNext();
@@ -513,7 +513,7 @@ ostream& MusicXmlFile::printTraverse(ostream& out, CXMLObject* entry) {
 // MusicXmlFile::printCloseEvent --
 //
 
-ostream& MusicXmlFile::printCloseEvent(ostream& out, 
+ostream& MusicXmlFile::printCloseEvent(ostream& out,
       CXMLObject* entry) {
    CXMLElement* element = (CXMLElement*)entry;
    if (element->Zoom() != NULL) {
@@ -611,7 +611,7 @@ ostream& MusicXmlFile::printDocument(ostream& out, CXMLObject* entry) {
 // MusicXmlFile::printCDataSection --
 //
 
-ostream& MusicXmlFile::printCDataSection(ostream& out, 
+ostream& MusicXmlFile::printCDataSection(ostream& out,
       CXMLObject* entry) {
    CXMLCDATASection* cdata = (CXMLCDATASection*) entry;
    printString(out, cdata);
@@ -625,7 +625,7 @@ ostream& MusicXmlFile::printCDataSection(ostream& out,
 // printGenericData --
 //
 
-ostream& MusicXmlFile::printGenericData(ostream& out, 
+ostream& MusicXmlFile::printGenericData(ostream& out,
       CXMLObject* entry) {
    CXMLGenericData* generic = (CXMLGenericData*)entry;
    printString(out, generic);
@@ -654,7 +654,7 @@ ostream& MusicXmlFile::printComment(ostream& out, CXMLObject* entry) {
 // MusicXmlFile::printString --
 //
 
-ostream& MusicXmlFile::printString(ostream& out, 
+ostream& MusicXmlFile::printString(ostream& out,
       CXMLCharacterData* characters) {
    unsigned int i;
    XMLString string = characters->GetData();
@@ -677,7 +677,7 @@ ostream& MusicXmlFile::printElement(ostream& out, CXMLObject* entry) {
    int i;
    for (i=0; i<element->GetAttributes().GetLength(); i++) {
       out << " "
-          << element->GetAttributes().GetName(i) 
+          << element->GetAttributes().GetName(i)
           << "=\""
           << element->GetAttributes().GetValue(i)
           << "\"";
@@ -698,7 +698,7 @@ ostream& MusicXmlFile::printElement(ostream& out, CXMLObject* entry) {
 // MusicXmlFile::printCharacterData --
 //
 
-ostream& MusicXmlFile::printCharacterData(ostream& out, 
+ostream& MusicXmlFile::printCharacterData(ostream& out,
          CXMLObject* entry) {
    CXMLCharacterData* data = (CXMLCharacterData*)entry;
 //   out << "(((";
@@ -715,7 +715,7 @@ ostream& MusicXmlFile::printCharacterData(ostream& out,
 // MusicXmlFile::read --
 //
 
-void MusicXmlFile::read(const char* aFile) { 
+void MusicXmlFile::read(const char* aFile) {
    CXMLFactory         factory;
    CXMLDocumentBuilder builder;
 
@@ -748,7 +748,7 @@ void MusicXmlFile::read(const char* aFile) {
 // operator<< -- directions for printing a MusicXmlFile object.
 //
 
-ostream& operator<<(ostream& out, MusicXmlFile& aMusicXmlFile) { 
+ostream& operator<<(ostream& out, MusicXmlFile& aMusicXmlFile) {
    aMusicXmlFile.print(out);
    return out;
 }
@@ -816,10 +816,10 @@ void MusicXmlFile::fixMeasureNumbersForPart(int staffno) {
    for (i=0; i<partdata[staffno].getSize(); i++) {
       if (partdata[staffno][i].type == MXI_divisions) {
          tickinfo = partdata[staffno][i].divisions;
-      } else if (partdata[staffno][i].type == MXI_measure) {   
+      } else if (partdata[staffno][i].type == MXI_measure) {
          measures.append(i);
          timeticks.append(mticks);
-      } else if (partdata[staffno][i].type == MXI_time) {   
+      } else if (partdata[staffno][i].type == MXI_time) {
          mticks = getTimeSignatureTicks(partdata[staffno][i].obj, tickinfo);
       }
    }
@@ -847,7 +847,7 @@ void MusicXmlFile::fixMeasureNumbersForPart(int staffno) {
    for (i=1; i<partial.getSize(); i++) {
       if (partial[i] && partial[i-1]) {
 
-         if ((partdata[staffno][measures[i]].tickdur + 
+         if ((partdata[staffno][measures[i]].tickdur +
               partdata[staffno][measures[i-1]].tickdur) == timeticks[i-1]) {
             // current measure is a non-controlling barline so mark it
             partdata[staffno][measures[i]].measureno = 0;
@@ -911,7 +911,7 @@ void MusicXmlFile::fixPartPickups(int staffno) {
             firstnote = i;
          }
       }
-         
+
       i++;
    }
 
@@ -1143,7 +1143,7 @@ int MusicXmlFile::parseElement(CXMLObject* entry) {
          tval = partstaves.getSize()-1;
          partoffset.append(tval);
       } else {
-         tval = partstaves[partstaves.getSize()-1-1] + 
+         tval = partstaves[partstaves.getSize()-1-1] +
                 partoffset[partoffset.getSize()-1];
          partoffset.append(tval);
       }
@@ -1155,13 +1155,13 @@ int MusicXmlFile::parseElement(CXMLObject* entry) {
             addStaffData();
             partstaves[partcount]++;
             for (jj=partcount+1; jj<partoffset.getSize(); jj++) {
-               partoffset[jj]++;      
+               partoffset[jj]++;
             }
             // printArray("partstaves contents: ", partstaves);
             // printArray("partoffset contents: ", partoffset);
 
          }
-      } 
+      }
       partcount++;
 
       for (i=0; i<element->GetAttributes().GetLength(); i++) {
@@ -1212,16 +1212,16 @@ int MusicXmlFile::getPartNumberFromId(const char* buffer) {
 // MusicXmlFile::getInstrumentName --
 //
 
-void MusicXmlFile::getInstrumentName(CXMLObject* object, int partnum, 
+void MusicXmlFile::getInstrumentName(CXMLObject* object, int partnum,
       XMLString& idname) {
 
    CXMLElement* scorepartwise = (CXMLElement*)object->GetParent();
    if (scorepartwise->GetName() != "score-partwise") {
-      cerr << "Expecting <score-partwise> but found " 
+      cerr << "Expecting <score-partwise> but found "
            << scorepartwise->GetName() << " instead." << endl;
       return;
    }
- 
+
    // go through children until <part-list> is found, then <score-part>
    int foundQ = 0;
    object = (CXMLObject*)scorepartwise;
@@ -1231,9 +1231,9 @@ void MusicXmlFile::getInstrumentName(CXMLObject* object, int partnum,
          if (((CXMLElement*)object)->GetName() == "part-list") {
             object = object->Zoom();
             while (object != NULL) {  // <score-part> search
-               if (object->GetType() != xmlElement) { 
+               if (object->GetType() != xmlElement) {
                   object = object->GetNext();
-                  continue; 
+                  continue;
                }
                if (((CXMLElement*)object)->GetName() != "score-part") {
                   object = object->GetNext();
@@ -1305,7 +1305,7 @@ void MusicXmlFile::parsePart(CXMLObject* entry, int partnum) {
 // MusicXmlFile::parseMeasure -- read in one measure
 //
 
-void MusicXmlFile::parseMeasure(CXMLObject* entry, int partnum, 
+void MusicXmlFile::parseMeasure(CXMLObject* entry, int partnum,
       long& ticktime) {
 
    if (entry == NULL) {
@@ -1318,7 +1318,7 @@ void MusicXmlFile::parseMeasure(CXMLObject* entry, int partnum,
    if (element->GetName() != "measure") {
       return;
    }
-   
+
    // insert a barline into data for part
    _MusicXmlItem tempitem;
    tempitem.ticktime = ticktime;
@@ -1360,11 +1360,11 @@ void MusicXmlFile::parseMeasure(CXMLObject* entry, int partnum,
 
 //////////////////////////////
 //
-// MusicXmlFile::parseDirection -- element location for sound (tempo) and 
+// MusicXmlFile::parseDirection -- element location for sound (tempo) and
 //   written dynamics.
 //
 
-void MusicXmlFile::parseDirection(CXMLObject* object, int partnum, 
+void MusicXmlFile::parseDirection(CXMLObject* object, int partnum,
       long& ticktime) {
    if (object == NULL) {
       return;
@@ -1378,7 +1378,7 @@ void MusicXmlFile::parseDirection(CXMLObject* object, int partnum,
    }
 
    // check for text placement:
-   //  <direction placement="above"> 
+   //  <direction placement="above">
    CXMLElement* rootelement = element;
 
    object = object->Zoom();
@@ -1405,7 +1405,7 @@ void MusicXmlFile::parseDirection(CXMLObject* object, int partnum,
 // MusicXmlFile::parseDirectionType -- extract dynamics from direction type
 //
 
-void MusicXmlFile::parseDirectionType(CXMLObject* object, int partnum, 
+void MusicXmlFile::parseDirectionType(CXMLObject* object, int partnum,
       long& ticktime, CXMLElement* elementroot) {
    if (object == NULL) {
       return;
@@ -1490,7 +1490,7 @@ void MusicXmlFile::parseDirectionType(CXMLObject* object, int partnum,
             if (obj2->GetType() == xmlCharacterData) {
                textdata = (CXMLCharacterData*)obj2;
                string = textdata->GetData();
-               if ((string == "cresc.") || (string == "decresc.") 
+               if ((string == "cresc.") || (string == "decresc.")
                      || (string == "dim.")) {
                   tempitem.type      = MXI_dynamic;
                   tempitem.obj       = element;
@@ -1527,7 +1527,7 @@ void MusicXmlFile::parseDirectionType(CXMLObject* object, int partnum,
 // MusicXmlFile::parseForward --
 //
 
-void MusicXmlFile::parseForward(CXMLObject* object, 
+void MusicXmlFile::parseForward(CXMLObject* object,
       int partnum, long& ticktime) {
    if (object == NULL) {
       return;
@@ -1563,7 +1563,7 @@ void MusicXmlFile::parseForward(CXMLObject* object,
 // MusicXmlFile::parseBackup --
 //
 
-void MusicXmlFile::parseBackup(CXMLObject* object, 
+void MusicXmlFile::parseBackup(CXMLObject* object,
       int partnum, long& ticktime) {
    if (object == NULL) {
       return;
@@ -1617,7 +1617,7 @@ void MusicXmlFile::parsePrint(CXMLObject* entry, int partnum, int ticktime) {
    tempitem.ticktime = ticktime;
    tempitem.serialnum= parseserialnum++;
    tempitem.divisions = parsedivisions;
-   
+
    appendAllPartStaves(partnum, tempitem);
 }
 
@@ -1647,7 +1647,7 @@ void MusicXmlFile::parseBarline(CXMLObject* entry, int partnum, int ticktime) {
    tempitem.ticktime = ticktime;
    tempitem.serialnum= parseserialnum++;
    tempitem.divisions = parsedivisions;
-   
+
    appendAllPartStaves(partnum, tempitem);
 }
 
@@ -1658,11 +1658,11 @@ void MusicXmlFile::parseBarline(CXMLObject* entry, int partnum, int ticktime) {
 // MusicXmlFile::getAttributeValue --
 //
 
-XMLString MusicXmlFile::getAttributeValue(CXMLObject* object, 
+XMLString MusicXmlFile::getAttributeValue(CXMLObject* object,
       const char* name) {
    XMLString string;
    CXMLElement* element = (CXMLElement*)object;
-   int i; 
+   int i;
    for (i=0; i<element->GetAttributes().GetLength(); i++) {
       if (element->GetAttributes().GetName(i) == name) {
          string = element->GetAttributes().GetValue(i);
@@ -1677,7 +1677,7 @@ XMLString MusicXmlFile::getAttributeValue(CXMLObject* object,
 
 //////////////////////////////
 //
-// MusicXmlFile::parseSound --  
+// MusicXmlFile::parseSound --
 //
 
 void MusicXmlFile::parseSound(CXMLObject* entry, int partnum, long& ticktime) {
@@ -1773,7 +1773,7 @@ void MusicXmlFile::parseNote(CXMLObject* entry, int partnum, long& ticktime) {
                }
                durcurr = durcurr->GetNext();
             }
-          
+
          } else if (element->GetName() == "chord") {
             chordQ = 1;
             // get the duration of the last note in the chord
@@ -1859,7 +1859,7 @@ void MusicXmlFile::parseNote(CXMLObject* entry, int partnum, long& ticktime) {
    tempitem.ficta     = hasFicta;   hasFicta = 0;
    tempitem.divisions = parsedivisions;
    partdata[partoffset[partnum]+staff].append(tempitem);
-   
+
    ticktime += duration;
 }
 
@@ -1900,7 +1900,7 @@ int MusicXmlFile::parseFicta(CXMLObject* entry) {
                if (element->GetAttributes().GetName(i) == "parentheses") {
                   if (element->GetAttributes().GetValue(i) == "yes") {
                      return 1;
-                  } 
+                  }
                }
             }
 
@@ -2054,9 +2054,9 @@ int MusicXmlFile::getClefStaffNumber(CXMLObject* object) {
 
 //////////////////////////////
 //
-// MusicXmlFile::getStaffNumber -- return the staff number of the 
+// MusicXmlFile::getStaffNumber -- return the staff number of the
 //      object, or 1 by default.
-// 
+//
 
 int MusicXmlFile::getStaffNumber(CXMLObject* object) {
    int output = 1;
@@ -2124,7 +2124,7 @@ void MusicXmlFile::checkPartStaff(int partnum, int staff) {
 // MusicXmlFile::parseAttributes --
 //
 
-void MusicXmlFile::parseAttributes(CXMLObject* entry, int partnum, 
+void MusicXmlFile::parseAttributes(CXMLObject* entry, int partnum,
       long& ticktime) {
    if (entry == NULL) {
       return;
@@ -2136,7 +2136,7 @@ void MusicXmlFile::parseAttributes(CXMLObject* entry, int partnum,
    if (element->GetName() != "attributes") {
       return;
    }
-   
+
    CXMLObject* current = element;
    current = current->Zoom();
    _MusicXmlItem tempitem;
@@ -2152,7 +2152,7 @@ void MusicXmlFile::parseAttributes(CXMLObject* entry, int partnum,
          tempitem.obj       = current;
          tempitem.divisions = parsedivisions;
          tempitem.ticktime  = ticktime;
-     
+
          if (element->GetName() == "divisions") {
             tempitem.type = MXI_divisions;
             parsedivisions = getDivisions(element);
@@ -2189,7 +2189,7 @@ void MusicXmlFile::parseAttributes(CXMLObject* entry, int partnum,
             tempitem.serialnum = parseserialnum++;
             tempitem.divisions = parsedivisions;
             appendAllPartStaves(partnum, tempitem);
-         } 
+         }
 
       }
       current = current->GetNext();
@@ -2242,7 +2242,7 @@ int MusicXmlFile::staffcompare(const void* A, const void* B) {
 
       if ((a.type == MXI_print) && (b.type != MXI_print)) return -1;
       if ((a.type != MXI_print) && (b.type == MXI_print)) return +1;
-      
+
       if ((a.type == MXI_clef) && (b.type == MXI_time)) return -1;
       if ((a.type == MXI_time) && (b.type == MXI_clef)) return +1;
 
@@ -2276,7 +2276,7 @@ int MusicXmlFile::staffcompare(const void* A, const void* B) {
       // otherwise, for non-durational items, sort by their original position
       // in the MusicXML File:
       if (a.type == MXI_note) {   // notes always go last when at same time
-         return +1; 
+         return +1;
       } else if (b.type == MXI_note) {
          return -1;
       } else if (a.serialnum < b.serialnum) {
@@ -2357,7 +2357,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
    int status;
    partvoiceticktime2 = -1;
    partvoiceticktime1 = -1;
-   
+
    int newlineQ = 0;   // for printing dynamics and lyrics after notes.
    SSTREAM* tempstream = new SSTREAM;
 
@@ -2372,6 +2372,17 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
       (*tempstream) << "\t*staff" << staffno+1;
    }
    (*tempstream) << "\n"; humline++;
+
+   char partname[1024] = {0};
+   getPartName(partname, staffno);
+   if ((strlen(partname) > 0) && (strstr(partname, "MusicXML") == NULL)) {
+      // should check that partname does not have a tab character
+      (*tempstream) << "*I\"" << partname;
+      if (humdrumDynamics && partdynamics[staffno]) {
+         (*tempstream) << "\t*";
+      }
+      (*tempstream) << "\n"; humline++;
+   }
 
    int noteinit = 0;
    int i;
@@ -2428,8 +2439,8 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
                // voice in the spine, and one for the second voice
                // in the spine.  If the spine are combined to
                // have only one clef marker, then the rhythm cannot be
-               // parsed correctly since the duration of the first 
-               // voice will be lost most likely in the merging of the 
+               // parsed correctly since the duration of the first
+               // voice will be lost most likely in the merging of the
                // two voices.
                (*tempstream) << "\t";
                (*tempstream) << printKernClef(buffer, partdata[staffno][i].obj);
@@ -2440,7 +2451,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
             (*tempstream) << "\n"; humline++;
             break;
          case MXI_key:
-            getKernKey(buffer, partdata[staffno][i].obj); 
+            getKernKey(buffer, partdata[staffno][i].obj);
             if (buffer[0] != '\0') {
                (*tempstream) << buffer;
                if (humdrumDynamics && partdynamics[staffno]) {
@@ -2452,7 +2463,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
          case MXI_timemet:
             getKernTimeMet(buffer, partdata[staffno][i].obj);
             if (buffer[0] != '\0') {
-               (*tempstream) << buffer; 
+               (*tempstream) << buffer;
                if (humdrumDynamics && partdynamics[staffno]) {
                   (*tempstream) << "\t" << buffer;
                }
@@ -2503,7 +2514,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
             if (newlineQ) {
                if (humdrumDynamics && partdynamics[staffno]) {
                   if (i < partdata[staffno].getSize()-1) {
-                     if (partdata[staffno][i].ticktime != 
+                     if (partdata[staffno][i].ticktime !=
                          partdata[staffno][i+1].ticktime) {
                         // time for something else, but no dynamic/lyric found
                         (*tempstream) << "\t.\n"; humline++;
@@ -2528,7 +2539,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
                } else {
                   (*tempstream) << "\n"; humline++;
                }
-            } 
+            }
             break;
       }
    }
@@ -2573,7 +2584,7 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
          }
       }
    }
-   // cout << "!! Adding Lyrics to " << staffno << " total = " 
+   // cout << "!! Adding Lyrics to " << staffno << " total = "
    //      << lyriccount << endl;
    if (lyriccount > MAXLYRIC) {
       // don't want to add wierd number of lyrics.
@@ -2636,11 +2647,11 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
       if (partdata[staffno][i].type == MXI_note) {
          serialline.line = partdata[staffno][i].humline;
          serialline.serial = partdata[staffno][i].serialnum;
-         seriallines.append(serialline); 
+         seriallines.append(serialline);
       }
    }
 
-   qsort(seriallines.getBase(), seriallines.getSize(), 
+   qsort(seriallines.getBase(), seriallines.getSize(),
          sizeof(_SerialLine), seriallinesort);
 
    // now that a database of lines for each serial number of notes
@@ -2668,8 +2679,8 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
       // have a lyric to insert, find out which line to put it on
       serialline.serial = ownerserial;
 
-      match = (_SerialLine*) bsearch(&serialline, seriallines.getBase(), 
-                      seriallines.getSize(), sizeof(_SerialLine), 
+      match = (_SerialLine*) bsearch(&serialline, seriallines.getBase(),
+                      seriallines.getSize(), sizeof(_SerialLine),
                       seriallinesort);
 
 //      void *bsearch(const void *key, const void *base, size_t nmemb,
@@ -2677,7 +2688,7 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
 
 
       if (match == NULL) {
-         cout << "!! Lyric placement serial not found :" 
+         cout << "!! Lyric placement serial not found :"
               << serialline.serial << endl;
          continue;
       }
@@ -2808,7 +2819,7 @@ char* MusicXmlFile::getLyricText(char* buffer, CXMLObject* object) {
 
    // <extend/> is used to place underscore starting on current
    // syllable.
-   
+
    return buffer;
 }
 
@@ -2835,7 +2846,7 @@ int seriallinesort(const void* a, const void* b) {
 
 //////////////////////////////
 //
-// MusicXmlFile::isGraceNote -- 
+// MusicXmlFile::isGraceNote --
 //
 
 int MusicXmlFile::isGraceNote(CXMLObject* object) {
@@ -2929,7 +2940,7 @@ char*  MusicXmlFile::getCharacterData(char* buffer, CXMLObject* object) {
 
 //////////////////////////////
 //
-// MusicXmlFile::printText -- 
+// MusicXmlFile::printText --
 //
 
 void MusicXmlFile::printText(ostream& out, int staffno, int index) {
@@ -3046,7 +3057,7 @@ void MusicXmlFile::printDynamic(ostream& out, int staffno, int index) {
       return;
    }
    CXMLElement* element = (CXMLElement*)object;
-   if ((element->GetName() != "dynamics") && 
+   if ((element->GetName() != "dynamics") &&
        (element->GetName() != "wedge") &&
        (element->GetName() != "words") ) {
       out << "\t.";
@@ -3091,7 +3102,7 @@ void MusicXmlFile::printDynamic(ostream& out, int staffno, int index) {
          }
          object = object->GetNext();
       }
-   } 
+   }
 
    else if (element->GetName() == "wedge") {
       int i;
@@ -3151,7 +3162,7 @@ void MusicXmlFile::processSpineChanges(SSTREAM& newstream, SSTREAM& oldstream,
    strings.setSize(50000);
    strings.setGrowth(50000);
    strings.setSize(0);
-   
+
    dynamics.setSize(50000);
    dynamics.setGrowth(50000);
    dynamics.setSize(0);
@@ -3176,7 +3187,7 @@ void MusicXmlFile::processSpineChanges(SSTREAM& newstream, SSTREAM& oldstream,
             ptr2[0] = '\0';
             length = strlen(buffer);
          }
-      } 
+      }
       length = strlen(buffer);
       ptr = new char[length+1];
       strcpy(ptr, buffer);
@@ -3238,7 +3249,7 @@ void MusicXmlFile::processSpineChanges(SSTREAM& newstream, SSTREAM& oldstream,
                }
                newstream << "\n";
             }
-         } 
+         }
 
          // process multiple spine changes:
          else if ((tabcount[i-1] == 0) && (tabcount[i] == 2)) {
@@ -3297,7 +3308,7 @@ void MusicXmlFile::processSpineChanges(SSTREAM& newstream, SSTREAM& oldstream,
                newstream << "\t*";
             }
             newstream << "\n";
-         } 
+         }
 
       }
       newstream << strings[i];
@@ -3341,9 +3352,9 @@ char* MusicXmlFile::getKernKey(char* buffer, CXMLObject* object) {
       }
       object = object->GetNext();
    }
-   
+
    strcpy(buffer, Convert::keyNumberToKern(fifths));
-   
+
    return buffer;
 }
 
@@ -3366,12 +3377,12 @@ int MusicXmlFile::printSystemBreak(ostream& out, CXMLObject* object) {
    CXMLElement* element = (CXMLElement*)object;
    if (element->GetName() != "print") {
       return output;
-   }   
+   }
 
    int i;
    for (i=0; i<element->GetAttributes().GetLength(); i++) {
       if (element->GetAttributes().GetName(i) == "new-system") {
-         if (element->GetAttributes().GetValue(i) == 
+         if (element->GetAttributes().GetValue(i) ==
                "yes") {
             out << "!!linebreak:original\n";
 	    output++;
@@ -3400,12 +3411,12 @@ int MusicXmlFile::printPageBreak(ostream& out, CXMLObject* object) {
    CXMLElement* element = (CXMLElement*)object;
    if (element->GetName() != "print") {
       return output;
-   }   
+   }
 
    int i;
    for (i=0; i<element->GetAttributes().GetLength(); i++) {
       if (element->GetAttributes().GetName(i) == "new-page") {
-         if (element->GetAttributes().GetValue(i) == 
+         if (element->GetAttributes().GetValue(i) ==
                "yes") {
             out << "!!pagebreak:original\n";
 	    output++;
@@ -3422,7 +3433,7 @@ int MusicXmlFile::printPageBreak(ostream& out, CXMLObject* object) {
 
 char* MusicXmlFile::printKernClef(char* buffer, CXMLObject* object) {
    strcpy(buffer, "*");
-   
+
    if (object == NULL) {
       return buffer;
    }
@@ -3432,7 +3443,7 @@ char* MusicXmlFile::printKernClef(char* buffer, CXMLObject* object) {
    CXMLElement* element = (CXMLElement*)object;
    if (element->GetName() != "clef") {
       return buffer;
-   }   
+   }
 
    int type = -1;   // 0 = g clef, 1 = f clef, 2 = c clef
    int line = 0;
@@ -3466,7 +3477,7 @@ char* MusicXmlFile::printKernClef(char* buffer, CXMLObject* object) {
             line = getIntFromCharacterData(object->Zoom());
          } else if (element->GetName() == "clef-octave-change") {
             octavechange = getIntFromCharacterData(object->Zoom());
-         } 
+         }
 
       }
       object = object->GetNext();
@@ -3493,7 +3504,7 @@ char* MusicXmlFile::printKernClef(char* buffer, CXMLObject* object) {
 
    char buf[32] = {0};
    sprintf(buf, "%d", line);
-   
+
    strcat(buffer, buf);
 
    return buffer;
@@ -3520,10 +3531,10 @@ int MusicXmlFile::getIntFromCharacterData(CXMLObject* object) {
          removeBorderSpaces(buf);
          sscanf(buf, "%d", &output);
       }
-         
+
       object = object->GetNext();
    }
-   
+
    return output;
 }
 
@@ -3568,7 +3579,7 @@ int MusicXmlFile::printMeasureStyle(char* buffer, int staffno, int index) {
                if (element->GetName() == "repeat") {
                   for (i=0; i<element->GetAttributes().GetLength(); i++) {
                      if (element->GetAttributes().GetName(i) == "direction") {
-                        if (element->GetAttributes().GetValue(i) == 
+                        if (element->GetAttributes().GetValue(i) ==
                               "backward") {
                            repeatback = 1;
                         }
@@ -3582,7 +3593,7 @@ int MusicXmlFile::printMeasureStyle(char* buffer, int staffno, int index) {
                         string = cdata->GetData();
                         if (strstr(string.c_str(), "light-heavy") != NULL) {
                            finalbar = 1;
-                        } else if (strstr(string.c_str(), "light-thin") 
+                        } else if (strstr(string.c_str(), "light-thin")
                               != NULL) {
                            thinthin = 1;
                         }
@@ -3611,7 +3622,7 @@ int MusicXmlFile::printMeasureStyle(char* buffer, int staffno, int index) {
                if (element->GetName() == "repeat") {
                   for (i=0; i<element->GetAttributes().GetLength(); i++) {
                      if (element->GetAttributes().GetName(i) == "direction") {
-                        if (element->GetAttributes().GetValue(i) == 
+                        if (element->GetAttributes().GetValue(i) ==
                               "backward") {
                            repeatback = 1;
                         }
@@ -3625,7 +3636,7 @@ int MusicXmlFile::printMeasureStyle(char* buffer, int staffno, int index) {
                         string = cdata->GetData();
                         if (strstr(string.c_str(), "light-heavy") != NULL) {
                            finalbar = 1;
-                        } else if (strstr(string.c_str(), "light-light") 
+                        } else if (strstr(string.c_str(), "light-light")
                               != NULL) {
                            thinthin = 1;
                         }
@@ -3681,7 +3692,7 @@ int MusicXmlFile::printMeasureStyle(char* buffer, int staffno, int index) {
 
    if (!measureQ) { // a non-controlling barline needs to be printed
       strcat(buffer, "=");
-   } 
+   }
 
    if (finalbar && ending) {
       strcat(buffer, "=");
@@ -3740,7 +3751,7 @@ char* MusicXmlFile::getKernMetronome(char* buffer, CXMLObject* object) {
          break;
       }
    }
-   
+
    sprintf(buffer, "*MM%d", tempo);
 
    return buffer;
@@ -3755,7 +3766,7 @@ char* MusicXmlFile::getKernMetronome(char* buffer, CXMLObject* object) {
 
 char* MusicXmlFile::getKernTimeMet(char* buffer, CXMLObject* object) {
    buffer[0]= '\0';
-   if (object == NULL) { 
+   if (object == NULL) {
       return buffer;
    }
    if (object->GetType() != xmlElement) {
@@ -3775,7 +3786,7 @@ char* MusicXmlFile::getKernTimeMet(char* buffer, CXMLObject* object) {
          } else if (element->GetAttributes().GetValue(i) == "cut") {
             strcpy(buffer, "*met(c|)");
             return buffer;
-         } 
+         }
       }
    }
 
@@ -3831,7 +3842,7 @@ char* MusicXmlFile::getKernTimeSig(char* buffer, CXMLObject* object) {
                }
                obj2 = obj2->GetNext();
             }
-         } 
+         }
 
          if (element->GetName() == "beat-type") {
             obj2 = object->Zoom();
@@ -3846,7 +3857,7 @@ char* MusicXmlFile::getKernTimeSig(char* buffer, CXMLObject* object) {
                }
                obj2 = obj2->GetNext();
             }
-         } 
+         }
 
       }
       object = object->GetNext();
@@ -3888,7 +3899,7 @@ int MusicXmlFile::getNextVoiceTime(int staffno, int index, int voice) {
    int size = partdata[staffno].getSize();
    if (output == 0) {
       if (partdata[staffno][size-1].type == MXI_note) {
-         return partdata[staffno][size-1].ticktime + 
+         return partdata[staffno][size-1].ticktime +
                 partdata[staffno][size-1].tickdur;
       } else {
          return partdata[staffno][size-1].ticktime;
@@ -3912,7 +3923,7 @@ int MusicXmlFile::getNextVoiceTime(int staffno, int index, int voice) {
 int MusicXmlFile::getInterpRestDuration(char* interpbuffer, int interptick,
       int divisions) {
     // try to create a rhythm out of the entire duration:
-    Convert::durationToKernRhythm(interpbuffer, 
+    Convert::durationToKernRhythm(interpbuffer,
           (double)interptick/divisions);
 
     // tests now need to be done in order to verify that the interpreted
@@ -3932,7 +3943,7 @@ int MusicXmlFile::getInterpRestDuration(char* interpbuffer, int interptick,
 // MusicXmlFile::getKernNoteProperties --
 //
 
-void MusicXmlFile::getKernNoteProperties(_NoteState& ns, CXMLObject* object, 
+void MusicXmlFile::getKernNoteProperties(_NoteState& ns, CXMLObject* object,
       int tickdur) {
    ns.clear();
    if (object == NULL) {
@@ -3990,7 +4001,7 @@ void MusicXmlFile::getKernNoteProperties(_NoteState& ns, CXMLObject* object,
             if (element->GetAttributes().GetName(i) == "parentheses") {
                if (element->GetAttributes().GetValue(i) == "yes") {
                   ns.ficta = 1;
-               } 
+               }
             }
          }
 
@@ -4138,7 +4149,7 @@ void MusicXmlFile::getKernNoteProperties(_NoteState& ns, CXMLObject* object,
                   ns.stemdir = +1;
                }
                break;
-            } 
+            }
             obj2 = obj2->GetNext();
          }
       } // end of if "stem"
@@ -4199,12 +4210,12 @@ void MusicXmlFile::getKernNoteProperties(_NoteState& ns, CXMLObject* object,
 // MusicXmlFile::printKernNote --
 //
 
-int MusicXmlFile::printKernNote(ostream& out, int staffno, int index, 
+int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
       int divisions) {
 
    _NoteState cs;
 
-   getKernNoteProperties(cs, partdata[staffno][index].obj, 
+   getKernNoteProperties(cs, partdata[staffno][index].obj,
       partdata[staffno][index].tickdur);
 
    if (cs.chordnote) {
@@ -4214,7 +4225,7 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
    }
 
    ///////////////////////////////////////////////////////////////////////
-   // 
+   //
    // found out all of the information about the kern note, now print
    // the components according to the canonical order.
    //
@@ -4242,9 +4253,9 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
             break;
          }
       }
-      
-      if ((voice > 1) && ((lastnoteindex < 0) || 
-                           (partdata[staffno][lastnoteindex].ticktime != 
+
+      if ((voice > 1) && ((lastnoteindex < 0) ||
+                           (partdata[staffno][lastnoteindex].ticktime !=
                             partdata[staffno][index].ticktime))) {
 
          if (voice == 2) {
@@ -4252,10 +4263,10 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
             // the first voice is not sounding at this time
             if (partdata[staffno][index].ticktime >=
                 partvoiceticktime1) {
-               interptick = getNextVoiceTime(staffno, index, 1) - 
+               interptick = getNextVoiceTime(staffno, index, 1) -
                             partdata[staffno][index].ticktime;
-               interpextenttick = getInterpRestDuration(interpbuffer, 
-                                   interptick, 
+               interpextenttick = getInterpRestDuration(interpbuffer,
+                                   interptick,
                                    partdata[staffno][index].divisions);
                partvoiceticktime1 = partdata[staffno][index].ticktime +
                                     interpextenttick;
@@ -4270,21 +4281,21 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
          } else {
             out << ".\t";
          }
-      } 
+      }
    }
 
    // canonical item #1: open elided phrase marker
-   if (cs.elidedphrasestart) {    
+   if (cs.elidedphrasestart) {
       out << "&{";
    }
 
    // canonical item #2: open phrase marker
-   if (cs.phrasestart) {    
+   if (cs.phrasestart) {
       out << "{";
    }
 
    // canonical item #3: open elided slur marker
-   if (cs.elidedslurstart) {    
+   if (cs.elidedslurstart) {
       out << "&(";
    }
 
@@ -4428,9 +4439,9 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
    }
 
 
-   // 
+   //
    //  end of canonical kern markers.
-   // 
+   //
    ////////////////////////////////////////////////////////////////////////
 
    // determine what to print after note: space, tab, null token, or newline.
@@ -4440,9 +4451,9 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
                      // allow in multiple voices later ...
    } else if (index+1 < partdata[staffno].getSize()) {
       if (partdata[staffno][index+1].type == MXI_note) {
-         if (partdata[staffno][index+1].ticktime == 
+         if (partdata[staffno][index+1].ticktime ==
                partdata[staffno][index].ticktime) {
-            if (partdata[staffno][index+1].voice == 
+            if (partdata[staffno][index+1].voice ==
                 partdata[staffno][index].voice) {
                // the next note is a chord note
                out << " ";
@@ -4462,23 +4473,23 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
       newlineQ = 1;
    }
 
-   // print a newline if necessary, but print a null token for the 
+   // print a newline if necessary, but print a null token for the
    // second voice if it is currently active.
    if (newlineQ) {
       if (partdata[staffno][index].voice == 1) {
          if (partdata[staffno][index].ticktime < partvoiceticktime2) {
             out << "\t.";
          }
-      } 
+      }
 
       // out << "\n";  // print newline in calling function...
    }
 
    if (partdata[staffno][index].voice == 2) {
-      partvoiceticktime2 = partdata[staffno][index].ticktime + 
+      partvoiceticktime2 = partdata[staffno][index].ticktime +
                            partdata[staffno][index].tickdur;
    } else if (partdata[staffno][index].voice == 1) {
-      partvoiceticktime1 = partdata[staffno][index].ticktime + 
+      partvoiceticktime1 = partdata[staffno][index].ticktime +
                            partdata[staffno][index].tickdur;
    }
 
@@ -4489,7 +4500,7 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
 
 //////////////////////////////
 //
-// MusicXmlFile::getDivisions -- 
+// MusicXmlFile::getDivisions --
 //
 
 int MusicXmlFile::getDivisions(CXMLObject* object) {
@@ -4519,7 +4530,7 @@ int MusicXmlFile::getDivisions(CXMLObject* object) {
          sscanf(buffer, "%d", &output);
          // cout << "Found divisions: " << output << endl;
          break;
-      } 
+      }
       object = object->GetNext();
    }
 
@@ -4552,7 +4563,7 @@ int MusicXmlFile::getMeasureNumber(CXMLObject* object) {
    char buffer[1024] = {0};
    for (i=0; i<element->GetAttributes().GetLength(); i++) {
       if (element->GetAttributes().GetName(i) == "number") {
-         string = element->GetAttributes().GetValue(i); 
+         string = element->GetAttributes().GetValue(i);
          strncpy(buffer, string.c_str(), 1024);
          sscanf(buffer, "%d", &output);
          break;
@@ -4580,7 +4591,7 @@ void MusicXmlFile::fixMidiAccidentals(void) {
    int index = 0;
    int lindex = 0;
    int llindex = 0;
-   
+
    for (i=0; i<partdata.getSize(); i++) {
       note = lnote = llnote = -1;
       index = lindex = llindex = 0;
@@ -4638,7 +4649,7 @@ HumdrumFile& MusicXmlFile::createHumdrumFile(HumdrumFile& hfile) {
    int i;
    // most MusicXML files start with highest part first, and then
    // progress towards the lowest part, so assemble the parts
-   // in reverse order to follow the Humdrum convention of 
+   // in reverse order to follow the Humdrum convention of
    // encoding the scores from lowest to hightest pitch ranges
    // in the score.
    for (i=0; i<count; i++) {
@@ -4724,7 +4735,7 @@ int MusicXmlFile::getMeasureTickDuration(CXMLObject* object) {
    if (element->GetName() != "measure") {
       return 0;
    }
-  
+
    int maxtick  = 0;
    int tickpos  = 0;
    int duration = 0;
@@ -4836,7 +4847,7 @@ int MusicXmlFile::getForwardTickDuration(CXMLObject* object) {
 
 //////////////////////////////
 //
-// MusicXmlFile::getNoteTickDuration -- return 0 duration if the note 
+// MusicXmlFile::getNoteTickDuration -- return 0 duration if the note
 //    contains a <chord> element.  <note> with <chord> elements
 //    do not increment the timeline.  All <note> containing a
 //    <chord> element must have the same duration as the
