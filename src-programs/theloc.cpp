@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
       if (numinputs < 1) {
          processData(cin);
       } else {
-         input.open(options.getArg(i+1));
+         input.open(options.getArg(i+1).data());
          processData(input);
          input.close();
       }
