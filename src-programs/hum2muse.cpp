@@ -5084,6 +5084,47 @@ void convertHtmlTextToMuseData(Array<char> & text) {
    pre.sar(text, "^fine$", "fine\\+", ""); // workaround to force fine printing
    pre.sar(text, "D\\. C\\.", "D.\\+C.", "g"); // workaround for Da capo
 
+   // Polish accented letters (no mapping at the moment
+   pre.sar(text, "&Aogon;", "A,", "g"); // A ogon
+   pre.sar(text, "&Eogon;", "E,", "g"); // E ogon
+   pre.sar(text, "&aogon;", "a,", "g"); // a ogon
+   pre.sar(text, "&eogon;", "e,", "g"); // e ogon
+
+   pre.sar(text, "&Cacute;", "C'", "g"); // C acute
+   pre.sar(text, "&Nacute;", "N'", "g"); // N acute
+   pre.sar(text, "&Sacute;", "S'", "g"); // S acute
+   pre.sar(text, "&Zacute;", "Z'", "g"); // Z acute
+   pre.sar(text, "&Zdot;", "Z.", "g"); // Z dot
+   pre.sar(text, "&Lstrok;", "L/", "g"); // L-stroke
+
+   pre.sar(text, "&cacute;", "c'", "g"); // c acute
+   pre.sar(text, "&nacute;", "n'", "g"); // n acute
+   pre.sar(text, "&sacute;", "s'", "g"); // s acute
+   pre.sar(text, "&zacute;", "z'", "g"); // z acute
+   pre.sar(text, "&zdot;", "z.", "g");   // z dot
+   pre.sar(text, "&lstrok;", "l/", "g"); // l-stroke
+
+   // Unicode UTF-8 for Polish letters:
+   pre.sar(text, "\\xc4\\x84", "A,", "g");   // A ogon
+   pre.sar(text, "\\xc4\\x86", "C'", "g");   // C acute
+   pre.sar(text, "\\xc4\\x98", "E,", "g");   // E ogon
+   pre.sar(text, "\\xc5\\x81", "L/", "g");   // L slash
+   pre.sar(text, "\\xc5\\x83", "N'", "g");   // N acute
+   pre.sar(text, "\\xc3\\x93", "\\O7", "g"); // O acute
+   pre.sar(text, "\\xc5\\x9a", "S'", "g");   // S acute
+   pre.sar(text, "\\xc5\\xb9", "Z'", "g");   // Z acute
+   pre.sar(text, "\\xc5\\xbb", "Z.", "g");   // Z dot
+
+   pre.sar(text, "\\xc4\\x85", "a,", "g");   // a ogon
+   pre.sar(text, "\\xc4\\x87", "c'", "g");   // c acute
+   pre.sar(text, "\\xc4\\x99", "e,", "g");   // e ogon
+   pre.sar(text, "\\xc5\\x82", "l/", "g");   // l slash
+   pre.sar(text, "\\xc5\\x84", "n'", "g");   // n acute
+   pre.sar(text, "\\xc3\\xb3", "\\o7", "g"); // o acute
+   pre.sar(text, "\\xc5\\x9b", "s'", "g");   // s acute
+   pre.sar(text, "\\xc5\\xba", "z'", "g");   // z acute
+   pre.sar(text, "\\xc5\\xbc", "z.", "g");   // z dot
+
 }
 
 
