@@ -5,8 +5,9 @@
 // Last Modified: Fri Feb 25 00:09:19 PST 2005 Balanced <measure> markers
 // Last Modified: Tue Dec 12 20:23:42 PST 2006 Handling > and < as text
 // Last Modified: Tue Nov 22 07:08:10 PST 2011 Fixed grace noteshapes
-// Last Modified: Tue Jun 26 15:13:50 PDT 2012 Added <time-modification> for tuplets
-// Last Modified: Tue Jun 26 17:06:38 PDT 2012 Some bug fixes for multi-voice treatment
+// Last Modified: Tue Jun 26 15:13:50 PDT 2012 Added time-modification f/tuplets
+// Last Modified: Tue Jun 26 17:06:38 PDT 2012 Bug fixes f/multi-voice treatment
+// Last Modified: Fri Jul  3 14:41:16 PDT 2015 Added colored marker export
 // Filename:      ...sig/examples/all/hum2xml.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2xml.cpp
 // Syntax:        C++; museinfo
@@ -22,11 +23,8 @@
 #include <cctype>
 #include <stdio.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-#else
-   #include <iostream.h>
-#endif
+#include <iostream>
+#include <string>
 
 // function declarations:
 void      checkOptions          (Options& opts, int argc, char** argv);
@@ -80,6 +78,10 @@ void      printMode             (int lev, HumdrumFile& infile, int line,
                                  int col, int voice);
 int       adjustKeyInfo         (HumdrumFile& infile, int line, int col, 
                                  int voice);
+void      setColorCharacters    (HumdrumFile& infile, Array<char>& colorchar,
+                                 Array<string>& colorout);
+string    checkColor            (const char* note, Array<char>& colorchar, 
+                                 Array<string>& colorout);
 
 // User interface variables:
 Options   options;
@@ -111,6 +113,9 @@ Array<int> Barlines;
 
 int  ClefOctaveTranspose = 0;   // used to fix bug in MusicXML vocal tenor clef notes
 
+Array<char> Colorchar;          // charcter in **kern data which causes color
+Array<string> Colorcode;        // color code that the marker indicates
+
 //////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv) {
@@ -140,6 +145,7 @@ int main(int argc, char** argv) {
          // don't know what this case may be
       }
       setLineTicks(LineTick, infile, divisions);
+      setColorCharacters(infile, Colorchar, Colorcode);
       convertToMusicXML(infile);
 
    }
@@ -1363,7 +1369,7 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
 
    pline(lev, "<voice>");
    cout << voice << "</voice>\n";
-   int vcase = voice;
+   // int vcase = voice;
 
 /*
    int vcase = 0;
@@ -1434,7 +1440,6 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
    // printDots(durstring);
    printDots(newbuffer.getBase());
 
-
    /// WRITTEN ACCIDENTALS ////////////////////////////////////////////
 
    if (toupper(buff2[0]) != 'R') {
@@ -1465,12 +1470,25 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
       pline(lev, "<stem>up</stem>\n");
    } else if (strchr(buffer, '\\') != NULL) {
       pline(lev, "<stem>down</stem>\n");
+   }
+
+   // Disabling automatic stemming.  Use "autostem" to add manually, or
+   // let the program receiving MusicXML data decide on a stem direction:
+   /*
    } else if (vcase == 1) {
-      pline(lev, "<stem>down</stem>\n");
+      pline(lev, "<stem>up</stem>\n");
    } else if (vcase == 2) {
       if (strchr(buffer, '/') == NULL && strchr(buffer, '\\') == NULL) {
-         pline(lev, "<stem>up</stem>\n");
+         pline(lev, "<stem>down</stem>\n");
       }
+   }
+   */
+
+   // Notehead
+   string notecolor = checkColor(buffer, Colorchar, Colorcode);
+   if (notecolor != "") {
+      pline(lev, "<notehead color=\"");
+      cout << notecolor << "\">normal</notehead>\n";
    }
 
    if (durationR.getFloat() >= 1.0) {
@@ -2066,6 +2084,76 @@ void usage(const char* command) {
 
 }
 
+
+//////////////////////////////
+//
+// setColorCharacters -- If the Humdrum file has a record in the form:
+//    !!!RDF**kern:\s*([^\s])\s*=\s*(match|mark)
+//    Then $1 is the marker in **kern data to indicate a match result
+//    from a search red is the default color.  If there is a color code
+//    in the RDF marker that will be the marker's color.
+//
+//
+
+void setColorCharacters(HumdrumFile& infile, Array<char>& colorchar,
+      Array<string>& colorout) {
+   PerlRegularExpression pre;
+   colorchar.setSize(0);
+   colorout.setSize(0);
+   char value;
+   string color;
+   int i;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isBibliographic()) {
+         continue;
+      }
+      // !!!RDF**kern: N= mark color="#ff0000", root
+      if (pre.search(infile[i].getLine(), 
+            "^!!!RDF\\*\\*kern:\\s*([^\\s])\\s*=\\s*match", "i") ||
+          pre.search(infile[i].getLine(), 
+            "^!!!RDF\\*\\*kern:\\s*([^\\s])\\s*=\\s*mark", "i")
+         ) {
+         value = pre.getSubmatch(1)[0];
+         colorchar.append(value);
+         if (pre.search(infile[i].getLine(), 
+               "color\\s*=\\s*\"?(#[a-f0-9]{6})\"?", "i")) {
+            color = pre.getSubmatch(1);
+            colorout.append(color);
+         } else {
+            color = "#ff0000";
+            colorout.append(color);
+         }
+      }
+   }
+
+   if (debugQ) {
+      if (colorchar.getSize() > 0) {
+         cout << "COLOR MARKERS:\n";
+         for (i=0; i<colorchar.getSize(); i++) {
+            cout << "\t\"" << colorchar[i] << "\" ==> ";
+            cout << "\t\"" << colorout[i] << "\"";
+            cout << "\n";
+         }
+      }
+   }
+}
+
+
+
+//////////////////////////////
+//
+// checkColor --
+//
+
+string checkColor(const char* note, Array<char>& colorchar, 
+      Array<string>& colorout) {
+   for (int i=0; i<colorchar.getSize(); i++) {
+      if (strchr(note, colorchar[i]) != NULL) {
+         return colorout[i];
+      }
+   }
+   return "";
+}
 
 
 
