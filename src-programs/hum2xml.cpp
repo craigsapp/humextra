@@ -25,6 +25,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
 // function declarations:
 void      checkOptions          (Options& opts, int argc, char** argv);
@@ -35,18 +36,19 @@ void      makePart              (HumdrumFile& infile, int start, int col,
                                  int count);
 void      generatePartInfo      (HumdrumFile& infile, int start, int col,
                                  int count);
-void      convertDataToMusicXML (HumdrumFile& infile, int line, int col, 
+void      convertDataToMusicXML (HumdrumFile& infile, int line, int col,
                                  int voice);
-void      convertMeasureToXML   (HumdrumFile& infile, int line, int col, 
+void      convertMeasureToXML   (HumdrumFile& infile, int line, int col,
                                  int voice);
-void      convertAttributeToXML (HumdrumFile& infile, int line, int col, 
+void      convertAttributeToXML (HumdrumFile& infile, int line, int col,
                                  int voice);
-void      convertNoteToXML      (HumdrumFile& infile, int line, int col, 
+void      convertNoteToXML      (HumdrumFile& infile, int line, int col,
                                  int voice);
-void      pline                 (int level, const char* string);
+void      pline                 (int level, const char* string, 
+                                 ostream& out = cout);
 void      usage                 (const char* command);
 double    convertNoteEntryToXML (HumdrumFile& infile, int line, int col,
-                                 const char* buffer, int chord, int vlevel, 
+                                 const char* buffer, int chord, int vlevel,
                                  int voice);
 void      checkMeasure          (void);
 void      printDurationType     (const char* durstring);
@@ -59,29 +61,38 @@ void      printGlobalComment    (HumdrumFile& infile, int line);
 void      printBibliography     (HumdrumFile& infile, int line);
 void      checkbackup           (int currenttick, int targettick);
 void      processTextUnderlay   (HumdrumFile& infile, int line, int col);
-void      displayUnknownTextType(HumdrumFile& infile, int line, int col, 
+void      displayUnknownTextType(HumdrumFile& infile, int line, int col,
                                  int verse);
-void      displayLyrics         (HumdrumFile& infile, int line, int col, 
+void      displayLyrics         (HumdrumFile& infile, int line, int col,
                                  int verse);
 void      displayHTMLText       (const char* buffer);
-void      processBeams          (HumdrumFile& infile, int line, int col, 
+void      processBeams          (HumdrumFile& infile, int line, int col,
                                  const char* buffer, int vlevel);
 void      setLineTicks          (Array<int>& LineTick, HumdrumFile& infile, int divisions);
 void      getBarlines           (Array<int>& barlines, HumdrumFile& infile);
-void      convertMeasureToMusicXML(HumdrumFile& infile, int track, 
+void      convertMeasureToMusicXML(HumdrumFile& infile, int track,
                                  int startbar, int endbar);
-int       getMaxVoice           (HumdrumFile& infile, int track, 
+int       getMaxVoice           (HumdrumFile& infile, int track,
                                  int startline, int endline);
-void      convertVoice          (HumdrumFile& infile, int track, int startbar, 
+void      convertVoice          (HumdrumFile& infile, int track, int startbar,
                                  int endbar, int voice);
-void      printMode             (int lev, HumdrumFile& infile, int line, 
+void      printMode             (int lev, HumdrumFile& infile, int line,
                                  int col, int voice);
-int       adjustKeyInfo         (HumdrumFile& infile, int line, int col, 
+int       adjustKeyInfo         (HumdrumFile& infile, int line, int col,
                                  int voice);
 void      setColorCharacters    (HumdrumFile& infile, Array<char>& colorchar,
                                  Array<string>& colorout);
-string    checkColor            (const char* note, Array<char>& colorchar, 
+string    checkColor            (const char* note, Array<char>& colorchar,
                                  Array<string>& colorout);
+void      convertBnumForNote    (ostream& out, HumdrumFile& infile, int line, 
+                                 int col);
+void      convertBassoContinuoFigureGroup(ostream& out, HumdrumFile& infile,
+                                 int line, int col);
+void      convertBassoContinuoFigure(ostream& out, HumdrumFile& infile,
+                                 int line, int col);
+void      convertBassoContinuoFigureSingle(ostream& out, const char* figure);
+int       checkForAnotherFigure (ostream& out, HumdrumFile& infile, int oline,
+                                 int line, int ktrack, int btrack);
 
 // User interface variables:
 Options   options;
@@ -215,20 +226,20 @@ void setLineTicks(Array<int>& LineTick, HumdrumFile& infile, int divisions) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("debug=b",  "print debug information"); 
-   opts.define("nocaution=b",  "print cautionary accidentals"); 
-   opts.define("r|reverse=b",  "reverse the order of the parts"); 
+   opts.define("debug=b",  "print debug information");
+   opts.define("nocaution=b",  "print cautionary accidentals");
+   opts.define("r|reverse=b",  "reverse the order of the parts");
 
-   opts.define("author=b",  "author of program"); 
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("h|help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -247,7 +258,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       example();
       exit(0);
    }
-   
+
    debugQ      = opts.getBoolean("debug");
    cautionaryQ = !opts.getBoolean("nocaution");
    reverseQ    = opts.getBoolean("reverse");
@@ -269,7 +280,7 @@ void example(void) {
 
 //////////////////////////////
 //
-// convertToMusicXML -- 
+// convertToMusicXML --
 //
 // MusicXML 0.6a header:
 // <?xml version="1.0" standalone="no"?>
@@ -300,18 +311,18 @@ void convertToMusicXML(HumdrumFile& infile) {
 
    int count = makePartList(infile);
 
-   int start = 0;  // should be the start of exclusive interpretation line  
+   int start = 0;  // should be the start of exclusive interpretation line
                    // (but setting to zero).
    int gcount = 0;
    int i;
    if (!reverseQ) {
-      // print parts in reverse order because Humdrum scores are printed lowest 
+      // print parts in reverse order because Humdrum scores are printed lowest
       // part first going towards highest, but MusicXML is from highest to lowest.
       for (i=kerntracks.getSize()-1; i>=0 ;i--) {
          makePart(infile, start, kerntracks[i], ++gcount);
       }
    } else {
-      // print reverse because Humdrum score is probably reversed 
+      // print reverse because Humdrum score is probably reversed
       for (i=0; i<kerntracks.getSize(); i++) {
          makePart(infile, start, kerntracks[i], ++gcount);
       }
@@ -348,7 +359,7 @@ void printGlobalComments(HumdrumFile& infile, int direction) {
          }
          i++;
       }
-      
+
    } else {
       stop = infile.getNumLines() - 1;
       i = stop;
@@ -374,7 +385,7 @@ void printGlobalComments(HumdrumFile& infile, int direction) {
    }
 
 }
- 
+
 
 //////////////////////////////
 //
@@ -425,6 +436,7 @@ void printBibliography(HumdrumFile& infile, int line) {
 }
 
 
+
 //////////////////////////////
 //
 // makePart -- ggg
@@ -436,7 +448,7 @@ void makePart(HumdrumFile& infile, int start, int track, int count) {
    pline(lev, "<part id=\"P");
    cout << count << "\">\n";
    lev++;
-   minit = 0;  
+   minit = 0;
    musicstart = 0;
    AbsTick = 0;
    ClefOctaveTranspose = 0;  // reset any clef transposition from previous part
@@ -498,8 +510,8 @@ void convertMeasureToMusicXML(HumdrumFile& infile, int track, int startbar,
 
    int maxVoice = getMaxVoice(infile, track, startbar, endbar);
 
-//cout << "<!-- Track = " << track << "\tstart = " 
-//      << startbar << "\tend = " << endbar 
+//cout << "<!-- Track = " << track << "\tstart = "
+//      << startbar << "\tend = " << endbar
 //      << "\tvoices = " << maxVoice
 //      << " -->" << endl;
 
@@ -510,12 +522,13 @@ void convertMeasureToMusicXML(HumdrumFile& infile, int track, int startbar,
 }
 
 
+
 //////////////////////////////
 //
 // convertVoice --
 //
 
-void convertVoice(HumdrumFile& infile, int track, int startbar, int endbar, 
+void convertVoice(HumdrumFile& infile, int track, int startbar, int endbar,
       int voice) {
 
     // off by one for some reason
@@ -528,12 +541,12 @@ void convertVoice(HumdrumFile& infile, int track, int startbar, int endbar,
       // don't print measure information for secondary voices
       start++;
    }
-   
+
    for (i=start; i<=endbar; i++) {
       v = 0;
       for (j=0; j<infile[i].getFieldCount(); j++) {
          t = infile[i].getPrimaryTrack(j);
-         if (t != track) { 
+         if (t != track) {
             continue;
          }
          v++;
@@ -612,12 +625,12 @@ void convertDataToMusicXML(HumdrumFile& infile, int line, int col, int voice) {
    }
 }
 
-   
+
 
 //////////////////////////////
 //
 // updateAccidentals -- restore accidentals at a measure boundary.
-// 
+//
 
 void updateAccidentals(void) {
    // copy v1states to v1lastmeasure
@@ -636,7 +649,7 @@ void updateAccidentals(void) {
 // convertMeasureToXML --
 //
 
-void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) { 
+void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) {
    int measureno = -1;
 
    if (!musicstart) {
@@ -650,7 +663,7 @@ void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) {
    int nextline = -1;
    int nextcol = -1;
    int track = infile[line].getPrimaryTrack(col);
-   
+
    // locate the next barline
    int i, j;
    for (i=line+1; i<infile.getNumLines(); i++) {
@@ -674,22 +687,22 @@ void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) {
    }
 */
 
-   if ((strncmp(infile[line][col], "==", 2) == 0) 
+   if ((strncmp(infile[line][col], "==", 2) == 0)
          || (strcmp(infile[line][col], "*-") == 0)) {
       checkbackup(AbsTick, LineTick[line]);
       lev++;
-      pline(lev, "<barline location=\"right\">\n"); 
+      pline(lev, "<barline location=\"right\">\n");
       lev++;
       pline(lev, "<bar-style>light-heavy</bar-style>\n");
       lev--;
-      pline(lev, "</barline>\n"); 
+      pline(lev, "</barline>\n");
       lev--;
       pline(lev, "</measure>\n");
       measurestate = 0;
    } else if ((ptr = strchr(infile[line][col], ':')) != NULL) {
       if ((ptr+1)[0] == '|' || (ptr+1)[0] == '!') {
          lev++;
-         pline(lev, "<barline>\n"); 
+         pline(lev, "<barline>\n");
          lev++;
          if (strstr(infile[line][col], ":|!") != NULL) {
             pline(lev, "<bar-style>light-heavy</bar-style>\n");
@@ -702,7 +715,7 @@ void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) {
          }
          pline(lev, "<repeat direction=\"backward\"/>\n");
          lev--;
-         pline(lev, "</barline>\n"); 
+         pline(lev, "</barline>\n");
          lev--;
       }
 
@@ -710,14 +723,14 @@ void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) {
       checkbackup(AbsTick, LineTick[line]);
 
       lev++;
-      pline(lev, "<barline>\n"); 
+      pline(lev, "<barline>\n");
       lev++;
       pline(lev, "<bar-style>light-light</bar-style>\n");
       lev--;
-      pline(lev, "</barline>\n"); 
+      pline(lev, "</barline>\n");
       lev--;
 
-   } 
+   }
 
 
    if (strcmp(infile[line+1][0], "*-") == 0) {
@@ -731,7 +744,7 @@ void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) {
          pline(lev, "</measure>\n");
          measurestate = 0;
       }
-   } 
+   }
    minit++;
 
    if (sscanf(infile[line][col], "=%d", &measureno)) {
@@ -750,7 +763,7 @@ void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) {
    if ((ptr = strchr(infile[line][col], ':')) != NULL) {
       if ((ptr-1)[0] == '|' || (ptr-1)[0] == '!') {
          lev++;
-         pline(lev, "<barline>\n"); 
+         pline(lev, "<barline>\n");
          lev++;
          if (strstr(infile[line][col], ":|!") != NULL) {
             pline(lev, "<bar-style>light-heavy</bar-style>\n");
@@ -763,7 +776,7 @@ void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) {
          }
          pline(lev, "<repeat direction=\"forward\"/>\n");
          lev--;
-         pline(lev, "</barline>\n"); 
+         pline(lev, "</barline>\n");
          lev--;
       }
    }
@@ -773,7 +786,7 @@ void convertMeasureToXML(HumdrumFile& infile, int line, int col, int voice) {
 
 //////////////////////////////
 //
-// checkMeasure -- 
+// checkMeasure --
 //
 
 void checkMeasure(void) {
@@ -782,7 +795,7 @@ void checkMeasure(void) {
       pline(lev, "<measure number=\"");
       cout << minit << "\">\n";
       measurestate = 1;
-   } 
+   }
 }
 
 
@@ -1152,6 +1165,10 @@ void convertNoteToXML(HumdrumFile& infile, int line, int col, int voice) {
 
    lev++;
 
+   if (strcmp(infile[line][col], ".") != 0) {
+      convertBnumForNote(cout, infile, line, col);
+   }
+
    // double cdur = 0;
    // int xdur = 0;
 
@@ -1163,8 +1180,8 @@ void convertNoteToXML(HumdrumFile& infile, int line, int col, int voice) {
    }
 
 /*
-   if ((col+1 < infile[line].getFieldCount()) && 
-         (infile[line].getPrimaryTrack(col) == 
+   if ((col+1 < infile[line].getFieldCount()) &&
+         (infile[line].getPrimaryTrack(col) ==
          infile[line].getPrimaryTrack(col+1))) {
 
       xdur = (int)(cdur * divisions);
@@ -1176,7 +1193,7 @@ void convertNoteToXML(HumdrumFile& infile, int line, int col, int voice) {
          cdur = convertNoteEntryToXML(infile, line, col+1, buffer, i, 1);
       }
 
-      xdur = (int)(cdur * divisions) - 
+      xdur = (int)(cdur * divisions) -
             (int)(divisions * infile[line].getDuration());
       // AbsTick += xdur;
    }
@@ -1189,7 +1206,235 @@ void convertNoteToXML(HumdrumFile& infile, int line, int col, int voice) {
 
 //////////////////////////////
 //
-// checkbackup -- 
+// convertBnumForNote --
+//
+
+void convertBnumForNote(ostream& out, HumdrumFile& infile, int line, int col) {
+   int j;
+   int bcol = -1;
+   for (j=col+1; j<infile[line].getFieldCount(); j++) {
+      if (infile[line].isExInterp(j, "**kern")) {
+         return;
+      } else if (infile[line].isExInterp(j, "**Bnum")) {
+         bcol = j;
+         break;
+      }
+   }
+   if (bcol < 0) {
+      return;
+   }
+
+   // Possibly have some figured base content to process.
+   // For now, only check at the current time for figures.
+   // Otherwise, follow the primary track of the col data and
+   // see if there are Bnum values which occur during the sustain
+   // portion of the music and also print those.
+
+   stringstream firstout;
+   stringstream secondout;
+
+   lev++;
+   if (strcmp(infile[line][bcol], ".") != 0) {
+      convertBassoContinuoFigureGroup(firstout, infile, line, bcol);
+   }
+   lev--;
+
+   int ktrack = infile[line].getPrimaryTrack(col);
+   int btrack = infile[line].getPrimaryTrack(bcol);
+   int ticks = checkForAnotherFigure(secondout, infile, line, line+1, 
+         ktrack, btrack);
+
+   if (firstout.str().size() > 0) {
+      pline(lev, "<figured-bass>\n", out);
+      out << firstout.str();
+
+	   lev++;
+  	   pline(lev, "<duration>", out);
+	   out << ticks << "</duration>\n";
+	   lev--;
+      pline(lev, "</figured-bass>\n", out);
+   }
+
+ 	if (secondout.str().size() > 0) {
+    	out << secondout.str();
+  	}
+
+}
+
+
+
+//////////////////////////////
+//
+// checkForAnotherFigure --
+//
+
+int checkForAnotherFigure(ostream& out, HumdrumFile& infile, int oline, 
+      int line, int ktrack, int btrack) {
+
+   int i, j;
+   RationalNumber starttime = infile[oline].getAbsBeat();
+   RationalNumber endtime;
+   int ticks = 0;
+
+   int tline = -1;
+   for (i=line; i<infile.getNumLines(); i++) {
+      if (!infile[i].isData()) {
+         continue;
+      } else {
+         tline = i;
+			break;
+      }
+   }
+   
+   if (tline < 0) {
+      endtime = infile[infile.getNumLines()-1].getAbsBeatR();
+      RationalNumber dur = endtime - starttime;
+      ticks = divisions * dur.getNumerator() / dur.getDenominator();
+      return ticks;
+   }
+
+   int kcol = -1;
+   int bcol = -1;
+   for (j=0; j<infile[tline].getFieldCount(); j++) {
+      if (infile[tline].getPrimaryTrack(j) != ktrack) {
+         continue;
+      }
+      kcol = j;
+      int jj;
+      for (jj=j; jj<infile[tline].getFieldCount(); jj++) {
+         if (infile[tline].getPrimaryTrack(jj) == btrack) {
+         	bcol = jj;
+         	break;
+         }
+      }
+      break;
+   }
+
+   if (kcol < 0) {
+      return 0;
+   }
+   if (bcol < 0) {
+      return 0;
+   }
+
+   if (strcmp(infile[tline][kcol], ".") != 0) {
+      // At a new note, so don't try to print another figure base.
+      endtime = infile[tline].getAbsBeatR();
+      RationalNumber dur = endtime - starttime;
+      ticks = divisions * dur.getNumerator() / dur.getDenominator();
+      return ticks;
+   }
+   if (strcmp(infile[tline][bcol], ".") != 0) {
+      // Print another figure, starting with a <duration> marker.
+      RationalNumber time1 = infile[oline].getAbsBeat();
+      RationalNumber time2 = infile[tline].getAbsBeat();
+      RationalNumber dur = time2 - time1;
+      ticks = divisions * dur.getNumerator() / dur.getDenominator();
+      convertBnumForNote(out, infile, tline, kcol);
+   }
+
+   stringstream tempout;
+   int dur =  checkForAnotherFigure(tempout, infile, tline, tline+1, 
+         ktrack, btrack);
+
+   if (tempout.str().size() > 0) {
+      out << tempout.str();
+      pline(lev, "<duration>", out);
+      out << dur << "</duration>\n";
+      pline(lev--, "</figured-bass>", out);
+   }
+
+   // This needs to be fixed: the return value should be "ticks" and
+   // "dur" should be printed in this group instead.
+   return ticks;
+}
+
+
+
+//////////////////////////////
+//
+// convertBassoContinuoFigureGroup --
+//
+
+void convertBassoContinuoFigureGroup(ostream& out, HumdrumFile& infile,
+      int line, int col) {
+   char buffer[1024] = {0};
+   int tcount = infile[line].getTokenCount(col);
+   int k;
+   for (k=0; k<tcount; k++) {
+      infile[line].getToken(buffer, col, k);
+      convertBassoContinuoFigureSingle(out, buffer);
+   }
+}
+
+
+
+//////////////////////////////
+//
+// convertBassoContinuoFigureSingle --
+//
+
+void convertBassoContinuoFigureSingle(ostream& out, const char* figure) {
+   PerlRegularExpression pre;
+   PerlRegularExpression pre2;
+   char prefix[1024] = {0};
+   char number[1024] = {0};
+   char suffix[1024] = {0};
+   pre.search(figure, "([^0-9]*)([0-9]*)([^0-9]*)");
+
+   strcpy(prefix, pre.getSubmatch(1));
+   strcpy(number, pre.getSubmatch(2));
+   strcpy(suffix, pre.getSubmatch(3));
+
+   pline(lev, "<figure>\n", out);
+   lev++;
+
+   if (strlen(prefix) > 0) {
+      if (strchr(prefix, '#') != NULL) {
+         pline(lev, "<prefix>sharp</prefix>\n", out);
+      } else if (strchr(prefix, 'b') != NULL) {
+         pline(lev, "<prefix>flat</prefix>\n", out);
+      } else if (strchr(prefix, '-') != NULL) {
+         pline(lev, "<prefix>flat</prefix>\n", out);
+      } else if (strchr(prefix, 'f') != NULL) {
+         pline(lev, "<prefix>flat</prefix>\n", out);
+      }
+   }
+
+   if (strlen(number)) {
+      pline(lev, "<figure-number>", out);
+      out << number << "</figure-number>\n";
+   }
+
+   if (strlen(suffix) > 0) {
+      if (strchr(suffix, '#') != NULL) {
+         pline(lev, "<suffix>sharp</suffix>\n", out);
+      } else if (strchr(suffix, 'b') != NULL) {
+         pline(lev, "<suffix>flat</suffix>\n", out);
+      } else if (strchr(suffix, '-') != NULL) {
+         pline(lev, "<suffix>flat</suffix>\n", out);
+      } else if (strchr(suffix, 'f') != NULL) {
+         pline(lev, "<suffix>flat</suffix>\n", out);
+      } else if (strchr(suffix, '+') != NULL) {
+         pline(lev, "<suffix>cross</suffix>\n", out);
+      } else if (strchr(suffix, 'n') != NULL) {
+         pline(lev, "<suffix>natural</suffix>\n", out);
+      } else if (strchr(suffix, '/') != NULL) {
+         pline(lev, "<suffix>slash</suffix>\n", out);
+      } else if (strchr(suffix, '\\') != NULL) {
+         pline(lev, "<suffix>backslash</suffix>\n", out);
+      }
+   }
+
+   lev--;
+   pline(lev, "</figure>\n", out);
+}
+
+
+
+//////////////////////////////
+//
+// checkbackup --
 //
 
 void checkbackup (int currenttick, int targettick) {
@@ -1248,7 +1493,7 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
       pline(lev, "</forward>\n");
       return durationR.getFloat();
    }
- 
+
    double output = 0;
 
    // int explicitz = 0;
@@ -1337,7 +1582,7 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
       int value = (int)ratnum.getFloat();
       cout << value << "</duration>\n";
       if (!chord) {
-         // don't keep track of chord notes, and presume first note of 
+         // don't keep track of chord notes, and presume first note of
          // chord has correct duration for entire chord.
          AbsTick += value;
       }
@@ -1464,7 +1709,7 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
          pline(lev, "</time-modification>\n");
       }
    }
-    
+
    // Stem direction
    if (strchr(buffer, '/') != NULL) {
       pline(lev, "<stem>up</stem>\n");
@@ -1523,47 +1768,47 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
    }
 
    /// FERMATAS ///////////////////////////////////////////////////////
- 
+
    if (strchr(buffer, ';') != NULL) {
       pline(lev, "<notations>\n");
       lev++;
-      pline(lev, "<fermata type=\"upright\"/>\n"); 
+      pline(lev, "<fermata type=\"upright\"/>\n");
       lev--;
       pline(lev, "</notations>\n");
    }
 
    /// ARTICULATIONS ////////////////////////////////////////////
- 
+
    if (strchr(buffer, '\'') != NULL) {
       pline(lev, "<notations>\n");
       lev++;
       pline(lev, "<articulations>\n");
       lev++;
-      pline(lev, "<staccato placement=\"above\"/>\n"); 
+      pline(lev, "<staccato placement=\"above\"/>\n");
       lev--;
       pline(lev, "</articulations>\n");
       lev--;
       pline(lev, "</notations>\n");
    }
- 
+
    if (strchr(buffer, '~') != NULL) {
       pline(lev, "<notations>\n");
       lev++;
       pline(lev, "<articulations>\n");
       lev++;
-      pline(lev, "<tenuto placement=\"above\"/>\n"); 
+      pline(lev, "<tenuto placement=\"above\"/>\n");
       lev--;
       pline(lev, "</articulations>\n");
       lev--;
       pline(lev, "</notations>\n");
    }
- 
+
    if (strchr(buffer, '^') != NULL) {
       pline(lev, "<notations>\n");
       lev++;
       pline(lev, "<articulations>\n");
       lev++;
-      pline(lev, "<accent placement=\"above\"/>\n"); 
+      pline(lev, "<accent placement=\"above\"/>\n");
       lev--;
       pline(lev, "</articulations>\n");
       lev--;
@@ -1597,7 +1842,7 @@ void processBeams(HumdrumFile& infile, int line, int col, const char* buffer,
    int openbeam = 0;
    int closebeam = 0;
 
-   int i=0; 
+   int i=0;
    int sum = 0;
    int length = strlen(buffer);
    for (i=0; i<length; i++) {
@@ -1629,20 +1874,20 @@ void processBeams(HumdrumFile& infile, int line, int col, const char* buffer,
       return;
    }
 
-   // int totalcount = beamlevel[vlevel] + openbeam - closebeam + 
+   // int totalcount = beamlevel[vlevel] + openbeam - closebeam +
    //       backhook + forehook;
    int rcount = 0;
 
    if (openbeam != 0) {
       // add any new beams which are starting
- 
+
       // continue any old beams
       for (i=0; i<beamlevel[vlevel]; i++) {
          pline(lev, "<beam number=\"");
          cout << i+1 << "\">continue</beam>\n";
          rcount++;
       }
-   
+
       // add new beams
       for (i=0; i<openbeam; i++) {
          pline(lev, "<beam number=\"");
@@ -1669,7 +1914,7 @@ void processBeams(HumdrumFile& infile, int line, int col, const char* buffer,
          cout << i+1 << "\">continue</beam>\n";
          rcount++;
       }
-   
+
       // close old beams
       for (i=0; i<closebeam; i++) {
          // some strange problem required this following if statement to preven end=0
@@ -1684,11 +1929,11 @@ void processBeams(HumdrumFile& infile, int line, int col, const char* buffer,
       // add any ending beam hook
       for (i=0; i<backhook; i++) {
          pline(lev, "<beam number=\"");
-         cout << beamlevel[vlevel] + closebeam + i + 1 
+         cout << beamlevel[vlevel] + closebeam + i + 1
               << "\">backward hook</beam>\n";
          rcount++;
       }
-   
+
    }
 
    if (beamlevel[vlevel] < 0) {
@@ -1713,13 +1958,13 @@ void processTextUnderlay(HumdrumFile& infile, int line, int col) {
 
    int tcol = col+1;
    int verse = 1;
-   while (tcol < fields && 
+   while (tcol < fields &&
          strcmp(infile[line].getExInterp(tcol), "**kern") != 0) {
       if (strcmp(infile[line][tcol], ".") == 0) {
          // ignore null tokens
       } else if (strcmp(infile[line].getExInterp(tcol), "**text") == 0) {
          displayLyrics(infile, line, tcol, verse);
-      } else {
+      } else if (strcmp(infile[line].getExInterp(tcol), "**Bnum") != 0) {
          displayUnknownTextType(infile, line, tcol, verse);
       }
 
@@ -1747,7 +1992,7 @@ void displayLyrics(HumdrumFile& infile, int line, int col, int verse) {
 // displayUnknownTextType --
 //
 
-void displayUnknownTextType(HumdrumFile& infile, int line, int col, 
+void displayUnknownTextType(HumdrumFile& infile, int line, int col,
       int verse) {
 
    pline(lev, "<lyric number=\"");
@@ -1814,7 +2059,7 @@ void checkAccidentals(int diatonic, int alter, int chord) {
       diatonic = toupper(diatonic);
 
       if (v1states[diatonic - 'A'] != alter) {
-   
+
          pline(lev, "<accidental>");
          switch (alter) {
             case 2:  cout << "double-sharp"; break;
@@ -1826,10 +2071,10 @@ void checkAccidentals(int diatonic, int alter, int chord) {
          cout << "</accidental>\n";
          v1states[diatonic - 'A'] = alter;
          v1lastmeasure[diatonic - 'A'] = alter;
-   
+
       } else if (cautionaryQ && v1lastmeasure[diatonic - 'A'] != alter) {
          // if a cautionary accidental accross measure, then adjust here
-   
+
          pline(lev, "<accidental>");
          switch (alter) {
             case 2:  cout << "double-sharp"; break;
@@ -1848,7 +2093,7 @@ void checkAccidentals(int diatonic, int alter, int chord) {
 
       diatonic = toupper(diatonic);
       if (v1prechordstates[diatonic - 'A'] != alter) {
-   
+
          pline(lev, "<accidental>");
          switch (alter) {
             case 2:  cout << "double-sharp"; break;
@@ -1860,10 +2105,10 @@ void checkAccidentals(int diatonic, int alter, int chord) {
          cout << "</accidental>\n";
          v1states[diatonic - 'A'] = alter;
          v1lastmeasure[diatonic - 'A'] = alter;
-   
+
       } else if (cautionaryQ && v1chord[diatonic - 'A'] != alter) {
          // if a cautionary accidental accross measure, then adjust here
-   
+
          pline(lev, "<accidental>");
          switch (alter) {
             case 2:  cout << "double-sharp"; break;
@@ -1969,19 +2214,19 @@ int makePartList(HumdrumFile& infile) {
    lev++;
    pline(lev, "<part-list>\n");
    lev++;
-   
+
    // find the start of the spine data and output a part for each
    // spine
    int i = 0;
    int count = 0;   // the number of **kern spines
    int j = 0;
-   while (i<infile.getNumLines() && infile[i].getType() != 
+   while (i<infile.getNumLines() && infile[i].getType() !=
          E_humrec_interpretation) {
       i++;
    }
    if (infile[i].getType() == E_humrec_interpretation) {
       if (strncmp("**", infile[i][0], 2) != 0) {
-         cout << "Error on line " << i + 1 << " of file: No start of data" 
+         cout << "Error on line " << i + 1 << " of file: No start of data"
               << endl;
       }
    } else {
@@ -2054,7 +2299,7 @@ void generatePartInfo(HumdrumFile& infile, int start, int col, int count) {
       // cout << col << "</part-name>\n";
       pline(lev, "<part-name></part-name>\n");
    }
- 
+
    lev--;
    pline(lev, "</score-part>\n");
 }
@@ -2066,12 +2311,12 @@ void generatePartInfo(HumdrumFile& infile, int start, int col, int count) {
 // pline -- print a line of data
 //
 
-void pline(int level, const char* string) {
+void pline(int level, const char* string, ostream& out) {
    for (int i=0; i<level; i++) {
-      cout << '\t';
+      out << '\t';
    }
-   cout << string;
-} 
+   out << string;
+}
 
 
 
@@ -2108,14 +2353,14 @@ void setColorCharacters(HumdrumFile& infile, Array<char>& colorchar,
          continue;
       }
       // !!!RDF**kern: N= mark color="#ff0000", root
-      if (pre.search(infile[i].getLine(), 
+      if (pre.search(infile[i].getLine(),
             "^!!!RDF\\*\\*kern:\\s*([^\\s])\\s*=\\s*match", "i") ||
-          pre.search(infile[i].getLine(), 
+          pre.search(infile[i].getLine(),
             "^!!!RDF\\*\\*kern:\\s*([^\\s])\\s*=\\s*mark", "i")
          ) {
          value = pre.getSubmatch(1)[0];
          colorchar.append(value);
-         if (pre.search(infile[i].getLine(), 
+         if (pre.search(infile[i].getLine(),
                "color\\s*=\\s*\"?(#[a-f0-9]{6})\"?", "i")) {
             color = pre.getSubmatch(1);
             colorout.append(color);
@@ -2145,7 +2390,7 @@ void setColorCharacters(HumdrumFile& infile, Array<char>& colorchar,
 // checkColor --
 //
 
-string checkColor(const char* note, Array<char>& colorchar, 
+string checkColor(const char* note, Array<char>& colorchar,
       Array<string>& colorout) {
    for (int i=0; i<colorchar.getSize(); i++) {
       if (strchr(note, colorchar[i]) != NULL) {
