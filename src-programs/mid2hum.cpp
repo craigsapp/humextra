@@ -927,4 +927,4 @@ Here are the options available with the mid2hum program:
                    the program.
 
 */
-// md5sum: f5aa9214aff6f6a74fed6381302d05ad mid2hum.cpp [20131108]
+// md5sum: 68387dd687518c696a4ac2637333c827 mid2hum.cpp [20151120]

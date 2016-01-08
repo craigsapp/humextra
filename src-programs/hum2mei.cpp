@@ -216,7 +216,7 @@ Array<int>         PTRACK;          // used to control the staff number;
 Array<MeasureInfo> MINFO;           // used to create <measure> attributes
 const char*        IDMARKER = "sc"; // used for @id value generation
 int                DATASTART = 0;   // first line of actual data
-const char*        INDENT = "\t";   // indenting string
+string             INDENT = "\t";   // indenting string
 Array<const char*> LANGS;           // for list of languages used in meiHead
 const char*        DTDLOCATION  = "/DTD/mei19b-full.dtd"; 
 
@@ -2728,12 +2728,12 @@ void checkOptions(Options& opts, int argc, char** argv) {
 
    debugQ   = opts.getBoolean("debug");
    verboseQ = opts.getBoolean("verbose");
-   INDENT   = opts.getString("indent").data();
+   INDENT   = opts.getString("indent");
 
    // tab character in option is being eaten (probably by the 
    // option parser, so if the INDENT string is empty, force it
    // to be a tab character.
-   if (strlen(INDENT) == 0) {
+   if (INDENT.size() == 0) {
       INDENT = "\t";
    }
    if (opts.getBoolean("noxmlscope")) {
@@ -2755,7 +2755,7 @@ void Indent(SSTREAM& out, int indent, const char* string) {
    int limit = 100;
    const char* istring = string;
    if (istring == NULL) {
-      istring = INDENT;
+      istring = INDENT.data();
    }
 	    
    if (indent > limit) {
@@ -2812,4 +2812,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 07255d0cd30e55844270b7d7954c2bd2 hum2mei.cpp [20140205]
+// md5sum: 67286362a6cbd1bf08365d34aca6f4a9 hum2mei.cpp [20151120]

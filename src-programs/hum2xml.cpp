@@ -2402,5 +2402,5 @@ string checkColor(const char* note, Array<char>& colorchar,
 
 
 
-// md5sum: 04ab48416a0554c6ddabd22c5121fa8c hum2xml.cpp [20140205]
+// md5sum: fab28588e4d72e74ea25927709988315 hum2xml.cpp [20151120]
 //

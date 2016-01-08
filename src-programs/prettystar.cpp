@@ -1336,4 +1336,4 @@ void removeDollarsFromString(Array<char>& buffer, int maxblock) {
 
 
 
-// md5sum: 0e713a16488534ca9d497bf76e394a27 prettystar.cpp [20120615]
+// md5sum: 63ec6ee53c5bba93afde8f94d4529b34 prettystar.cpp [20151120]

@@ -809,4 +809,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: d6f6e9e66f043f55df4bf5d25d7d8952 hgrep.cpp [20130420]
+// md5sum: 51e1cd7478a549ff34d1aaf9ffd3053e hgrep.cpp [20151120]

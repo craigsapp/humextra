@@ -160,4 +160,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 655580d46fd07c70dd921d54482e3fa6 scordur.cpp [20060502]
+// md5sum: b0b67b2522788c549d481bb38e0ecfdc scordur.cpp [20151120]

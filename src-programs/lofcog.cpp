@@ -795,4 +795,4 @@ double getAverage(HumdrumFile& infile, Array<Array<double> >& data,
 
 
 
-// md5sum: 5a02410e288a4f8168cc943cde1ace7c lofcog.cpp [20050403]
+// md5sum: 1151e458bd559a0d53d9a9d9151410fa lofcog.cpp [20151120]

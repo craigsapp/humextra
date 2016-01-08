@@ -159,4 +159,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 1d57d2af01a86b854da3c669dc530230 spinetrace.cpp [20050403]
+// md5sum: f4f9fc359d6d163111e0e71ccec5d085 spinetrace.cpp [20151120]

@@ -797,4 +797,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: cd0bcca0a9d174245a22684bd171ba3e harm2kern.cpp [20131108]
+// md5sum: 4c0d712c2fbfc18c346f3a83280e3fdd harm2kern.cpp [20151120]

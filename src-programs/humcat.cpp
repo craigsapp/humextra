@@ -403,4 +403,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: c8f34a7f6c04aed3445355b1f4deef3a humcat.cpp [20080518]
+// md5sum: 85e01639c1b4dd251c57995e590035b8 humcat.cpp [20151120]

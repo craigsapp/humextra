@@ -576,4 +576,4 @@ int skinicompare(const void* a, const void* b) {
     
 
 
-// md5sum: d012098f6632fbeffafcce3894b6631a kern2skini.cpp [20131108]
+// md5sum: 05edc8766e9f11dc0efd60b79b362492 kern2skini.cpp [20151120]

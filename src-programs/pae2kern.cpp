@@ -1750,4 +1750,4 @@ int getLineIndex(vector<ArrayChar>& pieces, const char* string) {
 
 
 
-// md5sum: 4ea2b3d62015afbbaae6cc72d172b3eb pae2kern.cpp [20131108]
+// md5sum: 61e32ce8b251d8ad807d4704cd1b92fa pae2kern.cpp [20151120]

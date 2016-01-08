@@ -930,4 +930,4 @@ void getDataLineTimings(Array<int>& linetimes, HumdrumFile& infile) {
 
    }
 }
-// md5sum: eba16e614e3343bbd91df5abe111f924 tsroot.cpp [20090626]
+// md5sum: 426e83e1b111d6868df3222ab9bba162 tsroot.cpp [20151120]

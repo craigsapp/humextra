@@ -276,4 +276,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 769f7294c0db26092ae410f6cf3d28ee scaletype.cpp [20130420]
+// md5sum: ceb5ff0b617e0f347f375d804b857f94 scaletype.cpp [20151120]

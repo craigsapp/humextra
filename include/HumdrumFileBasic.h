@@ -138,6 +138,7 @@ class HumdrumFileBasic {
       int                    getSpineCount    (int index);
       int                    getTracksByExInterp(Array<int>& tracks, 
                                                   const char* exinterp);
+		int                    getKernTracks    (Array<int>& tracks);
       int                    getType          (int index);
       void                   makeVts          (Array<char>& vtsstring);
       static void            makeVts          (Array<char>& vtsstring,

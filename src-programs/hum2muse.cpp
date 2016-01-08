@@ -18,6 +18,7 @@
 // Last Modified: Tue Aug 21 09:36:43 PDT 2012 Added line extensions
 // Last Modified: Mon Aug 19 15:12:09 PDT 2013 Added *elision controls
 // Last Modified: Fri Jan  3 14:34:21 PST 2014 Added RDF**kern:j tied group
+// Last Modified: Wed Jan  6 19:51:34 PST 2016 Added left/right quotes
 // Filename:      ...sig/examples/all/hum2muse.cpp 
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2muse.cpp
 // Syntax:        C++; museinfo
@@ -314,7 +315,8 @@ void  getMeasureInfo           (Array<int>& measures, HumdrumFile& infile);
 void  getMeasureData           (MuseData& tempdata, int track, 
                                 HumdrumFile& infile, int startline, 
                                 int stopline, int tpq, int& tickpos,
-                                int& measuresuppress, int& founddataQ);
+                                int& measuresuppress, int& founddataQ,
+                                Array<Array<char> >& lastVerse);
 int   getMaxVoices             (HumdrumFile& infile, int startline, 
                                 int stopline, int track);
 void  addMeasureEntry          (MuseData& tempdata, HumdrumFile& infile, 
@@ -323,12 +325,13 @@ void  processVoice             (MuseData& tempdata, HumdrumFile& infile,
                                 int startline, int stopline, int track, 
                                 int voice, int tpq, int& tickpos,
                                 int& measuresuppress, int& founddataQ,
-                                int starttick, int stoptick);
+                                int starttick, int stoptick,
+                                Array<Array<char> >& lastVerse);
 int   getGlobalTicksPerQuarter   (HumdrumFile& infile);
 int   getTick                  (int tpq, HumdrumFile& infile, int line);
 int   addNoteToEntry           (MuseData& tempdata, HumdrumFile& infile, 
                                 int row, int col, int tpq, int voice, 
-                                int opentie);
+                                int opentie, Array<Array<char> >& lastVerse);
 int   getTickDur               (int tpq, HumdrumFile& infile, int row, 
                                 int col);
 void  addBackup                (MuseData& tempdata, int backticks, int tpq);
@@ -484,7 +487,8 @@ void  track2column             (Array<int>& trackcol, HumdrumFile& infile,
 void  addLyrics                (MuseRecord& arecord, HumdrumFile& infile, 
                                 int row, int col, 
                                 Array<Array<int> >& TextAssignment,
-                                Array<Array<int> >& TextElisions);
+                                Array<Array<int> >& TextElisions,
+                                Array<Array<char> >& lastVerse);
 void  convertHumdrumTextToMuseData(Array<char> & text);
 void  convertHtmlTextToMuseData(Array<char> & text);
 void  getWorkAndMovement       (Array<char>& work, Array<char>& movment, 
@@ -774,13 +778,13 @@ void analyzeTacet(Array<Array<int> >& tacet, HumdrumFile& infile) {
    }
 
 
-//	for (ii=0; ii<tacet.getSize(); ii++) {
-//		cout << "@";
-//		for (jj=0; jj<tacet[ii].getSize(); jj++) {
-//			cout << tacet[ii][jj] << "\t";
-//		}
-//		cout << endl;
-//	}
+	// for (ii=0; ii<tacet.getSize(); ii++) {
+	// 	cout << "@";
+	// 	for (jj=0; jj<tacet[ii].getSize(); jj++) {
+	// 		cout << tacet[ii][jj] << "\t";
+	// 	}
+	// 	cout << endl;
+	// }
 
 }
 
@@ -2499,6 +2503,9 @@ void convertTrackToMuseData(MuseData& musedata, int track,
       int total, int printFirstMeasureQ) {
    Array<int> measures;
 
+	Array<Array<char> > lastVerse;
+	lastVerse.setSize(0);
+
    // should probably move to calling function, but keeping here for now
    // in case the more generalized solution of finding the barlines in each
    // individual track should be done instead of the global barlines.
@@ -2538,7 +2545,7 @@ void convertTrackToMuseData(MuseData& musedata, int track,
               << measures[i] << NEWLINE;
       }
       getMeasureData(tempdata, track, infile, measures[i], measures[i+1], 
-            tpq[i], tickpos, printFirstMeasureQ, founddataQ);
+            tpq[i], tickpos, printFirstMeasureQ, founddataQ, lastVerse);
       musedata.append(tempdata);
    }
 
@@ -3561,7 +3568,7 @@ void addPartName(HumdrumFile& infile, int track, MuseData& tempdata) {
 
 void getMeasureData(MuseData& tempdata, int track, HumdrumFile& infile, 
       int startline, int stopline, int tpq, int& tickpos, 
-      int& measuresuppress, int& founddataQ) {
+      int& measuresuppress, int& founddataQ, Array<Array<char> >& lastVerse) {
    int maxvoice = getMaxVoices(infile, startline, stopline, track);
    if (debugQ) {
       cout << "For line range " << startline+1 << " to " << stopline+1
@@ -3581,7 +3588,8 @@ void getMeasureData(MuseData& tempdata, int track, HumdrumFile& infile,
    int voice;
    for (voice=0; voice<maxvoice; voice++) {
       processVoice(tempdata, infile, startline, stopline, track, voice+1, 
-            tpq, tickpos, measuresuppress, founddataQ, starttick, stoptick);
+            tpq, tickpos, measuresuppress, founddataQ, starttick, stoptick,
+            lastVerse);
    }
 }
 
@@ -3594,8 +3602,8 @@ void getMeasureData(MuseData& tempdata, int track, HumdrumFile& infile,
 
 void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline, 
       int stopline, int track, int voice, int tpq, int& tickpos, 
-      int& measuresuppress, int& founddataQ, int starttick, int stoptick) {
-
+      int& measuresuppress, int& founddataQ, int starttick, int stoptick,
+		Array<Array<char> >& lastVerse) {
    int tpqtest = -1;
    if (LastTPQPrinted != tpq) {
       tpqtest = tpq;
@@ -3758,7 +3766,8 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
          // forward marker if needed.
          if (strcmp(infile[i][j], ".") != 0) {
             tickpos += addNoteToEntry(tempdata, infile, i, j, tpq, 
-                             voice, firstitem & startingmeasure & hangtieQ);
+                             voice, firstitem & startingmeasure & hangtieQ,
+                             lastVerse);
             firstitem = 0;
          }
       }
@@ -3998,7 +4007,7 @@ RationalNumber getDurationNoDots(const char* input, const char* def) {
 //
 
 int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
-      int tpq, int voice, int opentie) {
+      int tpq, int voice, int opentie, Array<Array<char> >& lastVerse) {
    int& i = row;
    int& j = col;
    MuseRecord arecord;
@@ -4407,7 +4416,8 @@ aligned full measure breve rest without this other complication, use
          arecord.getColumn(19) = ' ';
       }
       if (kk == 0) {
-         addLyrics(arecord, infile, row, col, TextAssignment, TextElisions);
+         addLyrics(arecord, infile, row, col, TextAssignment, TextElisions,
+               lastVerse);
       }
       tempdata.append(arecord);
       if (!psuggestion.isEmpty()) {
@@ -4636,7 +4646,8 @@ void hideNotesAfterLong(HumdrumFile& infile, int row, int col) {
 //
 
 void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col, 
-      Array<Array<int> >& TextAssignment, Array<Array<int> >& TextElisions) {
+      Array<Array<int> >& TextAssignment, Array<Array<int> >& TextElisions,
+      Array<Array<char> >& lastVerse) {
    int track = infile[row].getPrimaryTrack(col);
    int versecount = TextAssignment[track].getSize();
    if (versecount == 0) {
@@ -4662,6 +4673,7 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
    PerlRegularExpression pre;
    char buffer[1024] = {0};
    int textcol;
+
    for (i=0; i<versecount; i++) {
       verses[i].setSize(1);
       verses[i][0] = '\0';
@@ -4675,13 +4687,37 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
  
       // skip verse if blank.  This will need to be fixed later
       // to avoid verse ordering to get mixed up.
-      if ((i > 0) && pre.search(ptr, "^\\s*$")) {
-         // ggg
-         continue;
-      }
+      if (lastVerse.getSize() != versecount) {
+      	if ((i >= 0) && pre.search(ptr, "^\\s*$")) {
+					if (i == 0) {
+         			strcat(buffer, "");
+					} else {
+         			strcat(buffer, "|");
+					}
+         	continue;
+      	}
+		} else {
+      	if ((i >= 0) && pre.search(ptr, "^\\s*$")) {
+					char extension[2] = {0};
+					if (lastVerse[i].getSize() > 1) {
+					   extension[0] = lastVerse[i][lastVerse[i].getSize()-2];
+						if (extension[0] != '-') {
+							extension[0] = '_';
+						}
+					}
+					if (i == 0) {
+         			strcat(buffer, extension);
+					} else {
+         			strcat(buffer, "|");
+         			strcat(buffer, extension);
+					}
+         	continue;
+      	}
+		}
       if (i > 0) {
          strcat(buffer, "|");
       }
+
       int extensionneeded = 0;
       verses[i].setSize(strlen(ptr)+1);
       strcpy(verses[i].getBase(), ptr);
@@ -4694,8 +4730,8 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
          // if the verse syllable starts with a digit, then it will not be
          // printed by default in MuseData muse2ps program.  Adding
          // the string "\+" without quote in front of the number will
-         // allow the number to be printed.  Likewise, < and . characters need to be
-         // forced to print in a similar manner.
+         // allow the number to be printed.  Likewise, < and . characters 
+         // need to be forced to print in a similar manner.
          if (std::isdigit(verses[i].getBase()[0]) && (strcmp(ptr, "") != 0)) {
             strcat(buffer, "\\+");
          }
@@ -4710,6 +4746,10 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
          if (extensionQ && needsWordExtension(infile, row, col, textcol, 
                verses[i])) {
             extensionneeded = 1;
+				if (i < lastVerse.getSize()) {
+			  	   lastVerse[i].setSize(lastVerse[i].getSize()+1);
+					strcat(lastVerse[i].getBase(), "_");
+				}
          }
 
          // removing & at end of line.  This means do not extend a line after
@@ -4792,6 +4832,21 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
       }
    }
 
+	if (lastVerse.getSize() != verses.getSize()) {
+		lastVerse.setSize(verses.getSize());
+		for (i=0; i<lastVerse.getSize(); i++) {
+			lastVerse[i].setSize(1);
+			lastVerse[i][0] = '\0';
+		}
+	}
+
+	for (i=0; i<verses.getSize(); i++) {
+		if (verses[i].getSize() > 1) {
+			lastVerse[i].setSize(verses[i].getSize());
+			strcpy(lastVerse[i].getBase(), verses[i].getBase());
+		}
+	}
+	
    // Convert spaces to \+ (elison character may have removed some spaces).
    Array<char> newbuffer;
    newbuffer.setSize(strlen(buffer)+1);
@@ -4800,11 +4855,11 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
    if (!pre.search(newbuffer, "^\\s*$")) {
       pre.sar(newbuffer, "\\s", "\\+", "g");
    }
+   pre.sar(newbuffer, "%%%", "", "g");
 
    if (strlen(buffer) > 0) {
       arecord.insertString(44, newbuffer.getBase());
    }
-
 }
 
 
@@ -4978,6 +5033,9 @@ void convertHumdrumTextToMuseData(Array<char> & text) {
    pre.sar(text, "\\^Y", "\\===Y===9", "g");    // circumflex
 
    pre.sar(text, "===", "", "g"); // get rid of buffer characters
+
+   pre.sar(text, "^\"", "\\0\"", "g");    // lefthand double quote
+
 
    // macron: 1
    // cedilla: 5
@@ -6470,6 +6528,17 @@ void addChordLevelArtic(MuseData& tempdata, MuseRecord&  arecord,
       } else {
          arecord.addAdditionalNotation('E');
       }
+   }
+
+   // N is hardwired to signum sign
+   // N = signum
+   // NX = signum with editorial brackets
+   // Ny = invisible signum
+   if (strstr(token, "NX") != NULL) {
+      arecord.addAdditionalNotation('&'); // editorial mark
+      arecord.addAdditionalNotation('C');
+   } else if ((strchr(token, 'N') != NULL) && (strstr(token, "Ny") == NULL)) {
+      arecord.addAdditionalNotation('C');
    }
 
    if ((strchr(token, '`') != NULL) || (strstr(token, "\'\'") != NULL)) {
@@ -9847,4 +9916,4 @@ getNewLine:
 
 */
 
-// md5sum: f22495d32e98a9ac1cfffe7e06af0813 hum2muse.cpp [20140426]
+// md5sum: 55ec871ac153218946777569a6c424eb hum2muse.cpp [20151120]

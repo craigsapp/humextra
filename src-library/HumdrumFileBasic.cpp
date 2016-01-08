@@ -614,8 +614,8 @@ const char* HumdrumFileBasic::getTrackExInterp(int track) {
 
 //////////////////////////////
 //
-// getTracksByExInterp -- return a list of track numbers which have the
-//     matching exclusive interpretation type.
+// HumdrumFileBasic::getTracksByExInterp -- return a list of track numbers
+//     which have the matching exclusive interpretation type.
 //
 
 int HumdrumFileBasic::getTracksByExInterp(Array<int>& tracks, 
@@ -636,6 +636,18 @@ int HumdrumFileBasic::getTracksByExInterp(Array<int>& tracks,
 
    return tracks.getSize();
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBasic::getKernTracks --
+//
+
+int HumdrumFileBasic::getKernTracks(Array<int>& tracks) {
+   return getTracksByExInterp(tracks, "**kern");
+}
+
 
 
 //////////////////////////////

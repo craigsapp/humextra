@@ -248,7 +248,7 @@ ostream& MusicXmlFile::printGraceNoteRhythm(ostream& out, _MusicXmlItem& item) {
                   }
                }
                current = current->GetNext();
-	    }
+            }
          }
       }
       entry = entry->GetNext();
@@ -2417,8 +2417,8 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
             }
             break;
          case MXI_print:
-	    humline += printSystemBreak((*tempstream), partdata[staffno][i].obj);
-	    humline += printPageBreak((*tempstream), partdata[staffno][i].obj);
+            humline += printSystemBreak((*tempstream),partdata[staffno][i].obj);
+            humline += printPageBreak((*tempstream), partdata[staffno][i].obj);
             break;
          case MXI_barline:
             if (printMeasureStyle(buffer, staffno, i)) {
@@ -2527,12 +2527,12 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
                               printDynamic(*tempstream, staffno, ++i);
                               (*tempstream) << "\n"; humline++;
                            } else {
-	                      (*tempstream) << "\t.\n"; humline++;
+                              (*tempstream) << "\t.\n"; humline++;
                            }
                         } else {
-	                   (*tempstream) << "\t.\n"; humline++;
+                           (*tempstream) << "\t.\n"; humline++;
                         }
-	             }
+                     }
                   } else {
                      (*tempstream) << "\t.\n"; humline++;
                   }
@@ -2615,7 +2615,7 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
                // add "*", "**text", or "*-" token
                // cout << "Adding a interpretation element" << endl;
                if (strncmp(hfile[i][0], "**", 2) == 0) {
-               hfile[i].appendField("**text", E_unknown, "1");
+                  hfile[i].appendField("**text", E_unknown, "1");
                } else if (strncmp(hfile[i][0], "*-", 2) == 0) {
                   hfile[i].appendField("*-", E_unknown, "1");
                } else if (strncmp(hfile[i][0], "*staff", 6) == 0) {
@@ -2659,11 +2659,12 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
    // the partdata for the staffno and insert text for each
    // lyric found in the data.
 
-   char* buffer[4096] = {0};
+   char buffer[4096] = {0};
    int lyricnum = 0;
    int ownerserial = 0;
    _SerialLine* match = NULL;
    for (i=0; i<partdata[staffno].getSize(); i++) {
+      buffer[0] = '\0';
       if (partdata[staffno][i].type != MXI_lyric) {
          continue;
       }
@@ -2694,16 +2695,25 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
       }
 
 
-      getLyricText((char*)buffer, (CXMLObject*)partdata[staffno][i].obj);
+      getLyricText(buffer, (CXMLObject*)partdata[staffno][i].obj);
       if (hfile[match->line].getType() == E_humrec_data_measure) {
          // temporary bug fix from unusual line error
          hfile[match->line-1].changeField(
            hfile[match->line].getFieldCount()-lyriccount+lyricnum-1,
-           (char*)buffer);
+           buffer);
       } else {
+         // fix strange case where there is no **text data but, text
+         // is expected. [20151228]
+         int slen = strlen(buffer);
+         if ((buffer)[slen-1] == '\t') {
+            // this case should not occur, but just in case...
+            strcat(buffer, ".");
+         } else if (slen == 0) {
+            strcat(buffer, ".");
+         }
          hfile[match->line].changeField(
            hfile[match->line].getFieldCount()-lyriccount+lyricnum-1,
-           (char*)buffer);
+           buffer);
       }
 
    }
@@ -3241,7 +3251,7 @@ void MusicXmlFile::processSpineChanges(SSTREAM& newstream, SSTREAM& oldstream,
          } else if ((tabcount[i-1] == 1) && (tabcount[i] == 0)) {
             if (strstr(strings[i], "clef") != NULL) {
                newstream << strings[i] << '\t';
-	       tabcount[i] = 1;
+               tabcount[i] = 1;
             } else {
                newstream << "*v\t*v";
                if (humdrumDynamics && partdynamics[staffno]) {
@@ -3385,7 +3395,7 @@ int MusicXmlFile::printSystemBreak(ostream& out, CXMLObject* object) {
          if (element->GetAttributes().GetValue(i) ==
                "yes") {
             out << "!!linebreak:original\n";
-	    output++;
+            output++;
          }
       }
    }
@@ -3419,7 +3429,7 @@ int MusicXmlFile::printPageBreak(ostream& out, CXMLObject* object) {
          if (element->GetAttributes().GetValue(i) ==
                "yes") {
             out << "!!pagebreak:original\n";
-	    output++;
+            output++;
          }
       }
    }
@@ -4058,7 +4068,7 @@ void MusicXmlFile::getKernNoteProperties(_NoteState& ns, CXMLObject* object,
                if (type == 1) {
                   ns.slurend = 1;
                }
-	       /*
+               /*
                if ((type == 0) && (number == 1)) {
                   ns.slurstart = 1;
                }
@@ -4066,14 +4076,14 @@ void MusicXmlFile::getKernNoteProperties(_NoteState& ns, CXMLObject* object,
                   ns.slurend = 1;
                }
                if ((type == 1) && (number == 2)) {
-		  // doesn't work so well: 2 could just mean a separate voice
+                  // doesn't work so well: 2 could just mean a separate voice
                   // ns.elidedslurstart = 1;
                }
                if ((type == 1) && (number == 2)) {
-		  // doesn't work so well: 2 could just mean a separate voice
+                  // doesn't work so well: 2 could just mean a separate voice
                   // ns.elidedslurend = 1;
                }
-	       */
+               */
             } else if (elem2->GetName() == "articulations") {
                obj3 = elem2->Zoom();
                while (obj3 != NULL) {
@@ -4163,7 +4173,6 @@ void MusicXmlFile::getKernNoteProperties(_NoteState& ns, CXMLObject* object,
 
 /* Canonical Kern token signifier ordering:
 
-	   signified			signifier(s)	comments
 	1. open phrase elision indicator	&	must precede {
 	2. open phrase mark			{
 	3. open slur elision indicator		&	must precede (
@@ -4457,11 +4466,11 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
                 partdata[staffno][index].voice) {
                // the next note is a chord note
                out << " ";
-	       newlineQ = 0;
+               newlineQ = 0;
             } else {
                // the next note is in another voice in part
                out << "\t";
-	       newlineQ = 0;
+               newlineQ = 0;
             }
          } else {
             newlineQ = 1;

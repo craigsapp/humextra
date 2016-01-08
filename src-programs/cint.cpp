@@ -223,7 +223,8 @@ int       printCombinationModule(ostream& out, const char* filename,
 int       printCombinationModulePrepare(ostream& out, const char* filename,
                                 Array<Array<NoteNode> >& notes, int n, 
                                 int startline, int part1, int part2,
-                                Array<Array<SigString> >& retrospective);
+                                Array<Array<SigString> >& retrospective,
+                                HumdrumFile& infile);
 int       getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, 
                                 int n, int startline, int part1, int part2);
 void      addMarksToInputData  (HumdrumFile& infile, 
@@ -235,6 +236,7 @@ void      initializeRetrospective(Array<Array<SigString> >& retrospective,
                                 HumdrumFile& infile, Array<int>& ktracks);
 int       getTriangleIndex     (int number, int num1, int num2);
 void      adjustKTracks        (Array<int>& ktracks, const char* koption);
+int       getMeasure           (HumdrumFile& infile, int line);
 
 // global variables
 Options   options;             // database for command-line arguments
@@ -255,6 +257,7 @@ int       topQ         = 0;      // used with -t option
 int       toponlyQ     = 0;      // used with -T option
 int       hparenQ      = 0;      // used with -h option
 int       mparenQ      = 0;      // used with -y option
+int       locationQ    = 0;      // used with --location option
 int       koptionQ     = 0;      // used with -k option
 int       parenQ       = 0;      // used with -p option
 int       rowsQ        = 0;      // used with --rows option
@@ -343,7 +346,7 @@ int processFile(HumdrumFile& infile, const char* filename, Options& options) {
       initializeRetrospective(retrospective, infile, ktracks);
    }
 
-   if (rhythmQ || durationQ) {
+   if (locationQ || rhythmQ || durationQ) {
       infile.analyzeRhythm("4");
    }
 
@@ -732,7 +735,7 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
             int part2 = part1+1+jj;
             // cout << part1 << "," << part2;
             matchcount += printCombinationModulePrepare(cout, filename, 
-                  notes, n, currentindex, part1, part2, retrospective);
+                  notes, n, currentindex, part1, part2, retrospective, infile);
          }
       }
 
@@ -755,7 +758,8 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
 
 int printCombinationModulePrepare(ostream& out, const char* filename,
        Array<Array<NoteNode> >& notes, int n, int startline, int part1, 
-       int part2, Array<Array<SigString> >& retrospective) {
+       int part2, Array<Array<SigString> >& retrospective, 
+		HumdrumFile& infile) {
    int count = 0;
    SSTREAM tempstream;
    int match;
@@ -776,6 +780,19 @@ int printCombinationModulePrepare(ostream& out, const char* filename,
          match = SearchString.search(tempstream.CSTRING);
          if (match) {
             count++;
+				if (locationQ) {
+					int line = notes[0][startline].line;
+					double loc = infile[line].getAbsBeat() / 
+							infile[infile.getNumLines()-1].getAbsBeat();
+					loc = int(100.0 * loc + 0.5)/100.0;
+					cout << "!!LOCATION:" 
+							<< "\t"  << loc 
+							<< "\tm" << getMeasure(infile, line)
+							<< "\tv" << (notes.getSize() - part2)
+							<< ":v"  << (notes.getSize() - part1)
+							<< "\t"  << infile.getFilename() 
+							<< endl;
+				}
             if (raw2Q || rawQ) {
                out << tempstream.CSTRING;
                // newline already added somewhere previously.
@@ -807,6 +824,30 @@ int printCombinationModulePrepare(ostream& out, const char* filename,
    }
 
    return count;
+}
+
+
+
+//////////////////////////////
+//
+// getMeasure -- return the last measure number of the given line index.
+//
+
+int getMeasure(HumdrumFile& infile, int line) {
+   int i;
+	int measure = 0;
+   for (i=line; i>=0; i--) {
+		if (!infile[i].isBarline()) {
+			continue;
+		}
+		if (std::isdigit(infile[i][0][1])) {
+			int flag = sscanf(infile[i][0], "=%d", &measure);
+			if (flag > 0) {
+				return measure;
+			}
+		}
+	}
+	return 0;
 }
 
 
@@ -2707,6 +2748,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
                   "put curly braces around melodic intervals");
    opts.define("p|parentheses=b", "put parentheses around modules intervals");
    opts.define("l|lattice=b", "calculate lattice");
+   opts.define("loc|location=b", "displayLocation");
    opts.define("s|sustain=b", "display sustain/attack states of notes");
    opts.define("o|octave=b", "reduce compound intervals to within an octave");
    opts.define("H|no-harmonic=b", "don't display harmonic intervals");
@@ -2820,6 +2862,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    filenameQ    = opts.getBoolean("filename");
    suspensionsQ = opts.getBoolean("suspensions");
    uncrossQ     = opts.getBoolean("uncross");
+	locationQ    = opts.getBoolean("location");
    retroQ       = opts.getBoolean("retrospective");
    NoteMarker   = 0;
    if (opts.getBoolean("note-marker")) {
@@ -2876,4 +2919,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 02f850affdebfecc0d8681638a6ebeae cint.cpp [20140731]
+// md5sum: 14ed86395660c9200c5640ca2183c64b cint.cpp [20151120]
