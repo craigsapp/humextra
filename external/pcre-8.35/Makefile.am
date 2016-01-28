@@ -212,7 +212,7 @@ else
 
 pcre_chartables.c: $(srcdir)/pcre_chartables.c.dist
 	rm -f $@
-	cp -r $(srcdir)/pcre_chartables.c.dist $@
+	cp -f $(srcdir)/pcre_chartables.c.dist $@
 
 endif # WITH_REBUILD_CHARTABLES
 
