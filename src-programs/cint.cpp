@@ -2566,7 +2566,6 @@ int hasAttack(Array<NoteNode>& data) {
 
 
 
-
 //////////////////////////////
 //
 // allSustained -- returns true if all NoteNodes are sustains
