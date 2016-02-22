@@ -1,7 +1,8 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Jul  9 13:20:28 PDT 1998
-// Last Modified: Tue Dec  5 15:11:50 PST 2000 (enable polyphonic sampling)
+// Last Modified: Tue Dec  5 15:11:50 PST 2000 enable polyphonic sampling
+// Last Modified: Mon Feb 22 15:31:39 PST 2016 Some modernization and generalization
 // Filename:      ...sig/examples/all/sample.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/sample.cpp
 // Syntax:        C++; museinfo
@@ -18,12 +19,13 @@
 
 
 // function declarations
-void         checkOptions(Options& opts, int argc, char* argv[]);
-void         createDataLine(char* buffer, HumdrumFile& infile, int line, 
-                   double duration, int style);
-void         example(void);
-void         processRecords(HumdrumFile& infile, HumdrumFile& outfile);
-void         usage(const char* command);
+void         checkOptions      (Options& opts, int argc, char* argv[]);
+void         createDataLine    (char* buffer, HumdrumFile& infile, int line, 
+                                double duration, int style);
+void         example           (void);
+void         processRecords    (HumdrumFile& infile, HumdrumFile& outfile);
+void         usage             (const char* command);
+void         setupBuffers      (Options& opts);
 
 // interface variables
 Options                options;          // database for command-line arguments
@@ -33,28 +35,18 @@ CircularBuffer<int>    styles(1000);
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
+   HumdrumStream streamer(options);
    HumdrumFile infile, outfile;
 
    // process the command-line options
    checkOptions(options, argc, argv);
 
-   // figure out the number of input files to process
-   int numinputs = options.getArgCount();
-
-   for (int i=0; i<numinputs || i==0; i++) {
+   while (streamer.read(infile)) {
+      processRecords(infile, outfile);
+		outfile.write(cout);
       infile.clear();
       outfile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
-      }
-      // analyze the input file according to command-line options
-      processRecords(infile, outfile);
-
-      outfile.write(cout);
+      setupBuffers(options);
    }
 
    return 0;
@@ -99,11 +91,20 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       exit(0);
    }
 
+   setupBuffers(opts);
+}
+
+
+
+//////////////////////////////
+//
+// setupBuffers --
+//
+
+void setupBuffers(Options& opts) {
    double duration = 0.0;
    int style = 0;
-
-   int length;
-   length = strlen(opts.getString("rhythm").data());
+   int length = strlen(opts.getString("rhythm").data());
    char buffer[length + 1];
    strcpy(buffer, opts.getString("rhythm").data());
 
