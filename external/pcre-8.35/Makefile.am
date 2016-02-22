@@ -212,7 +212,7 @@ else
 
 pcre_chartables.c: $(srcdir)/pcre_chartables.c.dist
 	rm -f $@
-	cp -f $(srcdir)/pcre_chartables.c.dist $@
+	$(LN_S) $(srcdir)/pcre_chartables.c.dist $@
 
 endif # WITH_REBUILD_CHARTABLES
 
@@ -729,58 +729,58 @@ dist_man_MANS = \
 
 # Arrange for the per-function man pages to have 16- and 32-bit names as well.
 install-data-hook:
-	cp -f pcre_assign_jit_stack.3		 $(DESTDIR)$(man3dir)/pcre16_assign_jit_stack.3
-	cp -f pcre_compile.3			 $(DESTDIR)$(man3dir)/pcre16_compile.3
-	cp -f pcre_compile2.3			 $(DESTDIR)$(man3dir)/pcre16_compile2.3
-	cp -f pcre_config.3			 $(DESTDIR)$(man3dir)/pcre16_config.3
-	cp -f pcre_copy_named_substring.3	 $(DESTDIR)$(man3dir)/pcre16_copy_named_substring.3
-	cp -f pcre_copy_substring.3		 $(DESTDIR)$(man3dir)/pcre16_copy_substring.3
-	cp -f pcre_dfa_exec.3			 $(DESTDIR)$(man3dir)/pcre16_dfa_exec.3
-	cp -f pcre_exec.3			 $(DESTDIR)$(man3dir)/pcre16_exec.3
-	cp -f pcre_free_study.3		 $(DESTDIR)$(man3dir)/pcre16_free_study.3
-	cp -f pcre_free_substring.3		 $(DESTDIR)$(man3dir)/pcre16_free_substring.3
-	cp -f pcre_free_substring_list.3	 $(DESTDIR)$(man3dir)/pcre16_free_substring_list.3
-	cp -f pcre_fullinfo.3			 $(DESTDIR)$(man3dir)/pcre16_fullinfo.3
-	cp -f pcre_get_named_substring.3	 $(DESTDIR)$(man3dir)/pcre16_get_named_substring.3
-	cp -f pcre_get_stringnumber.3		 $(DESTDIR)$(man3dir)/pcre16_get_stringnumber.3
-	cp -f pcre_get_stringtable_entries.3	 $(DESTDIR)$(man3dir)/pcre16_get_stringtable_entries.3
-	cp -f pcre_get_substring.3		 $(DESTDIR)$(man3dir)/pcre16_get_substring.3
-	cp -f pcre_get_substring_list.3	 $(DESTDIR)$(man3dir)/pcre16_get_substring_list.3
-	cp -f pcre_jit_exec.3			 $(DESTDIR)$(man3dir)/pcre16_jit_exec.3
-	cp -f pcre_jit_stack_alloc.3		 $(DESTDIR)$(man3dir)/pcre16_jit_stack_alloc.3
-	cp -f pcre_jit_stack_free.3		 $(DESTDIR)$(man3dir)/pcre16_jit_stack_free.3
-	cp -f pcre_maketables.3		 $(DESTDIR)$(man3dir)/pcre16_maketables.3
-	cp -f pcre_pattern_to_host_byte_order.3 $(DESTDIR)$(man3dir)/pcre16_pattern_to_host_byte_order.3
-	cp -f pcre_refcount.3			 $(DESTDIR)$(man3dir)/pcre16_refcount.3
-	cp -f pcre_study.3			 $(DESTDIR)$(man3dir)/pcre16_study.3
-	cp -f pcre_utf16_to_host_byte_order.3	 $(DESTDIR)$(man3dir)/pcre16_utf16_to_host_byte_order.3
-	cp -f pcre_version.3			 $(DESTDIR)$(man3dir)/pcre16_version.3
-	cp -f pcre_assign_jit_stack.3		 $(DESTDIR)$(man3dir)/pcre32_assign_jit_stack.3
-	cp -f pcre_compile.3			 $(DESTDIR)$(man3dir)/pcre32_compile.3
-	cp -f pcre_compile2.3			 $(DESTDIR)$(man3dir)/pcre32_compile2.3
-	cp -f pcre_config.3			 $(DESTDIR)$(man3dir)/pcre32_config.3
-	cp -f pcre_copy_named_substring.3	 $(DESTDIR)$(man3dir)/pcre32_copy_named_substring.3
-	cp -f pcre_copy_substring.3		 $(DESTDIR)$(man3dir)/pcre32_copy_substring.3
-	cp -f pcre_dfa_exec.3			 $(DESTDIR)$(man3dir)/pcre32_dfa_exec.3
-	cp -f pcre_exec.3			 $(DESTDIR)$(man3dir)/pcre32_exec.3
-	cp -f pcre_free_study.3		 $(DESTDIR)$(man3dir)/pcre32_free_study.3
-	cp -f pcre_free_substring.3		 $(DESTDIR)$(man3dir)/pcre32_free_substring.3
-	cp -f pcre_free_substring_list.3	 $(DESTDIR)$(man3dir)/pcre32_free_substring_list.3
-	cp -f pcre_fullinfo.3			 $(DESTDIR)$(man3dir)/pcre32_fullinfo.3
-	cp -f pcre_get_named_substring.3	 $(DESTDIR)$(man3dir)/pcre32_get_named_substring.3
-	cp -f pcre_get_stringnumber.3		 $(DESTDIR)$(man3dir)/pcre32_get_stringnumber.3
-	cp -f pcre_get_stringtable_entries.3	 $(DESTDIR)$(man3dir)/pcre32_get_stringtable_entries.3
-	cp -f pcre_get_substring.3		 $(DESTDIR)$(man3dir)/pcre32_get_substring.3
-	cp -f pcre_get_substring_list.3	 $(DESTDIR)$(man3dir)/pcre32_get_substring_list.3
-	cp -f pcre_jit_exec.3			 $(DESTDIR)$(man3dir)/pcre32_jit_exec.3
-	cp -f pcre_jit_stack_alloc.3		 $(DESTDIR)$(man3dir)/pcre32_jit_stack_alloc.3
-	cp -f pcre_jit_stack_free.3		 $(DESTDIR)$(man3dir)/pcre32_jit_stack_free.3
-	cp -f pcre_maketables.3		 $(DESTDIR)$(man3dir)/pcre32_maketables.3
-	cp -f pcre_pattern_to_host_byte_order.3 $(DESTDIR)$(man3dir)/pcre32_pattern_to_host_byte_order.3
-	cp -f pcre_refcount.3			 $(DESTDIR)$(man3dir)/pcre32_refcount.3
-	cp -f pcre_study.3			 $(DESTDIR)$(man3dir)/pcre32_study.3
-	cp -f pcre_utf32_to_host_byte_order.3	 $(DESTDIR)$(man3dir)/pcre32_utf32_to_host_byte_order.3
-	cp -f pcre_version.3			 $(DESTDIR)$(man3dir)/pcre32_version.3
+	ln -sf pcre_assign_jit_stack.3		 $(DESTDIR)$(man3dir)/pcre16_assign_jit_stack.3
+	ln -sf pcre_compile.3			 $(DESTDIR)$(man3dir)/pcre16_compile.3
+	ln -sf pcre_compile2.3			 $(DESTDIR)$(man3dir)/pcre16_compile2.3
+	ln -sf pcre_config.3			 $(DESTDIR)$(man3dir)/pcre16_config.3
+	ln -sf pcre_copy_named_substring.3	 $(DESTDIR)$(man3dir)/pcre16_copy_named_substring.3
+	ln -sf pcre_copy_substring.3		 $(DESTDIR)$(man3dir)/pcre16_copy_substring.3
+	ln -sf pcre_dfa_exec.3			 $(DESTDIR)$(man3dir)/pcre16_dfa_exec.3
+	ln -sf pcre_exec.3			 $(DESTDIR)$(man3dir)/pcre16_exec.3
+	ln -sf pcre_free_study.3		 $(DESTDIR)$(man3dir)/pcre16_free_study.3
+	ln -sf pcre_free_substring.3		 $(DESTDIR)$(man3dir)/pcre16_free_substring.3
+	ln -sf pcre_free_substring_list.3	 $(DESTDIR)$(man3dir)/pcre16_free_substring_list.3
+	ln -sf pcre_fullinfo.3			 $(DESTDIR)$(man3dir)/pcre16_fullinfo.3
+	ln -sf pcre_get_named_substring.3	 $(DESTDIR)$(man3dir)/pcre16_get_named_substring.3
+	ln -sf pcre_get_stringnumber.3		 $(DESTDIR)$(man3dir)/pcre16_get_stringnumber.3
+	ln -sf pcre_get_stringtable_entries.3	 $(DESTDIR)$(man3dir)/pcre16_get_stringtable_entries.3
+	ln -sf pcre_get_substring.3		 $(DESTDIR)$(man3dir)/pcre16_get_substring.3
+	ln -sf pcre_get_substring_list.3	 $(DESTDIR)$(man3dir)/pcre16_get_substring_list.3
+	ln -sf pcre_jit_exec.3			 $(DESTDIR)$(man3dir)/pcre16_jit_exec.3
+	ln -sf pcre_jit_stack_alloc.3		 $(DESTDIR)$(man3dir)/pcre16_jit_stack_alloc.3
+	ln -sf pcre_jit_stack_free.3		 $(DESTDIR)$(man3dir)/pcre16_jit_stack_free.3
+	ln -sf pcre_maketables.3		 $(DESTDIR)$(man3dir)/pcre16_maketables.3
+	ln -sf pcre_pattern_to_host_byte_order.3 $(DESTDIR)$(man3dir)/pcre16_pattern_to_host_byte_order.3
+	ln -sf pcre_refcount.3			 $(DESTDIR)$(man3dir)/pcre16_refcount.3
+	ln -sf pcre_study.3			 $(DESTDIR)$(man3dir)/pcre16_study.3
+	ln -sf pcre_utf16_to_host_byte_order.3	 $(DESTDIR)$(man3dir)/pcre16_utf16_to_host_byte_order.3
+	ln -sf pcre_version.3			 $(DESTDIR)$(man3dir)/pcre16_version.3
+	ln -sf pcre_assign_jit_stack.3		 $(DESTDIR)$(man3dir)/pcre32_assign_jit_stack.3
+	ln -sf pcre_compile.3			 $(DESTDIR)$(man3dir)/pcre32_compile.3
+	ln -sf pcre_compile2.3			 $(DESTDIR)$(man3dir)/pcre32_compile2.3
+	ln -sf pcre_config.3			 $(DESTDIR)$(man3dir)/pcre32_config.3
+	ln -sf pcre_copy_named_substring.3	 $(DESTDIR)$(man3dir)/pcre32_copy_named_substring.3
+	ln -sf pcre_copy_substring.3		 $(DESTDIR)$(man3dir)/pcre32_copy_substring.3
+	ln -sf pcre_dfa_exec.3			 $(DESTDIR)$(man3dir)/pcre32_dfa_exec.3
+	ln -sf pcre_exec.3			 $(DESTDIR)$(man3dir)/pcre32_exec.3
+	ln -sf pcre_free_study.3		 $(DESTDIR)$(man3dir)/pcre32_free_study.3
+	ln -sf pcre_free_substring.3		 $(DESTDIR)$(man3dir)/pcre32_free_substring.3
+	ln -sf pcre_free_substring_list.3	 $(DESTDIR)$(man3dir)/pcre32_free_substring_list.3
+	ln -sf pcre_fullinfo.3			 $(DESTDIR)$(man3dir)/pcre32_fullinfo.3
+	ln -sf pcre_get_named_substring.3	 $(DESTDIR)$(man3dir)/pcre32_get_named_substring.3
+	ln -sf pcre_get_stringnumber.3		 $(DESTDIR)$(man3dir)/pcre32_get_stringnumber.3
+	ln -sf pcre_get_stringtable_entries.3	 $(DESTDIR)$(man3dir)/pcre32_get_stringtable_entries.3
+	ln -sf pcre_get_substring.3		 $(DESTDIR)$(man3dir)/pcre32_get_substring.3
+	ln -sf pcre_get_substring_list.3	 $(DESTDIR)$(man3dir)/pcre32_get_substring_list.3
+	ln -sf pcre_jit_exec.3			 $(DESTDIR)$(man3dir)/pcre32_jit_exec.3
+	ln -sf pcre_jit_stack_alloc.3		 $(DESTDIR)$(man3dir)/pcre32_jit_stack_alloc.3
+	ln -sf pcre_jit_stack_free.3		 $(DESTDIR)$(man3dir)/pcre32_jit_stack_free.3
+	ln -sf pcre_maketables.3		 $(DESTDIR)$(man3dir)/pcre32_maketables.3
+	ln -sf pcre_pattern_to_host_byte_order.3 $(DESTDIR)$(man3dir)/pcre32_pattern_to_host_byte_order.3
+	ln -sf pcre_refcount.3			 $(DESTDIR)$(man3dir)/pcre32_refcount.3
+	ln -sf pcre_study.3			 $(DESTDIR)$(man3dir)/pcre32_study.3
+	ln -sf pcre_utf32_to_host_byte_order.3	 $(DESTDIR)$(man3dir)/pcre32_utf32_to_host_byte_order.3
+	ln -sf pcre_version.3			 $(DESTDIR)$(man3dir)/pcre32_version.3
 
 pcrecpp_man = doc/pcrecpp.3
 EXTRA_DIST += $(pcrecpp_man)

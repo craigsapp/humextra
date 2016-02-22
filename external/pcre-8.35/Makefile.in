@@ -3152,7 +3152,7 @@ config.h.generic: configure.ac
 
 @WITH_REBUILD_CHARTABLES_FALSE@pcre_chartables.c: $(srcdir)/pcre_chartables.c.dist
 @WITH_REBUILD_CHARTABLES_FALSE@	rm -f $@
-@WITH_REBUILD_CHARTABLES_FALSE@	cp -f $(srcdir)/pcre_chartables.c.dist $@
+@WITH_REBUILD_CHARTABLES_FALSE@	$(LN_S) $(srcdir)/pcre_chartables.c.dist $@
 
 # A compatibility line, the old build system worked with 'make test'
 test: check ;

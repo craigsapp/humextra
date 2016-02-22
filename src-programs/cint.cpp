@@ -1160,7 +1160,7 @@ int printCombinationModule(ostream& out, const char* filename,
    //    outp = &cout;
    // }
 
-   if (n + startline >= notes[0].getSize()) {
+   if (n + startline >= notes[0].getSize()) { // [20150202]
       // definitely nothing to do
       return 0;
    }
@@ -1381,6 +1381,8 @@ int printCombinationModule(ostream& out, const char* filename,
    if (attackQ && (attackcount == n)) {
       return retroline;
    } else if ((countm>1) && (count == n)) {
+      return retroline;
+   } else if (n == 0) {
       return retroline;
    } else {
       // did not print the required number of modules.
@@ -2867,8 +2869,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    if (opts.getBoolean("note-marker")) {
       NoteMarker = opts.getString("note-marker").data()[0];
    }
-   if (Chaincount < 1) {
-      Chaincount = 1;
+   if (Chaincount < 0) {
+      Chaincount = 0;
    }
    
    if (searchQ) {
@@ -2918,4 +2920,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 14ed86395660c9200c5640ca2183c64b cint.cpp [20151120]
+// md5sum: aab1a9354e3ef11a038a283948c4e8b3 cint.cpp [20160217]

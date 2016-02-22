@@ -234,6 +234,7 @@ void createDataLine(char* buffer, HumdrumFile& infile, int line,
    Convert::durationToKernRhythm(dstring, duration);
    int pitch;
 
+
    int i, k;
    for (i=0; i<infile[line].getFieldCount(); i++) {
       if (infile[line].getExInterpNum(i) == E_KERN_EXINT) {
@@ -244,8 +245,12 @@ void createDataLine(char* buffer, HumdrumFile& infile, int line,
             for (k=0; k<tokencount; k++) {
                infile[dotline].getToken(tbuffer, dotspine, k);
                pitch = Convert::kernToBase40(tbuffer);
-               Convert::base40ToKern(pbuffer, pitch);
-               strcat(buffer, dstring);
+               if (pitch >= 0) {
+                  Convert::base40ToKern(pbuffer, pitch);
+                  strcat(buffer, dstring);
+               } else {
+                  strcat(buffer, "r");
+               }
                if (style == 'r') {
                   strcat(buffer, "r");
                } else {
@@ -260,8 +265,12 @@ void createDataLine(char* buffer, HumdrumFile& infile, int line,
             for (k=0; k<tokencount; k++) {
                infile[line].getToken(tbuffer, i, k);
                pitch = Convert::kernToBase40(tbuffer);
-               Convert::base40ToKern(pbuffer, pitch);
-               strcat(buffer, dstring);
+               if (pitch >= 0) {
+                  Convert::base40ToKern(pbuffer, pitch);
+                  strcat(buffer, dstring);
+               } else {
+                  strcat(buffer, "r");
+               }
                if (style == 'r') {
                   strcat(buffer, "r");
                } else {
