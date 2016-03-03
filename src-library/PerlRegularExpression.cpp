@@ -567,6 +567,35 @@ void PerlRegularExpression::studySearch() {
 //   default value: optionstring = NULL
 //
 
+int PerlRegularExpression::sar(string& inout, const string& searchstring,
+      const string& replacestring, const string& optionstring)  {
+   Array<char> inout2;
+   inout2.setSize(inout.size() + 1);
+   strcpy(inout2.getBase(), inout.c_str());
+   int count = sar(inout2, searchstring.c_str(), replacestring.c_str(),
+         optionstring.c_str());
+   inout = inout2.getBase();
+   return count;
+}
+
+
+int PerlRegularExpression::sar(vector<char>& inout, const string& searchstring,
+      const string& replacestring, const string& optionstring)  {
+   Array<char> inout2;
+   inout2.setSize(inout.size() + 1);
+   strncpy(inout2.getBase(), inout.data(), inout.size());
+   inout2[inout2.getSize()-1] = '\0';
+   int count = sar(inout2, searchstring.c_str(), replacestring.c_str(),
+         optionstring.c_str());
+   int i;
+   inout.reserve(inout2.getSize());
+   for (i=0; i<inout2.getSize()-1; i++) {
+      inout[i] = inout2[i];
+   }
+   return count;
+}
+
+
 int PerlRegularExpression::sar(Array<char>& inout, const char* searchstring,
       const char* replacestring, const char* optionstring)  {
 
@@ -717,12 +746,34 @@ int PerlRegularExpression::searchAndReplace(Array<char>& output,
 }
 
 
+int PerlRegularExpression::searchAndReplace(string& output, 
+      const string& input, const string& searchstring, 
+      const string&  replacestring) {
+   initializeSearch(searchstring.c_str());
+   setReplaceString(replacestring.c_str());
+
+   Array<char> output2;
+   int count = searchAndReplace(output2, input.c_str());
+   output = output2.getBase();
+   return count;
+}
+
+
 
 //////////////////////////////
 //
 // PerlRegularExpression::searchAndReplace -- do a search and replace with
 //   the same search and replace from a previous call.
 //
+
+int PerlRegularExpression::searchAndReplace(string& output, 
+      const string& input) {
+   Array<char> output2;
+   int count = searchAndReplace(output2, input.c_str());
+   output = output2.getBase();
+   return count;
+}
+
 
 int PerlRegularExpression::searchAndReplace(Array<char>& output, 
       const char* input) {
@@ -788,10 +839,27 @@ int PerlRegularExpression::searchAndReplace(Array<char>& output,
 //     default value: optionstring = NULL
 //
 
-int PerlRegularExpression::search(Array<char>& input, const char* searchstring,
-      const char* optionstring) {
+int PerlRegularExpression::search(Array<char>& input, 
+      const char* searchstring, const char* optionstring) {
    return PerlRegularExpression::search(input.getBase(), searchstring,
          optionstring);
+}
+
+
+int PerlRegularExpression::search(const vector<char>& input, 
+      const string& searchstring, const string& optionstring) {
+   string input2;
+   for (int i=0; i<(int)input.size(); i++) {
+      input2[i] = input[i];
+   }
+   return PerlRegularExpression::search(input2, searchstring,
+         optionstring);
+}
+
+int PerlRegularExpression::search(const string& input, 
+      const string& searchstring, const string& optionstring) {
+   return PerlRegularExpression::search(input.c_str(), searchstring.c_str(),
+         optionstring.c_str());
 }
 
 
@@ -836,9 +904,15 @@ int PerlRegularExpression::search(const char* input, const char* searchstring,
 //   previous used/specified search pattern and options.
 //
 
-int PerlRegularExpression::search(Array<char>& input) {
+int PerlRegularExpression::search(const Array<char>& input) {
    return PerlRegularExpression::search(input.getBase());
 }
+
+
+int PerlRegularExpression::search(const string& input) {
+   return PerlRegularExpression::search(input.c_str());
+}
+
 
 int PerlRegularExpression::search(const char* input) {
    if (valid == 0) {

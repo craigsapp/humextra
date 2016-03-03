@@ -637,6 +637,25 @@ int HumdrumFileBasic::getTracksByExInterp(Array<int>& tracks,
    return tracks.getSize();
 }
 
+int HumdrumFileBasic::getTracksByExInterp(vector<int>& tracks, 
+      const char* exinterp) {
+   int maxsize = getMaxTracks();
+   tracks.reserve(maxsize);
+   tracks.resize(0);
+   int i;
+   for (i=0; i<trackexinterp.getSize(); i++) {
+      if (strcmp(trackexinterp[i], exinterp) == 0) {
+         tracks.push_back(i);
+         tracks.back()++;
+      } else if (strcmp(trackexinterp[i]+2, exinterp) == 0) {
+         tracks.push_back(i);
+         tracks.back()++;
+      }
+   }
+
+   return tracks.size();
+}
+
 
 
 //////////////////////////////
@@ -648,6 +667,9 @@ int HumdrumFileBasic::getKernTracks(Array<int>& tracks) {
    return getTracksByExInterp(tracks, "**kern");
 }
 
+int HumdrumFileBasic::getKernTracks(vector<int>& tracks) {
+   return getTracksByExInterp(tracks, "**kern");
+}
 
 
 //////////////////////////////

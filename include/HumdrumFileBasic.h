@@ -25,12 +25,10 @@
 #include "SigCollection.h"
 #include "Array.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-   using namespace std;
-#else
-   #include <iostream.h>
-#endif
+#include <vector>
+#include <iostream>
+
+using namespace std;
 
 // the following define is for compiling/not compiling the automatic
 // downloading of data from the web inside of the read() functions.
@@ -46,19 +44,9 @@
    #include <unistd.h>      /* read, write     */
    #include <string.h>      /* memcpy          */
 
-   #ifndef OLDCPP
-      #include <sstream>
-      #define SSTREAM stringstream
-      #define CSTRING str().c_str()
-   #else
-      #ifdef VISUAL
-         #include <strstrea.h>     /* for Windows 95 */
-      #else
-         #include <strstream.h>
-      #endif
-      #define SSTREAM strstream
-      #define CSTRING str()
-   #endif
+   #include <sstream>
+   #define SSTREAM stringstream
+   #define CSTRING str().c_str()
 #endif
 
 
@@ -138,7 +126,10 @@ class HumdrumFileBasic {
       int                    getSpineCount    (int index);
       int                    getTracksByExInterp(Array<int>& tracks, 
                                                   const char* exinterp);
+      int                    getTracksByExInterp(vector<int>& tracks, 
+                                                  const char* exinterp);
 		int                    getKernTracks    (Array<int>& tracks);
+		int                    getKernTracks    (vector<int>& tracks);
       int                    getType          (int index);
       void                   makeVts          (Array<char>& vtsstring);
       static void            makeVts          (Array<char>& vtsstring,

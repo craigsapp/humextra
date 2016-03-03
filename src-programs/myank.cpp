@@ -1,9 +1,10 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Dec 26 17:03:54 PST 2010
-// Last Modified: Fri Jan 14 17:06:32 PST 2011 (added --mark and --mdsep)
-// Last Modified: Wed Feb  2 12:13:11 PST 2011 (added *met extraction)
+// Last Modified: Fri Jan 14 17:06:32 PST 2011 Added --mark and --mdsep
+// Last Modified: Wed Feb  2 12:13:11 PST 2011 Added *met extraction
 // Last Modified: Mon Apr  1 00:28:01 PDT 2013 Enabled multiple segment input
+// Last Modified: Tue Feb 23 04:40:04 PST 2016 Added --section option
 // Filename:      ...sig/examples/all/myank.cpp 
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/myank.cpp
 // Syntax:        C++; museinfo
@@ -11,30 +12,19 @@
 // Description:   Extract measures from input data.
 //
 
-#include <math.h>
-
-#ifndef OLDCPP
-   #include <iostream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <iostream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-
-#include "string.h"
-
 #include "humdrum.h"
 #include "PerlRegularExpression.h"
 #include "MuseData.h"
+
+#include <string.h>
+#include <math.h>
+
+#include <iostream>
+#include <sstream>
+#include <string>
+
+using namespace std;
+
 
 class Coord {
    public:
@@ -214,6 +204,8 @@ void      getMetStates         (Array<Array<Coord> >& metstates,
 Coord     getLocalMetInfo      (HumdrumFile& infile, int row, int track);
 int       atEndOfFile          (HumdrumFile& infile, int line);
 void      processFile          (HumdrumFile& infile, int segmentCount);
+int       getSectionCount      (HumdrumFile& infile);
+void      getSectionString     (string& sstring, HumdrumFile& infile, int sec);
 
 
 // User interface variables:
@@ -231,6 +223,8 @@ int    nolastbarQ  = 0;            // used with -B option
 int    markQ       = 0;            // used with --mark option
 int    doubleQ     = 0;            // used with --mdsep option
 int    barnumtextQ = 0;            // used with -T option
+int    Section     = 0;            // used with --section option
+int    sectionCountQ = 0;          // used with --section-count option
 Array<MeasureInfo> MeasureOutList; // used with -m option
 Array<MeasureInfo> MeasureInList;  // used with -m option
 
@@ -261,6 +255,11 @@ int main(int argc, char** argv) {
 //
 
 void processFile(HumdrumFile& infile, int segmentCount) {
+   if (sectionCountQ) {
+      int sections = getSectionCount(infile);
+      cout << sections << endl;
+      return;
+   }
 
    getMetStates(metstates, infile);
    getMeasureStartStop(MeasureInList, infile);
@@ -268,15 +267,20 @@ void processFile(HumdrumFile& infile, int segmentCount) {
    Array<char> measurestring;
    measurestring.setSize(strlen(options.getString("measure").data())+1);
    strcpy(measurestring.getBase(), options.getString("measure").data());
-   SSTREAM mstring;
    if (markQ) {
+      stringstream mstring;
       getMarkString(mstring, infile); 
       mstring << ends;
-      measurestring.setSize(strlen(mstring.CSTRING)+1);
-      strcpy(measurestring.getBase(), mstring.CSTRING);
+      measurestring.setSize(strlen(mstring.str().c_str())+1);
+      strcpy(measurestring.getBase(), mstring.str().c_str());
       if (debugQ) {
-         cout << "MARK STRING: " << mstring.CSTRING << endl;
+         cout << "MARK STRING: " << mstring.str().c_str() << endl;
       }
+   } else if (Section) {
+      string sstring;
+      getSectionString(sstring, infile, Section);
+      measurestring.setSize(sstring.size()+1);
+      strcpy(measurestring.getBase(), sstring.c_str());
    }
    if (debugQ) {
       cout << "MARK MEASURES: " << measurestring << endl;
@@ -1550,6 +1554,81 @@ void getMeasureStartStop(Array<MeasureInfo>& measurelist, HumdrumFile& infile) {
 
 //////////////////////////////
 //
+// getSectionCount -- Count the number of sections in a file according to
+//     JRP rules: sections are defined by double barlines. There may be some
+//     corner cases to consider.
+//
+
+int getSectionCount(HumdrumFile& infile) {
+   int i;
+   int count = 0;
+   int dataQ = 0;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!dataQ && infile[i].isData()) {
+         dataQ = 1;
+         count++;
+         continue;
+      }
+      if (infile[i].isBarline()) {
+         if (strstr(infile[i][0], "||")) {
+            dataQ = 0;
+         }
+      }
+   }
+   return count;
+}
+
+
+
+//////////////////////////////
+//
+// getSectionString -- return the measure range of a section.
+//
+
+void getSectionString(string& sstring, HumdrumFile& infile, int sec) {
+   int i;
+   int first = -1;
+   int second = -1;
+   int barnum = 0;
+   int count = 0;
+   int dataQ = 0;
+   PerlRegularExpression pre;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!dataQ && infile[i].isData()) {
+         dataQ = 1;
+         count++;
+         if (count == sec) {
+            first = barnum;
+         } else if (count == sec+1) {
+            second = barnum - 1;
+         }
+         continue;
+      }
+      if (infile[i].isBarline()) {
+         if (strstr(infile[i][0], "||")) {
+            dataQ = 0;
+         }
+         if (pre.search(infile[i][0], "(\\d+)")) {
+            barnum = atoi(pre.getSubmatch(1));
+         } 
+      }
+   }
+   if (second < 0) {
+      second = barnum;
+   }
+   char buffer1[32] = {0};
+   char buffer2[32] = {0};
+   sprintf(buffer1, "%d", first);
+   sprintf(buffer2, "%d", second);
+   sstring = buffer1;
+   sstring += "-";
+   sstring += buffer2;
+}
+
+
+
+//////////////////////////////
+//
 // atEndOfFile --
 //
 
@@ -2270,6 +2349,8 @@ void checkOptions(Options& opts, int argc, char** argv) {
    opts.define("B|noendbar=b", "Do not print barline at end of data");
    opts.define("max=b",  "print maximum measure number");
    opts.define("min=b",  "print minimum measure number");
+   opts.define("section-count=b", "count the number of sections, JRP style");
+   opts.define("section=i:0", "extract given section number (indexed from 1");
 
    opts.define("author=b",    "Program author");
    opts.define("version=b",   "Program version");
@@ -2302,18 +2383,22 @@ void checkOptions(Options& opts, int argc, char** argv) {
    maxQ     = opts.getBoolean("max");
    minQ     = opts.getBoolean("min");
 
-   invisibleQ = !opts.getBoolean("not-invisible");
-   instrumentQ = opts.getBoolean("instrument");
-   nolastbarQ  = opts.getBoolean("noendbar");
-   markQ       = opts.getBoolean("mark");
-   doubleQ     = opts.getBoolean("mdsep");
-   barnumtextQ = opts.getBoolean("bar-number-text");
+   invisibleQ    = !opts.getBoolean("not-invisible");
+   instrumentQ   =  opts.getBoolean("instrument");
+   nolastbarQ    =  opts.getBoolean("noendbar");
+   markQ         =  opts.getBoolean("mark");
+   doubleQ       =  opts.getBoolean("mdsep");
+   barnumtextQ   =  opts.getBoolean("bar-number-text");
+   sectionCountQ =  opts.getBoolean("section-count");
+   Section       =  opts.getInteger("section");
 
-   if (!(opts.getBoolean("measures") || markQ)) {
-      // if -m option is not given, then --mark option presumed
-      markQ = 1;
-      // cerr << "Error: the -m option is required" << endl;
-      // exit(1);
+   if (!Section) {
+      if (!(opts.getBoolean("measures") || markQ)) {
+         // if -m option is not given, then --mark option presumed
+         markQ = 1;
+         // cerr << "Error: the -m option is required" << endl;
+         // exit(1);
+      }
    }
 
 }

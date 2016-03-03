@@ -20,43 +20,66 @@
 #include "Array.h"
 #include "SigString.h"
 #include "pcre.h"
+#include <vector>
 
 
 class PerlRegularExpression {
    public:
            PerlRegularExpression    (void);
-	  ~PerlRegularExpression    ();
-	    
+          ~PerlRegularExpression    ();
+   
       int  search                   (Array<char>& input, 
-		                     const char* searchstring,
-				     const char* optionstring = NULL);
+                                     const char* searchstring,
+                                     const char* optionstring = NULL);
+      int  search                   (const vector<char>& input, 
+                                     const string& searchstring,
+                                     const string& optionstring = "");
+      int  search                   (const string& input, 
+                                     const string& searchstring,
+                                     const string& optionstring = "");
       int  search                   (const char* input, 
-		                     const char* searchstring,
-				     const char* optionstring = NULL);
-      int  search                   (Array<char>& input);
+                                     const char* searchstring,
+                                     const char* optionstring = NULL);
+      int  search                   (const Array<char>& input);
+      int  search                   (const string& input);
       int  search                   (const char* input);
 
       int  searchAndReplace         (Array<char>& output, const char* input,
                                      const char* searchstring, 
-				     const char* replacestring);
-      int  searchAndReplace         (Array<char>& output, 
-                                     const char* input);
+                                     const char* replacestring);
+      int  searchAndReplace         (string& output, const string& input,
+                                     const string& searchstring, 
+                                     const string& replacestring);
+      int  searchAndReplace         (Array<char>& output, const char* input);
+      int  searchAndReplace         (string& output, const string& input);
+
       int  sar                      (Array<char>& inout,
                                      const char* searchstring,
                                      const char* replacestring,
                                      const char* optionstring = NULL);
+      int  sar                      (string& inout,
+                                     const string& searchstring,
+                                     const string& replacestring,
+                                     const string& optionstring = "");
+      int  sar                      (vector<char>& inout,
+                                     const string& searchstring,
+                                     const string& replacestring,
+                                     const string& optionstring = "");
 
       void tr                       (Array<char>& inout, 
-		                     const char* inputlist, 
-		                     const char* outputlist);
+                                     const char* inputlist, 
+                                     const char* outputlist);
+
       static int getTokens          (Array<SigString>& output, 
                                      const char* separator, 
                                      const char* input);
+
       static int getTokens          (Array<Array<char> >& output, 
                                      const char* separator, 
                                      const char* input);
+
       static int getTokensWithEmpties(Array<Array<char> >& output, 
-                                     const char* separator, const char* input);
+                                      const char* separator, const char* input);
 
       void initializeSearch         (void);
       void initializeSearch         (const char* searchstring);
@@ -109,7 +132,7 @@ class PerlRegularExpression {
                                      const char* input); 
 
 };
-	
+
 #endif  /* _PERLREGULAREXPRESSION_H_INCLUDED */
 
 
