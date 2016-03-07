@@ -78,6 +78,10 @@ class PerlRegularExpression {
                                      const char* separator, 
                                      const char* input);
 
+      static int getTokens          (vector<string >& output, 
+                                     const string& separator, 
+                                     const string& input);
+
       static int getTokensWithEmpties(Array<Array<char> >& output, 
                                       const char* separator, const char* input);
 

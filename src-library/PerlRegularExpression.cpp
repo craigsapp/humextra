@@ -1037,6 +1037,20 @@ int PerlRegularExpression::getTokens(Array<SigString>& output,
 }
 
 
+
+int PerlRegularExpression::getTokens(vector<string>& output, 
+      const string& separator, const string& input) {
+   Array<Array<char> > pretokens;
+   getTokens(pretokens, separator.c_str(), input.c_str());
+   int i;
+   output.resize(pretokens.getSize());
+   for (i=0; i<(int)output.size(); i++) {
+      output[i] = pretokens[i].getBase();
+   }
+   return output.size();
+}
+
+
 int PerlRegularExpression::getTokensWithEmpties(Array<Array<char> >& output, 
       const char* separator, const char* input) {
 

@@ -9,6 +9,8 @@ for i in $SRCBASE/sigInfo/*
 do
    ln -s $i
 done
+rm -f MidiFile.h
+rm -f MidiFile2.h
 
 
 # classes borrowed from sigBase:
@@ -25,7 +27,7 @@ ln -s $SRCBASE/sigBase/CircularBuffer.h
 ln -s $SRCBASE/sigBase/EnvelopeString.h
 ln -s $SRCBASE/sigBase/FileIO.h
 ln -s $SRCBASE/sigBase/Options.h
-ln -s $SRCBASE/sigBase/Options_private.h
+#ln -s $SRCBASE/sigBase/Options_private.h
 ln -s $SRCBASE/sigBase/PixelColor.h
 ln -s $SRCBASE/sigBase/PlotData.h
 ln -s $SRCBASE/sigBase/PlotFigure.h
@@ -34,7 +36,7 @@ ln -s $SRCBASE/sigBase/CheckSum.h
 
 # classes borrowed from sigControl:
 ln -s $SRCBASE/sigControl/gminstruments.h
-ln -s $SRCBASE/sigControl/MidiMessage.h
+#ln -s $SRCBASE/sigControl/MidiMessage.h
 #ln -s $SRCBASE/sigControl/MidiOutput.h
 #ln -s $SRCBASE/sigControl/MidiOutPort.h
 #ln -s $SRCBASE/sigControl/MidiOutPort_linux.h

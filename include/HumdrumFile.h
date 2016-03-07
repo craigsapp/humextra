@@ -210,6 +210,7 @@ class HumdrumFile : public HumdrumFileBasic {
          int flag = AFLAG_COMPOUND_METER);
       void analyzeAttackAccentuation(Array<int>& atakcent);
       void analyzeMetricLevel(Array<int>& metlev);
+      void analyzeMetricLevel(vector<int>& metlev);
 
       // sonority harmonic analyses
       void analyzeSonorityQuality(Array<ChordQuality>& cq);

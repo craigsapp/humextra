@@ -17,9 +17,15 @@
 
 PCRE = $(wildcard pcre-8.35)
 
-.PHONY: centerpoint $(PCRE)
+.PHONY: centerpoint midifile $(PCRE)
 
-all: centerpoint pcre improv
+
+all: centerpoint pcre midifile improv
+
+
+midifile:
+	(cd midifile; $(MAKE) library)
+
 
 centerpoint:
 	(cd centerpoint && $(MAKE) static_release)
@@ -34,6 +40,7 @@ centerpoint:
 #	@echo Error trying to copy static library for centerpoint
 #endif
 
+
 pcre:
 	# The following command helps to avoid having autoreconf or
 	# aclocal or other stupid non-installed configuration tools
@@ -43,17 +50,18 @@ pcre:
 	(cd $(PCRE); $(MAKE))
 	-mkdir ../lib
 	cp $(PCRE)/.libs/libpcre.a ../lib/libpcre.a
-
 ifneq ($(wildcard ../lib),)
 	(cd ../lib; ranlib libpcre.a)
 else
 	@echo Error trying to copy static library for pcre
 endif
 
-clean: cleancenterpoint cleanpcre improv-clean
+clean: cleancenterpoint cleanmidi cleanpcre improv-clean
 
-superclean: cleancenterpoint cleanpcre remove-improv
+superclean: cleancenterpoint cleanpcre remove-improv cleanmidi
 
+cleanmidi:
+	(cd midifile; $(MAKE) clean)
 
 cleancenterpoint:
 	(cd centerpoint; $(MAKE) clean)

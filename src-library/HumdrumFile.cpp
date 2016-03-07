@@ -4214,6 +4214,16 @@ void HumdrumFile::analyzeAttackAccentuation(Array<int>& atakcent) {
 //    the data.
 //
 
+void HumdrumFile::analyzeMetricLevel(vector<int>& metlev) {
+   Array<int> tempout;
+   analyzeMetricLevel(tempout);
+   metlev.resize(tempout.getSize());
+   for (int i=0; i<tempout.getSize(); i++) {
+      metlev[i] = tempout[i];
+   }
+}
+
+
 void HumdrumFile::analyzeMetricLevel(Array<int>& metlev) {
    HumdrumFile& score = *this;
    int i;

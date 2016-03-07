@@ -186,9 +186,16 @@ endif
 # The following setup is for PERL-Compatible Regular Expression library
 # linking (for themax2 in particular).
 ifneq ($(wildcard external/pcre-8.35),)
-   PREFLAGS    += -I$(wildcard external/pcre-8.35)
+   PREFLAGS    += -Iexternal/pcre-8.35
    POSTFLAGS   += -lpcre
    PCRE        := yes
+endif
+
+# The following setup is for MIDI files:
+ifneq ($(wildcard external/midifile),)
+   PREFLAGS    += -Iexternal/midifile/include
+   POSTFLAGS   += -Lexternal/midifile/lib -lmidifile
+   MIDIFILE    := yes
 endif
 
 

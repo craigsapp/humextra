@@ -13,7 +13,7 @@
 //                open-ended problem.  I am not going to go through the
 //                trouble of writing a robust converter.  For more complicated
 //                MIDI to Humdrum conversions, I suggest the following method:
-// 
+//
 //                If you want to convert MIDI files into Humdrum files,
 //                I would suggest that you use the xml2hum program:
 //                   http://museinfo.sapp.org/examples/humdrum/xml2hum.cpp
@@ -32,7 +32,7 @@
 //                lyrics
 //                clean up rhythm on slightly shortened or lengthend notes.
 // Done:
-//                key signatures 
+//                key signatures
 //                barlines (only for constant meters)
 //                time signatures
 //                chord notes (partly done, but not robust)
@@ -48,21 +48,12 @@
 #include "HumdrumFile.h"
 #include <math.h>
 #include <cctype>
+#include <iostream>
+#include <sstream>
+#define SSTREAM stringstream
+#define CSTRING str().c_str()
 
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>    /* for Windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+using namespace std;
 
 
 class MidiInfo {
@@ -123,9 +114,9 @@ int       MidiInfoCompare   (const void* a, const void* b);
 void      printRestCorrection (ostream& out, int restcorr, int tqp);
 void      processMetaMessage(MidiFile& midifile, int track, int event,
                              Array<MetaInfo>& metadata);
-void      printMetaData     (ostream& out, Array<MetaInfo>& metadata, 
+void      printMetaData     (ostream& out, Array<MetaInfo>& metadata,
                              int metaindex);
-void      splitDataWithMeasure(ostream& out, HumdrumFile& hfile, int index, 
+void      splitDataWithMeasure(ostream& out, HumdrumFile& hfile, int index,
                              int& measurenum, double firstdur);
 void      printHumdrumFileWithBarlines(ostream& out, HumdrumFile& hfile);
 void      checkOptions      (Options& opts, int argc, char** argv);
@@ -212,27 +203,27 @@ void getMidiData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile) {
    int k;
    for (i=0; i<midifile.getNumTracks(); i++) {
       for (j=0; j<midifile.getNumEvents(i); j++) {
-         if (((midifile.getEvent(i, j)[0] & 0xf0) == 0x90) &&
-             (midifile.getEvent(i, j)[2] > 0) ) {
+         if (((midifile.getEvent(i, j).data[0] & 0xf0) == 0x90) &&
+             (midifile.getEvent(i, j).data[2] > 0) ) {
             // a note-on message. Store the state
-            k = midifile.getEvent(i, j)[1];
+            k = midifile.getEvent(i, j).data[1];
             if (notestates[i][k].state == 1) {
                storenote(notestates[i][k], mididata, i,
-                     midifile.getEvent(i, j).tick);
+                     midifile.getEvent(i, j).time);
             }
             notestates[i][k].track = i;
             notestates[i][k].key = k;
             notestates[i][k].state = 1;
             notestates[i][k].index = j;
-            notestates[i][k].starttick = midifile.getEvent(i, j).tick;
+            notestates[i][k].starttick = midifile.getEvent(i, j).time;
             notestates[i][k].tickdur = -1;
-         } else if (((midifile.getEvent(i, j)[0] & 0xf0) == 0x80) ||
-             (((midifile.getEvent(i, j)[0] & 0xf0) == 0x90) &&
-             (midifile.getEvent(i, j)[2] == 0)) ) {
+         } else if (((midifile.getEvent(i, j).data[0] & 0xf0) == 0x80) ||
+             (((midifile.getEvent(i, j).data[0] & 0xf0) == 0x90) &&
+             (midifile.getEvent(i, j).data[2] == 0)) ) {
             // a note-off message.  Print the previous stored note-on message
-            k = midifile.getEvent(i, j)[1];
+            k = midifile.getEvent(i, j).data[1];
             storenote(notestates[i][k], mididata, i,
-                  midifile.getEvent(i, j).tick);
+                  midifile.getEvent(i, j).time);
          } else {
             processMetaMessage(midifile, i, j, metadata);
          }
@@ -245,7 +236,7 @@ void getMidiData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile) {
       cout << "Track " << i << endl;
       for (j=0; j<mididata[i].getSize(); j++) {
          cout << "\tNote: pitch = "
-              << (int)midifile.getEvent(i, mididata[i][j].index)[1]
+              << (int)midifile.getEvent(i, mididata[i][j].index).data[1]
               << "\tduration = "
               << (double)mididata[i][j].tickdur/midifile.getTicksPerQuarterNote()
               << endl;
@@ -273,8 +264,8 @@ void getMidiData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile) {
 void processMetaMessage(MidiFile& midifile, int track, int event,
       Array<MetaInfo>& metadata) {
    MetaInfo tempmeta;
-   tempmeta.type = midifile.getEvent(track, event)[1];
-   tempmeta.starttick = midifile.getEvent(track, event).tick;
+   tempmeta.type = midifile.getEvent(track, event).data[1];
+   tempmeta.starttick = midifile.getEvent(track, event).time;
    int tempo = 0;
    int d;  // counter into data field of meta message
    switch (tempmeta.type) {
@@ -291,16 +282,16 @@ void processMetaMessage(MidiFile& midifile, int track, int event,
       case 0x05:   // lyric
          break;
       case 0x06:   // marker
-         tempmeta.tsize = (uchar)midifile.getEvent(track, event)[2];
+         tempmeta.tsize = (uchar)midifile.getEvent(track, event).data[2];
          for (d=0; d<tempmeta.tsize; d++) {
-            tempmeta.text[d] = midifile.getEvent(track, event)[3+d];
+            tempmeta.text[d] = midifile.getEvent(track, event).data[3+d];
          }
          tempmeta.text[tempmeta.tsize] = '\0';
          break;
       case 0x07:   // cue point
-         tempmeta.tsize = (uchar)midifile.getEvent(track, event)[2];
+         tempmeta.tsize = (uchar)midifile.getEvent(track, event).data[2];
          for (d=0; d<tempmeta.tsize; d++) {
-            tempmeta.text[d] = midifile.getEvent(track, event)[3+d];
+            tempmeta.text[d] = midifile.getEvent(track, event).data[3+d];
          }
          tempmeta.text[tempmeta.tsize] = '\0';
          break;
@@ -314,19 +305,19 @@ void processMetaMessage(MidiFile& midifile, int track, int event,
       case 0x7F:   // sequencer-specific meta event
          break;
       case 0x51:   // tempo marking
-         tempo = midifile.getEvent(track, event)[3];
-         tempo = (tempo << 8) | midifile.getEvent(track, event)[4];
-         tempo = (tempo << 8) | midifile.getEvent(track, event)[5];
+         tempo = midifile.getEvent(track, event).data[3];
+         tempo = (tempo << 8) | midifile.getEvent(track, event).data[4];
+         tempo = (tempo << 8) | midifile.getEvent(track, event).data[5];
          tempmeta.tempo = (int)(60.0/tempo*1000000.0 + 0.5);
          break;
       case 0x58:   // time signature
-         tempmeta.numerator   = midifile.getEvent(track, event)[3];
+         tempmeta.numerator   = midifile.getEvent(track, event).data[3];
          tempmeta.denominator = (int)pow(2.0,
-               midifile.getEvent(track, event)[4]);
+               midifile.getEvent(track, event).data[4]);
          break;
       case 0x59:   // key signature
-         tempmeta.keysig = midifile.getEvent(track, event)[3];
-         tempmeta.mode   = midifile.getEvent(track, event)[4];
+         tempmeta.keysig = midifile.getEvent(track, event).data[3];
+         tempmeta.mode   = midifile.getEvent(track, event).data[4];
    }
 
    metadata.append(tempmeta);
@@ -593,7 +584,7 @@ void printKernData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile,
       } else {
          tempfile.clear();
          tempfile.read(*buffstream);
-         delete buffstream; 
+         delete buffstream;
          buffstream = new SSTREAM;
          printHumdrumFileWithBarlines(*buffstream, tempfile);
          (*buffstream) << ends;
@@ -633,14 +624,14 @@ void printMetaData(ostream& out, Array<MetaInfo>& metadata, int metaindex) {
          for (ii=0; ii<metadata[metaindex].tsize; ii++) {
             if (std::isprint(metadata[metaindex].text[ii])) {
                count++;
-            } 
+            }
          }
          if (count > 0) {
             out << "! ";
             for (ii=0; ii<metadata[metaindex].tsize; ii++) {
                if (std::isprint(metadata[metaindex].text[ii])) {
                   out << metadata[metaindex].text[ii];
-               } 
+               }
             }
             out << "\n";
          }
@@ -652,14 +643,14 @@ void printMetaData(ostream& out, Array<MetaInfo>& metadata, int metaindex) {
          for (ii=0; ii<metadata[metaindex].tsize; ii++) {
             if (std::isprint(metadata[metaindex].text[ii])) {
                count++;
-            } 
+            }
          }
          if (count > 0) {
             out << "! ";
             for (ii=0; ii<metadata[metaindex].tsize; ii++) {
                if (std::isprint(metadata[metaindex].text[ii])) {
                   out << metadata[metaindex].text[ii];
-               } 
+               }
             }
             out << "\n";
          }
@@ -735,7 +726,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << "compiled: " << __DATE__ << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().c_str());
+      usage(opts.getCommand());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -743,7 +734,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (opts.getArgCount() != 1) {
-      usage(opts.getCommand().c_str());
+      usage(opts.getCommand());
       exit(1);
    }
 
@@ -797,7 +788,7 @@ void printHumdrumFileWithBarlines(ostream& out, HumdrumFile& hfile) {
          bpos = (hfile[i].getAbsBeat() - pickupbeat) /
                    timesigtop*4.0 / timesigbottom;
          startmeasure = (int)bpos;
-         endmeasure = (int)(bpos + Convert::kernToDuration(hfile[i][0]) / 
+         endmeasure = (int)(bpos + Convert::kernToDuration(hfile[i][0]) /
                       timesigtop*4.0 / timesigbottom - 0.001);
          if (fabs(bpos - (int)bpos) < 0.001) {
             out << "=";
@@ -813,7 +804,7 @@ void printHumdrumFileWithBarlines(ostream& out, HumdrumFile& hfile) {
          if (startmeasure == endmeasure) {
             out << hfile[i] << "\n";
          } else {
-            firstdur = ((double)endmeasure * timesigtop / 
+            firstdur = ((double)endmeasure * timesigtop /
                          4.0 * timesigbottom) - hfile[i].getAbsBeat();
             splitDataWithMeasure(out, hfile, i, measurenum, firstdur);
          }
@@ -831,7 +822,7 @@ void printHumdrumFileWithBarlines(ostream& out, HumdrumFile& hfile) {
 // splitDataWithMeasure --
 //
 
-void splitDataWithMeasure(ostream& out, HumdrumFile& hfile, int index, 
+void splitDataWithMeasure(ostream& out, HumdrumFile& hfile, int index,
       int& measurenum, double firstdur) {
    double seconddur = Convert::kernToDuration(hfile[index][0]) - firstdur;
    int i;
@@ -898,13 +889,13 @@ Here are the options available with the mid2hum program:
                    printed in score format.  You will need to correct
                    the rhythm in the individual parts, and then use
                    the Humdrum assemble command to combine the files together.
--r		== output the Humdrum spines in reverse ordering.  The default
+-r              == output the Humdrum spines in reverse ordering.  The default
                    method is from the last track to the first track in the
                    MIDI file which usually corresponds to the lowest part
                    to highest part respectively which is the standard
                    ordering of parts in a Humdrum file.
--M		== don't print measure numbers.  This is useful if measure 
-                   numbers need to be edited separately, or there was a 
+-M              == don't print measure numbers.  This is useful if measure
+                   numbers need to be edited separately, or there was a
                    measure counting problem in the program.
 -p 0.0          == specify a pickup-duration with which the music starts.
                    The duration specified after the -p option is the number
@@ -919,12 +910,14 @@ Here are the options available with the mid2hum program:
 -q 0.25         == often score-based MIDI files contain durations which are
                    not precisely legato, and a small rest is placed after
                    the note.  This option quantizes the ending position of
-                   a note to the nearest rhythmic value (by default to the 
+                   a note to the nearest rhythmic value (by default to the
                    nearest sixteenth note.)
 --version=b     == print when the program was compiled, and what version
                    is it.
---options       == print a list of all possible command-line options for 
+--options       == print a list of all possible command-line options for
                    the program.
 
 */
-// md5sum: 8fe7abc78f7899e42734020c6f4edcf3 mid2hum.cpp [20160305]
+
+
+

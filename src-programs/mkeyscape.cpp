@@ -2184,7 +2184,7 @@ double loadHistogramFromMidiFile(Array<Array<HISTTYPE> >& histogram,
    const char* filename, int segments) {
 
    MidiFile midifile(filename);
-   midifile.absoluteTime();
+   midifile.absoluteTicks();
    midifile.joinTracks();
 
    Array<int> ontimes(128*16);
@@ -2194,15 +2194,15 @@ double loadHistogramFromMidiFile(Array<Array<HISTTYPE> >& histogram,
 
    int i;
    int command = 0;
-   int totalduration = midifile.getEvent(0,midifile.getNumEvents(0)-1).time;
+   int totalduration = midifile.getEvent(0,midifile.getNumEvents(0)-1).tick;
    // using the last item as the total duration is not so great because
    // some MIDI files have some junk messages long after the music 
    // has stopped (2_ase.mid is an example), so search backwards
    // through the midifile for the last note-on or note-off message.
    for (i=midifile.getNumEvents(0)-1; i>=0; i--) {
-      command = midifile.getEvent(0,i).data[0] & 0xf0;
+      command = midifile.getEvent(0,i)[0] & 0xf0;
       if (command == 0x90 || command == 0x80) {
-         totalduration = midifile.getEvent(0, i).time;
+         totalduration = midifile.getEvent(0, i).tick;
          break;
       }
    }
@@ -2212,16 +2212,16 @@ double loadHistogramFromMidiFile(Array<Array<HISTTYPE> >& histogram,
    int duration;
    int ontime;
    for (i=0; i<midifile.getNumEvents(0); i++) {
-      command = midifile.getEvent(0,i).data[0] & 0xf0;
-      channel = midifile.getEvent(0,i).data[0] & 0x0f;
+      command = midifile.getEvent(0,i)[0] & 0xf0;
+      channel = midifile.getEvent(0,i)[0] & 0x0f;
       if (channelfilter[channel] == 0) {
          // ignore events on this channel
          continue;
       }
-      if (command == 0x90 && midifile.getEvent(0,i).data[2] != 0) {
+      if (command == 0x90 && midifile.getEvent(0,i)[2] != 0) {
          // store note-on velocity and time.
-         key = midifile.getEvent(0,i).data[1];
-         ontime = midifile.getEvent(0,i).time;
+         key = midifile.getEvent(0,i)[1];
+         ontime = midifile.getEvent(0,i).tick;
          if (ontimes[key * channel] > -1) {
             // the previous note was not turned off, to turn
             // it off now and store that note in the histogram
@@ -2235,8 +2235,8 @@ double loadHistogramFromMidiFile(Array<Array<HISTTYPE> >& histogram,
          }
       } else if (command == 0x90 || command == 0x80) {
          // process a note-off command
-         key = midifile.getEvent(0,i).data[1];
-         ontime = midifile.getEvent(0,i).time;
+         key = midifile.getEvent(0,i)[1];
+         ontime = midifile.getEvent(0,i).tick;
          if (ontimes[key * channel] > -1) {
             // process the note which has been waiting
             duration = ontime - ontimes[key * channel];

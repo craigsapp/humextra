@@ -46,30 +46,19 @@
 
 #include "museinfo.h"
 #include "PerlRegularExpression.h"
-#include "SigString.h"
 
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
 
-// stringstream, or strstream in older CPP is needed only for PerfViz files:
-#ifndef OLDCPP
-   #include <fstream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <fstream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>    /* for Windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <string>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+
+using namespace std;
 
 #define TICKSPERQUARTERNOTE 120
 
@@ -125,7 +114,7 @@ double PerfVizNote::approxtempo =  0;
 const char *outlocation = NULL;
 int   trackcount  = 0;           // number of tracks in MIDI file
 int   track       = 0;           // track number starting at 0
-int   offset      = 0;           // start-time offset in ticks
+int   Offset      = 0;           // start-time offset in ticks
 int   tempo       = 60;          // default tempo
 
 // user interface variables
@@ -166,10 +155,10 @@ int     metQ             =   0;    // used with --met option
 int     met2Q            =   0;    // used with --met2 option
 int     infoQ            =   0;    // used with --info option
 int     timbresQ         =   0;    // used with --timbres option
-Array<SigString> TimbreName;       // used with --timbres option
-Array<int> TimbreValue;            // used with --timbres option
-Array<int> TimbreVolume;           // used with --timbres option
-Array<int> VolumeMapping;          // used with --timbres option
+vector<string> TimbreName;         // used with --timbres option
+vector<int> TimbreValue;           // used with --timbres option
+vector<int> TimbreVolume;          // used with --timbres option
+vector<int> VolumeMapping;         // used with --timbres option
 double  bendamt          = 200;    // used with --bend option
 int     bendpcQ          =   0;    // used with --temperament option
 double  bendbypc[12]     = {0};    // used with --temperament and --monotune
@@ -179,43 +168,43 @@ double  rhysc            = 1.0;    // used with -r option
     // for example, use -r 4.0 to make written sixteenth notes
     // appear as if they were quarter notes in the MIDI file.
 
-SSTREAM *PVIZ = NULL;    // for storing individual notes in PerfViz data file.
+stringstream *PVIZ = NULL;    // for storing individual notes in PerfViz data file.
 double   tickfactor = 960.0 / 1000.0;
 
 // function declarations:
-void      assignTracks      (HumdrumFile& infile, Array<int>& trackchannel);
+void      assignTracks      (HumdrumFile& infile, vector<int>& trackchannel);
 double    checkForTempo     (HumdrumRecord& record);
 void      checkOptions      (Options& opts, int argc, char** argv);
 void      example           (void);
 int       makeVLV           (uchar *buffer, int number);
 void      reviseInstrumentMidiNumbers(const char* string);
 int       setMidiPlusVolume (const char* kernnote);
-void      storeMetaText     (MidiFile& mfile, int track, const char* string, 
+void      storeMetaText     (MidiFile& mfile, int track, const string& string, 
                                int tick, int metaType = 1);
 void      storeMidiData     (HumdrumFile& infile, MidiFile& outfile);
 void      storeInstrument   (int ontick, MidiFile& mfile, HumdrumFile& infile, 
                              int line, int row, int pcQ);
 void      usage             (const char* command);
-void      storeFreeNote     (Array<Array<int> >& array,int ptrack,int midinote);
-void      getDynamics       (HumdrumFile& infile, Array<Array<char> >& dynamics,
+void      storeFreeNote     (vector<vector<int> >& array,int ptrack,int midinote);
+void      getDynamics       (HumdrumFile& infile, vector<string>& dynamics,
                              int defaultdynamic);
-void      getDynamicAssignments(HumdrumFile& infile, Array<int>& assignments);
+void      getDynamicAssignments(HumdrumFile& infile, vector<int>& assignments);
 void      getStaffValues    (HumdrumFile& infile, int staffline, 
-                             Array<Array<int> >& staffvalues);
-void      getNewDynamics    (Array<int>& currentdynamic, 
-                             Array<int>& assignments, 
+                             vector<vector<int> >& staffvalues);
+void      getNewDynamics    (vector<int>& currentdynamic, 
+                             vector<int>& assignments, 
                              HumdrumFile& infile, int line, 
-                             Array<Array<char> >& crescendos,
-                             Array<Array<char> >& accentuation);
+                             vector<string>& crescendos,
+                             vector<string>& accentuation);
 void      processCrescDecresc(HumdrumFile& infile, 
-                              Array<Array<char> >& dynamics, 
-                              Array<Array<char> >& crescendos);
-void      interpolateDynamics(HumdrumFile& infile, Array<char>& dyn, 
-                             Array<char>& cresc);
-void      generateInterpolation(HumdrumFile& infile, Array<char>& dyn, 
-                             Array<char>& cresc, int startline, int stopline, 
+                              vector<string>& dynamics, 
+                              vector<string>& crescendos);
+void      interpolateDynamics(HumdrumFile& infile, string& dyn, 
+                             string& cresc);
+void      generateInterpolation(HumdrumFile& infile, string& dyn, 
+                             string& cresc, int startline, int stopline, 
                              int direction);
-int       findtermination    (Array<char>& dyn, Array<char>& cresc, int start);
+int       findtermination    (string& dyn, string& cresc, int start);
 char      adjustVolumeHuman  (int startvol, int delta);
 char      adjustVolumeMetric (int startvol, int delta, double metricpos);
 char      applyAccentuation  (int dynamic, int accent);
@@ -226,14 +215,14 @@ int       getMillisecondDuration(HumdrumFile& infile, int row, int col,
 void      addTempoTrack      (HumdrumFile& infile, MidiFile& outfile);
 void      getBendByPcData    (double* bendbypc, const char* filename);
 void      insertBendData     (MidiFile& outfile, double* bendbypc);
-void      getKernTracks      (Array<int>& tracks, HumdrumFile& infile);
-void      getTitle           (Array<char>& title, HumdrumFile& infile);
+void      getKernTracks      (vector<int>& tracks, HumdrumFile& infile);
+void      getTitle           (string& title, HumdrumFile& infile);
 void      addMonoTemperamentAdjustment(MidiFile& outfile, int track, 
                               int channel, int ticktime, int midinote, 
                               double* bendbypc);
 
 // PerfViz related functions:
-void      writePerfVizMatchFile(const char* filename, SSTREAM& contents);
+void      writePerfVizMatchFile(const char* filename, stringstream& contents);
 ostream& operator<<            (ostream& out, PerfVizNote& note);
 void     printPerfVizKey       (int key);
 void     printPerfVizTimeSig   (int tstop, int tsbottom);
@@ -245,12 +234,12 @@ void     adjustEventTimes      (MidiFile& outfile, int starttick);
 void     checkForBend          (MidiFile& outfile, int notetick, int channel, 
                                 HumdrumFile& infile, int row, int col, 
                                 double scalefactor);
-void     storeTimbres          (Array<SigString>& name, Array<int>& value, 
-                                Array<int>& volumes, const char* string);
+void     storeTimbres          (vector<string>& name, vector<int>& value, 
+                                vector<int>& volumes, const string& string);
 void     autoPan               (MidiFile& outfile, HumdrumFile& infile);
 
-Array<int> tracknamed;      // for storing boolean if track is named
-Array<int> trackchannel;    // channel of each track
+vector<int> tracknamed;      // for storing boolean if track is named
+vector<int> trackchannel;    // channel of each track
 
 #define TICKSPERQUARTERNOTE 120
 int tpq = TICKSPERQUARTERNOTE;
@@ -258,7 +247,7 @@ int tpq = TICKSPERQUARTERNOTE;
 //////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   VolumeMapping.setSize(0);
+   VolumeMapping.resize(0);
 
    // for humanizing processes 
    #ifndef VISUAL
@@ -267,7 +256,7 @@ int main(int argc, char* argv[]) {
       srand(time(NULL));
    #endif
 
-   SSTREAM *perfviz = NULL;
+   stringstream *perfviz = NULL;
 
    HumdrumFile infile;
    MidiFile    outfile;
@@ -282,7 +271,7 @@ int main(int argc, char* argv[]) {
    outfile.setTicksPerQuarterNote(tpq);
 
    if (timeQ) {
-      outfile.setMillisecondDelta();
+      outfile.setMillisecondTicks();
    }
 
    // figure out the number of input files to process
@@ -304,7 +293,7 @@ int main(int argc, char* argv[]) {
       infile.analyzeRhythm("4", debugQ);
 
       if (perfvizQ) {
-         perfviz = new SSTREAM[1];
+         perfviz = new stringstream[1];
 	 const char *filename = NULL;
 	 PVIZ = perfviz;
          perfviz[0] << "info(matchFileVersion,2.0).\n";
@@ -312,9 +301,9 @@ int main(int argc, char* argv[]) {
             perfviz[0] << "info(scoreFileName,'STDIN').\n";
          } else {
             perfviz[0] << "info(scoreFileName,'";
-	    filename = strrchr(options.getArg(i+1).data(), '/');
+	    filename = strrchr(options.getArg(i+1).c_str(), '/');
             if (filename == NULL) {
-               filename = options.getArg(i+1).data();
+               filename = options.getArg(i+1).c_str();
             } else {
                filename = filename + 1;
             }
@@ -323,9 +312,9 @@ int main(int argc, char* argv[]) {
          }
          if (options.getBoolean("output")) {
             perfviz[0] << "info(midiFileName,'";
-	    filename = strrchr(options.getString("output").data(), '/');
+	    filename = strrchr(options.getString("output").c_str(), '/');
             if (filename == NULL) {
-               filename = options.getString("output").data();
+               filename = options.getString("output").c_str();
             } else {
                filename = filename + 1;
             }
@@ -340,8 +329,8 @@ int main(int argc, char* argv[]) {
       }
 
       trackcount = infile.getMaxTracks();
-      tracknamed.setSize(trackcount + 1);
-      trackchannel.setSize(trackcount + 1);
+      tracknamed.resize(trackcount + 1);
+      trackchannel.resize(trackcount + 1);
       for (int j=0; j<trackcount+1; j++) {
          tracknamed[j]   = 0;
          trackchannel[j] = fixedChannel;
@@ -350,7 +339,7 @@ int main(int argc, char* argv[]) {
          assignTracks(infile, trackchannel);
       }
       outfile.addTrack(trackcount);
-      outfile.absoluteTime();
+      outfile.absoluteTicks();
 
       /*
       // removed this code because of all of the lousy free MIDI 
@@ -359,8 +348,8 @@ int main(int argc, char* argv[]) {
       // store the "General MIDI activation" system exclusive:
       // don't bother if this is just a Type 0 MIDI file
       if (!options.getBoolean("type0")) {
-         Array<uchar> gmsysex;
-         gmsysex.setSize(6);
+         vector<uchar> gmsysex;
+         gmsysex.resize(6);
          gmsysex[0] = 0xf0;     // Start of SysEx
          gmsysex[1] = 0x7e;     // Universal (reserved) ID number 
          gmsysex[2] = 0x7f;     // Device ID (general transmission)
@@ -387,7 +376,8 @@ int main(int argc, char* argv[]) {
       if (stdoutQ) {
          outfile.write(cout);
       } else if (outlocation == NULL) {
-         outfile.printHex(cout);
+         // outfile.printHex(cout);
+         cout << outfile;
       } else if (infoQ) {
          cout << outfile;
       } else {
@@ -397,7 +387,7 @@ int main(int argc, char* argv[]) {
       if (perfvizQ) {
          // currently you cannot create multiple PerfViz files from
          // multiple inputs.
-         writePerfVizMatchFile(options.getString("perfviz").data(), perfviz[0]);
+         writePerfVizMatchFile(options.getString("perfviz").c_str(), perfviz[0]);
          delete [] perfviz;
       }
    }
@@ -425,8 +415,8 @@ void insertBendData(MidiFile& outfile, double* bendbypc) {
       // don't store in first track if a multi-track file.
       // track = 1;
    }
-   Array<uchar> mididata;
-   mididata.setSize(2);
+   vector<uchar> mididata;
+   mididata.resize(2);
    if (instrumentnumber < 0) {
       mididata[1] = 0;
    } else {
@@ -440,20 +430,20 @@ void insertBendData(MidiFile& outfile, double* bendbypc) {
       bendvalue = bendbypc[i];
       // outfile.addPitchBend(track, offset, channel, bendvalue);
       if (outfile.getNumTracks() == 0) {
-         outfile.addPitchBend(0, offset, channel, bendvalue);
+         outfile.addPitchBend(0, Offset, channel, bendvalue);
       } else {
          for (j=1; j<outfile.getNumTracks(); j++) {
-            outfile.addPitchBend(j, offset, channel, bendvalue);
+            outfile.addPitchBend(j, Offset, channel, bendvalue);
          }
       }
       if (forcedQ) {
          mididata[0] = 0xc0 | (0x0f & channel);
          // outfile.addEvent(track, offset, mididata);
          if (outfile.getNumTracks() == 0) {
-            outfile.addEvent(0, offset, mididata);
+            outfile.addEvent(0, Offset, mididata);
          } else {
             for (j=1; j<outfile.getNumTracks(); j++) {
-               outfile.addEvent(j, offset, mididata);
+               outfile.addEvent(j, Offset, mididata);
             }
          }
       }
@@ -484,18 +474,18 @@ void addMonoTemperamentAdjustment(MidiFile& outfile, int track, int channel,
 
 void adjustEventTimes(MidiFile& outfile, int starttick) {
    int i, j;
-   MFEvent* eventptr;
-   int atime;
+   MidiEvent* eventptr;
+   int atick;
    int minval = 1000000000;
    for (i=0; i<outfile.getTrackCount(); i++) {
       for (j=0; j<outfile.getNumEvents(i); j++) {
-	 eventptr = &outfile.getEvent(i, j);
-         if (eventptr->data.getSize() <= 0) {
+	      eventptr = &outfile.getEvent(i, j);
+         if (eventptr->size() <= 0) {
             continue;
          }
-         if ((eventptr->data[0] & 0xf0) == 0x90) {
-            if (eventptr->time < minval) {
-               minval = eventptr->time;
+         if (((*eventptr)[0] & 0xf0) == 0x90) {
+            if (eventptr->tick < minval) {
+               minval = eventptr->tick;
             }
             break;
          } 
@@ -510,12 +500,12 @@ void adjustEventTimes(MidiFile& outfile, int starttick) {
    for (i=0; i<outfile.getTrackCount(); i++) {
       for (j=0; j<outfile.getNumEvents(i); j++) {
          eventptr = &outfile.getEvent(i, j);
-         atime = eventptr->time;
-         atime = atime - minval;
-         if (atime < 0) {
-            atime = 0;
+         atick = eventptr->tick;
+         atick = atick - minval;
+         if (atick < 0) {
+            atick = 0;
          }
-         eventptr->time = atime;
+         eventptr->tick = atick;
       }
    }
 }
@@ -533,7 +523,7 @@ void addTempoTrack(HumdrumFile& infile, MidiFile& outfile) {
    double absbeat;
    int ontick;
    int ttempo;
-   Array<uchar> mididata;
+   vector<uchar> mididata;
 
    // should erase previous contents of tempo track first...
 
@@ -545,7 +535,7 @@ void addTempoTrack(HumdrumFile& infile, MidiFile& outfile) {
                   tempo = strtod(infile[i][j], NULL);
                   //cout << "The tempo value read was " << tempo << endl;
                   tempo = tempo * tscaling;
-                  mididata.setSize(6);
+                  mididata.resize(6);
                   mididata[0] = 0xff;
                   mididata[1] = 0x51;
                   mididata[2] = 3;
@@ -555,7 +545,7 @@ void addTempoTrack(HumdrumFile& infile, MidiFile& outfile) {
                   mididata[5] = (uchar)(ttempo & 0xff);
                   absbeat = infile.getAbsBeat(i);
                   ontick = int(absbeat * outfile.getTicksPerQuarterNote());
-                  outfile.addEvent(0, ontick + offset, mididata);
+                  outfile.addEvent(0, ontick + Offset, mididata);
                }
             }
          }
@@ -573,14 +563,14 @@ void addTempoTrack(HumdrumFile& infile, MidiFile& outfile) {
 //    there are not enough channels to go around.
 //
 
-void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
+void assignTracks(HumdrumFile& infile, vector<int>& trackchannel) {
    int i, j;
 
 
-   Array<int> instruments;        // MIDI instruments indicated in track
-   trackchannel.setSize(infile.getMaxTracks() + 1);
-   instruments.setSize(trackchannel.getSize());
-   for (i=0; i<instruments.getSize(); i++) {
+   vector<int> instruments;        // MIDI instruments indicated in track
+   trackchannel.resize(infile.getMaxTracks() + 1);
+   instruments.resize(trackchannel.size());
+   for (i=0; i<(int)instruments.size(); i++) {
       if (forcedQ) {
          instruments[i] = instrumentnumber;
       } else {
@@ -594,10 +584,10 @@ void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
    int instcount = 0;
    PerlRegularExpression pre2;
 
-   VolumeMapping.setSize(infile.getMaxTracks()+1);
-   VolumeMapping.setAll(64);
+   VolumeMapping.resize(infile.getMaxTracks()+1);
+   fill(VolumeMapping.begin(), VolumeMapping.end(), 64);
    if (idynQ) {
-      VolumeMapping.setSize(0);
+      VolumeMapping.resize(0);
    }
    for (i=0; i<infile.getNumLines(); i++) {
       if (debugQ) {
@@ -620,17 +610,16 @@ void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
                if (!pre.search(infile[i][j], "^\\*I\"\\s*(.*)\\s*", "")) {
                   inst = -1;
                } else {
-                  SigString targetname;
+                  string targetname;
                   targetname = pre.getSubmatch(1);
                   int i;
                   inst = -1;
 
-                  for (i=0; i<TimbreName.getSize(); i++) {
-                     if (pre2.search(targetname.getBase(), 
-                           TimbreName[i].getBase(), "i")) {
+                  for (i=0; i<(int)TimbreName.size(); i++) {
+                     if (pre2.search(targetname, TimbreName[i], "i")) {
                      // if (TimbreName[i] == targetname) {
                         inst = TimbreValue[i];
-                        if (track < VolumeMapping.getSize()) {
+                        if (track < (int)VolumeMapping.size()) {
                            VolumeMapping[track] = TimbreVolume[i];
                         }
                         break;
@@ -640,12 +629,11 @@ void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
                   if (inst == -1) {
                      // search for default timbre setting if not otherwise
                      // found.
-                     for (i=0; i<TimbreName.getSize(); i++) {
-                        if (pre2.search("DEFAULT", TimbreName[i].getBase(), 
-                              "i")) {
+                     for (i=0; i<(int)TimbreName.size(); i++) {
+                        if (pre2.search("DEFAULT", TimbreName[i], "i")) {
                         // if (TimbreName[i] == targetname) {
                            inst = TimbreValue[i];
-                           if (track < VolumeMapping.getSize()) {
+                           if (track < (int)VolumeMapping.size()) {
                               VolumeMapping[track] = TimbreVolume[i];
                            }
                            break;
@@ -682,7 +670,7 @@ void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
       // have enough space to store each instrument on a separate channel
       // regardless of instrumentation
       nextChannel = 1;        // channel 0 is for undefined instrument spines
-      for (i=0; i<instruments.getSize(); i++) {
+      for (i=0; i<(int)instruments.size(); i++) {
          if (instruments[i] == -1) {
             trackchannel[i] = 0;
          } else {
@@ -703,7 +691,7 @@ void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
       // same channel.
       nextChannel = 1;     // channel 0 is for undefined instrument spines
       int foundDup = -1;
-      for (i=0; i<instruments.getSize(); i++) {
+      for (i=0; i<(int)instruments.size(); i++) {
          foundDup = -1;
          for (j=0; j<i; j++) {
             if (instruments[j] == instruments[i]) {
@@ -730,7 +718,7 @@ void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
 
       if (nextChannel > 16) {
          // channel allocation is over quota: squash over-allocations:
-         for (i=0; i<trackchannel.getSize(); i++) {
+         for (i=0; i<(int)trackchannel.size(); i++) {
             if (trackchannel[i] > 15) {
                trackchannel[i] = 0;
             }
@@ -739,12 +727,12 @@ void assignTracks(HumdrumFile& infile, Array<int>& trackchannel) {
 
    }
 
-   Array<int> kerntracks;
+   vector<int> kerntracks;
    getKernTracks(kerntracks, infile);
 
    // don't conserve tracks if there is enough to go around
-   if (kerntracks.getSize() < 13) { 
-      for (i=0; i<kerntracks.getSize(); i++) {
+   if (kerntracks.size() < 13) { 
+      for (i=0; i<(int)kerntracks.size(); i++) {
          trackchannel[kerntracks[i]] = i;
          if (i>8) {   // avoid general midi drum track channel
             trackchannel[kerntracks[i]] = i+1;
@@ -924,7 +912,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -932,7 +920,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (opts.getBoolean("instruments")) {
-      reviseInstrumentMidiNumbers(opts.getString("instruments").data());
+      reviseInstrumentMidiNumbers(opts.getString("instruments").c_str());
    }
 
    if (opts.getBoolean("nocomments")) {
@@ -998,7 +986,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (opts.getBoolean("output")) {
-      outlocation = opts.getString("output").data();
+      outlocation = opts.getString("output").c_str();
    } else {
       outlocation = NULL;
    }
@@ -1048,20 +1036,20 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    if (bendpcQ) {
       bendQ = 0;   // disable other type of bending (but keep bendamt)
       forcedQ = 1; // force a timber setting for all channels (piano default)
-      getBendByPcData(bendbypc, opts.getString("temperament").data());
+      getBendByPcData(bendbypc, opts.getString("temperament").c_str());
       // for different method, see: http://www.xs4all.nl/~huygensf/scala
    } else if (monotuneQ) {
       bendQ = 0;
-      getBendByPcData(bendbypc, opts.getString("monotune").data());
+      getBendByPcData(bendbypc, opts.getString("monotune").c_str());
    }
 
    timbresQ = opts.getBoolean("timbres");
    if (timbresQ) {
       storeTimbres(TimbreName, TimbreValue, TimbreVolume, 
-            opts.getString("timbres").data());
+            opts.getString("timbres"));
    } else {
-      TimbreName.setSize(0);
-      TimbreValue.setSize(0);
+      TimbreName.resize(0);
+      TimbreValue.resize(0);
    }
 
    if (opts.getBoolean("transpose")) {
@@ -1138,25 +1126,25 @@ void example(void) {
 // storeMetaText --
 //
 
-void storeMetaText(MidiFile& mfile, int track, const char* string, int tick,
+void storeMetaText(MidiFile& mfile, int track, const string& text, int tick,
       int metaType) {
    int i;
-   int length = strlen(string);
-   Array<uchar> metadata;
+   int length = text.size();
+   vector<uchar> metadata;
    uchar size[23] = {0};
    int lengthsize =  makeVLV(size, length);
 
-   metadata.setSize(2+lengthsize+length);
+   metadata.resize(2+lengthsize+length);
    metadata[0] = 0xff;
    metadata[1] = metaType;
    for (i=0; i<lengthsize; i++) {
       metadata[2+i] = size[i];
    }
    for (i=0; i<length; i++) {
-      metadata[2+lengthsize+i] = string[i];
+      metadata[2+lengthsize+i] = text[i];
    }
 
-   mfile.addEvent(track, tick + offset, metadata);
+   mfile.addEvent(track, tick + Offset, metadata);
 }
 
 
@@ -1215,7 +1203,7 @@ int makeVLV(uchar *buffer, int number) {
 // getIdynDynamics -- extracts **idyn amplitude values for notes.
 //
 
-void getIdynDynamics(HumdrumFile& infile, Array<Array<char> >& dynamics, 
+void getIdynDynamics(HumdrumFile& infile, vector<string>& dynamics, 
       double idynoffset) {
    int i, j, k;
    int intdyn;
@@ -1223,10 +1211,10 @@ void getIdynDynamics(HumdrumFile& infile, Array<Array<char> >& dynamics,
    double dyn;
    int notecount;
    char buffer[1024] = {0};
-   dynamics.setSize(infile.getNumLines());
-   for (i=0; i<dynamics.getSize(); i++) {
-      dynamics[i].setSize(8);
-      dynamics[i].setSize(0);
+   dynamics.resize(infile.getNumLines());
+   for (i=0; i<(int)dynamics.size(); i++) {
+      dynamics[i].resize(8);
+      dynamics[i].resize(0);
    }
 
    for (i=0; i<infile.getNumLines(); i++) {
@@ -1257,16 +1245,16 @@ void getIdynDynamics(HumdrumFile& infile, Array<Array<char> >& dynamics,
                intdyn = 127;
             }
 	    cdyn = char(intdyn);
-            dynamics[i].append(cdyn);
+            dynamics[i].push_back(cdyn);
          }
       }
    }
 
 
    if (debugQ) {
-      for (i=0; i<dynamics.getSize(); i++) {
+      for (i=0; i<(int)dynamics.size(); i++) {
          cout << i << ":";
-         for (j=0; j<dynamics[i].getSize(); j++) {
+         for (j=0; j<(int)dynamics[i].size(); j++) {
             cout << "\t" << (int)dynamics[i][j];
          }
          cout << "\n";
@@ -1290,7 +1278,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
    int ontick = 0;
    int idyncounter = 0;   // used for individual note volumes
    int offtick = 0;
-   Array<uchar> mididata;
+   vector<uchar> mididata;
    int i, j, k;
    int ii;
    int tokencount = 0;
@@ -1301,18 +1289,18 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
    int sforzandoQ = 0;
    int volume = defaultvolume;
    int ttempo;
-   Array<int> freeQ;
-   freeQ.setSize(infile.getMaxTracks());
-   freeQ.setAll(0);
-   Array<Array<int> > freenotestate;
-   freenotestate.setSize(freeQ.getSize());
-   for (i=0; i<freenotestate.getSize(); i++) {
-      freenotestate[i].setSize(0);
-      freenotestate[i].allowGrowth();
+   vector<int> freeQ;
+   freeQ.resize(infile.getMaxTracks());
+   fill(freeQ.begin(), freeQ.end(), 0);
+   vector<vector<int> > freenotestate;
+   freenotestate.resize(freeQ.size());
+   for (i=0; i<(int)freenotestate.size(); i++) {
+      freenotestate[i].resize(0);
+      // freenotestate[i].allowGrowth();
    }
    int ptrack = 0;
 
-   Array<Array<char> > dynamics;
+   vector<string> dynamics;
    if (idynQ) {
       getIdynDynamics(infile, dynamics, idynoffset);
    } else {
@@ -1324,7 +1312,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
    if (tscaling != 1.0) {
       ttempo = (int)(100 * tscaling);
       if (ttempo > 0) {
-         mididata.setSize(6);
+         mididata.resize(6);
          mididata[0] = 0xff;
          mididata[1] = 0x51;
          mididata[2] = 3;
@@ -1332,17 +1320,17 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
          mididata[3] = (uchar)((ttempo >> 16) & 0xff);
          mididata[4] = (uchar)((ttempo >> 8) & 0xff);
          mididata[5] = (uchar)(ttempo & 0xff);
-         outfile.addEvent(0, 0 + offset, mididata);
+         outfile.addEvent(0, 0 + Offset, mididata);
       }
    }
 
    if (options.getBoolean("comment")) {
-      storeMetaText(outfile, 0, options.getString("comment").data(), 0);
+      storeMetaText(outfile, 0, options.getString("comment"), 0);
    }
 
    if (perfvizQ) {
       // set the tempo to MM 120.0 at tick time 0.
-      mididata.setSize(6);
+      mididata.resize(6);
       mididata[0] = 0xff;
       mididata[1] = 0x51;
       mididata[2] = 3;
@@ -1359,11 +1347,11 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
 
    if (storeTextQ) {
       // store the title
-      Array<char> title;
-      title.setSize(0);
+      string title;
+      title.resize(0);
       getTitle(title, infile);
-      if (title.getSize() > 0) {
-         storeMetaText(outfile, 0, title.getBase(), 0, 3);
+      if (title.size() > 0) {
+         storeMetaText(outfile, 0, title, 0, 3);
       }
    }
 
@@ -1391,7 +1379,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             absbeat = infile.getAbsBeat(i);
             ontick = int(absbeat * outfile.getTicksPerQuarterNote());
          }
-         storeMetaText(outfile, 0, infile[i].getLine(), ontick + offset);
+         storeMetaText(outfile, 0, infile[i].getLine(), ontick + Offset);
       } else if (storeTextQ && (infile[i].getType() == E_humrec_bibliography)) {
          if (timeQ || perfvizQ) {
             ontick = getMillisecondTime(infile, i);
@@ -1403,12 +1391,12 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             ontick = int(absbeat * outfile.getTicksPerQuarterNote());
          }
          if (strncmp(&(infile[i].getLine()[3]), "YEC", 3) == 0) {
-            storeMetaText(outfile, 0, infile[i].getLine(), ontick+offset, 2);
+            storeMetaText(outfile, 0, infile[i].getLine(), ontick+Offset, 2);
          // store OTL as regular text, creating sequence name separately
          //} else if (strncmp(&(infile[i].getLine()[3]), "OTL", 3) == 0) {
          //   storeMetaText(outfile, 0, infile[i].getLine(), ontick+offset, 3);
          } else if (storeCommentQ) {
-            storeMetaText(outfile, 0, infile[i].getLine(), ontick + offset);
+            storeMetaText(outfile, 0, infile[i].getLine(), ontick + Offset);
          }
       } 
       if (infile[i].isInterpretation() || infile[i].isGlobalComment()) {
@@ -1417,7 +1405,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
          if (tempo > 0 && !tempospineQ && !perfvizQ) {
             // cout << "The tempo read was " <<  tempo << endl;
             ttempo = tempo;  // scaling already applied.
-            mididata.setSize(6);
+            mididata.resize(6);
             mididata[0] = 0xff;
             mididata[1] = 0x51;
             mididata[2] = 3;
@@ -1434,8 +1422,8 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                absbeat = infile.getAbsBeat(i);
                ontick = int(absbeat * outfile.getTicksPerQuarterNote());
             }
-            outfile.addEvent(0, ontick + offset, mididata);
-            // outfile.addEvent(0, 10 + offset, mididata);
+            outfile.addEvent(0, ontick + Offset, mididata);
+            // outfile.addEvent(0, 10 + Offset, mididata);
             tempo = -1;
          }
 
@@ -1453,22 +1441,22 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             int track = infile[i].getPrimaryTrack(j);
 
             if (strcmp(infile[i][j], "**kern") == 0 && forcedQ && !bendpcQ) {
-               Array<uchar> mididata;
-               mididata.setSize(2);
+               vector<uchar> mididata;
+               mididata.resize(2);
                mididata[0] = 0xc0 | (0x0f & trackchannel[track]);
                mididata[1] = instrumentnumber;
-               outfile.addEvent(track, ontick + offset, mididata);
+               outfile.addEvent(track, ontick + Offset, mididata);
                continue;
             }
 
             if (strncmp(infile[i][j], "*I", 2) == 0) {
-               storeInstrument(ontick + offset, outfile, infile, i, j, 
+               storeInstrument(ontick + Offset, outfile, infile, i, j, 
                      instrumentQ);
                continue;
             } 
 
             if ((!autopanQ) && (strncmp(infile[i][j], "*pan=", 5) == 0)) {
-               storePan(ontick + offset, outfile, infile, i, j);
+               storePan(ontick + Offset, outfile, infile, i, j);
                continue;
             } 
 	    
@@ -1516,10 +1504,10 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                // turn off any previous notes in the track
                // started during a free rhythm section
                ptrack = infile[i].getPrimaryTrack(j) - 1;
-               for (ii=0; ii<freenotestate[ptrack].getSize(); ii++) {
+               for (ii=0; ii<(int)freenotestate[ptrack].size(); ii++) {
                   // turn off the note if it is zero or above
                   if (freenotestate[ptrack][ii] >= 0) {
-                     mididata.setSize(3);
+                     mididata.resize(3);
                      if (bendpcQ) {
                         int pcchan = freenotestate[ptrack][ii] % 12;
                         if (pcchan >= 9) { 
@@ -1531,12 +1519,12 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                      }
                      mididata[1] = (uchar)freenotestate[ptrack][ii];
                      mididata[2] = 0;
-                     outfile.addEvent(track, ontick + offset + 1, mididata);
+                     outfile.addEvent(track, ontick + Offset + 1, mididata);
                      // added 1 to the previous line for grace notes 7Apr2004
                      freenotestate[ptrack][ii] = -1;
-                     if (ii == freenotestate[ptrack].getSize() - 1) {
+                     if (ii == ((int)freenotestate[ptrack].size() - 1)) {
                         // shrink-wrap the free note off array
-                        freenotestate[ptrack].setSize(ii);
+                        freenotestate[ptrack].resize(ii);
                         break;
                      }
                   }
@@ -1557,12 +1545,12 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             }
 
             if (idynQ) {
-              if (dynamics[i].getSize() > idyncounter) {
+              if ((int)dynamics[i].size() > idyncounter) {
                  volume = dynamics[i][idyncounter]; 
               } else {
                 //  cout << "Warning: bad volume data on line " << i+1 << endl;
 		//  cout << "Size of dynamics array is: " 
-                //       << dynamics[i].getSize() << endl;
+                //       << dynamics[i].size() << endl;
                 //  cout << "Note counter on line: " << idyncounter << endl;
                 //  volume = 64;
               }
@@ -1586,7 +1574,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                }
                track = infile[i].getPrimaryTrack(j);
                if (storeTextQ) {
-                  storeMetaText(outfile, track, infile[i][j], ontick+offset);
+                  storeMetaText(outfile, track, infile[i][j], ontick+Offset);
                }
                continue;
             } else {
@@ -1599,10 +1587,10 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                if (freeQ[ptrack] != 0) {
                   // turn off any previous notes in the track
                   // during a free rhythm section
-                  for (ii=0; ii<freenotestate[ptrack].getSize(); ii++) {
+                  for (ii=0; ii<(int)freenotestate[ptrack].size(); ii++) {
                      // turn off the note if it is zero or above
                      if (freenotestate[ptrack][ii] >= 0) {
-                        mididata.setSize(3);
+                        mididata.resize(3);
                         if (bendpcQ) {
                            int pcchan = freenotestate[ptrack][ii] % 12;
                            if (pcchan >= 9) { 
@@ -1614,11 +1602,11 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                         }
                         mididata[1] = (uchar)freenotestate[ptrack][ii];
                         mididata[2] = 0;
-                        outfile.addEvent(track, ontick + offset, mididata);
+                        outfile.addEvent(track, ontick + Offset, mididata);
                         freenotestate[ptrack][ii] = -1;
-                        if (ii == freenotestate[ptrack].getSize() - 1) {
+                        if (ii == ((int)freenotestate[ptrack].size() - 1)) {
                            // shrink-wrap the free note off array
-                           freenotestate[ptrack].setSize(ii);
+                           freenotestate[ptrack].resize(ii);
                            break;
                         }
                      }
@@ -1627,7 +1615,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                // This code is disabling dynamics, should be fixed.
                // [20130424]
                // But needs to be here so that --timbre volumes work [20131012]
-               if (VolumeMapping.getSize() > 0) {
+               if (VolumeMapping.size() > 0) {
                   volume = VolumeMapping[infile[i].getPrimaryTrack(j)];
                }
                for (k=0; k<tokencount; k++) {
@@ -1754,7 +1742,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                   if (volume > 127) {
                      volume = 127;
                   }
-                  mididata.setSize(3);
+                  mididata.resize(3);
                   if (bendpcQ) {
                      int pcchan = midinote % 12;
                      if (pcchan >= 9) { 
@@ -1769,9 +1757,9 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                   if (fixedvolumeQ) {
                      mididata[2] = defaultvolume;
                   }
-                  outfile.addEvent(track, ontick + offset, mididata);
+                  outfile.addEvent(track, ontick + Offset, mididata);
                   if (bendQ) {
-                     checkForBend(outfile, ontick + offset, trackchannel[track],
+                     checkForBend(outfile, ontick + Offset, trackchannel[track],
                            infile, i, j, bendamt);
                   }
                   idyncounter++;
@@ -1801,10 +1789,10 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                      }
                      if (monotuneQ) {
                         addMonoTemperamentAdjustment(outfile, track, 
-                              trackchannel[track], offtick+offset, 
+                              trackchannel[track], offtick+Offset, 
                               midinote, bendbypc);
                      }
-                     outfile.addEvent(track, offtick + offset, mididata);
+                     outfile.addEvent(track, offtick + Offset, mididata);
                   } else {
                      // store the notes to be turned off later
                      storeFreeNote(freenotestate, ptrack, midinote);
@@ -1818,7 +1806,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
    // now add the end-of-track message to all tracks so that they
    // end at the same time.
 
-   mididata.setSize(3);
+   mididata.resize(3);
    
    if (timeQ) {
       ontick = getFileDurationInMilliseconds(infile);
@@ -1844,12 +1832,12 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
          mididata[0] = 0x90;
          mididata[1] = 0x00;
          mididata[2] = 0x00;
-         outfile.addEvent(0, ontick-1+offset, mididata);
+         outfile.addEvent(0, ontick-1+Offset, mididata);
       }
       mididata[0] = 0xff;
       mididata[1] = 0x2f;
       mididata[2] = 0x00;
-      outfile.addEvent(0, ontick+offset, mididata);
+      outfile.addEvent(0, ontick+Offset, mididata);
    } else {  // type 1 MIDI file
       int trackcount = outfile.getNumTracks();
       for (i=0; i<trackcount; i++) {
@@ -1859,12 +1847,12 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             mididata[0] = 0x90;
             mididata[1] = 0x00;
             mididata[2] = 0x00;
-            outfile.addEvent(i, ontick-1+offset, mididata);
+            outfile.addEvent(i, ontick-1+Offset, mididata);
          }
          mididata[0] = 0xff;
          mididata[1] = 0x2f;
          mididata[2] = 0x00;
-         outfile.addEvent(i, ontick+offset, mididata);
+         outfile.addEvent(i, ontick+Offset, mididata);
       }
    }
 }
@@ -1877,9 +1865,9 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
 //    include that first, then OTL
 //
 
-void getTitle(Array<char>& title, HumdrumFile& infile) {
-   title.setSize(1000);
-   title.setSize(0);
+void getTitle(string& title, HumdrumFile& infile) {
+   title.resize(1000);
+   title.resize(0);
    int opr = -1;
    int otl = -1;
    int i;
@@ -1915,8 +1903,7 @@ void getTitle(Array<char>& title, HumdrumFile& infile) {
    if (len == 0) {
       return;
    }
-   title.setSize(len+1);
-   strcpy(title.getBase(), buffer);
+   title = buffer;
 }
 
 
@@ -1961,10 +1948,10 @@ void checkForBend(MidiFile& outfile, int notetick, int channel,
 // storeFreeNote -- store a midi note in the freenotestate array.
 //
 
-void storeFreeNote(Array<Array<int> >& array, int ptrack, int midinote) {
+void storeFreeNote(vector<vector<int> >& array, int ptrack, int midinote) {
    int i;
    int loc = -1;
-   for (i=0; i<array[ptrack].getSize(); i++) {
+   for (i=0; i<(int)array[ptrack].size(); i++) {
       if (array[ptrack][i] < 0) {
          loc = i;
          break;
@@ -1974,7 +1961,7 @@ void storeFreeNote(Array<Array<int> >& array, int ptrack, int midinote) {
    if (loc >= 0) {
       array[ptrack][loc] = midinote;
    } else {
-      array[ptrack].append(midinote);
+      array[ptrack].push_back(midinote);
    }
 }
 
@@ -2170,8 +2157,8 @@ void storePan(int ontime, MidiFile& outfile, HumdrumFile& infile,
    //   ontime = 0;
    //}
 
-   Array<uchar> mididata;
-   mididata.setSize(3);
+   vector<uchar> mididata;
+   mididata.resize(3);
    mididata[0] = 0xb0 | channel;
    mididata[1] = 10;
    mididata[2] = mvalue;
@@ -2186,24 +2173,24 @@ void storePan(int ontime, MidiFile& outfile, HumdrumFile& infile,
 
 void autoPan(MidiFile& outfile, HumdrumFile& infile) {
 
-   Array<int> kerntracks;
+   vector<int> kerntracks;
    getKernTracks(kerntracks, infile);
 
    double value = 0.0;
    int    mval  = 0;
-   // Array<int> trackchannel;    // channel of each track
+   // vector<int> trackchannel;    // channel of each track
    
-   Array<uchar> mididata;
-   mididata.setSize(3);
+   vector<uchar> mididata;
+   mididata.resize(3);
    
    long ontime = 0;
    int i;
    int channel;
    int track;
-   for (i=0; i<kerntracks.getSize(); i++) {
+   for (i=0; i<(int)kerntracks.size(); i++) {
       track = kerntracks[i];
       channel = trackchannel[track];
-      value = 127.0 * i/(kerntracks.getSize()-1);
+      value = 127.0 * i/(kerntracks.size()-1);
       if (value < 0.0) { value = 0.0; }
       if (value > 127.0) { value = 127.0; }
       mval = (int)value;
@@ -2234,19 +2221,19 @@ void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
       if (!pre.search(infile[line][row], "^\\*I\"\\s*(.*)\\s*", "")) {
          return;
       }
-      SigString targetname;
+      string targetname;
       targetname = pre.getSubmatch(1);
       int i;
       int pc = -1;
-      for (i=0; i<TimbreName.getSize(); i++) {
-         if (pre2.search(targetname.getBase(), TimbreName[i].getBase(), "i")) {
+      for (i=0; i<(int)TimbreName.size(); i++) {
+         if (pre2.search(targetname, TimbreName[i], "i")) {
             pc = TimbreValue[i];
             break;
          }
       }
       if (pc < 0) {
-         for (i=0; i<TimbreName.getSize(); i++) {
-            if (pre2.search("DEFAULT", TimbreName[i].getBase(), "i")) {
+         for (i=0; i<(int)TimbreName.size(); i++) {
+            if (pre2.search("DEFAULT", TimbreName[i], "i")) {
                pc = TimbreValue[i];
                break;
             }
@@ -2257,11 +2244,11 @@ void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
          track = infile[line].getPrimaryTrack(row);
          int channel = 0x0f & trackchannel[track];   
 
-         Array<uchar> mididata;
-         mididata.setSize(2);
+         vector<uchar> mididata;
+         mididata.resize(2);
          mididata[0] = 0xc0 | channel;
          mididata[1] = (uchar)pc;
-         mfile.addEvent(track, ontick + offset, mididata);
+         mfile.addEvent(track, ontick + Offset, mididata);
       }
 
    } else {
@@ -2275,19 +2262,19 @@ void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
       int channel = 0x0f & trackchannel[track];   
    
       // store the program change if requested:
-      Array<uchar> mididata;
-      mididata.setSize(2);
+      vector<uchar> mididata;
+      mididata.resize(2);
       mididata[0] = 0xc0 | channel;
       mididata[1] = (uchar)pc;
       if (pcQ && pc >= 0 && !forcedQ) {
-         mfile.addEvent(track, ontick + offset, mididata);
+         mfile.addEvent(track, ontick + Offset, mididata);
       }
 
       if (!tracknamed[track]) {
          tracknamed[track] = 1;
          storeMetaText(mfile, track, trackname, 0, 3);    // Track Name
       }
-      storeMetaText(mfile, track, trackname + offset, ontick, 4);  // Inst. Name
+      storeMetaText(mfile, track, trackname + Offset, ontick, 4);  // Inst. Name
    }
 
 }
@@ -2309,35 +2296,35 @@ void usage(const char* command) {
 // getDynamics --
 //
 
-void getDynamics(HumdrumFile& infile, Array<Array<char> >& dynamics, 
+void getDynamics(HumdrumFile& infile, vector<string>& dynamics, 
       int defaultdynamic) {
    int maxtracks = infile.getMaxTracks();
-   Array<int> currentdynamic;
-   currentdynamic.setSize(maxtracks);
-   currentdynamic.setAll(defaultdynamic);
+   vector<int> currentdynamic;
+   currentdynamic.resize(maxtracks);
+   fill(currentdynamic.begin(), currentdynamic.end(), defaultdynamic);
 
-   Array<int> metlev;
+   vector<int> metlev;
    infile.analyzeMetricLevel(metlev);
 
-   Array<Array<char> > crescendos;  // -1=decrescendo, +1=crescendo, 0=none
-   crescendos.setSize(maxtracks);
+   vector<string> crescendos;  // -1=decrescendo, +1=crescendo, 0=none
+   crescendos.resize(maxtracks);
 
-   Array<Array<char> > accentuation;  // v = sf, sfz, fz, sffz
-   accentuation.setSize(maxtracks);
+   vector<string> accentuation;  // v = sf, sfz, fz, sffz
+   accentuation.resize(maxtracks);
 
-   dynamics.setSize(maxtracks);
+   dynamics.resize(maxtracks);
 
    int i; 
    int j;
-   for (i=0; i<dynamics.getSize(); i++) {
-      dynamics[i].setSize(infile.getNumLines());
-      crescendos[i].setSize(infile.getNumLines());
-      crescendos[i].setAll(0);
-      accentuation[i].setSize(infile.getNumLines());
-      accentuation[i].setAll(0);
+   for (i=0; i<(int)dynamics.size(); i++) {
+      dynamics[i].resize(infile.getNumLines());
+      crescendos[i].resize(infile.getNumLines());
+      fill(crescendos[i].begin(), crescendos[i].end(), 0);
+      accentuation[i].resize(infile.getNumLines());
+      fill(accentuation[i].begin(), accentuation[i].end(), 0);
    }
 
-   Array<int> assignments;  // dynamic data which controls kern data
+   vector<int> assignments;  // dynamic data which controls kern data
    getDynamicAssignments(infile, assignments);
 
 
@@ -2346,7 +2333,7 @@ void getDynamics(HumdrumFile& infile, Array<Array<char> >& dynamics,
          getNewDynamics(currentdynamic, assignments, infile, i, crescendos, 
               accentuation);
       }
-      for (j=0; j<currentdynamic.getSize(); j++) {
+      for (j=0; j<(int)currentdynamic.size(); j++) {
          dynamics[j][i] = currentdynamic[j];
          // remove new dynamic marker:
          if (currentdynamic[j] < 0) {
@@ -2362,8 +2349,8 @@ void getDynamics(HumdrumFile& infile, Array<Array<char> >& dynamics,
       cout << "----------------------------------------------" << endl;
       cout << "Dynamics profile of file:" << endl;
    }
-   for (i=0; i<dynamics[0].getSize(); i++) {
-      for (j=0; j<dynamics.getSize(); j++) {
+   for (i=0; i<(int)dynamics[0].size(); i++) {
+      for (j=0; j<(int)dynamics.size(); j++) {
          if (dynamics[j][i] < 0) {
             dynamics[j][i] = -dynamics[j][i];
          } 
@@ -2476,11 +2463,11 @@ char adjustVolumeHuman(int startvol, int delta) {
 //    crescendos and decrescendos found in the file.
 //
 
-void processCrescDecresc(HumdrumFile& infile, Array<Array<char> >& dynamics, 
-   Array<Array<char> >& crescendos) {
+void processCrescDecresc(HumdrumFile& infile, vector<string>& dynamics, 
+   vector<string>& crescendos) {
 
    int i;
-   for (i=0; i<dynamics.getSize(); i++) {
+   for (i=0; i<(int)dynamics.size(); i++) {
       interpolateDynamics(infile, dynamics[i], crescendos[i]);
    }
 }
@@ -2492,13 +2479,13 @@ void processCrescDecresc(HumdrumFile& infile, Array<Array<char> >& dynamics,
 // interpolateDynamics --
 //
 
-void interpolateDynamics(HumdrumFile& infile, Array<char>& dyn, 
-      Array<char>& cresc) {
+void interpolateDynamics(HumdrumFile& infile, string& dyn, 
+      string& cresc) {
    int direction = 0;
    int i;
    int ii;
   
-   for (i=0; i<dyn.getSize(); i++) {
+   for (i=0; i<(int)dyn.size(); i++) {
       if (cresc[i] != 0) {
          if (cresc[i] > 0) {
             direction = +1;
@@ -2524,8 +2511,8 @@ void interpolateDynamics(HumdrumFile& infile, Array<char>& dyn,
 // generateInterpolation -- do the actual interpolation work.
 //
 
-void generateInterpolation(HumdrumFile& infile, Array<char>& dyn, 
-      Array<char>& cresc, int startline, int stopline, int direction) {
+void generateInterpolation(HumdrumFile& infile, string& dyn, 
+      string& cresc, int startline, int stopline, int direction) {
 
    double startbeat = infile[startline].getAbsBeat();  
    double stopbeat  = infile[stopline].getAbsBeat();
@@ -2556,7 +2543,7 @@ void generateInterpolation(HumdrumFile& infile, Array<char>& dyn,
    double slope = (double)(stopvel-startvel)/(double)(stopbeat-startbeat);
    double currvel = 0.0;
    double currbeat = 0.0;
-   for (i=startline+1; i<stopline && i<dyn.getSize(); i++) { 
+   for (i=startline+1; i<stopline && i<(int)dyn.size(); i++) { 
       currbeat = infile[i].getAbsBeat();
       currvel  = slope * (currbeat - startbeat) + startvel;
       if (currvel > 127.0) {
@@ -2577,9 +2564,9 @@ void generateInterpolation(HumdrumFile& infile, Array<char>& dyn,
 // findtermination --
 //
 
-int findtermination(Array<char>& dyn, Array<char>& cresc, int start) {
+int findtermination(string& dyn, string& cresc, int start) {
    int i;
-   for (i=start+1; i<dyn.getSize(); i++) {
+   for (i=start+1; i<(int)dyn.size(); i++) {
       if (cresc[i] != 0) {
          break;
       } else if (dyn[i] < 0) {
@@ -2587,8 +2574,8 @@ int findtermination(Array<char>& dyn, Array<char>& cresc, int start) {
       }
    }
    
-   if (i>=dyn.getSize()) {
-      i = dyn.getSize()-1;
+   if (i>=(int)dyn.size()) {
+      i = dyn.size()-1;
    }
    return i;
 }
@@ -2600,9 +2587,9 @@ int findtermination(Array<char>& dyn, Array<char>& cresc, int start) {
 // getNewDynamics --
 //
 
-void getNewDynamics(Array<int>& currentdynamic, Array<int>& assignments, 
-      HumdrumFile& infile, int line, Array<Array<char> >& crescendos,
-      Array<Array<char> >& accentuation) {
+void getNewDynamics(vector<int>& currentdynamic, vector<int>& assignments, 
+      HumdrumFile& infile, int line, vector<string>& crescendos,
+      vector<string>& accentuation) {
 
    if (infile[line].getType() != E_humrec_data) {
       return;
@@ -2680,7 +2667,7 @@ void getNewDynamics(Array<int>& currentdynamic, Array<int>& assignments,
       }
       
       if (dval > 0 || cresval !=0) {
-         for (j=0; j<assignments.getSize(); j++) {
+         for (j=0; j<(int)assignments.size(); j++) {
             if (assignments[j] == track) {
                // mark new dynamics with a minus sign 
                // which will be removed after cresc/decresc processing
@@ -2707,9 +2694,9 @@ void getNewDynamics(Array<int>& currentdynamic, Array<int>& assignments,
 // getDynamicAssignments --
 //
 
-void getDynamicAssignments(HumdrumFile& infile, Array<int>& assignments) {
-   assignments.setSize(infile.getMaxTracks());
-   assignments.setAll(-1);
+void getDynamicAssignments(HumdrumFile& infile, vector<int>& assignments) {
+   assignments.resize(infile.getMaxTracks());
+   fill(assignments.begin(), assignments.end(), -1);
 
    // *staff assignment assumed to be all on one line, and before
    // any note data.
@@ -2758,11 +2745,11 @@ void getDynamicAssignments(HumdrumFile& infile, Array<int>& assignments) {
 
    // there is a *staff assignment line, so follow the directions found there
 
-   Array<Array<int> > staffvalues;
+   vector<vector<int> > staffvalues;
    getStaffValues(infile, staffline, staffvalues);
 
    int k;
-   // assignments.setSize(infile.getMaxTracks());
+   // assignments.resize(infile.getMaxTracks());
    for (i=0; i<infile[exinterp].getFieldCount(); i++) {
       if (strcmp(infile[exinterp][i], "**kern") != 0) {
          continue;
@@ -2771,7 +2758,7 @@ void getDynamicAssignments(HumdrumFile& infile, Array<int>& assignments) {
          if (strcmp(infile[exinterp][j], "**dynam") != 0) {
             continue;
          }
-         for (k=0; k<staffvalues[j].getSize(); k++) {
+         for (k=0; k<(int)staffvalues[j].size(); k++) {
             if (staffvalues[i][0] == staffvalues[j][k]) {
                assignments[infile[exinterp].getPrimaryTrack(i)-1] = 
                   infile[exinterp].getPrimaryTrack(j)-1;
@@ -2780,7 +2767,7 @@ void getDynamicAssignments(HumdrumFile& infile, Array<int>& assignments) {
       }
    }
 
-   // for (i=0;i<assignments.getSize();i++) {
+   // for (i=0;i<assignments.size();i++) {
    //    cout << "ASSIGNMENT " << i << " = " << assignments[i] << endl;
    // }
 
@@ -2795,13 +2782,13 @@ void getDynamicAssignments(HumdrumFile& infile, Array<int>& assignments) {
 //
 
 void getStaffValues(HumdrumFile& infile, int staffline, 
-      Array<Array<int> >& staffvalues) {
+      vector<vector<int> >& staffvalues) {
 
-   staffvalues.setSize(infile[staffline].getFieldCount());
+   staffvalues.resize(infile[staffline].getFieldCount());
 
    int i;
-   for (i=0; i<staffvalues.getSize(); i++) {
-      staffvalues[i].setSize(0);
+   for (i=0; i<(int)staffvalues.size(); i++) {
+      staffvalues[i].resize(0);
    }
 
    int value;
@@ -2811,7 +2798,7 @@ void getStaffValues(HumdrumFile& infile, int staffline,
       if (strncmp(infile[staffline][i], "*staff", 6) == 0) {
          if (strchr(infile[staffline][i], '/') == NULL) {
             if (sscanf(infile[staffline][i], "*staff%d", &value) == 1) {
-               staffvalues[i].append(value);
+               staffvalues[i].push_back(value);
             }
          } else {
             // more than one number in the staff assignment
@@ -2821,7 +2808,7 @@ void getStaffValues(HumdrumFile& infile, int staffline,
                   break;
                }
                value = strtol(cptr, &newcptr, 10);
-               staffvalues[i].append(value);
+               staffvalues[i].push_back(value);
                cptr = newcptr;
                if (cptr[0] != '/') {
                   break;
@@ -3100,10 +3087,10 @@ void printRational(ostream& out, double value) {
 // writePerfVizMatchFile --
 //
 
-void writePerfVizMatchFile(const char* filename, SSTREAM& contents) {
+void writePerfVizMatchFile(const char* filename, stringstream& contents) {
    ofstream outputfile(filename);
    contents   << ends;
-   outputfile << contents.CSTRING;
+   outputfile << contents.str();
    outputfile.close();
 }
 
@@ -3190,35 +3177,35 @@ void printPerfVizTempo(double approxtempo) {
 // storeTimbres --
 //
 
-void storeTimbres(Array<SigString>& name, Array<int>& value, 
-      Array<int>& volumes, const char* string) {
+void storeTimbres(vector<string>& name, vector<int>& value, 
+      vector<int>& volumes, const string& input) {
    PerlRegularExpression pre;
-   Array<Array<char> > tokens;
-   pre.getTokens(tokens, "\\s*;\\s*", string);
-   name.setSize(tokens.getSize());
-   value.setSize(tokens.getSize());
-   volumes.setSize(tokens.getSize());
-   name.setSize(0);
-   value.setSize(0);
-   volumes.setSize(0);
+   vector<string> tokens;
+   pre.getTokens(tokens, "\\s*;\\s*", input);
+   name.resize(tokens.size());
+   value.resize(tokens.size());
+   volumes.resize(tokens.size());
+   name.resize(0);
+   value.resize(0);
+   volumes.resize(0);
 
-   SigString tempstr;
+   string tempstr;
    int temp;
    int i;
-   for (i=0; i<tokens.getSize(); i++) {
+   for (i=0; i<(int)tokens.size(); i++) {
 
       if (pre.search(tokens[i], "(.*)\\s*:\\s*i?(\\d+),v(\\d+)", "")) {
          temp = atoi(pre.getSubmatch(2));
-         value.append(temp);
+         value.push_back(temp);
          temp = atoi(pre.getSubmatch(3));
-         volumes.append(temp);
+         volumes.push_back(temp);
          tempstr = pre.getSubmatch(1);
-         name.append(tempstr);
+         name.push_back(tempstr);
       } else if (pre.search(tokens[i], "(.*)\\s*:\\s*(\\d+)", "")) {
          temp = atoi(pre.getSubmatch(2));
-         value.append(temp);
+         value.push_back(temp);
          tempstr = pre.getSubmatch(1);
-         name.append(tempstr);
+         name.push_back(tempstr);
       }
 
    }
@@ -3235,17 +3222,17 @@ void storeTimbres(Array<SigString>& name, Array<int>& value,
 //
 //
 
-void getKernTracks(Array<int>& tracks, HumdrumFile& infile) {
-   tracks.setSize(infile.getMaxTracks());
-   tracks.setSize(0);
+void getKernTracks(vector<int>& tracks, HumdrumFile& infile) {
+   tracks.resize(infile.getMaxTracks());
+   tracks.resize(0);
    int i;
    for (i=1; i<=infile.getMaxTracks(); i++) {
       if (strcmp(infile.getTrackExInterp(i), "**kern") == 0) {
-         tracks.append(i);
+         tracks.push_back(i);
       }
    }
 }
 
 
 
-// md5sum: 1ba53685d56886cf8b0b097d9014082e hum2mid.cpp [20151120]
+// md5sum: f2d04b860e882e5d30fcfe1920e9828e hum2mid.cpp [20160305]
