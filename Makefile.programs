@@ -209,8 +209,8 @@ endif
 # from http://improv.sapp.org
 
 ifneq ($(wildcard external/improv),)
-   PREFLAGS  += -Iexternal/improv/include
-   POSTFLAGS += -limprov
+   IMPROV_PREFLAGS  = -Iexternal/improv/include
+   IMPROV_POSTFLAGS = -Lexternal/improv/lib -limprov
    IMPROV    := yes
 endif
 
@@ -299,11 +299,19 @@ xml2hum:
 endif
 
 
+$(TARGDIR)/humplay : $(notdir humplay.cpp)
+ifeq ($(wildcard $(TARGDIR)),)
+	@mkdir -p $(TARGDIR)
+endif
+	@echo [CC] $@
+	@$(COMPILER) $(IMPROV_PREFLAGS) $(PREFLAGS) -o $@ $< \
+		$(IMPROV_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
 
 ###########################################################################
 #
 # Defining explicit rules for program sourcefile dependencies:
 #
+
 
 $(TARGDIR)/% : $(notdir %.cpp)
 ifeq ($(wildcard $(TARGDIR)),)
@@ -311,16 +319,16 @@ ifeq ($(wildcard $(TARGDIR)),)
 endif
 	@echo [CC] $@
 	@$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
-	&& strip $@$(EXTEN)
+		&& strip $@$(EXTEN)
 
-% : $(notdir %.cpp)
-ifeq ($(wildcard $(TARGDIR)),)
-	@mkdir -p $(TARGDIR)
-endif
-	@echo [CC] $@
-	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
-	&& strip $(TARGDIR)/$@$(EXTEN)
-
+#
+#% : $(notdir %.cpp)
+#ifeq ($(wildcard $(TARGDIR)),)
+#	@mkdir -p $(TARGDIR)
+#endif
+#	@echo [CC] $@
+#	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
+#	&& strip $(TARGDIR)/$@$(EXTEN)
 #                                                                         #
 #                                                                         #
 ###########################################################################
