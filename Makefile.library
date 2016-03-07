@@ -320,13 +320,6 @@ Maxwell.o: Maxwell.cpp Maxwell.h HumdrumFile.h HumdrumFileBasic.h \
   Enum_humdrumRecord.h Array.h Array.cpp NoteList.h ChordQuality.h \
   EnumerationInterval.h Enum_chordQuality.h Enum_base40.h
 
-MidiFile.o: MidiFile.cpp MidiFile.h FileIO.h Array.h SigCollection.h \
-  SigCollection.cpp Array.cpp
-
-MidiFile2.o: MidiFile2.cpp MidiFile2.h MidiMessage.h sigTypes.h
-
-MidiMessage.o: MidiMessage.cpp MidiMessage.h
-
 MuseRecord.o: MuseRecord.cpp Convert.h HumdrumEnumerations.h \
   EnumerationCQI.h Enumeration.h EnumerationData.h Enum_basic.h \
   SigCollection.h SigCollection.cpp Enum_chordQuality.h EnumerationCQR.h \
