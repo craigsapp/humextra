@@ -155,7 +155,6 @@ COMPILER  = LANG=C $(ENV) g++ $(ARCH)
 #            -Wl,--no-whole-archive -lmingw32 -L$(LIBDIR) -l$(LIBFILE)
 
 
-
 DEFINES   = $(addprefix -D,$(OSTYPE))
 DEFINES  += $(addprefix -D,$(OSSUBTYPE))
 
@@ -170,49 +169,78 @@ PREFLAGS += -std=c++11
 
 POSTFLAGS ?= -L$(LIBDIR) -l$(LIBFILE)
 
-# Thread library needed for MIDI input programs in Linux:
-ifeq ($(OSTYPE),LINUX)
-   POSTFLAGS += -lpthread
+
+###########################################################################
+##
+## Linking to external libraries:
+##    There are four external libraries which are used to compile the
+##    humextra programs:
+##  (1) PCRE (http://www.pcre.org)
+##     This is used for working with regular expressions.  May be 
+##     fased out when GCC version 5+ is ubiquitous on linux computers.
+##     GCC 5+ implments C++11 standard which includes regular expressions
+##     for C++ (however, they are based on JavaScript regular expressions
+##     rather than PERL, so we will see).
+##  (2) CenterpointXML by Guenter Obiltschnig
+##     Now orphaned C++ library for parsing XML file.  Will be updated
+##     to pugixml (http://www.pugixml.org) in the future.
+##  (3) midifile (http://midifile.sapp.org)
+##     Used to parse or create Standard MIDI Files.
+##  (4) improv (http://improv.sapp.org)
+##     Used for cross-platform real-time MIDI playback.
+##
+
+# The following setup is for PERL-Compatible Regular Expression library
+# linking (for themax2 in particular, but also in many other humextra
+# programs as well).  Therefore it is used when linking all programs.
+
+ifneq ($(wildcard external/pcre-8.35),)
+   PREFLAGS           += -Iexternal/pcre-8.35
+   POSTFLAGS          += -lpcre
+   PCRE               := yes
 endif
+
 
 # The following setup is for compiling XML parsing code
 # which uses the CenterPoint XML classes:
+
 ifneq ($(wildcard external/centerpoint),)
-   PREFLAGS    += -Iexternal/centerpoint/include
-   POSTFLAGS   += -lcslxml
-   CENTERPOINT := yes
+   XML_PREFLAGS        = -Iexternal/centerpoint/include
+   XML_POSTFLAGS       = -lcslxml
+   XML                := yes
 endif
 
-# The following setup is for PERL-Compatible Regular Expression library
-# linking (for themax2 in particular).
-ifneq ($(wildcard external/pcre-8.35),)
-   PREFLAGS    += -Iexternal/pcre-8.35
-   POSTFLAGS   += -lpcre
-   PCRE        := yes
-endif
 
-# The following setup is for MIDI files:
+# The following setup is for MIDI files parsing:
+
 ifneq ($(wildcard external/midifile),)
-   PREFLAGS    += -Iexternal/midifile/include
-   POSTFLAGS   += -Lexternal/midifile/lib -lmidifile
-   MIDIFILE    := yes
+   MIDIFILE_PREFLAGS   = -Iexternal/midifile/include
+   MIDIFILE_POSTFLAGS  = -Lexternal/midifile/lib -lmidifile
+   MIDIFILE           := yes
 endif
+
+
+# For compiling programs with interactive MIDI (such as humplay), you
+# first need to compile the improv library which can be downloaded
+# from http://improv.sapp.org (Makefile.library tries to do this).
+
+ifneq ($(wildcard external/improv),)
+   IMPROV_PREFLAGS     = -Iexternal/improv/include
+   IMPROV_POSTFLAGS    = -Lexternal/improv/lib -limprov
+   IMPROV             := yes
+
+   # Thread library needed for MIDI input programs in Linux:
+   ifeq ($(OSTYPE),LINUX)
+      IMPROV_POSTFLAGS += -lpthread
+   endif
+endif
+
 
 
 ###################################
 #
 # Interactive MIDI program compiling setup
 #
-
-# for compiling programs with interactive MIDI (such as humplay), you
-# first need to compile the improv library which can be downloaded
-# from http://improv.sapp.org
-
-ifneq ($(wildcard external/improv),)
-   IMPROV_PREFLAGS  = -Iexternal/improv/include
-   IMPROV_POSTFLAGS = -Lexternal/improv/lib -limprov
-   IMPROV    := yes
-endif
 
 # extra setup for compiling interactive MIDI programs:
 ifneq ($(origin IMPROV),undefined)
@@ -259,6 +287,7 @@ SCRIPTS=$(SCRIPTS_PERL)
 #                                                                         #
 
 examples: all
+
 all: bin scripts $(addprefix $(TARGDIR)/,$(PROGS))
 	@echo Finished compiling all programs.
 
@@ -291,7 +320,7 @@ endif
 
 
 # Programs which need the centerpoint XML library:
-ifeq ($(origin CENTERPOINT),undefined)
+ifeq ($(origin XML),undefined)
 bin/xml2hum:
 	@echo Skipping compilation of xml2hum since centerpoint library not found.
 xml2hum:
@@ -299,13 +328,65 @@ xml2hum:
 endif
 
 
+###########################################################################
+##
+## Programs which require the XML external library
+##
+
+$(TARGDIR)/xml2hum : $(notdir xml2hum.cpp)
+ifeq ($(wildcard $(TARGDIR)),)
+	@mkdir -p $(TARGDIR)
+endif
+	@echo [CC] $@
+	@$(COMPILER) $(XML_PREFLAGS) $(PREFLAGS) -o $@ $< \
+		$(XML_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
+
+
+
+###########################################################################
+##
+## Programs which require the midifile external library
+##
+
+$(TARGDIR)/hum2mid : $(notdir hum2mid.cpp)
+ifeq ($(wildcard $(TARGDIR)),)
+	@mkdir -p $(TARGDIR)
+endif
+	@echo [CC] $@
+	@$(COMPILER) $(MIDIFILE_PREFLAGS) $(PREFLAGS) -o $@ $< \
+		$(MIDIFILE_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
+
+$(TARGDIR)/mid2hum : $(notdir mid2hum.cpp)
+ifeq ($(wildcard $(TARGDIR)),)
+	@mkdir -p $(TARGDIR)
+endif
+	@echo [CC] $@
+	@$(COMPILER) $(MIDIFILE_PREFLAGS) $(PREFLAGS) -o $@ $< \
+		$(MIDIFILE_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
+
+$(TARGDIR)/mkeyscape: $(notdir mkeyscape.cpp)
+ifeq ($(wildcard $(TARGDIR)),)
+	@mkdir -p $(TARGDIR)
+endif
+	@echo [CC] $@
+	@$(COMPILER) $(MIDIFILE_PREFLAGS) $(PREFLAGS) -o $@ $< \
+		$(MIDIFILE_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
+
+
+###########################################################################
+##
+## Programs which require the midifile external library
+##
+
 $(TARGDIR)/humplay : $(notdir humplay.cpp)
 ifeq ($(wildcard $(TARGDIR)),)
 	@mkdir -p $(TARGDIR)
 endif
 	@echo [CC] $@
-	@$(COMPILER) $(IMPROV_PREFLAGS) $(PREFLAGS) -o $@ $< \
-		$(IMPROV_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
+	@$(COMPILER) $(MIDIFILE_PREFLAGS) $(IMPROV_PREFLAGS) $(PREFLAGS) \
+		-o $@ $< $(IMPROV_POSTFLAGS) $(MIDIFILE_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
+
+
 
 ###########################################################################
 #
