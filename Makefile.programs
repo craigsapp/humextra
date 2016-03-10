@@ -2,7 +2,7 @@
 ##
 ## Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 ## Creation Date: Sun Apr  3 15:34:28 PDT 2005
-## Last Modified: Wed Aug 25 14:29:18 PDT 2010
+## Last Modified: Wed Mar  9 12:46:27 PST 2016
 ## Filename:      ...humextra/Makefile.programs
 ##
 ## Description:   This Makefile creates the Humdrum Extras library
@@ -225,13 +225,18 @@ endif
 # from http://improv.sapp.org (Makefile.library tries to do this).
 
 ifneq ($(wildcard external/improv),)
-   IMPROV_PREFLAGS     = -Iexternal/improv/include
-   IMPROV_POSTFLAGS    = -Lexternal/improv/lib -limprov
+   IMPROV_PREFLAGS     = -Iexternal/improv/include 
+   IMPROV_POSTFLAGS    = -Lexternal/improv/lib -limprov 
+
+   IMPROV_PREFLAGS    += -Iexternal/midifile/include
+   IMPROV_POSTFLAGS   += -Lexternal/midifile/lib -l midifile
+
    IMPROV             := yes
 
    # Thread library needed for MIDI input programs in Linux:
+   # Probably also need in OS X?
    ifeq ($(OSTYPE),LINUX)
-      IMPROV_POSTFLAGS += -lpthread
+      IMPROV_POSTFLAGS += -L/usr/lib -lpthread
    endif
 endif
 
@@ -246,17 +251,17 @@ endif
 ifneq ($(origin IMPROV),undefined)
    # On Apple OS X computers, include MIDI related libraries:
    ifeq ($(OSTYPE),OSXPC)
-      POSTFLAGS += -framework CoreMIDI -framework CoreServices
-      POSTFLAGS += -framework AudioUnit -framework AudioToolbox
+      IMPROV_POSTFLAGS += -framework CoreMIDI -framework CoreServices
+      IMPROV_POSTFLAGS += -framework AudioUnit -framework AudioToolbox
    endif
 
    # On Linux computers, include MIDI related libraries:
    ifeq ($(OSTYPE),LINUX)
       # include pthread library for MIDI input parsing:
-      POSTFLAGS += -L/usr/lib -lpthread
       # Add the ALSA library interface, if using ALSA:
       ifeq ($(OSSUBTYPE),ALSA)
-         POSTFLAGS += -lasound
+         IMPROV_PREFLAGS  += -I/usr/include/alsa 
+         IMPROV_POSTFLAGS += -lasound 
       endif
    endif
 endif
@@ -305,86 +310,38 @@ scripts:
 
 
 ###########################################################################
-#
-# Exceptions to the default rules found a the bottom of the Makefile
-#
-
-
-# Programs which need the improv MIDI library:
-ifeq ($(origin IMPROV),undefined)
-bin/humplay:
-	@echo Skipping compilation of humplay since improv library not found.
-humplay:
-	@echo Skipping compilation of humplay since improv library not found.
-endif
-
-
-# Programs which need the centerpoint XML library:
-ifeq ($(origin XML),undefined)
-bin/xml2hum:
-	@echo Skipping compilation of xml2hum since centerpoint library not found.
-xml2hum:
-	@echo Skipping compilation of xml2hum since centerpoint library not found.
-endif
-
-
-###########################################################################
 ##
-## Programs which require the XML external library
+## Certain programs require different external libraries, so give the
+## required external library dependencies by program here.  All programs
+## are preseumed to require PCRE, so that is added to the default
+## PREFLAGS and POSTFLAGS variable
 ##
 
-$(TARGDIR)/xml2hum : $(notdir xml2hum.cpp)
-ifeq ($(wildcard $(TARGDIR)),)
-	@mkdir -p $(TARGDIR)
-endif
-	@echo [CC] $@
-	@$(COMPILER) $(XML_PREFLAGS) $(PREFLAGS) -o $@ $< \
-		$(XML_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
 
+xml2hum:   PREFLAGS  += $(XML_PREFLAGS)
+xml2hum:   POSTFLAGS += $(XML_POSTFLAGS)
+$(TARGDIR)/xml2hum:   PREFLAGS  += $(XML_PREFLAGS)
+$(TARGDIR)/xml2hum:   POSTFLAGS += $(XML_POSTFLAGS)
 
+hum2mid:   PREFLAGS  += $(MIDIFILE_PREFLAGS)
+hum2mid:   POSTFLAGS += $(MIDIFILE_POSTFLAGS)
+$(TARGDIR)/hum2mid:   PREFLAGS  += $(MIDIFILE_PREFLAGS)
+$(TARGDIR)/hum2mid:   POSTFLAGS += $(MIDIFILE_POSTFLAGS)
 
-###########################################################################
-##
-## Programs which require the midifile external library
-##
+mid2hum:   PREFLAGS  += $(MIDIFILE_PREFLAGS)
+mid2hum:   POSTFLAGS += $(MIDIFILE_POSTFLAGS)
+$(TARGDIR)/mid2hum:   PREFLAGS  += $(MIDIFILE_PREFLAGS)
+$(TARGDIR)/mid2hum:   POSTFLAGS += $(MIDIFILE_POSTFLAGS)
 
-$(TARGDIR)/hum2mid : $(notdir hum2mid.cpp)
-ifeq ($(wildcard $(TARGDIR)),)
-	@mkdir -p $(TARGDIR)
-endif
-	@echo [CC] $@
-	@$(COMPILER) $(MIDIFILE_PREFLAGS) $(PREFLAGS) -o $@ $< \
-		$(MIDIFILE_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
+mkeyscape: PREFLAGS  += $(MIDIFILE_PREFLAGS)
+mkeyscape: POSTFLAGS += $(MIDIFILE_POSTFLAGS)
+$(TARGDIR)/mkeyscape: PREFLAGS  += $(MIDIFILE_PREFLAGS)
+$(TARGDIR)/mkeyscape: POSTFLAGS += $(MIDIFILE_POSTFLAGS)
 
-$(TARGDIR)/mid2hum : $(notdir mid2hum.cpp)
-ifeq ($(wildcard $(TARGDIR)),)
-	@mkdir -p $(TARGDIR)
-endif
-	@echo [CC] $@
-	@$(COMPILER) $(MIDIFILE_PREFLAGS) $(PREFLAGS) -o $@ $< \
-		$(MIDIFILE_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
-
-$(TARGDIR)/mkeyscape: $(notdir mkeyscape.cpp)
-ifeq ($(wildcard $(TARGDIR)),)
-	@mkdir -p $(TARGDIR)
-endif
-	@echo [CC] $@
-	@$(COMPILER) $(MIDIFILE_PREFLAGS) $(PREFLAGS) -o $@ $< \
-		$(MIDIFILE_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
-
-
-###########################################################################
-##
-## Programs which require the midifile external library
-##
-
-$(TARGDIR)/humplay : $(notdir humplay.cpp)
-ifeq ($(wildcard $(TARGDIR)),)
-	@mkdir -p $(TARGDIR)
-endif
-	@echo [CC] $@
-	@$(COMPILER) $(MIDIFILE_PREFLAGS) $(IMPROV_PREFLAGS) $(PREFLAGS) \
-		-o $@ $< $(IMPROV_POSTFLAGS) $(MIDIFILE_POSTFLAGS) $(POSTFLAGS) && strip $@$(EXTEN)
+humplay:   PREFLAGS  += $(IMPROV_PREFLAGS) $(ALSA_PREFLAGS)
+humplay:   POSTFLAGS += $(IMPROV_POSTFLAGS) $(ALSA_POSTFLAGS)
+$(TARGDIR)/humplay:   PREFLAGS  += $(IMPROV_PREFLAGS) $(ALSA_PREFLAGS)
+$(TARGDIR)/humplay:   POSTFLAGS += $(IMPROV_POSTFLAGS) $(ALSA_POSTFLAGS)
 
 
 
@@ -394,22 +351,20 @@ endif
 #
 
 
-$(TARGDIR)/% : $(notdir %.cpp)
-ifeq ($(wildcard $(TARGDIR)),)
+% : $(notdir %.cpp)
 	@mkdir -p $(TARGDIR)
-endif
+	@echo [CC] $@
+	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
+		&& strip $(TARGDIR)/$@$(EXTEN)
+
+
+$(TARGDIR)/% : $(notdir %.cpp)
+	@mkdir -p $(TARGDIR)
 	@echo [CC] $@
 	@$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
 		&& strip $@$(EXTEN)
 
-#
-#% : $(notdir %.cpp)
-#ifeq ($(wildcard $(TARGDIR)),)
-#	@mkdir -p $(TARGDIR)
-#endif
-#	@echo [CC] $@
-#	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
-#	&& strip $(TARGDIR)/$@$(EXTEN)
+
 #                                                                         #
 #                                                                         #
 ###########################################################################
