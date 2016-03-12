@@ -1,0 +1,22 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Sat Mar 12 14:17:32 PST 2016
+# Last Modified: Sat Mar 12 14:17:35 PST 2016
+# Filename:      finalis
+# Syntax:        perl 5
+#
+# Description:   This script is an alias for the command:
+#                    sonority -F
+#
+
+use strict;
+
+my @files = @ARGV;
+
+foreach my $file (@files) {
+   my $finalis = `sonority -F $file`;
+   print $finalis;
+}
+
+
