@@ -1,0 +1,104 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Sat Mar 12 12:53:39 PST 2016
+# Last Modified: Sat Mar 12 14:03:13 PST 2016
+# Filename:      finalis-tonic
+# Syntax:        perl 5
+#
+# Description:   This script will add a key designation to any input files
+#                according to the finals note of the input file(2).  Each input
+#                file (or standard input) may only contain one movement.  The
+#                key designation is only in a major mode.  So if the finalis is
+#                "C", then the key designation is *C: even if the music is in 
+#                C minor (but this would be fixed later if needed).  
+#
+#                This script is useful for doing scale-degree anlaysis on music
+#                without key designations, and where the finalis (last sonority)
+#                indicates the tonic key for the scale-degree anlaysis.
+#
+#                Example:
+#                   finalis-tonic jrp://Jos2724
+#                This should add a *B-: marker after the key signature at the 
+#                start of the file.  Then running through deg is not possible:
+#                   finalis-tonic jrp://Jos2724 | deg -at
+#
+#                If a file already has any key designation, then a new one
+#                will not be added.  Both of these commands should return
+#                the same content:
+#                    humcat h://chorales/chor001.krn
+#                    finalis-tonic h://chorales/chor001.krn
+#
+
+use strict;
+my @files = @ARGV;
+my $interval;
+my $results;
+my @lines;
+my @data;
+my $count;
+my $inserted;
+my $fcount;
+
+foreach my $file (@files) {
+   $count = `humcat $file | egrep -i '^\\*[A-G][#-]?:' | wc -l`;
+   chomp $count;
+   if ($count > 0) {
+      # The file already has a key designation, so just print it:
+      $results = `humcat $file`;
+      print $results;
+      next;
+   }
+   
+   # Extract the root of the finalis sonority:
+   $interval = `sonority -F $file`;
+   chomp $interval;
+   # Add key marker to data
+   $results = `humcat $file`;
+   @lines = split(/\n/, $results);
+   $inserted = 0;
+   foreach my $line (@lines) {
+      if ($inserted) {
+         print "$line\n";
+         next;
+      }
+      if ($line =~ /^\s*$/) {
+         print "$line\n";
+         next;
+      }
+      if ($line =~ /^[!=]/) {
+         print "$line\n";
+         next;
+      }
+      if ($line =~ /^\*k\[[^\t]*\]/) {
+         # Found a key signature, so add after the given line:
+         print "$line\n";
+         @data = split(/\t/, $line);
+         for (my $i=0; $i<@data; $i++) {
+            print "*$interval:";
+            print "\t" if $i < $#data;
+         }
+         print "\n";
+         $inserted++;
+         next;
+      }
+      if ($line =~ /^\*/) {
+         print "$line\n";
+         next;
+      }
+
+      # Found a data line but have not printed a key yet:
+      @data = split(/\t/, $line);
+      for (my $i=0; $i<@data; $i++) {
+         print "*$interval:";
+         print "\t" if $i < $#data;
+      }
+      print "\n";
+      $inserted++;
+      print "$line\n";
+      
+   }
+}
+
+
+
