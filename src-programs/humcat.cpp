@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
    }
 
    if (segmentQ && good2) {
-      printFile(infiles[0]);
+      printFile(infiles[1]);
    }
 
    if (!segmentQ) {

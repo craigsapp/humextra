@@ -193,7 +193,7 @@ restarting:
 
    // (2) If ifstream is closed but there is a file to be processed,
    // load it into the ifstream and start processing it immediately.
-   else if ((filelist.size() > 0) && (curfile < (int)filelist.size()-1)) {
+   else if (((int)filelist.size() > 0) && (curfile < (int)filelist.size()-1)) {
       curfile++;
       if (instream.is_open()) {
          instream.close();
@@ -461,7 +461,6 @@ void HumdrumStream::fillUrlBuffer(stringstream& inputdata, const char* uriname) 
    HumdrumFile::getUriToUrlMapping(webaddress, 100000, uriname);
 
    string hostname;
-
    string location;
 
    const char* ptr = webaddress;
@@ -474,9 +473,11 @@ void HumdrumStream::fillUrlBuffer(stringstream& inputdata, const char* uriname) 
 
    hostname = ptr;
 
-   char* pot;
-   if ((pot = strchr(hostname.c_str(), '/')) != NULL) {
-      *pot = '\0';
+   for (int i=0; i<(int)hostname.size(); i++) {
+      if (hostname[i] == '/') {
+         hostname.resize(i);
+         break;
+      }
    }
 
    if ((filename = strchr(ptr, '/')) != NULL) {
