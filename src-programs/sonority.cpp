@@ -9,6 +9,7 @@
 // Last Modified: Mon Apr 26 06:21:58 PDT 2010 -n, -s options added
 // Last Modified: Thu Mar 10 15:06:00 PST 2011 -i option added
 // Last Modified: Wed Mar 16 14:16:01 PDT 2011 added --iv option
+// Last Modified: Wed Mar 16 14:16:01 PDT 2011 added --iv option
 // Filename:      ...sig/examples/all/sonority2.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/sonority2.cpp
 // Syntax:        C++; museinfo
@@ -48,6 +49,8 @@ double  getMeasureSize      (HumdrumFile& infile, int width);
 void    printLegend         (int legendheight, int legendwidth);
 void    printAttackMarker   (HumdrumFile& infile, int line);
 void    printAttackMarker   (HumdrumFile& infile, int line);
+void    printFinalis        (HumdrumFile& infile);
+
 
 // global variables
 Options      options;            // database for command-line arguments
@@ -59,6 +62,8 @@ int          suppressQ = 0;      // used with -s option
 int          parenQ    = 1;      // used with -P option
 int          ivQ       = 0;      // used with --iv option
 int          forteQ    = 0;      // used with --forte option
+int          finalisQ  = 0;      // used with -F option
+int          base40Q   = 0;      // used with -F option
 int          tnQ       = 0;      // used with --tn option
 int          tniQ      = 0;      // used with --tni option
 int          attackQ   = 0;      // used with -x option
@@ -100,6 +105,8 @@ int main(int argc, char* argv[]) {
       // analyze the input file according to command-line options
       if (imageQ) {
          printTriadImage(infile, imagey, imagex);
+      } else if (finalisQ) {
+         printFinalis(infile);
       } else {
          processRecords(infile);
       }
@@ -111,6 +118,35 @@ int main(int argc, char* argv[]) {
 
 
 ///////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////
+//
+// printFinalis --
+//
+
+void printFinalis(HumdrumFile& infile) {
+   Array<ChordQuality> cq;
+   infile.analyzeSonorityQuality(cq);
+   char buffer[128] = {0};
+
+   for (int i = cq.getSize()-1; i>=0; i--) {
+      if (infile[i].isData()) {
+         int root = cq[i].getRoot();
+         if (root > 4000) {
+            // skip rests
+            continue;
+         }
+         if (base40Q) {
+            cout << root-2 << endl;
+         } else {
+            cout << Convert::base40ToKern(buffer, root + 3 * 40) << endl;
+         }
+         break;
+      }
+   }
+}
+
 
 
 //////////////////////////////
@@ -136,32 +172,32 @@ void printTriadImage(HumdrumFile& infile, int rows, int cols) {
    triads[2].setAll(24);
 
 
-   colorindex[0]  = "0 255 0";		// C major
-   colorindex[1]  = "38 255 140";	// C-sharp major
-   colorindex[2]  = "63 95 255";	// D major
-   colorindex[3]  = "228 19 83";	// E-flat major
-   colorindex[4]  = "255 0 0";		// E major
-   colorindex[5]  = "255 255 0";	// F major
-   colorindex[6]  = "192 255 0";	// F-sharp major
-   colorindex[7]  = "93 211 255";	// G major
-   colorindex[8]  = "129 50 255";	// A-flat major
-   colorindex[9]  = "205 41 255";	// A major
-   colorindex[10] = "255 160 0";	// B-flat major
-   colorindex[11] = "255 110 10";	// B major
-   colorindex[12] = "0 161 0";		// C minor
-   colorindex[13] = "15 191 90";	// C-sharp minor
-   colorindex[14] = "37 61 181";	// D minor
-   colorindex[15] = "184 27 75";	// E-flat minor
-   colorindex[16] = "175 0 0";		// E minor
-   colorindex[17] = "220 200 0";	// F minor
-   colorindex[18] = "140 200 0";	// F-sharp minor
-   colorindex[19] = "65 163 181";	// G minor
-   colorindex[20] = "100 28 181";	// G-sharp minor
-   colorindex[21] = "136 13 181";	// A minor
-   colorindex[22] = "181 93 20";	// B-flat minor
-   colorindex[23] = "211 107 0";	// B minor
-   colorindex[24] = "255 255 255";	// background
-   colorindex[25] = "0 0 0";		// silence
+   colorindex[0]  = "0 255 0";      // C major
+   colorindex[1]  = "38 255 140";   // C-sharp major
+   colorindex[2]  = "63 95 255";    // D major
+   colorindex[3]  = "228 19 83";    // E-flat major
+   colorindex[4]  = "255 0 0";      // E major
+   colorindex[5]  = "255 255 0";    // F major
+   colorindex[6]  = "192 255 0";    // F-sharp major
+   colorindex[7]  = "93 211 255";   // G major
+   colorindex[8]  = "129 50 255";   // A-flat major
+   colorindex[9]  = "205 41 255";   // A major
+   colorindex[10] = "255 160 0";    // B-flat major
+   colorindex[11] = "255 110 10";   // B major
+   colorindex[12] = "0 161 0";      // C minor
+   colorindex[13] = "15 191 90";    // C-sharp minor
+   colorindex[14] = "37 61 181";    // D minor
+   colorindex[15] = "184 27 75";    // E-flat minor
+   colorindex[16] = "175 0 0";      // E minor
+   colorindex[17] = "220 200 0";    // F minor
+   colorindex[18] = "140 200 0";    // F-sharp minor
+   colorindex[19] = "65 163 181";   // G minor
+   colorindex[20] = "100 28 181";   // G-sharp minor
+   colorindex[21] = "136 13 181";   // A minor
+   colorindex[22] = "181 93 20";    // B-flat minor
+   colorindex[23] = "211 107 0";    // B minor
+   colorindex[24] = "255 255 255";  // background
+   colorindex[25] = "0 0 0";        // silence
 
 
    double start;
@@ -189,7 +225,6 @@ void printTriadImage(HumdrumFile& infile, int rows, int cols) {
       }
 
       if (!(majQ || minQ)) {
-cerr << cq[i] << "\t" << cq[i].getTypeName() << endl;
          continue;
       }
       start = infile[i].getAbsBeat();
@@ -528,6 +563,7 @@ void printLegend(int legendheight, int legendwidth) {
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("t|type=b",          "show only chord type");
+   opts.define("base40|base-40|40|b40=b", "show finalis as interval down to C");
    opts.define("i|inversion=b",     "show only chord inversion");
    opts.define("r|root=b",          "show only chord root");
    opts.define("a|assemble|append=b", "append analysis to input data");
@@ -537,6 +573,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("d|debug=b",         "determine bad input line num");
    opts.define("n|notes=b",         "display pitch classes in sonority");
    opts.define("iv=b",              "print interval vector");
+   opts.define("F|finalis=b",       "print finalis pitch");
    opts.define("x|sonor|suspension=b",    "print marker if not all start attacks");
    opts.define("forte=b",           "print forte interval vector set name");
    opts.define("Tn|tn=b",           "print forte set with subsets");
@@ -613,6 +650,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       tnQ = 1;
       forteQ = 1;
    }
+   finalisQ  =  opts.getBoolean("finalis");
+   base40Q   =  opts.getBoolean("base-40");
    notesQ    =  opts.getBoolean("notes");
    suppressQ =  opts.getBoolean("suppress");
    parenQ    = !opts.getBoolean("paren-off");
@@ -669,7 +708,7 @@ void processRecords(HumdrumFile& infile) {
    for (int i=0; i<infile.getNumLines(); i++) {
       if (options.getBoolean("debug")) {
          cout << "processing line " << (i+1) << " of input ..." << endl;
-	 cout << "LINE IS: " << infile[i] << endl;
+         cout << "LINE IS: " << infile[i] << endl;
       }
       switch (infile[i].getType()) {
          case E_humrec_none:
@@ -712,7 +751,7 @@ void processRecords(HumdrumFile& infile) {
                   cout << "*";
                }
             }
-	    cout << endl;
+            cout << endl;
             break;
          case E_humrec_data_kern_measure:
             if (appendQ) {
@@ -727,7 +766,7 @@ void processRecords(HumdrumFile& infile) {
             }
             // handle null fields
             if (infile[i].equalFieldsQ("**kern", ".")) {
-	       cout << "." << endl;
+               cout << "." << endl;
                break;
             }
             if (ivQ) {
@@ -791,21 +830,21 @@ void processRecords(HumdrumFile& infile) {
                               options.getBoolean("root"))
                         ) {
                      char tempbuffer[128] = {0};
-	             strcpy(tempbuffer, aString);
+                     strcpy(tempbuffer, aString);
                      strcpy(aString, options.getString("unknown").data());
-	             strcat(aString, tempbuffer);
+                     strcat(aString, tempbuffer);
                   }
-		  if (suppressQ && transitionalSonority(quality, infile, i)) {
+                  if (suppressQ && transitionalSonority(quality, infile, i)) {
                      strcpy(aString, ".");
                   }
                } else {
                   strcpy(aString, "rest");
                }
-	       cout << aString << endl;
+               cout << aString << endl;
             } else {
                quality = cq[i];
                fillStringWithNotes(aString, quality, infile, i);
-	       cout << aString << endl;
+               cout << aString << endl;
             }
 
             break;
@@ -1093,4 +1132,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 34272c2309369bdf1a7f89d3ba596dce sonority.cpp [20151120]
+// md5sum: fc7f486c3ddba3f86a166a9aa7614583 sonority.cpp [20160312]

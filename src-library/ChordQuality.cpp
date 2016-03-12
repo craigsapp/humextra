@@ -22,21 +22,9 @@
 
 #include <string.h>
 
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-   
+#include <sstream>
+
+using namespace std;
 
 char* ChordQuality::displayString = NULL;
 
@@ -210,13 +198,13 @@ const char* ChordQuality::getTypeName(void) const {
 //
 
 void ChordQuality::makeString(char* space, int pcsQ) {
-   SSTREAM temp;
+   stringstream temp;
    temp << *this;
    if (pcsQ) {
       printPitchClasses(temp);
    }
    temp << ends;
-   strcpy(space, temp.CSTRING);
+   strcpy(space, temp.str().c_str());
 }
 
 

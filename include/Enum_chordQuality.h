@@ -22,40 +22,41 @@
 // Chord Types
 //
 
-#define E_chord_unknown        (000)       /* example:   C D E F F# G B      */
+#define E_chord_unknown        (000)       /* example:   C D E F F# G B  */
 
 //////////////////////////////
 //
 // basic chord quality set #1
 //
 
-#define E_chord_rest           (100)       /* example:                       */
-#define E_chord_note           (101)       /* example:   C                   */
+#define E_chord_rest           (100)       /* example:                  */
+#define E_chord_note           (101)       /* example:   C              */
 
 // dyads
-#define E_chord_incmaj         (102)       /* example:   C E                 */
-#define E_chord_incmin         (103)       /* example:   C Eb                */
+#define E_chord_incmaj         (102)       /* example:   C E            */
+#define E_chord_incmin         (103)       /* example:   C Eb           */
+#define E_chord_incmajx3       (104)       /* example:   C G            */
  
 // triads
-#define E_chord_dim            (104)       /* example:   C Eb Gb             */
-#define E_chord_min            (105)       /* example:   C Eb G              */
-#define E_chord_maj            (106)       /* example:   C E  G              */
-#define E_chord_aug            (107)       /* example:   C E  G#             */
-#define E_chord_minminx5       (108)       /* example:   C Eb    Bb          */
-#define E_chord_domsevx5       (109)       /* example:   C E     Bb          */
+#define E_chord_dim            (105)       /* example:   C Eb Gb        */
+#define E_chord_min            (106)       /* example:   C Eb G         */
+#define E_chord_maj            (107)       /* example:   C E  G         */
+#define E_chord_aug            (108)       /* example:   C E  G#        */
+#define E_chord_minminx5       (109)       /* example:   C Eb    Bb     */
+#define E_chord_domsevx5       (110)       /* example:   C E     Bb     */
 
 // tetrads
-#define E_chord_fullydim       (110)       /* example:   C Eb Gb Bbb         */
-#define E_chord_halfdim        (111)       /* example:   C Eb Gb Bb          */
-#define E_chord_minmin         (112)       /* example:   C Eb G  Bb          */
-#define E_chord_minmaj         (113)       /* example:   C Eb G  B           */
-#define E_chord_domsev         (114)       /* example:   C E  G  Bb          */
-#define E_chord_majmaj         (115)       /* example:   C E  G  B           */
+#define E_chord_fullydim       (111)       /* example:   C Eb Gb Bbb    */
+#define E_chord_halfdim        (112)       /* example:   C Eb Gb Bb     */
+#define E_chord_minmin         (113)       /* example:   C Eb G  Bb     */
+#define E_chord_minmaj         (114)       /* example:   C Eb G  B      */
+#define E_chord_domsev         (115)       /* example:   C E  G  Bb     */
+#define E_chord_majmaj         (116)       /* example:   C E  G  B      */
 
 // special chords
-#define E_chord_frensix        (116)       /* example:   Ab C D  F#          */
-#define E_chord_germsix        (117)       /* example:   Ab C Eb F#          */
-#define E_chord_italsix        (118)       /* example:   Ab C    F#          */
+#define E_chord_frensix        (117)       /* example:   Ab C D  F#     */
+#define E_chord_germsix        (118)       /* example:   Ab C Eb F#     */
+#define E_chord_italsix        (119)       /* example:   Ab C    F#     */
 
 
 // names of chord quality types for **qual data for the basic set
@@ -63,23 +64,24 @@
 #define E_chord_name_rest      "r"
 #define E_chord_name_unknown   "X"
 #define E_chord_name_note      "note"
+#define E_chord_name_incmajx3  "incmajx3"
 #define E_chord_name_incmaj    "incmaj"
 #define E_chord_name_incmin    "incmin"
 #define E_chord_name_dim       "dim"
 #define E_chord_name_min       "min"
 #define E_chord_name_maj       "maj"
 #define E_chord_name_aug       "aug"
-#define E_chord_name_minminx5  "minminx5"
-#define E_chord_name_domsevx5  "domsevx5"
-#define E_chord_name_fullydim  "fullydim"
-#define E_chord_name_halfdim   "halfdim"
-#define E_chord_name_minmin    "minmin"
-#define E_chord_name_minmaj    "minmaj"
-#define E_chord_name_domsev    "domsev"
-#define E_chord_name_majmaj    "majmaj"
-#define E_chord_name_frensix   "french"
-#define E_chord_name_germsix   "german"
-#define E_chord_name_italsix   "italian"
+#define E_chord_name_minminx5  "minmin7x5"
+#define E_chord_name_domsevx5  "dom7x5"
+#define E_chord_name_fullydim  "fulldim7"
+#define E_chord_name_halfdim   "halfdim7"
+#define E_chord_name_minmin    "minmin7"
+#define E_chord_name_minmaj    "minmaj7"
+#define E_chord_name_domsev    "dom7"
+#define E_chord_name_majmaj    "majmaj7"
+#define E_chord_name_frensix   "french6"
+#define E_chord_name_germsix   "german6"
+#define E_chord_name_italsix   "italian6"
 
 
 

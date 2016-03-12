@@ -27,6 +27,7 @@ class EnumerationCQT : public Enumeration {
          add(E_chord_note     ,   E_chord_name_note     ,   ENUM_FIXED_ALLOC);
          add(E_chord_incmin   ,   E_chord_name_incmin   ,   ENUM_FIXED_ALLOC);
          add(E_chord_incmaj   ,   E_chord_name_incmaj   ,   ENUM_FIXED_ALLOC);
+         add(E_chord_incmajx3 ,   E_chord_name_incmajx3 ,   ENUM_FIXED_ALLOC);
          add(E_chord_dim      ,   E_chord_name_dim      ,   ENUM_FIXED_ALLOC);
          add(E_chord_min      ,   E_chord_name_min      ,   ENUM_FIXED_ALLOC);
          add(E_chord_maj      ,   E_chord_name_maj      ,   ENUM_FIXED_ALLOC);

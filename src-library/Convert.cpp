@@ -154,7 +154,6 @@ int Convert::kernToMidiNoteNumber(const char* aKernString) {
 
 char* Convert::durationRToKernRhythm(char* output, RationalNumber input, 
       int timebase) {
-
    output[0] = '\0';
 
    // dividing by 4 to convert from whole note units to quarter note units.
@@ -195,8 +194,13 @@ char* Convert::durationRToKernRhythm(char* output, RationalNumber input,
       return output;
    }
 
-   // unknown rhythm, so output a qqq string to intdicate a grace note...
-   strcpy(output, "qqq");
+   if (newdur.getNumerator() == 0) {
+      strcpy(output, "q");
+      return output;
+   }
+
+   // unknown rhythm, so output a rational duration
+   sprintf(output, "%d%%%d", newdur.getDenominator(), newdur.getNumerator());
    return output;
 }
 
@@ -852,7 +856,6 @@ char* Convert::museClefToKernClef(char* kernOutput, int museInput) {
 //
 
 ChordQuality Convert::chordQualityStringToValue(const char* aString) {
-
    ChordQuality output;
    char* temp;
    char* token;
@@ -912,6 +915,7 @@ void Convert::chordQualityToNoteSet(SigCollection<int>& noteSet,
       case E_chord_note:     break;
       case E_chord_incmin:   output[1] = 11; break;
       case E_chord_incmaj:   output[1] = 12; break;
+      case E_chord_incmajx3: output[1] = 23; break;
       case E_chord_secsev:
       case E_chord_dim:      output[1] = 11; output[2] = 22; break;
       case E_chord_min:      output[1] = 11; output[2] = 23; break;
@@ -2708,6 +2712,8 @@ int Convert::checkChord(const SigCollection<int>& aSet) {
             output = E_chord_incmin;
          } else if (inval[0] == 12) {
             output = E_chord_incmaj;
+         } else if (inval[0] == 23) {
+            output = E_chord_incmajx3;
          } else {
             output = E_unknown;
          }
