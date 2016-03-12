@@ -2,6 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Dec 11 16:03:43 PST 2012
 // Last Modified: Tue Dec 11 16:03:46 PST 2012
+// Last Modified: Fri Mar 11 21:25:24 PST 2016 Changed to STL
 // Filename:      ...sig/include/sigInfo/HumdrumStream.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/HumdrumStream.h
 // Syntax:        C++ 
@@ -17,15 +18,12 @@
 #define _HUMDRUMSTREAM_H_INCLUDED
 
 #include "HumdrumFile.h"
-#include "Array.h"
 #include "Options.h"
 
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#define SSTREAM stringstream
-#define CSTRING str().c_str()
 using namespace std;
 
 // the following define is for compiling/not compiling the automatic
@@ -61,25 +59,26 @@ class HumdrumStream {
       int             read               (HumdrumFile& infile);
 
    protected:
-      ifstream            instream;      // used to read from list of files.
-      SSTREAM             urlbuffer;     // used to read data over internet.
-      Array<char>         newfilebuffer; // used to keep track of !!!!segment: 
-                                         // records.
+      ifstream        instream;         // used to read from list of files.
+      stringstream    urlbuffer;        // used to read data over internet.
+      string          newfilebuffer;    // used to keep track of !!!!segment: 
+                                        // records.
 
-      Array<Array<char> > filelist;      // used when not using cin
-      int                 curfile;       // index into filelist
+      vector<string>  filelist;         // used when not using cin
+      int             curfile;          // index into filelist
 
-      Array<Array<char> > universals;    // storage for universal comments
+      vector<string>  universals;       // storage for universal comments
 
       // automatic URI downloading of data in read()
       #ifdef USING_URI
-      void     fillUrlBuffer            (SSTREAM& uribuffer, 
+      void     fillUrlBuffer            (stringstream& uribuffer, 
                                          const char* uriname);
-      int      getChunk                 (int socket_id, SSTREAM& inputdata, 
-                                         char* buffer, int bufsize);
-      int      getFixedDataSize         (int socket_id, int datalength, 
-                                         SSTREAM& inputdata, char* buffer, 
+      int      getChunk                 (int socket_id, 
+                                         stringstream& inputdata, char* buffer,
                                          int bufsize);
+      int      getFixedDataSize         (int socket_id, int datalength, 
+                                         stringstream& inputdata, 
+                                         char* buffer, int bufsize);
       int      open_network_socket      (const char *hostname, 
                                          unsigned short int port);
       void     prepare_address          (struct sockaddr_in *addr, 

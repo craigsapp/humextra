@@ -2,6 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Apr  5 13:07:18 PDT 1998
 // Last Modified: Sat Mar  1 09:31:01 PST 2014 Implemented with STL.
+// Last Modified: Fri Mar 11 21:26:59 PST 2016 remove command from getArgList 
 // Filename:      Options.cpp
 // Web Address:   https://github.com/craigsapp/optionlib/blob/master/include/Options.h
 // Documentation: http://sig.sapp.org/doc/classes/Options
@@ -490,9 +491,9 @@ int Options::getArgumentCount(void) {
 //
 
 vector<string>& Options::getArgList(vector<string>& output) {
-   output.resize(argument.size());
-   for (int i=0; i<(int)argument.size(); i++) {
-      output[i] = *argument[i];
+   output.resize(argument.size()-1);
+   for (int i=1; i<(int)argument.size(); i++) {
+      output[i-1] = *argument[i];
    }
    return output;
 }

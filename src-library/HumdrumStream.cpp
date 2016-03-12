@@ -2,6 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Dec 11 16:09:32 PST 2012
 // Last Modified: Tue Dec 11 16:09:38 PST 2012
+// Last Modified: Fri Mar 11 21:26:18 PST 2016 Changed to STL
 // Filename:      ...sig/src/sigInfo/HumdrumStream.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/HumdrumStream.cpp
 // Syntax:        C++ 
@@ -18,8 +19,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#define SSTREAM stringstream
-#define CSTRING str().c_str()
 using namespace std;
 
 #ifdef USING_URI
@@ -39,36 +38,21 @@ using namespace std;
 //
 
 HumdrumStream::HumdrumStream(void) {
-   filelist.setSize(0);   
    curfile = -1;
-   universals.setSize(0);
-   newfilebuffer.setSize(0);
 }
 
 HumdrumStream::HumdrumStream(char** list) {
-   filelist.setSize(0);   
    curfile = -1;
-   universals.setSize(0);
-   newfilebuffer.setSize(0);
-
    setFileList(list);
 }
 
 HumdrumStream::HumdrumStream(const vector<string>& list) {
-   filelist.setSize(0);   
    curfile = -1;
-   universals.setSize(0);
-   newfilebuffer.setSize(0);
-
    setFileList(list);
 }
 
 HumdrumStream::HumdrumStream(Options& options) {
-   filelist.setSize(0);   
    curfile = -1;
-   universals.setSize(0);
-   newfilebuffer.setSize(0);
-
    vector<string> list;
    options.getArgList(list);
    setFileList(list);
@@ -82,10 +66,10 @@ HumdrumStream::HumdrumStream(Options& options) {
 //
 
 void HumdrumStream::clear(void) {
-   filelist.setSize(0);
    curfile = 0;
-   universals.setSize(0);
-   newfilebuffer.setSize(0);
+   filelist.resize(0);
+   universals.resize(0);
+   newfilebuffer.resize(0);
 }
 
 
@@ -96,36 +80,22 @@ void HumdrumStream::clear(void) {
 //
 
 int HumdrumStream::setFileList(char** list) {
-   filelist.setSize(1000);
-   filelist.setGrowth(10000);
-   filelist.setSize(0);
-
+   filelist.reserve(1000);
+   filelist.resize(0);
    int i = 0;
    while (list[i] != NULL) {
-      filelist.increase(1);
-      filelist.last() = list[i];
+      filelist.push_back(list[i]);
       i++;
    }
-
    return i;
 }
 
 
 int HumdrumStream::setFileList(const vector<string>& list) {
-   filelist.setSize(1000);
-   filelist.setGrowth(10000);
-   filelist.setSize(0);
-
-   int i = 0;
-   // The current version of the list includes the command at index 0.
-   for (i=1; i<(int)list.size(); i++) {
-      filelist.increase(1);
-      filelist.last() = list[i].data();
-      i++;
-   }
-
-   return i;
+   filelist = list;
+   return (int)list.size();
 }
+
 
 
 //////////////////////////////
@@ -165,7 +135,7 @@ int HumdrumStream::eof(void) {
 
    // (2) If ifstream is closed but there is a file to be processed,
    // load it into the ifstream and start processing it immediately.
-   else if ((filelist.getSize() > 0) && (curfile < filelist.getSize()-1)) {
+   else if ((filelist.size() > 0) && (curfile < (int)filelist.size()-1)) {
       return 0;
    } else {
       // no input fstream open and no list of files to process, so
@@ -223,21 +193,21 @@ restarting:
 
    // (2) If ifstream is closed but there is a file to be processed,
    // load it into the ifstream and start processing it immediately.
-   else if ((filelist.getSize() > 0) && (curfile < filelist.getSize()-1)) {
+   else if ((filelist.size() > 0) && (curfile < (int)filelist.size()-1)) {
       curfile++;
       if (instream.is_open()) {
          instream.close();
       }
-      if (strstr(filelist[curfile].getBase(), "://") != NULL) {
+      if (strstr(filelist[curfile].c_str(), "://") != NULL) {
          // The next file to read is a URL/URI, so buffer the
          // data from the internet and start reading that instead
          // of reading from a file on the hard disk.
-         fillUrlBuffer(urlbuffer, filelist[curfile].getBase());
-         infile.setFilename(filelist[curfile].getBase());
+         fillUrlBuffer(urlbuffer, filelist[curfile].c_str());
+         infile.setFilename(filelist[curfile].c_str());
          goto restarting;
       }
-      instream.open(filelist[curfile].getBase());
-      infile.setFilename(filelist[curfile].getBase());
+      instream.open(filelist[curfile].c_str());
+      infile.setFilename(filelist[curfile].c_str());
       if (!instream.is_open()) {
          // file does not exist or cannot be opened close
          // the file and try luck with next file in the list
@@ -261,7 +231,7 @@ restarting:
    // If there is "newfilebuffer" content, then set the filename of the
    // HumdrumFile to that value. 
 
-   if (newfilebuffer.getSize() > 0) {
+   if (newfilebuffer.size() > 0) {
       // store the filename for the current HumdrumFile being read:
       PerlRegularExpression pre;
       if (pre.search(newfilebuffer, 
@@ -272,9 +242,9 @@ restarting:
             infile.setSegmentLevel(0);
          }
          infile.setFilename(pre.getSubmatch(2));
-      } else if ((curfile >=0) && (curfile < filelist.getSize()) 
-            && (filelist.getSize() > 0)) {
-         infile.setFilename(filelist[curfile].getBase());
+      } else if ((curfile >=0) && (curfile < (int)filelist.size()) 
+            && (filelist.size() > 0)) {
+         infile.setFilename(filelist[curfile].c_str());
       } else {
          // reading from standard input, but no name.
       }
@@ -285,7 +255,7 @@ restarting:
       return 0;
    }
 
-   SSTREAM buffer;
+   stringstream buffer;
    int foundUniversalQ = 0;
 
    // Start reading the input stream.  If !!!!SEGMENT: universal comment
@@ -298,13 +268,13 @@ restarting:
    int dataFoundQ = 0;
    int starstarFoundQ = 0;
    int starminusFoundQ = 0;
-   if (newfilebuffer.getSize() < 4) {
+   if (newfilebuffer.size() < 4) {
       //searchName = 1;
    }
    char templine[123123] = {0};
 
    if (newinput->eof()) {
-      if (curfile < filelist.getSize()-1) {
+      if (curfile < (int)filelist.size()-1) {
          curfile++;
          goto restarting;
       }
@@ -316,8 +286,8 @@ restarting:
 
    // if the previous line from the last read starts with "**"
    // then treat it as part of the current file.
-   if ((newfilebuffer.getSize() > 1) && 
-       (strncmp(newfilebuffer.getBase(), "**", 2)) == 0) {
+   if ((newfilebuffer.size() > 1) && 
+       (strncmp(newfilebuffer.c_str(), "**", 2)) == 0) {
       buffer << newfilebuffer << "\n";
       newfilebuffer = "";
       starstarFoundQ = 1;
@@ -327,7 +297,7 @@ restarting:
       input.getline(templine, 123123, '\n');
       if ((!dataFoundQ) && 
             (strncmp(templine, "!!!!SEGMENT", strlen("!!!!SEGMENT")) == 0)) {
-         Array<char> tempstring;
+         string tempstring;
          tempstring = templine;
          PerlRegularExpression pre;
          if (pre.search(tempstring, 
@@ -400,14 +370,12 @@ restarting:
          // this record placed into the first entry?
          if (foundUniversalQ) {
             // already found a previous universal, so append.
-            universals.increase(1);
-            universals.last() = templine;
+            universals.push_back(templine);
          } else {
             // new universal comment, to delete all previous
             // universal comments and store this one.
-            universals.setSize(1000);
-            universals.setGrowth(10000);
-            universals.setSize(1);
+            universals.reserve(1000);
+            universals.resize(1);
             universals[0] = templine;
             foundUniversalQ = 1;
          }
@@ -427,14 +395,13 @@ restarting:
             // The file can only be added once in this manner
             // so that infinite loops are prevented.
             int found = 0;
-            for (int mm=0; mm<filelist.getSize(); mm++) {
-               if (strcmp(filelist[mm].getBase(), templine) == 0) {
+            for (int mm=0; mm<(int)filelist.size(); mm++) {
+               if (strcmp(filelist[mm].c_str(), templine) == 0) {
                   found = 1;
                }
             }
             if (!found) {
-               filelist.increase(1);
-               filelist.last() = templine;
+               filelist.push_back(templine);
                addedFilename = 1;
             }
             continue;
@@ -462,12 +429,12 @@ restarting:
    // Universal comments (demoted into Global comments) at the start
    // of the data stream (maybe allow for postpending Universal comments
    // in the future).
-   SSTREAM contents;
-   for (int i=0; i<universals.getSize(); i++) {
+   stringstream contents;
+   for (int i=0; i<(int)universals.size(); i++) {
       contents << &(universals[i][1]) << "\n";
    }
    buffer << ends;
-   contents << buffer.CSTRING;
+   contents << buffer.str();
    infile.read(contents);
    return 1;
 }
@@ -480,23 +447,22 @@ restarting:
 
 #ifndef USING_URI
 
-void HumdrumStream::fillUrlBuffer(SSTREAM& uribuffer, const char* uriname) {
+void HumdrumStream::fillUrlBuffer(stringstream& uribuffer, const char* uriname) {
    // do nothing; 
 }
 
 #else
 
-void HumdrumStream::fillUrlBuffer(SSTREAM& inputdata, const char* uriname) {
+void HumdrumStream::fillUrlBuffer(stringstream& inputdata, const char* uriname) {
    inputdata.str(""); // empty any contents in buffer
    inputdata.clear(); // reset error flags in buffer
 
    char webaddress[123123] = {0};
    HumdrumFile::getUriToUrlMapping(webaddress, 100000, uriname);
 
-   Array<char> hostname;
+   string hostname;
 
-   Array<char> location;
-   location.setSize(0);
+   string location;
 
    const char* ptr = webaddress;
    const char* filename = NULL;
@@ -506,50 +472,46 @@ void HumdrumStream::fillUrlBuffer(SSTREAM& inputdata, const char* uriname) {
       ptr += strlen("http://");
    }
 
-   hostname.setSize((int)strlen(ptr)+1);
-   hostname.setGrowth(0);
-   strcpy(hostname.getBase(), ptr);
+   hostname = ptr;
+
    char* pot;
-   if ((pot = strchr(hostname.getBase(), '/')) != NULL) {
+   if ((pot = strchr(hostname.c_str(), '/')) != NULL) {
       *pot = '\0';
    }
 
    if ((filename = strchr(ptr, '/')) != NULL) {
-      location.setSize((int)strlen(filename)+1);
-      strcpy(location.getBase(), filename);
-      location.allowGrowth(0);
+      location = filename;
    }
-   if (location.getSize() == 0) {
-      location.setSize(2);
-      location.allowGrowth(0);
-      strcpy(location.getBase(), "/");
+   if (location.size() == 0) {
+      location = "/";
    }
 
    char newline[3] = {0x0d, 0x0a, 0};
 
-   SSTREAM request;
-   request << "GET "   << location.getBase() << " HTTP/1.1" << newline;
-   request << "Host: " << hostname.getBase() << newline;
+   stringstream request;
+   request << "GET "   << location << " HTTP/1.1" << newline;
+   request << "Host: " << hostname << newline;
    request << "User-Agent: HumdrumFile Downloader 1.0 (" 
            << __DATE__ << ")" << newline;
    request << "Connection: close" << newline;  // this line is necessary
    request << newline;
    request << ends;
 
-   // cout << "HOSTNAME: " << hostname.getBase() << endl;
-   // cout << "LOCATION: " << location.getBase() << endl;
-   // cout << request.CSTRING << endl;
+   // cout << "HOSTNAME: " << hostname << endl;
+   // cout << "LOCATION: " << location << endl;
+   // cout << request.str() << endl;
    // cout << "-------------------------------------------------" << endl;
 
-   int socket_id = open_network_socket(hostname.getBase(), 80);
-   if (::write(socket_id, request.CSTRING, strlen(request.CSTRING)) == -1) {
+   int socket_id = open_network_socket(hostname.c_str(), 80);
+   if (::write(socket_id, request.str().c_str(), 
+         strlen(request.str().c_str())) == -1) {
       exit(-1);
    }
    #define URI_BUFFER_SIZE (10000)
    char buffer[URI_BUFFER_SIZE];
    int message_len;
-   // SSTREAM inputdata;
-   SSTREAM header;
+   // stringstream inputdata;
+   stringstream header;
    int foundcontent = 0;
    int i;
    int newlinecounter = 0;
@@ -580,7 +542,7 @@ void HumdrumStream::fillUrlBuffer(SSTREAM& inputdata, const char* uriname) {
    int chunked = 0;
 
    header << ends;
-   // cout << header.CSTRING << endl;
+   // cout << header.str() << endl;
    // cout << "-------------------------------------------------" << endl;
    while (header.getline(buffer, URI_BUFFER_SIZE)) {
       int len = (int)strlen(buffer);
@@ -656,7 +618,7 @@ void HumdrumStream::fillUrlBuffer(SSTREAM& inputdata, const char* uriname) {
 
    // inputdata << ends;
    //cout << "CONTENT:=======================================" << endl;
-   //cout << inputdata.CSTRING;
+   //cout << inputdata.str();
    //cout << "===============================================" << endl;
 }
 
@@ -736,7 +698,7 @@ int HumdrumStream::open_network_socket(const char *hostname,
 //
 
 int HumdrumStream::getFixedDataSize(int socket_id, int datalength, 
-      SSTREAM& inputdata, char* buffer, int bufsize) {
+      stringstream& inputdata, char* buffer, int bufsize) {
    int readcount = 0;
    int readsize;
    int message_len;
@@ -787,7 +749,7 @@ int HumdrumStream::getFixedDataSize(int socket_id, int datalength,
 // 
 // The message is finally closed by a last CRLF combination.
 
-int HumdrumStream::getChunk(int socket_id, SSTREAM& inputdata, 
+int HumdrumStream::getChunk(int socket_id, stringstream& inputdata, 
       char* buffer, int bufsize) {
    int chunksize = 0;
    int message_len;

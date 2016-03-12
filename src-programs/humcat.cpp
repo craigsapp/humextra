@@ -3,6 +3,7 @@
 // Creation Date: Mon Oct 14 23:58:44  2002
 // Last Modified: Mon Apr 25 11:30:20 PDT 2005
 // Last Modified: Thu Dec 13 21:03:33 PST 2012 Added -s option
+// Last Modified: Fri Mar 11 20:44:58 PST 2016 Switch to STL
 // Filename:      ...sig/examples/all/humcat.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/humcat.cpp
 // Syntax:        C++; museinfo
@@ -16,29 +17,26 @@
 #include <string.h>
 #include <stdio.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-#endif
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
 
 // function declarations:
 void      checkOptions          (Options& opts, int argc, char** argv);
 void      example               (void);
 void      usage                 (const char* command);
 void      printFile             (HumdrumFile& infile, int start, int stop);
-int       getIdTags             (Array<Array<char> >& idtags, 
-                                 HumdrumFile& infile);
+int       getIdTags             (vector<string>& idtags, HumdrumFile& infile);
 void      printFileID           (HumdrumFile& infile, int index, int count, 
-                                 Array<Array<char> >& primaryids);
-int       findTag               (Array<Array<char> >& primaryids, 
-                                 Array<char>& idtags);
+                                 vector<string>& primaryids);
+int       findTag               (vector<string>& primaryids, string& idtags);
 void      printLineID           (HumdrumFile& infile, int index, 
-                                 Array<Array<char> >& primaryids, 
-				 Array<Array<char> >& idtags);
+                                 vector<string>& primaryids, 
+				 vector<string>& idtags);
 int       hasSegment            (HumdrumFile& infile);
+void      printFile             (HumdrumFile& infile);
 
 // User interface variables:
 Options   options;
@@ -51,7 +49,7 @@ int main(int argc, char** argv) {
    checkOptions(options, argc, argv);
    HumdrumStream streamer(options);
 
-   Array<Array<char> > idtags;
+   vector<string> idtags;
    int idtagQ = 0;
 
    HumdrumFile infiles[2];
@@ -65,33 +63,14 @@ int main(int argc, char** argv) {
    }
 
    // if printing segments, then don't do extra work to suppress **/*-:
-   int ii;
    int hassegment;
+
    if (segmentQ && good1) {
-      infiles[0].printNonemptySegmentLabel(cout);
-      hassegment = hasSegment(infiles[0]);
-      for (ii=0; ii<infiles[0].getNumLines(); ii++) {
-         if (hassegment) {
-            if (strncmp(infiles[0][ii][0], "!!!!SEGMENT", 11) != 0) {
-               cout << infiles[0][ii] << '\n';
-            }
-         } else {
-            cout << infiles[0][ii] << '\n';
-         }
-      }
+      printFile(infiles[0]);
    }
+
    if (segmentQ && good2) {
-      infiles[1].printNonemptySegmentLabel(cout);
-      hassegment = hasSegment(infiles[1]);
-      for (ii=0; ii<infiles[1].getNumLines(); ii++) {
-         if (hassegment) {
-            if (strncmp(infiles[1][ii][0], "!!!!SEGMENT", 11) != 0) {
-               cout << infiles[1][ii] << '\n';
-            }
-         } else {
-            cout << infiles[1][ii] << '\n';
-         } 
-      }
+      printFile(infiles[0]);
    }
 
    if (!segmentQ) {
@@ -115,16 +94,18 @@ int main(int argc, char** argv) {
    int count = 1;
    while (streamer.read(infiles[currindex])) {
       count++;
-      infiles[currindex].printNonemptySegmentLabel(cout);
+      if (segmentQ) {
+         infiles[currindex].printNonemptySegmentLabel(cout);
+     }
       hassegment = hasSegment(infiles[currindex]);
       if (segmentQ) {
-         for (ii=0; ii<infiles[currindex].getNumLines(); ii++) {
+         for (int i=0; i<infiles[currindex].getNumLines(); i++) {
             if (hassegment) {
-               if (strncmp(infiles[currindex][ii][0], "!!!!SEGMENT", 11) != 0) {
-                  cout << infiles[currindex][ii] << '\n';
+               if (strncmp(infiles[currindex][i][0], "!!!!SEGMENT", 11) != 0) {
+                  cout << infiles[currindex][i] << '\n';
                }
             } else {
-               cout << infiles[currindex][ii] << '\n';
+               cout << infiles[currindex][i] << '\n';
             } 
          }
          currindex = !currindex;
@@ -157,6 +138,27 @@ int main(int argc, char** argv) {
 
 //////////////////////////////
 //
+// printFile --
+//
+
+void printFile(HumdrumFile& infile) {
+   infile.printNonemptySegmentLabel(cout);
+   int hassegment = hasSegment(infile);
+   for (int i=0; i<infile.getNumLines(); i++) {
+      if (hassegment) {
+         if (strncmp(infile[i][0], "!!!!SEGMENT", 11) != 0) {
+            cout << infile[i] << '\n';
+         }
+      } else {
+         cout << infile[i] << '\n';
+      }
+   }
+}
+
+
+
+//////////////////////////////
+//
 // hasSegment -- true if the content of the Humdrum file has a line starting
 //      with !!!!SEGMENT .  This is necessary to suppress writing more than
 //      one SEGMENT marker for the file.  Only looks at the first line in the
@@ -178,12 +180,11 @@ int hasSegment(HumdrumFile& infile) {
 // getIdTags --
 //
 
-int getIdTags(Array<Array<char> >& idtags, HumdrumFile& infile) {
+int getIdTags(vector<string>& idtags, HumdrumFile& infile) {
    int i, j;
-   idtags.setSize(infile.getMaxTracks());
-   for (i=0; i<idtags.getSize(); i++) {
-      idtags[i].setSize(128);
-      idtags[i][0] = '\0';
+   idtags.resize(infile.getMaxTracks());
+   for (i=0; i<(int)idtags.size(); i++) {
+      idtags[i] = "";
    }
    int foundids = 0;
    char tag[128] = {0};
@@ -197,7 +198,7 @@ int getIdTags(Array<Array<char> >& idtags, HumdrumFile& infile) {
             strcpy(tag, &(infile[i][j][4]));
             if (strlen(tag)) {
                foundids++;
-               strcpy(idtags[infile[i].getPrimaryTrack(j)-1].getBase(), tag);
+               idtags[infile[i].getPrimaryTrack(j)-1] = tag;
             }
          }
       }
@@ -246,9 +247,9 @@ void printFile(HumdrumFile& infile, int start, int stop) {
 //
 
 void printFileID(HumdrumFile& infile, int index, int count, 
-      Array<Array<char> >& primaryids) {
+      vector<string>& primaryids) {
 
-   Array<Array<char> > idtags;
+   vector<string> idtags;
    int idtagQ = getIdTags(idtags, infile);
    if (!idtagQ) {
       cout << "ERROR: no ID tags found in file: " << endl;
@@ -288,28 +289,27 @@ void printFileID(HumdrumFile& infile, int index, int count,
 // printLineID --
 //
 
-void printLineID(HumdrumFile& infile, int index, 
-      Array<Array<char> >& primaryids, Array<Array<char> >& idtags) {
-   Array<Array<int> > spines;
-   spines.setSize(primaryids.getSize());
+void printLineID(HumdrumFile& infile, int index, vector<string>& primaryids, 
+      vector<string>& idtags) {
+   vector<vector<int> > spines;
+   spines.resize(primaryids.size());
    int i;
-   for (i=0; i<spines.getSize(); i++) {
-      spines[i].setSize(32);
-      spines[i].setSize(0);
+   for (i=0; i<(int)spines.size(); i++) {
+      spines[i].reserve(32);
    }
 
    int mapping;
-   for (i=0; i<idtags.getSize(); i++) {
+   for (i=0; i<(int)idtags.size(); i++) {
       mapping = findTag(primaryids, idtags[i]);
-      spines[mapping].append(i);
+      spines[mapping].push_back(i);
    }
 
    int j;
-   for (i=0; i<spines.getSize(); i++) {
-      if (spines[i].getSize() == 0) {
+   for (i=0; i<(int)spines.size(); i++) {
+      if (spines[i].size() == 0) {
          cout << "X";
       } else {
-         for (j=0; j<spines[i].getSize(); j++) {
+         for (j=0; j<(int)spines[i].size(); j++) {
             cout << "Y";
          }
       }
@@ -325,14 +325,12 @@ void printLineID(HumdrumFile& infile, int index,
 // findTag --
 //
 
-int findTag(Array<Array<char> >& primaryids, Array<char>& idtags) {
-   int i;
-   for (i=0; i<primaryids.getSize(); i++) {
-      if (strcmp(primaryids[i].getBase(), idtags.getBase()) == 0) {
+int findTag(vector<string>& primaryids, string& idtags) {
+   for (int i=0; i<(int)primaryids.size(); i++) {
+      if (primaryids[i] == idtags) {
          return i;
       }
    }
-
    return -1;
 }
 
