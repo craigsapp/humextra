@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 19 15:25:16 PST 2003
-// Last Modified: Thu Nov 20 10:10:42 PST 2003
+// Last Modified: Sat Mar 12 20:17:33 PST 2016
 // Filename:      ...sig/examples/all/lo5.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/lofcog.cpp
 // Syntax:        C++; museinfo
@@ -19,25 +19,29 @@
 
 #include <math.h>
 
+#include <vector>
+
+using namespace std;
+
 // function declarations
 void   checkOptions      (Options& opts, int argc, char* argv[]);
 void   example           (void);
 void   usage             (const char* command);
-void   analyzeFile       (HumdrumFile& infile, Array<double>& fifthmean);
-void   printAnalysis     (HumdrumFile& infile, Array<double>& fifthmeean);
+void   analyzeFile       (HumdrumFile& infile, vector<double>& fifthmean);
+void   printAnalysis     (HumdrumFile& infile, vector<double>& fifthmeean);
 int    lo5ToBase40       (double lineval);
 int    base40ToLo5       (int base40);
 double getFifthMean      (HumdrumFile& infile, int line, double beats, 
                           CircularBuffer<int>& notes, 
                           CircularBuffer<double>& absbeat, double& meansum,
                           int measure);
-void   printXfig         (HumdrumFile& infile, Array<double>& fifthmean);
+void   printXfig         (HumdrumFile& infile, vector<double>& fifthmean);
 int    chooseLineNumber  (int base12, double average);
 void   convertBase12ToBase40(int base12, int& x, int& y, int& z);
-void   getDeviation      (HumdrumFile& infile, Array<double>& cog,
-                          Array<Array<double> >& deviation);
+void   getDeviation      (HumdrumFile& infile, vector<double>& cog,
+                          vector<vector<double> >& deviation);
 double getAverage        (HumdrumFile& infile, 
-                          Array<Array<double> >& pastdist, double abeat,
+                          vector<vector<double> >& pastdist, double abeat,
                           int index);
 
 // global variables
@@ -64,7 +68,7 @@ const char* CurrentFile = ".";
 
 int main(int argc, char* argv[]) {
    HumdrumFile infile;
-   Array<double> fifthmean;
+   vector<double> fifthmean;
 
    // process the command-line options
    checkOptions(options, argc, argv);
@@ -107,7 +111,7 @@ int main(int argc, char* argv[]) {
 // printXfig -- print data in xfig format
 //
 
-void printXfig(HumdrumFile& infile, Array<double>& fifthmean) {
+void printXfig(HumdrumFile& infile, vector<double>& fifthmean) {
    int i;
    double xmin = 10000;
    double xmax = 0;
@@ -180,13 +184,12 @@ void printXfig(HumdrumFile& infile, Array<double>& fifthmean) {
 //     the file.
 //
 
-void analyzeFile(HumdrumFile& infile, Array<double>& fifthmean) {
+void analyzeFile(HumdrumFile& infile, vector<double>& fifthmean) {
    int i;
    int measure = 0;
    int linecount = infile.getNumLines();
-   fifthmean.setSize(linecount);
-   fifthmean.allowGrowth(0);
-   fifthmean.setAll(0);
+   fifthmean.resize(linecount);
+   fill(fifthmean.begin(), fifthmean.end(), 0);
 
    CircularBuffer<int>    notes(10000);
    CircularBuffer<double> absbeat(10000);
@@ -246,7 +249,6 @@ void analyzeFile(HumdrumFile& infile, Array<double>& fifthmean) {
             break;
       }
    }
-
 }
 
 
@@ -337,13 +339,15 @@ double getFifthMean(HumdrumFile& infile, int line, double beats,
          meansum += linenum;
 
          // remove any old notes which are outside of the analysis window
-         while (infile[line].getAbsBeat() - absbeat[absbeat.getCount()-1] > 
-               beats) {
+         while ((notes.getCount() > 0) && 
+                (infile[line].getAbsBeat() - absbeat[absbeat.getCount()-1] 
+                      > beats)) {
             tnote = notes.extract();
-            // tbeat = absbeat.extract();
+            absbeat.extract();
             meansum -= tnote;
          }
       }
+
    }
 
    if (notes.getCount() > 0) {
@@ -413,22 +417,20 @@ void convertBase12ToBase40(int base12, int& x, int& y, int& z) {
 //    fifth mean.
 //
 
-void getDeviation(HumdrumFile& infile, Array<double>& cog,
-      Array<Array<double> >& deviation) {
+void getDeviation(HumdrumFile& infile, vector<double>& cog,
+      vector<vector<double> >& deviation) {
 
-   Array<Array<int> > notes;
+   vector<vector<int> > notes;
 
-   deviation.setSize(infile.getNumLines());
-   notes.setSize(infile.getNumLines());
+   deviation.resize(infile.getNumLines());
+   notes.resize(infile.getNumLines());
 
    int i, j, k;
-   for (i=0; i<deviation.getSize(); i++) {
-      deviation[i].setSize(32);
-      deviation[i].setGrowth(32);
-      deviation[i].setSize(0);
-      notes[i].setSize(32);
-      notes[i].setGrowth(32);
-      notes[i].setSize(0);
+   for (i=0; i<(int)deviation.size(); i++) {
+      deviation[i].reserve(32);
+      deviation[i].resize(0);
+      notes[i].reserve(32);
+      notes[i].resize(0);
    }
 
    char buffer[1024] = {0};
@@ -461,7 +463,7 @@ void getDeviation(HumdrumFile& infile, Array<double>& cog,
                continue;
             }
             // have an interesting note, so store it
-            notes[i].append(base40);
+            notes[i].push_back(base40);
          }
       }
    }
@@ -470,11 +472,11 @@ void getDeviation(HumdrumFile& infile, Array<double>& cog,
 
    double dev;
    for (i=0; i<infile.getNumLines(); i++) {
-      if (notes[i].getSize() < 1) {
+      if (notes[i].size() < 1) {
          continue;
       }
-      deviation[i].setSize(notes[i].getSize());
-      for (j=0; j<notes[i].getSize(); j++) {
+      deviation[i].resize(notes[i].size());
+      for (j=0; j<(int)notes[i].size(); j++) {
          dev = base40ToLo5(notes[i][j]) - cog[i];
          deviation[i][j] = dev;
       }
@@ -489,14 +491,14 @@ void getDeviation(HumdrumFile& infile, Array<double>& cog,
 // printAnalysis -- print the analysis of the mean.
 //
 
-void printAnalysis(HumdrumFile& infile, Array<double>& fifthmean) {
+void printAnalysis(HumdrumFile& infile, vector<double>& fifthmean) {
    int i;
    int linecount = infile.getNumLines();
    char buffer[1024] = {0};
    int printbeat = 0;
    int ii, kk;
 
-   Array<Array<double> > deviation;
+   vector<vector<double> > deviation;
    if (deviationQ) {
       getDeviation(infile, fifthmean, deviation);
    }
@@ -561,11 +563,11 @@ void printAnalysis(HumdrumFile& infile, Array<double>& fifthmean) {
                   if (averageQ) {
                      cout << getAverage(infile, deviation, avgbeat, i);
                   } else {
-                     for (kk=0; kk<deviation[i].getSize(); kk++) {
+                     for (kk=0; kk<(int)deviation[i].size(); kk++) {
                         tempval = deviation[i][kk];
                         tempval = (int)(100 * tempval + 0.5)/100.0;
                         cout << tempval;
-                        if (kk < deviation[i].getSize() - 1) {
+                        if (kk < (int)deviation[i].size() - 1) {
                            cout << " ";
                         }
                      }
@@ -765,7 +767,7 @@ int base40ToLo5(int base40) {
 // getAverage --
 //
 
-double getAverage(HumdrumFile& infile, Array<Array<double> >& data,
+double getAverage(HumdrumFile& infile, vector<vector<double> >& data,
       double abeat, int index) {
    int i, j;
 
@@ -777,7 +779,7 @@ double getAverage(HumdrumFile& infile, Array<Array<double> >& data,
       if (startdur - infile[i].getAbsBeat() > abeat) {
          break;
       }
-      for (j=0; j<data[i].getSize(); j++) {
+      for (j=0; j<(int)data[i].size(); j++) {
          if (data[i][j] == -1.0) {
             sum += infile[i].getAbsBeat();
          } else {

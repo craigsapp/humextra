@@ -11,6 +11,7 @@ Header Record 10
 Group memberships: score
 score: part 1 of 1
 $  Q:64   T:4/4   C:4
+P C0:x0
 E4   512      1 B
 E4   256      1 w
 E4   128      1 h

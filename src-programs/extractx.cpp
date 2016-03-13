@@ -137,9 +137,9 @@ int main(int argc, char* argv[]) {
    HumdrumFile infile;
 
    while (streamer.read(infile)) {
-      if (!streamer.eof()) {
-         cout << "!!!!SEGMENT: " << infile.getFileName() << endl;
-      }
+      //if (!streamer.eof()) {
+      //   cout << "!!!!SEGMENT: " << infile.getFileName() << endl;
+      //}
       processFile(infile);
    }
 
@@ -275,7 +275,7 @@ void getInterpretationFields(vector<int>& field, vector<int>& subfield,
    pre.sar(buffer, "\\s+", "", "g");  // remove spaces from the search string.
 
    while (pre.search(buffer, "^([^,]+)")) {
-      sstrings.push_back(pre.getSubmatch());
+      sstrings.push_back(pre.getSubmatch(1));
       pre.sar(buffer, "^[^,]+,?", "", "");
    }
 
@@ -290,6 +290,8 @@ void getInterpretationFields(vector<int>& field, vector<int>& subfield,
    tracks.resize(infile.getMaxTracks()+1);
    fill(tracks.begin(), tracks.end(), 0);
 
+   // Algorithm below could be made more efficient by
+   // not searching the entire file...
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isInterpretation()) {
          continue;

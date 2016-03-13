@@ -175,9 +175,12 @@ const string& Option_register::getOption(void) {
 //
 
 void Option_register::reset(void) {
-   definition.clear();
-   defaultOption.clear();
-   modifiedOption.clear();
+   definition.resize(0);
+   defaultOption.resize(0);
+   modifiedOption.resize(0);
+	description.resize(0);
+   modifiedQ = 0;
+   type = 's';
 }
 
 
@@ -699,6 +702,8 @@ void Options::reset(void) {
    commandString.clear();
    extraArgv.clear();
    extraArgv_strings.clear();
+
+   optionList.clear();
 
    oargc = -1;
    oargv.clear();

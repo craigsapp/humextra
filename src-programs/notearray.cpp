@@ -7,6 +7,7 @@
 // Last Modified: Thu Oct 20 22:23:27 PDT 2011 Fixed init bug
 // Last Modified: Sun Oct 20 17:41:10 PDT 2013 Fixed tie problem
 // Last Modified: Tue Nov 12 14:37:11 PST 2013 Added column for measure duration
+// Last Modified: Sat Mar 12 20:41:25 PST 2016 Switched to STL
 // Filename:      ...sig/examples/all/notearray.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/notearray.cpp
 // Syntax:        C++; museinfo
@@ -21,12 +22,11 @@
 
 #include "humdrum.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-   using namespace std;
-#else
-   #include <iostream.h>
-#endif
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
    
 #define STYLE_BASE40 40
 #define STYLE_BASE12 12
@@ -47,37 +47,37 @@
 #define TYPE_NEXT	7300
 
 // function declarations
-void getNoteArray           (Array<Array<int> >& notes, Array<int>& measpos, 
-                             Array<int>& linenum, HumdrumFile& infile, 
+void getNoteArray           (vector<vector<int> >& notes, vector<int>& measpos, 
+                             vector<int>& linenum, HumdrumFile& infile, 
                              int base, int flags);
-void printNoteArray         (Array<Array<int> >& notes, Array<int>& measpos, 
-                             Array<int>& linenum, HumdrumFile& infile,
-                             Array<double>& bardur, Array<double>& beatdur);
+void printNoteArray         (vector<vector<int> >& notes, vector<int>& measpos, 
+                             vector<int>& linenum, HumdrumFile& infile,
+                             vector<double>& bardur, vector<double>& beatdur);
 void printComments          (HumdrumFile& infile, int startline, int stopline, 
                              int style);
 void printExclusiveInterpretations(int basecount);
-void printLine              (Array<Array<int> >& notes, 
-                             Array<Array<int> >& attacks, 
-                             Array<Array<int> >& lasts, 
-                             Array<Array<int> >& nexts, Array<int>& measpos, 
-                             Array<int>& linenum, Array<double>& bardur, 
-                             Array<double>& beatdur, HumdrumFile& infile, 
+void printLine              (vector<vector<int> >& notes, 
+                             vector<vector<int> >& attacks, 
+                             vector<vector<int> >& lasts, 
+                             vector<vector<int> >& nexts, vector<int>& measpos, 
+                             vector<int>& linenum, vector<double>& bardur, 
+                             vector<double>& beatdur, HumdrumFile& infile, 
                              int index, int style);
 void usage                  (const char* command);
 void example                (void);
 void checkOptions           (Options& opts, int argc, char* argv[]);
-void getNoteAttackIndexes   (Array<Array<int> >& attacks, 
-                             Array<Array<int> >& notes, int offst);
-void getLastAttackIndexes   (Array<Array<int> >& lasts, 
-                             Array<Array<int> >& notes, int offset);
-void getNextAttackIndexes   (Array<Array<int> >& lasts, 
-                             Array<Array<int> >& notes, int offset);
-int  noteStartMarker        (Array<Array<int> >& notes, int line, int column);
-int  noteEndMarker          (Array<Array<int> >& notes, int line, int column);
-int  noteContinueMarker     (Array<Array<int> >& notes, int line, int column);
-int  singleNote             (Array<Array<int> >& notes, int line, int column);
-void getMeasureDurations    (Array<double>& bardur, HumdrumFile& infile);
-void getBeatDurations       (Array<double>& beatdur, HumdrumFile& infile);
+void getNoteAttackIndexes   (vector<vector<int> >& attacks, 
+                             vector<vector<int> >& notes, int offst);
+void getLastAttackIndexes   (vector<vector<int> >& lasts, 
+                             vector<vector<int> >& notes, int offset);
+void getNextAttackIndexes   (vector<vector<int> >& lasts, 
+                             vector<vector<int> >& notes, int offset);
+int  noteStartMarker        (vector<vector<int> >& notes, int line, int column);
+int  noteEndMarker          (vector<vector<int> >& notes, int line, int column);
+int  noteContinueMarker     (vector<vector<int> >& notes, int line, int column);
+int  singleNote             (vector<vector<int> >& notes, int line, int column);
+void getMeasureDurations    (vector<double>& bardur, HumdrumFile& infile);
+void getBeatDurations       (vector<double>& beatdur, HumdrumFile& infile);
 
 
 // global variables
@@ -136,11 +136,11 @@ const char* beatbase = "";     // used with -t option
 
 int main(int argc, char** argv) {
 
-   Array<Array<int> > notelist;
-   Array<double>      bardur;
-   Array<double>      beatdur;
-   Array<int>         measpos;
-   Array<int>         linenum;
+   vector<vector<int> > notelist;
+   vector<double>      bardur;
+   vector<double>      beatdur;
+   vector<int>         measpos;
+   vector<int>         linenum;
  
    HumdrumFile infile;
 
@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
 
       getNoteArray(notelist, measpos, linenum, infile, base, doubleQ);
       printNoteArray(notelist, measpos, linenum, infile, bardur, beatdur);
-      OffsetSum += notelist.getSize();
+      OffsetSum += notelist.size();
     
       if (!saQ) {
          Absoffset += infile.getTotalDurationR();
@@ -204,10 +204,10 @@ int main(int argc, char** argv) {
 //      line in the music.
 //
 
-void getMeasureDurations(Array<double>& bardur, HumdrumFile& infile) {
+void getMeasureDurations(vector<double>& bardur, HumdrumFile& infile) {
    int i;
    double value = infile.getPickupDuration();
-   bardur.setSize(infile.getNumLines());
+   bardur.resize(infile.getNumLines());
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].isBarline()) {
          value = infile[i].getBeat();
@@ -224,10 +224,10 @@ void getMeasureDurations(Array<double>& bardur, HumdrumFile& infile) {
 //      line in the music.
 //
 
-void getBeatDurations(Array<double>& bardur, HumdrumFile& infile) {
+void getBeatDurations(vector<double>& bardur, HumdrumFile& infile) {
    int i;
    double value = 1.0; // quarter note
-   bardur.setSize(infile.getNumLines());
+   bardur.resize(infile.getNumLines());
    PerlRegularExpression pre;
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].isInterpretation()) {
@@ -257,17 +257,17 @@ void getBeatDurations(Array<double>& bardur, HumdrumFile& infile) {
 //    	1: turn on double-barline rest markers.
 //
 
-void getNoteArray(Array<Array<int> >& notes, Array<int>& measpos, 
-      Array<int>& linenum, HumdrumFile& infile, int style, int flags) {
+void getNoteArray(vector<vector<int> >& notes, vector<int>& measpos, 
+      vector<int>& linenum, HumdrumFile& infile, int style, int flags) {
 
-   notes.setSize(infile.getNumLines());
-   notes.setSize(0);
+   notes.reserve(infile.getNumLines());
+   notes.resize(0);
 
-   measpos.setSize(infile.getNumLines());
-   measpos.setSize(0);
+   measpos.reserve(infile.getNumLines());
+   measpos.resize(0);
 
-   linenum.setSize(infile.getNumLines());
-   linenum.setSize(0);
+   linenum.reserve(infile.getNumLines());
+   linenum.resize(0);
 
    int measnum = 0;
    int rest    = 0;
@@ -275,24 +275,22 @@ void getNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
    int negQ    = 0;
 
    // prestorage for note lists so that --no-sustain option can be applied
-   Array<int> templist;
-   templist.setSize(1000);
-   templist.setSize(0);
+   vector<int> templist;
+   templist.reserve(1000);
 
-   Array<int> templistI;
-   templistI.setSize(1000);
-   templistI.setSize(0);
+   vector<int> templistI;
+   templistI.reserve(1000);
 
    int value;
    int firstQ = 1;
    if (typeQ) {
       // store even if lineQ is zero!
       value = TYPE_LINE;
-      linenum.append(value);
+      linenum.push_back(value);
    }
    if (typeQ) {
       value = TYPE_MEASURE;
-      measpos.append(value);
+      measpos.push_back(value);
    }
 
    // increment measure number in case of pickups
@@ -300,21 +298,21 @@ void getNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
    for (i=0; i<infile.getNumLines(); i++) {
 
       if (infile[i].isMeasure()) {
-         if (doubleQ && (templist.getSize() == 0)) {
+         if (doubleQ && (templist.size() == 0)) {
             if (strstr(infile[i][0], "||") != NULL) {
                // insert a rest sonority to break music
                // from previous measure
-               notes.setSize(notes.getSize() + 1);
-               notes.last().setSize(infile[i].getFieldCount());
-               notes.last().setSize(0);
+               notes.resize(notes.size() + 1);
+               notes.back().reserve(infile[i].getFieldCount());
+               notes.back().resize(0);
                for (j=0; j<infile[i].getFieldCount(); j++) {
                   if (!infile[i].isExInterp(j, "**kern")) {
                      continue;
                   }
-                  notes.last().append(rest);
-                  linenum.append(i);
+                  notes.back().push_back(rest);
+                  linenum.push_back(i);
                }
-               measpos.append(measnum);
+               measpos.push_back(measnum);
             }
          }
 
@@ -326,7 +324,7 @@ void getNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
          continue;
       }
 
-      templist.setSize(0);
+      templist.resize(0);
 
 
       for (j=0; j<infile[i].getFieldCount(); j++) {
@@ -373,13 +371,13 @@ void getNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
             baseval = Convert::base40ToMidiNoteNumber(baseval);
          }
          baseval = attack * baseval;
-         templist.append(baseval);
+         templist.push_back(baseval);
       }
 
       negQ = 1;
       if (susxQ) {
          // if all notes are negative, then do not store the line
-         for (int m=0; m<templist.getSize(); m++) {
+         for (int m=0; m<(int)templist.size(); m++) {
             if (templist[m] >= 0) {
                negQ = 0;
                break;
@@ -392,42 +390,38 @@ void getNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
 
       if (firstQ && typeQ) {
          firstQ = 0;
-         templistI.setSize(templist.getSize());
+         templistI.resize(templist.size());
          int value = TYPE_NOTES;
          switch (style) {
             case STYLE_BASE40: value += 40; break;
             case STYLE_BASE12: value += 12; break;
             case STYLE_BASE7:  value +=  7; break;
          }
-         templistI.setAll(value);
-         notes.increase();
-         notes.last() = templistI;
+         fill(templistI.begin(), templistI.end(), value);
+         notes.push_back(templistI);
       }
 
-      notes.increase();
-      notes.last() = templist;
-      measpos.append(measnum);
-      linenum.append(i);
-
+      notes.push_back(templist);
+      measpos.push_back(measnum);
+      linenum.push_back(i);
    }
 
-
    if (endQ) {
-      notes.increase();
-      notes.last().setSize(notes.last(-1).getSize());
-      notes.last().zero();
+      notes.resize(notes.size()+1);
+      notes.back().resize(notes[notes.size()-2].size());
+      fill(notes.back().begin(), notes.back().end(), 0);
       // sustains instead of rests (have to copy .last(-1):
-      // for (i=0; i<notes.last().getSize(); i++) {
-      //    if (notes.last()[i] > 0) {
-      //       notes.last()[i] *= -1;
+      // for (i=0; i<(int)notes.last().size(); i++) {
+      //    if (notes.back()[i] > 0) {
+      //       notes.back()[i] *= -1;
       //    }
       // }
-      measpos.append(measpos.last());
-      linenum.append(linenum.last());
+      measpos.push_back(measpos.back());
+      linenum.push_back(linenum.back());
       // store the data termination line as the line number of the sonority
       for (i=infile.getNumLines()-1; i>=0; i--) {
          if (infile[i].isInterpretation()) {
-            linenum.last() = i;
+            linenum.back() = i;
             break;
          }
       }
@@ -435,8 +429,8 @@ void getNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
       // increment the measure number if the beat of the end
       // is at 1.  This will work unless the last sonority is a 
       // grace note.
-      if (infile[linenum.last()].getBeat() == 1.0) {
-         measpos.last()++; 
+      if (infile[linenum.back()].getBeat() == 1.0) {
+         measpos.back()++; 
       }
    }
 
@@ -449,17 +443,13 @@ void getNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
 // printNoteArray --
 //
 
-void printNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
-      Array<int>& linenum, HumdrumFile& infile, Array<double>& bardur, 
-      Array<double>& beatdur) {
+void printNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
+      vector<int>& linenum, HumdrumFile& infile, vector<double>& bardur, 
+      vector<double>& beatdur) {
 
-   linenum.allowGrowth(0);
-   measpos.allowGrowth(0);
-   notes.allowGrowth(0);
-
-   Array<Array<int> > attacks;
-   Array<Array<int> > lasts;
-   Array<Array<int> > nexts;
+   vector<vector<int> > attacks;
+   vector<vector<int> > lasts;
+   vector<vector<int> > nexts;
    if (attackQ) {
       getNoteAttackIndexes(attacks, notes, Offset + OffsetSum);
    }
@@ -471,7 +461,7 @@ void printNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
    }
 
    int i, j;
-   for (i=0; i<notes.getSize(); i++) {
+   for (i=0; i<(int)notes.size(); i++) {
       if (i == 0) { 
          if (commentQ && !typeQ) {
             printComments(infile, 0, linenum[0], humdrumQ);
@@ -479,10 +469,10 @@ void printNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
             printComments(infile, 0, linenum[1], humdrumQ);
          }
          if (infoQ) {
-            printExclusiveInterpretations(notes[0].getSize());
+            printExclusiveInterpretations(notes[0].size());
          } else if (humdrumQ) {
             // always print exclusive interpretations if Humdrum output
-            printExclusiveInterpretations(notes[0].getSize());
+            printExclusiveInterpretations(notes[0].size());
          }
          if (mathQ) {
             if (Count <= 1) {
@@ -512,12 +502,12 @@ void printNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
       if (nextQ)   { width++; }
       if (kernQ)   { width++; }
          
-      int counter = notes[0].getSize();
+      int counter = notes[0].size();
       counter *= width;
       counter += indexQ + lineQ + measureQ + beatQ + absoluteQ + linedurQ;
-      // if (attackQ) { counter += notes[0].getSize(); }
-      // if (lastQ) { counter += notes[0].getSize(); }
-      // if (nextQ) { counter += notes[0].getSize(); }
+      // if (attackQ) { counter += notes[0].size(); }
+      // if (lastQ) { counter += notes[0].size(); }
+      // if (nextQ) { counter += notes[0].size(); }
       for (j=0; j<counter; j++) {
          cout << "*-";
          if (j < counter-1) {
@@ -538,7 +528,7 @@ void printNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
    }
 
    if (commentQ) {
-      printComments(infile, linenum.last(), infile.getNumLines()-1, humdrumQ);
+      printComments(infile, linenum.back(), infile.getNumLines()-1, humdrumQ);
    }
 }
 
@@ -550,43 +540,43 @@ void printNoteArray(Array<Array<int> >& notes, Array<int>& measpos,
 //     of notes (or the first rest in a series of rests) in each voice.
 //
 
-void getLastAttackIndexes(Array<Array<int> >& lasts, 
-      Array<Array<int> >& notes, int offset) {
+void getLastAttackIndexes(vector<vector<int> >& lasts, 
+      vector<vector<int> >& notes, int offset) {
 
    int start = 0;
-   lasts.setSize(notes.getSize());
+   lasts.resize(notes.size());
    if (typeQ) {
-      lasts[0].setAll(TYPE_LAST);
+      fill(lasts[0].begin(), lasts[0].end(), TYPE_LAST);
       start = 1;
    }
 
    int i, j;
 
-   lasts[start].setAll(-1);
+   fill(lasts[start].begin(), lasts[start].end(), -1);
 
-   if (notes.getSize() == start+1) {
+   if ((int)notes.size() == start+1) {
       return;
    }
 
-   Array<int> states;
-   states.setSize(notes[0].getSize());
+   vector<int> states;
+   states.resize(notes[0].size());
    if (typeQ) {
-      states.setAll(offset+1);
+      fill(states.begin(), states.end(), offset+1);
    } else {
-      states.setAll(offset);
+      fill(states.begin(), states.end(), offset);
    }
 
-   for (i=0; i<notes.getSize(); i++) {
-      lasts[i].setSize(notes[i].getSize());
+   for (i=0; i<(int)notes.size(); i++) {
+      lasts[i].resize(notes[i].size());
       if (i <= start) {
-         lasts[i].setAll(-1);
+         fill(lasts[i].begin(), lasts[i].end(), -1);
          if (typeQ && (i==0)) {
-            lasts[i].setAll(TYPE_LAST);
+            fill(lasts[i].begin(), lasts[i].end(), TYPE_LAST);
          }
          continue;
       }
 
-      for (j=0; j<notes[i].getSize(); j++) {
+      for (j=0; j<(int)notes[i].size(); j++) {
          if (notes[i][j] > 0) {
             // a new note attack, store the note attack index in
             // the states array after recording the index of the previous note
@@ -628,29 +618,29 @@ void getLastAttackIndexes(Array<Array<int> >& lasts,
 //     of notes (or the first rest in a series of rests) in each voice.
 //
 
-void getNextAttackIndexes(Array<Array<int> >& nexts, 
-      Array<Array<int> >& notes, int offset) {
+void getNextAttackIndexes(vector<vector<int> >& nexts, 
+      vector<vector<int> >& notes, int offset) {
 
    int start = 0;
-   nexts.setSize(notes.getSize());
+   nexts.resize(notes.size());
    if (typeQ) {
-      nexts[0].setSize(notes[0].getSize());
-      nexts[0].setAll(TYPE_NEXT);
+      nexts[0].resize(notes[0].size());
+      fill(nexts[0].begin(), nexts[0].end(), TYPE_NEXT);
       start = 1;
    }
 
    int i, j;
 
-   nexts.last().setSize(notes.last().getSize());
-   nexts.last().setAll(-1);
+   nexts.back().resize(notes.back().size());
+   fill(nexts.back().begin(), nexts.back().end(), -1);
 
-   if (notes.getSize() == start+1) {
+   if ((int)notes.size() == start+1) {
       return;
    }
 
-   for (i=notes.getSize()-2; i>=start; i--) {
-      nexts[i].setSize(notes[i].getSize());
-      for (j=0; j<notes[i].getSize(); j++) {
+   for (i=(int)notes.size()-2; i>=start; i--) {
+      nexts[i].resize(notes[i].size());
+      for (j=0; j<(int)notes[i].size(); j++) {
          if ((notes[i][j] != 0) && (notes[i+1][j] == 0)) {
             // next note is a "rest attack"
             nexts[i][j] = i + 1 + offset;
@@ -675,19 +665,18 @@ void getNextAttackIndexes(Array<Array<int> >& nexts,
 //     of notes (or the first rest in a series of rests) in each voice.
 //
 
-void getNoteAttackIndexes(Array<Array<int> >& attacks, 
-      Array<Array<int> >& notes, int offset) {
+void getNoteAttackIndexes(vector<vector<int> >& attacks, 
+      vector<vector<int> >& notes, int offset) {
 
-   attacks.setSize(notes.getSize());
+   attacks.resize(notes.size());
    int i, j;
 
-   attacks[0].setSize(notes[0].getSize());
-   attacks[0].setAll(offset);
+   attacks[0].resize(notes[0].size());
+   fill (attacks[0].begin(), attacks[0].end(), offset);
 
-   for (i=1; i<attacks.getSize(); i++) {
-      attacks[i].setSize(notes[i].getSize());
-      attacks[i].allowGrowth(0);
-      for (j=0; j<attacks[i].getSize(); j++) {
+   for (i=1; i<(int)attacks.size(); i++) {
+      attacks[i].resize(notes[i].size());
+      for (j=0; j<(int)attacks[i].size(); j++) {
          if (notes[i][j] < 0) {
             // a sustained note, so store index of attack note
             attacks[i][j] = attacks[i-1][j];
@@ -708,7 +697,7 @@ void getNoteAttackIndexes(Array<Array<int> >& attacks,
    }
 
    if (typeQ) {
-      attacks[0].setAll(TYPE_ATTACK);
+      fill(attacks[0].begin(), attacks[0].end(), TYPE_ATTACK);
    }
 }
 
@@ -721,10 +710,10 @@ void getNoteAttackIndexes(Array<Array<int> >& attacks,
 //    style == 1: index line (don't extract beat or absbeat from infile)
 //
 
-void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks, 
-      Array<Array<int> >& lasts, Array<Array<int> >& nexts, 
-      Array<int>& measpos, Array<int>& linenum, Array<double>& bardur,
-      Array<double>& beatdur, HumdrumFile& infile, 
+void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks, 
+      vector<vector<int> >& lasts, vector<vector<int> >& nexts, 
+      vector<int>& measpos, vector<int>& linenum, vector<double>& bardur,
+      vector<double>& beatdur, HumdrumFile& infile, 
       int index, int style) {
 
    int& i = index;
@@ -864,17 +853,16 @@ void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks,
    }
 
 
-   Array<int> values;
-   values.setSize(notes.getSize() * 10);
-   values.setSize(0);
+   vector<int> values;
+   values.reserve(notes.size() * 10);
 
    int vv;
    int sign;
-   for (j=0; j<notes[i].getSize(); j++) {
+   for (j=0; j<(int)notes[i].size(); j++) {
       vv = notes[i][j];
       //if (kernQ && (style == 1) && typeQ) {
       // int ww = TYPE_KERN;
-      //   values.append(ww);
+      //   values.push_back(ww);
       //} 
       if (vv < TYPE_NOTES) {
          if (vv < 0) {
@@ -894,19 +882,19 @@ void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks,
             }
          }
          vv *= sign;
-         values.append(vv);
+         values.push_back(vv);
       } else {
-         values.append(vv);
+         values.push_back(vv);
       }
 
       if (attackQ) {
-         values.append(attacks[i][j]);
+         values.push_back(attacks[i][j]);
       }
       if (lastQ) {
-         values.append(lasts[i][j]);
+         values.push_back(lasts[i][j]);
       }
       if (nextQ) {
-         values.append(nexts[i][j]);
+         values.push_back(nexts[i][j]);
       }
    }
 
@@ -917,7 +905,7 @@ void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks,
 
    char buffer[1024] = {0};
 
-   for (j=0; j<values.getSize(); j++) {
+   for (j=0; j<(int)values.size(); j++) {
       if (kernQ && ((j % width) == 0)) {
          //if (mathQ) {
          //   cout << ",";
@@ -962,7 +950,7 @@ void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks,
       }
       cout << "\t" << values[j];
 
-      if (j < values.getSize()-1) {
+      if (j < (int)values.size()-1) {
          if (mathQ) {
             cout << ",";
          }
@@ -971,7 +959,7 @@ void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks,
    }
    if (mathQ) {
       cout << "}";
-      if (i < linenum.getSize() - 1) {
+      if (i < (int)linenum.size() - 1) {
          cout << ",";
       }
    }
@@ -985,7 +973,7 @@ void printLine(Array<Array<int> >& notes, Array<Array<int> >& attacks,
 // singleNote -- true if the note in the column/line is uniq
 //
 
-int singleNote(Array<Array<int> >& notes, int line, int column) {
+int singleNote(vector<vector<int> >& notes, int line, int column) {
    int start = 0;
    if (typeQ) {
       start = 1;
@@ -998,10 +986,10 @@ int singleNote(Array<Array<int> >& notes, int line, int column) {
    int nextpitch = -1;
    int lastpitch = -1;
 
-   if ((line > start) && (notes.getSize() > 1+start)) {
+   if ((line > start) && ((int)notes.size() > 1+start)) {
       lastpitch = notes[line-1][column];
    }
-   if ((notes.getSize() > start+1) && (line < notes.getSize() - 1)) {
+   if (((int)notes.size() > start+1) && (line < (int)notes.size() - 1)) {
       nextpitch = notes[line+1][column];
    }
  
@@ -1036,7 +1024,7 @@ int singleNote(Array<Array<int> >& notes, int line, int column) {
 // noteStartMarker --
 //
 
-int noteStartMarker(Array<Array<int> >& notes, int line, int column) {
+int noteStartMarker(vector<vector<int> >& notes, int line, int column) {
    int start = 0;
    if (typeQ) {
       start = 1;
@@ -1049,10 +1037,10 @@ int noteStartMarker(Array<Array<int> >& notes, int line, int column) {
    int nextpitch = -1;
    int lastpitch = -1;
 
-   if ((line > start) && (notes.getSize() > 1+start)) {
+   if ((line > start) && ((int)notes.size() > 1+start)) {
       lastpitch = notes[line-1][column];
    }
-   if ((notes.getSize() > start+1) && (line < notes.getSize() - 1)) {
+   if (((int)notes.size() > start+1) && (line < (int)notes.size() - 1)) {
       nextpitch = notes[line+1][column];
    }
 
@@ -1082,7 +1070,7 @@ int noteStartMarker(Array<Array<int> >& notes, int line, int column) {
 // noteContinueMarker --
 //
 
-int noteContinueMarker(Array<Array<int> >& notes, int line, int column) {
+int noteContinueMarker(vector<vector<int> >& notes, int line, int column) {
    int start = 0;
    if (typeQ) {
       start = 1;
@@ -1095,10 +1083,10 @@ int noteContinueMarker(Array<Array<int> >& notes, int line, int column) {
    int nextpitch = -1;
    int lastpitch = -1;
 
-   if ((line > start) && (notes.getSize() > 1+start)) {
+   if ((line > start) && ((int)notes.size() > 1+start)) {
       lastpitch = notes[line-1][column];
    }
-   if ((notes.getSize() > start+1) && (line < notes.getSize() - 1)) {
+   if (((int)notes.size() > start+1) && (line < (int)notes.size() - 1)) {
       nextpitch = notes[line+1][column];
    }
 
@@ -1127,7 +1115,7 @@ int noteContinueMarker(Array<Array<int> >& notes, int line, int column) {
 // noteEndMarker --
 //
 
-int noteEndMarker(Array<Array<int> >& notes, int line, int column) {
+int noteEndMarker(vector<vector<int> >& notes, int line, int column) {
    int start = 0;
    if (typeQ) {
       start = 1;
@@ -1140,10 +1128,10 @@ int noteEndMarker(Array<Array<int> >& notes, int line, int column) {
    int nextpitch = -1;
    // int lastpitch = -1;
 
-   if ((line > start) && (notes.getSize() > 1+start)) {
+   if ((line > start) && ((int)notes.size() > 1+start)) {
       // lastpitch = notes[line-1][column];
    }
-   if ((notes.getSize() > start+1) && (line < notes.getSize() - 1)) {
+   if (((int)notes.size() > start+1) && (line < (int)notes.size() - 1)) {
       nextpitch = notes[line+1][column];
    }
 
