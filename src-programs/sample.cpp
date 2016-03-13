@@ -2,12 +2,14 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Jul  9 13:20:28 PDT 1998
 // Last Modified: Tue Dec  5 15:11:50 PST 2000 enable polyphonic sampling
-// Last Modified: Mon Feb 22 15:31:39 PST 2016 Some modernization and generalization
+// Last Modified: Mon Feb 22 15:31:39 PST 2016 Some modernization & generalizing
 // Filename:      ...sig/examples/all/sample.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/sample.cpp
 // Syntax:        C++; museinfo
 //
 // Description:   Samples pitches according to the given pattern
+//
+// Todo: Add pickup offsets and/or barline triggering of pattern.
 //
 
 #include "humdrum.h"
@@ -35,11 +37,10 @@ CircularBuffer<int>    styles(1000);
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   HumdrumStream streamer(options);
-   HumdrumFile infile, outfile;
-
    // process the command-line options
    checkOptions(options, argc, argv);
+   HumdrumStream streamer(options);
+   HumdrumFile infile, outfile;
 
    while (streamer.read(infile)) {
       processRecords(infile, outfile);

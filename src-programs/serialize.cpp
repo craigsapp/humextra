@@ -694,18 +694,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       chordQ = 1;
    }
 
-   const char* ptr = opts.getString("interp").data();
-   int length = strlen(ptr);
-   interp.resize(length+1);
-   if (length == 0) {
-      interp[0] = '\0';
-   } else if (strncmp(ptr, "**", 2) != 0) {
-      interp.resize(length+3);
-      interp = "**";
-      interp += ptr;
-   } else {
-      interp += ptr;
+   if (opts.getBoolean("interp")) {
+      interp = opts.getString("interp");
+      if ((interp.size() < 2) || (interp[0] != '*')) {
+         interp.insert(0, "**") ;
+      }
    }
+
    if (strlen(opts.getString("separator").data()) >= 1) {
       Separator = opts.getString("separator").data()[0];
    }
