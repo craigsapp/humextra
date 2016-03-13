@@ -32,11 +32,9 @@ int main(int argc, char* argv[]) {
    checkOptions(options, argc, argv);
    HumdrumStream streamer(options);
    HumdrumFile infile;
-
    while (streamer.read(infile)) {
       processFile(infile);
    }
-
    return 0;
 }
 

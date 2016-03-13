@@ -75,6 +75,7 @@ int          octaveVal = -100;   // used with -o option
 int          barlinesQ = 0;      // used with -b option
 int          legendQ   = 0;      // used with -l option
 int          outlineQ  = 1;      // 
+int          filenameQ = 0;      // used with --filename option
 const char*  notesep   = " ";    // used with -N option
 const char* colorindex[26];
 
@@ -83,25 +84,10 @@ const char* colorindex[26];
 
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile, outfile;
-
-   // process the command-line options
    checkOptions(options, argc, argv);
-
-   // figure out the number of input files to process
-   int numinputs = options.getArgCount();
-
-   for (int i=0; i<numinputs || i==0; i++) {
-      chordinit = 1;
-      infile.clear();
-
-      // if no command-line arguments read data file from standard input
-      if (numinputs < 1) {
-         infile.read(cin);
-      } else {
-         infile.read(options.getArg(i+1));
-      }
-
+   HumdrumStream streamer(options);
+   HumdrumFile infile;
+   while (streamer.read(infile)) {
       // analyze the input file according to command-line options
       if (imageQ) {
          printTriadImage(infile, imagey, imagex);
@@ -110,9 +96,7 @@ int main(int argc, char* argv[]) {
       } else {
          processRecords(infile);
       }
-       
    }
-
    return 0;
 }
 
@@ -130,6 +114,9 @@ void printFinalis(HumdrumFile& infile) {
    infile.analyzeSonorityQuality(cq);
    char buffer[128] = {0};
 
+   if (filenameQ) {
+      cout << infile.getFilename() << "\t";
+   }
    for (int i = cq.getSize()-1; i>=0; i--) {
       if (infile[i].isData()) {
          int root = cq[i].getRoot();
@@ -138,13 +125,14 @@ void printFinalis(HumdrumFile& infile) {
             continue;
          }
          if (base40Q) {
-            cout << root-2 << endl;
+            cout << root-2;
          } else {
-            cout << Convert::base40ToKern(buffer, root + 3 * 40) << endl;
+            cout << Convert::base40ToKern(buffer, root + 3 * 40);
          }
          break;
       }
    }
+   cout << endl;
 }
 
 
@@ -585,6 +573,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("o|octave=i:4",      "characters to separate pitch classes");
    opts.define("b|barlines=b",      "display barlines at bottom of image");
    opts.define("l|legend=b",        "display color mapping");
+   opts.define("filename=b",        "display filename for finalis output");
 
    opts.define("author=b",          "author of program");
    opts.define("version=b",         "compilation info");
@@ -638,6 +627,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       sscanf(opts.getString("image").data(), "%dx%d", &imagex, &imagey);
    }
 
+   filenameQ =  opts.getBoolean("filename");
    ivQ       =  opts.getBoolean("iv");
    attackQ   =  opts.getBoolean("suspension");
    forteQ    =  opts.getBoolean("forte");
