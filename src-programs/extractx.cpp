@@ -7,6 +7,7 @@
 // Last Modified: Tue Sep  8 11:43:46 PDT 2009 Added co-spine extraction
 // Last Modified: Sat Apr  6 00:48:21 PDT 2013 Enabled multiple segment input
 // Last Modified: Thu Oct 24 12:32:47 PDT 2013 Switch to HumdrumStream class
+// Last Modified: Sat Mar 12 18:34:05 PST 2016 Switch to STL
 // Filename:      ...sig/examples/all/extractx.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/extractx.cpp
 // Syntax:        C++; museinfo
@@ -23,74 +24,73 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-#endif
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
 
 
 // function declarations
 void    checkOptions            (Options& opts, int argc, char* argv[]);
 void    processFile             (HumdrumFile& infile);
-void    excludeFields           (HumdrumFile& infile, Array<int>& field, 
-                                 Array<int>& subfield, Array<int>& model);
-void    extractFields           (HumdrumFile& infile, Array<int>& field, 
-                                 Array<int>& subfield, Array<int>& model);
+void    excludeFields           (HumdrumFile& infile, vector<int>& field,
+                                 vector<int>& subfield, vector<int>& model);
+void    extractFields           (HumdrumFile& infile, vector<int>& field,
+                                 vector<int>& subfield, vector<int>& model);
 void    extractTrace            (HumdrumFile& infile, const string& tracefile);
-void    getInterpretationFields (Array<int>& field, Array<int>& subfield,
-                                 Array<int>& model, HumdrumFile& infile,
+void    getInterpretationFields (vector<int>& field, vector<int>& subfield,
+                                 vector<int>& model, HumdrumFile& infile,
                                  string& interps, int state);
 //void    extractInterpretations  (HumdrumFile& infile, string& interps);
 void    example                 (void);
 void    usage                   (const char* command);
-void    fillFieldData           (Array<int>& field, Array<int>& subfield, 
-                                 Array<int>& model, string& fieldstring, 
+void    fillFieldData           (vector<int>& field, vector<int>& subfield,
+                                 vector<int>& model, string& fieldstring,
                                  HumdrumFile& infile);
-void    processFieldEntry       (Array<int>& field, Array<int>& subfield, 
-                                 Array<int>& model, const char* string, 
+void    processFieldEntry       (vector<int>& field, vector<int>& subfield,
+                                 vector<int>& model, const char* astring,
                                  HumdrumFile& infile);
-void    removeDollarsFromString (Array<char>& buffer, int maxtrack);
-int     isInList                (int number, Array<int>& listofnum);
-void    getTraceData            (Array<int>& startline, 
-                                 Array<Array<int> >& fields, 
+void    removeDollarsFromString (string& buffer, int maxtrack);
+int     isInList                (int number, vector<int>& listofnum);
+void    getTraceData            (vector<int>& startline,
+                                 vector<vector<int> >& fields,
                                  const string& tracefile, HumdrumFile& infile);
-void    printTraceLine          (HumdrumFile& infile, int line, 
-                                 Array<int>& field);
-void    dealWithSpineManipulators(HumdrumFile& infile, int line, 
-                                 Array<int>& field, Array<int>& subfield,
-                                 Array<int>& model);
-void    storeToken              (Array<Array<char> >& storage, 
+void    printTraceLine          (HumdrumFile& infile, int line,
+                                 vector<int>& field);
+void    dealWithSpineManipulators(HumdrumFile& infile, int line,
+                                 vector<int>& field, vector<int>& subfield,
+                                 vector<int>& model);
+void    storeToken              (vector<string>& storage,
                                  const char* string);
-void    storeToken              (Array<Array<char> >& storage, int index, 
+void    storeToken              (vector<string>& storage, int index,
                                  const char* string);
-void    printMultiLines         (Array<int>& vsplit, Array<int>& vserial, 
-                                 Array<Array<char> >& tempout);
-void    reverseSpines           (Array<int>& field, Array<int>& subfield, 
-                                 Array<int>& model, HumdrumFile& infile, 
+void    printMultiLines         (vector<int>& vsplit, vector<int>& vserial,
+                                 vector<string>& tempout);
+void    reverseSpines           (vector<int>& field, vector<int>& subfield,
+                                 vector<int>& model, HumdrumFile& infile,
                                  const string& exinterp);
-void    getSearchPat            (Array<char>& spat, int target, 
+void    getSearchPat            (string& spat, int target,
                                  const char* modifier);
-void    expandSpines            (Array<int>& field, Array<int>& subfield, 
-                                 Array<int>& model, HumdrumFile& infile, 
+void    expandSpines            (vector<int>& field, vector<int>& subfield,
+                                 vector<int>& model, HumdrumFile& infile,
                                  string& interp);
-void    dealWithSecondarySubspine(Array<int>& field, Array<int>& subfield, 
-                                 Array<int>& model, int targetindex, 
-                                 HumdrumFile& infile, int line, int spine, 
+void    dealWithSecondarySubspine(vector<int>& field, vector<int>& subfield,
+                                 vector<int>& model, int targetindex,
+                                 HumdrumFile& infile, int line, int spine,
                                  int submodel);
-void    dealWithCospine         (Array<int>& field, Array<int>& subfield, 
-                                 Array<int>& model, int targetindex, 
-                                 HumdrumFile& infile, int line, int cospine, 
-                                 int comodel, int submodel, 
+void    dealWithCospine         (vector<int>& field, vector<int>& subfield,
+                                 vector<int>& model, int targetindex,
+                                 HumdrumFile& infile, int line, int cospine,
+                                 int comodel, int submodel,
                                  const string& cointerp);
-void    printCotokenInfo        (int& start, HumdrumFile& infile, int line, 
-                                 int spine, Array<Array<char> >& cotokens, 
-                                 Array<int>& spineindex, 
-                                 Array<int>& subspineindex);
-void    fillFieldDataByGrep     (Array<int>& field, Array<int>& subfield, 
-                                 Array<int>& model, const string& grepString, 
+void    printCotokenInfo        (int& start, HumdrumFile& infile, int line,
+                                 int spine, vector<string>& cotokens,
+                                 vector<int>& spineindex,
+                                 vector<int>& subspineindex);
+void    fillFieldDataByGrep     (vector<int>& field, vector<int>& subfield,
+                                 vector<int>& model, const string& grepString,
                                  HumdrumFile& infile, int state);
 
 // global variables
@@ -103,9 +103,9 @@ string       interps  = "";      // used with -i option
 int          debugQ   = 0;       // used with --debug option
 int          fieldQ   = 0;       // used with -f or -p option
 string       fieldstring = "";   // used with -f or -p option
-Array<int>   field;              // used with -f or -p option
-Array<int>   subfield;           // used with -f or -p option
-Array<int>   model;              // used with -p, or -e options and similar
+vector<int>   field;              // used with -f or -p option
+vector<int>   subfield;           // used with -f or -p option
+vector<int>   model;              // used with -p, or -e options and similar
 int          countQ   = 0;       // used with -C option
 int          traceQ   = 0;       // used with -t option
 string       tracefile = "";     // used with -t option
@@ -142,7 +142,7 @@ int main(int argc, char* argv[]) {
       }
       processFile(infile);
    }
-  
+
    return 0;
 }
 
@@ -163,21 +163,21 @@ void processFile(HumdrumFile& infile) {
    if (expandQ) {
       expandSpines(field, subfield, model, infile, expandInterp);
    } else if (interpQ) {
-      getInterpretationFields(field, subfield, model, infile, interps, 
+      getInterpretationFields(field, subfield, model, infile, interps,
             interpstate);
    } else if (reverseQ) {
       reverseSpines(field, subfield, model, infile, reverseInterp);
    } else if (fieldQ || excludeQ) {
       fillFieldData(field, subfield, model, fieldstring, infile);
    } else if (grepQ) {
-      fillFieldDataByGrep(field, subfield, model, grepString, infile, 
+      fillFieldDataByGrep(field, subfield, model, grepString, infile,
          interpstate);
    }
-   
+
    int j;
    if (debugQ && !traceQ) {
       cout << "!! Field Expansion List:";
-      for (j=0; j<field.getSize(); j++) {
+      for (j=0; j<(int)field.size(); j++) {
          cout << " " << field[j];
   if (subfield[j]) {
             cout << (char)subfield[j];
@@ -211,20 +211,20 @@ void processFile(HumdrumFile& infile) {
 // fillFieldDataByGrep --
 //
 
-void fillFieldDataByGrep(Array<int>& field, Array<int>& subfield, 
-      Array<int>& model, const string& searchstring, HumdrumFile& infile, 
+void fillFieldDataByGrep(vector<int>& field, vector<int>& subfield,
+      vector<int>& model, const string& searchstring, HumdrumFile& infile,
       int state) {
 
-   field.setSize(infile.getMaxTracks()+1);
-   subfield.setSize(infile.getMaxTracks()+1);
-   model.setSize(infile.getMaxTracks()+1);
-   field.setSize(0);
-   subfield.setSize(0);
-   model.setSize(0);
+   field.reserve(infile.getMaxTracks()+1);
+   subfield.reserve(infile.getMaxTracks()+1);
+   model.reserve(infile.getMaxTracks()+1);
+   field.resize(0);
+   subfield.resize(0);
+   model.resize(0);
 
-   Array<int> tracks;
-   tracks.setSize(infile.getMaxTracks()+1);
-   tracks.setAll(0);
+   vector<int> tracks;
+   tracks.resize(infile.getMaxTracks()+1);
+   fill(tracks.begin(), tracks.end(), 0);
    PerlRegularExpression pre;
    int track;
 
@@ -242,14 +242,14 @@ void fillFieldDataByGrep(Array<int>& field, Array<int>& subfield,
    }
 
    int zero = 0;
-   for (i=1; i<tracks.getSize(); i++) {
+   for (i=1; i<(int)tracks.size(); i++) {
       if (state != 0) {
          tracks[i] = !tracks[i];
       }
       if (tracks[i]) {
-         field.append(i);
-         subfield.append(zero);
-         model.append(zero);
+         field.push_back(i);
+         subfield.push_back(zero);
+         model.push_back(zero);
       }
    }
 }
@@ -261,72 +261,66 @@ void fillFieldDataByGrep(Array<int>& field, Array<int>& subfield,
 // getInterpretationFields --
 //
 
-void getInterpretationFields(Array<int>& field, Array<int>& subfield, 
-      Array<int>& model, HumdrumFile& infile, string& interps, int state) {
-   Array<Array<char> > sstrings; // search strings
-   sstrings.setSize(100);
-   sstrings.setSize(0);
-   sstrings.setGrowth(1000);
+void getInterpretationFields(vector<int>& field, vector<int>& subfield,
+      vector<int>& model, HumdrumFile& infile, string& interps, int state) {
+   vector<string> sstrings; // search strings
+   sstrings.reserve(100);
+   sstrings.resize(0);
 
    int i, j, k;
-   Array<char> buffer;
-   buffer.setSize(interps.size()+1);
-   strcpy(buffer.getBase(), interps.data());
+   string buffer;
+   buffer = interps;
 
    PerlRegularExpression pre;
    pre.sar(buffer, "\\s+", "", "g");  // remove spaces from the search string.
 
-   int index;
    while (pre.search(buffer, "^([^,]+)")) {
-      sstrings.setSize(sstrings.getSize()+1);
-      index = sstrings.getSize()-1;
-      sstrings[index].setSize(strlen(pre.getSubmatch(1))+1);
-      strcpy(sstrings[index].getBase(), pre.getSubmatch());
+      sstrings.push_back(pre.getSubmatch());
       pre.sar(buffer, "^[^,]+,?", "", "");
    }
 
    if (debugQ) {
       cout << "!! Interpretation strings to search for: " << endl;
-      for (i=0; i<sstrings.getSize(); i++) {
-         cout << "!!\t" << sstrings[i].getBase() << endl;
+      for (i=0; i<(int)sstrings.size(); i++) {
+         cout << "!!\t" << sstrings[i] << endl;
       }
    }
 
-   Array<int> tracks;
-   tracks.setSize(infile.getMaxTracks()+1);
-   tracks.setAll(0);
-   tracks.allowGrowth(0);
+   vector<int> tracks;
+   tracks.resize(infile.getMaxTracks()+1);
+   fill(tracks.begin(), tracks.end(), 0);
 
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isInterpretation()) {
          continue;
       }
       for (j=0; j<infile[i].getFieldCount(); j++) {
-         for (k=0; k<sstrings.getSize(); k++) {
-            if (strcmp(sstrings[k].getBase(), infile[i][j]) == 0) {
+         for (k=0; k<(int)sstrings.size(); k++) {
+            if (sstrings[k] == infile[i][j]) {
                tracks[infile[i].getPrimaryTrack(j)] = 1;
             }
          }
       }
    }
 
-   field.setSize(tracks.getSize());
-   field.setSize(0);
-   subfield.setSize(tracks.getSize());
-   subfield.setSize(0);
-   model.setSize(tracks.getSize());
-   model.setSize(0);
+   field.reserve(tracks.size());
+   subfield.reserve(tracks.size());
+   model.reserve(tracks.size());
+
+   field.resize(0);
+   subfield.resize(0);
+   model.resize(0);
 
 
    int zero = 0;
-   for (i=1; i<tracks.getSize(); i++) {
+   for (i=1; i<(int)tracks.size(); i++) {
       if (state == 0) {
          tracks[i] = !tracks[i];
       }
       if (tracks[i]) {
-         field.append(i);
-         subfield.append(zero);
-         model.append(zero);
+         field.push_back(i);
+         subfield.push_back(zero);
+         model.push_back(zero);
       }
    }
 
@@ -339,13 +333,12 @@ void getInterpretationFields(Array<int>& field, Array<int>& subfield,
 // expandSpines --
 //
 
-void expandSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
+void expandSpines(vector<int>& field, vector<int>& subfield, vector<int>& model,
       HumdrumFile& infile, string& interp) {
 
-   Array<int> splits;
-   splits.setSize(infile.getMaxTracks()+1);
-   splits.allowGrowth(0);
-   splits.setAll(0);
+   vector<int> splits;
+   splits.resize(infile.getMaxTracks()+1);
+   fill(splits.begin(), splits.end(), 0);
 
    int i, j;
    for (i=0; i<infile.getNumLines(); i++) {
@@ -360,65 +353,61 @@ void expandSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
       }
    }
 
-   field.setSize(infile.getMaxTracks()*2);
-   field.setSize(0);
-   field.allowGrowth(1);
-   subfield.setSize(infile.getMaxTracks()*2);
-   subfield.setSize(0);
-   subfield.allowGrowth(1);
-   model.setSize(infile.getMaxTracks()*2);
-   model.setSize(0);
-   model.allowGrowth(1);
+   field.reserve(infile.getMaxTracks()*2);
+   field.resize(0);
+
+   subfield.reserve(infile.getMaxTracks()*2);
+   subfield.resize(0);
+
+   model.reserve(infile.getMaxTracks()*2);
+   model.resize(0);
+
    int allQ = 0;
    if (interp.size() == 0) {
       allQ = 1;
    }
 
    // ggg
-   Array<int> dummyfield;
-   Array<int> dummysubfield;
-   Array<int> dummymodel;
+   vector<int> dummyfield;
+   vector<int> dummysubfield;
+   vector<int> dummymodel;
    getInterpretationFields(dummyfield, dummysubfield, model, infile, interp, 1);
 
-   Array<int> interptracks;
+   vector<int> interptracks;
 
-   interptracks.setSize(infile.getMaxTracks()+1);
-   interptracks.allowGrowth(0);
-   interptracks.setAll(0);
-   for (i=0; i<dummyfield.getSize(); i++) {
+   interptracks.resize(infile.getMaxTracks()+1);
+   fill(interptracks.begin(), interptracks.end(), 0);
+
+   for (i=0; i<(int)dummyfield.size(); i++) {
       interptracks[dummyfield[i]] = 1;
    }
 
    int aval = 'a';
    int bval = 'b';
    int zero = 0;
-   for (i=1; i<splits.getSize(); i++) {
+   for (i=1; i<(int)splits.size(); i++) {
       if (splits[i] && (allQ || interptracks[i])) {
-         field.append(i);
-         subfield.append(aval);
-         model.append(zero);
-         field.append(i);
-         subfield.append(bval);
-         model.append(zero);
+         field.push_back(i);
+         subfield.push_back(aval);
+         model.push_back(zero);
+         field.push_back(i);
+         subfield.push_back(bval);
+         model.push_back(zero);
       } else {
-         field.append(i);
-         subfield.append(zero);
-         model.append(zero);
+         field.push_back(i);
+         subfield.push_back(zero);
+         model.push_back(zero);
       }
    }
 
-   field.allowGrowth(0);
-   subfield.allowGrowth(0);
-   model.allowGrowth(0);
-
    if (debugQ) {
       cout << "!!expand: ";
-      for (i=0; i<field.getSize(); i++) {
+      for (i=0; i<(int)field.size(); i++) {
          cout << field[i];
          if (subfield[i]) {
             cout << (char)subfield[i];
          }
-         if (i < field.getSize()-1) {
+         if (i < (int)field.size()-1) {
             cout << ",";
          }
       }
@@ -434,13 +423,12 @@ void expandSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
 //   given exclusive interpretation.
 //
 
-void reverseSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
+void reverseSpines(vector<int>& field, vector<int>& subfield, vector<int>& model,
       HumdrumFile& infile, const string& exinterp) {
 
-   Array<int> target;
-   target.setSize(infile.getMaxTracks()+1);
-   target.allowGrowth(0);
-   target.setAll(0);
+   vector<int> target;
+   target.resize(infile.getMaxTracks()+1);
+   fill(target.begin(), target.end(), 0);
 
    int t;
 
@@ -450,18 +438,18 @@ void reverseSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
       }
    }
 
-   field.setSize(infile.getMaxTracks()*2);
-   field.setSize(0);
+   field.reserve(infile.getMaxTracks()*2);
+   field.resize(0);
 
    int i, j;
-   int lasti = target.getSize();
-   for (i=target.getSize()-1; i>0; i--) {
+   int lasti = target.size();
+   for (i=(int)target.size()-1; i>0; i--) {
       if (target[i]) {
          lasti = i;
-         field.append(i);
-         for (j=i+1; j<target.getSize(); j++) {
+         field.push_back(i);
+         for (j=i+1; j<(int)target.size(); j++) {
             if (!target[j]) {
-               field.append(j);
+               field.push_back(j);
             } else {
                break;
             }
@@ -474,9 +462,9 @@ void reverseSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
    int extras = 0;
    if (lasti != 1) {
       extras = lasti - 1;
-      field.setSize(field.getSize()+extras);
-      for (i=0; i<field.getSize()-extras; i++) {
-         field[field.getSize()-1-i] = field[field.getSize()-1-extras-i];
+      field.resize(field.size()+extras);
+      for (i=0; i<(int)field.size()-extras; i++) {
+         field[(int)field.size()-1-i] = field[(int)field.size()-1-extras-i];
       }
       for (i=0; i<extras; i++) {
          field[i] = i+1;
@@ -485,20 +473,18 @@ void reverseSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
 
    if (debugQ) {
       cout << "!!reverse: ";
-      for (i=0; i<field.getSize(); i++) {
+      for (i=0; i<(int)field.size(); i++) {
          cout << field[i] << " ";
       }
       cout << endl;
    }
-	     
 
-   subfield.setSize(field.getSize());
-   subfield.allowGrowth(0);
-   subfield.setAll(0);
-   model.setSize(field.getSize());
-   model.allowGrowth(0);
-   model.setAll(0);
-   field.allowGrowth(0);
+   subfield.resize(field.size());
+   fill(subfield.begin(), subfield.end(), 0);
+
+   model.resize(field.size());
+   fill(model.begin(), model.end(), 0);
+
 }
 
 
@@ -508,34 +494,33 @@ void reverseSpines(Array<int>& field, Array<int>& subfield, Array<int>& model,
 // fillFieldData --
 //
 
-void fillFieldData(Array<int>& field, Array<int>& subfield, Array<int>& model,
-      string& fieldstring, HumdrumFile& infile) {
+void fillFieldData(vector<int>& field, vector<int>& subfield,
+      vector<int>& model, string& fieldstring, HumdrumFile& infile) {
 
    int maxtrack = infile.getMaxTracks();
 
-   field.setSize(maxtrack);
-   field.setGrowth(maxtrack);
-   field.setSize(0);
-   subfield.setSize(maxtrack);
-   subfield.setGrowth(maxtrack);
-   subfield.setSize(0);
-   model.setSize(maxtrack);
-   model.setGrowth(maxtrack);
-   model.setSize(0);
+   field.reserve(maxtrack);
+   field.resize(0);
+
+   subfield.reserve(maxtrack);
+   subfield.resize(0);
+
+   model.reserve(maxtrack);
+   model.resize(0);
 
    PerlRegularExpression pre;
-   Array<char> buffer;
-   buffer.setSize(fieldstring.size()+1);
-   strcpy(buffer.getBase(), fieldstring.data());
+   string buffer = fieldstring;
    pre.sar(buffer, "\\s", "", "gs");
    int start = 0;
    int value = 0;
-   value = pre.search(buffer.getBase(), "^([^,]+,?)");
+   value = pre.search(buffer, "^([^,]+,?)");
+   string tempstr;
    while (value != 0) {
       start += value - 1;
       start += strlen(pre.getSubmatch(1));
       processFieldEntry(field, subfield, model, pre.getSubmatch(), infile);
-      value = pre.search(buffer.getBase() + start, "^([^,]+,?)");
+      tempstr = buffer.c_str() + start;
+      value = pre.search(tempstr, "^([^,]+,?)");
    }
 }
 
@@ -543,55 +528,53 @@ void fillFieldData(Array<int>& field, Array<int>& subfield, Array<int>& model,
 
 //////////////////////////////
 //
-// processFieldEntry -- 
+// processFieldEntry --
 //   3-6 expands to 3 4 5 6
 //   $   expands to maximum spine track
 //   $-1 expands to maximum spine track minus 1, etc.
 //
 
-void processFieldEntry(Array<int>& field, Array<int>& subfield, 
-      Array<int>& model, const char* string, HumdrumFile& infile) {
+void processFieldEntry(vector<int>& field, vector<int>& subfield,
+      vector<int>& model, const char* astring, HumdrumFile& infile) {
 
    int maxtrack = infile.getMaxTracks();
    int modletter;
    int subletter;
 
    PerlRegularExpression pre;
-   Array<char> buffer;
-   buffer.setSize(strlen(string)+1);
-   strcpy(buffer.getBase(), string);
+   string buffer = astring;
 
-   // remove any comma left at end of input string (or anywhere else)
+   // remove any comma left at end of input astring (or anywhere else)
    pre.sar(buffer, ",", "", "g");
 
    // first remove $ symbols and replace with the correct values
    removeDollarsFromString(buffer, infile.getMaxTracks());
 
    int zero = 0;
-   if (pre.search(buffer.getBase(), "^(\\d+)-(\\d+)$")) {
+   if (pre.search(buffer, "^(\\d+)-(\\d+)$")) {
       int firstone = strtol(pre.getSubmatch(1), NULL, 10);
       int lastone  = strtol(pre.getSubmatch(2), NULL, 10);
 
       if ((firstone < 1) && (firstone != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains too small a number at start: " << firstone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if ((lastone < 1) && (lastone != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains too small a number at end: " << lastone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if (firstone > maxtrack) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains number too large at start: " << firstone << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);
       }
       if (lastone > maxtrack) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains number too large at end: " << lastone << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);
@@ -600,18 +583,18 @@ void processFieldEntry(Array<int>& field, Array<int>& subfield,
       int i;
       if (firstone > lastone) {
          for (i=firstone; i>=lastone; i--) {
-            field.append(i);
-            subfield.append(zero);
-            model.append(zero);
+            field.push_back(i);
+            subfield.push_back(zero);
+            model.push_back(zero);
          }
       } else {
          for (i=firstone; i<=lastone; i++) {
-            field.append(i);
-            subfield.append(zero);
-            model.append(zero);
+            field.push_back(i);
+            subfield.push_back(zero);
+            model.push_back(zero);
          }
       }
-   } else if (pre.search(buffer.getBase(), "^(\\d+)([a-z]*)")) {
+   } else if (pre.search(buffer, "^(\\d+)([a-z]*)")) {
       int value = strtol(pre.getSubmatch(1), NULL, 10);
       modletter = 0;
       subletter = 0;
@@ -635,24 +618,24 @@ void processFieldEntry(Array<int>& field, Array<int>& subfield,
       }
 
       if ((value < 1) && (value != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains too small a number at end: " << value << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if (value > maxtrack) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains number too large at start: " << value << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);
       }
-      field.append(value);
+      field.push_back(value);
       if (value == 0) {
-         subfield.append(zero);
-         model.append(zero);
+         subfield.push_back(zero);
+         model.push_back(zero);
       } else {
-         subfield.append(subletter);
-         model.append(modletter);
+         subfield.push_back(subletter);
+         model.push_back(modletter);
       }
    }
 }
@@ -664,29 +647,29 @@ void processFieldEntry(Array<int>& field, Array<int>& subfield,
 // removeDollarsFromString -- substitute $ sign for maximum track count.
 //
 
-void removeDollarsFromString(Array<char>& buffer, int maxtrack) {
+void removeDollarsFromString(string& buffer, int maxtrack) {
    PerlRegularExpression pre;
    char buf2[128] = {0};
    int value2;
 
-   if (pre.search(buffer.getBase(), "\\$$")) {
+   if (pre.search(buffer, "\\$$")) {
       sprintf(buf2, "%d", maxtrack);
       pre.sar(buffer, "\\$$", buf2);
    }
 
-   if (pre.search(buffer.getBase(), "\\$(?![\\d-])")) {
+   if (pre.search(buffer, "\\$(?![\\d-])")) {
       // don't know how this case could happen, however...
       sprintf(buf2, "%d", maxtrack);
       pre.sar(buffer, "\\$(?![\\d-])", buf2, "g");
    }
 
-   if (pre.search(buffer.getBase(), "\\$0")) {
+   if (pre.search(buffer, "\\$0")) {
       // replace $0 with maxtrack (used for reverse orderings)
       sprintf(buf2, "%d", maxtrack);
       pre.sar(buffer, "\\$0", buf2, "g");
    }
 
-   while (pre.search(buffer.getBase(), "\\$(-?\\d+)")) {
+   while (pre.search(buffer, "\\$(-?\\d+)")) {
       value2 = maxtrack - (int)fabs(strtol(pre.getSubmatch(1), NULL, 10));
       sprintf(buf2, "%d", value2);
       pre.sar(buffer, "\\$-?\\d+", buf2);
@@ -701,8 +684,8 @@ void removeDollarsFromString(Array<char>& buffer, int maxtrack) {
 // excludeFields -- print all spines except the ones in the list of fields.
 //
 
-void excludeFields(HumdrumFile& infile, Array<int>& field,
-      Array<int>& subfield, Array<int>& model) {
+void excludeFields(HumdrumFile& infile, vector<int>& field,
+      vector<int>& subfield, vector<int>& model) {
    int i;
    int j;
    int start = 0;
@@ -748,8 +731,8 @@ void excludeFields(HumdrumFile& infile, Array<int>& field,
 // extractFields -- print all spines in the list of fields.
 //
 
-void extractFields(HumdrumFile& infile, Array<int>& field,
-      Array<int>& subfield, Array<int>& model) {
+void extractFields(HumdrumFile& infile, vector<int>& field,
+      vector<int>& subfield, vector<int>& model) {
 
    PerlRegularExpression pre;
    int i;
@@ -759,7 +742,7 @@ void extractFields(HumdrumFile& infile, Array<int>& field,
    int target;
    int subtarget;
    int modeltarget;
-   Array<char> spat;
+   string spat;
 
    for (i=0; i<infile.getNumLines(); i++) {
       switch (infile[i].getType()) {
@@ -778,7 +761,7 @@ void extractFields(HumdrumFile& infile, Array<int>& field,
                break;
             }
             start = 0;
-            for (t=0; t<field.getSize(); t++) {
+            for (t=0; t<(int)field.size(); t++) {
                target = field[t];
                subtarget = subfield[t];
                modeltarget = model[t];
@@ -815,13 +798,12 @@ void extractFields(HumdrumFile& infile, Array<int>& field,
                   for (j=0; j<infile[i].getFieldCount(); j++) {
                      if (infile[i].getPrimaryTrack(j) != target) {
                         continue;
-                     } 
+                     }
                      switch (subtarget) {
                      case 'a':
 
                         getSearchPat(spat, target, "a");
-                        if (pre.search(infile[i].getSpineInfo(j), 
-                              spat.getBase()) ||
+                        if (pre.search(infile[i].getSpineInfo(j), spat) ||
                               !pre.search(infile[i].getSpineInfo(j), "\\(")) {
                            if (start != 0) {
                               cout << '\t';
@@ -834,20 +816,19 @@ void extractFields(HumdrumFile& infile, Array<int>& field,
                      case 'b':
 
                         getSearchPat(spat, target, "b");
-                        if (pre.search(infile[i].getSpineInfo(j), 
-                              spat.getBase())) { 
+                        if (pre.search(infile[i].getSpineInfo(j), spat)) {
                            if (start != 0) {
                               cout << '\t';
                            }
                            start = 1;
                            cout << infile[i][j];
-                        } else if (!pre.search(infile[i].getSpineInfo(j), 
+                        } else if (!pre.search(infile[i].getSpineInfo(j),
                               "\\(")) {
                            if (start != 0) {
                               cout << '\t';
                            }
                            start = 1;
-			   dealWithSecondarySubspine(field, subfield, model, t, 
+                           dealWithSecondarySubspine(field, subfield, model, t,
                                  infile, i, j, modeltarget);
                         }
 
@@ -856,8 +837,8 @@ void extractFields(HumdrumFile& infile, Array<int>& field,
                         if (start != 0) {
                            cout << '\t';
                         }
-			start = 1;
-			dealWithCospine(field, subfield, model, t, infile, i, j,
+                        start = 1;
+                        dealWithCospine(field, subfield, model, t, infile, i, j,
                            modeltarget, modeltarget, cointerp);
                         break;
                      default:
@@ -888,14 +869,12 @@ void extractFields(HumdrumFile& infile, Array<int>& field,
 // dealWithCospine -- extract the required token(s) from a co-spine.
 //
 
-void dealWithCospine(Array<int>& field, Array<int>& subfield, Array<int>& model,
-      int targetindex, HumdrumFile& infile, int line, int cospine, 
+void dealWithCospine(vector<int>& field, vector<int>& subfield, vector<int>& model,
+      int targetindex, HumdrumFile& infile, int line, int cospine,
       int comodel, int submodel, const string& cointerp) {
 
-   Array<Array<char> > cotokens;
-   cotokens.setSize(50);
-   cotokens.setSize(0);
-   cotokens.setGrowth(200);
+   vector<string> cotokens;
+   cotokens.reserve(50);
 
    char buffer[1024];
    int i, j, k;
@@ -919,20 +898,19 @@ void dealWithCospine(Array<int>& field, Array<int>& subfield, Array<int>& model,
    int count = infile[line].getTokenCount(cospine);
    for (k=0; k<count; k++) {
       infile[line].getToken(buffer, cospine, k, 1000);
-      cotokens.setSize(cotokens.getSize()+1);
-      index = cotokens.getSize()-1;
-      cotokens[index].setSize(strlen(buffer)+1);
-      strcpy(cotokens[index].getBase(), buffer);
+      cotokens.resize(cotokens.size()+1);
+      index = (int)cotokens.size()-1;
+      cotokens[index] = buffer;
    }
 
-   Array<int> spineindex;
-   Array<int> subspineindex;
-   spineindex.setSize(infile.getMaxTracks()*2);
-   subspineindex.setSize(infile.getMaxTracks()*2);
-   spineindex.setSize(0);
-   subspineindex.setSize(0);
-   spineindex.setGrowth(1000);
-   subspineindex.setGrowth(1000);
+   vector<int> spineindex;
+   vector<int> subspineindex;
+
+   spineindex.reserve(infile.getMaxTracks()*2);
+   spineindex.resize(0);
+
+   subspineindex.reserve(infile.getMaxTracks()*2);
+   subspineindex.resize(0);
 
    for (j=0; j<infile[line].getFieldCount(); j++) {
       if (strcmp(infile[line].getExInterp(j), cointerp.data()) != 0) {
@@ -949,16 +927,16 @@ void dealWithCospine(Array<int>& field, Array<int>& subfield, Array<int>& model,
                continue;
             }
          }
-         spineindex.append(j);
-         subspineindex.append(k);
+         spineindex.push_back(j);
+         subspineindex.push_back(k);
       }
    }
 
    if (debugQ) {
       cout << "\n!!codata:\n";
-      for (i=0; i<cotokens.getSize(); i++) {
-         cout << "!!\t" << i << "\t" << cotokens[i].getBase();
-         if (i < spineindex.getSize()) {
+      for (i=0; i<(int)cotokens.size(); i++) {
+         cout << "!!\t" << i << "\t" << cotokens[i];
+         if (i < (int)spineindex.size()) {
             cout << "\tspine=" << spineindex[i];
             cout << "\tsubspine=" << subspineindex[i];
          } else {
@@ -969,10 +947,10 @@ void dealWithCospine(Array<int>& field, Array<int>& subfield, Array<int>& model,
       }
    }
 
-   Array<char> buff;
+   string buff;
 
    int start = 0;
-   for (i=0; i<field.getSize(); i++) {
+   for (i=0; i<(int)field.size(); i++) {
       if (strcmp(infile.getTrackExInterp(field[i]), cointerp.data()) != 0) {
          continue;
       }
@@ -984,20 +962,20 @@ void dealWithCospine(Array<int>& field, Array<int>& subfield, Array<int>& model,
          if (subfield[i] == 'a') {
             getSearchPat(buff, field[i], "a");
             if ((strchr(infile[line].getSpineInfo(j), '(') == NULL) ||
-               (strstr(infile[line].getSpineInfo(j), buff.getBase()) != NULL)) {
-               printCotokenInfo(start, infile, line, j, cotokens, spineindex, 
+               (strstr(infile[line].getSpineInfo(j), buff.c_str()) != NULL)) {
+               printCotokenInfo(start, infile, line, j, cotokens, spineindex,
                      subspineindex);
             }
          } else if (subfield[i] == 'b') {
             // this section may need more work...
             getSearchPat(buff, field[i], "b");
             if ((strchr(infile[line].getSpineInfo(j), '(') == NULL) ||
-               (strstr(infile[line].getSpineInfo(j), buff.getBase()) != NULL)) {
-               printCotokenInfo(start, infile, line, j, cotokens, spineindex, 
+               (strstr(infile[line].getSpineInfo(j), buff.c_str()) != NULL)) {
+               printCotokenInfo(start, infile, line, j, cotokens, spineindex,
                      subspineindex);
             }
          } else {
-            printCotokenInfo(start, infile, line, j, cotokens, spineindex, 
+            printCotokenInfo(start, infile, line, j, cotokens, spineindex,
                subspineindex);
          }
       }
@@ -1011,20 +989,20 @@ void dealWithCospine(Array<int>& field, Array<int>& subfield, Array<int>& model,
 // printCotokenInfo --
 //
 
-void printCotokenInfo(int& start, HumdrumFile& infile, int line, int spine, 
-      Array<Array<char> >& cotokens, Array<int>& spineindex, 
-      Array<int>& subspineindex) {
+void printCotokenInfo(int& start, HumdrumFile& infile, int line, int spine,
+      vector<string>& cotokens, vector<int>& spineindex,
+      vector<int>& subspineindex) {
    int i;
    int found = 0;
-   for (i=0; i<spineindex.getSize(); i++) {
+   for (i=0; i<(int)spineindex.size(); i++) {
       if (spineindex[i] == spine) {
          if (start == 0) {
             start++;
          } else {
             cout << subtokenseparator;
          }
-         if (i<cotokens.getSize()) {
-            cout << cotokens[i].getBase();
+         if (i<(int)cotokens.size()) {
+            cout << cotokens[i];
          } else {
             cout << ".";
          }
@@ -1049,15 +1027,15 @@ void printCotokenInfo(int& start, HumdrumFile& infile, int line, int spine,
 //     does not exist on a line.
 //
 
-void dealWithSecondarySubspine(Array<int>& field, Array<int>& subfield, 
-      Array<int>& model, int targetindex, HumdrumFile& infile, int line, 
+void dealWithSecondarySubspine(vector<int>& field, vector<int>& subfield,
+      vector<int>& model, int targetindex, HumdrumFile& infile, int line,
       int spine, int submodel) {
 
    int& i = line;
    int& j = spine;
 
    PerlRegularExpression pre;
-   Array<char> buffer;
+   string buffer;
 
    switch (infile[line].getType()) {
       case E_humrec_data_comment:
@@ -1091,8 +1069,7 @@ void dealWithSecondarySubspine(Array<int>& field, Array<int>& subfield,
             } else if (strchr(infile[i][j], 'Q') != NULL) {
                cout << ".";
             } else {
-               buffer.setSize(strlen(infile[i][j])+1);
-               strcpy(buffer.getBase(), infile[i][j]);
+               buffer = infile[i][j];
                if (pre.search(buffer, "{")) {
                   cout << "{";
                }
@@ -1111,7 +1088,7 @@ void dealWithSecondarySubspine(Array<int>& field, Array<int>& subfield,
                      pre.sar(buffer, "(?<=r)", editorialInterpretation, "");
                   }
                }
-               cout << buffer.getBase();
+               cout << buffer;
             }
          } else {
             cout << infile[i][j];
@@ -1129,22 +1106,21 @@ void dealWithSecondarySubspine(Array<int>& field, Array<int>& subfield,
 
 //////////////////////////////
 //
-// getSearchPat -- 
+// getSearchPat --
 //
 
-void getSearchPat(Array<char>& spat, int target, const char* modifier) {
+void getSearchPat(string& spat, int target, const char* modifier) {
    if (strlen(modifier) > 20) {
       cerr << "Error in GetSearchPat" << endl;
       exit(1);
    }
-   spat.setSize(32);
-   strcpy(spat.getBase(), "\\(");
+   spat.reserve(32);
+   spat = "\\(";
    char buffer[32] = {0};
    sprintf(buffer, "%d", target);
-   strcat(spat.getBase(), buffer);
-   strcat(spat.getBase(), "\\)");
-   strcat(spat.getBase(), modifier);
-   spat.setSize(strlen(spat.getBase())+1);
+   spat += buffer;
+   spat += "\\)";
+   spat += modifier;
 }
 
 
@@ -1155,22 +1131,20 @@ void getSearchPat(Array<char>& spat, int target, const char* modifier) {
 //     spine manipulators (**, *-, *x, *v, *^) when creating the output.
 //
 
-void dealWithSpineManipulators(HumdrumFile& infile, int line, 
-      Array<int>& field, Array<int>& subfield, Array<int>& model) {
+void dealWithSpineManipulators(HumdrumFile& infile, int line,
+      vector<int>& field, vector<int>& subfield, vector<int>& model) {
 
-   Array<int> vmanip;  // counter for *v records on line
-   vmanip.setSize(infile[line].getFieldCount());
-   vmanip.allowGrowth(0);
-   vmanip.setAll(0);
+   vector<int> vmanip;  // counter for *v records on line
+   vmanip.resize(infile[line].getFieldCount());
+   fill(vmanip.begin(), vmanip.end(), 0);
 
-   Array<int> xmanip; // counter for *x record on line
-   xmanip.setSize(infile[line].getFieldCount());
-   xmanip.allowGrowth(0);
-   xmanip.setAll(0);
+   vector<int> xmanip; // counter for *x record on line
+   xmanip.resize(infile[line].getFieldCount());
+   fill(xmanip.begin(), xmanip.end(), 0);
 
    int i = 0;
    int j;
-   for (j=0; j<vmanip.getSize(); j++) {
+   for (j=0; j<(int)vmanip.size(); j++) {
       if (strcmp(infile[line][j], "*v") == 0) {
          vmanip[j] = 1;
       }
@@ -1180,7 +1154,7 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
    }
 
    int counter = 1;
-   for (i=1; i<xmanip.getSize(); i++) {
+   for (i=1; i<(int)xmanip.size(); i++) {
       if ((xmanip[i] == 1) && (xmanip[i-1] == 1)) {
          xmanip[i] = counter;
          xmanip[i-1] = counter;
@@ -1190,9 +1164,9 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
 
    counter = 1;
    i = 0;
-   while (i < vmanip.getSize()) {
+   while (i < (int)vmanip.size()) {
       if (vmanip[i] == 1) {
-         while ((i < vmanip.getSize()) && (vmanip[i] == 1)) {
+         while ((i < (int)vmanip.size()) && (vmanip[i] == 1)) {
             vmanip[i] = counter;
             i++;
          }
@@ -1201,46 +1175,40 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
       i++;
    }
 
-   Array<int> fieldoccur;  // nth occurance of an input spine in the output
-   fieldoccur.setSize(field.getSize());
-   fieldoccur.allowGrowth(0);
-   fieldoccur.setAll(0);
- 
-   Array<int> trackcounter; // counter of input spines occurances in output
-   trackcounter.setSize(infile.getMaxTracks()+1);
-   trackcounter.allowGrowth(0);
-   trackcounter.setAll(0);
+   vector<int> fieldoccur;  // nth occurance of an input spine in the output
+   fieldoccur.resize(field.size());
+   fill(fieldoccur.begin(), fieldoccur.end(), 0);
 
-   for (i=0; i<field.getSize(); i++) {
+   vector<int> trackcounter; // counter of input spines occurances in output
+   trackcounter.resize(infile.getMaxTracks()+1);
+   fill(trackcounter.begin(), trackcounter.end(), 0);
+
+   for (i=0; i<(int)field.size(); i++) {
       if (field[i] != 0) {
          trackcounter[field[i]]++;
          fieldoccur[i] = trackcounter[field[i]];
       }
    }
 
-   Array<Array<char> > tempout;
-   Array<int> vserial;  
-   Array<int> xserial;
-   Array<int> fpos;     // input column of output spine
+   vector<string> tempout;
+   vector<int> vserial;
+   vector<int> xserial;
+   vector<int> fpos;     // input column of output spine
 
-   tempout.setSize(1000);
-   tempout.setGrowth(1000);
-   tempout.setSize(0);
+   tempout.reserve(1000);
+   tempout.resize(0);
 
-   vserial.setSize(1000);
-   vserial.setGrowth(1000);
-   vserial.setSize(0);
+   vserial.resize(1000);
+   vserial.resize(0);
 
-   xserial.setSize(1000);
-   xserial.setGrowth(1000);
-   xserial.setSize(0);
+   xserial.resize(1000);
+   xserial.resize(0);
 
-   fpos.setSize(1000);
-   fpos.setGrowth(1000);
-   fpos.setSize(0);
+   fpos.resize(1000);
+   fpos.resize(0);
 
-   Array<char> spat;
-   Array<char> spinepat;
+   string spat;
+   string spinepat;
    PerlRegularExpression pre;
    int subtarget;
    int modeltarget;
@@ -1250,7 +1218,7 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
    int t;
    int target;
    int tval;
-   for (t=0; t<field.getSize(); t++) {
+   for (t=0; t<(int)field.size(); t++) {
       target = field[t];
       subtarget = subfield[t];
       modeltarget = model[t];
@@ -1267,23 +1235,23 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
       suppress = 0;
       if (target == 0) {
          if (strncmp(infile[line][0], "**", 2) == 0) {
-            storeToken(tempout, "**blank"); 
+            storeToken(tempout, "**blank");
             tval = 0;
-            vserial.append(tval);
-            xserial.append(tval);
-            fpos.append(tval);
+            vserial.push_back(tval);
+            xserial.push_back(tval);
+            fpos.push_back(tval);
          } else if (strcmp(infile[line][0], "*-") == 0) {
-            storeToken(tempout, "*-"); 
+            storeToken(tempout, "*-");
             tval = 0;
-            vserial.append(tval);
-            xserial.append(tval);
-            fpos.append(tval);
+            vserial.push_back(tval);
+            xserial.push_back(tval);
+            fpos.push_back(tval);
          } else {
-            storeToken(tempout, "*"); 
+            storeToken(tempout, "*");
             tval = 0;
-            vserial.append(tval);
-            xserial.append(tval);
-            fpos.append(tval);
+            vserial.push_back(tval);
+            xserial.push_back(tval);
+            fpos.push_back(tval);
          }
       } else {
          for (j=0; j<infile[line].getFieldCount(); j++) {
@@ -1293,12 +1261,12 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
        // filter by subfield
        if (subtarget == 'a') {
                getSearchPat(spat, target, "b");
-          if (pre.search(infile[line].getSpineInfo(j), spat.getBase())) {
+          if (pre.search(infile[line].getSpineInfo(j), spat)) {
                   continue;
           }
        } else if (subtarget == 'b') {
                getSearchPat(spat, target, "a");
-          if (pre.search(infile[line].getSpineInfo(j), spat.getBase())) {
+          if (pre.search(infile[line].getSpineInfo(j), spat)) {
                   continue;
                }
             }
@@ -1314,17 +1282,16 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
                   }
                } else {
                   getSearchPat(spat, target, "a");
-                  spinepat.setSize(strlen(infile[line].getSpineInfo(j))+1);
-                  strcpy(spinepat.getBase(), infile[line].getSpineInfo(j));
+                  spinepat =  infile[line].getSpineInfo(j);
                   pre.sar(spinepat, "\\(", "\\(", "g");
                   pre.sar(spinepat, "\\)", "\\)", "g");
 
-        if ((strcmp(infile[line][j], "*v") == 0) &&
-                        (strcmp(spinepat.getBase(), spat.getBase()) == 0)) {
+                  if ((strcmp(infile[line][j], "*v") == 0) &&
+                        (spinepat == spat)) {
                      storeToken(tempout, "*");
                   } else {
                      getSearchPat(spat, target, "b");
-                     if ((strcmp(spinepat.getBase(), spat.getBase())==0) && 
+                     if ((spinepat == spat) &&
                            (strcmp(infile[line][j], "*v") == 0)) {
                         // do nothing
                         suppress = 1;
@@ -1345,20 +1312,19 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
                   }
                } else {
                   getSearchPat(spat, target, "b");
-                  spinepat.setSize(strlen(infile[line].getSpineInfo(j))+1);
-                  strcpy(spinepat.getBase(), infile[line].getSpineInfo(j));
+                  spinepat = infile[line].getSpineInfo(j);
                   pre.sar(spinepat, "\\(", "\\(", "g");
                   pre.sar(spinepat, "\\)", "\\)", "g");
 
                   if ((strcmp(infile[line][j], "*v") == 0) &&
-                        (strcmp(spinepat.getBase(), spat.getBase()) == 0)) {
+                        (spinepat == spat)) {
                      storeToken(tempout, "*");
                   } else {
                      getSearchPat(spat, target, "a");
-                     if ((strcmp(spinepat.getBase(), spat.getBase())==0) && 
+                     if ((spinepat == spat) &&
                            (strcmp(infile[line][j], "*v") == 0)) {
                         // do nothing
-			suppress = 1;
+                        suppress = 1;
                      } else {
                         storeToken(tempout, infile[line][j]);
                      }
@@ -1374,40 +1340,37 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
                storeToken(tempout, infile[line][j]);
             }
 
-	    if (suppress) {
+            if (suppress) {
                continue;
             }
 
-            if (strcmp(tempout[tempout.getSize()-1].getBase(), "*x") == 0) {
+            if (tempout[(int)tempout.size()-1] == "*x") {
                tval = fieldoccur[t] * 1000 + xmanip[j];
-               xserial.append(tval);
-	       xdebug = 1;
+               xserial.push_back(tval);
+               xdebug = 1;
             } else {
                tval = 0;
-               xserial.append(tval);
+               xserial.push_back(tval);
             }
 
-            if (strcmp(tempout[tempout.getSize()-1].getBase(), "*v") == 0) {
+            if (tempout[(int)tempout.size()-1] == "*v") {
                tval = fieldoccur[t] * 1000 + vmanip[j];
-               vserial.append(tval);
-	       vdebug = 1;
+               vserial.push_back(tval);
+               vdebug = 1;
             } else {
                tval = 0;
-               vserial.append(tval);
+               vserial.push_back(tval);
             }
 
-            fpos.append(j);
+            fpos.push_back(j);
 
          }
       }
    }
 
-   vserial.allowGrowth(0);
-   xserial.allowGrowth(0);
-
    if (debugQ && xdebug) {
       cout << "!! *x serials = ";
-      for (int ii=0; ii<xserial.getSize(); ii++) {
+      for (int ii=0; ii<(int)xserial.size(); ii++) {
          cout << xserial[ii] << " ";
       }
       cout << "\n";
@@ -1416,77 +1379,72 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
    if (debugQ && vdebug) {
       cout << "!!LINE: " << infile[line].getLine() << endl;
       cout << "!! *v serials = ";
-      for (int ii=0; ii<vserial.getSize(); ii++) {
+      for (int ii=0; ii<(int)vserial.size(); ii++) {
          cout << vserial[ii] << " ";
       }
       cout << "\n";
    }
 
    // check for proper *x syntax /////////////////////////////////
-   for (i=0; i<xserial.getSize()-1; i++) {
+   for (i=0; i<(int)xserial.size()-1; i++) {
       if (!xserial[i]) {
          continue;
       }
       if (xserial[i] != xserial[i+1]) {
-         if (strcmp(tempout[i].getBase(), "*x") == 0) {
+         if (tempout[i] == "*x") {
             xserial[i] = 0;
-            tempout[i].setSize(tempout[i].getSize()-1);
-            strcpy(tempout[i].getBase(), "*");
+            tempout[i] = "*";
          }
       } else {
          i++;
       }
    }
 
-   if ((tempout.getSize() == 1) || (xserial.getSize() == 1)) {
+   if ((tempout.size() == 1) || (xserial.size() == 1)) {
       // get rid of *x if there is only one spine in output
       if (xserial[0]) {
          xserial[0] = 0;
-         tempout[0].setSize(tempout[0].getSize()-1);
-         strcpy(tempout[0].getBase(), "*");
+         tempout[0] = "*";
       }
-   } else if (xserial.getSize() > 1) {
+   } else if ((int)xserial.size() > 1) {
       // check the last item in the list
-      int index = xserial.getSize()-1;
-      if (strcmp(tempout[index].getBase(), "*x") == 0) {
+      int index = (int)xserial.size()-1;
+      if (tempout[index] == "*x") {
          if (xserial[index] != xserial[index-1]) {
             xserial[index] = 0;
-            tempout[index].setSize(tempout[index].getSize()-1);
-            strcpy(tempout[index].getBase(), "*");
+            tempout[index] = "*";
          }
       }
    }
-	     
+
    // check for proper *v syntax /////////////////////////////////
-   Array<int> vsplit;
-   vsplit.setSize(vserial.getSize());
-   vsplit.allowGrowth(0);
-   vsplit.setAll(0);
+   vector<int> vsplit;
+   vsplit.resize((int)vserial.size());
+   fill(vsplit.begin(), vsplit.end(), 0);
 
    // identify necessary line splits
-   for (i=0; i<vserial.getSize()-1; i++) {
+   for (i=0; i<(int)vserial.size()-1; i++) {
       if (!vserial[i]) {
          continue;
       }
-      while ((i<vserial.getSize()-1) && (vserial[i]==vserial[i+1])) {
+      while ((i<(int)vserial.size()-1) && (vserial[i]==vserial[i+1])) {
          i++;
       }
-      if ((i<vserial.getSize()-1) && vserial[i]) {
-         if (vserial.getSize() > 1) {
+      if ((i<(int)vserial.size()-1) && vserial[i]) {
+         if (vserial.size() > 1) {
             if (vserial[i+1]) {
                vsplit[i+1] = 1;
             }
          }
-      } 
+      }
    }
 
    // remove single *v spines:
 
-   for (i=0; i<vsplit.getSize()-1; i++) {
+   for (i=0; i<(int)vsplit.size()-1; i++) {
       if (vsplit[i] && vsplit[i+1]) {
-         if (strcmp(tempout[i].getBase(), "*v") == 0) {
-            tempout[i].setSize(2);
-            strcpy(tempout[i].getBase(), "*");
+         if (tempout[i] == "*v") {
+            tempout[i] = "*";
             vsplit[i] = 0;
          }
       }
@@ -1494,38 +1452,37 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
 
    if (debugQ) {
       cout << "!!vsplit array: ";
-      for (i=0; i<vsplit.getSize(); i++) {
+      for (i=0; i<(int)vsplit.size(); i++) {
          cout << " " << vsplit[i];
       }
       cout << endl;
    }
-        
-   if (vsplit.getSize() > 0) {
-      if (vsplit[vsplit.getSize()-1]) {
-         if (strcmp(tempout[tempout.getSize()-1].getBase(), "*v") == 0) {
-            tempout[tempout.getSize()-1].setSize(2);
-            strcpy(tempout[tempout.getSize()-1].getBase(), "*");
-            vsplit[vsplit.getSize()-1] = 0;
+
+   if (vsplit.size() > 0) {
+      if (vsplit[(int)vsplit.size()-1]) {
+         if (tempout[(int)tempout.size()-1] == "*v") {
+            tempout[(int)tempout.size()-1] = "*";
+            vsplit[(int)vsplit.size()-1] = 0;
          }
       }
    }
 
    int vcount = 0;
-   for (i=0; i<vsplit.getSize(); i++) {
+   for (i=0; i<(int)vsplit.size(); i++) {
       vcount += vsplit[i];
    }
-   
+
    if (vcount) {
       printMultiLines(vsplit, vserial, tempout);
    }
 
    int start = 0;
-   for (i=0; i<tempout.getSize(); i++) {
-      if (strcmp(tempout[i].getBase(), "") != 0) {
+   for (i=0; i<(int)tempout.size(); i++) {
+      if (tempout[i] != "") {
          if (start != 0) {
             cout << "\t";
          }
-         cout << tempout[i].getBase();
+         cout << tempout[i];
          start++;
       }
    }
@@ -1541,12 +1498,12 @@ void dealWithSpineManipulators(HumdrumFile& infile, int line,
 // printMultiLines -- print separate *v lines.
 //
 
-void printMultiLines(Array<int>& vsplit, Array<int>& vserial, 
-      Array<Array<char> >& tempout) {
+void printMultiLines(vector<int>& vsplit, vector<int>& vserial,
+      vector<string>& tempout) {
    int i;
 
    int splitpoint = -1;
-   for (i=0; i<vsplit.getSize(); i++) {
+   for (i=0; i<(int)vsplit.size(); i++) {
       if (vsplit[i]) {
          splitpoint = i;
          break;
@@ -1555,8 +1512,8 @@ void printMultiLines(Array<int>& vsplit, Array<int>& vserial,
 
    if (debugQ) {
       cout << "!!tempout: ";
-      for (i=0; i<tempout.getSize(); i++) {
-         cout << tempout[i].getBase() << " ";
+      for (i=0; i<(int)tempout.size(); i++) {
+         cout << tempout[i] << " ";
       }
       cout << endl;
    }
@@ -1568,30 +1525,27 @@ void printMultiLines(Array<int>& vsplit, Array<int>& vserial,
    int start = 0;
    int printv = 0;
    for (i=0; i<splitpoint; i++) {
-      if (strcmp(tempout[i].getBase(), "") != 0) {
+      if (tempout[i] != "") {
          if (start) {
             cout << "\t";
          }
-         cout << tempout[i].getBase();
+         cout << tempout[i];
          start = 1;
-         if (strcmp(tempout[i].getBase(), "*v") == 0) {
+         if (tempout[i] == "*v") {
             if (printv) {
-               tempout[i].setSize(1);               
-               tempout[i][0] = '\0';
+               tempout[i] = "";
             } else {
-               tempout[i].setSize(2);               
-               strcpy(tempout[i].getBase(), "*");
+               tempout[i] = "*";
                printv = 1;
             }
          } else {
-            tempout[i].setSize(2);
-            strcpy(tempout[i].getBase(), "*");
+            tempout[i] = "*";
          }
       }
    }
 
-   for (i=splitpoint; i<vsplit.getSize(); i++) {
-      if (strcmp(tempout[i].getBase(), "") != 0) {
+   for (i=splitpoint; i<(int)vsplit.size(); i++) {
+      if (tempout[i] != "") {
          if (start) {
             cout << "\t";
          }
@@ -1615,15 +1569,12 @@ void printMultiLines(Array<int>& vsplit, Array<int>& vserial,
 // storeToken --
 //
 
-void storeToken(Array<Array<char> >& storage, const char* string) {
-   storage.setSize(storage.getSize()+1);
-   int index = storage.getSize()-1;
-   storeToken(storage, index, string);
+void storeToken(vector<string>& storage, const char* string) {
+   storage.push_back(string);
 }
 
-void storeToken(Array<Array<char> >& storage, int index, const char* string) {
-   storage[index].setSize(strlen(string)+1);
-   strcpy(storage[index].getBase(), string);
+void storeToken(vector<string>& storage, int index, const char* string) {
+   storage[index] = string;
 }
 
 
@@ -1634,9 +1585,9 @@ void storeToken(Array<Array<char> >& storage, int index, const char* string) {
 //     returns the matching index plus one.
 //
 
-int isInList(int number, Array<int>& listofnum) {
+int isInList(int number, vector<int>& listofnum) {
    int i;
-   for (i=0; i<listofnum.getSize(); i++) {
+   for (i=0; i<(int)listofnum.size(); i++) {
       if (listofnum[i] == number) {
          return i+1;
       }
@@ -1649,20 +1600,18 @@ int isInList(int number, Array<int>& listofnum) {
 
 //////////////////////////////
 //
-// getTraceData -- 
+// getTraceData --
 //
 
-void getTraceData(Array<int>& startline, Array<Array<int> >& fields, 
+void getTraceData(vector<int>& startline, vector<vector<int> >& fields,
       const string& tracefile, HumdrumFile& infile) {
    char buffer[1024] = {0};
    PerlRegularExpression pre;
    int linenum;
-   startline.setSize(10000);
-   startline.setGrowth(10000);
-   startline.setSize(0);
-   fields.setSize(10000);
-   fields.setGrowth(10000);
-   fields.setSize(0);
+   startline.reserve(10000);
+   startline.resize(0);
+   fields.reserve(10000);
+   fields.resize(0);
 
    ifstream input;
    input.open(tracefile.data());
@@ -1671,10 +1620,10 @@ void getTraceData(Array<int>& startline, Array<Array<int> >& fields,
       exit(1);
    }
 
-   Array<char> temps;
-   Array<int> field;
-   Array<int> subfield;
-   Array<int> model;
+   string temps;
+   vector<int> field;
+   vector<int> subfield;
+   vector<int> model;
 
    input.getline(buffer, 1024);
    while (!input.eof()) {
@@ -1686,19 +1635,18 @@ void getTraceData(Array<int>& startline, Array<Array<int> >& fields,
       }
       linenum = strtol(pre.getSubmatch(1), NULL, 10);
       linenum--;  // adjust so that line 0 is the first line in the file
-      temps.setSize(strlen(buffer)+1);
-      strcpy(temps.getBase(), buffer);
+      temps = buffer;
       pre.sar(temps, "\\d+", "", "");
       pre.sar(temps, "[^,\\s\\d\\$\\-].*", "");  // remove any possible comments
       pre.sar(temps, "\\s", "", "g");
-      if (pre.search(temps.getBase(), "^\\s*$")) {
+      if (pre.search(temps, "^\\s*$")) {
          // no field data to process online
          continue;
       }
-      startline.append(linenum);
-      string ttemp = temps.getBase();
+      startline.push_back(linenum);
+      string ttemp = temps;
       fillFieldData(field, subfield, model, ttemp, infile);
-      fields.append(field);
+      fields.push_back(field);
       input.getline(buffer, 1024);
    }
 
@@ -1712,23 +1660,23 @@ void getTraceData(Array<int>& startline, Array<Array<int> >& fields,
 //
 
 void extractTrace(HumdrumFile& infile, const string& tracefile) {
-   Array<int> startline;
-   Array<Array<int> > fields;
+   vector<int> startline;
+   vector<vector<int> > fields;
    getTraceData(startline, fields, tracefile, infile);
    int i, j;
 
    if (debugQ) {
-      for (i=0; i<startline.getSize(); i++) {
+      for (i=0; i<(int)startline.size(); i++) {
          cout << "!!TRACE " << startline[i]+1 << ":\t";
-         for (j=0; j<fields[i].getSize(); j++) {
+         for (j=0; j<(int)fields[i].size(); j++) {
             cout << fields[i][j] << " ";
          }
          cout << "\n";
       }
    }
-             
 
-   if (startline.getSize() == 0) {
+
+   if (startline.size() == 0) {
       for (i=0; i<infile.getNumLines(); i++) {
          switch (infile[i].getType()) {
             case E_humrec_none:
@@ -1752,8 +1700,8 @@ void extractTrace(HumdrumFile& infile, const string& tracefile) {
    }
 
    int endline;
-   for (j=0; j<startline.getSize(); j++) {
-      if (j == startline.getSize()-1) {
+   for (j=0; j<(int)startline.size(); j++) {
+      if (j == (int)startline.size()-1) {
          endline = infile.getNumLines()-1;
       } else {
          endline = startline[j+1]-1;
@@ -1779,14 +1727,14 @@ void extractTrace(HumdrumFile& infile, const string& tracefile) {
 // printTraceLine --
 //
 
-void printTraceLine(HumdrumFile& infile, int line, Array<int>& field) {
+void printTraceLine(HumdrumFile& infile, int line, vector<int>& field) {
    int j;
    int t;
    int start = 0;
    int target;
 
    start = 0;
-   for (t=0; t<field.getSize(); t++) {
+   for (t=0; t<(int)field.size(); t++) {
       target = field[t];
       for (j=0; j<infile[line].getFieldCount(); j++) {
          if (infile[line].getPrimaryTrack(j) != target) {
@@ -1819,10 +1767,9 @@ void extractInterpretations(HumdrumFile& infile, string& interps) {
    int j;
    int column = 0;
    PerlRegularExpression pre;
-   Array<char> buffer;
-   buffer.setSize(1024);
-   buffer.setSize(1);
-   strcpy(buffer.getBase(), "");
+   string buffer;
+   buffer.reserve(1024);
+   buffer = "";
 
    for (i=0; i<infile.getNumLines(); i++) {
       if (debugQ) {
@@ -1841,11 +1788,9 @@ void extractInterpretations(HumdrumFile& infile, string& interps) {
          case E_humrec_data:
             column = 0;
             for (j=0; j<infile[i].getFieldCount(); j++) {
-               buffer.setSize(strlen(infile[i].getExInterp(j))+1);
-               strcpy(buffer.getBase(), infile[i].getExInterp(j));
-               buffer.setSize(buffer.getSize()+strlen("\\b"));
-               strcat(buffer.getBase(), "\\b"); // word boundary marker
-	       pre.sar(buffer, "\\*", "\\\\*", "g");
+               buffer = infile[i].getExInterp(j);
+               buffer += "\\b";  // word boundary marker
+               pre.sar(buffer, "\\*", "\\\\*", "g");
                if (pre.search(interps.data(), buffer.getBase()) == 0) {
                // if (strstr(interps.data(), infile[i].getExInterp(j)) == NULL) {
                   continue;
@@ -1880,8 +1825,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("P|F|S|x|exclude=s:", "Remove listed spines from output");
    opts.define("i=s:", "Exclusive interpretation list to extract from input");
    opts.define("I=s:", "Exclusive interpretation exclusion list");
-   opts.define("f|p|s|field|path|spine=s:", 
-		   "for extraction of particular spines");
+   opts.define("f|p|s|field|path|spine=s:",
+                     "for extraction of particular spines");
    opts.define("C|count=b", "print a count of the number of spines in file");
    opts.define("c|cointerp=s:**kern", "Exclusive interpretation for cospines");
    opts.define("g|grep=s:", "Extract spines which match a given regex.");
@@ -1892,8 +1837,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("E|expand-interp=s:", "expand subspines limited to exinterp");
    opts.define("m|model|method=s:d", "method for extracting secondary spines");
    opts.define("M|cospine-model=s:d", "method for extracting cospines");
-   opts.define("Y|no-editoral-rests=b", 
-		   "do not display yy marks on interpreted rests");
+   opts.define("Y|no-editoral-rests=b",
+                     "do not display yy marks on interpreted rests");
 
    opts.define("debug=b", "print debugging information");
    opts.define("author=b");                     // author of program
@@ -1901,7 +1846,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");                    // example usages
    opts.define("h|help=b");                     // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -1930,7 +1875,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       interpstate = 0;
       interps = opts.getString("I");
    }
-	     
+
    fieldQ      = opts.getBoolean("f");
    debugQ      = opts.getBoolean("debug");
    countQ      = opts.getBoolean("count");
@@ -1949,7 +1894,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    if (interpQ) {
       fieldQ = 1;
    }
-	    
+
    if (expandQ) {
       fieldQ = 1;
       expandInterp = opts.getString("expand-interp");
