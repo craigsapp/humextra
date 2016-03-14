@@ -38,32 +38,32 @@ class HumdrumRecord {
    public:
                         HumdrumRecord      (void);
                         HumdrumRecord      (const string& aLine, 
-                                              int aLineNum = -1);
+                                            int aLineNum = -1);
                         HumdrumRecord      (const HumdrumRecord& aRecord);
                        ~HumdrumRecord      ();
   
       void              appendField        (const string& aField, 
-                                              int anInterp = E_unknown,
-                                              const string& spinetrace = "");
+                                            int anInterp = E_unknown,
+                                            const string& spinetrace = "");
       void              appendFieldEI      (const string& aField, 
-                                             const string& anInterp = "**unknown",
-                                             const string& spinetrace = "");
+                                            const string& anInterp="**unknown",
+                                            const string& spinetrace = "");
       void              changeField        (int aField, const string& aString);
       void              copySpineInfo      (char** info, int size,
-                                              int line = 0);
-      void              copySpineInfo      (vector<char*>& aCollection,
-                                              int line = 0);
+                                            int line = 0);
+      void              copySpineInfo      (vector<string>& aCollection,
+                                            int line = 0);
       void              copySpineInfo      (HumdrumRecord& aRecord,
-                                              int line = 0);
+                                            int line = 0);
 
       int               equalDataQ         (const string& aValue);
       int               equalFieldsQ       (void);
       int               equalFieldsQ       (int anInterp);
       int               equalFieldsQ       (const string& anInterp);
       int               equalFieldsQ       (int anInterp, const string&
-                                              compareString);
+                                            compareString);
       int               equalFieldsQ       (const string& anInterp,
-                                              const string& compareString);
+                                            const string& compareString);
       double            getAbsBeat         (void) const;
       RationalNumber    getAbsBeatR        (void) const;
       double            getBeat            (void) const;
@@ -73,11 +73,11 @@ class HumdrumRecord {
       int               getDotLine         (int index);
       int               getDotSpine        (int index);
       int               getDotField        (int index) 
-                                              { return getDotSpine(index); } 
+                                            { return getDotSpine(index); } 
       double            getDuration        (void) const;
       RationalNumber    getDurationR       (void) const;
       int               getExInterpNum     (int fieldIndex) const;
-      const char*       getExInterp        (int fieldIndex) const;
+      const string&     getExInterp        (int fieldIndex) const;
       int               getFieldCount      (void) const;
       int               getFieldCount      (const string& exinterp) const;
       int               getFieldCount      (int exinterp) const;
@@ -90,15 +90,15 @@ class HumdrumRecord {
       string&           getBibKey          (string& buffer);
       string&           getBibValue        (string& buffer);
       string&           getBibLangIso639_2 (const string& string = NULL);
-      static const char*getLanguageName    (const string& code);
-      static const char*getBibliographicMeaning(string& output, 
+      static const string& getLanguageName (const string& code);
+      static const string& getBibliographicMeaning(string& output, 
                                             const string& code);
-      const char*       getLine            (void); 
+      const string&     getLine            (void); 
       int               getLineNum         (void) const; 
       int               getPrimaryTrack    (int spineNumber);
       double            getTrack           (int spineNumber);
       int               getTrackColumn     (int track);
-      const char*       getSpineInfo       (int index) const;
+      const string&     getSpineInfo       (int index) const;
       int               getSpinePrediction (void);
       int               getSpineWidth      (void);
       void              changeToken        (int spineIndex, int tokenIndex,  
@@ -120,9 +120,9 @@ class HumdrumRecord {
       int               isGlobalComment    (void) const;
       int               isBibliographic    (void) const;
       int               isReferenceRecord  (void) const 
-                              { return isBibliographic(); }
+                                            { return isBibliographic(); }
       int               isReference        (void) const
-                              { return isBibliographic(); }
+                                            { return isBibliographic(); }
       int               isMeasure          (void) const;
       int               isBarline          (void) const { return isMeasure(); }
       int               isLocalComment     (void) const;
@@ -133,7 +133,6 @@ class HumdrumRecord {
       int               isNullToken        (int index);
       int               hasNoteAttack      (int field);
       int               isRest             (int field);
-
 
       int               dataQ              (void) const;
       int               measureQ           (void) const;
@@ -149,12 +148,14 @@ class HumdrumRecord {
       int               isInterpretation   (void) const;
       int               isExclusiveInterpretation (int index) const;
       int               isExInterp         (int index) const 
-			      { return isExclusiveInterpretation(index); }
+                                    { return isExclusiveInterpretation(index); }
       int               isTandem           (void) const;
       int               isSpineManipulator (int index);
       int               isSpineManipulator (void);
-      int               isSpineManip       (void) { return isSpineManipulator(); }
-      int               hasSpineManip      (void) { return isSpineManipulator(); }
+      int               isSpineManip       (void) 
+                                            { return isSpineManipulator(); }
+      int               hasSpineManip      (void) 
+                                            { return isSpineManipulator(); }
 
       int               isClef             (int index);
       int               isOriginalClef     (int index);
@@ -207,7 +208,7 @@ class HumdrumRecord {
       HumdrumRecord&    operator=          (const HumdrumRecord& aRecord);
       HumdrumRecord&    operator=          (const HumdrumRecord* aRecord);
       HumdrumRecord&    operator=          (const string& aRecord);
-      const char*       operator[]         (int index) const;
+      const string&     operator[]         (int index) const;
       void              setAbsBeat         (double aValue);
       void              setAbsBeat         (int top, int bottom);
       void              setAbsBeatR        (int top, int bottom);
