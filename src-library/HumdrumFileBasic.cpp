@@ -2,25 +2,26 @@
 // Copyright 1998-2004 by Craig Stuart Sapp, All Rights Reserved.
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon May 18 13:43:47 PDT 1998
-// Last Modified: Wed Nov 29 10:24:29 PST 2000 split from HumdrumFile class
-// Last Modified: Wed Mar 21 17:38:23 PST 2001 added spine width feature
-// Last Modified: Thu Nov 15 12:38:49 PST 2001 added getTrackExInterp
-// Last Modified: Sat May  8 12:57:53 PDT 2004 fix complicated spine tracing
-// Last Modified: Wed Jun  2 15:19:57 PDT 2004 fix fix in spine trace ! lines
-// Last Modified: Fri Apr 24 15:01:35 PDT 2009 fixed contructor with char*
-// Last Modified: Wed Apr 29 17:14:44 PDT 2009 fixed *x bug in dot analysis
-// Last Modified: Mon May  4 12:11:13 PDT 2009 fixed new? bug in dot analysis
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 renamed SigCollection class
-// Last Modified: Mon Jun 22 15:03:44 PDT 2009 added Humdrum/Http URIs
-// Last Modified: Wed Sep  2 21:48:23 PDT 2009 fixed problem with *x again
-// Last Modified: Wed May 12 22:29:42 PDT 2010 added embedded PDF parsing
-// Last Modified: Mon Feb 14 08:14:53 PST 2011 added VTS functions
-// Last Modified: Tue Apr 24 16:37:34 PDT 2012 added jrp:// URI
-// Last Modified: Tue Dec 11 17:23:04 PST 2012 added fileName, segmentLevel
-// Last Modified: Mon Apr  1 16:44:32 PDT 2013 added printNonemptySegmentLevel
+// Last Modified: Wed Nov 29 10:24:29 PST 2000 Split from HumdrumFile class
+// Last Modified: Wed Mar 21 17:38:23 PST 2001 Added spine width feature
+// Last Modified: Thu Nov 15 12:38:49 PST 2001 Added getTrackExInterp
+// Last Modified: Sat May  8 12:57:53 PDT 2004 Fix complicated spine tracing
+// Last Modified: Wed Jun  2 15:19:57 PDT 2004 Fix fix in spine trace ! lines
+// Last Modified: Fri Apr 24 15:01:35 PDT 2009 Fixed contructor with char*
+// Last Modified: Wed Apr 29 17:14:44 PDT 2009 Fixed *x bug in dot analysis
+// Last Modified: Mon May  4 12:11:13 PDT 2009 Fixed new? bug in dot analysis
+// Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed SigCollection class
+// Last Modified: Mon Jun 22 15:03:44 PDT 2009 Added Humdrum/Http URIs
+// Last Modified: Wed Sep  2 21:48:23 PDT 2009 Fixed problem with *x again
+// Last Modified: Wed May 12 22:29:42 PDT 2010 Added embedded PDF parsing
+// Last Modified: Mon Feb 14 08:14:53 PST 2011 Added VTS functions
+// Last Modified: Tue Apr 24 16:37:34 PDT 2012 Added jrp:// URI
+// Last Modified: Tue Dec 11 17:23:04 PST 2012 Added fileName, segmentLevel
+// Last Modified: Mon Apr  1 16:44:32 PDT 2013 Added printNonemptySegmentLevel
+// Last Modified: Sun Mar 13 17:10:48 PDT 2016 Switched to STL
 // Filename:      ...sig/src/sigInfo/HumdrumFileBasic.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/HumdrumFileBasic.cpp
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Basic parsing functions for handling a Humdrum data file.
 //                Special musical parsing of the Humdrum file is done in
@@ -37,14 +38,11 @@
 #include <stdio.h>
 #include <cctype>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-   using namespace std;
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-#endif
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+using namespace std;
 
 char HumdrumFileBasic::empty[1] = {0};
 
@@ -151,7 +149,7 @@ int& HumdrumFileAddress::k(void)           { return address[3]; }
 // HumdrumFileAddress::zero -- Set all address components to 0.
 //
 
-void HumdrumFileAddress::zero(void) { 
+void HumdrumFileAddress::zero(void) {
    address[0] = 0;
    address[1] = 0;
    address[2] = 0;
@@ -165,7 +163,7 @@ void HumdrumFileAddress::zero(void) {
 // HumdrumFileAddress::operator= --
 //
 
-HumdrumFileAddress HumdrumFileAddress::operator=(const 
+HumdrumFileAddress HumdrumFileAddress::operator=(const
       HumdrumFileAddress& anAddress) {
    if (this == &anAddress) {
       return *this;
@@ -202,49 +200,36 @@ void HumdrumFileAddress::setLineField(int aLine, int aField) {
 //
 
 HumdrumFileBasic::HumdrumFileBasic(void) {
-   records.setSize(100000);          // initial storage size 100000 lines
-   records.setSize(0);
-   records.allowGrowth();          
-   records.setGrowth(1000000);      // grow in increments of 1000000 lines
+   records.reserve(100000);          // initial storage size 100000 lines
+   records.resize(0);
    maxtracks = 0;
-   fileName.setSize(1); fileName[0] = '\0';
+   fileName = "";
    segmentLevel = 0;
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(0);
+   trackexinterp.resize(0);
 }
 
 
 HumdrumFileBasic::HumdrumFileBasic(const HumdrumFileBasic& aHumdrumFileBasic) {
-   records.setSize(100000);          // initial storage size 100000 lines
-   records.setSize(0);
-   records.allowGrowth();          
-   records.setGrowth(1000000);      // grow in increments of 1000000 lines
+   records.reserve(100000);          // initial storage size 100000 lines
+   records.resize(0);
    maxtracks = 0;
-   fileName.setSize(1); fileName[0] = '\0';
+   fileName = "";
    segmentLevel = 0;
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(0);
+   trackexinterp.resize(0);
 
    *this = aHumdrumFileBasic;
 }
 
 
 HumdrumFileBasic::HumdrumFileBasic(const char* filename) {
-   records.setSize(100000);          // initial storage size 100000 lines
-   records.setSize(0);
-   records.allowGrowth();          
-   records.setAllocSize(1000000);    // grow in increments of 1000000 lines
+   records.reserve(100000);          // initial storage size 100000 lines
+   records.resize(0);
    maxtracks = 0;
-   fileName.setSize(1); fileName[0] = '\0';
+   fileName = "";
    segmentLevel = 0;
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(0);
+   trackexinterp.resize(0);
 
-   #ifndef OLDCPP
-      ifstream infile(filename, ios::in);
-   #else
-      ifstream infile(filename, ios::in | ios::nocreate);
-   #endif
+   ifstream infile(filename, ios::in);
 
    if (!infile) {
       cerr << "Error: cannot open file: " << filename << endl;
@@ -270,21 +255,14 @@ HumdrumFileBasic::HumdrumFileBasic(const char* filename) {
 
 
 HumdrumFileBasic::HumdrumFileBasic(const string& filename) {
-   records.setSize(100000);          // initial storage size 100000 lines
-   records.setSize(0);
-   records.allowGrowth();          
-   records.setAllocSize(1000000);    // grow in increments of 1000000 lines
+   records.reserve(100000);          // initial storage size 100000 lines
+   records.resize(0);
    maxtracks = 0;
-   fileName.setSize(1); fileName[0] = '\0';
+   fileName = "";
    segmentLevel = 0;
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(0);
+   trackexinterp.resize(0);
 
-   #ifndef OLDCPP
-      ifstream infile(filename.data(), ios::in);
-   #else
-      ifstream infile(filename.data(), ios::in | ios::nocreate);
-   #endif
+   ifstream infile(filename.data(), ios::in);
 
    if (!infile) {
       cerr << "Error: cannot open file: " << filename << endl;
@@ -311,7 +289,7 @@ HumdrumFileBasic::HumdrumFileBasic(const string& filename) {
 
 ////////////////////////////////////////
 //
-// HumdrumFileBasic::setAllocation -- set the expected number of 
+// HumdrumFileBasic::setAllocation -- set the expected number of
 //     lines from the input file.
 //
 
@@ -322,11 +300,9 @@ void HumdrumFileBasic::setAllocation(int allocation) {
    if (allocation > 10000000) {
       return;
    }
-   int currentsize = records.getSize();
+   int currentsize = records.size();
    if (currentsize < allocation) {
-      records.setSize(allocation);
-      records.setSize(currentsize);
-      records.setAllocSize(allocation);
+      records.reserve(allocation);
    }
 }
 
@@ -373,7 +349,7 @@ void HumdrumFileBasic::appendLine(const char* aLine) {
    HumdrumRecord* aRecord;
    aRecord = new HumdrumRecord;
    aRecord->setLine(aLine);
-   records[records.getSize()] = aRecord;
+   records.push_back(aRecord);
 }
 
 
@@ -381,9 +357,9 @@ void HumdrumFileBasic::appendLine(HumdrumRecord& aRecord) {
    HumdrumRecord *tempRecord;
    tempRecord = new HumdrumRecord;
    *tempRecord = aRecord;
-   records[records.getSize()] = tempRecord;
+   records.push_back(tempRecord);
 }
-   
+
 
 void HumdrumFileBasic::appendLine(HumdrumRecord* aRecord) {
    appendLine(*aRecord);
@@ -398,25 +374,24 @@ void HumdrumFileBasic::appendLine(HumdrumRecord* aRecord) {
 
 void HumdrumFileBasic::clear(void) {
    int i;
-   for (i=0; i<records.getSize(); i++) {
+   for (i=0; i<(int)records.size(); i++) {
       if (records[i] != NULL) {
          // delete [] records[i];
          delete records[i];
          records[i] = NULL;
       }
    }
-   records.setSize(0);
+   records.resize(0);
    maxtracks = 0;
-   fileName.setSize(1); fileName[0] = '\0';
+   fileName = "";
    segmentLevel = 0;
-   for (i=0; i<trackexinterp.getSize(); i++) {
+   for (i=0; i<(int)trackexinterp.size(); i++) {
       if (trackexinterp[i] != NULL) {
          delete [] trackexinterp[i];
          trackexinterp[i] = NULL;
       }
    }
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(0);
+   trackexinterp.resize(0);
 }
 
 
@@ -452,7 +427,7 @@ void HumdrumFileBasic::setFilename(const char* filename) {
 //
 
 const char* HumdrumFileBasic::getFilename(void) {
-   return fileName.getBase();
+   return fileName.c_str();
 }
 
 
@@ -485,7 +460,7 @@ ostream& HumdrumFileBasic::printSegmentLabel(ostream& out) {
 ostream& HumdrumFileBasic::printNonemptySegmentLabel(ostream& out) {
    if (strlen(getFilename()) > 0) {
       printSegmentLabel(out);
-   } 
+   }
    return out;
 }
 
@@ -530,7 +505,7 @@ HumdrumFileBasic HumdrumFileBasic::extract(int aField) {
          case E_humrec_data_interpretation:
             if (aField < 0) {
                fieldNumber = records[i]->getFieldCount() + aField;
-               if (fieldNumber < 0) { 
+               if (fieldNumber < 0) {
                   fieldNumber = 0;
                }
             } else {
@@ -618,32 +593,13 @@ const char* HumdrumFileBasic::getTrackExInterp(int track) {
 //     which have the matching exclusive interpretation type.
 //
 
-int HumdrumFileBasic::getTracksByExInterp(Array<int>& tracks, 
-      const char* exinterp) {
-   int maxsize = getMaxTracks();
-   tracks.setSize(maxsize);
-   tracks.setSize(0);
-   int i;
-   for (i=0; i<trackexinterp.getSize(); i++) {
-      if (strcmp(trackexinterp[i], exinterp) == 0) {
-         tracks.append(i);
-         tracks.last()++;
-      } else if (strcmp(trackexinterp[i]+2, exinterp) == 0) {
-         tracks.append(i);
-         tracks.last()++;
-      }
-   }
-
-   return tracks.getSize();
-}
-
-int HumdrumFileBasic::getTracksByExInterp(vector<int>& tracks, 
+int HumdrumFileBasic::getTracksByExInterp(vector<int>& tracks,
       const char* exinterp) {
    int maxsize = getMaxTracks();
    tracks.reserve(maxsize);
    tracks.resize(0);
    int i;
-   for (i=0; i<trackexinterp.getSize(); i++) {
+   for (i=0; i<(int)trackexinterp.size(); i++) {
       if (strcmp(trackexinterp[i], exinterp) == 0) {
          tracks.push_back(i);
          tracks.back()++;
@@ -663,13 +619,10 @@ int HumdrumFileBasic::getTracksByExInterp(vector<int>& tracks,
 // HumdrumFileBasic::getKernTracks --
 //
 
-int HumdrumFileBasic::getKernTracks(Array<int>& tracks) {
-   return getTracksByExInterp(tracks, "**kern");
-}
-
 int HumdrumFileBasic::getKernTracks(vector<int>& tracks) {
    return getTracksByExInterp(tracks, "**kern");
 }
+
 
 
 //////////////////////////////
@@ -695,7 +648,7 @@ const char* HumdrumFileBasic::getLine(int index) {
            << ", but you asked for line index: " << index << endl;
       exit(1);
    }
-  
+
    return records[index]->getLine();
 }
 
@@ -743,7 +696,7 @@ const char* HumdrumFileBasic::getBibValue(char* buffer, const char* key) {
 //
 
 int HumdrumFileBasic::getNumLines(void) {
-   return records.getSize();
+   return records.size();
 }
 
 
@@ -809,29 +762,28 @@ HumdrumFileBasic& HumdrumFileBasic::operator=(const HumdrumFileBasic& aFile) {
 
    // delete any current contents
    int i;
-   for (i=0; i<records.getSize(); i++) {
+   for (i=0; i<(int)records.size(); i++) {
       delete records[i];
       records[i] = NULL;
    }
 
-   records.setSize(aFile.records.getSize());
-   for (i=0; i<aFile.records.getSize(); i++) {
+   records.resize(aFile.records.size());
+   for (i=0; i<(int)aFile.records.size(); i++) {
       records[i] = new HumdrumRecord;
       *(records[i]) = *(aFile.records[i]);
    }
 
    maxtracks = aFile.maxtracks;
 
-   for (i=0; i<trackexinterp.getSize(); i++) {
+   for (i=0; i<(int)trackexinterp.size(); i++) {
       if (trackexinterp[i] != NULL) {
          delete [] trackexinterp[i];
          trackexinterp[i] = NULL;
       }
    }
-   trackexinterp.setSize(aFile.trackexinterp.getSize());
-   trackexinterp.allowGrowth(0);
+   trackexinterp.resize(aFile.trackexinterp.size());
    int length;
-   for (i=0; i<aFile.trackexinterp.getSize(); i++) {
+   for (i=0; i<(int)aFile.trackexinterp.size(); i++) {
       length = strlen(aFile.trackexinterp[i]);
       trackexinterp[i] = new char[length+1];
       strcpy(trackexinterp[i], aFile.trackexinterp[i]);
@@ -857,38 +809,34 @@ void HumdrumFileBasic::read(const char* filename) {
       if (strncmp(filename, "http://", strlen("http://")) == 0) {
          readFromHttpURI(filename);
          return;
-      } 
+      }
       if (strncmp(filename, "jrp://", strlen("jrp://")) == 0) {
          readFromJrpURI(filename);
          return;
-      } 
+      }
       if (strncmp(filename, "humdrum://", strlen("humdrum://")) == 0) {
          readFromHumdrumURI(filename);
          return;
-      } 
+      }
       if (strncmp(filename, "hum://", strlen("hum://")) == 0) {
          readFromHumdrumURI(filename);
          return;
-      } 
+      }
       if (strncmp(filename, "h://", strlen("h://")) == 0) {
          readFromHumdrumURI(filename);
          return;
-      } 
+      }
    }
 #endif
 
    int i;
-   for (i=0; i<records.getSize(); i++) {
+   for (i=0; i<(int)records.size(); i++) {
       delete records[i];
       records[i] = NULL;
    }
-   records.setSize(0);
+   records.resize(0);
 
-   #ifndef OLDCPP
-      ifstream infile(filename, ios::in);
-   #else
-      ifstream infile(filename, ios::in | ios::nocreate);
-   #endif
+   ifstream infile(filename, ios::in);
 
    if (!infile) {
       cerr << "Error: could not open file: " << filename << endl;
@@ -896,7 +844,7 @@ void HumdrumFileBasic::read(const char* filename) {
    }
 
    if (infile.peek() == '%') {
-      SSTREAM embeddedData;
+      stringstream embeddedData;
       extractEmbeddedDataFromPdf(embeddedData, infile);
       read(embeddedData);
       return;
@@ -922,7 +870,7 @@ void HumdrumFileBasic::read(istream& inStream) {
    int linecount = 0;
 
    if (inStream.peek() == '%') {
-      SSTREAM embeddedData;
+      stringstream embeddedData;
       extractEmbeddedDataFromPdf(embeddedData, inStream);
       read(embeddedData);
       return;
@@ -941,17 +889,17 @@ void HumdrumFileBasic::read(istream& inStream) {
             readFromHumdrumURI(templine);
             delete [] templine;
             return;
-         } 
+         }
          if (strncmp(templine, "hum://", strlen("hum://")) == 0) {
             readFromHumdrumURI(templine);
             delete [] templine;
             return;
-         } 
+         }
          if (strncmp(templine, "h://", strlen("h://")) == 0) {
             readFromHumdrumURI(templine);
             delete [] templine;
             return;
-         } 
+         }
       }
 #endif
       if (inStream.eof() && (strcmp(templine, "") == 0)) {
@@ -1009,7 +957,7 @@ HumdrumFileBasic HumdrumFileBasic::removeNullRecords(void) {
 
 HumdrumRecord& HumdrumFileBasic::operator[](int index) {
    if (index >= getNumLines()) {
-      cerr << "Error: maximum line index is: " << getNumLines() - 1 
+      cerr << "Error: maximum line index is: " << getNumLines() - 1
            << ", but you asked for line index: " << index << endl;
       exit(1);
    }
@@ -1042,14 +990,14 @@ void HumdrumFileBasic::write(const char* filename) {
       exit(1);
    }
 
-   for (int i=0; i<records.getSize(); i++) {
+   for (int i=0; i<(int)records.size(); i++) {
       outfile << records[i]->getLine() << endl;
    }
 }
 
 
 void HumdrumFileBasic::write(ostream& outStream) {
-   for (int i=0; i<records.getSize(); i++) {
+   for (int i=0; i<(int)records.size(); i++) {
       outStream << records[i]->getLine() << endl;
    }
 }
@@ -1083,31 +1031,26 @@ ostream& operator<<(ostream& out, HumdrumFileBasic& aHumdrumFileBasic) {
 
 ///////////////////////////////
 //
-// HumdrumFileBasic::privateSpineAnalysis -- assign the spine paths to the 
+// HumdrumFileBasic::privateSpineAnalysis -- assign the spine paths to the
 //     individual fields in each spine for the Humdrum File.
 //
 
 void HumdrumFileBasic::privateSpineAnalysis(void) {
-   
+
    int init = 0;
    int spineid = 0;
 
-   SigCollection<char*> spineinfo;
-   SigCollection<int> exinterps;
+   vector<char*> spineinfo;
+   vector<int> exinterps;
 
-   exinterps.setSize(100);
-   exinterps.setAllocSize(100);
-   exinterps.setSize(1);
-   exinterps[0] = 0;
-   exinterps.allowGrowth();
+   exinterps.reserve(100);
+   exinterps.resize(0);
+   exinterps.push_back(0);
 
-   spineinfo.setSize(1000);
-   spineinfo.setAllocSize(1000);
-   spineinfo.setSize(0);
-   spineinfo.allowGrowth();
+   spineinfo.reserve(1000);
+   spineinfo.resize(0);
 
    int currentwidth = 0;
-
    int prediction = 0;
    int length;
    int tlen = 0;
@@ -1117,30 +1060,27 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
    char buffer[1024] = {0};
    char* bp;
 
-   for (i=0; i<trackexinterp.getSize(); i++) {
+   for (i=0; i<(int)trackexinterp.size(); i++) {
       if (trackexinterp[i] != NULL) {
          delete [] trackexinterp[i];
          trackexinterp[i] = NULL;
       }
    }
-   trackexinterp.setSize(100);
-   trackexinterp.setGrowth(1000);
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(1);
-
+   trackexinterp.reserve(100);
+   trackexinterp.resize(0);
 
    int linecount = getNumLines();
    for (n=0; n<linecount; n++) {
       ((*this)[n]).setLineNum(n+1);
-      type = ((*this)[n]).getType(); 
-      if (type == E_humrec_data || type == E_humrec_data_measure || 
+      type = ((*this)[n]).getType();
+      if (type == E_humrec_data || type == E_humrec_data_measure ||
             type == E_humrec_data_comment) {
          if (init == 0) {
             cout << (*this);
-            cout << "Error on line " << n+1 
+            cout << "Error on line " << n+1
                  << " of data: no starting interpretation" << endl;
             exit(1);
-         } 
+         }
          ((*this)[n]).copySpineInfo(spineinfo, n+1);
          currentwidth = (*this)[n].getFieldCount();
          (*this)[n].setSpineWidth(currentwidth);
@@ -1148,14 +1088,19 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
          currentwidth = (*this)[n].getFieldCount();
          if (!init) {
             init = 1;
+cout << "TEST " << (*this)[n] << endl;
+cout << "TYPE " << (*this)[n].getType() << endl;
+cout << "EXCLUSIVE " << (*this)[n].hasExclusiveQ() << endl;
             if (!((*this)[n]).hasExclusiveQ()) {
                cout << "Error on line " << n+1 << " of file: "
                     << "No starting exclusive interpretation" << endl;
                cout << "The file contains: " << endl;
                cout << (*this) << endl;
+               cout << "LINE WITH MISSING INTERPRETATION:" << endl;
+               cout << (*this)[n] << endl;
                exit(1);
             }
-            if (spineinfo.getSize() != 0) {
+            if (spineinfo.size() != 0) {
                cout << "Error on line " << n+1 << endl;
                exit(1);
             }
@@ -1165,26 +1110,26 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
                }
                tlen = strlen(getRecord(n)[i]);
                tptr = new char[tlen + 1];
-               strcpy(tptr, getRecord(n)[i]); 
-               trackexinterp.append(tptr);
+               strcpy(tptr, getRecord(n)[i]);
+               trackexinterp.push_back(tptr);
                spineid++;
                sprintf(buffer, "%d", spineid);
                length = strlen(buffer);
                bp = new char[length + 1];
                strcpy(bp, buffer);
-               spineinfo.append(bp);
+               spineinfo.push_back(bp);
                int value;
                value = Convert::exint.getValue(getRecord(n)[i]);
-               if (spineid != exinterps.getSize()) {
+               if (spineid != (int)exinterps.size()) {
                   cout << "Error in exclusive interpretation allocation.";
                   cout << "Line: " << n+1 << endl;
                   exit(1);
                }
                if (value == E_unknown) {
                   value = Convert::exint.add(getRecord(n)[i]);
-                  exinterps.append(value);
+                  exinterps.push_back(value);
                } else {
-                  exinterps.append(value);
+                  exinterps.push_back(value);
                }
             }
             ((*this)[n]).copySpineInfo(spineinfo, n+1);
@@ -1214,7 +1159,7 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
                cerr << "Error in termination of humdrum data" << endl;
             }
             ((*this)[n]).copySpineInfo(spineinfo, n+1);
-            makeNewSpineInfo(spineinfo, ((*this)[n]), prediction, spineid, 
+            makeNewSpineInfo(spineinfo, ((*this)[n]), prediction, spineid,
                  exinterps);
 
             if (prediction == 0) {
@@ -1237,23 +1182,23 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
    }
 
    // delete the contents of spineinfo
-   for (i=0; i<spineinfo.getSize(); i++) {
+   for (i=0; i<(int)spineinfo.size(); i++) {
       if (spineinfo[i] != NULL) {
-         delete [] spineinfo[i];   
+         delete [] spineinfo[i];
          spineinfo[i] = NULL;
       }
    }
 
-   spineinfo.setSize(0);
+   spineinfo.resize(0);
 
    // provide Exclusive Interpretations ownerships to the record spines
-   
+
    int spineindex;
    linecount = getNumLines();
    int m;
    const char* ptr;
    for (n=0; n<linecount; n++) {
-      type = ((*this)[n]).getType(); 
+      type = ((*this)[n]).getType();
       if ((type & E_humrec_data) == E_humrec_data) {
          for (m=0; m<getSpineCount(n); m++) {
             ptr = ((*this)[n]).getSpineInfo(m);
@@ -1267,7 +1212,6 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
    }
 
    maxtracks = spineid;
-   trackexinterp.allowGrowth(0);
 }
 
 
@@ -1279,12 +1223,12 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
 //    line that has at least one path indicator
 //
 
-void HumdrumFileBasic::makeNewSpineInfo(SigCollection<char*>&spineinfo, 
+void HumdrumFileBasic::makeNewSpineInfo(vector<char*>&spineinfo,
    HumdrumRecord& aRecord, int newsize, int& spineid,
-   SigCollection<int>& ex) {
+   vector<int>& ex) {
 
-   SigCollection<char*> newinfo;
-   newinfo.setSize(newsize);
+   vector<char*> newinfo;
+   newinfo.resize(newsize);
    int i, j;
    for (i=0; i<newsize; i++) {
       newinfo[i] = new char[1024];
@@ -1330,37 +1274,37 @@ void HumdrumFileBasic::makeNewSpineInfo(SigCollection<char*>&spineinfo,
                   strcat(newinfo[outindex], " ");
                   strcat(newinfo[outindex], spineinfo[inindex+subcount-1]);
                   simplifySpineString(newinfo[outindex]);
-               } 
+               }
             } else {
                break;
             }
          }
          if (subcount == 1) {
-            cout << "Error: single *v path indicator on line: " 
+            cout << "Error: single *v path indicator on line: "
                  << aRecord.getLineNum() << "\n"
                  << aRecord.getLine()
                  << endl;
             exit(1);
          } else {
-            inindex += subcount-1;   
+            inindex += subcount-1;
          }
          // check to see if the spine info can be simplified:
-         simplifySpineInfo(newinfo, outindex);    
+         simplifySpineInfo(newinfo, outindex);
 
          outindex++;
       } else if (strncmp("**", aRecord[inindex], 2) == 0) {
          int value;
          value = Convert::exint.getValue(aRecord[inindex]);
-         if (spineid != ex.getSize()) {
-            cout << "Error in exclusive interpretation allocation" 
+         if (spineid != (int)ex.size()) {
+            cout << "Error in exclusive interpretation allocation"
                  << endl;
             exit(1);
          }
          if (value == E_unknown) {
             value = Convert::exint.add(aRecord[inindex]);
-            ex.append(value);
+            ex.push_back(value);
          } else {
-            ex.append(value);
+            ex.push_back(value);
          }
          strcpy(newinfo[outindex], spineinfo[inindex]);
          outindex++;
@@ -1370,28 +1314,28 @@ void HumdrumFileBasic::makeNewSpineInfo(SigCollection<char*>&spineinfo,
       }
    }
 
-   if (outindex != newinfo.getSize()) {
+   if (outindex != (int)newinfo.size()) {
       cout << "Error in HumdrumFileBasic path parsing" << endl;
       exit(1);
    }
 
-   if (inindex != spineinfo.getSize()) {
+   if (inindex != (int)spineinfo.size()) {
       cout << "Error in HumdrumFileBasic path parsing" << endl;
       exit(1);
    }
 
    // delete the old information:
-   for (i=0; i<spineinfo.getSize(); i++) {
+   for (i=0; i<(int)spineinfo.size(); i++) {
       if (spineinfo[i] != NULL) {
          delete [] spineinfo[i];
          spineinfo[i] = NULL;
       }
    }
-   spineinfo.setSize(newinfo.getSize());
+   spineinfo.resize(newinfo.size());
 
    // copy the new spine path indicators
    int length;
-   for (i=0; i<spineinfo.getSize(); i++) {
+   for (i=0; i<(int)spineinfo.size(); i++) {
       length = strlen(newinfo[i]);
       spineinfo[i] = new char[length + 1];
       strcpy(spineinfo[i], newinfo[i]);
@@ -1399,7 +1343,7 @@ void HumdrumFileBasic::makeNewSpineInfo(SigCollection<char*>&spineinfo,
       newinfo[i] = NULL;
    }
 
-   newinfo.setSize(0);
+   newinfo.resize(0);
 }
 
 
@@ -1427,34 +1371,32 @@ void HumdrumFileBasic::simplifySpineString(char* spinestring) {
 
    char buffer[1024] = {0};
    strcpy(buffer, spinestring);
-   Array<char*> ptrs;
-   Array<int> lengths;
+   vector<char*> ptrs;
+   vector<int> lengths;
 
-   ptrs.setSize(100);
-   ptrs.setGrowth(100);
-   ptrs.setSize(0);
+   ptrs.reserve(100);
+   ptrs.resize(0);
 
-   lengths.setSize(100);
-   lengths.setGrowth(100);
-   lengths.setSize(0);
+   lengths.reserve(100);
+   lengths.resize(0);
 
    char* ptr = strtok(buffer, " ");
    while (ptr != NULL) {
-      ptrs.append(ptr);
+      ptrs.push_back(ptr);
       length = strlen(ptr);
-      lengths.append(length);
+      lengths.push_back(length);
       ptr = strtok(NULL, " ");
    }
 
 
    int i, j;
    int k;
-   for (i=0; i<lengths.getSize()-1; i++) {
-      for (j=i+1; j<lengths.getSize(); j++) {
+   for (i=0; i<(int)lengths.size()-1; i++) {
+      for (j=i+1; j<(int)lengths.size(); j++) {
          if (lengths[i] == lengths[j]) {
             if (strncmp(ptrs[i], ptrs[j], lengths[i]-1) == 0) {
                spinestring[0] = '\0';
-               for (k=0; k<ptrs.getSize(); k++) {
+               for (k=0; k<(int)ptrs.size(); k++) {
                   if (k == j) continue;
                   if (k == i) {
                      strncat(spinestring, &(ptrs[k][1]), lengths[k]-3);
@@ -1493,8 +1435,7 @@ endofspinefunction:
 //                       1b 1a 2 simplifies to 1 2
 //
 
-void HumdrumFileBasic::simplifySpineInfo(SigCollection<char*>& info, 
-      int index) {
+void HumdrumFileBasic::simplifySpineInfo(vector<char*>& info, int index) {
    char* temp;
    int length;
    length = strlen(info[index]);
@@ -1508,22 +1449,22 @@ void HumdrumFileBasic::simplifySpineInfo(SigCollection<char*>& info,
       }
    }
 
-   char* p1; 
-   char* p2; 
+   char* p1;
+   char* p2;
    if (count == 1) {
-      p1 = strtok(temp, " ");   
-      p2 = strtok(NULL, " ");   
+      p1 = strtok(temp, " ");
+      p2 = strtok(NULL, " ");
 
       p1 += 1;
       p2 += 1;
 
       int len1 = strlen(p1);
       int len2 = strlen(p2);
-    
+
       if (len1 > 2 && len2 > 2) {
          p1[len1-2] = '\0';
          p2[len2-2] = '\0';
-   
+
          if (strcmp(p1, p2) == 0) {
             strcpy(info[index], p1);
          }
@@ -1566,7 +1507,7 @@ int HumdrumFileBasic::predictNewSpineCount(HumdrumRecord& aRecord) {
             }
          }
          if (subcount == 1) {
-            cout << "Error: single *v pathindicator on line: " 
+            cout << "Error: single *v pathindicator on line: "
                  << aRecord.getLineNum() << "\n"
                  << aRecord.getLine()
                  << endl;
@@ -1594,8 +1535,8 @@ int HumdrumFileBasic::predictNewSpineCount(HumdrumRecord& aRecord) {
 //
 
 void HumdrumFileBasic::privateDotAnalysis(void) {
-   Array<int> lastline;
-   Array<int> lastspine;
+   vector<int> lastline;
+   vector<int> lastspine;
 
    int i, j;
    int count = 0;
@@ -1604,8 +1545,8 @@ void HumdrumFileBasic::privateDotAnalysis(void) {
    for (i=0; i<length; i++) {
       if (strncmp((*this)[i][0], "**", 2) == 0) {
          count = (*this)[i].getFieldCount();
-         lastline.setSize(count);
-         lastspine.setSize(count);
+         lastline.resize(count);
+         lastspine.resize(count);
          for (j=0; j<count; j++) {
             lastline[j] = -1;
             lastspine[j] = -1;
@@ -1620,7 +1561,7 @@ void HumdrumFileBasic::privateDotAnalysis(void) {
          readjustDotArrays(lastline, lastspine, (*this)[i], newcount);
          continue;
       }
-     
+
       if ((*this)[i].getType() == E_humrec_data) {
          if (newcount != 0 && newcount != (*this)[i].getFieldCount()) {
             cout << "Error on line " << i+1 << ": invalid number of spines"
@@ -1651,21 +1592,15 @@ void HumdrumFileBasic::privateDotAnalysis(void) {
 // HumdrumFileBasic::readjustDotArrays -- handle spine path changes
 //
 
-void HumdrumFileBasic::readjustDotArrays(Array<int>& lastline, 
-      Array<int>& lastspine, HumdrumRecord& record, int newsize) {
+void HumdrumFileBasic::readjustDotArrays(vector<int>& lastline,
+      vector<int>& lastspine, HumdrumRecord& record, int newsize) {
 
-   Array<int> newline;
-   Array<int> newspine;
-   newline.setSize(newsize);
-   newspine.setSize(newsize);
-   newline.allowGrowth(0);
-   newspine.allowGrowth(0);
+   vector<int> newline(newsize);
+   vector<int> newspine(newsize);
+   fill(newline.begin(), newline.end(), -1);
+   fill(newspine.begin(), newspine.end(), -1);
 
    int i, j;
-   for (i=0; i<newsize; i++) {
-      newline[i] = -1;
-      newspine[i] = -1;
-   }
 
    int spinecount = record.getFieldCount();
    int subcount;
@@ -1706,19 +1641,19 @@ void HumdrumFileBasic::readjustDotArrays(Array<int>& lastline,
                if (subcount > 1) {
                   newline[outindex] = lastline[inindex+subcount-1];
                   newspine[outindex] = lastspine[inindex+subcount-1];
-               } 
+               }
             } else {
                break;
             }
          }
          if (subcount == 1) {
-            cout << "Error: single *v path indicator on line: " 
+            cout << "Error: single *v path indicator on line: "
                  << record.getLineNum() << "\n"
                  << record.getLine()
                  << endl;
             exit(1);
          } else {
-            inindex += subcount-1;   
+            inindex += subcount-1;
          }
          outindex++;
       } else if (strncmp("**", record[inindex], 2) == 0) {
@@ -1732,20 +1667,20 @@ void HumdrumFileBasic::readjustDotArrays(Array<int>& lastline,
       }
    }
 
-   if (outindex != newline.getSize()) {
+   if (outindex != (int)newline.size()) {
       cout << "Error in HumdrumFileBasic path parsing" << endl;
       exit(1);
    }
 
-   if (inindex != lastline.getSize()) {
+   if (inindex != (int)lastline.size()) {
       cout << "Error in HumdrumFileBasic path parsing" << endl;
       exit(1);
    }
 
    // copy the new information
-   lastline.setSize(newline.getSize());
-   lastspine.setSize(newspine.getSize());
-   for (i=0; i<newline.getSize(); i++) {
+   lastline.resize(newline.size());
+   lastspine.resize(newspine.size());
+   for (i=0; i<(int)newline.size(); i++) {
       lastline[i] = newline[i];
       lastspine[i] = newspine[i];
    }
@@ -1759,7 +1694,7 @@ void HumdrumFileBasic::readjustDotArrays(Array<int>& lastline,
 // HumdrumFileBasic::extractEmbeddedDataFromPdf --
 //
 
-void HumdrumFileBasic::extractEmbeddedDataFromPdf(ostream& outputData, 
+void HumdrumFileBasic::extractEmbeddedDataFromPdf(ostream& outputData,
       istream& inputData) {
    PDFFile pdffile;
    pdffile.process(inputData);
@@ -1785,7 +1720,7 @@ void HumdrumFileBasic::extractEmbeddedDataFromPdf(ostream& outputData,
 // HumdrumFileBasic::getUriToUrlMapping --
 //
 
-char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize, 
+char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
       const char* uri) {
 
    if (strncmp(uri, "http://", strlen("http://")) == 0) {
@@ -1809,57 +1744,41 @@ char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
       } else if (strncmp(ptr, "h://", strlen("h://")) == 0) {
          ptr += strlen("h://");
       }
-      Array<char> location;
-      location.setSize(strlen(ptr)+1);
-      location.allowGrowth(0);
-      strcpy(location.getBase(), ptr);
-   
-      Array<char> filename;
-      filename.setSize(1);
-      filename[0] = '\0';
-      filename.setSize(0);
-   
-      strcpy(location.getBase(), ptr);
-   
-      char* pot;
-      if ((pot = strrchr(location.getBase(), '/')) != NULL) {
-         *pot = '\0';
-         pot++;
-         filename.setSize(strlen(pot)+1);
-         strcpy(filename.getBase(), pot);
-         filename.allowGrowth(0);
-      } else {
-         filename = location;
-         location.setSize(2);
-         strcpy(location.getBase(), "/");
+      string location = ptr;
+      string filename = "";
+
+      size_t found = location.rfind("/");
+      if (found != string::npos) {
+         filename = location.substr(found+1);
+         location.resize(found);
       }
-   
-      SSTREAM httprequest;
+
+      stringstream httprequest;
       httprequest << "http://" << "kern.ccarh.org";
-      if (strchr(filename.getBase(), '.') != NULL) {
+      if (strchr(filename.c_str(), '.') != NULL) {
          httprequest << "/cgi-bin/ksdata?file=";
-         if (filename.getSize() > 0) {
-            httprequest << filename.getBase();
+         if (filename.size() > 0) {
+            httprequest << filename;
          }
          httprequest << "&l=";
-         if (location.getSize() > 0) {
-            httprequest << location.getBase();
+         if (location.size() > 0) {
+            httprequest << location;
          }
       } else {
          httprequest << "/cgi-bin/ksdata?l=";
-         if (location.getSize() > 0) {
-            httprequest << location.getBase();
+         if (location.size() > 0) {
+            httprequest << location;
             httprequest << "/";
-            httprequest << filename.getBase();
+            httprequest << filename;
          }
       }
       httprequest << "&format=kern";
       httprequest << ends;
-     
-      strcpy(buffer, httprequest.CSTRING);
+
+      strcpy(buffer, httprequest.str().c_str());
       return buffer;
    }
-   
+
    if (strncmp(uri, "jrp://", strlen("jrp://")) == 0) {
       const char* ptr = uri;
       // skip over the staring portion of the address:
@@ -1868,14 +1787,14 @@ char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
       } else if (strncmp(ptr, "jrp:", strlen("jrp:")) == 0) {
          ptr += strlen("jrp:");
       }
-   
-      SSTREAM httprequest;
+
+      stringstream httprequest;
       httprequest << "http://" << "jrp.ccarh.org";
       httprequest << "/cgi-bin/jrp?a=humdrum&f=";
       httprequest << ptr;
       httprequest << ends;
 
-      strcpy(buffer, httprequest.CSTRING);
+      strcpy(buffer, httprequest.str().c_str());
       return buffer;
    }
 
@@ -1885,15 +1804,15 @@ char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
 }
 
 
-   
+
 #ifdef USING_URI
 
 //////////////////////////////
 //
 // readFromHumdrumURI -- Read a Humdrum file from an humdrum:// web address
-// 
+//
 // Example:
-// maps: humdrum://osu/classical/haydn/london/sym099a.krn 
+// maps: humdrum://osu/classical/haydn/london/sym099a.krn
 // into:
 // http://kern.ccarh.org/cgi-bin/ksdata?file=sym099a.krn&l=/osu/classical/haydn/london&format=kern
 //
@@ -1908,45 +1827,35 @@ void HumdrumFileBasic::readFromHumdrumURI(const char* humdrumaddress) {
    } else if (strncmp(ptr, "h://", strlen("h://")) == 0) {
       ptr += strlen("h://");
    }
-   Array<char> location;
-   location.setSize(strlen(ptr)+1);
-   location.allowGrowth(0);
-   strcpy(location.getBase(), ptr);
+   string location;
+   location = ptr;
 
-   Array<char> filename;
-   filename.setSize(1);
-   filename[0] = '\0';
-   filename.setSize(0);
+   string filename;
+   filename = "";
 
-   strcpy(location.getBase(), ptr);
+   location = ptr;
 
-   char* pot;
-   if ((pot = strrchr(location.getBase(), '/')) != NULL) {
-      *pot = '\0';
-      pot++;
-      filename.setSize(strlen(pot)+1);
-      strcpy(filename.getBase(), pot);
-      filename.allowGrowth(0);
-   } else {
-      filename = location;
-      location.setSize(2);
-      strcpy(location.getBase(), "/");
+
+   size_t found = location.rfind("/");
+   if (found != string::npos) {
+      filename = location.substr(found+1);
+      location.resize(found);
    }
 
-   SSTREAM httprequest;
+   stringstream httprequest;
    httprequest << "http://" << "kern.ccarh.org";
    httprequest << "/cgi-bin/ksdata?file=";
-   if (filename.getSize() > 0) {
-      httprequest << filename.getBase();
+   if (filename.size() > 0) {
+      httprequest << filename;
    }
    httprequest << "&l=";
-   if (location.getSize() > 0) {
-      httprequest << location.getBase();
+   if (location.size() > 0) {
+      httprequest << location;
    }
    httprequest << "&format=kern";
    httprequest << ends;
 
-   readFromHttpURI(httprequest.CSTRING);
+   readFromHttpURI(httprequest.str().c_str());
 }
 
 
@@ -1954,9 +1863,9 @@ void HumdrumFileBasic::readFromHumdrumURI(const char* humdrumaddress) {
 //////////////////////////////
 //
 // readFromJrpURI -- Read a Humdrum file from a jrp:// web-style address
-// 
+//
 // Example:
-// maps: 
+// maps:
 //    jrp://Jos2721-La_Bernardina
 // into:
 //    http://jrp.ccarh.org/cgi-bin/jrp?a=humdrum&f=Jos2721-La_Bernardina
@@ -1971,13 +1880,13 @@ void HumdrumFileBasic::readFromJrpURI(const char* jrpaddress) {
       ptr += strlen("jrp:");
    }
 
-   SSTREAM httprequest;
+   stringstream httprequest;
    httprequest << "http://" << "jrp.ccarh.org";
    httprequest << "/cgi-bin/jrp?a=humdrum&f=";
    httprequest << ptr;
    httprequest << ends;
 
-   readFromHttpURI(httprequest.CSTRING);
+   readFromHttpURI(httprequest.str().c_str());
 }
 
 
@@ -1988,10 +1897,10 @@ void HumdrumFileBasic::readFromJrpURI(const char* jrpaddress) {
 //
 
 void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
-   Array<char> hostname;
+   string hostname;
 
-   Array<char> location;
-   location.setSize(0);
+   string location;
+   location.resize(0);
 
    const char* ptr = webaddress;
    const char* filename = NULL;
@@ -2001,51 +1910,44 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
       ptr += strlen("http://");
    }
 
-   hostname.setSize(strlen(ptr)+1);
-   hostname.setGrowth(0);
-   strcpy(hostname.getBase(), ptr);
-   char* pot;
-   if ((pot = strchr(hostname.getBase(), '/')) != NULL) {
-      *pot = '\0';
+   hostname = ptr;
+   size_t found = hostname.rfind("/");
+   if (found != string::npos) {
+      hostname.resize(found);
    }
-
 
    if ((filename = strchr(ptr, '/')) != NULL) {
-      location.setSize(strlen(filename)+1);
-      strcpy(location.getBase(), filename);
-      location.allowGrowth(0);
+      location = filename;
    }
-   if (location.getSize() == 0) {
-      location.setSize(2);
-      location.allowGrowth(0);
-      strcpy(location.getBase(), "/");
+   if (location.size() == 0) {
+      location = "/";
    }
 
    char newline[3] = {0x0d, 0x0a, 0};
 
-   SSTREAM request;
-   request << "GET "   << location.getBase() << " HTTP/1.1" << newline;
-   request << "Host: " << hostname.getBase() << newline;
-   request << "User-Agent: HumdrumFile Downloader 1.0 (" 
+   stringstream request;
+   request << "GET "   << location << " HTTP/1.1" << newline;
+   request << "Host: " << hostname  << newline;
+   request << "User-Agent: HumdrumFile Downloader 1.0 ("
            << __DATE__ << ")" << newline;
    request << "Connection: close" << newline;  // this line is necessary
    request << newline;
    request << ends;
 
-   // cout << "HOSTNAME: " << hostname.getBase() << endl;
-   // cout << "LOCATION: " << location.getBase() << endl;
-   // cout << request.CSTRING << endl;
+   // cout << "HOSTNAME: " << hostname  << endl;
+   // cout << "LOCATION: " << location << endl;
+   // cout << request.str().c_str() << endl;
    // cout << "-------------------------------------------------" << endl;
 
-   int socket_id = open_network_socket(hostname.getBase(), 80);
-   if (::write(socket_id, request.CSTRING, strlen(request.CSTRING)) == -1) {
+   int socket_id = open_network_socket(hostname.c_str(), 80);
+   if (::write(socket_id, request.str().c_str(), strlen(request.str().c_str())) == -1) {
       exit(-1);
    }
    #define URI_BUFFER_SIZE (10000)
    char buffer[URI_BUFFER_SIZE];
    int message_len;
-   SSTREAM inputdata;
-   SSTREAM header;
+   stringstream inputdata;
+   stringstream header;
    int foundcontent = 0;
    int i;
    int newlinecounter = 0;
@@ -2076,7 +1978,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
    int chunked = 0;
 
    header << ends;
-   // cout << header.CSTRING << endl;
+   // cout << header.str().c_str() << endl;
    // cout << "-------------------------------------------------" << endl;
    while (header.getline(buffer, URI_BUFFER_SIZE)) {
       int len = strlen(buffer);
@@ -2105,7 +2007,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
 
    // once the length of the remaining data is known (or not), read it:
    if (datalength > 0) {
-      getFixedDataSize(socket_id, datalength, inputdata, buffer, 
+      getFixedDataSize(socket_id, datalength, inputdata, buffer,
             URI_BUFFER_SIZE);
 
    } else if (chunked) {
@@ -2120,7 +2022,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
          exit(1);
       }
    } else {
-      // if the size of the rest of the data cannot be found in the 
+      // if the size of the rest of the data cannot be found in the
       // header, then just keep reading until done (but this will
       // probably cause a 5 second delay at the last read).
       while ((message_len = ::read(socket_id, buffer, URI_BUFFER_SIZE)) != 0) {
@@ -2142,7 +2044,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
                      continue;
                   }
                }
-               
+
             }
          }
       }
@@ -2153,7 +2055,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
    inputdata << ends;
 
    // cout << "CONTENT:=======================================" << endl;
-   // cout << inputdata.CSTRING;
+   // cout << inputdata.str().c_str();
    // cout << "===============================================" << endl;
 
    HumdrumFileBasic::read(inputdata);
@@ -2174,21 +2076,21 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
 // an HTTP message (either a request sent by a client or the response from
 // the server), the body of the message is made of an unspecified number
 // of chunks ending with a last, zero-sized, chunk.
-// 
+//
 // Each non-empty chunk starts with the number of octets of the data it
-// embeds (size written in hexadecimal) followed by a CRLF (carriage 
-// return and linefeed), and the data itself. The chunk is then closed 
-// with a CRLF. In some implementations, white space chars (0x20) are 
+// embeds (size written in hexadecimal) followed by a CRLF (carriage
+// return and linefeed), and the data itself. The chunk is then closed
+// with a CRLF. In some implementations, white space chars (0x20) are
 // padded between chunk-size and the CRLF.
-// 
+//
 // The last chunk is a single line, simply made of the chunk-size (0),
 // some optional padding white spaces and the terminating CRLF. It is not
 // followed by any data, but optional trailers can be sent using the same
 // syntax as the message headers.
-// 
+//
 // The message is finally closed by a last CRLF combination.
 
-int HumdrumFileBasic::getChunk(int socket_id, SSTREAM& inputdata, 
+int HumdrumFileBasic::getChunk(int socket_id, stringstream& inputdata,
       char* buffer, int bufsize) {
    int chunksize = 0;
    int message_len;
@@ -2216,7 +2118,7 @@ int HumdrumFileBasic::getChunk(int socket_id, SSTREAM& inputdata,
       cerr << "Strange error occurred right after reading a chunk size" << endl;
       exit(1);
    }
-   
+
    // now expect 0x0a:
    message_len = ::read(socket_id, buffer, 1);
    if ((message_len == 0) || (buffer[0] != 0x0a)) {
@@ -2234,8 +2136,8 @@ int HumdrumFileBasic::getChunk(int socket_id, SSTREAM& inputdata,
 // getFixedDataSize -- read a know amount of data from a socket.
 //
 
-int HumdrumFileBasic::getFixedDataSize(int socket_id, int datalength, 
-      SSTREAM& inputdata, char* buffer, int bufsize) {
+int HumdrumFileBasic::getFixedDataSize(int socket_id, int datalength,
+      stringstream& inputdata, char* buffer, int bufsize) {
    int readcount = 0;
    int readsize;
    int message_len;
@@ -2261,12 +2163,12 @@ int HumdrumFileBasic::getFixedDataSize(int socket_id, int datalength,
 
 //////////////////////////////
 //
-// HumdrumFileBasic::prepare_address -- Store a computer name, such as 
-//    www.google.com into a sockaddr_in structure for later use in 
+// HumdrumFileBasic::prepare_address -- Store a computer name, such as
+//    www.google.com into a sockaddr_in structure for later use in
 //    open_network_socket.
 //
 
-void HumdrumFileBasic::prepare_address(struct sockaddr_in *address, 
+void HumdrumFileBasic::prepare_address(struct sockaddr_in *address,
       const char *hostname, unsigned short int port) {
 
    memset(address, 0, sizeof(struct sockaddr_in));
@@ -2295,10 +2197,10 @@ void HumdrumFileBasic::prepare_address(struct sockaddr_in *address,
 //    Intended for downloading a Humdrum file from a website.
 //
 
-int HumdrumFileBasic::open_network_socket(const char *hostname, 
+int HumdrumFileBasic::open_network_socket(const char *hostname,
       unsigned short int port) {
-   int inet_socket;                 // socket descriptor 
-   struct sockaddr_in servaddr;     // IP/port of the remote host 
+   int inet_socket;                 // socket descriptor
+   struct sockaddr_in servaddr;     // IP/port of the remote host
 
    prepare_address(&servaddr, hostname, port);
 
@@ -2331,21 +2233,21 @@ int HumdrumFileBasic::open_network_socket(const char *hostname,
 
 //////////////////////////////
 //
-// HumdrumFileBasic::makeVts -- create a !!!VTS: record for the 
+// HumdrumFileBasic::makeVts -- create a !!!VTS: record for the
 // given Humdrum data.  The function will ignore all reference records
 // which start with the string "!!!VTS" when calculating the VTS data.
 // The data is always assumbed to be encoded with Unix newlines (0x0a).
 //
 
-void HumdrumFileBasic::makeVts(Array<char>& vtsstring) {
+void HumdrumFileBasic::makeVts(string& vtsstring) {
    HumdrumFileBasic::makeVts(vtsstring, (*this));
 }
 
 
-void HumdrumFileBasic::makeVts(Array<char>& vtsstring, 
+void HumdrumFileBasic::makeVts(string& vtsstring,
       HumdrumFileBasic& infile) {
    int i;
-   SSTREAM tstream;
+   stringstream tstream;
    for (i=0; i<infile.getNumLines(); i++) {
       if (strncmp(infile[i][0], "!!!VTS", 6) == 0) {
          continue;
@@ -2353,12 +2255,11 @@ void HumdrumFileBasic::makeVts(Array<char>& vtsstring,
       tstream << infile[i] << (char)0x0a;
    }
    tstream << ends;
-   int len = strlen(tstream.CSTRING);
-   unsigned long checksum = CheckSum::crc32(tstream.CSTRING, len);
+   int len = strlen(tstream.str().c_str());
+   unsigned long checksum = CheckSum::crc32(tstream.str().c_str(), len);
    char buffer[128] = {0};
    sprintf(buffer, "!!!VTS: %lu", checksum);
-   vtsstring.setSize(strlen(buffer) + 1);
-   strcpy(vtsstring.getBase(), buffer);
+   vtsstring = buffer;
 }
 
 
@@ -2369,14 +2270,14 @@ void HumdrumFileBasic::makeVts(Array<char>& vtsstring,
 // when creating the result.  (not comments, barline, interpretations).
 //
 
-void HumdrumFileBasic::makeVtsData(Array<char>& vtsstring) {
+void HumdrumFileBasic::makeVtsData(string& vtsstring) {
    HumdrumFileBasic::makeVtsData(vtsstring, (*this));
 }
 
-void HumdrumFileBasic::makeVtsData(Array<char>& vtsstring, 
+void HumdrumFileBasic::makeVtsData(string& vtsstring,
       HumdrumFileBasic& infile) {
    int i;
-   SSTREAM tstream;
+   stringstream tstream;
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isData()) {
          continue;
@@ -2384,12 +2285,11 @@ void HumdrumFileBasic::makeVtsData(Array<char>& vtsstring,
       tstream << infile[i] << (char)0x0a;
    }
    tstream << ends;
-   int len = strlen(tstream.CSTRING);
-   unsigned long checksum = CheckSum::crc32(tstream.CSTRING, len);
+   int len = strlen(tstream.str().c_str());
+   unsigned long checksum = CheckSum::crc32(tstream.str().c_str(), len);
    char buffer[128] = {0};
    sprintf(buffer, "!!!VTS-data: %lu", checksum);
-   vtsstring.setSize(strlen(buffer) + 1);
-   strcpy(vtsstring.getBase(), buffer);
+   vtsstring = buffer;
 }
 
 

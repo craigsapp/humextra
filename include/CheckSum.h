@@ -14,23 +14,11 @@
 #ifndef _CHECKSUM_H_INCLUDED
 #define _CHECKSUM_H_INCLUDED
 
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>     /* for Windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-   
+#include <sstream>
+#include <string>
 
-#include "Array.h"
+using namespace std;
+
 
 struct MD5_CTX {              // MD5 context
    unsigned long state[4];    // state (ABCD) 
@@ -47,8 +35,8 @@ class CheckSum {
       static unsigned long crc32     (const char* buf, int length);
 
       // equivalent to the md5sum output by "md5sum" command:
-      static void          getMD5Sum (Array<char>& md5sum, Array<char>& data);
-      static void          getMD5Sum (ostream& out, SSTREAM& data);
+      static void          getMD5Sum (string& md5sum, string& data);
+      static void          getMD5Sum (ostream& out, stringstream& data);
 
    protected:
 

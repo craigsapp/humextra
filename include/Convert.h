@@ -3,16 +3,16 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Jun  8 00:38:46 PDT 1998
 // Last Modified: Tue Jun 23 14:00:23 PDT 1998
-// Last Modified: Fri May  5 12:17:08 PDT 2000 (added kernToMidiNoteNumber())
-// Last Modified: Wed Nov 29 12:28:00 PST 2000 (added base40ToMidiNoteNumber())
-// Last Modified: Wed Jan  2 12:19:07 PST 2002 (added kotoToDuration)
-// Last Modified: Wed Dec  1 01:36:29 PST 2004 (added base40ToIntervalAbbr())
-// Last Modified: Sun Jun  4 21:04:50 PDT 2006 (added base40ToPerfViz())
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
-// Last Modified: Wed Nov 18 16:40:33 PST 2009 (added base40/trans converts)
-// Last Modified: Sat May 22 11:02:12 PDT 2010 (added RationalNumber)
-// Last Modified: Sun Dec 26 04:54:46 PST 2010 (added kernClefToBaseline)
-// Last Modified: Sat Jan 22 17:13:36 PST 2011 (added kernToDurationNoDots)
+// Last Modified: Fri May  5 12:17:08 PDT 2000 Added kernToMidiNoteNumber()
+// Last Modified: Wed Nov 29 12:28:00 PST 2000 Added base40ToMidiNoteNumber()
+// Last Modified: Wed Jan  2 12:19:07 PST 2002 Added kotoToDuration
+// Last Modified: Wed Dec  1 01:36:29 PST 2004 Added base40ToIntervalAbbr()
+// Last Modified: Sun Jun  4 21:04:50 PDT 2006 Added base40ToPerfViz()
+// Last Modified: Wed Nov 18 16:40:33 PST 2009 Added base40/trans converts
+// Last Modified: Sat May 22 11:02:12 PDT 2010 Added RationalNumber
+// Last Modified: Sun Dec 26 04:54:46 PST 2010 Added kernClefToBaseline
+// Last Modified: Sat Jan 22 17:13:36 PST 2011 Added kernToDurationNoDots
+// Last Modified: Sun Mar 13 16:00:38 PDT 2016 Switched to STL
 // Filename:      ...sig/include/sigInfo/Convert.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Convert.h
 // Syntax:        C++ 
@@ -27,9 +27,9 @@
 
 #include "HumdrumEnumerations.h"
 #include "ChordQuality.h"
-#include "SigCollection.h"
 #include "RationalNumber.h"
 
+#include <vector>
 
 class Convert {
    public: 
@@ -77,13 +77,13 @@ class Convert {
 
       static ChordQuality chordQualityStringToValue (const char* aString);
       static int       chordQualityToBaseNote    (const ChordQuality& aQuality);
-      static void      chordQualityToNoteSet     (SigCollection<int>& noteSet, 
+      static void      chordQualityToNoteSet     (vector<int>& noteSet, 
                                                   const ChordQuality& aQuality);
       static int       chordQualityToInversion   (const char* aQuality);
       static int       chordQualityToRoot        (const char* aQuality);
       static int       chordQualityToType        (const char* aQuality);
       static void      noteSetToChordQuality     (ChordQuality& cq, 
-                                                  const SigCollection<int>& aSet);
+                                                  const vector<int>& aSet);
 
    // conversions dealing with base 40 system of notation
 
@@ -97,7 +97,7 @@ class Convert {
       static int       kernToBase40               (const char* kernfield);
       static int       kernToBase40Class          (const char* kernfield);
       static int       kernNoteToBase40           (const char* name);
-      static SigCollection<int> keyToScaleDegrees (int aKey, int aMode);
+      static vector<int> keyToScaleDegrees (int aKey, int aMode);
       static int       museToBase40               (const char* pitchString);
       static int       base40ToScoreVPos          (int pitch, int clef);
       static char*     base40ToMuse               (int base40, char* buffer);
@@ -130,31 +130,31 @@ class Convert {
       static RationalNumber kotoToDurationR       (const char* aKotoString);
 
    // convsions related to serial interval descriptions
-      static const char* base12ToTnSetName        (Array<int>& base12);
-      static void        base12ToTnSetNameAllSubsets(Array<int>& list, 
-                                                   Array<int>& notes);
-      static void      base12ToTnNormalForm       (Array<int>& tnorm, 
-                                                   Array<int>& base12);
-      static void      base12ToNormalForm         (Array<int>& nform, 
-                                                   Array<int>& base12);
-      static void      base40ToIntervalVector     (Array<int>& iv,  
-                                                      Array<int>& base40);
-      static void      base12ToIntervalVector     (Array<int>& iv,  
-                                                      Array<int>& base12);
+      static const char* base12ToTnSetName        (vector<int>& base12);
+      static void        base12ToTnSetNameAllSubsets(vector<int>& list, 
+                                                   vector<int>& notes);
+      static void      base12ToTnNormalForm       (vector<int>& tnorm, 
+                                                   vector<int>& base12);
+      static void      base12ToNormalForm         (vector<int>& nform, 
+                                                   vector<int>& base12);
+      static void      base40ToIntervalVector     (vector<int>& iv,  
+                                                      vector<int>& base40);
+      static void      base12ToIntervalVector     (vector<int>& iv,  
+                                                      vector<int>& base12);
 
    protected:
       // findBestNormalRotation used with bse12ToNormalForm
-      static int     findBestNormalRotation   (Array<int>& input, int asize, 
-                                               Array<int>& choices);
+      static int     findBestNormalRotation   (vector<int>& input, int asize, 
+                                               vector<int>& choices);
 
       static int     calculateInversion       (int aType, int bassNote, 
                                                int root);
-      static int     checkChord               (const SigCollection<int>& aSet);
+      static int     checkChord               (const vector<int>& aSet);
       static int     intcompare               (const void* a, const void* b);
-      static void    rotatechord              (SigCollection<int>& aChord);
-      static void    addCombinations          (Array<Array<int> >& combinations,
-                                               Array<int>& input, 
-                                               Array<int>& temp, 
+      static void    rotatechord              (vector<int>& aChord);
+      static void    addCombinations          (vector<vector<int> >& combinations,
+                                               vector<int>& input, 
+                                               vector<int>& temp, 
                                                int q=0, int r=0);
 
 

@@ -4,7 +4,6 @@
 // Creation Date: Sun Jun  7 16:24:06 PDT 1998
 // Last Modified: Sun Jun  7 16:24:06 PDT 1998
 // Last Modified: Thu May 14 21:53:43 PDT 2009 (modified output display)
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
 //
 // Filename:      ...sig/include/sigInfo/ChordQuality.cpp
 // Web Address:   http://sig.sapp.org/include/sigInfo/ChordQuality.cpp
@@ -20,14 +19,10 @@
 #ifndef _CHORDQUALITY_H_INCLUDED
 #define _CHORDQUALITY_H_INCLUDED
 
-#include "SigCollection.h"
-#include "Array.h"
+#include <iostream>
+#include <vector>
 
-#ifndef OLDCPP
-   #include <iostream>
-#else
-   #include <iostream.h>
-#endif
+using namespace std;
 
 
 class ChordQuality {
@@ -43,11 +38,10 @@ class ChordQuality {
       static const char* getDisplay       (void);
       int                getInversion     (void) const;
       const char*        getInversionName (void) const;
-      SigCollection<int> getNotesInChord  (void) const;
-      void               getNotesInChord  (SigCollection<int>& notes) const;
+      vector<int>        getNotesInChord  (void) const;
+      void               getNotesInChord  (vector<int>& notes) const;
       ostream&           printPitchClasses(ostream& out);
-      void               setPitchClasses  (Array<int>& newnotes);
-      void               setPitchClasses  (SigCollection<int>& newnotes);
+      void               setPitchClasses  (vector<int>& newnotes);
       int                getRoot          (void) const;
       const char*        getRootName      (void) const;
       int                getType          (void) const;
@@ -66,7 +60,7 @@ class ChordQuality {
       void               setType          (const char* aTypeName);
 
    private:
-      SigCollection<int> chordNotes;      // pitch classes for unknown sonority
+      vector<int> chordNotes;      // pitch classes for unknown sonority
       int                chordType;       // chord type enumeration
       int                chordInversion;  // inversion of the chord
       int                chordRoot;       // root pitch class of the chord

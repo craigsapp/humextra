@@ -17,15 +17,13 @@
 
 #include "Enum_muserec.h"
 #include "RationalNumber.h"
-#include "Array.h"
 #include <stdarg.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-   using namespace std;
-#else
-   #include <iostream.h>
-#endif
+#include <iostream>
+#include <string>
+
+using namespace std;
+
 
 class MuseRecordBasic {
    public:
@@ -39,9 +37,9 @@ class MuseRecordBasic {
       void              cleanLineEnding    (void);
       void              extract            (char* output, int start, int stop);
       char&             getColumn          (int index);
-      void              getColumns         (Array<char>& data, int startcol, 
+      void              getColumns         (string& data, int startcol, 
                                             int endcol);
-      void              setColumns         (Array<char>& data, int startcol, 
+      void              setColumns         (string& data, int startcol, 
                                             int endcol);
       int               getLength          (void) const;
       const char*       getLine            (void); 
@@ -61,11 +59,12 @@ class MuseRecordBasic {
       void              shrink             (void);
       void              insertString       (int column, const char* string);
       void              insertStringRight  (int column, const char* string);
-      void              setString          (Array<char>& astring);
+      void              setString          (string& astring);
       void              appendString       (const char* astring);
       void              appendInteger      (int value);
       void              appendRational     (RationalNumber& value);
       void              append             (const char* format, ...);
+      void              push_back          (const char* format, ...);
 
       // mark-up accessor functions:
 
@@ -97,7 +96,7 @@ class MuseRecordBasic {
       void              setNextTiedNoteLineIndex(int index);
 
    protected:
-      Array<char>       recordString;      // actual characters on line
+      string            recordString;      // actual characters on line
 
       // mark-up data for the line:
       int               lineindex;         // index into original file

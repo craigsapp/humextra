@@ -16,9 +16,10 @@
 // Last Modified: Wed Jun 16 21:15:06 PDT 2004 Indep. tracks in analyzeKeyKS
 // Last Modified: Mon Jun  5 06:59:27 PDT 2006 Add fixIrritatingPickupProblem
 // Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed SigCollection class
-// Last Modified: Sat Sep  5 22:03:28 PDT 2009 ArrayInt to Array<int>
+// Last Modified: Sat Sep  5 22:03:28 PDT 2009 ArrayInt to vector<int>
 // Last Modified: Sun Jun 20 13:42:12 PDT 2010 Added rhythm list)
 // Last Modified: Mon Sep 16 20:26:17 PDT 2013 Added getMeasureNumber()
+// Last Modified: Sun Mar 13 17:07:56 PDT 2016 Switched to STL
 // Filename:      ...sig/include/sigInfo/HumdrumFile.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/HumdrumFile.h
 // Syntax:        C++ 
@@ -131,21 +132,21 @@ class HumdrumFile : public HumdrumFileBasic {
                                                int options = 0);
       int                    getNextDatumLine (int& nspine, int index, int spine, 
                                                int options = 0);
-      int                    getNoteList      (Array<int>& notes, int line, 
+      int                    getNoteList      (vector<int>& notes, int line, 
                                                    int flag);
-      void                   getNoteArray     (Array<double>& absbeat, 
-                                               Array<int>& pitches, 
-                                               Array<double>& durations, 
-                                               Array<double>& levels,
+      void                   getNoteArray     (vector<double>& absbeat, 
+                                               vector<int>& pitches, 
+                                               vector<double>& durations, 
+                                               vector<double>& levels,
                                                int startLine = 0, 
                                                int endLine = 0, 
                                                int tracknum = -1);
-      void                   getNoteArray2    (Array<double>& absbeat, 
-                                               Array<int>& pitches, 
-                                               Array<double>& durations, 
-                                               Array<double>& levels,
-                                               Array<Array<int> >& lastpitches,
-                                               Array<Array<int> >& nextpitches,
+      void                   getNoteArray2    (vector<double>& absbeat, 
+                                               vector<int>& pitches, 
+                                               vector<double>& durations, 
+                                               vector<double>& levels,
+                                               vector<vector<int> >& lastpitches,
+                                               vector<vector<int> >& nextpitches,
                                                int startLine = 0, 
                                                int endLine = 0);
       double                 getTiedDuration  (int linenum, int field, 
@@ -175,52 +176,51 @@ class HumdrumFile : public HumdrumFileBasic {
       int                    getMinTimeBase   (void);
       RationalNumber         getMinTimeBaseR  (void);
       int                    rhythmQ          (void);
-      void                   getRhythms       (Array<RationalNumber>& rhys);
+      void                   getRhythms       (vector<RationalNumber>& rhys);
 
       //
       // analyses that generate external data
       //
       
       // serialisms
-      void        getIntervalVector  (Array<int>& iv, int line, 
+      void        getIntervalVector  (vector<int>& iv, int line, 
                                       int attackQ = 0);
       const char* getForteSetName    (int line);
-      void        getNormalForm      (Array<int>& norm, int line, 
+      void        getNormalForm      (vector<int>& norm, int line, 
                                       int attackQ = 0);
-      void        getTnNormalForm    (Array<int>& tnorm, int line,
+      void        getTnNormalForm    (vector<int>& tnorm, int line,
                                       int attackQ = 0);
-      void        getBase12PitchList (Array<int>& list, int line, 
+      void        getBase12PitchList (vector<int>& list, int line, 
                                       int attackQ = 0);
       const char* getTnSetName       (int line, int attackQ = 0);
-      void        getTnSetNameAllSubsets(Array<int>& list, int line,
+      void        getTnSetNameAllSubsets(vector<int>& list, int line,
                                       int attackQ = 0);
 
 
-      void analyzeDataIndex(Array<int>& indices, int segment = -1);
+      void analyzeDataIndex(vector<int>& indices, int segment = -1);
 
       // form analyses
-      int  analyzeCliche(Array<int>& cliche, double duration, 
+      int  analyzeCliche(vector<int>& cliche, double duration, 
             int minimumcount, double start = -1.0, double stop = -1.0);
 
       // metrical analyses 
-      void analyzeTempoMarkings(Array<double>& tempo, double tdefault = 60.0);
-      void analyzeMeter(Array<double>& top, Array<double>& bottom, 
+      void analyzeTempoMarkings(vector<double>& tempo, double tdefault = 60.0);
+      void analyzeMeter(vector<double>& top, vector<double>& bottom, 
          int flag = AFLAG_NOCOMPOUND_METER);
-      void analyzeBeatDuration(Array<double>& beatdur, 
+      void analyzeBeatDuration(vector<double>& beatdur, 
          int flag = AFLAG_COMPOUND_METER);
-      void analyzeAttackAccentuation(Array<int>& atakcent);
-      void analyzeMetricLevel(Array<int>& metlev);
+      void analyzeAttackAccentuation(vector<int>& atakcent);
       void analyzeMetricLevel(vector<int>& metlev);
 
       // sonority harmonic analyses
-      void analyzeSonorityQuality(Array<ChordQuality>& cq);
-      void analyzeSonorityRoot(Array<int>& roots, 
+      void analyzeSonorityQuality(vector<ChordQuality>& cq);
+      void analyzeSonorityRoot(vector<int>& roots, 
             int flag = AFLAG_BASE40_PITCH);
 
       // Krumhansl-Schmuckler key-finding algorithms
-      int analyzeKeyKS(Array<double>& scores, int startindex, int
+      int analyzeKeyKS(vector<double>& scores, int startindex, int
             stopindex, int rhythmQ = 1, int binaryQ = 0, int tracknum = -1);
-      int analyzeKeyKS2(Array<double>& scores, int startindex, int
+      int analyzeKeyKS2(vector<double>& scores, int startindex, int
             stopindex, double* majorprofile, double* minorprofile, 
             int rhythmQ = 1, int binaryQ = 0, int tracknum = -1);
 
@@ -228,58 +228,58 @@ class HumdrumFile : public HumdrumFileBasic {
       int rhythmcheck;          // 1 = rhythm analysis has been done
       int minrhythm;            // the least common multiple of all rhythms
       RationalNumber minrhythmR;  // the least common multiple of all rhythms
-      Array<RationalNumber> localrhythms;  // used with rhythmanalysis
+      vector<RationalNumber> localrhythms;  // used with rhythmanalysis
       RationalNumber pickupdur; // duration of a pickup measure
 
    private:
       int            ispoweroftwo            (int value);
-      RationalNumber getMinimumRationalRhythm(Array<RationalNumber>& rhythms);
+      RationalNumber getMinimumRationalRhythm(vector<RationalNumber>& rhythms);
       static int intcompare(const void* a, const void* b);
-      void   convertKernStringToArray(Array<int>& array, const char* string);
+      void   convertKernStringToArray(vector<int>& array, const char* string);
 
       // spine analysis functions:
       void       privateSpineAnalysis(void);
       int        predictNewSpineCount(HumdrumRecord& aRecord);
-      void       makeNewSpineInfo(SigCollection<char*>&spineinfo, 
+      void       makeNewSpineInfo(vector<char*>&spineinfo, 
                         HumdrumRecord& aRecord, int newsize, int& spineid,
-                        SigCollection<int>& ex);
-      void       simplifySpineInfo(SigCollection<char*>& info, int index);
+                        vector<int>& ex);
+      void       simplifySpineInfo(vector<char*>& info, int index);
 
 
       // rhythm analysis functions:
       void       privateRhythmAnalysis(const char* base = "", int debug = 0);
       RationalNumber determineDurationR(HumdrumRecord& aRecord,
-                        int& init, SigCollection<RationalNumber>& lastdurations,
-                         SigCollection<RationalNumber>& runningstatus,
-                         Array<int>& rhythms, Array<int>& ignore);
+                        int& init, vector<RationalNumber>& lastdurations,
+                         vector<RationalNumber>& runningstatus,
+                         vector<int>& rhythms, vector<int>& ignore);
       RationalNumber determineDurationR2(HumdrumRecord& aRecord,
-                        int& init, SigCollection<RationalNumber>& lastdurations,
-                         SigCollection<RationalNumber>& runningstatus,
-                         Array<RationalNumber>& rhythms, Array<int>& ignore);
+                        int& init, vector<RationalNumber>& lastdurations,
+                         vector<RationalNumber>& runningstatus,
+                         vector<RationalNumber>& rhythms, vector<int>& ignore);
       void       adjustForSpinePaths(HumdrumRecord& aRecord, 
-                         SigCollection<RationalNumber>& lastdurations, 
-                         SigCollection<RationalNumber>& runningstatus, 
-			 int& init, int& datastart, Array<int>& ignore);
+                         vector<RationalNumber>& lastdurations, 
+                         vector<RationalNumber>& runningstatus, 
+			 int& init, int& datastart, vector<int>& ignore);
       void       adjustForRhythmMarker(HumdrumRecord& aRecord,
                          int state, int spine, 
-                         SigCollection<RationalNumber>& lastdurations, 
-                         SigCollection<RationalNumber>& runningstatus, 
-			 int& init, int& datastart, Array<int>& ignore);
-      void       fixIncompleteBarMeter(SigCollection<double>& meterbeats, 
-                         SigCollection<double>& timebase);
+                         vector<RationalNumber>& lastdurations, 
+                         vector<RationalNumber>& runningstatus, 
+			 int& init, int& datastart, vector<int>& ignore);
+      void       fixIncompleteBarMeter(vector<double>& meterbeats, 
+                         vector<double>& timebase);
       void       fixIncompleteBarMeterR(
-		         SigCollection<RationalNumber>& meterbeats, 
-                         SigCollection<RationalNumber>& timebase, const char* base);
+		         vector<RationalNumber>& meterbeats, 
+                         vector<RationalNumber>& timebase, const char* base);
       void       fixIrritatingPickupProblem(void);
-      void       initializeTracers(SigCollection<RationalNumber>& lastduration,
-                         SigCollection<RationalNumber>& runningstatus, 
+      void       initializeTracers(vector<RationalNumber>& lastduration,
+                         vector<RationalNumber>& runningstatus, 
                          HumdrumRecord& currRecord);
       int        GCD      (int a, int b);
-      int        findlcm  (Array<int>& rhythms);
+      int        findlcm  (vector<int>& rhythms);
 
       // determining the meaning of dots (null records)
       void       privateDotAnalysis(void);
-      void       readjustDotArrays(Array<int>& lastline, Array<int>& lastspine, 
+      void       readjustDotArrays(vector<int>& lastline, vector<int>& lastspine, 
                        HumdrumRecord& record, int newsize);
 
       // for use with assemble()
@@ -289,7 +289,7 @@ class HumdrumFile : public HumdrumFileBasic {
                        HumdrumRecord& aRecord, const char* token);
                           
       // private function for analyzeCliche:
-      int attemptMatch(Array<Array<int> >& allnotes, Array<int>& di, int
+      int attemptMatch(vector<vector<int> >& allnotes, vector<int>& di, int
          starti, int i, int j, double duration);
 
 
@@ -299,43 +299,43 @@ class HumdrumFile : public HumdrumFileBasic {
    //
 
    public:
-      int measureChordRoot            (Array<double>& scores,
-                                       Array<double>& parameters, 
+      int measureChordRoot            (vector<double>& scores,
+                                       vector<double>& parameters, 
                                        double startbeat, double stopbeat, 
                                        int algorithmno = 0, int debug = 0);
-      int measureChordRoot            (Array<double>& scores,
-                                       Array<double>& parameters, 
+      int measureChordRoot            (vector<double>& scores,
+                                       vector<double>& parameters, 
                                        int startindex, int stopindex, 
                                        int algorithmno = 0, int debug = 0);
-      int  measureChordRoot0          (Array<double>& scores, 
-                                       Array<double>& parameters, 
+      int  measureChordRoot0          (vector<double>& scores, 
+                                       vector<double>& parameters, 
                                        NoteListArray& notelist);
-      int  measureChordRoot1          (Array<double>& scores, 
-                                       Array<double>& parameters, 
+      int  measureChordRoot1          (vector<double>& scores, 
+                                       vector<double>& parameters, 
                                        NoteListArray& notelist);
-      int  measureChordRoot2          (Array<double>& scores, 
-                                       Array<double>& parameters, 
+      int  measureChordRoot2          (vector<double>& scores, 
+                                       vector<double>& parameters, 
                                        NoteListArray& notelist);
-      int  measureChordRoot3          (Array<double>& scores, 
-                                       Array<double>& parameters, 
+      int  measureChordRoot3          (vector<double>& scores, 
+                                       vector<double>& parameters, 
                                        NoteListArray& notelist);
-      int  measureChordRoot4          (Array<double>& scores, 
-                                       Array<double>& parameters, 
+      int  measureChordRoot4          (vector<double>& scores, 
+                                       vector<double>& parameters, 
                                        NoteListArray& notelist);
-      int  measureChordRoot5          (Array<double>& scores, 
-                                       Array<double>& parameters, 
+      int  measureChordRoot5          (vector<double>& scores, 
+                                       vector<double>& parameters, 
                                        NoteListArray& notelist);
-      int  measureChordRoot6          (Array<double>& scores, 
-                                       Array<double>& parameters, 
+      int  measureChordRoot6          (vector<double>& scores, 
+                                       vector<double>& parameters, 
                                        NoteListArray& notelist);
-      int  measureChordRoot7          (Array<double>& scores, 
-                                       Array<double>& parameters, 
+      int  measureChordRoot7          (vector<double>& scores, 
+                                       vector<double>& parameters, 
                                        NoteListArray& notelist);
-      int  measureChordRoot8          (Array<double>& scores, 
-                                       Array<double>& parameters, 
+      int  measureChordRoot8          (vector<double>& scores, 
+                                       vector<double>& parameters, 
                                        NoteListArray& notelist);
-      int  measureChordRoot9          (Array<double>& scores, 
-                                       Array<double>& parameters, 
+      int  measureChordRoot9          (vector<double>& scores, 
+                                       vector<double>& parameters, 
                                        NoteListArray& notelist);
       void generateNoteList           (NoteListArray& notelist, 
                                        int startLinst, int endLine);
@@ -343,16 +343,16 @@ class HumdrumFile : public HumdrumFileBasic {
 
    // old functions which should not be used:
   
-   int analyzeChordProbabilityDurNorm(Array<double>& coef, 
-      double startbeat, double stopbeat, Array<int>& scorelevels, 
+   int analyzeChordProbabilityDurNorm(vector<double>& coef, 
+      double startbeat, double stopbeat, vector<int>& scorelevels, 
       double empirical1, double empirical2, double sx, double sy);
 
-   int analyzeChordProbabilityDur(Array<double>& coef, 
-      double startbeat, double stopbeat, Array<int>& scorelevels, 
+   int analyzeChordProbabilityDur(vector<double>& coef, 
+      double startbeat, double stopbeat, vector<int>& scorelevels, 
       double empirical1, double empirical2, double sx, double sy);
 
-   int analyzeChordProbability(Array<double>& coef, 
-      int start, int stop, Array<int>& scorelevels, double empirical1,
+   int analyzeChordProbability(vector<double>& coef, 
+      int start, int stop, vector<int>& scorelevels, double empirical1,
       double empirical2, double sx, double sy);
 
 };

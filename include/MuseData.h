@@ -14,7 +14,8 @@
 #define _MUSEDATA_H_INCLUDED
 
 #include "MuseRecord.h"
-#include "Array.h"
+
+#include <vector>
 
 
 // A MuseEventSet is a timestamp and then a list of pointers to all
@@ -38,7 +39,7 @@ class MuseEventSet {
 
    protected:
       RationalNumber     absbeat;           // starting time of events
-      Array<MuseRecord*> events;            // list of events on absbeat
+      vector<MuseRecord*> events;            // list of events on absbeat
 };
 
 
@@ -59,10 +60,17 @@ class MuseData {
       int               getLineCount        (void);
       int               getNumLines         (void) { return getLineCount(); }
       MuseRecord&       last                (void);
+      MuseRecord&       back                (void) { return last(); }
       int               isEmpty             (void);
+
       int               append              (MuseRecord& arecord);
       int               append              (MuseData& musedata);
-      int               append              (Array<char>& charstring);
+      int               append              (string& charstring);
+
+      int               push_back(MuseRecord& arecord) { return append(arecord); }
+      int               push_back(MuseData& musedata) { return append(musedata); }
+      int               push_back(string& charstring) { return append(charstring); }
+
       void              insert              (int index, MuseRecord& arecord);
       void              clear               (void);
       int               getInitialTPQ       (void);
@@ -115,9 +123,9 @@ class MuseData {
 
 
    private:
-      Array<MuseRecord*>     data;
-      Array<MuseEventSet*>   sequence;
-      Array<char>            name;
+      vector<MuseRecord*>    data;
+      vector<MuseEventSet*>  sequence;
+      string                 name;
 
    protected:
       void              processTie          (int eventindex, int recordindex, 

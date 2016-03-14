@@ -27,6 +27,8 @@
 #include <iostream>
 #include <istream>
 #include <string>
+#include <vector>
+
 using namespace std;
 
 
@@ -51,21 +53,21 @@ class HumdrumFileSet {
                                                const char* filename = "");
 
    protected:
-      Array<HumdrumFile*>    data;
+      vector<HumdrumFile*>   data;
 
       void                   appendHumdrumFileContent(const char* filename, 
-                                               SSTREAM& inbuffer);
+                                               stringstream& inbuffer);
 
       #ifdef USING_URI
-      void                   readAppendFromHumdrumURI(SSTREAM& inputstream,
+      void                   readAppendFromHumdrumURI(stringstream& inputstream,
                                                 const char* humdrumaddress);
-      void                   readAppendFromJrpURI(SSTREAM& inputstream, 
+      void                   readAppendFromJrpURI(stringstream& inputstream, 
                                                 const char* jrpaddress);
-      void                   readAppendFromHttpURI(SSTREAM& inputstream,
+      void                   readAppendFromHttpURI(stringstream& inputstream,
                                                 const char* webaddress,
                                                 const char* filename = NULL);
       int                    getChunk          (int socket_id, 
-                                                SSTREAM& inputstream, 
+                                                stringstream& inputstream, 
                                                 char* buffer, int bufsize);
       void                   prepare_address   (struct sockaddr_in *address, 
                                                 const char *hostname, 
@@ -73,7 +75,7 @@ class HumdrumFileSet {
       int                    open_network_socket(const char *hostname, 
                                                 unsigned short int port);
       int                    getFixedDataSize  (int socket_id, int datalength, 
-                                                SSTREAM& inputstream, 
+                                                stringstream& inputstream, 
                                                 char* buffer, int bufsize);
       #endif
 

@@ -3,6 +3,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Jan  1 19:54:45 PST 2003 (extracted from HumdrumFile.cpp)
 // Last Modified: Wed Jan  1 19:54:59 PST 2003
+// Last Modified: Sun Mar 13 16:58:57 PDT 2016 Switched to STL
 // Filename:      ...sig/src/sigInfo/Maxwell.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/Maxwell.cpp
 // Syntax:        C++ 
@@ -56,12 +57,11 @@ Maxwell::~Maxwell() {
 //
 
 void Maxwell::analyzeVerticalDissonance(HumdrumFile& score, 
-      Array<int>& vertdis) {
-   Array<int> notes;
+      vector<int>& vertdis) {
+   vector<int> notes;
 
-   vertdis.setSize(score.getNumLines());
-   vertdis.setSize(0);
-   vertdis.allowGrowth(1);
+   vertdis.reserve(score.getNumLines());
+   vertdis.resize(0);
    int analysis = 0;
 
    int line;
@@ -69,7 +69,7 @@ void Maxwell::analyzeVerticalDissonance(HumdrumFile& score,
 maxwellverticaldissonance_top:
       if (score[line].getType() != E_humrec_data) {
          analysis = UNDEFINED_VERTICAL;
-         vertdis.append(analysis);
+         vertdis.push_back(analysis);
          continue;
       }
    
@@ -77,15 +77,15 @@ maxwellverticaldissonance_top:
             NL_NORESTS);
       
       // IF sonority consists of only one note, THEN it is a consonant vertical.
-      if (notes.getSize() <= 1) {
+      if (notes.size() <= 1) {
          analysis = CONSONANT_VERTICAL;
-         vertdis.append(analysis);
+         vertdis.push_back(analysis);
          continue;
       }
    
       // IF a sonority consists of two notes that form a consonant interval
       // other than a perfect fourth, THEN it is a consonant vertical.
-      if (notes.getSize() == 2) {
+      if (notes.size() == 2) {
          int interval = notes[1] - notes[0];
          if (interval < 0) {
             cout << "Error on line " << line+1 << " of file: " 
@@ -96,7 +96,7 @@ maxwellverticaldissonance_top:
          interval = interval % 40;
          if (interval == E_base40_per4) {
             analysis =  DISSONANT_VERTICAL;
-            vertdis.append(analysis);
+            vertdis.push_back(analysis);
             continue;
          } else if (interval == E_base40_per1 ||
                     interval == E_base40_maj3 ||
@@ -105,11 +105,11 @@ maxwellverticaldissonance_top:
                     interval == E_base40_maj6 ||
                     interval == E_base40_per5) {
             analysis = CONSONANT_VERTICAL;
-            vertdis.append(analysis);
+            vertdis.push_back(analysis);
             continue;
          } else {
             analysis = DISSONANT_VERTICAL;
-            vertdis.append(analysis);
+            vertdis.push_back(analysis);
             continue;
          }
       }
@@ -118,8 +118,8 @@ maxwellverticaldissonance_top:
       // consonant intervals, THEN it is a consonant vertical.
       int i, j;
       int interval;
-      for (i=0; i<notes.getSize()-1; i++) {
-         for (j=i+1; j<notes.getSize(); j++) {
+      for (i=0; i<(int)notes.size()-1; i++) {
+         for (j=i+1; j<(int)notes.size(); j++) {
             interval = notes[j] - notes[i];
             interval = interval % 40;
             if (interval == E_base40_per1 ||
@@ -129,7 +129,7 @@ maxwellverticaldissonance_top:
                // do nothing
             } else {
                analysis = DISSONANT_VERTICAL;
-               vertdis.append(analysis);
+               vertdis.push_back(analysis);
                line++;
                goto maxwellverticaldissonance_top;
             }
@@ -138,10 +138,9 @@ maxwellverticaldissonance_top:
    
       // the chord notes contain only consonant intervals.
       analysis = CONSONANT_VERTICAL;
-      vertdis.append(analysis);
+      vertdis.push_back(analysis);
    }
 
-   vertdis.allowGrowth(0);
 }
 
 
@@ -155,13 +154,12 @@ maxwellverticaldissonance_top:
 // and the pitches all lie within a single octave, THEN it is tertian.
 //
 
-void Maxwell::analyzeTertian(HumdrumFile& score, Array<int>& tertian) {
-   Array<int> notes;
+void Maxwell::analyzeTertian(HumdrumFile& score, vector<int>& tertian) {
+   vector<int> notes;
    int analysis;
 
-   tertian.setSize(score.getNumLines());
-   tertian.setSize(0);
-   tertian.allowGrowth(1);
+   tertian.reserve(score.getNumLines());
+   tertian.resize(0);
    
    int line;
    for (line=0; line<score.getNumLines(); line++) {
@@ -169,7 +167,7 @@ analyzemaxwelltertian_top:
 
       if (score[line].getType() != E_humrec_data) {
          analysis = TERTIAN_UNKNOWN;
-         tertian.append(analysis);
+         tertian.push_back(analysis);
          continue;
       }
    
@@ -177,18 +175,18 @@ analyzemaxwelltertian_top:
             NL_NORESTS);
       
       // if there is one or fewer notes, then cannot be tertian
-      if (notes.getSize() <= 1) {
+      if (notes.size() <= 1) {
          analysis = TERTIAN_NO;
-         tertian.append(analysis);
+         tertian.push_back(analysis);
          continue;
       }
    
       int i, j;
       int foundTertianQ = 0;
       int interval;
-      for (i=0; i<notes.getSize(); i++) {
+      for (i=0; i<(int)notes.size(); i++) {
          foundTertianQ = 1;
-         for (j=1; j<notes.getSize(); j++) {
+         for (j=1; j<(int)notes.size(); j++) {
             interval = notes[j] - notes[j-1];
             if (interval == E_base40_maj3 ||
                 interval == E_base40_min3 ||
@@ -206,7 +204,7 @@ analyzemaxwelltertian_top:
          }
          if (foundTertianQ == 1) {
             analysis = TERTIAN_YES;
-            tertian.append(analysis);
+            tertian.push_back(analysis);
             line++;
             goto analyzemaxwelltertian_top;
          }
@@ -214,10 +212,9 @@ analyzemaxwelltertian_top:
       }
 
       analysis = TERTIAN_NO;
-      tertian.append(analysis);
+      tertian.push_back(analysis);
    }
 
-   tertian.allowGrowth(0);
 }
 
 
@@ -228,17 +225,17 @@ analyzemaxwelltertian_top:
 //      and analyzeTertianDissonanceLevel.
 // 
 
-void Maxwell::rotateNotes(Array<int>& notes) {
-   if (notes.getSize() < 2) {
+void Maxwell::rotateNotes(vector<int>& notes) {
+   if (notes.size() < 2) {
       return;
    }
 
    int note = notes[0];
    int i;
-   for (i=0; i<notes.getSize() - 1; i++) {
+   for (i=0; i<(int)notes.size() - 1; i++) {
       notes[i] = notes[i+1];
    }
-   notes[notes.getSize()-1] = note + 40;
+   notes[(int)notes.size()-1] = note + 40;
 }
 
 
@@ -252,15 +249,14 @@ void Maxwell::rotateNotes(Array<int>& notes) {
 //    THEN it is accented.
 //
 
-void Maxwell::analyzeAccent(HumdrumFile& score, Array<int>& accent, int flag) {
+void Maxwell::analyzeAccent(HumdrumFile& score, vector<int>& accent, int flag) {
    int compoundQ = flag & (0x01<<COMPOUND_METER_BIT);
    int metercount = 4;
    int meterbase = 4;
    int analysis;
 
-   accent.allowGrowth(1);
-   accent.setSize(score.getNumLines());
-   accent.setSize(0);
+   accent.reserve(score.getNumLines());
+   accent.resize(0);
    
    if (score.rhythmQ() == 0) {
       score.analyzeRhythm();
@@ -284,7 +280,7 @@ void Maxwell::analyzeAccent(HumdrumFile& score, Array<int>& accent, int flag) {
 
       if (score[line].getType() != E_humrec_data) {
          analysis = ACCENT_UNKNOWN;
-         accent.append(analysis);
+         accent.push_back(analysis);
          continue;
       }
 
@@ -304,14 +300,13 @@ void Maxwell::analyzeAccent(HumdrumFile& score, Array<int>& accent, int flag) {
    
       if (fraction == 0) {
          analysis = ACCENT_YES;
-         accent.append(analysis);
+         accent.push_back(analysis);
       } else {
          analysis = ACCENT_NO;
-         accent.append(analysis);
+         accent.push_back(analysis);
       }
    }
 
-   accent.allowGrowth(0);
 }
 
 
@@ -333,13 +328,12 @@ void Maxwell::analyzeAccent(HumdrumFile& score, Array<int>& accent, int flag) {
 //
 
 void Maxwell::analyzeTertianDissonanceLevel(HumdrumFile& score, 
-      Array<double>& terdis) {
+      vector<double>& terdis) {
 
-   terdis.setSize(score.getNumLines());
-   terdis.setSize(0);
-   terdis.allowGrowth(1);
+   terdis.reserve(score.getNumLines());
+   terdis.resize(0);
 
-   Array<int> notes;
+   vector<int> notes;
    double analysis;
 
    int line;
@@ -347,25 +341,25 @@ void Maxwell::analyzeTertianDissonanceLevel(HumdrumFile& score,
 analyzemaxwelltertiandissonancelevel_top:
       if (score[line].getType() != E_humrec_data) {
          analysis = TERTIAN_UNKNOWN;
-         terdis.append(analysis);
+         terdis.push_back(analysis);
          continue;
       }
    
       score.getNoteList(notes, line, NL_PC | NL_FILL | NL_SORT | NL_UNIQ | 
             NL_NORESTS);
       
-      if (notes.getSize() <= 1) {
+      if (notes.size() <= 1) {
          analysis = TERTIAN_0;
-         terdis.append(analysis);
+         terdis.push_back(analysis);
          continue;
       }
    
       int i, j;
       int foundTertianQ = 0;
       int interval;
-      for (i=0; i<notes.getSize(); i++) {
+      for (i=0; i<(int)notes.size(); i++) {
          foundTertianQ = 1;
-         for (j=1; j<notes.getSize(); j++) {
+         for (j=1; j<(int)notes.size(); j++) {
             interval = notes[j] - notes[j-1];
             if (interval == E_base40_maj3 ||
                 interval == E_base40_min3 ||
@@ -388,11 +382,11 @@ analyzemaxwelltertiandissonancelevel_top:
       }
    
       // filter augmented sixth chords:
-      for (i=1; i<notes.getSize(); i++) {
+      for (i=1; i<(int)notes.size(); i++) {
          interval = notes[i] - notes[i-1];
          if (interval == E_base40_aug6 || interval == E_base40_dim3) {
             analysis = TERTIAN_4;
-            terdis.append(analysis);
+            terdis.push_back(analysis);
             line++;
             goto analyzemaxwelltertiandissonancelevel_top;
          }
@@ -401,26 +395,26 @@ analyzemaxwelltertiandissonancelevel_top:
       // filter out non tertian sonorities:
       if (!foundTertianQ) {
          analysis = TERTIAN_5;
-         terdis.append(analysis);
+         terdis.push_back(analysis);
          continue;
       }
    
       // filter tertian chords with major sevenths:
-      interval = notes[notes.getSize() - 1] - notes[0];
+      interval = notes[(int)notes.size() - 1] - notes[0];
       if (interval == E_base40_maj7) {
          analysis = TERTIAN_5;
-         terdis.append(analysis);
+         terdis.push_back(analysis);
          continue;
       }
    
       // filter out augmented fifth chords:
-      if (notes[notes.getSize() - 1] - notes[0] < E_base40_min6) {
-         for (i=0; i<notes.getSize() - 1; i++) {
-            for (j=i+1; j<notes.getSize(); j++) {
+      if (notes[(int)notes.size() - 1] - notes[0] < E_base40_min6) {
+         for (i=0; i<(int)notes.size() - 1; i++) {
+            for (j=i+1; j<(int)notes.size(); j++) {
                interval = notes[j] - notes[j-1];
                if (interval == E_base40_aug5) {
                   analysis = TERTIAN_3;
-                  terdis.append(analysis);
+                  terdis.push_back(analysis);
                   line++;
                   goto analyzemaxwelltertiandissonancelevel_top;
                }
@@ -428,14 +422,14 @@ analyzemaxwelltertiandissonancelevel_top:
          }
       }
    
-      if (notes.getSize() == 2) {
+      if (notes.size() == 2) {
          if (notes[1] - notes[0] == E_base40_dim5) {
             analysis = TERTIAN_2;
-            terdis.append(analysis);
+            terdis.push_back(analysis);
             continue;
          } else {
             analysis = TERTIAN_1;
-            terdis.append(analysis);
+            terdis.push_back(analysis);
             continue;
          }
       }
@@ -444,40 +438,40 @@ analyzemaxwelltertiandissonancelevel_top:
       int interval2;
       interval1 = notes[1] - notes[0];
       interval2 = notes[2] - notes[0];
-      if (notes.getSize() == 3) {
+      if (notes.size() == 3) {
          if (interval2 == E_base40_per5) {
             if (interval1 == E_base40_maj3 || interval1 == E_base40_min3) {
                analysis = TERTIAN_1;
-               terdis.append(analysis);
+               terdis.push_back(analysis);
                continue;
             } else {
                analysis = TERTIAN_5;
-               terdis.append(analysis);
+               terdis.push_back(analysis);
                continue;
             }
          } else if (interval2 == E_base40_dim5) {
             if (interval1 == E_base40_min3) {
                analysis = TERTIAN_2;
-               terdis.append(analysis);
+               terdis.push_back(analysis);
                continue;
             } else {
                analysis = TERTIAN_5;
-               terdis.append(analysis);
+               terdis.push_back(analysis);
                continue;
             }
          } else if (interval2 == E_base40_min7) {
             if (interval1 == E_base40_maj3 ||
                 interval1 == E_base40_per5) {
                analysis = TERTIAN_2;
-               terdis.append(analysis);
+               terdis.push_back(analysis);
                continue;
             } else if (interval1 == E_base40_min3) {
                analysis = TERTIAN_2_5;
-               terdis.append(analysis);
+               terdis.push_back(analysis);
                continue;
             } else {
                analysis = TERTIAN_5;
-               terdis.append(analysis);
+               terdis.push_back(analysis);
                continue;
             }
          } else if (interval2 == E_base40_dim7) {
@@ -485,16 +479,16 @@ analyzemaxwelltertiandissonancelevel_top:
                 interval1 == E_base40_dim5 ||
                 interval1 == E_base40_per5) {
                analysis = TERTIAN_4;
-               terdis.append(analysis);
+               terdis.push_back(analysis);
                continue;
             } else {
                analysis = TERTIAN_5;
-               terdis.append(analysis);
+               terdis.push_back(analysis);
                continue;
             }
          } else {
             analysis = TERTIAN_5;
-            terdis.append(analysis);
+            terdis.push_back(analysis);
             continue;
          }
       }
@@ -503,20 +497,20 @@ analyzemaxwelltertiandissonancelevel_top:
       interval1 = notes[1] - notes[0];
       interval2 = notes[2] - notes[0];
       interval3 = notes[3] - notes[0];
-      if (notes.getSize() == 4) {
+      if (notes.size() == 4) {
          if (interval3 == E_base40_maj7) {
             analysis = TERTIAN_5;
-            terdis.append(analysis);
+            terdis.push_back(analysis);
             continue;
          } else if (interval3 == E_base40_min7) {
             if (interval2 == E_base40_per5) {
                if (interval1 == E_base40_min3) {
                   analysis = TERTIAN_2;
-                  terdis.append(analysis);
+                  terdis.push_back(analysis);
                   continue;
                } else if (interval1 == E_base40_maj3) {
                   analysis = TERTIAN_1_5;
-                  terdis.append(analysis);
+                  terdis.push_back(analysis);
                   continue;
                }
             }
@@ -524,13 +518,13 @@ analyzemaxwelltertiandissonancelevel_top:
             if (interval2 == E_base40_per5) {
                if (interval1 == E_base40_min3) {
                   analysis = TERTIAN_4;
-                  terdis.append(analysis);
+                  terdis.push_back(analysis);
                   continue;
                } 
             } else if (interval2 == E_base40_dim5) {
                if (interval1 == E_base40_min3) {
                   analysis = TERTIAN_4;
-                  terdis.append(analysis);
+                  terdis.push_back(analysis);
                   continue;
                } 
             } 
@@ -539,10 +533,9 @@ analyzemaxwelltertiandissonancelevel_top:
    
       // couldn't identify tertian chord
       analysis = TERTIAN_5;
-      terdis.append(analysis);
+      terdis.push_back(analysis);
    }
 
-   terdis.allowGrowth(0);
 }
 
 
@@ -561,12 +554,12 @@ analyzemaxwelltertiandissonancelevel_top:
 // Default values: flag = AFLAG_COMPOUND_METER
 //
 
-void Maxwell::analyzeDissonantInContext(HumdrumFile& score, Array<int>& dissic, 
+void Maxwell::analyzeDissonantInContext(HumdrumFile& score, vector<int>& dissic, 
       int flag) {
-   Array<int> vertdis(0);
-   Array<int> tertian(0);
-   Array<double> terdis(0);
-   Array<int> accent(0);
+   vector<int> vertdis(0);
+   vector<int> tertian(0);
+   vector<double> terdis(0);
+   vector<int> accent(0);
 
    analyzeDissonantInContext(score, dissic, vertdis, tertian, 
          terdis, accent, flag);
@@ -574,30 +567,29 @@ void Maxwell::analyzeDissonantInContext(HumdrumFile& score, Array<int>& dissic,
 
 
 void Maxwell::analyzeDissonantInContext(HumdrumFile& score, 
-      Array<int>& dissic, Array<int>& vertdis, Array<int>& tertian, 
-      Array<double>& terdis, Array<int>& accent, int flag) {
+      vector<int>& dissic, vector<int>& vertdis, vector<int>& tertian, 
+      vector<double>& terdis, vector<int>& accent, int flag) {
 
    int analysis;
 
-   dissic.setSize(score.getNumLines());
-   dissic.setSize(0);
-   dissic.allowGrowth(1);
+   dissic.reserve(score.getNumLines());
+   dissic.resize(0);
 
    if (score.rhythmQ() == 0) {
       score.analyzeRhythm();
    } 
 
    // make sure dependent analyses have been done
-   if (vertdis.getSize() != score.getNumLines()) {
+   if ((int)vertdis.size() != score.getNumLines()) {
       analyzeVerticalDissonance(score, vertdis);
    }
-   if (tertian.getSize() != score.getNumLines()) {
+   if ((int)tertian.size() != score.getNumLines()) {
       analyzeTertian(score, tertian);
    }
-   if (terdis.getSize() != score.getNumLines()) {
+   if ((int)terdis.size() != score.getNumLines()) {
       analyzeTertianDissonanceLevel(score, terdis);
    }
-   if (accent.getSize() != score.getNumLines()) {
+   if ((int)accent.size() != score.getNumLines()) {
       analyzeAccent(score, accent, flag);
    }
 
@@ -607,7 +599,7 @@ void Maxwell::analyzeDissonantInContext(HumdrumFile& score,
 
       if (score[line].getType() != E_humrec_data) {
          analysis = DISSIC_UNDEFINED;
-         dissic.append(analysis);
+         dissic.push_back(analysis);
          continue;
       }
 
@@ -615,7 +607,7 @@ void Maxwell::analyzeDissonantInContext(HumdrumFile& score,
       // in context.
       if (tertian[line] == TERTIAN_NO) {
          analysis = DISSIC_YES;
-         dissic.append(analysis);
+         dissic.push_back(analysis);
          continue;
       }
    
@@ -624,7 +616,7 @@ void Maxwell::analyzeDissonantInContext(HumdrumFile& score,
       // tertian-dissonance level, THEN the sonority is dissonant in context.
       double nextdislevel = -1;
       int nexttertian = -1;
-      for (i=line+1; i<tertian.getSize(); i++) {
+      for (i=line+1; i<(int)tertian.size(); i++) {
          if (tertian[i] != TERTIAN_UNKNOWN) {
             nextdislevel = terdis[i];
             nexttertian  = tertian[i];
@@ -635,7 +627,7 @@ void Maxwell::analyzeDissonantInContext(HumdrumFile& score,
             (vertdis[line] == DISSONANT_VERTICAL) &&
             (nexttertian == TERTIAN_YES) && (nextdislevel < terdis[line])) {
          analysis = DISSIC_YES;
-         dissic.append(analysis);
+         dissic.push_back(analysis);
          continue;
       }
    
@@ -655,15 +647,14 @@ void Maxwell::analyzeDissonantInContext(HumdrumFile& score,
           (vertdis[line] == DISSONANT_VERTICAL) &&
           (lasttertian == TERTIAN_YES) && (lastterdis < terdis[line])) {
          analysis = DISSIC_YES;
-         dissic.append(analysis);
+         dissic.push_back(analysis);
          continue;
       }
    
       analysis = DISSIC_NO;
-      dissic.append(analysis);
+      dissic.push_back(analysis);
    }
 
-   dissic.allowGrowth(0);
 }
 
 
@@ -687,12 +678,12 @@ void Maxwell::analyzeDissonantInContext(HumdrumFile& score,
 //
 
 void Maxwell::analyzeDissonantNotes(HumdrumFile& score, 
-      Array<ArrayInt>& notediss) {
-   Array<int> vertdis(0);
-   Array<int> tertian(0);
-   Array<double> terdis(0);
-   Array<int> accent(0);
-   Array<int> dissic(0);
+      vector<ArrayInt>& notediss) {
+   vector<int> vertdis(0);
+   vector<int> tertian(0);
+   vector<double> terdis(0);
+   vector<int> accent(0);
+   vector<int> dissic(0);
 
    analyzeDissonantNotes(score, notediss, vertdis, tertian, terdis, accent, 
          dissic);
@@ -700,36 +691,36 @@ void Maxwell::analyzeDissonantNotes(HumdrumFile& score,
 
 
 void Maxwell::analyzeDissonantNotes(HumdrumFile& score, 
-      Array<ArrayInt>& notediss, Array<int>& vertdis, Array<int>& tertian, 
-      Array<double>& terdis, Array<int>& accent, Array<int>& dissic) {
+      vector<ArrayInt>& notediss, vector<int>& vertdis, vector<int>& tertian, 
+      vector<double>& terdis, vector<int>& accent, vector<int>& dissic) {
 
    int i;
-   Array<int> currentnotes;
+   vector<int> currentnotes;
 
    if (score.rhythmQ() == 0) {
       score.analyzeRhythm();
    }
 
-   notediss.setSize(score.getNumLines());
-   for (i=0; i<notediss.getSize(); i++) {
-      notediss[i].setSize(0); 
+   notediss.resize(score.getNumLines());
+   for (i=0; i<(int)notediss.size(); i++) {
+      notediss[i].resize(0); 
    }
 
    // make sure dependent analyses have been done
-   if (dissic.getSize() != score.getNumLines()) {
+   if ((int)dissic.size() != score.getNumLines()) {
       analyzeDissonantInContext(score, dissic, vertdis, tertian, 
          terdis, accent);
    }
-   if (vertdis.getSize() != score.getNumLines()) {
+   if ((int)vertdis.size() != score.getNumLines()) {
       analyzeVerticalDissonance(score, vertdis);
    }
-   if (tertian.getSize() != score.getNumLines()) {
+   if ((int)tertian.size() != score.getNumLines()) {
       analyzeTertian(score, tertian);
    }
-   if (terdis.getSize() != score.getNumLines()) {
+   if ((int)terdis.size() != score.getNumLines()) {
       analyzeTertianDissonanceLevel(score, terdis);
    }
-   if (accent.getSize() != score.getNumLines()) {
+   if ((int)accent.size() != score.getNumLines()) {
       analyzeAccent(score, accent);
    }
 
@@ -738,7 +729,7 @@ void Maxwell::analyzeDissonantNotes(HumdrumFile& score,
    for (line=0; line<score.getNumLines(); line++) {
       score.getNoteList(currentnotes, line, NL_NOFILL | NL_NOSORT |
             NL_NOUNIQ | NL_NORESTS);
-      for (i=0; i<currentnotes.getSize(); i++) {
+      for (i=0; i<(int)currentnotes.size(); i++) {
          currentnotes[i] = measureNoteDissonance(score, line, currentnotes[i], 
                vertdis, accent, dissic);
       }
@@ -746,7 +737,6 @@ void Maxwell::analyzeDissonantNotes(HumdrumFile& score,
       notediss[line] = currentnotes;
    }
 
-   notediss.allowGrowth(0);
 }
 
 
@@ -758,7 +748,7 @@ void Maxwell::analyzeDissonantNotes(HumdrumFile& score,
 //
 
 int Maxwell::measureNoteDissonance(HumdrumFile& score, int line, int note, 
-      Array<int>& vertdis, Array<int>& accent, Array<int>& dissic) {
+      vector<int>& vertdis, vector<int>& accent, vector<int>& dissic) {
 
    if (score[line].getType() != E_humrec_data) {
       return NOTEDISSONANT_UNKNOWN;
@@ -773,12 +763,12 @@ int Maxwell::measureNoteDissonance(HumdrumFile& score, int line, int note,
 
    int dissintervalQ = 0;
    int interval;
-   Array<int> notes;
+   vector<int> notes;
    score.getNoteList(notes, line, NL_PC | NL_FILL | NL_SORT | NL_UNIQ | 
          NL_NORESTS);
    int i, j;
-   for (i=0; i<notes.getSize()-1; i++) {
-      for (j=i+1; j<notes.getSize(); j++) {
+   for (i=0; i<(int)notes.size()-1; i++) {
+      for (j=i+1; j<(int)notes.size(); j++) {
          interval = notes[j] - notes[i];
          if (interval == E_base40_per1 ||
              interval == E_base40_min3 ||
@@ -795,8 +785,7 @@ int Maxwell::measureNoteDissonance(HumdrumFile& score, int line, int note,
       }
    }
 
-   Array<int> nextnotes;
-   nextnotes.setSize(0);
+   vector<int> nextnotes;
    int nextline = line+1;
    while ((nextline < score.getNumLines()) && 
          (score[nextline].getType() != E_humrec_data)) {
@@ -807,7 +796,7 @@ int Maxwell::measureNoteDissonance(HumdrumFile& score, int line, int note,
       score.getNoteList(nextnotes, nextline, NL_PC | NL_FILL | NL_SORT | 
             NL_UNIQ | NL_NORESTS);
       noteinnextQ = 0;
-      for (i=0; i<nextnotes.getSize(); i++) {
+      for (i=0; i<(int)nextnotes.size(); i++) {
          if (note == nextnotes[i]) {
             noteinnextQ = 1;
             break;
@@ -825,8 +814,7 @@ int Maxwell::measureNoteDissonance(HumdrumFile& score, int line, int note,
    }
 
    int noteinlastQ = 0;
-   Array<int> lastnotes;
-   lastnotes.setSize(0);
+   vector<int> lastnotes;
    int lastline = line-1;
    while ((lastline > 0) && (score[lastline].getType() != E_humrec_data)) {
       lastline--;
@@ -835,7 +823,7 @@ int Maxwell::measureNoteDissonance(HumdrumFile& score, int line, int note,
       score.getNoteList(lastnotes, lastline, NL_PC | NL_FILL | NL_SORT | 
             NL_UNIQ | NL_NORESTS);
       noteinlastQ = 0;
-      for (i=0; i<lastnotes.getSize(); i++) {
+      for (i=0; i<(int)lastnotes.size(); i++) {
          if (note == lastnotes[i]) {
             noteinlastQ = 1;
             break;
@@ -865,26 +853,26 @@ int Maxwell::measureNoteDissonance(HumdrumFile& score, int line, int note,
 //    Default value: flag = AFLAG_COMPOUND_METER
 //
 
-void Maxwell::analyzeSonorityRelations(HumdrumFile& score, Array<int>&sonrel, 
+void Maxwell::analyzeSonorityRelations(HumdrumFile& score, vector<int>&sonrel, 
       int flag) {
 
-   Array<int> vertdis;
-   Array<int> tertian;
-   Array<double> terdis;
-   Array<int> accent;
-   Array<int> dissic;
-   Array<double> beatdur;
-   Array<ChordQuality> cq;
+   vector<int> vertdis;
+   vector<int> tertian;
+   vector<double> terdis;
+   vector<int> accent;
+   vector<int> dissic;
+   vector<double> beatdur;
+   vector<ChordQuality> cq;
 
    analyzeSonorityRelations(score, sonrel, vertdis, tertian, terdis,
          accent, dissic, beatdur, cq, flag);
 }
 
 
-void Maxwell::analyzeSonorityRelations(HumdrumFile& score, Array<int>&sonrel,
-      Array<int>& vertdis, Array<int>& tertian, Array<double>& terdis,
-      Array<int>& accent, Array<int>& dissic, Array<double>& beatdur,
-      Array<ChordQuality>& cq, int flag) {
+void Maxwell::analyzeSonorityRelations(HumdrumFile& score, vector<int>&sonrel,
+      vector<int>& vertdis, vector<int>& tertian, vector<double>& terdis,
+      vector<int>& accent, vector<int>& dissic, vector<double>& beatdur,
+      vector<ChordQuality>& cq, int flag) {
 
    int debugQ = flag & (1<<DEBUG_BIT);
 
@@ -892,33 +880,32 @@ void Maxwell::analyzeSonorityRelations(HumdrumFile& score, Array<int>&sonrel,
       score.analyzeRhythm();
    }
 
-   sonrel.setSize(score.getNumLines());
-   sonrel.setSize(0);
-   sonrel.allowGrowth(1);
+   sonrel.reserve(score.getNumLines());
+   sonrel.resize(0);
 
    // make sure dependent analyses have been done
 
-   if (dissic.getSize() != score.getNumLines()) {
+   if ((int)dissic.size() != score.getNumLines()) {
       analyzeDissonantInContext(score, dissic, vertdis, tertian,
          terdis, accent, flag);
    }
-   if (vertdis.getSize() != score.getNumLines()) {
+   if ((int)vertdis.size() != score.getNumLines()) {
       analyzeVerticalDissonance(score, vertdis);
    }
-   if (tertian.getSize() != score.getNumLines()) {
+   if ((int)tertian.size() != score.getNumLines()) {
       analyzeTertian(score, tertian);
    }
-   if (terdis.getSize() != score.getNumLines()) {
+   if ((int)terdis.size() != score.getNumLines()) {
       analyzeTertianDissonanceLevel(score, terdis);
    }
-   if (accent.getSize() != score.getNumLines()) {
+   if ((int)accent.size() != score.getNumLines()) {
       analyzeAccent(score, accent, flag);
    }
-   if (cq.getSize() != score.getNumLines()) {
+   if ((int)cq.size() != score.getNumLines()) {
       score.analyzeSonorityQuality(cq);
    }                                     
 
-   if (beatdur.getSize() != score.getNumLines()) {
+   if ((int)beatdur.size() != score.getNumLines()) {
       score.analyzeBeatDuration(beatdur, flag);
    }
 
@@ -932,16 +919,15 @@ void Maxwell::analyzeSonorityRelations(HumdrumFile& score, Array<int>&sonrel,
 
       if (score[line].getType() != E_humrec_data) {
          analysis1 = CHORD_UNKNOWN;
-         sonrel.append(analysis1);
+         sonrel.push_back(analysis1);
          continue;
       }
 
       analysis1 = measureChordFunction1(score, line, vertdis, tertian, terdis,
             accent, dissic, beatdur, cq);
-      sonrel.append(analysis1);
+      sonrel.push_back(analysis1);
    }
 
-   sonrel.allowGrowth(0);
 }
 
 
@@ -953,9 +939,9 @@ void Maxwell::analyzeSonorityRelations(HumdrumFile& score, Array<int>&sonrel,
 //
 
 int Maxwell::measureChordFunction1(HumdrumFile& score, int line, 
-      Array<int>& vertdis, Array<int>& tertian, Array<double>& terdis, 
-      Array<int>& accent, Array<int>& dissic, Array<double>& beatdur, 
-      Array<ChordQuality>& cq) {
+      vector<int>& vertdis, vector<int>& tertian, vector<double>& terdis, 
+      vector<int>& accent, vector<int>& dissic, vector<double>& beatdur, 
+      vector<ChordQuality>& cq) {
 
    //
    // preliminaries 
@@ -1081,8 +1067,8 @@ int Maxwell::measureChordFunction1(HumdrumFile& score, int line,
 //
 
 int Maxwell::measureChordFunction2(HumdrumFile& score, int line, 
-      Array<int>& vertdis, Array<int>& tertian, Array<double>& terdis, 
-      Array<int>& accent, Array<int>& dissic, Array<ChordQuality>& cq) {
+      vector<int>& vertdis, vector<int>& tertian, vector<double>& terdis, 
+      vector<int>& accent, vector<int>& dissic, vector<ChordQuality>& cq) {
 
    // Rule 31: IF a chord is in the same key as the previous chord AND
    // the chord has the same harmonic function as the previous chord AND

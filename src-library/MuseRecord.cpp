@@ -6,8 +6,8 @@
 // Last Modified: Wed Oct 12 23:06:08 PDT 2011 fixed prob in setNoteheadShape
 // Filename:      ...sig/src/sigInfo/MuseRecord.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/MuseRecord.cpp
-// Syntax:        C++ 
-// 
+// Syntax:        C++
+//
 // Description:   A class that stores one line of data for a Musedata file.
 //
 // To do: check on gracenotes/cuenotes with chord notes.
@@ -22,21 +22,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>     /* for Windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-   
+#include <sstream>
+#include <string>
+
+using namespace std;
+
 
 
 //////////////////////////////
@@ -85,7 +75,7 @@ char* MuseRecord::getNoteField(char* output) {
          extract(output, 2, 5);
          break;
       default:
-         cerr << "Error: cannot use getNoteField function on line: " 
+         cerr << "Error: cannot use getNoteField function on line: "
               << getLine() << endl;
          exit(1);
    }
@@ -115,7 +105,7 @@ int MuseRecord::getOctave(void) {
       cerr << "Error: no octave specification in note field: " << recordInfo
            << endl;
       exit(1);
-   } 
+   }
 
    return recordInfo[index] - '0';
 }
@@ -134,14 +124,14 @@ char* MuseRecord::getOctave(char* output) {
       cerr << "Error: no octave specification in note field: " << recordInfo
            << endl;
       exit(1);
-   } 
+   }
 
    output[0] = recordInfo[index];
    output[1] = '\0';
 
    return output;
 }
-   
+
 
 
 //////////////////////////////
@@ -167,7 +157,7 @@ char* MuseRecord::getPitch(char* output) {
 
    return output;
 }
-   
+
 
 
 //////////////////////////////
@@ -190,7 +180,7 @@ char* MuseRecord::getPitchClass(char* output) {
 
    return output;
 }
-   
+
 
 
 //////////////////////////////
@@ -202,7 +192,7 @@ char* MuseRecord::getPitchClass(char* output) {
 int MuseRecord::getAccidental(void) {
    char recordInfo[16];
    getNoteField(recordInfo);
-   
+
    int output = 0;
    int index = 0;
    while (recordInfo[index] != '\0' && index < 16) {
@@ -219,10 +209,10 @@ int MuseRecord::getAccidental(void) {
 
 char* MuseRecord::getAccidental(char* output) {
    int type = getAccidental();
-   
+
    switch (type) {
       case -2: strcpy(output, "ff"); break;
-      case -1: strcpy(output,  "f"); break; 
+      case -1: strcpy(output,  "f"); break;
       case  0: strcpy(output,   ""); break;
       case  1: strcpy(output,  "#"); break;
       case  2: strcpy(output, "##"); break;
@@ -300,11 +290,11 @@ void MuseRecord::setPitch(int base40, int chordnote, int gracenote) {
       case 4:  diatonic[0] = 'G'; break;
       case 5:  diatonic[0] = 'A'; break;
       case 6:  diatonic[0] = 'B'; break;
-      default: diatonic[0] = 'X'; 
+      default: diatonic[0] = 'X';
    }
 
    char octave[2] = {0};
-   octave[0]   = '0' + base40 / 40; 
+   octave[0]   = '0' + base40 / 40;
 
    char accidental[4] = {0};
    int acc = Convert::base40ToAccidental(base40);
@@ -383,7 +373,7 @@ void MuseRecord::setPitchAtIndex(int index, const char* pitchname) {
 
 //////////////////////////////
 //
-// MuseRecord::getTickDurationField -- returns the string containing the 
+// MuseRecord::getTickDurationField -- returns the string containing the
 //      duration, and tie information.
 //
 
@@ -402,7 +392,7 @@ char* MuseRecord::getTickDurationField(char* output) {
       case E_muserec_note_grace:
       default:
          output[0] = '\0';
-         // cerr << "Error: cannot use getTickDurationField function on line: " 
+         // cerr << "Error: cannot use getTickDurationField function on line: "
          //      << getLine() << endl;
          // exit(1);
    }
@@ -537,7 +527,7 @@ void MuseRecord::setNoteheadShape(RationalNumber& duration) {
 
    if (duration > 16) {                // maxima
       setNoteheadMaxima();
-   } else if (duration > 8) {         // long
+   } else if (duration > 8) {          // long
       setNoteheadLong();
    } else if (duration > 4) {          // breve
       if (roundBreve) {
@@ -545,21 +535,21 @@ void MuseRecord::setNoteheadShape(RationalNumber& duration) {
       } else {
          setNoteheadBreve();
       }
-   } else if (duration > 2) {           // whole note
+   } else if (duration > 2) {            // whole note
       setNoteheadWhole();
-   } else if (duration > 1) {           // half note
+   } else if (duration > 1) {            // half note
       setNoteheadHalf();
-   } else if (duration > note8th) {           // quarter note
+   } else if (duration > note8th) {      // quarter note
       setNoteheadQuarter();
    } else if (duration > note16th) {     // eighth note
       setNotehead8th();
-   } else if (duration > note32nd) {    // 16th note
+   } else if (duration > note32nd) {     // 16th note
       setNotehead16th();
-   } else if (duration > note64th) {    // 32nd note
+   } else if (duration > note64th) {     // 32nd note
       setNotehead32nd();
    } else if (duration > note128th) {    // 64th note
       setNotehead64th();
-   } else if (duration > note256th) {   // 128th note
+   } else if (duration > note256th) {    // 128th note
       setNotehead128th();
    } else if (duration == note256th) {   // 256th note
       // not allowing tuplets on the 256th note level.
@@ -619,7 +609,7 @@ void MuseRecord::setNoteheadShapeMensural(RationalNumber& duration) {
 
 void MuseRecord::setNoteheadMaxima(void) {
    if ((*this)[0] == 'c' || ((*this)[0] == 'g')) {
-      cerr << "Error: cue/grace notes cannot be maximas in setNoteheadLong" 
+      cerr << "Error: cue/grace notes cannot be maximas in setNoteheadLong"
            << endl;
       exit(1);
    } else {
@@ -629,7 +619,7 @@ void MuseRecord::setNoteheadMaxima(void) {
 
 void MuseRecord::setNoteheadLong(void) {
    if ((*this)[0] == 'c' || ((*this)[0] == 'g')) {
-      cerr << "Error: cue/grace notes cannot be longs in setNoteheadLong" 
+      cerr << "Error: cue/grace notes cannot be longs in setNoteheadLong"
            << endl;
       exit(1);
    } else {
@@ -643,17 +633,21 @@ void MuseRecord::setNoteheadBreve(void) {
 
 void MuseRecord::setNoteheadBreveSquare(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = 'A';  
+      getColumn(8) = 'A';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = 'A';
    } else {                        // normal note
       getColumn(17) = 'B';
+      // getColumn(17) = 'b';
    }
 }
 
+// Note 'b' means regular breve now.  The 'B' above will
+// cause a line to be hidden automatically even if "P c0:x0" is set.
+
 void MuseRecord::setNoteheadBreveRound(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = 'A';  
+      getColumn(8) = 'A';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = 'A';
    } else {                        // normal note
@@ -667,7 +661,7 @@ void MuseRecord::setNoteheadBreveMensural(void) {
 
 void MuseRecord::setNoteheadWhole(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '9';  
+      getColumn(8) = '9';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '9';
    } else {                        // normal note
@@ -677,7 +671,7 @@ void MuseRecord::setNoteheadWhole(void) {
 
 void MuseRecord::setNoteheadWholeMensural(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '9';  
+      getColumn(8) = '9';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '9';
    } else {                        // normal note
@@ -687,7 +681,7 @@ void MuseRecord::setNoteheadWholeMensural(void) {
 
 void MuseRecord::setNoteheadHalf(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '8';  
+      getColumn(8) = '8';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '8';
    } else {                        // normal note
@@ -697,7 +691,7 @@ void MuseRecord::setNoteheadHalf(void) {
 
 void MuseRecord::setNoteheadHalfMensural(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '8';  
+      getColumn(8) = '8';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '8';
    } else {                        // normal note
@@ -707,7 +701,7 @@ void MuseRecord::setNoteheadHalfMensural(void) {
 
 void MuseRecord::setNoteheadQuarter(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '7';  
+      getColumn(8) = '7';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '7';
    } else {                        // normal note
@@ -717,7 +711,7 @@ void MuseRecord::setNoteheadQuarter(void) {
 
 void MuseRecord::setNoteheadQuarterMensural(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '7';  
+      getColumn(8) = '7';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '7';
    } else {                        // normal note
@@ -727,7 +721,7 @@ void MuseRecord::setNoteheadQuarterMensural(void) {
 
 void MuseRecord::setNotehead8th(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '6';  
+      getColumn(8) = '6';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '6';
    } else {                        // normal note
@@ -737,7 +731,7 @@ void MuseRecord::setNotehead8th(void) {
 
 void MuseRecord::setNotehead8thMensural(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '6';  
+      getColumn(8) = '6';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '6';
    } else {                        // normal note
@@ -747,7 +741,7 @@ void MuseRecord::setNotehead8thMensural(void) {
 
 void MuseRecord::setNotehead16th(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '5';  
+      getColumn(8) = '5';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '5';
    } else {                        // normal note
@@ -757,7 +751,7 @@ void MuseRecord::setNotehead16th(void) {
 
 void MuseRecord::setNotehead16thMensural(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '5';  
+      getColumn(8) = '5';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '5';
    } else {                        // normal note
@@ -767,7 +761,7 @@ void MuseRecord::setNotehead16thMensural(void) {
 
 void MuseRecord::setNotehead32nd(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '4';  
+      getColumn(8) = '4';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '4';
    } else {                        // normal note
@@ -777,7 +771,7 @@ void MuseRecord::setNotehead32nd(void) {
 
 void MuseRecord::setNotehead32ndMensural(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '4';  
+      getColumn(8) = '4';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '4';
    } else {                        // normal note
@@ -787,7 +781,7 @@ void MuseRecord::setNotehead32ndMensural(void) {
 
 void MuseRecord::setNotehead64th(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '3';  
+      getColumn(8) = '3';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '3';
    } else {                        // normal note
@@ -797,7 +791,7 @@ void MuseRecord::setNotehead64th(void) {
 
 void MuseRecord::setNotehead64thMensural(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '3';  
+      getColumn(8) = '3';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '3';
    } else {                        // normal note
@@ -807,7 +801,7 @@ void MuseRecord::setNotehead64thMensural(void) {
 
 void MuseRecord::setNotehead128th(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '2';  
+      getColumn(8) = '2';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '2';
    } else {                        // normal note
@@ -817,7 +811,7 @@ void MuseRecord::setNotehead128th(void) {
 
 void MuseRecord::setNotehead128thMensural(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '2';  
+      getColumn(8) = '2';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '2';
    } else {                        // normal note
@@ -827,7 +821,7 @@ void MuseRecord::setNotehead128thMensural(void) {
 
 void MuseRecord::setNotehead256th(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '1';  
+      getColumn(8) = '1';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '1';
    } else {                        // normal note
@@ -837,7 +831,7 @@ void MuseRecord::setNotehead256th(void) {
 
 void MuseRecord::setNotehead256thMensural(void) {
    if ((*this)[0] == 'g') {        // grace note
-      getColumn(8) = '1';  
+      getColumn(8) = '1';
    } else if ((*this)[0] == 'c') { // cue-sized note (with duration)
       getColumn(17) = '1';
    } else {                        // normal note
@@ -1069,7 +1063,7 @@ char* MuseRecord::getFootnoteFlagField(char* output) {
    extract(output, 13, 13);
    return output;
 }
-         
+
 
 //////////////////////////////
 //
@@ -1098,7 +1092,7 @@ int MuseRecord::getFootnoteFlag(void) {
 
    return output;
 }
- 
+
 
 
 //////////////////////////////
@@ -1118,7 +1112,7 @@ int MuseRecord::footnoteFlagQ(void) {
 
    return output;
 }
-      
+
 
 
 //////////////////////////////
@@ -1145,7 +1139,7 @@ char* MuseRecord::getLevel(char* output) {
       output[0] = '\0';
    }
    return output;
-}   
+}
 
 
 int MuseRecord::getLevel(void) {
@@ -1160,7 +1154,7 @@ int MuseRecord::getLevel(void) {
 
    return output;
 }
- 
+
 
 
 //////////////////////////////
@@ -1180,7 +1174,7 @@ int MuseRecord::levelQ(void) {
 
    return output;
 }
-      
+
 
 
 //////////////////////////////
@@ -1207,7 +1201,7 @@ char* MuseRecord::getTrack(char* output) {
       output[0] = '\0';
    }
    return output;
-}   
+}
 
 
 int MuseRecord::getTrack(void) {
@@ -1222,7 +1216,7 @@ int MuseRecord::getTrack(void) {
 
    return output;
 }
- 
+
 
 
 //////////////////////////////
@@ -1318,8 +1312,8 @@ int MuseRecord::getGraphicNoteType(void) {
 
    return output;
 }
-     
-      
+
+
 //////////////////////////////
 //
 // MuseRecord::graphicNoteTypeQ --
@@ -1354,10 +1348,10 @@ int MuseRecord::getGraphicNoteTypeSize(void) {
            << getLine() << endl;
       exit(1);
    }
- 
+
    switch (recordInfo[0]) {
       case 'L': case 'b': case 'w': case 'h': case 'q': case 'e':
-      case 's': case 't': case 'x': case 'y': case 'z': 
+      case 's': case 't': case 'x': case 'y': case 'z':
          output = 1;
          break;
       case 'B': case 'A': case '9': case '8': case '7': case '6':
@@ -1387,7 +1381,7 @@ char* MuseRecord::getProlongationField(char* output) {
    } else {
       extract(output, 18, 18);
    }
- 
+
    return output;
 }
 
@@ -1405,7 +1399,7 @@ char* MuseRecord::getProlongation(char* output) {
    }
    return output;
 }
-  
+
 
 int MuseRecord::getProlongation(void) {
    int output = 0;
@@ -1420,10 +1414,10 @@ int MuseRecord::getProlongation(void) {
               << getLine() << endl;
          exit(1);
    }
-   
+
    return output;
 }
-         
+
 
 
 //////////////////////////////
@@ -1436,7 +1430,7 @@ char* MuseRecord::getStringProlongation(char* doutput) {
       case 0:   strcpy(doutput, "");   break;
       case 1:   strcpy(doutput, ".");   break;
       case 2:   strcpy(doutput, "..");   break;
-      default: 
+      default:
          cerr << "Error: unknown number of prolongation dots (column 18): "
               << getLine() << endl;
          exit(1);
@@ -1455,7 +1449,7 @@ char* MuseRecord::getStringProlongation(char* doutput) {
 int MuseRecord::prolongationQ(void) {
    return getProlongation();
 }
-   
+
 
 //////////////////////////////
 //
@@ -1533,7 +1527,7 @@ int MuseRecord::notatedAccidentalQ(void) {
 
    return output;
 }
-   
+
 
 
 ///////////////////////////////
@@ -1695,7 +1689,7 @@ int MuseRecord::timeModificationQ(void) {
 //
 // MuseRecord::timeModificationLeftQ --
 //
-   
+
 int MuseRecord::timeModificationLeftQ(void) {
    int output = 0;
    char recordInfo[16];
@@ -1714,7 +1708,7 @@ int MuseRecord::timeModificationLeftQ(void) {
 //
 // MuseRecord::timeModificationRightQ --
 //
-   
+
 int MuseRecord::timeModificationRightQ(void) {
    int output = 0;
    char recordInfo[16];
@@ -1742,7 +1736,7 @@ char* MuseRecord::getStemDirectionField(char* output) {
       output[0] = getColumn(23);
       output[1] = '\0';
    }
-   
+
    return output;
 }
 
@@ -1794,9 +1788,9 @@ int MuseRecord::stemDirectionQ(void) {
    } else {
       output = 1;
    }
-   
+
    return output;
-} 
+}
 
 
 //////////////////////////////
@@ -1839,7 +1833,7 @@ int MuseRecord::getStaff(void) {
    } else {
       output = strtol(recordInfo, NULL, 36);
    }
-   
+
    return output;
 }
 
@@ -1861,7 +1855,7 @@ int MuseRecord::staffQ(void) {
    }
 
    return output;
-} 
+}
 
 
 
@@ -1887,7 +1881,7 @@ char* MuseRecord::getBeamField(char* output) {
 // MuseRecord::setBeamInfo --
 //
 
-void MuseRecord::setBeamInfo(Array<char>& strang) {
+void MuseRecord::setBeamInfo(string& strang) {
    setColumns(strang, 26, 31);
 }
 
@@ -2111,7 +2105,7 @@ char* MuseRecord::getKernBeamStyle(char* output) {
          case ']':                 // end beam
             strcat(output, "J");
             break;
-         case 'K':                 // forward hook 
+         case 'K':                 // forward hook
             strcat(output, "K");
             break;
          case 'k':                 // backward hook
@@ -2123,7 +2117,7 @@ char* MuseRecord::getKernBeamStyle(char* output) {
    }
    return output;
 }
- 
+
 
 
 //////////////////////////////
@@ -2291,7 +2285,7 @@ int MuseRecord::addEditorialLevelQ(void) {
 
 //////////////////////////////
 //
-// MuseRecord::findField -- returns true when it finds the first 
+// MuseRecord::findField -- returns true when it finds the first
 //	instance of the key in the additional fields record.
 //
 
@@ -2314,13 +2308,13 @@ int MuseRecord::findField(const char* key) {
       if (output == 1) {
          break;
       }
-endofloop: 
+endofloop:
    ;
    }
-   
+
    return output;
 }
-            
+
 
 
 //////////////////////////////
@@ -2379,7 +2373,7 @@ int MuseRecord::getSlurStartColumn(void) {
    return -1;
 }
 
-   
+
 
 //////////////////////////////
 //
@@ -2460,7 +2454,7 @@ char* MuseRecord::getVerse(int index, char* output) {
    while (c < index && tindex < 80) {
       if (getColumn(tindex) == '|') {
          c++;
-      } 
+      }
       tindex++;
    }
 
@@ -2489,7 +2483,7 @@ char* MuseRecord::getVerse(int index, char* output) {
 
    return output;
 }
-      
+
 
 //////////////////////////////
 //
@@ -2502,7 +2496,7 @@ char* MuseRecord::getKernNoteStyle(char* output, int beams, int stems) {
    char temp[16];
 
    // place the rhythm
-   SSTREAM tempdur;
+   stringstream tempdur;
    int notetype = getGraphicNoteType();
    if (timeModificationLeftQ()) {
       notetype = notetype / 4 * getTimeModificationLeft();
@@ -2513,7 +2507,7 @@ char* MuseRecord::getKernNoteStyle(char* output, int beams, int stems) {
       }
    }
    tempdur << notetype << ends;
-   strcat(output, tempdur.CSTRING);
+   strcat(output, tempdur.str().c_str());
 
    // add any dots of prolongation to the output string
    strcat(output, getStringProlongation(temp));
@@ -2546,7 +2540,7 @@ char* MuseRecord::getKernNoteStyle(char* output, int beams, int stems) {
             ; // nothing                 // ' ' = no stem (if stage 2)
       }
    }
-  
+
    // if beams is true, then show any beams
    if (beams && beamQ()) {
       getKernBeamStyle(temp);
@@ -2570,8 +2564,8 @@ char* MuseRecord::getKernNoteAccents(char* output) {
    for (int i=0; i<addnotecount; i++) {
       getAddItem(i, tempnote);
       switch (tempnote[0]) {
-         case 'v':   strcat(output, "v");   break; // up-bow 
-         case 'n':   strcat(output, "u");   break; // down-bow 
+         case 'v':   strcat(output, "v");   break; // up-bow
+         case 'n':   strcat(output, "u");   break; // down-bow
          case 'o':   strcat(output, "j");   break; // harmonic
          case 'O':   strcat(output, "I");   break; // open string (to generic)
          case 'A':   strcat(output, "^");   break; // accent up
@@ -2593,10 +2587,10 @@ char* MuseRecord::getKernNoteAccents(char* output) {
          case 'j':   strcat(output, "H");   break; // glissando (slide)
      }
    }
-   
+
    return output;
 }
-   
+
 
 
 
@@ -2613,13 +2607,13 @@ char* MuseRecord::getKernRestStyle(char* output, int quarter) {
    char rhythmstring[16];
 
    // place the rhythm
-   SSTREAM tempdur;
-  
+   stringstream tempdur;
+
    int notetype;
    float dnotetype;
    if (graphicNoteTypeQ()) {
       notetype = getGraphicNoteType();
-         
+
       if (timeModificationLeftQ()) {
          notetype = notetype / 4 * getTimeModificationLeft();
       }
@@ -2627,7 +2621,7 @@ char* MuseRecord::getKernRestStyle(char* output, int quarter) {
          notetype = notetype * getTimeModificationRight() / 2;
       }
       tempdur << notetype << ends;
-      strcat(output, tempdur.CSTRING);
+      strcat(output, tempdur.str().c_str());
 
       // add any dots of prolongation to the output string
       strcat(output, getStringProlongation(temp));
@@ -2698,7 +2692,7 @@ int MuseRecord::getMeasureNumber(void) {
    getMeasureNumber(measureInfo);
    return atoi(measureInfo);
 }
-   
+
 
 
 //////////////////////////////
@@ -2737,7 +2731,7 @@ int MuseRecord::measureFermataQ(void) {
          break;
       }
    }
-   
+
    return output;
 }
 
@@ -2745,7 +2739,7 @@ int MuseRecord::measureFermataQ(void) {
 //////////////////////////////
 //
 // MuseRecord::measureFlagQ -- Returns true if there are non-space
-//     characters in columns 17 through 80.   A more smarter way of 
+//     characters in columns 17 through 80.   A more smarter way of
 //     doing this is checking the allocated length of the record, and
 //     do not search non-allocated columns for non-space characters...
 //
@@ -2774,7 +2768,7 @@ int MuseRecord::measureFlagQ(const char* key) {
 
 //////////////////////////////
 //
-// MuseRecord::addMeasureFlag -- add the following characters to the 
+// MuseRecord::addMeasureFlag -- add the following characters to the
 //    Flag region of the measure flag area (columns 17-80).  But only
 //    add the flag if it is not already present in the region.  If it is
 //    not present, then append it after the last non-space character
@@ -2783,24 +2777,22 @@ int MuseRecord::measureFlagQ(const char* key) {
 //
 
 void MuseRecord::addMeasureFlag(const char* strang) {
-   Array<char> flags;
+   string flags;
    getColumns(flags, 17, 80);
-   Array<char> flag;
-   flag.setSize(strlen(strang)+1);
+   string flag;
+   flag = strang;
    PerlRegularExpression pre;
    // pre.setBasicSyntax();
-   strcpy(flag.getBase(), strang);
    pre.sar(flag, "\\*", "\\*", "g");
    pre.sar(flag, "\\|", "\\|", "g");
-   if (pre.search(flags, flag.getBase(), "")) {
+   if (pre.search(flags, flag.c_str(), "")) {
       // flag was already found in flags, so don't do anything
       return;
    }
 
    pre.sar(flags, "\\s+$", "", "");
-   flags.setSize(flags.getSize() + strlen(strang) + 1);
-   strcat(flags.getBase(), " ");
-   strcat(flags.getBase(), strang);
+   flags += " ";
+   flags += strang;
    setColumns(flags, 17, 80);
 }
 
@@ -2875,7 +2867,7 @@ char* MuseRecord::getAttributeList(char* output) {
       case E_muserec_musical_attributes:
          break;
       default:
-         cerr << "Error: cannot use getAttributeList function on line: " 
+         cerr << "Error: cannot use getAttributeList function on line: "
               << getLine() << endl;
          exit(1);
    }
@@ -2888,7 +2880,7 @@ char* MuseRecord::getAttributeList(char* output) {
          tempcol = column - 1;
          while (tempcol > 0 && getColumn(tempcol) != ' ') {
             tempcol--;
-         } 
+         }
          tempcol++;
          while (tempcol <= column) {
             output[index] = getColumn(tempcol);
@@ -2904,7 +2896,7 @@ char* MuseRecord::getAttributeList(char* output) {
       }
    }
    output[index] = '\0';
-    
+
    return output;
 }
 
@@ -2920,7 +2912,7 @@ int MuseRecord::attributeQ(const char* attribute) {
       case E_muserec_musical_attributes:
          break;
       default:
-         cerr << "Error: cannot use getAttributeList function on line: " 
+         cerr << "Error: cannot use getAttributeList function on line: "
               << getLine() << endl;
          exit(1);
    }
@@ -2962,7 +2954,7 @@ int MuseRecord::getAttributeInt(char attribute) {
       case E_muserec_musical_attributes:
          break;
       default:
-         cerr << "Error: cannot use getAttributeInt function on line: " 
+         cerr << "Error: cannot use getAttributeInt function on line: "
               << getLine() << endl;
          exit(1);
    }
@@ -2984,7 +2976,7 @@ int MuseRecord::getAttributeInt(char attribute) {
                ending = 2;
             } else if (getColumn(tempcol) == 'D') {
                ending = 1;
-            } 
+            }
             tempcol++;
             index++;
          }
@@ -3014,7 +3006,7 @@ int MuseRecord::getAttributeString(char* output, const char* attribute) {
       case E_muserec_musical_attributes:
          break;
       default:
-         cerr << "Error: cannot use getAttributeInt function on line: " 
+         cerr << "Error: cannot use getAttributeInt function on line: "
               << getLine() << endl;
          exit(1);
    }
@@ -3036,7 +3028,7 @@ int MuseRecord::getAttributeString(char* output, const char* attribute) {
                ending = 2;
             } else if (getColumn(tempcol) == 'D') {
                ending = 1;
-            } 
+            }
             tempcol++;
             index++;
          }
@@ -3078,7 +3070,7 @@ char* MuseRecord::getFigureCountField(char* output) {
    extract(output, 2, 2);
    return output;
 }
-   
+
 
 //////////////////////////////
 //
@@ -3093,7 +3085,7 @@ char* MuseRecord::getFigureCount(char* output) {
    }
    return output;
 }
- 
+
 
 int MuseRecord::getFigureCount(void) {
    allowFigurationOnly("getFigureCount");
@@ -3121,7 +3113,7 @@ char* MuseRecord::getFigurePointerField(char* output) {
 //
 // figurePointerQ --
 //
-   
+
 int MuseRecord::figurePointerQ(void) {
    allowFigurationOnly("figurePointerQ");
    int output = 0;
@@ -3146,7 +3138,7 @@ char* MuseRecord::getFigureFields(char* output) {
    extract(output, 17, 80);
    return output;
 }
-   
+
 
 //////////////////////////////
 //
@@ -3168,7 +3160,7 @@ int MuseRecord::figureFieldsQ(void) {
    }
    return output;
 }
-      
+
 
 
 //////////////////////////////
@@ -3186,7 +3178,7 @@ char* MuseRecord::getFigure(int index, char* output) {
    char temp[128] = {0};
    char *tempp;
    getFigureFields(temp);
-   tempp = strtok(temp, " "); 
+   tempp = strtok(temp, " ");
    for (int i=1; i<= index; i++) {
       tempp = strtok(NULL, " ");
    }
@@ -3212,7 +3204,7 @@ void MuseRecord::allowFigurationOnly(const char* functionName) {
       case E_muserec_figured_harmony:
         break;
       default:
-         cerr << "Error: can only access " << functionName 
+         cerr << "Error: can only access " << functionName
               << " on a figuration record.  Line is: " << getLine() << endl;
          exit(1);
    }
@@ -3234,7 +3226,7 @@ void MuseRecord::allowFigurationAndNotesOnly(const char* functionName) {
       case E_muserec_note_cue:
         break;
       default:
-         cerr << "Error: can only access " << functionName 
+         cerr << "Error: can only access " << functionName
               << " on a figuration record.  Line is: " << getLine() << endl;
          exit(1);
    }
@@ -3252,7 +3244,7 @@ void MuseRecord::allowMeasuresOnly(const char* functionName) {
       case E_muserec_measure:
         break;
       default:
-         cerr << "Error: can only access " << functionName 
+         cerr << "Error: can only access " << functionName
               << " on a measure record.  Line is: " << getLine() << endl;
          exit(1);
    }
@@ -3273,7 +3265,7 @@ void MuseRecord::allowNotesOnly(const char* functionName) {
       case E_muserec_note_cue:
         break;
       default:
-         cerr << "Error: can only access " << functionName 
+         cerr << "Error: can only access " << functionName
               << " on a note record.  Line is: " << getLine() << endl;
          exit(1);
    }
@@ -3321,13 +3313,13 @@ int MuseRecord::getAddElementIndex(int& index, char* output, char* input) {
 
          case 'Z':                    // sfz, or Zp = sfp
             // elements starting with 'Z':
-            //    Z      = sfz 
+            //    Z      = sfz
             //    Zp     = sfp
             count++;
             output[outputIndex++] = input[index++];
             if (input[index] == 'p') {
                output[outputIndex++] = input[index++];
-            } 
+            }
             break;
 
          case 'm':                      // mezzo
@@ -3350,7 +3342,7 @@ int MuseRecord::getAddElementIndex(int& index, char* output, char* input) {
             output[outputIndex++] = input[index++];
             if (input[index] == 'd') {
                output[outputIndex++] = input[index++];
-            } 
+            }
             break;
 
          case '1':                     // fingering
@@ -3371,14 +3363,14 @@ int MuseRecord::getAddElementIndex(int& index, char* output, char* input) {
          //////////////////////////////
          // Ornaments
          //
-         case 't':                     // trill (tr.)  
-         case 'r':                     // turn  
-         case 'k':                     // delayed turn  
-         case 'w':                     // shake  
-         case '~':                     // trill wavy line extension  
-         case 'c':                     // continued wavy line  
+         case 't':                     // trill (tr.)
+         case 'r':                     // turn
+         case 'k':                     // delayed turn
+         case 'w':                     // shake
+         case '~':                     // trill wavy line extension
+         case 'c':                     // continued wavy line
          case 'M':                     // mordent
-         case 'j':                     // slide (Schleifer)  
+         case 'j':                     // slide (Schleifer)
            // ornaments can be modified by accidentals:
            //    s     = sharp
            //    ss    = double sharp
@@ -3386,7 +3378,7 @@ int MuseRecord::getAddElementIndex(int& index, char* output, char* input) {
            //    ff    = double flat
            //    h     = natural
            //    u     = next accidental is under the ornament
-           // any combination of these characters following a 
+           // any combination of these characters following a
            // ornament is considered one element.
            //
            count++;
@@ -3400,7 +3392,7 @@ int MuseRecord::getAddElementIndex(int& index, char* output, char* input) {
          //////////////////////////////////////////////////////////////
          // The following chars are uniquely SINGLE letter items:    //
          //                                                          //
-         //                                                          // 
+         //                                                          //
          case '-':                     // tie                        //
          case '(':                     // open  slur #1              //
          case ')':                     // close slur #1              //
@@ -3441,7 +3433,7 @@ int MuseRecord::getAddElementIndex(int& index, char* output, char* input) {
             index++;
             break;
          default:
-            cout << "Error: unknown additional notation: " 
+            cout << "Error: unknown additional notation: "
                  << input[index] << endl;
             exit(1);
       }
@@ -3461,7 +3453,7 @@ int MuseRecord::getAddElementIndex(int& index, char* output, char* input) {
 // MuseRecord::zerase -- removes specified number of characters from
 // 	the beginning of the string.
 //
- 
+
 char* MuseRecord::zerase(char* output, int num) {
    int length = strlen(output);
    if (num >= length) {
@@ -3473,7 +3465,7 @@ char* MuseRecord::zerase(char* output, int num) {
    }
    return output;
 }
-      
+
 
 
 // md5sum: 05e1e67705ebcb2bfa1afad9e504582c MuseRecord.cpp [20050403]

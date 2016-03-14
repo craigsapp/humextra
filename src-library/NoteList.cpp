@@ -335,8 +335,7 @@ void NoteList::pitchBase40Class(void) {
 //
 
 NoteListArray::NoteListArray(void) { 
-   setSize(0);
-   allowGrowth(1);
+   resize(0);
 }
 
 
@@ -358,9 +357,7 @@ NoteListArray::~NoteListArray() {
 //
 
 void NoteListArray::clear(void) {
-   int i, size;
-   size = getSize();
-   for (i=0; i<size; i++) {
+   for (int i=0; i<(int)size(); i++) {
       (*this)[i].clear();
    }
 }
@@ -373,9 +370,7 @@ void NoteListArray::clear(void) {
 //
 
 void NoteListArray::pitchBase12(void) {
-   int i, size;
-   size = getSize();
-   for (i=0; i<size; i++) {
+   for (int i=0; i<(int)size(); i++) {
       (*this)[i].pitchBase12();
    }
 }
@@ -388,9 +383,7 @@ void NoteListArray::pitchBase12(void) {
 //
 
 void NoteListArray::pitchBase12Class (void) {
-   int i, size;
-   size = getSize();
-   for (i=0; i<size; i++) {
+   for (int i=0; i<(int)size(); i++) {
       (*this)[i].pitchBase12Class();
    }
 }
@@ -403,9 +396,7 @@ void NoteListArray::pitchBase12Class (void) {
 //
 
 void NoteListArray::pitchBase40(void) {
-   int i, size;
-   size = getSize();
-   for (i=0; i<size; i++) {
+   for (int i=0; i<(int)size(); i++) {
       (*this)[i].pitchBase40();
    }
 }
@@ -418,9 +409,7 @@ void NoteListArray::pitchBase40(void) {
 //
 
 void NoteListArray::pitchBase40Class(void) {
-   int i, size;
-   size = getSize();
-   for (i=0; i<size; i++) {
+   for (int i=0; i<(int)size(); i++) {
       (*this)[i].pitchBase40Class();
    }
 }

@@ -18,8 +18,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#define SSTREAM stringstream
-#define CSTRING str().c_str()
+
 using namespace std;
 
 
@@ -29,9 +28,8 @@ using namespace std;
 //
 
 HumdrumFileSet::HumdrumFileSet(void) {
-   data.setSize(10000);
-   data.setGrowth(90000);
-   data.setSize(0);
+   data.reserve(10000);
+   data.resize(0);
 }
 
 
@@ -54,11 +52,11 @@ HumdrumFileSet::~HumdrumFileSet() {
 
 void HumdrumFileSet::clear(void) {
    int i;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       delete data[i];
       data[i] = NULL;
    }
-   data.setSize(0);
+   data.resize(0);
 }
 
 
@@ -70,7 +68,7 @@ void HumdrumFileSet::clear(void) {
 //
 
 int HumdrumFileSet::getSize(void) {
-   return data.getSize();
+   return data.size();
 }
 
 
@@ -138,7 +136,7 @@ int HumdrumFileSet::readAppend(const string& filename) {
 int HumdrumFileSet::readAppend(const char* filename) {
 
 #ifdef USING_URI
-   SSTREAM instream;
+   stringstream instream;
    if (strstr(filename, "://") != NULL) {
       if (strncmp(filename, "http://", strlen("http://")) == 0) {
          readAppendFromHttpURI(instream, filename);
@@ -176,7 +174,7 @@ int HumdrumFileSet::readAppend(const char* filename) {
    }
 
    if (infile.peek() == '%') {
-      SSTREAM embeddedData;
+      stringstream embeddedData;
       HumdrumFile::extractEmbeddedDataFromPdf(embeddedData, infile);
       return readAppend(embeddedData);
    }
@@ -192,13 +190,13 @@ int HumdrumFileSet::readAppend(istream& inStream, const char* filename) {
    int contentQ   = 0;
    int exclusiveQ = 0;
    char line[1123123] = {0};
-   SSTREAM* inbuffer;
+   stringstream* inbuffer;
    char tfilename[123123] = {0};
    if (strrchr(filename, '/') != NULL) {
       filename = strrchr(filename, '/') + 1;
    }
    strcpy(tfilename, filename);
-   inbuffer = new SSTREAM;
+   inbuffer = new stringstream;
    while (!inStream.eof()) {
       line[0] = '\0';
       inStream.getline(line, 321321);
@@ -215,7 +213,7 @@ int HumdrumFileSet::readAppend(istream& inStream, const char* filename) {
             }
             appendHumdrumFileContent(tfilename, *inbuffer);
             delete inbuffer;
-            inbuffer = new SSTREAM;
+            inbuffer = new stringstream;
             strcpy(tfilename, "");
          }
          strcpy(tfilename, pre.getSubmatch(1));
@@ -228,7 +226,7 @@ int HumdrumFileSet::readAppend(istream& inStream, const char* filename) {
          // empty filename.
          appendHumdrumFileContent("", *inbuffer);
          delete inbuffer;
-         inbuffer = new SSTREAM;
+         inbuffer = new stringstream;
          exclusiveQ = 1;
          contentQ = 1;
          *inbuffer << line << "\n";
@@ -249,13 +247,13 @@ int HumdrumFileSet::readAppend(istream& inStream, const char* filename) {
 
 
 void HumdrumFileSet::appendHumdrumFileContent(const char* filename, 
-      SSTREAM& inbuffer) {
+      stringstream& inbuffer) {
    HumdrumFile* newfile;
    newfile = new HumdrumFile;
    HumdrumFile& infile = *newfile;
    infile.setFilename(filename);
    infile.read(inbuffer);
-   data.append(newfile);
+   data.push_back(newfile);
 }
 
 
@@ -271,7 +269,7 @@ void HumdrumFileSet::appendHumdrumFileContent(const char* filename,
 // http://kern.ccarh.org/cgi-bin/ksdata?file=sym099a.krn&l=/osu/classical/haydn/london&format=kern
 //
 
-void HumdrumFileSet::readAppendFromHumdrumURI(SSTREAM& inputstream, 
+void HumdrumFileSet::readAppendFromHumdrumURI(stringstream& inputstream, 
       const char* humdrumaddress) {
    const char* ptr = humdrumaddress;
    // skip over the staring portion of the address:
@@ -282,44 +280,32 @@ void HumdrumFileSet::readAppendFromHumdrumURI(SSTREAM& inputstream,
    } else if (strncmp(ptr, "h://", strlen("h://")) == 0) {
       ptr += strlen("h://");
    }
-   Array<char> location;
-   location.setSize(strlen(ptr)+1);
-   location.allowGrowth(0);
-   strcpy(location.getBase(), ptr);
+   string location;
+   location = ptr;
+   string filename;
 
-   Array<char> filename;
-   filename.setSize(1);
-   filename[0] = '\0';
-   filename.setSize(0);
-
-   strcpy(location.getBase(), ptr);
-
-   char* pot;
-   if ((pot = strrchr(location.getBase(), '/')) != NULL) {
-      *pot = '\0';
-      pot++;
-      filename.setSize(strlen(pot)+1);
-      strcpy(filename.getBase(), pot);
-      filename.allowGrowth(0);
+   size_t found = location.rfind("/");
+   if (found != string::npos) {
+      filename = location.substr(found+1);
+      location.resize(found);
    } else {
       filename = location;
-      location.setSize(2);
-      strcpy(location.getBase(), "/");
+      location = "/";
    }
 
-   SSTREAM httprequest;
+   stringstream httprequest;
    httprequest << "http://" << "kern.ccarh.org";
    httprequest << "/cgi-bin/ksdata?";
-   if (strstr(filename.getBase(), ".krn") != NULL) {
-      httprequest << "l=" << location.getBase();
-      httprequest << "&file=" << filename.getBase();
+   if (strstr(filename.c_str(), ".krn") != NULL) {
+      httprequest << "l=" << location;
+      httprequest << "&file=" << filename;
       httprequest << "&format=kern";
    } else {
       httprequest << "l=" << ptr;
    }
    httprequest << ends;
 
-   readAppendFromHttpURI(inputstream, httprequest.CSTRING);
+   readAppendFromHttpURI(inputstream, httprequest.str().c_str());
 }
 
 
@@ -335,7 +321,7 @@ void HumdrumFileSet::readAppendFromHumdrumURI(SSTREAM& inputstream,
 //    http://jrp.ccarh.org/cgi-bin/jrp?a=humdrum&f=Jos2721-La_Bernardina
 //
 
-void HumdrumFileSet::readAppendFromJrpURI(SSTREAM& inputstream, 
+void HumdrumFileSet::readAppendFromJrpURI(stringstream& inputstream, 
       const char* jrpaddress) {
    const char* ptr = jrpaddress;
    // skip over the staring portion of the address:
@@ -345,14 +331,14 @@ void HumdrumFileSet::readAppendFromJrpURI(SSTREAM& inputstream,
       ptr += strlen("jrp:");
    }
 
-   SSTREAM httprequest;
+   stringstream httprequest;
    httprequest << "http://" << "jrp.ccarh.org";
    httprequest << "/cgi-bin/jrp?a=humdrum&f=";
    httprequest << ptr;
    httprequest << ends;
 
    const char* filename = jrpaddress;
-   readAppendFromHttpURI(inputstream, httprequest.CSTRING, filename);
+   readAppendFromHttpURI(inputstream, httprequest.str().c_str(), filename);
 }
 
 
@@ -363,12 +349,10 @@ void HumdrumFileSet::readAppendFromJrpURI(SSTREAM& inputstream,
 //    Default value: filename = NULL.
 //
 
-void HumdrumFileSet::readAppendFromHttpURI(SSTREAM& inputstream, 
+void HumdrumFileSet::readAppendFromHttpURI(stringstream& inputstream, 
       const char* webaddress, const char* filename) {
-   Array<char> hostname;
-
-   Array<char> location;
-   location.setSize(0);
+   string hostname;
+   string location;
 
    const char* ptr = webaddress;
 
@@ -377,25 +361,18 @@ void HumdrumFileSet::readAppendFromHttpURI(SSTREAM& inputstream,
       ptr += strlen("http://");
    }
 
-   hostname.setSize(strlen(ptr)+1);
-   hostname.setGrowth(0);
-   strcpy(hostname.getBase(), ptr);
-   char* pot;
-   if ((pot = strchr(hostname.getBase(), '/')) != NULL) {
-      *pot = '\0';
-      hostname.setSize(strlen(hostname.getBase())+1);
+   hostname = ptr;
+   size_t found = hostname.find("/");
+   if (found != string::npos) {
+      hostname.resize(found);
    }
 
    const char* ptr3;
    if ((ptr3 = strchr(ptr, '/')) != NULL) {
-      location.setSize(strlen(ptr3)+1);
-      strcpy(location.getBase(), ptr3);
-      location.allowGrowth(0);
+      location = ptr3;
    }
-   if (location.getSize() == 0) {
-      location.setSize(2);
-      location.allowGrowth(0);
-      strcpy(location.getBase(), "/");
+   if (location.size() == 0) {
+      location = "/";
    }
 
    const char* ptr2 = NULL;
@@ -406,28 +383,28 @@ void HumdrumFileSet::readAppendFromHttpURI(SSTREAM& inputstream,
 
    char newline[3] = {0x0d, 0x0a, 0};
 
-   SSTREAM request;
-   request << "GET "   << location.getBase() << " HTTP/1.1" << newline;
-   request << "Host: " << hostname.getBase() << newline;
+   stringstream request;
+   request << "GET "   << location << " HTTP/1.1" << newline;
+   request << "Host: " << hostname << newline;
    request << "User-Agent: HumdrumFile Downloader 1.0 (" 
            << __DATE__ << ")" << newline;
    request << "Connection: close" << newline;  // this line is necessary
    request << newline;
    request << ends;
 
-   // cout << "HOSTNAME: " << hostname.getBase() << endl;
-   // cout << "LOCATION: " << location.getBase() << endl;
-   // cout << request.CSTRING << endl;
+   // cout << "HOSTNAME: " << hostname << endl;
+   // cout << "LOCATION: " << location << endl;
+   // cout << request.str().c_str() << endl;
    // cout << "-------------------------------------------------" << endl;
 
-   int socket_id = open_network_socket(hostname.getBase(), 80);
-   if (::write(socket_id, request.CSTRING, strlen(request.CSTRING)) == -1) {
+   int socket_id = open_network_socket(hostname.c_str(), 80);
+   if (::write(socket_id, request.str().c_str(), strlen(request.str().c_str())) == -1) {
       exit(-1);
    }
    #define URI_BUFFER_SIZE (10000)
    char buffer[URI_BUFFER_SIZE];
    int message_len;
-   SSTREAM header;
+   stringstream header;
    int foundcontent = 0;
    int i;
    int newlinecounter = 0;
@@ -458,7 +435,7 @@ void HumdrumFileSet::readAppendFromHttpURI(SSTREAM& inputstream,
    int chunked = 0;
 
    header << ends;
-   // cout << header.CSTRING << endl;
+   // cout << header.str().c_str() << endl;
    // cout << "-------------------------------------------------" << endl;
    while (header.getline(buffer, URI_BUFFER_SIZE)) {
       int len = strlen(buffer);
@@ -533,7 +510,7 @@ void HumdrumFileSet::readAppendFromHttpURI(SSTREAM& inputstream,
    close(socket_id);
 
    // cout << "CONTENT:=======================================" << endl;
-   // cout << inputstream.CSTRING;
+   // cout << inputstream.str().c_str();
    // cout << "===============================================" << endl;
    // HumdrumFileSet::read(inputstream);
 }
@@ -567,7 +544,7 @@ void HumdrumFileSet::readAppendFromHttpURI(SSTREAM& inputstream,
 // 
 // The message is finally closed by a last CRLF combination.
 
-int HumdrumFileSet::getChunk(int socket_id, SSTREAM& inputstream, 
+int HumdrumFileSet::getChunk(int socket_id, stringstream& inputstream, 
       char* buffer, int bufsize) {
    int chunksize = 0;
    int message_len;
@@ -614,7 +591,7 @@ int HumdrumFileSet::getChunk(int socket_id, SSTREAM& inputstream,
 //
 
 int HumdrumFileSet::getFixedDataSize(int socket_id, int datalength, 
-      SSTREAM& inputstream, char* buffer, int bufsize) {
+      stringstream& inputstream, char* buffer, int bufsize) {
    int readcount = 0;
    int readsize;
    int message_len;

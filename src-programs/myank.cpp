@@ -5,6 +5,7 @@
 // Last Modified: Wed Feb  2 12:13:11 PST 2011 Added *met extraction
 // Last Modified: Mon Apr  1 00:28:01 PDT 2013 Enabled multiple segment input
 // Last Modified: Tue Feb 23 04:40:04 PST 2016 Added --section option
+// Last Modified: Sun Mar 13 23:13:06 PDT 2016 Switched to STL
 // Filename:      ...sig/examples/all/myank.cpp 
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/myank.cpp
 // Syntax:        C++; museinfo
@@ -22,6 +23,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -44,25 +46,25 @@ class MeasureInfo {
    public:
       MeasureInfo(void) { clear(); }
       void clear(void)  { num = seg = start = stop = -1; 
-         sclef.setSize(0); skeysig.setSize(0); skey.setSize(0);
-         stimesig.setSize(0); smet.setSize(0); stempo.setSize(0);
-         eclef.setSize(0); ekeysig.setSize(0); ekey.setSize(0);
-         etimesig.setSize(0); emet.setSize(0); etempo.setSize(0);
+         sclef.resize(0); skeysig.resize(0); skey.resize(0);
+         stimesig.resize(0); smet.resize(0); stempo.resize(0);
+         eclef.resize(0); ekeysig.resize(0); ekey.resize(0);
+         etimesig.resize(0); emet.resize(0); etempo.resize(0);
          file = NULL;
       }
       void setTrackCount(int tcount) {
-         sclef.setSize(tcount+1);
-         skeysig.setSize(tcount+1);
-         skey.setSize(tcount+1);
-         stimesig.setSize(tcount+1);
-         smet.setSize(tcount+1);
-         stempo.setSize(tcount+1);
-         eclef.setSize(tcount+1);
-         ekeysig.setSize(tcount+1);
-         ekey.setSize(tcount+1);
-         etimesig.setSize(tcount+1);
-         emet.setSize(tcount+1);
-         etempo.setSize(tcount+1);
+         sclef.resize(tcount+1);
+         skeysig.resize(tcount+1);
+         skey.resize(tcount+1);
+         stimesig.resize(tcount+1);
+         smet.resize(tcount+1);
+         stempo.resize(tcount+1);
+         eclef.resize(tcount+1);
+         ekeysig.resize(tcount+1);
+         ekey.resize(tcount+1);
+         etimesig.resize(tcount+1);
+         emet.resize(tcount+1);
+         etempo.resize(tcount+1);
          int i;
          for (i=0; i<tcount+1; i++) {
             sclef[i].clear();
@@ -88,20 +90,20 @@ class MeasureInfo {
       HumdrumFile* file;
     
       // musical settings at start of measure
-      Array<Coord> sclef;     // starting clef of segment
-      Array<Coord> skeysig;   // starting keysig of segment
-      Array<Coord> skey;      // starting key of segment
-      Array<Coord> stimesig;  // starting timesig of segment
-      Array<Coord> smet;      // starting met of segment
-      Array<Coord> stempo;    // starting tempo of segment
+      vector<Coord> sclef;     // starting clef of segment
+      vector<Coord> skeysig;   // starting keysig of segment
+      vector<Coord> skey;      // starting key of segment
+      vector<Coord> stimesig;  // starting timesig of segment
+      vector<Coord> smet;      // starting met of segment
+      vector<Coord> stempo;    // starting tempo of segment
 
       // musical settings at start of measure
-      Array<Coord> eclef;     // ending clef    of segment
-      Array<Coord> ekeysig;   // ending keysig  of segment
-      Array<Coord> ekey;      // ending key     of segment
-      Array<Coord> etimesig;  // ending timesig of segment
-      Array<Coord> emet;      // ending met     of segment
-      Array<Coord> etempo;    // ending tempo   of segment
+      vector<Coord> eclef;     // ending clef    of segment
+      vector<Coord> ekeysig;   // ending keysig  of segment
+      vector<Coord> ekey;      // ending key     of segment
+      vector<Coord> etimesig;  // ending timesig of segment
+      vector<Coord> emet;      // ending met     of segment
+      vector<Coord> etempo;    // ending tempo   of segment
 };
 
 
@@ -117,7 +119,7 @@ ostream& operator<<(ostream& out, MeasureInfo& info) {
    out << "STOP           = " << info.stop << endl;
 
    int i;
-   for (i=1; i<info.sclef.getSize(); i++) {
+   for (i=1; i<(int)info.sclef.size(); i++) {
       out << "TRACK " << i << ":" << endl;
       if (info.sclef[i].isValid()) {
          out << "   START CLEF    = " << infile[info.sclef[i].x][info.sclef[i].y]       << endl;
@@ -171,35 +173,35 @@ void      checkOptions         (Options& opts, int argc, char** argv);
 void      example              (void);
 void      usage                (const char* command);
 void      myank                (HumdrumFile& infile, 
-                                Array<MeasureInfo>& outmeasure);
-void      removeDollarsFromString(Array<char>& buffer, int maxx);
-void      processFieldEntry    (Array<MeasureInfo>& field, const char* string, 
+                                vector<MeasureInfo>& outmeasure);
+void      removeDollarsFromString(string& buffer, int maxx);
+void      processFieldEntry    (vector<MeasureInfo>& field, const char* string, 
                                 HumdrumFile& infile, int maxmeasure, 
-                                Array<MeasureInfo>& inmeasures, 
-                                Array<int>& inmap);
-void      expandMeasureOutList   (Array<MeasureInfo>& measureout, 
-                                Array<MeasureInfo>& measurein, 
+                                vector<MeasureInfo>& inmeasures, 
+                                vector<int>& inmap);
+void      expandMeasureOutList   (vector<MeasureInfo>& measureout, 
+                                vector<MeasureInfo>& measurein, 
                                 HumdrumFile& infile, const char* optionstring);
-void      getMeasureStartStop  (Array<MeasureInfo>& measurelist, 
+void      getMeasureStartStop  (vector<MeasureInfo>& measurelist, 
                                 HumdrumFile& infile);
 void      printEnding          (HumdrumFile& infile, int lastline, int adjlin);
 void      printStarting        (HumdrumFile& infile);
 void      reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2);
 void      reconcileStartingPosition(HumdrumFile& infile, int index2);
-void      printJoinLine        (Array<int>& splits, int index, int count);
+void      printJoinLine        (vector<int>& splits, int index, int count);
 void      printInvisibleMeasure(HumdrumFile& infile, int line);
 void      fillGlobalDefaults   (HumdrumFile& infile, 
-                                Array<MeasureInfo>& measurein, 
-                                Array<int>& inmap);
+                                vector<MeasureInfo>& measurein, 
+                                vector<int>& inmap);
 void      adjustGlobalInterpretations(HumdrumFile& infile, int ii,
-                                Array<MeasureInfo>& outmeasures, int index);
+                                vector<MeasureInfo>& outmeasures, int index);
 void      adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
-                                Array<MeasureInfo>& outmeasures, int index);
+                                vector<MeasureInfo>& outmeasures, int index);
 void      getMarkString        (ostream& out, HumdrumFile& infile);
 void      printDoubleBarline   (HumdrumFile& infile, int line);
-void      insertZerothMeasure  (Array<MeasureInfo>& measurelist, 
+void      insertZerothMeasure  (vector<MeasureInfo>& measurelist, 
                                 HumdrumFile& infile);
-void      getMetStates         (Array<Array<Coord> >& metstates, 
+void      getMetStates         (vector<vector<Coord> >& metstates, 
                                 HumdrumFile& infile);
 Coord     getLocalMetInfo      (HumdrumFile& infile, int row, int track);
 int       atEndOfFile          (HumdrumFile& infile, int line);
@@ -225,10 +227,10 @@ int    doubleQ     = 0;            // used with --mdsep option
 int    barnumtextQ = 0;            // used with -T option
 int    Section     = 0;            // used with --section option
 int    sectionCountQ = 0;          // used with --section-count option
-Array<MeasureInfo> MeasureOutList; // used with -m option
-Array<MeasureInfo> MeasureInList;  // used with -m option
+vector<MeasureInfo> MeasureOutList; // used with -m option
+vector<MeasureInfo> MeasureInList;  // used with -m option
 
-Array<Array<Coord> > metstates;
+vector<vector<Coord> > metstates;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -264,23 +266,20 @@ void processFile(HumdrumFile& infile, int segmentCount) {
    getMetStates(metstates, infile);
    getMeasureStartStop(MeasureInList, infile);
 
-   Array<char> measurestring;
-   measurestring.setSize(strlen(options.getString("measure").data())+1);
-   strcpy(measurestring.getBase(), options.getString("measure").data());
+   string measurestring = options.getString("measure");
+cout << "MEASURE STRING " << measurestring << endl;
    if (markQ) {
       stringstream mstring;
       getMarkString(mstring, infile); 
       mstring << ends;
-      measurestring.setSize(strlen(mstring.str().c_str())+1);
-      strcpy(measurestring.getBase(), mstring.str().c_str());
+      measurestring = mstring.str();
       if (debugQ) {
          cout << "MARK STRING: " << mstring.str().c_str() << endl;
       }
    } else if (Section) {
       string sstring;
       getSectionString(sstring, infile, Section);
-      measurestring.setSize(sstring.size()+1);
-      strcpy(measurestring.getBase(), sstring.c_str());
+      measurestring = sstring;
    }
    if (debugQ) {
       cout << "MARK MEASURES: " << measurestring << endl;
@@ -288,22 +287,22 @@ void processFile(HumdrumFile& infile, int segmentCount) {
    
    // expand to multiple measures later.
    expandMeasureOutList(MeasureOutList, MeasureInList, infile, 
-         measurestring.getBase());
+         measurestring.c_str());
 
    if (inlistQ) {
       cout << "INPUT MEASURE MAP: " << endl;
-      for (int i=0; i<MeasureInList.getSize(); i++) {
+      for (int i=0; i<(int)MeasureInList.size(); i++) {
          cout << MeasureInList[i];
       }
    }
    if (outlistQ) {
       cout << "OUTPUT MEASURE MAP: " << endl;
-      for (int i=0; i<MeasureOutList.getSize(); i++) {
+      for (int i=0; i<(int)MeasureOutList.size(); i++) {
          cout << MeasureOutList[i];
       }
    }
 
-   if (MeasureOutList.getSize() == 0) {
+   if (MeasureOutList.size() == 0) {
       // disallow processing files with no barlines
       return;
    }
@@ -324,10 +323,10 @@ void processFile(HumdrumFile& infile, int segmentCount) {
 // in the score, keeping track of meter without metric symbols.
 //
 
-void getMetStates(Array<Array<Coord> >& metstates, HumdrumFile& infile) {
-   Array<Coord> current;
-   current.setSize(infile.getMaxTracks()+1);
-   metstates.setSize(infile.getNumLines());
+void getMetStates(vector<vector<Coord> >& metstates, HumdrumFile& infile) {
+   vector<Coord> current;
+   current.resize(infile.getMaxTracks()+1);
+   metstates.resize(infile.getNumLines());
    PerlRegularExpression pre;
 
    int i, j, track;
@@ -344,12 +343,12 @@ void getMetStates(Array<Array<Coord> >& metstates, HumdrumFile& infile) {
          }
       }
 
-      // metstates[i].setSize(infile[i].getFieldCount());
+      // metstates[i].resize(infile[i].getFieldCount());
       // for (j=0; j<infile[i].getFieldCount(); j++) {
       //    track = infile[i].getPrimaryTrack(j);
       //    metstates[i][j] = current[track];
       // }
-      metstates[i].setSize(infile.getMaxTracks()+1);
+      metstates[i].resize(infile.getMaxTracks()+1);
       for (j=1; j<=infile.getMaxTracks(); j++) {
          metstates[i][j] = current[j];
       }
@@ -357,7 +356,7 @@ void getMetStates(Array<Array<Coord> >& metstates, HumdrumFile& infile) {
 
    if (debugQ) {
       for (i=0; i<infile.getNumLines(); i++) {
-         for (j=1; j<metstates[i].getSize(); j++) {
+         for (j=1; j<(int)metstates[i].size(); j++) {
             if (metstates[i][j].x < 0) {
                cout << ".";
             } else {
@@ -447,8 +446,8 @@ Coord getLocalMetInfo(HumdrumFile& infile, int row, int track) {
 //
 
 void getMarkString(ostream& out, HumdrumFile& infile)  {
-   Array<char> mchar; // list of characters which are marks
-   mchar.setSize(0);
+   string mchar; // list of characters which are marks
+   mchar.resize(0);
    int i, j, k, m;
    char target;
    PerlRegularExpression pre;
@@ -459,21 +458,21 @@ void getMarkString(ostream& out, HumdrumFile& infile)  {
       if (pre.search(infile[i][0], 
             "!!!RDF\\*\\*kern\\s*:\\s*([^=])\\s*=\\s*match", "i")) {
          target = pre.getSubmatch(1)[0];
-         mchar.append(target);
+         mchar.push_back(target);
       } else if (pre.search(infile[i][0], 
             "!!!RDF\\*\\*kern\\s*:\\s*([^=])\\s*=\\s*mark", "i")) {
          target = pre.getSubmatch(1)[0];
-         mchar.append(target);
+         mchar.push_back(target);
       }
    }
 
    if (debugQ) {
-      for (i=0; i<mchar.getSize(); i++) {
+      for (i=0; i<(int)mchar.size(); i++) {
          cout << "\tMARK CHARCTER: " << mchar[i] << endl;
       }
    }
 
-   if (mchar.getSize() == 0) {
+   if (mchar.size() == 0) {
       return;
    }
 
@@ -501,7 +500,7 @@ void getMarkString(ostream& out, HumdrumFile& infile)  {
             k=0;
             str = infile[i][j];
             while (str[k] != '\0') {
-               for (m=0; m<mchar.getSize(); m++) {
+               for (m=0; m<(int)mchar.size(); m++) {
                   if (str[k] == mchar[m]) {
                      if (inserted) {
                         out << ',';
@@ -528,8 +527,8 @@ outerforloop: ;
 // myank -- yank the specified measures.
 //
 
-void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
-   if (outmeasures.getSize() > 0) {
+void myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
+   if (outmeasures.size() > 0) {
       printStarting(infile);
    }
 
@@ -541,7 +540,7 @@ void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
    int measurestart = 1;
    int datastart = 0;
    int bartextcount = 0;
-   for (h=0; h<outmeasures.getSize(); h++) {
+   for (h=0; h<(int)outmeasures.size(); h++) {
       measurestart = 1;
       printed = 0;
       counter = 0;
@@ -600,17 +599,16 @@ void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
    }
 
    PerlRegularExpression pre;
-   Array<char> token;
+   string token;
    int lasti;
-   if (outmeasures.getSize() > 0) {
-      lasti = outmeasures.last().stop;
+   if (outmeasures.size() > 0) {
+      lasti = outmeasures.back().stop;
    } else {
       lasti = -1;
    }
    if ((!nolastbarQ) &&  (lasti >= 0) && infile[lasti].isMeasure()) {
       for (j=0; j<infile[lasti].getFieldCount(); j++) {
-         token.setSize(strlen(infile[lasti][j])+1);
-         strcpy(token.getBase(), infile[lasti][j]);
+         token = infile[lasti][j];
          pre.sar(token, "\\d+", "", "");
          if (doubleQ) {
             if (pre.search(token, "=(.+)")) {
@@ -635,7 +633,7 @@ void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
 
    if (lastline >= 0) {
       //printEnding(infile, lastline);
-      printEnding(infile, outmeasures.last().stop, lasti);
+      printEnding(infile, outmeasures.back().stop, lasti);
    }
 
 }
@@ -648,7 +646,7 @@ void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
 //
 
 void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
-      Array<MeasureInfo>& outmeasures, int index) {
+      vector<MeasureInfo>& outmeasures, int index) {
 
    if (index <= 0) {
       adjustGlobalInterpretationsStart(infile, ii, outmeasures, index);
@@ -678,16 +676,16 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
    // these lines may cause bugs, but they get rid of zeroth measure
    // problem.
 // ggg
-//   if ((outmeasures.getSize() > 1) && (outmeasures[index-1].num == 0)) {
+//   if ((outmeasures.size() > 1) && (outmeasures[index-1].num == 0)) {
 //      return;
 //   }
-//   if ((outmeasures.getSize() > 0) && (outmeasures[index].num == 0)) {
+//   if ((outmeasures.size() > 0) && (outmeasures[index].num == 0)) {
 //      return;
 //   }
 
    for (i=1; i<=tracks; i++) {
 
-      if (!clefQ && (outmeasures[index].sclef.getSize() > 0)) {
+      if (!clefQ && (outmeasures[index].sclef.size() > 0)) {
          x  = outmeasures[index].sclef[i].x;
          y  = outmeasures[index].sclef[i].y;
          xo = outmeasures[index-1].eclef[i].x;
@@ -699,7 +697,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
          }
       }
 
-      if (!keysigQ && (outmeasures[index].skeysig.getSize() > 0)) {
+      if (!keysigQ && (outmeasures[index].skeysig.size() > 0)) {
          x  = outmeasures[index].skeysig[i].x;
          y  = outmeasures[index].skeysig[i].y;
          xo = outmeasures[index-1].ekeysig[i].x;
@@ -711,7 +709,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
          }
       }
 
-      if (!keyQ && (outmeasures[index].skey.getSize() > 0)) {
+      if (!keyQ && (outmeasures[index].skey.size() > 0)) {
          x  = outmeasures[index].skey[i].x;
          y  = outmeasures[index].skey[i].y;
          xo = outmeasures[index-1].ekey[i].x;
@@ -723,7 +721,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
          }
       }
 
-      if (!timesigQ && (outmeasures[index].stimesig.getSize() > 0)) {
+      if (!timesigQ && (outmeasures[index].stimesig.size() > 0)) {
          x  = outmeasures[index].stimesig[i].x;
          y  = outmeasures[index].stimesig[i].y;
          xo = outmeasures[index-1].etimesig[i].x;
@@ -735,7 +733,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
          }
       }
 
-      if (!metQ && (outmeasures[index].smet.getSize() > 0)) {
+      if (!metQ && (outmeasures[index].smet.size() > 0)) {
          x  = outmeasures[index].smet[i].x;
          y  = outmeasures[index].smet[i].y;
          xo = outmeasures[index-1].emet[i].x;
@@ -747,7 +745,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
          }
       }
 
-      if (!tempoQ && (outmeasures[index].stempo.getSize() > 0)) {
+      if (!tempoQ && (outmeasures[index].stempo.size() > 0)) {
          x  = outmeasures[index].stempo[i].x;
          y  = outmeasures[index].stempo[i].y;
          xo = outmeasures[index-1].etempo[i].x;
@@ -910,7 +908,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
 //
 
 void adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
-      Array<MeasureInfo>& outmeasures, int index) {
+      vector<MeasureInfo>& outmeasures, int index) {
    if (index != 0) {
       cerr << "Error in adjustGlobalInterpetationsStart" << endl;
       exit(1);
@@ -1208,8 +1206,8 @@ void reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
    char buff1[1024] = {0};
    char buff2[1024] = {0};
 
-   Array<int> splits(infile[index1].getFieldCount());
-   splits.setAll(0);
+   vector<int> splits(infile[index1].getFieldCount());
+   fill(splits.begin(), splits.end(), 0);
 
    int hassplit = 0;
    for (i=0; i<infile[index1].getFieldCount(); i++) {
@@ -1229,13 +1227,13 @@ void reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
    }
 
    if (hassplit) {
-      for (i=0; i<splits.getSize(); i++) {
+      for (i=0; i<(int)splits.size(); i++) {
          if (splits[i]) {
             cout << "*^";
          } else {
             cout << '*';
          }
-         if (i < splits.getSize()-1) {
+         if (i < (int)splits.size()-1) {
             cout << '\t';
          }
       }
@@ -1243,7 +1241,7 @@ void reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
    }
 
    // make splits cumulative;
-   //for (i=1; i<splits.getSize(); i++) {
+   //for (i=1; i<(int)splits.size(); i++) {
    //   splits[i] += splits[i-1];
    //}
   
@@ -1287,26 +1285,26 @@ void reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
 //    allow for more than two spines to join at the same time.
 //
 
-void printJoinLine(Array<int>& splits, int index, int count) {
+void printJoinLine(vector<int>& splits, int index, int count) {
    int i;
-   for (i=0; i<splits.getSize(); i++) {
+   for (i=0; i<(int)splits.size(); i++) {
       if (i == index) {
          cout << "*v\t*v";
          i+=count-1;
       } else {
          cout << "*";
       }
-      if (i<splits.getSize()-1) {
+      if (i<(int)splits.size()-1) {
          cout << "\t";
       }
    }
    cout << "\n";
 
    // merge splits by one element
-   for (i=index+1; i<splits.getSize()-1; i++) {
+   for (i=index+1; i<(int)splits.size()-1; i++) {
       splits[i] = splits[i+1];
    }
-   splits.setSize(splits.getSize()-1);
+   splits.resize((int)splits.size()-1);
 }
 
 
@@ -1451,9 +1449,9 @@ void printEnding(HumdrumFile& infile, int lastline, int adjlin) {
 //    although, if the first measure is not labeled, then ...
 //
 
-void getMeasureStartStop(Array<MeasureInfo>& measurelist, HumdrumFile& infile) {
-   measurelist.setSize(infile.getNumLines());
-   measurelist.setSize(0);
+void getMeasureStartStop(vector<MeasureInfo>& measurelist, HumdrumFile& infile) {
+   measurelist.reserve(infile.getNumLines());
+   measurelist.resize(0);
 
    MeasureInfo current;
    int i, ii;
@@ -1494,7 +1492,7 @@ void getMeasureStartStop(Array<MeasureInfo>& measurelist, HumdrumFile& infile) {
          //   current.stop = ii;
          //   lastend = ii;
          //   i = ii - 1;
-         //   measurelist.append(current);
+         //   measurelist.push_back(current);
          //   break;
          //}
          if (pre.search(infile[ii][0], "=[^\\d]*(\\d+)")) {
@@ -1504,7 +1502,7 @@ void getMeasureStartStop(Array<MeasureInfo>& measurelist, HumdrumFile& infile) {
             lastend = ii;
             i = ii - 1;
             current.file = &infile;
-            measurelist.append(current);
+            measurelist.push_back(current);
             break;
          } else {
             if (atEndOfFile(infile, ii)) {
@@ -1544,7 +1542,7 @@ void getMeasureStartStop(Array<MeasureInfo>& measurelist, HumdrumFile& infile) {
          current.stop = lastmeasure;
       }
       current.file = &infile;
-      measurelist.append(current);
+      measurelist.push_back(current);
    }
 
 
@@ -1650,7 +1648,7 @@ int atEndOfFile(HumdrumFile& infile, int line) {
 // insertZerothMeasure --
 //
 
-void insertZerothMeasure(Array<MeasureInfo>& measurelist, 
+void insertZerothMeasure(vector<MeasureInfo>& measurelist, 
       HumdrumFile& infile) {
 
    PerlRegularExpression pre;
@@ -1691,7 +1689,7 @@ void insertZerothMeasure(Array<MeasureInfo>& measurelist,
    // current.start = startline;
    current.start = exinterpline+1;
    current.stop = stopline;
-   measurelist.append(current);
+   measurelist.push_back(current);
 }
 
 
@@ -1702,8 +1700,8 @@ void insertZerothMeasure(Array<MeasureInfo>& measurelist,
 //     to extract.
 //
 
-void expandMeasureOutList(Array<MeasureInfo>& measureout, 
-      Array<MeasureInfo>& measurein, HumdrumFile& infile, 
+void expandMeasureOutList(vector<MeasureInfo>& measureout, 
+      vector<MeasureInfo>& measurein, HumdrumFile& infile, 
       const char* optionstring) {
 
    PerlRegularExpression pre;
@@ -1711,7 +1709,7 @@ void expandMeasureOutList(Array<MeasureInfo>& measureout,
    int maxmeasure = -1;
    int minmeasure = -1;
    int i;
-   for (i=0; i<measurein.getSize(); i++) {
+   for (i=0; i<(int)measurein.size(); i++) {
       if (maxmeasure < measurein[i].num) {
          maxmeasure = measurein[i].num;
       }
@@ -1728,7 +1726,7 @@ void expandMeasureOutList(Array<MeasureInfo>& measureout,
       exit(1);
    }
    if (maxQ) {
-      if (measurein.getSize() == 0) {
+      if (measurein.size() == 0) {
          cout << 0 << endl;
       } else {
          cout << maxmeasure << endl;
@@ -1750,7 +1748,7 @@ void expandMeasureOutList(Array<MeasureInfo>& measureout,
             exit(0);
          }
       }
-      if (measurein.getSize() == 0) {
+      if (measurein.size() == 0) {
          cout << 0 << endl;
       } else {
          cout << minmeasure << endl;
@@ -1759,17 +1757,15 @@ void expandMeasureOutList(Array<MeasureInfo>& measureout,
    }
 
    // create reverse-lookup list
-   Array<int> inmap(maxmeasure+1);
-   inmap.setAll(-1);
-   for (i=0; i<measurein.getSize(); i++) {
+   vector<int> inmap(maxmeasure+1);
+   fill(inmap.begin(), inmap.end(), -1);
+   for (i=0; i<(int)measurein.size(); i++) {
       inmap[measurein[i].num] = i;
    }
 
    fillGlobalDefaults(infile, measurein, inmap);
 
-   Array <char> ostring;
-   ostring.setSize(strlen(optionstring)+1);
-   strcpy(ostring.getBase(), optionstring);
+   string ostring = optionstring;
  
    removeDollarsFromString(ostring, maxmeasure);
 
@@ -1781,17 +1777,16 @@ void expandMeasureOutList(Array<MeasureInfo>& measureout,
    pre.sar(ostring, "--+", "-", "g");  // remove extra dashes
    int value = 0;
    int start = 0;
-   Array<MeasureInfo>& range = measureout;
-   range.setSize(10000);
-   range.setSize(0);
-   range.setGrowth(5123123);
-   value = pre.search(ostring.getBase(), "^([^,]+,?)");
+   vector<MeasureInfo>& range = measureout;
+   range.reserve(10000);
+   range.resize(0);
+   value = pre.search(ostring, "^([^,]+,?)");
    while (value != 0) {
       start += value - 1;
       start += strlen(pre.getSubmatch(1));
       processFieldEntry(range, pre.getSubmatch(), infile, maxmeasure,
           measurein, inmap);
-      value = pre.search(ostring.getBase() + start, "^([^,]+,?)");
+      value = pre.search(ostring.c_str() + start, "^([^,]+,?)");
    }
 }
 
@@ -1802,33 +1797,33 @@ void expandMeasureOutList(Array<MeasureInfo>& measureout,
 // fillGlobalDefaults -- keep track of the clef, key signature, key, etc.
 //
 
-void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein, 
-      Array<int>& inmap) {
+void fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& measurein, 
+      vector<int>& inmap) {
    int i, j;
    PerlRegularExpression pre;
 
    int tracks = infile.getMaxTracks();
 
-   Array<Coord> currclef(tracks+1);
-   Array<Coord> currkeysig(tracks+1);
-   Array<Coord> currkey(tracks+1);
-   Array<Coord> currtimesig(tracks+1);
-   Array<Coord> currmet(tracks+1);
-   Array<Coord> currtempo(tracks+1);
+   vector<Coord> currclef(tracks+1);
+   vector<Coord> currkeysig(tracks+1);
+   vector<Coord> currkey(tracks+1);
+   vector<Coord> currtimesig(tracks+1);
+   vector<Coord> currmet(tracks+1);
+   vector<Coord> currtempo(tracks+1);
 
    Coord undefCoord;
    undefCoord.clear();
 
-   currclef.setAll(undefCoord);
-   currkeysig.setAll(undefCoord);
-   currkey.setAll(undefCoord);
-   currtimesig.setAll(undefCoord);
-   currmet.setAll(undefCoord);
-   currtempo.setAll(undefCoord);
+   fill(currclef.begin(), currclef.end(), undefCoord);
+   fill(currkeysig.begin(), currkeysig.end(), undefCoord);
+   fill(currkey.begin(), currkey.end(), undefCoord);
+   fill(currtimesig.begin(), currtimesig.end(), undefCoord);
+   fill(currmet.begin(), currmet.end(), undefCoord);
+   fill(currtempo.begin(), currtempo.end(), undefCoord);
 
-   int          currmeasure = -1;
-   int          lastmeasure = -1;
-   int          datafound   = 0;
+   int currmeasure = -1;
+   int lastmeasure = -1;
+   int datafound   = 0;
    int track;
    int thingy = 0;
 
@@ -1855,7 +1850,7 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
          lastmeasure = currmeasure;
          currmeasure = atoi(pre.getSubmatch(1));
 
-         if (currmeasure < inmap.getSize()) {
+         if (currmeasure < (int)inmap.size()) {
             // [20120818] Had to compensate for last measure being single
             // and un-numbered.
             if (inmap[currmeasure] < 0) {
@@ -1936,7 +1931,7 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
    }
 
    // store state of global music values at end of music
-   if ((currmeasure >= 0) && (currmeasure < inmap.getSize()) 
+   if ((currmeasure >= 0) && (currmeasure < (int)inmap.size()) 
          && (inmap[currmeasure] >= 0)) {
       measurein[inmap[currmeasure]].eclef    = currclef;
       measurein[inmap[currmeasure]].ekeysig  = currkeysig;
@@ -1948,25 +1943,25 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
 
 
    // go through the measure list and clean up start/end states
-   for (i=0; i<measurein.getSize()-2; i++) {
+   for (i=0; i<(int)measurein.size()-2; i++) {
 
-      if (measurein[i].sclef.getSize() == 0) {
-         measurein[i].sclef.setSize(tracks+1);
-         measurein[i].sclef.setAll(undefCoord);
+      if (measurein[i].sclef.size() == 0) {
+         measurein[i].sclef.resize(tracks+1);
+         fill(measurein[i].sclef.begin(), measurein[i].sclef.end(), undefCoord);
       }
-      if (measurein[i].eclef.getSize() == 0) {
-         measurein[i].eclef.setSize(tracks+1);
-         measurein[i].eclef.setAll(undefCoord);
+      if (measurein[i].eclef.size() == 0) {
+         measurein[i].eclef.resize(tracks+1);
+         fill(measurein[i].eclef.begin(), measurein[i].eclef.end(), undefCoord);
       }
-      if (measurein[i+1].sclef.getSize() == 0) {
-         measurein[i+1].sclef.setSize(tracks+1);
-         measurein[i+1].sclef.setAll(undefCoord);
+      if (measurein[i+1].sclef.size() == 0) {
+         measurein[i+1].sclef.resize(tracks+1);
+         fill(measurein[i+1].sclef.begin(), measurein[i+1].sclef.end(), undefCoord);
       }
-      if (measurein[i+1].eclef.getSize() == 0) {
-         measurein[i+1].eclef.setSize(tracks+1);
-         measurein[i+1].eclef.setAll(undefCoord);
+      if (measurein[i+1].eclef.size() == 0) {
+         measurein[i+1].eclef.resize(tracks+1);
+         fill(measurein[i+1].eclef.begin(), measurein[i+1].eclef.end(), undefCoord);
       }
-      for (j=1; j<measurein[i].sclef.getSize(); j++) {
+      for (j=1; j<(int)measurein[i].sclef.size(); j++) {
          if (!measurein[i].eclef[j].isValid()) {
             if (measurein[i].sclef[j].isValid()) {
                measurein[i].eclef[j] = measurein[i].sclef[j];
@@ -1979,23 +1974,23 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
          }
       }
 
-      if (measurein[i].skeysig.getSize() == 0) {
-         measurein[i].skeysig.setSize(tracks+1);
-         measurein[i].skeysig.setAll(undefCoord);
+      if (measurein[i].skeysig.size() == 0) {
+         measurein[i].skeysig.resize(tracks+1);
+         fill(measurein[i].skeysig.begin(), measurein[i].skeysig.end(), undefCoord);
       }
-      if (measurein[i].ekeysig.getSize() == 0) {
-         measurein[i].ekeysig.setSize(tracks+1);
-         measurein[i].ekeysig.setAll(undefCoord);
+      if (measurein[i].ekeysig.size() == 0) {
+         measurein[i].ekeysig.resize(tracks+1);
+         fill(measurein[i].ekeysig.begin(), measurein[i].ekeysig.end(), undefCoord);
       }
-      if (measurein[i+1].skeysig.getSize() == 0) {
-         measurein[i+1].skeysig.setSize(tracks+1);
-         measurein[i+1].skeysig.setAll(undefCoord);
+      if (measurein[i+1].skeysig.size() == 0) {
+         measurein[i+1].skeysig.resize(tracks+1);
+         fill(measurein[i+1].skeysig.begin(), measurein[i+1].skeysig.end(), undefCoord);
       }
-      if (measurein[i+1].ekeysig.getSize() == 0) {
-         measurein[i+1].ekeysig.setSize(tracks+1);
-         measurein[i+1].ekeysig.setAll(undefCoord);
+      if (measurein[i+1].ekeysig.size() == 0) {
+         measurein[i+1].ekeysig.resize(tracks+1);
+         fill(measurein[i+1].ekeysig.begin(), measurein[i+1].ekeysig.end(), undefCoord);
       }
-      for (j=1; j<measurein[i].skeysig.getSize(); j++) {
+      for (j=1; j<(int)measurein[i].skeysig.size(); j++) {
          if (!measurein[i].ekeysig[j].isValid()) {
             if (measurein[i].skeysig[j].isValid()) {
                measurein[i].ekeysig[j] = measurein[i].skeysig[j];
@@ -2008,23 +2003,23 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
          }
       }
 
-      if (measurein[i].skey.getSize() == 0) {
-         measurein[i].skey.setSize(tracks+1);
-         measurein[i].skey.setAll(undefCoord);
+      if (measurein[i].skey.size() == 0) {
+         measurein[i].skey.resize(tracks+1);
+         fill(measurein[i].skey.begin(), measurein[i].skey.end(), undefCoord);
       }
-      if (measurein[i].ekey.getSize() == 0) {
-         measurein[i].ekey.setSize(tracks+1);
-         measurein[i].ekey.setAll(undefCoord);
+      if (measurein[i].ekey.size() == 0) {
+         measurein[i].ekey.resize(tracks+1);
+         fill(measurein[i].ekey.begin(), measurein[i].ekey.end(), undefCoord);
       }
-      if (measurein[i+1].skey.getSize() == 0) {
-         measurein[i+1].skey.setSize(tracks+1);
-         measurein[i+1].skey.setAll(undefCoord);
+      if (measurein[i+1].skey.size() == 0) {
+         measurein[i+1].skey.resize(tracks+1);
+         fill(measurein[i+1].skey.begin(), measurein[i+1].skey.end(), undefCoord);
       }
-      if (measurein[i+1].ekey.getSize() == 0) {
-         measurein[i+1].ekey.setSize(tracks+1);
-         measurein[i+1].ekey.setAll(undefCoord);
+      if (measurein[i+1].ekey.size() == 0) {
+         measurein[i+1].ekey.resize(tracks+1);
+         fill(measurein[i+1].ekey.begin(), measurein[i+1].ekey.end(), undefCoord);
       }
-      for (j=1; j<measurein[i].skey.getSize(); j++) {
+      for (j=1; j<(int)measurein[i].skey.size(); j++) {
          if (!measurein[i].ekey[j].isValid()) {
             if (measurein[i].skey[j].isValid()) {
                measurein[i].ekey[j] = measurein[i].skey[j];
@@ -2037,23 +2032,23 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
          }
       }
 
-      if (measurein[i].stimesig.getSize() == 0) {
-         measurein[i].stimesig.setSize(tracks+1);
-         measurein[i].stimesig.setAll(undefCoord);
+      if (measurein[i].stimesig.size() == 0) {
+         measurein[i].stimesig.resize(tracks+1);
+         fill(measurein[i].stimesig.begin(), measurein[i].stimesig.end(), undefCoord);
       }
-      if (measurein[i].etimesig.getSize() == 0) {
-         measurein[i].etimesig.setSize(tracks+1);
-         measurein[i].etimesig.setAll(undefCoord);
+      if (measurein[i].etimesig.size() == 0) {
+         measurein[i].etimesig.resize(tracks+1);
+         fill(measurein[i].etimesig.begin(), measurein[i].etimesig.end(), undefCoord);
       }
-      if (measurein[i+1].stimesig.getSize() == 0) {
-         measurein[i+1].stimesig.setSize(tracks+1);
-         measurein[i+1].stimesig.setAll(undefCoord);
+      if (measurein[i+1].stimesig.size() == 0) {
+         measurein[i+1].stimesig.resize(tracks+1);
+         fill(measurein[i+1].stimesig.begin(), measurein[i+1].stimesig.end(), undefCoord);
       }
-      if (measurein[i+1].etimesig.getSize() == 0) {
-         measurein[i+1].etimesig.setSize(tracks+1);
-         measurein[i+1].etimesig.setAll(undefCoord);
+      if (measurein[i+1].etimesig.size() == 0) {
+         measurein[i+1].etimesig.resize(tracks+1);
+         fill(measurein[i+1].etimesig.begin(), measurein[i+1].etimesig.end(), undefCoord);
       }
-      for (j=1; j<measurein[i].stimesig.getSize(); j++) {
+      for (j=1; j<(int)measurein[i].stimesig.size(); j++) {
          if (!measurein[i].etimesig[j].isValid()) {
             if (measurein[i].stimesig[j].isValid()) {
                measurein[i].etimesig[j] = measurein[i].stimesig[j];
@@ -2066,23 +2061,23 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
          }
       }
 
-      if (measurein[i].smet.getSize() == 0) {
-         measurein[i].smet.setSize(tracks+1);
-         measurein[i].smet.setAll(undefCoord);
+      if (measurein[i].smet.size() == 0) {
+         measurein[i].smet.resize(tracks+1);
+         fill(measurein[i].smet.begin(), measurein[i].smet.end(), undefCoord);
       }
-      if (measurein[i].emet.getSize() == 0) {
-         measurein[i].emet.setSize(tracks+1);
-         measurein[i].emet.setAll(undefCoord);
+      if (measurein[i].emet.size() == 0) {
+         measurein[i].emet.resize(tracks+1);
+         fill(measurein[i].emet.begin(), measurein[i].emet.end(), undefCoord);
       }
-      if (measurein[i+1].smet.getSize() == 0) {
-         measurein[i+1].smet.setSize(tracks+1);
-         measurein[i+1].smet.setAll(undefCoord);
+      if (measurein[i+1].smet.size() == 0) {
+         measurein[i+1].smet.resize(tracks+1);
+         fill(measurein[i+1].smet.begin(), measurein[i+1].smet.end(), undefCoord);
       }
-      if (measurein[i+1].emet.getSize() == 0) {
-         measurein[i+1].emet.setSize(tracks+1);
-         measurein[i+1].emet.setAll(undefCoord);
+      if (measurein[i+1].emet.size() == 0) {
+         measurein[i+1].emet.resize(tracks+1);
+         fill(measurein[i+1].emet.begin(), measurein[i+1].emet.end(), undefCoord);
       }
-      for (j=1; j<measurein[i].smet.getSize(); j++) {
+      for (j=1; j<(int)measurein[i].smet.size(); j++) {
          if (!measurein[i].emet[j].isValid()) {
             if (measurein[i].smet[j].isValid()) {
                measurein[i].emet[j] = measurein[i].smet[j];
@@ -2095,23 +2090,23 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
          }
       }
 
-      if (measurein[i].stempo.getSize() == 0) {
-         measurein[i].stempo.setSize(tracks+1);
-         measurein[i].stempo.setAll(undefCoord);
+      if (measurein[i].stempo.size() == 0) {
+         measurein[i].stempo.resize(tracks+1);
+         fill(measurein[i].stempo.begin(), measurein[i].stempo.end(), undefCoord);
       }
-      if (measurein[i].etempo.getSize() == 0) {
-         measurein[i].etempo.setSize(tracks+1);
-         measurein[i].etempo.setAll(undefCoord);
+      if (measurein[i].etempo.size() == 0) {
+         measurein[i].etempo.resize(tracks+1);
+         fill(measurein[i].etempo.begin(), measurein[i].etempo.end(), undefCoord);
       }
-      if (measurein[i+1].stempo.getSize() == 0) {
-         measurein[i+1].stempo.setSize(tracks+1);
-         measurein[i+1].stempo.setAll(undefCoord);
+      if (measurein[i+1].stempo.size() == 0) {
+         measurein[i+1].stempo.resize(tracks+1);
+         fill(measurein[i+1].stempo.begin(), measurein[i+1].stempo.end(), undefCoord);
       }
-      if (measurein[i+1].etempo.getSize() == 0) {
-         measurein[i+1].etempo.setSize(tracks+1);
-         measurein[i+1].etempo.setAll(undefCoord);
+      if (measurein[i+1].etempo.size() == 0) {
+         measurein[i+1].etempo.resize(tracks+1);
+         fill(measurein[i+1].etempo.begin(), measurein[i+1].etempo.end(), undefCoord);
       }
-      for (j=1; j<measurein[i].stempo.getSize(); j++) {
+      for (j=1; j<(int)measurein[i].stempo.size(); j++) {
          if (!measurein[i].etempo[j].isValid()) {
             if (measurein[i].stempo[j].isValid()) {
                measurein[i].etempo[j] = measurein[i].stempo[j];
@@ -2144,21 +2139,19 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
 //   Ignore negative values and values which exceed the maximum value.
 //
 
-void processFieldEntry(Array<MeasureInfo>& field, const char* string, 
-     HumdrumFile& infile, int maxmeasure, Array<MeasureInfo>& inmeasures,
-     Array<int>& inmap) {
+void processFieldEntry(vector<MeasureInfo>& field, const char* astring, 
+     HumdrumFile& infile, int maxmeasure, vector<MeasureInfo>& inmeasures,
+     vector<int>& inmap) {
 
    MeasureInfo current;
 
    PerlRegularExpression pre;
-   Array<char> buffer;
-   buffer.setSize(strlen(string)+1);
-   strcpy(buffer.getBase(), string);
+   string buffer = astring;
 
    // remove any comma left at end of input string (or anywhere else)
    pre.sar(buffer, ",", "", "g");
 
-   if (pre.search(buffer.getBase(), "^(\\d+)[a-z]?-(\\d+)[a-z]?$")) {
+   if (pre.search(buffer, "^(\\d+)[a-z]?-(\\d+)[a-z]?$")) {
       int firstone = strtol(pre.getSubmatch(1), NULL, 10);
       int lastone  = strtol(pre.getSubmatch(2), NULL, 10);
 
@@ -2169,13 +2162,13 @@ void processFieldEntry(Array<MeasureInfo>& field, const char* string,
       if (lastone  < 0         ) { lastone  = 0         ; }
 
       if ((firstone < 1) && (firstone != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\"" 
               << " contains too small a number at start: " << firstone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if ((lastone < 1) && (lastone != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\"" 
               << " contains too small a number at end: " << lastone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
@@ -2185,9 +2178,9 @@ void processFieldEntry(Array<MeasureInfo>& field, const char* string,
       if (firstone > lastone) {
          for (i=firstone; i>=lastone; i--) {
             if (inmap[i] >= 0) {
-               if ((field.getSize() > 0) && 
-                     (field.last().stop == inmeasures[inmap[i]].start)) {
-                  field.last().stop = inmeasures[inmap[i]].stop;
+               if ((field.size() > 0) && 
+                     (field.back().stop == inmeasures[inmap[i]].start)) {
+                  field.back().stop = inmeasures[inmap[i]].stop;
                } else {
                   current.clear();
                   current.file = &infile;
@@ -2209,16 +2202,16 @@ void processFieldEntry(Array<MeasureInfo>& field, const char* string,
                   current.emet     = inmeasures[inmap[i]].emet;
                   current.etempo   = inmeasures[inmap[i]].etempo;
 
-                  field.append(current);
+                  field.push_back(current);
                }
             }
          }
       } else {
          for (i=firstone; i<=lastone; i++) {
             if (inmap[i] >= 0) {
-               if ((field.getSize() > 0) && 
-                     (field.last().stop == inmeasures[inmap[i]].start)) {
-                  field.last().stop = inmeasures[inmap[i]].stop;
+               if ((field.size() > 0) && 
+                     (field.back().stop == inmeasures[inmap[i]].start)) {
+                  field.back().stop = inmeasures[inmap[i]].stop;
                } else {
                   current.clear();
                   current.file = &infile;
@@ -2240,25 +2233,25 @@ void processFieldEntry(Array<MeasureInfo>& field, const char* string,
                   current.emet     = inmeasures[inmap[i]].emet;
                   current.etempo   = inmeasures[inmap[i]].etempo;
 
-                  field.append(current);
+                  field.push_back(current);
                }
             }
          }
       }
-   } else if (pre.search(buffer.getBase(), "^(\\d+)([a-z]*)")) {
+   } else if (pre.search(buffer, "^(\\d+)([a-z]*)")) {
       int value = strtol(pre.getSubmatch(1), NULL, 10);
       // do something with letter later...
 
       if ((value < 1) && (value != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << astring << "\"" 
               << " contains too small a number at end: " << value << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if (inmap[value] >= 0) {
-         if ((field.getSize() > 0) && 
-               (field.last().stop == inmeasures[inmap[value]].start)) {
-            field.last().stop = inmeasures[inmap[value]].stop;
+         if ((field.size() > 0) && 
+               (field.back().stop == inmeasures[inmap[value]].start)) {
+            field.back().stop = inmeasures[inmap[value]].stop;
          } else {
             current.clear();
             current.file = &infile;
@@ -2280,7 +2273,7 @@ void processFieldEntry(Array<MeasureInfo>& field, const char* string,
             current.emet     = inmeasures[inmap[value]].emet;
             current.etempo   = inmeasures[inmap[value]].etempo;
 
-            field.append(current);
+            field.push_back(current);
          }
       }
    }
@@ -2293,7 +2286,7 @@ void processFieldEntry(Array<MeasureInfo>& field, const char* string,
 // removeDollarsFromString -- substitute $ sign for maximum track count.
 //
 
-void removeDollarsFromString(Array<char>& buffer, int maxx) {
+void removeDollarsFromString(string& buffer, int maxx) {
    PerlRegularExpression pre;
    PerlRegularExpression pre2;
    char tbuf[1024] = {0};
@@ -2364,7 +2357,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
            << "craig@ccrma.stanford.edu, December 2010" << endl;
       exit(0);
    } else if (opts.getBoolean("version")) {
-      cout << argv[0] << ", version: 26 December 2010" << endl;
+      cout << argv[0] << ", version: 13 March 2015" << endl;
       cout << "compiled: " << __DATE__ << endl;
       cout << MUSEINFO_VERSION << endl;
       exit(0);
@@ -2376,13 +2369,12 @@ void checkOptions(Options& opts, int argc, char** argv) {
       exit(0);
    }
 
-   debugQ   = opts.getBoolean("debug");
-   inlistQ  = opts.getBoolean("inlist");
-   outlistQ = opts.getBoolean("outlist");
-   verboseQ = opts.getBoolean("verbose");
-   maxQ     = opts.getBoolean("max");
-   minQ     = opts.getBoolean("min");
-
+   debugQ        =  opts.getBoolean("debug");
+   inlistQ       =  opts.getBoolean("inlist");
+   outlistQ      =  opts.getBoolean("outlist");
+   verboseQ      =  opts.getBoolean("verbose");
+   maxQ          =  opts.getBoolean("max");
+   minQ          =  opts.getBoolean("min");
    invisibleQ    = !opts.getBoolean("not-invisible");
    instrumentQ   =  opts.getBoolean("instrument");
    nolastbarQ    =  opts.getBoolean("noendbar");

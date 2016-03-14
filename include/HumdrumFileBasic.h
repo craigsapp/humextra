@@ -1,14 +1,15 @@
 //
-// Copyright 1998-2000 by Craig Stuart Sapp, All Rights Reserved.
+// Copyright 1998-2016 by Craig Stuart Sapp, All Rights Reserved.
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon May 18 13:42:11 PDT 1998
 // Last Modified: Wed Nov 29 10:19:28 PST 2000
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 renamed SigCollection class
-// Last Modified: Mon Jun 22 15:03:44 PDT 2009 added Humdrum/Http URIs
-// Last Modified: Mon Feb 14 08:11:01 PST 2011 added VTS functions
-// Last Modified: Tue Apr 24 16:54:50 PDT 2012 added readFromJrpURI()
-// Last Modified: Tue Dec 11 17:23:04 PST 2012 added fileName, segmentLevel
-// Last Modified: Sat Apr 27 13:36:16 PDT 2013 added changeField()
+// Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed SigCollection class
+// Last Modified: Mon Jun 22 15:03:44 PDT 2009 Added Humdrum/Http URIs
+// Last Modified: Mon Feb 14 08:11:01 PST 2011 Added VTS functions
+// Last Modified: Tue Apr 24 16:54:50 PDT 2012 Added readFromJrpURI()
+// Last Modified: Tue Dec 11 17:23:04 PST 2012 Added fileName, segmentLevel
+// Last Modified: Sat Apr 27 13:36:16 PDT 2013 Added changeField()
+// Last Modified: Sun Mar 13 17:08:48 PDT 2016 Switched to STL
 // Filename:      ...sig/include/sigInfo/HumdrumFileBasic.h
 // Web Address:   http://museinfo.sapp.org/include/sigInfo/HumdrumFileBasic.h
 // Syntax:        C++ 
@@ -22,11 +23,9 @@
 #define _HUMDRUMFILEBASIC_H_INCLUDED
 
 #include "HumdrumRecord.h"
-#include "SigCollection.h"
-#include "Array.h"
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -43,10 +42,7 @@ using namespace std;
    #include <netdb.h>       /* gethostbyname   */
    #include <unistd.h>      /* read, write     */
    #include <string.h>      /* memcpy          */
-
    #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
 #endif
 
 
@@ -124,18 +120,15 @@ class HumdrumFileBasic {
       HumdrumRecord&         getRecord        (int index);
       int                    getSegmentCount  (void);
       int                    getSpineCount    (int index);
-      int                    getTracksByExInterp(Array<int>& tracks, 
-                                                  const char* exinterp);
       int                    getTracksByExInterp(vector<int>& tracks, 
                                                   const char* exinterp);
-		int                    getKernTracks    (Array<int>& tracks);
 		int                    getKernTracks    (vector<int>& tracks);
       int                    getType          (int index);
-      void                   makeVts          (Array<char>& vtsstring);
-      static void            makeVts          (Array<char>& vtsstring,
+      void                   makeVts          (string& vtsstring);
+      static void            makeVts          (string& vtsstring,
                                                HumdrumFileBasic& infile);
-      void                   makeVtsData      (Array<char>& vtsstring);
-      static void            makeVtsData      (Array<char>& vtsstring,
+      void                   makeVtsData      (string& vtsstring);
+      static void            makeVtsData      (string& vtsstring,
                                                HumdrumFileBasic& infile);
       HumdrumFileBasic&      operator=        (const HumdrumFileBasic& aFile);
       void                   read             (const char* filename);
@@ -154,12 +147,12 @@ class HumdrumFileBasic {
       const char*            getTrackExInterp (int track);
 
    protected:
-      Array<char>   fileName;      // storage for input file's name
-      int           segmentLevel;  // storage for input file's segment level
-      SigCollection<HumdrumRecord*>  records;
-      int           maxtracks;           // max exclusive interpretation count
-      Array<char*>  trackexinterp;
-      static char   empty[1];
+      string         fileName;       // storage for input file's name
+      int            segmentLevel;   // storage for input file's segment level
+      vector<HumdrumRecord*>  records;
+      int            maxtracks;      // max exclusive interpretation count
+      vector<char*>  trackexinterp;
+      static char    empty[1];
 
    private:
       static int intcompare(const void* a, const void* b);
@@ -167,15 +160,15 @@ class HumdrumFileBasic {
       // spine analysis functions:
       void       privateSpineAnalysis(void);
       int        predictNewSpineCount(HumdrumRecord& aRecord);
-      void       makeNewSpineInfo(SigCollection<char*>&spineinfo, 
+      void       makeNewSpineInfo(vector<char*>&spineinfo, 
                     HumdrumRecord& aRecord, int newsize, int& spineid,
-                    SigCollection<int>& ex);
+                    vector<int>& ex);
       void       simplifySpineString(char* spinestring);
-      void       simplifySpineInfo(SigCollection<char*>& info, int index);
+      void       simplifySpineInfo(vector<char*>& info, int index);
 
       // determining the meaning of dots (null records)
       void       privateDotAnalysis(void);
-      void       readjustDotArrays(Array<int>& lastline, Array<int>& lastspine, 
+      void       readjustDotArrays(vector<int>& lastline, vector<int>& lastspine, 
                        HumdrumRecord& record, int newsize);
 
 
@@ -184,10 +177,10 @@ class HumdrumFileBasic {
          void     readFromHumdrumURI       (const char* humdrumaddress);
          void     readFromJrpURI           (const char* jrpaddress);
          void     readFromHttpURI          (const char* webaddress);
-         int      getChunk                 (int socket_id, SSTREAM& inputdata, 
+         int      getChunk                 (int socket_id, stringstream& inputdata, 
                                             char* buffer, int bufsize);
          int      getFixedDataSize         (int socket_id, int datalength, 
-                                            SSTREAM& inputdata, char* buffer, 
+                                            stringstream& inputdata, char* buffer, 
                                             int bufsize);
          int      open_network_socket      (const char *hostname, 
                                             unsigned short int port);

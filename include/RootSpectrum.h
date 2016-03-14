@@ -2,7 +2,8 @@
 // Copyright 2002 by Craig Stuart Sapp, All Rights Reserved.
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Dec 24 18:20:23 PST 2002
-// Last Modified: Mon Feb 10 17:08:20 PST 2003 (added voice-leading)
+// Last Modified: Mon Feb 10 17:08:20 PST 2003 Added voice-leading
+// Last Modified: Sun Mar 13 16:41:52 PDT 2016 Switch to STL
 // Filename:      ...sig/include/sigInfo/RootSpectrum.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/RootSpectrum.h
 // Syntax:        C++ 
@@ -13,15 +14,13 @@
 #ifndef _ROOTSPECTRUM_H_INCLUDED
 #define _ROOTSPECTRUM_H_INCLUDED
 
-#include "Array.h"
 #include "IntervalWeight.h"
 #include "HumdrumFile.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-#else
-   #include <iostream.h>
-#endif
+#include <iostream>
+#include <vector>
+
+using namespace std;
 
 #define DISPLAY_DIATONIC   0
 #define DISPLAY_CHROMATIC  1
@@ -39,7 +38,7 @@ class RootSpectrum {
       double      getNormInvScore  (int index);
       int         getSize          (void);
       double&     operator[]       (int index);
-      void        getBestOrdering  (Array<int>& bestorder);
+      void        getBestOrdering  (vector<int>& bestorder);
 
       // rhythm parameters
       void        rhythmOn            (void);
@@ -96,7 +95,7 @@ class RootSpectrum {
                                     HumdrumFile& infile, int startline, 
                                     int stopline, int debugQ = 0);
    private:
-      Array <double> values;        // scores for each root.
+      vector<double> values;        // scores for each root.
       double         power;         // for scaling inverse scores
       int            durationQ;     // for using duration information
       int            levelQ;        // for using metric level information
@@ -114,8 +113,8 @@ class RootSpectrum {
       double         durationscaling(double duration);
       double         metricscaling  (double level);
       double         getMelodicScaling(int root, int note, 
-                                    Array<int>& lastpitches, 
-                                    Array<int>& nextpitches, 
+                                    vector<int>& lastpitches, 
+                                    vector<int>& nextpitches, 
                                     IntervalWeight& distances, 
                                     double absbeat, 
                                     double chordstartbeat,  

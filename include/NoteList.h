@@ -3,7 +3,8 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon May 14 14:21:10 PDT 2001
 // Last Modified: Mon May 14 14:21:08 PDT 2001
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
+// Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed SigCollection class
+// Last Modified: Sun Mar 13 16:53:29 PDT 2016 Switched to STL
 // Filename:      ...sig/include/sigInfo/NoteList.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/NoteList.h
 // Syntax:        C++ 
@@ -11,17 +12,13 @@
 // Description:   Used in chord and key identification in HumdrumFile class.
 //
 
-
 #ifndef _NOTELIST_H_INCLUDED
 #define _NOTELIST_H_INCLUDED
 
-#include "SigCollection.h"
+#include <ostream>
+#include <vector>
 
-#ifdef OLDCPP
-   #include <ostream.h>
-#else
-   #include <ostream>
-#endif
+using namespace std;
 
 class NoteList {
    public: 
@@ -58,7 +55,7 @@ class NoteList {
       void         pitchBase40Class (void);
 
    protected:
-      int   line;	    // line number in the original HumdrumFile
+      int   line;	          // line number in the original HumdrumFile
       unsigned short spine; // spine number of the note
       unsigned short token; // token number of the note (chord note)
       float track;          // track number in the original HumdrumFile
@@ -71,10 +68,10 @@ class NoteList {
 
 };
 
-class NoteListArray : public SigCollection<NoteList> {
+class NoteListArray : public vector<NoteList> {
    public:
-                   NoteListArray          (void);
-                  ~NoteListArray          ();
+                   NoteListArray    (void);
+                  ~NoteListArray    ();
 
       void         clear            (void);
       void         pitchBase12      (void);

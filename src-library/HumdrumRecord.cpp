@@ -21,10 +21,11 @@
 // Last Modified: Sat May 22 10:29:39 PDT 2010 added RationalNumber
 // Last Modified: Sun Dec 26 12:18:34 PST 2010 added setToken
 // Last Modified: Mon Jul 30 16:10:45 PDT 2012 added setSize and setAllFields
-// Last Modified: Mon Dec 10 10:14:08 PST 2012 added Array<char> getToken
+// Last Modified: Mon Dec 10 10:14:08 PST 2012 added string getToken
+// Last Modified: Sun Mar 13 17:32:12 PDT 2016 Switched to STL
 // Filename:      ...sig/src/sigInfo/HumdrumRecord.cpp
 // Webpage:       http://sig.sapp.org/src/sigInfo/HumdrumRecord.cpp
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Stores the data for one line in a HumdrumFile and
 //                segments data into spines.
@@ -38,21 +39,10 @@
 #include <cctype>
 #include <string.h>
 
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>   /* for Windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-   
+#include <sstream>
+#include <vector>
+
+using namespace std;
 
 
 //////////////////////////////
@@ -75,28 +65,20 @@ HumdrumRecord::HumdrumRecord(void) {
    modifiedQ = 0;
    lineno = -1;
 
-   recordFields.allowGrowth(1);
-   recordFields.setSize(32);   
-   recordFields.setGrowth(132);   
-   recordFields.setSize(0);   
+   recordFields.reserve(32);
+   recordFields.resize(0);
 
-   interpretation.allowGrowth(1);
-   interpretation.setSize(32);
-   interpretation.setGrowth(132);
-   interpretation.setSize(0);
+   interpretation.reserve(32);
+   interpretation.resize(0);
 
-   spineids.allowGrowth(1);
-   spineids.setSize(32);
-   spineids.setGrowth(132);
-   spineids.setSize(0);
+   spineids.reserve(32);
+   spineids.resize(0);
 
-   dotline.setSize(32);
-   dotline.setGrowth(132);
-   dotline.setSize(0);
+   dotline.reserve(32);
+   dotline.resize(0);
 
-   dotspine.setSize(32);
-   dotspine.setGrowth(132);
-   dotspine.setSize(0);
+   dotspine.reserve(32);
+   dotspine.resize(0);
 }
 
 
@@ -114,26 +96,16 @@ HumdrumRecord::HumdrumRecord(const char* aLine, int aLineNum) {
    recordString = new char[1];
    recordString[0] = '\0';
    modifiedQ = 0;
-   interpretation.allowGrowth(1);
-   interpretation.setSize(32);
-   interpretation.setGrowth(132);
-   interpretation.setSize(0);
-   recordFields.allowGrowth(1);
-   recordFields.setSize(32);
-   recordFields.setGrowth(132);
-   recordFields.setSize(0);
-   spineids.allowGrowth(1);
-   spineids.setSize(32);
-   spineids.setGrowth(132);
-   spineids.setSize(0);
-   dotline.allowGrowth(1);
-   dotline.setSize(0);
-   dotline.setSize(32);
-   dotline.setGrowth(132);
-   dotspine.allowGrowth(1);
-   dotspine.setSize(32);
-   dotspine.setGrowth(132);
-   dotspine.setSize(0);
+   interpretation.reserve(32);
+   interpretation.resize(0);
+   recordFields.reserve(32);
+   recordFields.resize(0);
+   spineids.reserve(32);
+   spineids.resize(0);
+   dotline.reserve(0);
+   dotline.resize(32);
+   dotspine.reserve(32);
+   dotspine.resize(0);
    setLine(aLine);
 }
 
@@ -151,16 +123,14 @@ HumdrumRecord::HumdrumRecord(const HumdrumRecord& aRecord) {
    recordString = new char[strlen(aRecord.recordString)+1];
    strcpy(recordString, aRecord.recordString);
    modifiedQ = aRecord.modifiedQ;
-   interpretation.allowGrowth();
-   interpretation.setSize(aRecord.interpretation.getSize());
-   recordFields.allowGrowth();
-   recordFields.setSize(aRecord.recordFields.getSize());
-   spineids.setSize(aRecord.spineids.getSize());
-   dotline.setSize(aRecord.dotline.getSize());
-   dotspine.setSize(aRecord.dotspine.getSize());
+   interpretation.resize(aRecord.interpretation.size());
+   recordFields.resize(aRecord.recordFields.size());
+   spineids.resize(aRecord.spineids.size());
+   dotline.resize(aRecord.dotline.size());
+   dotspine.resize(aRecord.dotspine.size());
 
    int i;
-   for (i=0; i<aRecord.recordFields.getSize(); i++) {
+   for (i=0; i<(int)aRecord.recordFields.size(); i++) {
       interpretation[i] = aRecord.interpretation[i];
       recordFields[i] = new char[strlen(aRecord.recordFields[i]) + 1];
       strcpy(recordFields[i], aRecord.recordFields[i]);
@@ -184,24 +154,23 @@ HumdrumRecord::~HumdrumRecord() {
       recordString = NULL;
    }
    int i;
-   for (i=0; i<recordFields.getSize(); i++) {
+   for (i=0; i<(int)recordFields.size(); i++) {
       if (recordFields[i] != NULL) {
          delete [] recordFields[i];
          recordFields[i] = NULL;
       }
    }
-   recordFields.setSize(0);
+   recordFields.resize(0);
 
-   for (i=0; i<spineids.getSize(); i++) {
+   for (i=0; i<(int)spineids.size(); i++) {
       if (spineids[i] != NULL) {
          delete [] spineids[i];
          spineids[i] = NULL;
       }
    }
-   spineids.setSize(0);
-
-   dotline.setSize(0);
-   dotspine.setSize(0);
+   spineids.resize(0);
+   dotline.resize(0);
+   dotspine.resize(0);
 
    lineno = -1;
    spinewidth = 0;
@@ -215,7 +184,7 @@ HumdrumRecord::~HumdrumRecord() {
 //     default value: anInterp = E_unknown
 //	
 
-void HumdrumRecord::appendField(const char* aField, int anInterp, 
+void HumdrumRecord::appendField(const char* aField, int anInterp,
       const char* spinetrace) {
    insertField(-1, aField, anInterp, spinetrace);
 }
@@ -229,7 +198,7 @@ void HumdrumRecord::appendField(const char* aField, int anInterp,
 //     default value: spinetrace = ""
 //	
 
-void HumdrumRecord::appendFieldEI(const char* aField, const char* anInterp, 
+void HumdrumRecord::appendFieldEI(const char* aField, const char* anInterp,
       const char* spinetrace) {
    insertField(-1, aField, anInterp, spinetrace);
 }
@@ -253,7 +222,7 @@ void HumdrumRecord::changeField(int aField, const char* aString) {
    }
    recordFields[aField] = new char[strlen(aString) + 1];
    strcpy(recordFields[aField], aString);
-   
+
    modifiedQ = 1;
 }
 
@@ -261,7 +230,7 @@ void HumdrumRecord::changeField(int aField, const char* aString) {
 
 //////////////////////////////
 //
-// HumdrumRecord::copySpineInfo -- 
+// HumdrumRecord::copySpineInfo --
 //     Default value: line = 0;
 //
 
@@ -296,14 +265,14 @@ void HumdrumRecord::copySpineInfo(char** info, int size, int line) {
 
 
 void HumdrumRecord::copySpineInfo(HumdrumRecord& aRecord, int line) {
-   int size = aRecord.spineids.getSize();
-   char** base = aRecord.spineids.getBase();
+   int size = aRecord.spineids.size();
+   char** base = aRecord.spineids.data();
    copySpineInfo(base, size, line);
 }
 
-void HumdrumRecord::copySpineInfo(SigCollection<char*>& aCollection, int line) {
-   int size = aCollection.getSize();
-   char** base = aCollection.getBase();
+void HumdrumRecord::copySpineInfo(vector<char*>& aCollection, int line) {
+   int size = aCollection.size();
+   char** base = aCollection.data();
    copySpineInfo(base, size, line);
 }
 
@@ -323,11 +292,11 @@ int HumdrumRecord::equalDataQ(const char* aValue) {
          break;
       }
    }
- 
+
    return output;
 }
-   
- 
+
+
 
 
 //////////////////////////////
@@ -344,7 +313,7 @@ int HumdrumRecord::equalFieldsQ(void) {
          break;
       }
    }
- 
+
    return output;
 }
 
@@ -390,9 +359,9 @@ int HumdrumRecord::equalFieldsQ(int anInterp, const char* compareString) {
    }
    return output;
 }
- 
 
-int HumdrumRecord::equalFieldsQ(const char* anInterp, 
+
+int HumdrumRecord::equalFieldsQ(const char* anInterp,
       const char* compareString) {
    return equalFieldsQ(Convert::exint.getValue(anInterp), compareString);
 }
@@ -405,7 +374,7 @@ int HumdrumRecord::equalFieldsQ(const char* anInterp,
 //    default value: maxsize = 0
 //
 
-char* HumdrumRecord::getBibKey(char* buffer, int maxsize) {
+const char* HumdrumRecord::getBibKey(char* buffer, int maxsize) {
    if (!isBibliographic()) {
       buffer[0] = '\0';
       return buffer;
@@ -431,30 +400,26 @@ char* HumdrumRecord::getBibKey(char* buffer, int maxsize) {
 
 
 //
-// Array<char> version
+// string version
 //
 
-char* HumdrumRecord::getBibKey(Array<char>& buffer) {
+const char* HumdrumRecord::getBibKey(string& buffer) {
    if (!isBibliographic()) {
-      buffer.setSize(1);
-      buffer[0] = '\0';
-     return buffer.getBase();
+      buffer = "";
+      return buffer.c_str();
    }
 
    int length = strlen(recordFields[0]+3);
-
-   buffer.setSize(length+1);
-
-   int i;
-   for (i=0; i<length; i++) {
+   buffer.reserve(length);
+   for (int i=0; i<length; i++) {
       if (buffer[i] == ':') {
-         buffer[i] = '\0';
-         buffer.setSize(i+1);
-         return buffer.getBase();
+         break;
+      } else {
+         buffer.push_back(recordFields[0][i]);
       }
    }
 
-   return buffer.getBase();
+   return buffer.c_str();
 }
 
 
@@ -465,8 +430,7 @@ char* HumdrumRecord::getBibKey(Array<char>& buffer) {
 //    default value: maxsize = 0
 //
 
-char* HumdrumRecord::getBibValue(char* buffer, int maxsize) {
-
+const char* HumdrumRecord::getBibValue(char* buffer, int maxsize) {
    if (!isBibliographic()) {
       buffer[0] = '\0';
       return buffer;
@@ -509,28 +473,23 @@ char* HumdrumRecord::getBibValue(char* buffer, int maxsize) {
 
 
 //
-// Array<char> version
+// string version
 //
 
-char* HumdrumRecord::getBibValue(Array<char>& buffer) {
+const char* HumdrumRecord::getBibValue(string& buffer) {
    if (!isBibliographic()) {
-      buffer.setSize(1);
-      buffer[0] = '\0';
-      return buffer.getBase();
+      buffer = "";
+      return buffer.c_str();
    }
 
    PerlRegularExpression pre;
-   int length;
    if (pre.search(recordString, "^!!![^:]+:\\s*(.*)\\s*$", "")) {
-      length = strlen(pre.getSubmatch(1));
-      buffer.setSize(length+1);
-      strcpy(buffer.getBase(), pre.getSubmatch());
-      return buffer.getBase();
+      buffer = pre.getSubmatch();
+      return buffer.c_str();
    }
 
-   buffer.setSize(1);
-   buffer[0] = '\0';
-   return buffer.getBase();
+   buffer = "";
+   return buffer.c_str();
 }
 
 
@@ -544,12 +503,12 @@ char* HumdrumRecord::getBibValue(Array<char>& buffer) {
 //    value of the absolute beat.
 //
 
-double HumdrumRecord::getAbsBeat(void) const { 
+double HumdrumRecord::getAbsBeat(void) const {
    return abslocR.getFloat();
 }
 
 
-RationalNumber HumdrumRecord::getAbsBeatR(void) const { 
+RationalNumber HumdrumRecord::getAbsBeatR(void) const {
    return abslocR;
 }
 
@@ -561,7 +520,7 @@ RationalNumber HumdrumRecord::getAbsBeatR(void) const {
 //   value is place holding.
 //
 
-int HumdrumRecord::getDotLine(int index) {  
+int HumdrumRecord::getDotLine(int index) {
    return dotline[index];
 }
 
@@ -573,7 +532,7 @@ int HumdrumRecord::getDotLine(int index) {
 //   value is place holding.
 //
 
-int HumdrumRecord::getDotSpine(int index) {  
+int HumdrumRecord::getDotSpine(int index) {
    return dotspine[index];
 }
 
@@ -587,12 +546,12 @@ int HumdrumRecord::getDotSpine(int index) {
 //    HumdrumFile::analyzeRhythm().
 //
 
-double HumdrumRecord::getBeat(void) const { 
+double HumdrumRecord::getBeat(void) const {
    return meterlocR.getFloat();
 }
 
 
-RationalNumber HumdrumRecord::getBeatR(void) const { 
+RationalNumber HumdrumRecord::getBeatR(void) const {
    return meterlocR;
 }
 
@@ -607,7 +566,7 @@ RationalNumber HumdrumRecord::getBeatR(void) const {
 //    a barline.
 //
 
-double HumdrumRecord::getMeasureDuration(void) const { 
+double HumdrumRecord::getMeasureDuration(void) const {
    if (!isBarline()) {
       return 0;
    }
@@ -615,7 +574,7 @@ double HumdrumRecord::getMeasureDuration(void) const {
 }
 
 
-RationalNumber HumdrumRecord::getMeasureDurationR(void) const { 
+RationalNumber HumdrumRecord::getMeasureDurationR(void) const {
    RationalNumber zero(0,1);
    if (!isBarline()) {
       return zero;
@@ -628,16 +587,16 @@ RationalNumber HumdrumRecord::getMeasureDurationR(void) const {
 //////////////////////////////
 //
 // HumdrumRecord::getDuration -- returns the duration of the current
-//    HumdrumRecord line in a HumdrumFile.  This value is by default 0, 
-//    but can be set manally with the setAbsBeat() function, or by 
+//    HumdrumRecord line in a HumdrumFile.  This value is by default 0,
+//    but can be set manally with the setAbsBeat() function, or by
 //    calling HumdrumFile::analyzeRhythm().
 //
 
-double HumdrumRecord::getDuration(void) const { 
+double HumdrumRecord::getDuration(void) const {
    return durationR.getFloat();
 }
 
-RationalNumber HumdrumRecord::getDurationR(void) const { 
+RationalNumber HumdrumRecord::getDurationR(void) const {
    return durationR;
 }
 
@@ -650,8 +609,8 @@ RationalNumber HumdrumRecord::getDurationR(void) const {
 //
 
 int HumdrumRecord::getExInterpNum(int index) const {
-   if (index >= interpretation.getSize()) {
-      cout << "Error: accessing too large a spine field number A: " << index 
+   if (index >= (int)interpretation.size()) {
+      cout << "Error: accessing too large a spine field number A: " << index
            << endl;
       exit(1);
    }
@@ -669,15 +628,15 @@ int HumdrumRecord::getExInterpNum(int index) const {
 //
 
 const char* HumdrumRecord::getExInterp(int index) const {
-   if (index >= interpretation.getSize()) {
-      if(interpretation.getSize() == 0) {
+   if (index >= (int)interpretation.size()) {
+      if(interpretation.size() == 0) {
          // return "" for lines such as Global Comments which are
          // not spine specific.
          return "";
       } else {
          cout << "Error: accessing too large a spine field number B: " << index
 	      << endl;;
-         cout << "Size of interpretation list: " << interpretation.getSize() 
+         cout << "Size of interpretation list: " << interpretation.size()
 	      << endl;
          cout << "But you tried to access index: " << index << endl;
          if (recordString != NULL) {
@@ -686,7 +645,7 @@ const char* HumdrumRecord::getExInterp(int index) const {
          exit(1);
       }
    }
-   
+
    return Convert::exint.getName(interpretation[index]);
 }
 
@@ -699,7 +658,7 @@ const char* HumdrumRecord::getExInterp(int index) const {
 //
 
 int HumdrumRecord::getFieldCount(void) const {
-   return recordFields.getSize();
+   return recordFields.size();
 }
 
 
@@ -711,7 +670,7 @@ int HumdrumRecord::getFieldCount(const char* exinterp) const {
 int HumdrumRecord::getFieldCount(int exinterp) const {
    int i;
    int count = 0;
-   for (i=0; i<recordFields.getSize(); i++) {
+   for (i=0; i<(int)recordFields.size(); i++) {
       if (getExInterpNum(i) == exinterp) {
          count++;
       }
@@ -728,18 +687,18 @@ int HumdrumRecord::getFieldCount(int exinterp) const {
 //     belong to a particular exclusive interpretation.
 //
 
-int HumdrumRecord::getFieldsByExInterp(Array<int>& fields, const char* exinterp) {
+int HumdrumRecord::getFieldsByExInterp(vector<int>& fields, const char* exinterp) {
    HumdrumRecord& aRecord = *this;
-   fields.setSize(aRecord.getFieldCount());
-   fields.setSize(0);
+   fields.reserve(aRecord.getFieldCount());
+   fields.resize(0);
 
    int i;
    for (i=0; i<aRecord.getFieldCount(); i++) {
       if (aRecord.isExInterp(i, exinterp)) {
-         fields.append(i);
+         fields.push_back(i);
       }
    }
-   return fields.getSize();
+   return fields.size();
 }
 
 
@@ -750,20 +709,20 @@ int HumdrumRecord::getFieldsByExInterp(Array<int>& fields, const char* exinterp)
 //     belong to a particular exclusive interpretation.
 //
 
-int HumdrumRecord::getTracksByExInterp(Array<int>& tracks, const char* exinterp) {
+int HumdrumRecord::getTracksByExInterp(vector<int>& tracks, const char* exinterp) {
    HumdrumRecord& aRecord = *this;
-   tracks.setSize(aRecord.getFieldCount());
-   tracks.setSize(0);
+   tracks.reserve(aRecord.getFieldCount());
+   tracks.resize(0);
 
    int i;
    int track;
    for (i=0; i<aRecord.getFieldCount(); i++) {
       if (aRecord.isExInterp(i, exinterp)) {
          track = aRecord.getPrimaryTrack(i);
-         tracks.append(track);
+         tracks.push_back(track);
       }
    }
-   return tracks.getSize();
+   return tracks.size();
 }
 
 
@@ -858,7 +817,7 @@ double HumdrumRecord::getTrack(int spineNumber) {
          output += subtrack/1000.0;
       }
    }
-  
+
    return output;
 }
 
@@ -890,7 +849,7 @@ int HumdrumRecord::getTrackColumn(int track) {
 //   otherwise starts indexing at 1.  Trying to get the primary
 //   track number of a non-spine line type will return 0.  For example,
 //   global comments do not belong to specific spines, and therefore
-//   have a primary track of 0. 
+//   have a primary track of 0.
 //
 
 int HumdrumRecord::getPrimaryTrack(int spineNumber) {
@@ -941,7 +900,7 @@ int HumdrumRecord::getSpineWidth(void) {
 //     default value: separator = ' '
 //
 
-void HumdrumRecord::changeToken(int spineIndex, int tokenIndex,  
+void HumdrumRecord::changeToken(int spineIndex, int tokenIndex,
       const char* newtoken, char separator) {
    HumdrumRecord& record = *this;
    char separatorstr[2] = {0};
@@ -975,7 +934,7 @@ void HumdrumRecord::changeToken(int spineIndex, int tokenIndex,
 
 //////////////////////////////
 //
-// HumdrumRecord::getTokenCount -- returns the number of 
+// HumdrumRecord::getTokenCount -- returns the number of
 //    tokens in the particular spine (1 + the number of spaces)
 //    Default value: separator = ' '.
 //
@@ -1011,13 +970,13 @@ int HumdrumRecord::getTokenCount(int fieldIndex, char separator) {
 //    Default values: buffersize = -1, separator = ' '.
 //
 
-char* HumdrumRecord::getToken(char* buffer, int fieldIndex, int tokenIndex,
-      int buffersize, char separator) {
-   
+const char* HumdrumRecord::getToken(char* buffer, int fieldIndex,
+      int tokenIndex, int buffersize, char separator) {
+
    if (buffersize < 1) {
       buffersize = 0x7fffffff;
    }
-  
+
    char sepstring[2];
    sepstring[0] = separator;
    sepstring[1] = '\0';
@@ -1048,21 +1007,17 @@ char* HumdrumRecord::getToken(char* buffer, int fieldIndex, int tokenIndex,
    for (i=0; i<length; i++) {
       buffer[i] = current[i];
    }
-   buffer[length] = '\0'; 
+   buffer[length] = '\0';
    return buffer;
 }
 
 
-char* HumdrumRecord::getToken(Array<char>& buffer, int fieldIndex, 
+const char* HumdrumRecord::getToken(string& buffer, int fieldIndex,
       int tokenIndex, int buffersize, char separator) {
    HumdrumRecord& arecord = *this;
    int len = strlen(arecord[fieldIndex]) + 1 + 4;
-   buffer.setSize(len);
-   arecord.getToken(buffer.getBase(), fieldIndex, tokenIndex, 
-      len, separator);
-   len = strlen(buffer.getBase()) + 1;
-   buffer.setSize(len);
-   return buffer.getBase();
+   arecord.getToken(buffer, fieldIndex, tokenIndex, len, separator);
+   return buffer.c_str();
 }
 
 
@@ -1074,7 +1029,7 @@ char* HumdrumRecord::getToken(Array<char>& buffer, int fieldIndex,
 //    Default value: separator = ' ';
 //
 
-void HumdrumRecord::getTokens(Array<Array<char> >& tokens, int fieldIndex, 
+void HumdrumRecord::getTokens(vector<string>& tokens, int fieldIndex,
       char separator) {
    char sep[2] = {0};
    HumdrumRecord& arecord = *this;
@@ -1102,7 +1057,7 @@ int HumdrumRecord::getType(void) const {
 // HumdrumRecord::is* --
 //
 
-int HumdrumRecord::isEmpty(void) const { 
+int HumdrumRecord::isEmpty(void) const {
    if (getType() == E_humrec_empty) {
       return 1;
    } else {
@@ -1116,11 +1071,11 @@ int HumdrumRecord::isGlobalComment(void) const { return globalCommentQ(); }
 int HumdrumRecord::isInterpretation(void) const { return interpretationQ(); }
 int HumdrumRecord::isBibliographic(void) const { return bibRecordQ(); }
 
-int HumdrumRecord::hasSpines(void) const { 
+int HumdrumRecord::hasSpines(void) const {
    return isData() || isMeasure() || isLocalComment() || isInterpretation();
 }
 
-int HumdrumRecord::isComment(void) const { 
+int HumdrumRecord::isComment(void) const {
    return isBibliographic() | isGlobalComment() | isLocalComment();
 }
 
@@ -1129,11 +1084,11 @@ int HumdrumRecord::isTandem(void) const {
       // can't be a tandem interpretation if it is not an interpretation...
       return 0;
    }
-	 
+	
    int i;
    for (i=0; i<getFieldCount(); i++) {
       if (strcmp(recordFields[i], "*^") == 0) {
-         return 0; 
+         return 0;
       }
       if (strcmp(recordFields[i], "*v") == 0) {
          return 0;
@@ -1152,9 +1107,9 @@ int HumdrumRecord::isTandem(void) const {
          // spine addition operator
          return 0;
       }
- 
+
    }
- 
+
    return 1;  // no spine-manipulators or exclusive interpretations found
 }
 
@@ -1201,7 +1156,7 @@ int HumdrumRecord::isNullToken(int index) {
 
 //////////////////////////////
 //
-// HumdrumRecord::hasNoteAttack -- Returns true if there is not a 
+// HumdrumRecord::hasNoteAttack -- Returns true if there is not a
 //     null token, "r", "_", or "]" in the given field.  Does not
 //     check to see if the data is **kern data, though.  In the future
 //     the data type could be examined, and if the data is **kern, apply
@@ -1211,29 +1166,29 @@ int HumdrumRecord::isNullToken(int index) {
 
 int HumdrumRecord::hasNoteAttack(int field) {
    PerlRegularExpression pre;
-   Array<Array<char> > notes;
+   vector<string> notes;
    pre.getTokens(notes, " ", (*this)[field]);
    int i;
-   for (i=0; i<notes.getSize(); i++) {
-      if (strcmp(notes[i].getBase(), ".") == 0) {
+   for (i=0; i<(int)notes.size(); i++) {
+      if (notes[i] == ".") {
          // a Null token (not allowed in chords as a subtoken).
          continue;
       }
-      if (strchr(notes[i].getBase(), 'r') != NULL) {
+      if (strchr(notes[i].c_str(), 'r') != NULL) {
          // rest (not allowed in a chord)
          continue;
       }
-      if (strchr(notes[i].getBase(), ']') != NULL) {
+      if (strchr(notes[i].c_str(), ']') != NULL) {
          // ending printed note if a tie group
          continue;
       }
-      if (strchr(notes[i].getBase(), '_') != NULL) {
+      if (strchr(notes[i].c_str(), '_') != NULL) {
          // tie continuation note
          continue;
       }
       return 1;
    }
-    
+
    return 0;
 }
 
@@ -1263,14 +1218,14 @@ int HumdrumRecord::isRest(int field) {
 //     with "o" to indicate the clef in the original source.
 //
 
-#define REGEX_ISORIGINALCLEF "^\\*oclef[CFG]v?\\d+" 
+#define REGEX_ISORIGINALCLEF "^\\*oclef[CFG]v?\\d+"
 
 int HumdrumRecord::isOriginalClef(int index) {
    HumdrumRecord& aRecord = *this;
    PerlRegularExpression pre;
    if (pre.search(aRecord[index], "^\\*oclef[CFG]v?\\d+")) {
       return 1;
-   } 
+   }
    if (strcmp("*oclefX", aRecord[index]) == 0) {
       //percussion clef
       return 1;
@@ -1294,14 +1249,14 @@ int HumdrumRecord::isAllOriginalClef(void) {
 //    clef tandem interpretation record.
 //
 
-#define REGEX_ISCLEF "^\\*clef[CFG]v?\\d+" 
+#define REGEX_ISCLEF "^\\*clef[CFG]v?\\d+"
 
 int HumdrumRecord::isClef(int index) {
    HumdrumRecord& aRecord = *this;
    PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISCLEF)) {
       return 1;
-   } 
+   }
    if (strcmp("*clefX", aRecord[index]) == 0) {
       //percussion clef
       return 1;
@@ -1321,7 +1276,7 @@ int HumdrumRecord::isAllClef(void) {
 
 //////////////////////////////
 //
-// HumdrumRecord::isParticularType --  Only checks one type of 
+// HumdrumRecord::isParticularType --  Only checks one type of
 //    exclusive interpretation (presumably **kern data).
 //
 
@@ -1335,7 +1290,7 @@ int HumdrumRecord::isParticularType(const char* regexp, const char* exinterp) {
       if (!aRecord.isExInterp(j, "**kern")) {
          continue;
       }
-      if ((strcmp(aRecord[j], "!") == 0)|| 
+      if ((strcmp(aRecord[j], "!") == 0)||
           (strcmp(aRecord[j], "*") == 0) ) {
          continue;
       }
@@ -1362,9 +1317,9 @@ int HumdrumRecord::isParticularType(const char* regexp, const char* exinterp) {
 
 #define REGEX_ISKEY "^\\*[A-Ga-g][-#n]?:"
 
-int HumdrumRecord::isKey(int index) { 
+int HumdrumRecord::isKey(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISKEY)) {
       return 1;
    }
@@ -1384,9 +1339,9 @@ int HumdrumRecord::isAllKey(void) {
 
 #define REGEX_ISKEYSIG "^\\*[kK]\\[[A-Ga-g#-]*\\]"
 
-int HumdrumRecord::isKeySig(int index) { 
+int HumdrumRecord::isKeySig(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISKEYSIG)) {
       return 1;
    }
@@ -1406,9 +1361,9 @@ int HumdrumRecord::isAllKeySig(void) {
 
 #define REGEX_ISTEMPO "^\\*MM\\d+\\.?\\d*"
 
-int HumdrumRecord::isTempo(int index) { 
+int HumdrumRecord::isTempo(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISTEMPO)) {
       return 1;
    }
@@ -1430,7 +1385,7 @@ int HumdrumRecord::isAllTempo(void) {
 
 int HumdrumRecord::isTimeSig(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISTIMESIG)) {
       return 1;
    }
@@ -1452,7 +1407,7 @@ int HumdrumRecord::isAllTimeSig(void) {
 
 int HumdrumRecord::isMetSig(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISMETSIG)) {
       return 1;
    }
@@ -1472,9 +1427,9 @@ int HumdrumRecord::isAllMetSig(void) {
 
 #define REGEX_ISTRANSPOSE "^\\*ITr"
 
-int HumdrumRecord::isTranspose(int index) { 
+int HumdrumRecord::isTranspose(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISTRANSPOSE)) {
       return 1;
    }
@@ -1494,9 +1449,9 @@ int HumdrumRecord::isAllTranspose(void) {
 
 #define REGEX_ISINSTRUMENTTYPE "^\\*I[a-z]{2,5}"
 
-int HumdrumRecord::isInstrumentType(int index) { 
+int HumdrumRecord::isInstrumentType(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], "^\\*I[a-z]{2,5}")) {
       return 1;
    }
@@ -1518,7 +1473,7 @@ int HumdrumRecord::isAllInstrumentType(void) {
 
 int HumdrumRecord::isInstrumentClass(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISINSTRUMENTCLASS)) {
       return 1;
    }
@@ -1540,7 +1495,7 @@ int HumdrumRecord::isAllInstrumentClass(void) {
 
 int HumdrumRecord::isInstrumentName(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISINSTRUMENTNAME)) {
       return 1;
    }
@@ -1562,7 +1517,7 @@ int HumdrumRecord::isAllInstrumentName(void) {
 
 int HumdrumRecord::isInstrumentAbbr(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISINSTRUMENTNAME)) {
       return 1;
    }
@@ -1582,9 +1537,9 @@ int HumdrumRecord::isAllInstrumentAbbr(void) {
 
 #define REGEX_ISINSTRUMENTNUM "^\\*I#"
 
-int HumdrumRecord::isInstrumentNum(int index) { 
+int HumdrumRecord::isInstrumentNum(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISINSTRUMENTNUM)) {
       return 1;
    }
@@ -1606,7 +1561,7 @@ int HumdrumRecord::isAllInstrumentNum(void) {
 
 int HumdrumRecord::isLabelExpansion(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISLABELEXPANSION)) {
       return 1;
    }
@@ -1628,7 +1583,7 @@ int HumdrumRecord::isAllLabelExpansion(void) {
 
 int HumdrumRecord::isLabelVariant(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISLABELVARIANT)) {
       return 1;
    }
@@ -1648,9 +1603,9 @@ int HumdrumRecord::isAllLabelVariant(void) {
 
 #define REGEX_ISLABELMARKER "^\\*>[^[]+$"
 
-int HumdrumRecord::isLabelMarker(int index) { 
+int HumdrumRecord::isLabelMarker(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISLABELMARKER)) {
       return 1;
    }
@@ -1670,9 +1625,9 @@ int HumdrumRecord::isAllLabelMarker(void) {
 
 #define REGEX_ISSTAFFNUMBER "^\\*staff\\d"
 
-int HumdrumRecord::isStaffNumber(int index) { 
+int HumdrumRecord::isStaffNumber(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISSTAFFNUMBER)) {
       return 1;
    }
@@ -1692,9 +1647,9 @@ int HumdrumRecord::isAllStaffNumber(void) {
 
 #define REGEX_ISSYSSTAFFNUMBER "^\\*staff:\\d"
 
-int HumdrumRecord::isSysStaffNumber(int index) { 
+int HumdrumRecord::isSysStaffNumber(int index) {
    HumdrumRecord& aRecord = *this;
-   PerlRegularExpression pre;   
+   PerlRegularExpression pre;
    if (pre.search(aRecord[index], REGEX_ISSYSSTAFFNUMBER)) {
       return 1;
    }
@@ -1728,7 +1683,7 @@ int HumdrumRecord::isNull(void) {
       // might be good to call a NULL, but not for now.
       return 0;
    }
-  
+
    int j;
    for (j=0; j<aRecord.getFieldCount(); j++) {
       if (strcmp(aRecord[j], target) != 0) {
@@ -1758,7 +1713,7 @@ int HumdrumRecord::dataQ(void) const {
 
 //////////////////////////////
 //
-// HumdrumRecord::measureQ -- 
+// HumdrumRecord::measureQ --
 //
 
 int HumdrumRecord::measureQ(void) const {
@@ -1773,7 +1728,7 @@ int HumdrumRecord::measureQ(void) const {
 
 //////////////////////////////
 //
-// HumdrumRecord::localCommentQ -- 
+// HumdrumRecord::localCommentQ --
 //
 
 int HumdrumRecord::localCommentQ(void) const {
@@ -1788,7 +1743,7 @@ int HumdrumRecord::localCommentQ(void) const {
 
 //////////////////////////////
 //
-// HumdrumRecord::globalComment -- 
+// HumdrumRecord::globalComment --
 //
 
 int HumdrumRecord::globalCommentQ(void) const {
@@ -1803,7 +1758,7 @@ int HumdrumRecord::globalCommentQ(void) const {
 
 //////////////////////////////
 //
-// HumdrumRecord::bibRecordQ -- 
+// HumdrumRecord::bibRecordQ --
 //
 
 int HumdrumRecord::bibRecordQ(void) const {
@@ -1868,18 +1823,20 @@ int HumdrumRecord::nullQ(void) const {
 
 int HumdrumRecord::hasExclusiveQ(void) const {
    if (getType() != E_humrec_data_interpretation) {
+cout << "GOT HERE AAAAAA" << this << endl;
       return 0;
-   } 
+   }
 
    int output = 0;
-   int i;
-   for (i=0; i<getFieldCount(); i++) {
+cout << "FIELD COUNTER " << getFieldCount() << endl;
+   for (int i=0; i<getFieldCount(); i++) {
+cout << "COMAPRING ** TO " <<  recordFields[i] << endl;
       if (strncmp("**", recordFields[i], 2) == 0) {
          output = 1;
          break;
       }
    }
-
+cout << "GOT HERE BBBBBBB" << this << endl;
    return output;
 }
 
@@ -1893,7 +1850,7 @@ int HumdrumRecord::hasExclusiveQ(void) const {
 int HumdrumRecord::hasPathQ(void) const {
    if (getType() != E_humrec_data_interpretation) {
       return 0;
-   } 
+   }
 
    int output = 0;
    int i;
@@ -1931,18 +1888,16 @@ void HumdrumRecord::insertField(int index, const char* aField, int anInterp,
       const char* spinetrace) {
    if (index < 0) {
       index = getFieldCount();
-   }      
-   recordFields[recordFields.getSize()] = NULL;
-   spineids[spineids.getSize()] = NULL;
-
-   interpretation.setSize(interpretation.getSize()+1);
-   interpretation[interpretation.getSize()-1] = E_unknown;
+   }
+   recordFields.push_back(NULL);
+   spineids.push_back(NULL);
+   interpretation.push_back(E_unknown);
 
    for (int i=getFieldCount()-2; i>=0; i--) {
       if (i >= index) {
-         recordFields[i+1]   = recordFields[i]; 
-         spineids[i+1]       = spineids[i]; 
-         interpretation[i+1] = interpretation[i]; 
+         recordFields[i+1]   = recordFields[i];
+         spineids[i+1]       = spineids[i];
+         interpretation[i+1] = interpretation[i];
       } else {
          break;
       }
@@ -1956,14 +1911,14 @@ void HumdrumRecord::insertField(int index, const char* aField, int anInterp,
    strcpy(spineids[index], spinetrace);
 
    int dummy = -1;
-   dotline.append(dummy);
-   dotspine.append(dummy);
+   dotline.push_back(dummy);
+   dotspine.push_back(dummy);
 
    modifiedQ = 1;
 }
 
 
-void HumdrumRecord::insertField(int index, const char* aField, 
+void HumdrumRecord::insertField(int index, const char* aField,
       const char* anInterp, const char* spinetrace) {
 
    int interptype = Convert::exint.getValue(anInterp);
@@ -1987,7 +1942,7 @@ HumdrumRecord& HumdrumRecord::operator=(const HumdrumRecord& aRecord) {
    // don't copy onto self
    if (&aRecord == this) {
       return *this;
-   }   
+   }
 
    duration = aRecord.duration;
    durationR= aRecord.durationR;
@@ -2007,28 +1962,28 @@ HumdrumRecord& HumdrumRecord::operator=(const HumdrumRecord& aRecord) {
       strcpy(recordString, aRecord.recordString);
    }
    modifiedQ = aRecord.modifiedQ;
-   interpretation.setSize(aRecord.interpretation.getSize());
+   interpretation.resize(aRecord.interpretation.size());
 
-   for (i=0; i<recordFields.getSize(); i++) {
+   for (i=0; i<(int)recordFields.size(); i++) {
       if (recordFields[i] != NULL) {
          delete [] recordFields[i];
          recordFields[i] = NULL;
       }
    }
 
-   for (i=0; i<spineids.getSize(); i++) {
+   for (i=0; i<(int)spineids.size(); i++) {
       if (spineids[i] != NULL) {
          delete [] spineids[i];
          spineids[i] = NULL;
       }
    }
 
-   recordFields.setSize(aRecord.recordFields.getSize());
-   spineids.setSize(aRecord.spineids.getSize());
+   recordFields.resize(aRecord.recordFields.size());
+   spineids.resize(aRecord.spineids.size());
 
    int allocSize = 0;
    for (i=0; i<aRecord.getFieldCount(); i++) {
-      if (interpretation.getSize() > 0) {
+      if (interpretation.size() > 0) {
           interpretation[i] = aRecord.interpretation[i];
       }
       allocSize = strlen(aRecord.recordFields[i]) + 1;
@@ -2039,7 +1994,7 @@ HumdrumRecord& HumdrumRecord::operator=(const HumdrumRecord& aRecord) {
       spineids[i] = new char[strlen(aRecord.spineids[i]) + 1];
       strcpy(spineids[i], aRecord.spineids[i]);
    }
- 
+
    return *this;
 }
 
@@ -2057,7 +2012,7 @@ HumdrumRecord& HumdrumRecord::operator=(const char* aLine) {
    meterlocR.zero();
    absloc   = 0.0;
    abslocR.zero();
-   setLine(aLine);   
+   setLine(aLine);
    return *this;
 }
 
@@ -2087,20 +2042,20 @@ const char* HumdrumRecord::operator[](int index) const {
 //    HumdrumFile::analyzeRhythm().
 //
 
-void HumdrumRecord::setAbsBeat(double aValue) { 
-   cerr << "ERROR not allowed to use HumdrumRecord::setAbsBeat at the moment" 
+void HumdrumRecord::setAbsBeat(double aValue) {
+   cerr << "ERROR not allowed to use HumdrumRecord::setAbsBeat at the moment"
         << endl;
    absloc = (float)aValue;
    // this function cannot co-exists with the following one
    // and will have to be removed.
 }
 
-void HumdrumRecord::setAbsBeat(const RationalNumber& aValue) { 
+void HumdrumRecord::setAbsBeat(const RationalNumber& aValue) {
    abslocR = aValue;
    absloc = abslocR.getFloat();
 }
 
-void HumdrumRecord::setAbsBeatR(const RationalNumber& aValue) { 
+void HumdrumRecord::setAbsBeatR(const RationalNumber& aValue) {
    abslocR = aValue;
    absloc = abslocR.getFloat();
 }
@@ -2123,25 +2078,25 @@ void HumdrumRecord::setAbsBeat(int top, int bottom) {
 //    HumdrumFile::analyzeRhythm().
 //
 
-void HumdrumRecord::setBeat(double aValue) { 
-   cerr << "ERROR not allowed to use HumdrumRecord::setBeat at the moment" 
+void HumdrumRecord::setBeat(double aValue) {
+   cerr << "ERROR not allowed to use HumdrumRecord::setBeat at the moment"
         << endl;
    meterloc = (float)aValue;
 }
 
-void HumdrumRecord::setBeat(int top, int bottom) { 
+void HumdrumRecord::setBeat(int top, int bottom) {
    meterlocR.setValue(top, bottom);
 }
 
-void HumdrumRecord::setBeatR(int top, int bottom) { 
+void HumdrumRecord::setBeatR(int top, int bottom) {
    meterlocR.setValue(top, bottom);
 }
 
-void HumdrumRecord::setBeat(const RationalNumber& aValue) { 
+void HumdrumRecord::setBeat(const RationalNumber& aValue) {
    meterlocR = aValue;
 }
 
-void HumdrumRecord::setBeatR(const RationalNumber& aValue) { 
+void HumdrumRecord::setBeatR(const RationalNumber& aValue) {
    meterlocR = aValue;
 }
 
@@ -2151,7 +2106,7 @@ void HumdrumRecord::setBeatR(const RationalNumber& aValue) {
 // HumdrumRecord::setDotLine -- set place holding value line location.
 //
 
-void HumdrumRecord::setDotLine(int index, int value) {  
+void HumdrumRecord::setDotLine(int index, int value) {
    dotline[index] = value;
 }
 
@@ -2162,7 +2117,7 @@ void HumdrumRecord::setDotLine(int index, int value) {
 // HumdrumRecord::setDotSpine -- set place holding value spine location.
 //
 
-void HumdrumRecord::setDotSpine(int index, int value) {  
+void HumdrumRecord::setDotSpine(int index, int value) {
    dotspine[index] = value;
 }
 
@@ -2170,12 +2125,12 @@ void HumdrumRecord::setDotSpine(int index, int value) {
 //////////////////////////////
 //
 // HumdrumRecord::setDuration -- sets the duration of the current
-//    HumdrumRecord line in a HumdrumFile.  This value is by default 0, 
-//    but can be set manally with the setAbsBeat() function, or by 
+//    HumdrumRecord line in a HumdrumFile.  This value is by default 0,
+//    but can be set manally with the setAbsBeat() function, or by
 //    calling HumdrumFile::analyzeRhythm().
 //
 
-void HumdrumRecord::setDuration(double aValue) { 
+void HumdrumRecord::setDuration(double aValue) {
    cerr << "Error: not allowed to use HumdrumRecord::setDuration at the moment"
         << endl;
    duration = (float)aValue;
@@ -2185,7 +2140,7 @@ void HumdrumRecord::setDuration(int top, int bottom) {
    durationR.setValue(top, bottom);
 }
 
-void HumdrumRecord::setDuration(RationalNumber aValue) { 
+void HumdrumRecord::setDuration(RationalNumber aValue) {
    durationR = aValue;
 }
 
@@ -2193,7 +2148,7 @@ void HumdrumRecord::setDurationR(int top, int bottom) {
    durationR.setValue(top, bottom);
 }
 
-void HumdrumRecord::setDurationR(RationalNumber aValue) { 
+void HumdrumRecord::setDurationR(RationalNumber aValue) {
    durationR = aValue;
 }
 
@@ -2206,24 +2161,24 @@ void HumdrumRecord::setDurationR(RationalNumber aValue) {
 //
 
 void HumdrumRecord::setExInterp(int index, int anInterpretation) {
-   if (index >= interpretation.getSize()) {
-      cout << "Error: accessing too large a field number A: " << index 
+   if (index >= (int)interpretation.size()) {
+      cout << "Error: accessing too large a field number A: " << index
            << " in line: " << getLine() << endl;
       cout << "Size of record: " << getFieldCount() << endl;
-      cout << "Size of interpretation array: " 
-           << interpretation.getSize() << endl;
+      cout << "Size of interpretation array: "
+           << interpretation.size() << endl;
       exit(1);
    }
-   
+
    interpretation[index] = anInterpretation;
 }
 
 
 void HumdrumRecord::setExInterp(int index, const char* interpString) {
-   if (index >= interpretation.getSize()) {
-      cout << "Error: accessing too large a field number B: " << index 
+   if (index >= (int)interpretation.size()) {
+      cout << "Error: accessing too large a field number B: " << index
            << " in line: " << getLine() << endl;
-      cout << "Size of interpretation list: " << interpretation.getSize() 
+      cout << "Size of interpretation list: " << interpretation.size()
 	   << endl;
       cout << "But you tried to access index: " << index << endl;
       exit(1);
@@ -2252,7 +2207,7 @@ void HumdrumRecord::setToken(int index, const char* aString) {
    strcpy(recordFields[index], aString);
    modifiedQ = 1;
 }
-   
+
 
 
 //////////////////////////////
@@ -2274,24 +2229,24 @@ void HumdrumRecord::setLine(const char* aLine) {
    modifiedQ = 0;
    int i;
 
-   if (recordFields.getSize() != 0) {
-      for (i=0; i<recordFields.getSize(); i++) {
+   if (recordFields.size() != 0) {
+      for (i=0; i<(int)recordFields.size(); i++) {
          if (recordFields[i] != NULL) {
             delete recordFields[i];
             recordFields[i] = NULL;
          }
       }
-      recordFields.setSize(0);
+      recordFields.resize(0);
    }
 
-   if (spineids.getSize() != 0) {
-      for (i=0; i<spineids.getSize(); i++) {
+   if (spineids.size() != 0) {
+      for (i=0; i<(int)spineids.size(); i++) {
          if (spineids[i] != NULL) {
             delete spineids[i];
             spineids[i] = NULL;
          }
       }
-      spineids.setSize(0);
+      spineids.resize(0);
    }
 
    type = determineType(recordString);
@@ -2302,10 +2257,8 @@ void HumdrumRecord::setLine(const char* aLine) {
       fieldCount = 1;
    }
 
-   interpretation.setSize(fieldCount);
-   for (i=0; i<fieldCount; i++) {
-      interpretation[i] = E_unknown;
-   }
+   interpretation.resize(fieldCount);
+   fill(interpretation.begin(), interpretation.end(), E_unknown);
 
    // chop up the input line into data fields to store in array.
    // but don't chop up if the fieldCount is just supposed to be 1...
@@ -2317,7 +2270,7 @@ void HumdrumRecord::setLine(const char* aLine) {
    if (fieldCount == 1) {
       temp = new char[strlen(recordString)+1];
       strcpy(temp, recordString);
-      index = recordFields.getSize(); 
+      index = recordFields.size();
       recordFields[index] = temp;
       spineids[index] = new char[1];
       spineids[index][0] = '\0';
@@ -2329,7 +2282,7 @@ void HumdrumRecord::setLine(const char* aLine) {
             temp = new char[stop-start+1];
             strncpy(temp, &recordString[start], stop-start);
             temp[stop-start] = '\0';
-            index = recordFields.getSize(); 
+            index = recordFields.size();
             recordFields[index] = temp;
             spineids[index] = new char[1];
             spineids[index][0] = '\0';
@@ -2340,14 +2293,14 @@ void HumdrumRecord::setLine(const char* aLine) {
       temp = new char[stop-start+1];
       strncpy(temp, &recordString[start], stop-start);
       temp[stop-start] = '\0';
-      index = recordFields.getSize();
+      index = recordFields.size();
       recordFields[index] = temp;
       spineids[index] = new char[1];
       spineids[index][0] = '\0';
    }
 
-   dotline.setSize(fieldCount);
-   dotspine.setSize(fieldCount);
+   dotline.resize(fieldCount);
+   dotspine.resize(fieldCount);
    for (i=0; i<fieldCount; i++) {
       setDotLine(i, -1);
       setDotSpine(i, -1);
@@ -2358,7 +2311,7 @@ void HumdrumRecord::setLine(const char* aLine) {
 
 //////////////////////////////
 //
-// HumdrumRecord::setLineNum -- 
+// HumdrumRecord::setLineNum --
 //
 
 void HumdrumRecord::setLineNum(int aNumber) {
@@ -2369,11 +2322,11 @@ void HumdrumRecord::setLineNum(int aNumber) {
 
 //////////////////////////////
 //
-// HumdrumRecord::setSpineID -- 
+// HumdrumRecord::setSpineID --
 //
 
 void HumdrumRecord::setSpineID(int index, const char* anID) {
-   if (index < spineids.getSize() && spineids[index] != NULL) {
+   if (index < (int)spineids.size() && spineids[index] != NULL) {
       delete [] spineids[index];
    }
    spineids[index] = new char[strlen(anID) + 1];
@@ -2392,13 +2345,13 @@ void HumdrumRecord::setSpineWidth(int aSize) {
    if (aSize >= 0) {
       int oldsize = spinewidth;
       spinewidth = aSize;
-      interpretation.setSize(spinewidth);
+      interpretation.resize(spinewidth);
       int i;
       if (oldsize > spinewidth) {
          for (i=oldsize; i<spinewidth; i++) {
             interpretation[i] = E_UNKNOWN_EXINT;
          }
-      } 
+      }
    }
 }
 
@@ -2410,7 +2363,7 @@ void HumdrumRecord::setSpineWidth(int aSize) {
 //      Record code, return a brief summary of it.
 //
 
-const char* HumdrumRecord::getBibliographicMeaning(Array<char>& output, 
+const char* HumdrumRecord::getBibliographicMeaning(string& output,
       const char* code) {
    int atcount = 0;
    char langbuf[128] = {0};
@@ -2435,10 +2388,10 @@ const char* HumdrumRecord::getBibliographicMeaning(Array<char>& output,
    if (strlen(pre.getSubmatch(2)) > 0) {
       numberfound = 1;
       number = strtol(pre.getSubmatch(2), NULL, 10);
-  
+
    }
 
-   SSTREAM description;
+   stringstream description;
 
    if (strcmp(keybuf, "ACO") == 0) {
       description << "Analytic collection";
@@ -2807,7 +2760,7 @@ const char* HumdrumRecord::getBibliographicMeaning(Array<char>& output,
       description << "EsAC Source concordance";
    } else if (strcmp(keybuf, "trd") == 0) {
       description << "EsAC Source";
-   } 
+   }
 
 
    if (atcount == 1) {
@@ -2824,11 +2777,8 @@ const char* HumdrumRecord::getBibliographicMeaning(Array<char>& output,
 
    description << ends;
 
-   len = strlen(description.CSTRING);
-   output.setSize(len+1);
-   strcpy(output.getBase(), description.CSTRING);
-
-   return output.getBase();
+   output = description.str();
+   return output.c_str();
 }
 
 
@@ -2847,7 +2797,7 @@ const char* HumdrumRecord::getLanguageName(const char* code) {
    for (i=0; i<len; i++) {
       string[i] = std::tolower(string[i]);
    }
-	  
+	
    if (strcmp(string, "aar") == 0) { return "Afar"; }
    if (strcmp(string, "aa" ) == 0) { return "Afar"; }
    if (strcmp(string, "abk") == 0) { return "Abkhazian"; }
@@ -3546,7 +3496,7 @@ const char* HumdrumRecord::getLanguageName(const char* code) {
 //////////////////////////////
 //
 // HumdrumRecord::getBibLangIso639_2 --  Returns the ISO 639.2 three-letter
-//    language code for the given record if it is a bibliographic 
+//    language code for the given record if it is a bibliographic
 //    record.  Returns and empty string if there is no language
 //    specification.
 //
@@ -3582,7 +3532,7 @@ const char* HumdrumRecord::getBibLangIso639_2(const char* string) {
    for (i=0; i<len; i++) {
       ptr[i] = std::tolower(ptr[i]);
    }
-   
+
    if (strcmp(ptr, "aar") == 0) { return "aar"; }  // Afar
    if (strcmp(ptr, "aa" ) == 0) { return "aar"; }  // Afar
    if (strcmp(ptr, "abk") == 0) { return "abk"; }  // Abkhazian
@@ -4272,7 +4222,7 @@ const char* HumdrumRecord::getBibLangIso639_2(const char* string) {
    if (strcmp(ptr, "zun") == 0) { return "zun"; }  // Zuni
    if (strcmp(ptr, "zxx") == 0) { return "zxx"; }  // No linguistic content; Not applicable
    if (strcmp(ptr, "zza") == 0) { return "zza"; }  // Zaza; Dimili; Dimli; Kirdki; Kirmanjki; Zazaki
-   
+
    // don know what the language code means, so return empty string:
    return "";
 
@@ -4295,19 +4245,19 @@ const char* HumdrumRecord::getBibLangIso639_2(const char* string) {
 //
 
 void HumdrumRecord::makeRecordString(void) {
-   SSTREAM temp;
+   stringstream temp;
    char tab = '\t';
-   for (int i=0; i<recordFields.getSize()-1; i++) {
+   for (int i=0; i<(int)recordFields.size()-1; i++) {
       temp << recordFields[i] << tab;
    }
-   temp << recordFields[recordFields.getSize()-1] << ends;
+   temp << recordFields[(int)recordFields.size()-1] << ends;
 
    if (recordString != NULL) {
       delete [] recordString;
       recordString = NULL;
    }
-   recordString = new char[strlen(temp.CSTRING) + 1];
-   strcpy(recordString, temp.CSTRING);
+   recordString = new char[strlen(temp.str().c_str()) + 1];
+   strcpy(recordString, temp.str().c_str());
    modifiedQ = 0;
 }
 
@@ -4325,7 +4275,7 @@ void HumdrumRecord::makeRecordString(void) {
 
 int HumdrumRecord::determineType(const char* aRecord) const {
    int index = 0;
-   
+
    if (aRecord[index] == '\0') {
       return E_humrec_empty;
    }
@@ -4343,17 +4293,17 @@ int HumdrumRecord::determineType(const char* aRecord) const {
    // if first character is not a '!', then must be data
    if (aRecord[index] != '!') {
       return E_humrec_data;
-   } 
+   }
 
    // if only one '!', then this is a local comment in the data
    if (aRecord[index+1] != '!') {
       return E_humrec_data_comment;
    }
-      
+
    // if two '!', then a global comment
    if (aRecord[index+2] != '!') {
       return E_humrec_global_comment;
-   } 
+   }
 
    // if three or more '!', then is a bibliographic record
    return E_humrec_bibliography;
@@ -4401,34 +4351,26 @@ int HumdrumRecord::determineFieldCount(const char* aLine) const {
 
 void HumdrumRecord::setSize(int asize) {
 
-   recordFields.allowGrowth(1);
-   recordFields.setSize(asize*4);   
-   recordFields.setGrowth(132);   
-   recordFields.setSize(asize);   
+   recordFields.reserve(asize*4);
+   recordFields.resize(asize);
 
-   spineids.allowGrowth(1);
-   spineids.setSize(asize*4);
-   spineids.setGrowth(132);
-   spineids.setSize(asize);
+   spineids.reserve(asize*4);
+   spineids.resize(asize);
 
-   interpretation.allowGrowth(1);
-   interpretation.setSize(asize*4);
-   interpretation.setGrowth(132);
-   interpretation.setSize(asize);
+   interpretation.reserve(asize*4);
+   interpretation.resize(asize);
 
-   dotline.setSize(asize*4);
-   dotline.setGrowth(132);
-   dotline.setSize(asize);
+   dotline.reserve(asize*4);
+   dotline.resize(asize);
 
-   dotspine.setSize(asize*4);
-   dotspine.setGrowth(132);
-   dotspine.setSize(asize);
+   dotspine.reserve(asize*4);
+   dotspine.resize(asize);
 
 
    char buffer[32] = {0};
    int i;
    int len;
-   for (i=0; i<recordFields.getSize(); i++) {
+   for (i=0; i<(int)recordFields.size(); i++) {
       recordFields[i] = new char[2];
       strcpy(recordFields[i], ".");
       sprintf(buffer, "%d", i+1);
@@ -4436,10 +4378,10 @@ void HumdrumRecord::setSize(int asize) {
       spineids[i] = new char[len+1];
       strcpy(spineids[i], buffer);
    }
-  
-   dotline.setAll(-1);
-   dotspine.setAll(-1);
-   interpretation.setAll(-1); // or 0?
+
+   fill(dotline.begin(), dotline.end(), -1);
+   fill(dotspine.begin(), dotspine.end(), -1);
+   fill(interpretation.begin(), interpretation.end(), -1);
 }
 
 

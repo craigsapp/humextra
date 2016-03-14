@@ -4,7 +4,6 @@
 // Creation Date: Sun Jun  7 16:24:06 PDT 1998
 // Last Modified: Sun Jun 11 12:39:40 PDT 2000
 // Last Modified: Thu May 14 21:53:43 PDT 2009 (modified output display)
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
 // Filename:      ...sig/src/sig/ChordQuality.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/ChordQuality.cpp
 // Syntax:        C++ 
@@ -41,7 +40,7 @@ ChordQuality::ChordQuality(void) {
    if (getDisplay() == NULL) {
       setDisplay("t:i:r");
    }
-   chordNotes.setSize(0);
+   chordNotes.resize(0);
 }
 
 
@@ -49,7 +48,7 @@ ChordQuality::ChordQuality(const ChordQuality& aChordQuality) {
    chordType = aChordQuality.getType();;
    chordInversion = aChordQuality.getInversion();;
    chordRoot = aChordQuality.getRoot();
-   chordNotes.setSize(0);
+   chordNotes.resize(0);
 }
 
 
@@ -57,7 +56,7 @@ ChordQuality::ChordQuality(int aType, int anInversion, int aRoot) {
    chordType = aType;
    chordInversion = anInversion;
    chordRoot = aRoot;
-   chordNotes.setSize(0);
+   chordNotes.resize(0);
 }
 
 
@@ -71,7 +70,7 @@ ChordQuality::~ChordQuality() {
    chordType = E_unknown;
    chordInversion = E_unknown;
    chordRoot = E_unknown;
-   chordNotes.setSize(0);
+   chordNotes.resize(0);
 }
 
 
@@ -125,19 +124,19 @@ const char* ChordQuality::getInversionName(void) const {
 // ChordQuality::getNotesInChord --
 //
 
-SigCollection<int> ChordQuality::getNotesInChord(void) const {
-   SigCollection<int>* output;
-   output = new SigCollection<int>;
+vector<int> ChordQuality::getNotesInChord(void) const {
+   vector<int>* output;
+   output = new vector<int>;
    Convert::chordQualityToNoteSet(*output, *this);
    return *output;
 }
 
 
-void ChordQuality::getNotesInChord(SigCollection<int>& notes) const {
-   notes.setSize(0);
-   if ((chordType != E_chord_unknown) && (chordNotes.getSize() > 0)) {
-      notes.setSize(chordNotes.getSize());
-      for (int i=0; i<notes.getSize(); i++) {
+void ChordQuality::getNotesInChord(vector<int>& notes) const {
+   notes.resize(0);
+   if ((chordType != E_chord_unknown) && ((int)chordNotes.size() > 0)) {
+      notes.resize(chordNotes.size());
+      for (int i=0; i<(int)notes.size(); i++) {
          notes[i] = chordNotes[i];
       }
    } else {
@@ -216,12 +215,12 @@ void ChordQuality::makeString(char* space, int pcsQ) {
 
 ostream& ChordQuality::printPitchClasses(ostream& out) {
    char buffer[128] = {0};
-   if (chordNotes.getSize() == 0) {
+   if (chordNotes.size() == 0) {
       return out;
    }
    out << '[';
    int i;
-   for (i=0; i<chordNotes.getSize(); i++) {
+   for (i=0; i<(int)chordNotes.size(); i++) {
       out << Convert::base40ToKern(buffer, chordNotes[i] + 40*3);
    }
    out << ']';
@@ -358,18 +357,10 @@ void ChordQuality::setType(const char* aTypeName) {
 //     in the sonority (particularly if the sonority is unknown).
 //
 
-void ChordQuality::setPitchClasses(Array<int>& notes) {
+void ChordQuality::setPitchClasses(vector<int>& notes) {
    int i;
-   chordNotes.setSize(notes.getSize());
-   for (i=0; i<chordNotes.getSize(); i++) {
-      chordNotes[i] = notes[i];
-   }
-}
-
-void ChordQuality::setPitchClasses(SigCollection<int>& notes) {
-   int i;
-   chordNotes.setSize(notes.getSize());
-   for (i=0; i<chordNotes.getSize(); i++) {
+   chordNotes.resize(notes.size());
+   for (i=0; i<(int)chordNotes.size(); i++) {
       chordNotes[i] = notes[i];
    }
 }
@@ -386,8 +377,8 @@ ChordQuality& ChordQuality::operator=(ChordQuality& aQuality) {
       return *this;
    }
    int i;
-   chordNotes.setSize(aQuality.chordNotes.getSize());
-   for (i=0; i<chordNotes.getSize(); i++) {
+   chordNotes.resize(aQuality.chordNotes.size());
+   for (i=0; i<(int)chordNotes.size(); i++) {
       chordNotes[i] = aQuality.chordNotes[i];
    }
    chordType      = aQuality.chordType;

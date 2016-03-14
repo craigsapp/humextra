@@ -35,9 +35,9 @@
 // Last Modified: Tue Jan 29 09:05:26 PST 2008 Fixed array bounds bug in 
 //                                              fixIrritatingPickupProblem()
 // Last Modified: Tue Oct 14 16:56:54 PDT 2008 Added 'Q' groupetto parsing
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed SigCollection class
+// Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed vector class
 // Last Modified: Fri Jun 19 23:24:03 PDT 2009 Fixed malformed meter parsing
-// Last Modified: Sat Sep  5 22:03:28 PDT 2009 ArrayInt to Array<int>
+// Last Modified: Sat Sep  5 22:03:28 PDT 2009 ArrayInt to vector<int>
 // Last Modified: Mon Oct 12 15:49:27 PDT 2009 Fixed "*clef *v *v" type cases
 // Last Modified: Sat May 22 10:52:36 PDT 2010 Added RationalNumber
 // Last Modified: Thu Oct 28 21:22:51 PDT 2010 Some fixing of combine()
@@ -45,6 +45,7 @@
 // Last Modified: Wed Feb  2 17:51:57 PST 2011 Partial fix for breve beat
 // Last Modified: Tue Apr 16 23:18:16 PDT 2013 Added attackQ to gBase12PchLst
 // Last Modified: Mon Sep 16 20:26:17 PDT 2013 Added getMeasureNumber()
+// Last Modified: Sun Mar 13 16:20:09 PDT 2016 Switched to STL
 // Filename:      ...sig/src/sigInfo/HumdrumFile.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/HumdrumFile.cpp
 // Syntax:        C++ 
@@ -65,24 +66,12 @@
 #include <cctype>
 #include <math.h>
 
-#ifndef OLDCPP
-   #include <fstream>
-   #include <iostream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <fstream.h>
-   #include <iostream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <fstream>
+#include <iostream>
+#include <sstream>
+
+using namespace std;
+
 
 // #define ROUNDERR 0.005
 // Changed on Tue Mar 23 17:48:42 PST 2004
@@ -100,7 +89,7 @@ HumdrumFile::HumdrumFile(void) : HumdrumFileBasic() {
    minrhythm = 0;
    minrhythmR = 0;
    pickupdur = -1;
-   localrhythms.setSize(0);
+   localrhythms.resize(0);
 }
 
 
@@ -110,7 +99,7 @@ HumdrumFile::HumdrumFile(const HumdrumFile& aHumdrumFile) :
    minrhythm = 0;
    minrhythmR = 0;
    pickupdur = -1;
-   localrhythms.setSize(0);
+   localrhythms.resize(0);
 }
 
 HumdrumFile::HumdrumFile(const HumdrumFileBasic& aHumdrumFile) :
@@ -119,7 +108,7 @@ HumdrumFile::HumdrumFile(const HumdrumFileBasic& aHumdrumFile) :
    minrhythm = 0;
    minrhythmR = 0;
    pickupdur = -1;
-   localrhythms.setSize(0);
+   localrhythms.resize(0);
 }
 
 
@@ -128,7 +117,7 @@ HumdrumFile::HumdrumFile(const char* filename) : HumdrumFileBasic(filename) {
    minrhythm = 0;
    minrhythmR = 0;
    pickupdur = -1;
-   localrhythms.setSize(0);
+   localrhythms.resize(0);
 }
 
 
@@ -403,15 +392,15 @@ int HumdrumFile::assemble(HumdrumFile& output, int count, HumdrumFile* pieces) {
 //      file.
 
 
-void HumdrumFile::getRhythms(Array<RationalNumber>& rhys) {
+void HumdrumFile::getRhythms(vector<RationalNumber>& rhys) {
    if (rhythmQ() == 0) {
       analyzeRhythm("4");
    }
    int i;
-   Array<RationalNumber>& rats = this->localrhythms;
+   vector<RationalNumber>& rats = this->localrhythms;
 
-   rhys.setSize(rats.getSize());
-   for (i=0; i<rhys.getSize(); i++) {
+   rhys.resize(rats.size());
+   for (i=0; i<(int)rhys.size(); i++) {
       rhys[i] = rats[i];
    }
 }
@@ -476,7 +465,7 @@ int HumdrumFile::processLinesForCombine(HumdrumFile& output, HumdrumFile& A,
       HumdrumFile& B, int debug) {
    int a = 0;
    int b = 0;
-   SSTREAM sout;
+   stringstream sout;
    int i;
    int foundStart = 0;   // boolean for finding start of data
 
@@ -1367,7 +1356,7 @@ int HumdrumFile::processLinesForCombine(HumdrumFile& output, HumdrumFile& A,
       cout << "CONTENTS OF FILE FOR DEBUGGING INFO:" << endl;
       sout << ends;
       sout << "\n";
-      cout << sout.CSTRING;
+      cout << sout.str();
    } 
    output.read(sout);
 
@@ -1390,7 +1379,7 @@ void HumdrumFile::clear(void) {
    HumdrumFileBasic::clear();
    rhythmcheck = 0;
    pickupdur = -1;
-   localrhythms.setSize(0);
+   localrhythms.resize(0);
 }
 
 
@@ -1694,7 +1683,7 @@ RationalNumber HumdrumFile::getAbsBeatR(int index) {
 //
 //
 
-int HumdrumFile::getNoteList(Array<int>& notes, int line, int flag) {
+int HumdrumFile::getNoteList(vector<int>& notes, int line, int flag) {
    // unpack flags:
    int restQ   = flag & (1 << 0);
    int expandQ = flag & (1 << 1);
@@ -1707,15 +1696,12 @@ int HumdrumFile::getNoteList(Array<int>& notes, int line, int flag) {
    int i, j;
    int note;
    char tokenbuffer[128] = {0};
-   Array<int> rawnotes;
-   rawnotes.setSize(32);
-   rawnotes.setSize(0);
-   rawnotes.allowGrowth();
+   vector<int> rawnotes;
+   rawnotes.reserve(32);
 
    HumdrumFile& score = *this;
 
-   notes.setSize(0);
-   notes.allowGrowth();
+   notes.resize(0);
 
    if (score[line].getType() != E_humrec_data) {
       return 0;
@@ -1759,10 +1745,10 @@ int HumdrumFile::getNoteList(Array<int>& notes, int line, int flag) {
             }
             if (note == E_base40_rest) {
                if (restQ) {
-                  rawnotes.append(note);
+                  rawnotes.push_back(note);
                } 
             } else {
-               rawnotes.append(note);
+               rawnotes.push_back(note);
             }
          }
       } else if (strcmp(score[line][i], ".") != 0) {
@@ -1788,47 +1774,47 @@ int HumdrumFile::getNoteList(Array<int>& notes, int line, int flag) {
             }
             if (note == E_base40_rest) {
                if (restQ) {
-                  rawnotes.append(note);
+                  rawnotes.push_back(note);
                } 
             } else {
-               rawnotes.append(note);
+               rawnotes.push_back(note);
             }
          }
       }
    }
 
-   if (rawnotes.getSize() == 0) {
+   if (rawnotes.size() == 0) {
       return 0;
    }
       
 
-   if (rawnotes.getSize() == 1) {
-      notes.setSize(1);
+   if (rawnotes.size() == 1) {
+      notes.resize(1);
       notes[0] = rawnotes[0];
       return 1;
    }
       
    // sort notes if needed:
    if (sortQ) {
-      qsort(rawnotes.getBase(), rawnotes.getSize(), sizeof(int), 
+      qsort(rawnotes.data(), rawnotes.size(), sizeof(int), 
             intcompare);
    }
 
    // uniq notes if needed:
    if (uniqQ && sortQ) {
       int oldnote = rawnotes[0];
-      notes.setSize(0);
-      notes.append(oldnote);
-      for (i=1; i<rawnotes.getSize(); i++) {
+      notes.resize(0);
+      notes.push_back(oldnote);
+      for (i=1; i<(int)rawnotes.size(); i++) {
          if (rawnotes[i] == oldnote) {
             continue;
          }
          oldnote = rawnotes[i];
-         notes.append(oldnote);                  
+         notes.push_back(oldnote);                  
       }
    } else if (uniqQ && ! sortQ) {
       int foundQ;
-      for (i=0; i<rawnotes.getSize(); i++) {
+      for (i=0; i<(int)rawnotes.size(); i++) {
          foundQ = 0;
          for (j=0; j<i; j++) {
             if (rawnotes[i] == rawnotes[j]) {
@@ -1837,14 +1823,14 @@ int HumdrumFile::getNoteList(Array<int>& notes, int line, int flag) {
             }
          }
          if (!foundQ) {
-            notes.append(rawnotes[i]);
+            notes.push_back(rawnotes[i]);
          }
       }
    } else {
       notes = rawnotes;
    }
 
-   return notes.getSize();
+   return notes.size();
 }
 
 
@@ -1855,8 +1841,8 @@ int HumdrumFile::getNoteList(Array<int>& notes, int line, int flag) {
 //     default values:  startLine = 0; endline = 0;
 //
 
-void HumdrumFile::getNoteArray(Array<double>& absbeat, 
-      Array<int>& pitches, Array<double>& durations, Array<double>& levels,
+void HumdrumFile::getNoteArray(vector<double>& absbeat, 
+      vector<int>& pitches, vector<double>& durations, vector<double>& levels,
       int startLine, int endLine, int tracknum) {
 
    HumdrumFile& score = *this;
@@ -1877,27 +1863,17 @@ void HumdrumFile::getNoteArray(Array<double>& absbeat,
    }
 
    // estimate the largest amount necessary:
-   absbeat.setSize(score.getNumLines() * score.getMaxTracks() * 10);
-   pitches.setSize(score.getNumLines() * score.getMaxTracks() * 10);
-   durations.setSize(score.getNumLines() * score.getMaxTracks() * 10);
-   levels.setSize(score.getNumLines() * score.getMaxTracks() * 10);
+   absbeat.reserve(score.getNumLines() * score.getMaxTracks() * 10);
+   pitches.reserve(score.getNumLines() * score.getMaxTracks() * 10);
+   durations.reserve(score.getNumLines() * score.getMaxTracks() * 10);
+   levels.reserve(score.getNumLines() * score.getMaxTracks() * 10);
 
-   absbeat.setGrowth(score.getNumLines());
-   pitches.setGrowth(score.getNumLines());
-   durations.setGrowth(score.getNumLines());
-   levels.setGrowth(score.getNumLines());
+   absbeat.resize(0);
+   pitches.resize(0);
+   durations.resize(0);
+   levels.resize(0);
 
-   absbeat.setSize(0);
-   pitches.setSize(0);
-   durations.setSize(0);
-   levels.setSize(0);
-
-   absbeat.allowGrowth(1);
-   pitches.allowGrowth(1);
-   durations.allowGrowth(1);
-   levels.allowGrowth(1);
-
-   Array<int> scorelevels;
+   vector<int> scorelevels;
    score.analyzeMetricLevel(scorelevels);
    
    int firsttime = 1;
@@ -1971,10 +1947,10 @@ void HumdrumFile::getNoteArray(Array<double>& absbeat,
                   continue;
                }
                level = 1.0/pow(2.0, scorelevels[ii]);
-               durations.append(duration);
-               levels.append(level);
-               pitches.append(pitch);
-               absbeat.append(beatvalue);
+               durations.push_back(duration);
+               levels.push_back(level);
+               pitches.push_back(pitch);
+               absbeat.push_back(beatvalue);
  
             } // end of a chord
          }
@@ -1983,14 +1959,8 @@ void HumdrumFile::getNoteArray(Array<double>& absbeat,
  
    } // end of the music selection   
 
-
-   absbeat.allowGrowth(0);
-   pitches.allowGrowth(0);
-   durations.allowGrowth(0);
-   levels.allowGrowth(0);
-
 /*
-   for (i=0; i<pitches.getSize(); i++) {
+   for (i=0; i<(int)pitches.size(); i++) {
       pitches[i] = (pitches[i] - 2 + 40) % 40;
    }
 */
@@ -2007,9 +1977,9 @@ void HumdrumFile::getNoteArray(Array<double>& absbeat,
 //     of chords.
 //
 
-void HumdrumFile::getNoteArray2(Array<double>& absbeat, 
-      Array<int>& pitches, Array<double>& durations, Array<double>& levels,
-      Array<Array<int> >& lastpitches, Array<Array<int> >& nextpitches,
+void HumdrumFile::getNoteArray2(vector<double>& absbeat, 
+      vector<int>& pitches, vector<double>& durations, vector<double>& levels,
+      vector<vector<int> >& lastpitches, vector<vector<int> >& nextpitches,
       int startLine, int endLine) {
 
    HumdrumFile& score = *this;
@@ -2024,42 +1994,28 @@ void HumdrumFile::getNoteArray2(Array<double>& absbeat,
    }
 
    // estimate the largest amount necessary:
-   absbeat.setSize(score.getNumLines() * score.getMaxTracks() * 10);
-   pitches.setSize(score.getNumLines() * score.getMaxTracks() * 10);
-   durations.setSize(score.getNumLines() * score.getMaxTracks() * 10);
-   levels.setSize(score.getNumLines() * score.getMaxTracks() * 10);
-   lastpitches.setSize(score.getNumLines() * score.getMaxTracks() * 10);
-   nextpitches.setSize(score.getNumLines() * score.getMaxTracks() * 10);
+   absbeat.reserve(score.getNumLines() * score.getMaxTracks() * 10);
+   pitches.reserve(score.getNumLines() * score.getMaxTracks() * 10);
+   durations.reserve(score.getNumLines() * score.getMaxTracks() * 10);
+   levels.reserve(score.getNumLines() * score.getMaxTracks() * 10);
+   lastpitches.reserve(score.getNumLines() * score.getMaxTracks() * 10);
+   nextpitches.reserve(score.getNumLines() * score.getMaxTracks() * 10);
 
-   absbeat.setGrowth(score.getNumLines());
-   pitches.setGrowth(score.getNumLines());
-   durations.setGrowth(score.getNumLines());
-   levels.setGrowth(score.getNumLines());
-   lastpitches.setGrowth(score.getNumLines());
-   nextpitches.setGrowth(score.getNumLines());
+   absbeat.resize(0);
+   pitches.resize(0);
+   durations.resize(0);
+   levels.resize(0);
+   lastpitches.resize(0);
+   nextpitches.resize(0);
 
-   absbeat.setSize(0);
-   pitches.setSize(0);
-   durations.setSize(0);
-   levels.setSize(0);
-   lastpitches.setSize(0);
-   nextpitches.setSize(0);
+   vector<int> templastpitches;
+   vector<int> tempnextpitches;
+   templastpitches.reserve(100);
+   tempnextpitches.reserve(100);
+   templastpitches.resize(0);
+   tempnextpitches.resize(0);
 
-   absbeat.allowGrowth(1);
-   pitches.allowGrowth(1);
-   durations.allowGrowth(1);
-   levels.allowGrowth(1);
-   lastpitches.allowGrowth(1);
-   nextpitches.allowGrowth(1);
-
-   Array<int> templastpitches;
-   Array<int> tempnextpitches;
-   templastpitches.setSize(100);
-   tempnextpitches.setSize(100);
-   templastpitches.setSize(0);
-   tempnextpitches.setSize(0);
-
-   Array<int> scorelevels;
+   vector<int> scorelevels;
    score.analyzeMetricLevel(scorelevels);
    
    int firsttime = 1;
@@ -2149,12 +2105,12 @@ void HumdrumFile::getNoteArray2(Array<double>& absbeat,
                convertKernStringToArray(templastpitches, lastptr);
                convertKernStringToArray(tempnextpitches, nextptr);
  
-               durations.append(duration);
-               levels.append(level);
-               pitches.append(pitch);
-               absbeat.append(beatvalue);
-               lastpitches.append(templastpitches);
-               nextpitches.append(tempnextpitches);
+               durations.push_back(duration);
+               levels.push_back(level);
+               pitches.push_back(pitch);
+               absbeat.push_back(beatvalue);
+               lastpitches.push_back(templastpitches);
+               nextpitches.push_back(tempnextpitches);
  
             } // end of a chord
          }
@@ -2163,14 +2119,8 @@ void HumdrumFile::getNoteArray2(Array<double>& absbeat,
  
    } // end of the music selection   
 
-
-   absbeat.allowGrowth(0);
-   pitches.allowGrowth(0);
-   durations.allowGrowth(0);
-   levels.allowGrowth(0);
-
 /*
-   for (i=0; i<pitches.getSize(); i++) {
+   for (i=0; i<(int)pitches.size(); i++) {
       pitches[i] = (pitches[i] - 2 + 40) % 40;
    }
 */
@@ -2183,9 +2133,9 @@ void HumdrumFile::getNoteArray2(Array<double>& absbeat,
 // convertKernStringToArray --  extract the base 40 notes from kern data.
 //
 
-void HumdrumFile::convertKernStringToArray(Array<int>& array, 
+void HumdrumFile::convertKernStringToArray(vector<int>& array, 
       const char* string) {
-   array.setSize(0);
+   array.resize(0);
    int note;
    char* buffer;
    int size = strlen(string);
@@ -2198,7 +2148,7 @@ void HumdrumFile::convertKernStringToArray(Array<int>& array,
    ptr = strtok(buffer, " \t\n");
    while (ptr != NULL) {
       note = Convert::kernToBase40(ptr);
-      array.append(note);
+      array.push_back(note);
       ptr = strtok(NULL, " \t\n");
    }
    delete [] buffer;
@@ -2505,13 +2455,13 @@ HumdrumFile& HumdrumFile::operator=(const HumdrumFile& aFile) {
 
    // delete any current contents
    int i;
-   for (i=0; i<records.getSize(); i++) {
+   for (i=0; i<(int)records.size(); i++) {
       delete records[i];
       records[i] = NULL;
    }
 
-   records.setSize(aFile.records.getSize());
-   for (i=0; i<aFile.records.getSize(); i++) {
+   records.resize(aFile.records.size());
+   for (i=0; i<(int)aFile.records.size(); i++) {
       records[i] = new HumdrumRecord;
       *(records[i]) = *(aFile.records[i]);
    }
@@ -2585,16 +2535,14 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
 
    minrhythm = 0;                  // keeping track of the min timebase 
    minrhythmR = 0;
-   Array<int> rhythms;
-   Array<RationalNumber> rhythmsR;
+   vector<int> rhythms;
+   vector<RationalNumber> rhythmsR;
 
-   rhythms.setSize(32);
-   rhythms.setSize(0);
-   rhythms.allowGrowth(1);
+   rhythms.reserve(32);
+   rhythms.resize(0);
 
-   rhythmsR.setSize(32);
-   rhythmsR.setSize(0);
-   rhythmsR.allowGrowth(1);
+   rhythmsR.reserve(32);
+   rhythmsR.resize(0);
 
    HumdrumFile& infile = *this;
    RationalNumber summation(0,1);  // for summing measure duration
@@ -2604,21 +2552,19 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
    RationalNumber measureBeats(0,1);
    // for fixing meter locations:
 
-   SigCollection<RationalNumber> meterbeats; 
-   SigCollection<RationalNumber> timebaseC;
+   vector<RationalNumber> meterbeats; 
+   vector<RationalNumber> timebaseC;
 
-   meterbeats.setSize(getNumLines());
-   timebaseC.setSize(getNumLines());
-   meterbeats.allowGrowth(0);
-   timebaseC.allowGrowth(0);
+   meterbeats.resize(getNumLines());
+   timebaseC.resize(getNumLines());
 
-   Array<int> ignore;              // for avoiding free rhythm spines
-   ignore.setSize(infile.getMaxTracks());
-   ignore.setAll(0);
+   vector<int> ignore;              // for avoiding free rhythm spines
+   ignore.resize(infile.getMaxTracks());
+   fill(ignore.begin(), ignore.end(), 0);
 
    // for analyzing record durations:
-   SigCollection<RationalNumber> lastdurations;
-   SigCollection<RationalNumber> runningstatus;
+   vector<RationalNumber> lastdurations;
+   vector<RationalNumber> runningstatus;
 
    // int fixedTimebase = 0;
    RationalNumber timebase = 4;
@@ -2849,8 +2795,8 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
    }
 
 
-   rhythms.setSize(rhythmsR.getSize());
-   for (i=0; i<rhythms.getSize(); i++) {
+   rhythms.resize(rhythmsR.size());
+   for (i=0; i<(int)rhythms.size(); i++) {
       // cout << "XRHYTHM = " << rhythmsR[i] << endl;
 
       if (ispoweroftwo(rhythmsR[i].getNumerator())) {
@@ -2867,8 +2813,8 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
       rhythmsR[i] = rhythms[i];
    } 
    minrhythm = findlcm(rhythms);
-   localrhythms.setSize(rhythmsR.getSize());
-   for (i=0; i<rhythmsR.getSize(); i++) {
+   localrhythms.resize(rhythmsR.size());
+   for (i=0; i<(int)rhythmsR.size(); i++) {
       localrhythms[i] = rhythmsR[i];
    }
 
@@ -2930,22 +2876,22 @@ int HumdrumFile::ispoweroftwo(int value) {
 //
 
 RationalNumber HumdrumFile::getMinimumRationalRhythm(
-      Array<RationalNumber>& rhythms) {
+      vector<RationalNumber>& rhythms) {
 
    // RationalNumber zeroR(0,1);
    // RationalNumber maxval  = zeroR;  
    // RationalNumber output  = zeroR;
    int i;
 
-   // for (i=0; i<rhythms.getSize(); i++) {
+   // for (i=0; i<(int)rhythms.size(); i++) {
    //    if (maxval < rhythms[i].getNumerator()) {
    //       maxval = rhythms[i].getNumerator();
    //    }
    // }
 
-   Array<int> singler;
-   singler.setSize(rhythms.getSize());
-   for (i=0; i<rhythms.getSize(); i++) {
+   vector<int> singler;
+   singler.resize(rhythms.size());
+   for (i=0; i<(int)rhythms.size(); i++) {
       // cout << "YRHYTHM = " << rhythms[i] << endl;
       singler[i] = rhythms[i].getNumerator() * rhythms[i].getDenominator();
    }
@@ -2972,9 +2918,9 @@ RationalNumber HumdrumFile::getMinimumRationalRhythm(
 //
 
 void HumdrumFile::spaceEmptyLines(void) {
-   Array<int> index;
-   index.setSize(getNumLines());
-   index.setSize(0);
+   vector<int> index;
+   index.reserve(getNumLines());
+   index.resize(0);
 
    int i;
    int q;
@@ -2993,12 +2939,12 @@ void HumdrumFile::spaceEmptyLines(void) {
             }
          }
          if (valid != 0) {
-            index.append(i);
+            index.push_back(i);
          }
       } else if (getType(i) == E_humrec_data_measure) {
          // keep track of barlines so that the spacing does not occur 
          // across barlines
-         index.append(i);
+         index.push_back(i);
       }
    }
 
@@ -3008,13 +2954,12 @@ void HumdrumFile::spaceEmptyLines(void) {
    newduration.zero();
    RationalNumber startbeat(0,1);
    RationalNumber basebeat(0,1);
-   index.allowGrowth(0);
-   for (i=0; i<index.getSize(); i++) {
+   for (i=0; i<(int)index.size(); i++) {
       if ((i > 0) && ((*this)[index[i]].getDuration() == 0)
                   && ((*this)[index[i]].getType() != E_humrec_data_measure)) {
          count = 1;
          j = i+1;
-         while ((j<index.getSize()) && ((*this)[index[j]].getDuration()==0)
+         while ((j<(int)index.size()) && ((*this)[index[j]].getDuration()==0)
                 && ((*this)[index[j]].getType() != E_humrec_data_measure)
                ) {
 
@@ -3092,12 +3037,12 @@ void HumdrumFile::spaceEmptyLines(void) {
 // findlcm -- find the least common multiple between rhythms
 //
 
-int HumdrumFile::findlcm(Array<int>& rhythms) {
-   if (rhythms.getSize() == 0) {
+int HumdrumFile::findlcm(vector<int>& rhythms) {
+   if (rhythms.size() == 0) {
       return 0;
    }
    int output = rhythms[0];
-   for (int i=1; i<rhythms.getSize(); i++) {
+   for (int i=1; i<(int)rhythms.size(); i++) {
       output = output * rhythms[i] / GCD(output, rhythms[i]);
    }
 
@@ -3130,24 +3075,20 @@ int HumdrumFile::GCD(int a, int b) {
 //
 
 void HumdrumFile::initializeTracers(
-      SigCollection<RationalNumber>& lastdurations,
-      SigCollection<RationalNumber>& runningstatus, HumdrumRecord& currRecord) {
-   lastdurations.allowGrowth(1);
-   runningstatus.allowGrowth(1);
-   lastdurations.setSize(0);
-   runningstatus.setSize(0);
+      vector<RationalNumber>& lastdurations,
+      vector<RationalNumber>& runningstatus, HumdrumRecord& currRecord) {
+   lastdurations.resize(0);
+   runningstatus.resize(0);
    RationalNumber zero(0,1);
    int i;
    for (i=0; i<currRecord.getFieldCount(); i++) {
       if (currRecord.getExInterpNum(i) == E_KERN_EXINT ||
           (strcmp(currRecord.getExInterp(i), "**recip") == 0) ||
           (strcmp(currRecord.getExInterp(i), "**koto") == 0)) {
-         lastdurations.append(zero);
-         runningstatus.append(zero);
+         lastdurations.push_back(zero);
+         runningstatus.push_back(zero);
       }
    }
-   lastdurations.allowGrowth(0);
-   runningstatus.allowGrowth(0);
 }
 
 
@@ -3160,37 +3101,35 @@ void HumdrumFile::initializeTracers(
 //
 
 void HumdrumFile::fixIncompleteBarMeterR(
-      SigCollection<RationalNumber>& meterbeats,
-      SigCollection<RationalNumber>& timebase, const char* base) {
+      vector<RationalNumber>& meterbeats,
+      vector<RationalNumber>& timebase, const char* base) {
 
    HumdrumFile& file = *this;
   
-   Array<int> barlocs;
-   barlocs.setSize(file.getNumLines());
-   barlocs.setSize(0);
+   vector<int> barlocs;
+   barlocs.reserve(file.getNumLines());
 
    int i, j;
    for (i=0; i<file.getNumLines(); i++) {
       if (!file[i].isMeasure()) {
          continue;
       }
-      barlocs.append(i);
+      barlocs.push_back(i);
    }
-   for (i=0; i<barlocs.getSize()-1; i++) {
+   for (i=0; i<(int)barlocs.size()-1; i++) {
       file[barlocs[i]].setBeatR(
             file[barlocs[i+1]].getAbsBeatR() - 
             file[barlocs[i]].getAbsBeatR()
          );
    }
-   file[barlocs.last()].setBeatR(
+   file[barlocs.back()].setBeatR(
        file[file.getNumLines()-1].getAbsBeatR() -
-       file[barlocs.last()].getAbsBeatR()
+       file[barlocs.back()].getAbsBeatR()
    );
 
  
-   Array<RationalNumber> timedur;  // timesig dur at each bar
-   timedur.setSize(barlocs.getSize());
-   timedur.setSize(0);
+   vector<RationalNumber> timedur;  // timesig dur at each bar
+   timedur.reserve(barlocs.size());
    PerlRegularExpression pre;
    PerlRegularExpression pre2;
    int top, bot, bot2;
@@ -3199,7 +3138,7 @@ void HumdrumFile::fixIncompleteBarMeterR(
    for (i=0; i<file.getNumLines(); i++) {
       if (file[i].isMeasure()) {
          barcounter++;
-         timedur.append(rat);
+         timedur.push_back(rat);
       }
       if (!file[i].isInterpretation()) {
          continue;
@@ -3225,7 +3164,7 @@ void HumdrumFile::fixIncompleteBarMeterR(
                rat *= 4;       // deal with different scalings later...
             }
             if (barcounter > 0) {
-               timedur.last() = rat;
+               timedur.back() = rat;
             }
          }
          break;
@@ -3233,14 +3172,14 @@ void HumdrumFile::fixIncompleteBarMeterR(
    }
 
    // debuging: show bar number, expected sum, actual sum
-   // for (i=0; i<barlocs.getSize(); i++) {
+   // for (i=0; i<(int)barlocs.size(); i++) {
    //    cout << file[barlocs[i]][0] << "\t" << timedur[i] 
    //         << "\t" << file[barlocs[i]].getBeatR()
    //         << endl;
    // }
 
    int ii;
-   for (i=0; i<barlocs.getSize(); i++) {
+   for (i=0; i<(int)barlocs.size(); i++) {
       if (timedur[i] == file[barlocs[i]].getBeatR()) {
          // the duration of the measure matches what is expected
          // so continue to next measure.
@@ -3257,7 +3196,7 @@ void HumdrumFile::fixIncompleteBarMeterR(
       // this will need to be handled properly.
       RationalNumber barsum = file[barlocs[i]].getBeatR();
       RationalNumber temp;
-      for (j=i+1; j<barlocs.getSize(); j++) {
+      for (j=i+1; j<(int)barlocs.size(); j++) {
          barsum += file[barlocs[j]].getBeatR();
          if (barsum > timedur[i]) {
             // measures cannot be combined into the expected duration
@@ -3268,7 +3207,7 @@ void HumdrumFile::fixIncompleteBarMeterR(
             // expected time signature, so make the meter values increase
             // instead of reset after each internal barline
             int endline = file.getNumLines()-1;
-            if (j < barlocs.getSize() - 1) {
+            if (j < (int)barlocs.size() - 1) {
                endline = barlocs[j+1]-1;
             }
             RationalNumber correction = file[barlocs[i]].getBeatR();
@@ -3286,7 +3225,7 @@ void HumdrumFile::fixIncompleteBarMeterR(
       }
    }
 
-   if (barlocs.getSize() == 0) {
+   if (barlocs.size() == 0) {
       return;
    }
 
@@ -3326,20 +3265,14 @@ void HumdrumFile::fixIncompleteBarMeterR(
 //
 
 void HumdrumFile::adjustForRhythmMarker(HumdrumRecord& aRecord,
-      int state, int spine, SigCollection<RationalNumber>& lastdurations, 
-      SigCollection<RationalNumber>& runningstatus, int& init, int& datastart,
-      Array<int>& ignore) {
+      int state, int spine, vector<RationalNumber>& lastdurations, 
+      vector<RationalNumber>& runningstatus, int& init, int& datastart,
+      vector<int>& ignore) {
 
-   SigCollection<RationalNumber> newdurations;
-   SigCollection<RationalNumber> newstatus;
-   newdurations.setSize(lastdurations.getSize() + 4);
-   newstatus.setSize(runningstatus.getSize() + 4);
-   newdurations.setGrowth(newdurations.getSize());
-   newstatus.setGrowth(newstatus.getSize());
-   newdurations.setSize(0);
-   newstatus.setSize(0);
-   newdurations.allowGrowth();
-   newstatus.allowGrowth();
+   vector<RationalNumber> newdurations;
+   vector<RationalNumber> newstatus;
+   newdurations.reserve(lastdurations.size() + 4);
+   newstatus.reserve(runningstatus.size() + 4);
 
    if (aRecord.getExInterpNum(spine) != E_KERN_EXINT &&
       (strcmp(aRecord.getExInterp(spine), "**recip") != 0) &&
@@ -3360,8 +3293,8 @@ void HumdrumFile::adjustForRhythmMarker(HumdrumRecord& aRecord,
             // stop ignoring
             ignore[aRecord.getPrimaryTrack(i)-1] = 0;
             RationalNumber zero(0,1);
-            lastdurations.append(zero);
-            runningstatus.append(zero);
+            lastdurations.push_back(zero);
+            runningstatus.push_back(zero);
          }
       } else if (ignore[aRecord.getPrimaryTrack(i) - 1] != 0) {
          continue;
@@ -3372,19 +3305,19 @@ void HumdrumFile::adjustForRhythmMarker(HumdrumRecord& aRecord,
          continue;
       }
       
-      newdurations.append(lastdurations[ii]);
-      newstatus.append(runningstatus[ii]);
+      newdurations.push_back(lastdurations[ii]);
+      newstatus.push_back(runningstatus[ii]);
       ii++;
    }
 
-   lastdurations.setSize(newdurations.getSize());
-   runningstatus.setSize(newstatus.getSize());
+   lastdurations.resize(newdurations.size());
+   runningstatus.resize(newstatus.size());
 
-   for (i=0; i<newdurations.getSize(); i++) {
+   for (i=0; i<(int)newdurations.size(); i++) {
       lastdurations[i] = newdurations[i];
    }
 
-   for (i=0; i<newstatus.getSize(); i++) {
+   for (i=0; i<(int)newstatus.size(); i++) {
       runningstatus[i] = newstatus[i];
    }
 
@@ -3400,24 +3333,20 @@ void HumdrumFile::adjustForRhythmMarker(HumdrumRecord& aRecord,
 //
 
 void HumdrumFile::adjustForSpinePaths(HumdrumRecord& aRecord, 
-      SigCollection<RationalNumber>& lastdurations, 
-      SigCollection<RationalNumber>& runningstatus,
-      int& init, int& datastart, Array<int>& ignore) {
+      vector<RationalNumber>& lastdurations, 
+      vector<RationalNumber>& runningstatus,
+      int& init, int& datastart, vector<int>& ignore) {
 
    int spinecount = aRecord.getFieldCount();
    int subcount;
    int inindex = 0;
 
-   SigCollection<RationalNumber> newdurations;
-   SigCollection<RationalNumber> newstatus;
-   newdurations.allowGrowth();
-   newstatus.allowGrowth();
-   newstatus.setSize(runningstatus.getSize() + 4);
-   newdurations.setSize(lastdurations.getSize() + 4);
-   newdurations.setGrowth(newdurations.getSize());
-   newstatus.setGrowth(newstatus.getSize());
-   newdurations.setSize(0);
-   newstatus.setSize(0);
+   vector<RationalNumber> newdurations;
+   vector<RationalNumber> newstatus;
+   newstatus.reserve(runningstatus.size() + 4);
+   newdurations.reserve(lastdurations.size() + 4);
+   newdurations.resize(0);
+   newstatus.resize(0);
 
    int i, j;
    for (i=0; i<spinecount; i++) {
@@ -3431,10 +3360,10 @@ void HumdrumFile::adjustForSpinePaths(HumdrumRecord& aRecord,
       }
 
       if (strcmp("*^", aRecord[i]) == 0) {
-         newdurations.append(lastdurations[inindex]);
-         newdurations.append(lastdurations[inindex]);
-         newstatus.append(runningstatus[inindex]);
-         newstatus.append(runningstatus[inindex]);
+         newdurations.push_back(lastdurations[inindex]);
+         newdurations.push_back(lastdurations[inindex]);
+         newstatus.push_back(runningstatus[inindex]);
+         newstatus.push_back(runningstatus[inindex]);
          inindex++;
       } else if (strcmp("*-", aRecord[i]) == 0) {
          inindex++;
@@ -3442,19 +3371,19 @@ void HumdrumFile::adjustForSpinePaths(HumdrumRecord& aRecord,
          // do nothing: wait and see if a new kern spine is added.
          inindex++;
       } else if (strcmp("*x", aRecord[i]) == 0) {
-         if (lastdurations.getSize() < inindex+1) {
+         if ((int)lastdurations.size() < inindex+1) {
             // this code needed for cases when *x is swapping
             // the order of a rhythmic and non-rhythmic spine.
             // might need to be more fixing (only tested
             // on two rhythmic spines.
-            newdurations.append(lastdurations[inindex+1]);
+            newdurations.push_back(lastdurations[inindex+1]);
          }
-         newdurations.append(lastdurations[inindex]);
-         if (runningstatus.getSize() < inindex+1) {
+         newdurations.push_back(lastdurations[inindex]);
+         if ((int)runningstatus.size() < inindex+1) {
             // like the previous comment
-            newstatus.append(runningstatus[inindex+1]);
+            newstatus.push_back(runningstatus[inindex+1]);
          }
-         newstatus.append(runningstatus[inindex]);
+         newstatus.push_back(runningstatus[inindex]);
          inindex+= 2;
          i++;
       } else if (strcmp("*v", aRecord[i]) == 0) {
@@ -3472,34 +3401,32 @@ void HumdrumFile::adjustForSpinePaths(HumdrumRecord& aRecord,
                  << endl;
             exit(1);
          } else {
-            newdurations.append(lastdurations[inindex]);
-            newstatus.append(runningstatus[inindex]);
+            newdurations.push_back(lastdurations[inindex]);
+            newstatus.push_back(runningstatus[inindex]);
             // note: the following line had an insidious off-by-one error
             // the follownig line CANNOT be: inindex += subcount-1;
             inindex += subcount;   
             i += subcount-1;   
          }
       } else if (strncmp("**", aRecord[inindex], 2) == 0) {
-         newdurations.setSize(newdurations.getSize()+1);
-         newdurations[newdurations.getSize()+1] = 0;
-         newstatus.setSize(newdurations.getSize()+1);
-         newstatus[newdurations.getSize()+1] = 0;
+         newdurations.push_back(0);
+         newstatus.push_back(0);
       } else {
-         newdurations.append(lastdurations[inindex]);
-         newstatus.append(runningstatus[inindex]);
+         newdurations.push_back(lastdurations[inindex]);
+         newstatus.push_back(runningstatus[inindex]);
          inindex++;
       }
    }
 
    // now replace the old arrays with the new values:
 
-   lastdurations.setSize(newdurations.getSize());
-   for (i=0; i<newdurations.getSize(); i++) {
+   lastdurations.resize(newdurations.size());
+   for (i=0; i<(int)newdurations.size(); i++) {
       lastdurations[i] = newdurations[i];
    }
 
-   runningstatus.setSize(newstatus.getSize());
-   for (i=0; i<newstatus.getSize(); i++) {
+   runningstatus.resize(newstatus.size());
+   for (i=0; i<(int)newstatus.size(); i++) {
       runningstatus[i] = newstatus[i];
    }
 
@@ -3518,14 +3445,14 @@ void HumdrumFile::adjustForSpinePaths(HumdrumRecord& aRecord,
 //	entries before a new **kern entry.  Also works on **koto spines.
 //
 //	This function will eventually replace determineDurationR
-//	It changes Array<int>& rhythms to
-//	           Array<RationalNumber>& rhythms.
+//	It changes vector<int>& rhythms to
+//	           vector<RationalNumber>& rhythms.
 //
 
 RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
-      int& init, SigCollection<RationalNumber>& lastdurations, 
-      SigCollection<RationalNumber>& runningstatus,
-      Array<RationalNumber>& rhythms, Array<int>& ignore) {
+      int& init, vector<RationalNumber>& lastdurations, 
+      vector<RationalNumber>& runningstatus,
+      vector<RationalNumber>& rhythms, vector<int>& ignore) {
    int i;
    // initialization:
    if (init) {
@@ -3533,8 +3460,8 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
       int size = aRecord.getFieldCount("**kern");
       size += aRecord.getFieldCount("**recip");
       size += aRecord.getFieldCount("**koto");
-      lastdurations.setSize(size);
-      runningstatus.setSize(size);
+      lastdurations.resize(size);
+      runningstatus.resize(size);
       for (i=0; i<size; i++) {
          lastdurations[i].zero();
          runningstatus[i].zero();
@@ -3544,7 +3471,7 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
    // Step (1): if lastdurations == runningstatus, then zero running
    // status.
    RationalNumber zero(0,1);
-   for (i=0; i<runningstatus.getSize(); i++) {
+   for (i=0; i<(int)runningstatus.size(); i++) {
       if ((runningstatus[i] - lastdurations[i]) == zero) {
          runningstatus[i].zero();
       } else {
@@ -3607,7 +3534,7 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
                // }
                int done = 0;
                RationalNumber value;
-               for (z=0; z<rhythms.getSize(); z++) {
+               for (z=0; z<(int)rhythms.size(); z++) {
                   if (rbase == 0) {
                      done = 1;
                      break;
@@ -3623,7 +3550,7 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
                   }
                }
                if (!done) {
-                  rhythms.append(rbase);
+                  rhythms.push_back(rbase);
                }
 
             }
@@ -3637,12 +3564,12 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
  
                cout << "\n\t" << aRecord.getLine() << endl;
                cout << "D";
-               for (q=0; q<lastdurations.getSize(); q++) {
+               for (q=0; q<(int)lastdurations.size(); q++) {
                   cout << "\t" << lastdurations[q]; 
                }
                cout << endl;
                cout << "RT";
-               for (q=0; q<runningstatus.getSize(); q++) {
+               for (q=0; q<(int)runningstatus.size(); q++) {
                   cout << "\t" << runningstatus[q]; 
                }
                cout << endl;
@@ -3654,7 +3581,7 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
          count++;
       }
    }
-   if (count != runningstatus.getSize()) {
+   if (count != (int)runningstatus.size()) {
       cerr << "Error: spine count has changed" << endl;
    }
 
@@ -3662,7 +3589,7 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
    RationalNumber min(99999999,1);
    RationalNumber testval;
 
-   for (i=0; i<lastdurations.getSize(); i++) {
+   for (i=0; i<(int)lastdurations.size(); i++) {
       testval = lastdurations[i] - runningstatus[i];
       if (testval.isNegative()) {   
          cout << "Error on line: " << aRecord.getLineNum() 
@@ -3671,12 +3598,12 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
          cout << "Line min duration is measured to be: " << testval << endl;
   
          cout << "Durations on this line: " << endl;
-         for (q=0; q<lastdurations.getSize(); q++) {
+         for (q=0; q<(int)lastdurations.size(); q++) {
             cout << "\t" << lastdurations[q]; 
          }
          cout << endl;
          cout << "Running total of durations from previous rhythm: " << endl;
-         for (q=0; q<runningstatus.getSize(); q++) {
+         for (q=0; q<(int)runningstatus.size(); q++) {
             cout << "\t" << runningstatus[q]; 
          }
          cout << endl;
@@ -3691,7 +3618,7 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
    }
 
    // Step (4): add the duration to the running values and to meter position
-   for (i=0; i<runningstatus.getSize(); i++) {
+   for (i=0; i<(int)runningstatus.size(); i++) {
       runningstatus[i] += min;
    }
 
@@ -3707,9 +3634,9 @@ RationalNumber HumdrumFile::determineDurationR2(HumdrumRecord& aRecord,
 //
 
 RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
-      int& init, SigCollection<RationalNumber>& lastdurations, 
-      SigCollection<RationalNumber>& runningstatus,
-      Array<int>& rhythms, Array<int>& ignore) {
+      int& init, vector<RationalNumber>& lastdurations, 
+      vector<RationalNumber>& runningstatus,
+      vector<int>& rhythms, vector<int>& ignore) {
    int i;
    // initialization:
    if (init) {
@@ -3717,8 +3644,8 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
       int size = aRecord.getFieldCount("**kern");
       size += aRecord.getFieldCount("**recip");
       size += aRecord.getFieldCount("**koto");
-      lastdurations.setSize(size);
-      runningstatus.setSize(size);
+      lastdurations.resize(size);
+      runningstatus.resize(size);
       for (i=0; i<size; i++) {
          lastdurations[i].zero();
          runningstatus[i].zero();
@@ -3728,7 +3655,7 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
    // Step (1): if lastdurations == runningstatus, then zero running
    // status.
    RationalNumber zero(0,1);
-   for (i=0; i<runningstatus.getSize(); i++) {
+   for (i=0; i<(int)runningstatus.size(); i++) {
       if ((runningstatus[i] - lastdurations[i]) == zero) {
          runningstatus[i].zero();
       } else {
@@ -3789,7 +3716,7 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
                   }
                }
                int done = 0;
-               for (z=0; z<rhythms.getSize(); z++) {
+               for (z=0; z<(int)rhythms.size(); z++) {
                   if (rbase == 0) {
                      done = 1;
                      break;
@@ -3800,7 +3727,7 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
                   }
                }
                if (!done) {
-                  rhythms.append(rbase);
+                  rhythms.push_back(rbase);
                }
 
             }
@@ -3814,12 +3741,12 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
  
                cout << "\n\t" << aRecord.getLine() << endl;
                cout << "D";
-               for (q=0; q<lastdurations.getSize(); q++) {
+               for (q=0; q<(int)lastdurations.size(); q++) {
                   cout << "\t" << lastdurations[q]; 
                }
                cout << endl;
                cout << "RT";
-               for (q=0; q<runningstatus.getSize(); q++) {
+               for (q=0; q<(int)runningstatus.size(); q++) {
                   cout << "\t" << runningstatus[q]; 
                }
                cout << endl;
@@ -3831,7 +3758,7 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
          count++;
       }
    }
-   if (count != runningstatus.getSize()) {
+   if (count != (int)runningstatus.size()) {
       cerr << "Error: spine count has changed" << endl;
    }
 
@@ -3839,7 +3766,7 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
    RationalNumber min(99999999,1);
    RationalNumber testval;
 
-   for (i=0; i<lastdurations.getSize(); i++) {
+   for (i=0; i<(int)lastdurations.size(); i++) {
       testval = lastdurations[i] - runningstatus[i];
       if (testval.isNegative()) {   
          cout << "Error on line: " << aRecord.getLineNum() 
@@ -3848,12 +3775,12 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
          cout << "Line min duration is measured to be: " << testval << endl;
   
          cout << "Durations on this line: " << endl;
-         for (q=0; q<lastdurations.getSize(); q++) {
+         for (q=0; q<(int)lastdurations.size(); q++) {
             cout << "\t" << lastdurations[q]; 
          }
          cout << endl;
          cout << "Running total of durations from previous rhythm: " << endl;
-         for (q=0; q<runningstatus.getSize(); q++) {
+         for (q=0; q<(int)runningstatus.size(); q++) {
             cout << "\t" << runningstatus[q]; 
          }
          cout << endl;
@@ -3868,7 +3795,7 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
    }
 
    // Step (4): add the duration to the running values and to meter position
-   for (i=0; i<runningstatus.getSize(); i++) {
+   for (i=0; i<(int)runningstatus.size(); i++) {
       runningstatus[i] += min;
    }
 
@@ -3890,15 +3817,13 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
 //     Default value: segment = 0;
 //
 
-void HumdrumFile::analyzeDataIndex(Array<int>& indices, int segment) {
+void HumdrumFile::analyzeDataIndex(vector<int>& indices, int segment) {
    HumdrumFile& score = *this;
-   indices.setSize(score.getNumLines());
-   indices.setSize(0);
-   indices.allowGrowth(1);
+   indices.reserve(score.getNumLines());
+   indices.resize(0);
 
    int count = score.getSegmentCount();
    if (segment < -1 || segment >= count) {
-      indices.allowGrowth(0);
       return;
    }
 
@@ -3920,7 +3845,7 @@ void HumdrumFile::analyzeDataIndex(Array<int>& indices, int segment) {
    int i;
    for (i=start; i<score.getNumLines(); i++) {
       if (score[i].getType() == E_humrec_data) {
-         indices.append(i);
+         indices.push_back(i);
       } else if (segment < 0 && 
                  score[i].getType() == E_humrec_interpretation && 
                  strcmp(score[i][0], "*-") == 0) {
@@ -3929,7 +3854,6 @@ void HumdrumFile::analyzeDataIndex(Array<int>& indices, int segment) {
       }
    }
 
-   indices.allowGrowth(0);
 }
 
 
@@ -3941,29 +3865,29 @@ void HumdrumFile::analyzeDataIndex(Array<int>& indices, int segment) {
 //     Default values: start = -1, stop = -1;
 //
 
-int HumdrumFile::analyzeCliche(Array<int>& cliche, double duration, 
+int HumdrumFile::analyzeCliche(vector<int>& cliche, double duration, 
       int minimumcount, double start, double stop) {
    HumdrumFile& score = *this;
    int  nlflag = NL_SORT | NL_UNIQ;
    // later flags to add: NL_PC; NL_FILL;
 
-   cliche.setSize(score.getNumLines());
-   cliche.zero();
+   cliche.resize(score.getNumLines());
+   fill(cliche.begin(), cliche.end(), 0);
 
-   Array<int> di;  // data index list for score data lines
+   vector<int> di;  // data index list for score data lines
    score.analyzeDataIndex(di);
 
-   Array<Array<int> > pitchset;
+   vector<vector<int> > pitchset;
    int starti = 0;
-// cout << "di get size = " << di.getSize() << endl;
+// cout << "di get size = " << di.size() << endl;
 
    if (start > 0) {
-      while (score[di[starti]].getAbsBeat() < start && starti < di.getSize()) {
+      while (score[di[starti]].getAbsBeat() < start && starti < (int)di.size()) {
          starti++;
       }
    }
 
-   int endi = di.getSize() - 1;
+   int endi = (int)di.size() - 1;
    if (stop > 0) {
       while (score[di[endi]].getAbsBeat() < stop && endi > 1) {
          endi--;
@@ -3971,8 +3895,8 @@ int HumdrumFile::analyzeCliche(Array<int>& cliche, double duration,
    }
 
    int i, j;
-   Array<Array<int> > allnotes;
-   allnotes.setSize(endi-starti+1);
+   vector<vector<int> > allnotes;
+   allnotes.resize(endi-starti+1);
    for (i=0; i<endi-starti+1; i++) {
       score.getNoteList(allnotes[i], di[i], nlflag);
    }
@@ -4023,7 +3947,7 @@ int HumdrumFile::analyzeCliche(Array<int>& cliche, double duration,
 // private: HumdrumFile::attemptMatch -- for use with analyzeCliche
 //
 
-int HumdrumFile::attemptMatch(Array<Array<int> >& allnotes, Array<int>& di, 
+int HumdrumFile::attemptMatch(vector<vector<int> >& allnotes, vector<int>& di, 
       int starti, int i, int j, double duration) {
    HumdrumFile& score = *this;
 
@@ -4039,11 +3963,11 @@ int HumdrumFile::attemptMatch(Array<Array<int> >& allnotes, Array<int>& di,
          sumduration += duration;
       }
       
-      if (allnotes[i+delta].getSize() != allnotes[j+delta].getSize()) {
+      if (allnotes[i+delta].size() != allnotes[j+delta].size()) {
          return 0;
       }
 
-      for (k=0; k<allnotes[i+delta].getSize(); k++) {
+      for (k=0; k<(int)allnotes[i+delta].size(); k++) {
          if (allnotes[i+delta][k] != allnotes[j+delta][k]) {
             return 0;
          }
@@ -4062,10 +3986,10 @@ int HumdrumFile::attemptMatch(Array<Array<int> >& allnotes, Array<int>& di,
 //     default value: tdefault = 60.0;
 //
 
-void HumdrumFile::analyzeTempoMarkings(Array<double>& tempo, double tdefault) {
+void HumdrumFile::analyzeTempoMarkings(vector<double>& tempo, double tdefault) {
    HumdrumFile& score = *this;
-   tempo.setSize(score.getNumLines());
-   tempo.zero();
+   tempo.resize(score.getNumLines());
+   fill(tempo.begin(), tempo.end(), 0.0);
  
    int i, j;
    double lasttempo = tdefault;
@@ -4099,7 +4023,7 @@ void HumdrumFile::analyzeTempoMarkings(Array<double>& tempo, double tdefault) {
 //   Default value: flag = 0;
 //
 
-void HumdrumFile::analyzeMeter(Array<double>& top, Array<double>& bottom,
+void HumdrumFile::analyzeMeter(vector<double>& top, vector<double>& bottom,
       int flag) {
    int    compoundQ   = flag & (0x01<<COMPOUND_METER_BIT);
    double goodtop     = -1.0;
@@ -4108,8 +4032,8 @@ void HumdrumFile::analyzeMeter(Array<double>& top, Array<double>& bottom,
    int    testbottom  = -1;
 
    HumdrumFile& score = *this;
-   top.setSize(score.getNumLines());
-   bottom.setSize(score.getNumLines());
+   top.resize(score.getNumLines());
+   bottom.resize(score.getNumLines());
 
    int j;
    int line;
@@ -4161,8 +4085,8 @@ void HumdrumFile::analyzeMeter(Array<double>& top, Array<double>& bottom,
 //     Default value: flag = AFLAG_COMPOUND_METER
 //
 
-void HumdrumFile::analyzeBeatDuration(Array<double>& beatdur, int flag) {
-   Array<double> top;
+void HumdrumFile::analyzeBeatDuration(vector<double>& beatdur, int flag) {
+   vector<double> top;
    analyzeMeter(top, beatdur, flag);
 }
 
@@ -4174,36 +4098,34 @@ void HumdrumFile::analyzeBeatDuration(Array<double>& beatdur, int flag) {
 //   accentuation
 //
 
-void HumdrumFile::analyzeAttackAccentuation(Array<int>& atakcent) {
+void HumdrumFile::analyzeAttackAccentuation(vector<int>& atakcent) {
    HumdrumFile& score = *this;
    int allnotes;
    int attacknotes;
    int sustainnotes;
    int analysis;
-   Array<int> notes;
+   vector<int> notes;
 
-   atakcent.setSize(score.getNumLines());
-   atakcent.setSize(0);
-   atakcent.allowGrowth(1);
+   atakcent.reserve(score.getNumLines());
+   atakcent.resize(0);
 
    for (int i=0; i<score.getNumLines(); i++) {
       if (score[i].getType() != E_humrec_data) {
          analysis = 0;      
-         atakcent.append(analysis);
+         atakcent.push_back(analysis);
          continue;
       }
       score.getNoteList(notes, i, NL_NOPC | NL_FILL | NL_NOSORT |
          NL_NOUNIQ | NL_NORESTS);
-      allnotes = notes.getSize();
+      allnotes = notes.size();
       score.getNoteList(notes, i, NL_NOPC | NL_NOFILL | NL_NOSORT |
          NL_NOUNIQ | NL_NOTIED | NL_NORESTS);
-      attacknotes = notes.getSize();
+      attacknotes = notes.size();
       sustainnotes = allnotes - attacknotes;
       analysis = attacknotes - sustainnotes;
-      atakcent.append(analysis);
+      atakcent.push_back(analysis);
    }
 
-   atakcent.allowGrowth(0);
 }
 
 
@@ -4215,33 +4137,23 @@ void HumdrumFile::analyzeAttackAccentuation(Array<int>& atakcent) {
 //
 
 void HumdrumFile::analyzeMetricLevel(vector<int>& metlev) {
-   Array<int> tempout;
-   analyzeMetricLevel(tempout);
-   metlev.resize(tempout.getSize());
-   for (int i=0; i<tempout.getSize(); i++) {
-      metlev[i] = tempout[i];
-   }
-}
-
-
-void HumdrumFile::analyzeMetricLevel(Array<int>& metlev) {
    HumdrumFile& score = *this;
    int i;
-   metlev.setSize(score.getNumLines());
-   metlev.zero();
+   metlev.resize(score.getNumLines());
+   fill(metlev.begin(), metlev.end(), 0);
 
-   Array<int> iscompound;
-   Array<double> msigtop; 
-   Array<double> msigbottom; 
+   vector<int> iscompound;
+   vector<double> msigtop; 
+   vector<double> msigbottom; 
 
    analyzeMeter(msigtop, msigbottom);
-   iscompound.setSize(msigtop.getSize());
-   iscompound.zero();
+   iscompound.resize(msigtop.size());
+   fill(iscompound.begin(), iscompound.end(), 0);
 
    int mval;
    int ltop = 0;
    int lbottom = 0;
-   for (i=0; i<iscompound.getSize(); i++) {
+   for (i=0; i<(int)iscompound.size(); i++) {
       if ((i > 0) && (ltop == msigtop[i]) && (lbottom == msigbottom[i])) {
          iscompound[i] = iscompound[i-1];
       } else {
@@ -4353,10 +4265,10 @@ void HumdrumFile::analyzeMetricLevel(Array<int>& metlev) {
 //   inversion of the given note sets.
 //
 
-void HumdrumFile::analyzeSonorityQuality(Array<ChordQuality>& cq) {
-   Array<int> notes;
+void HumdrumFile::analyzeSonorityQuality(vector<ChordQuality>& cq) {
+   vector<int> notes;
    HumdrumFile& score = *this;
-   cq.setSize(score.getNumLines());
+   cq.resize(score.getNumLines());
 
    int line;
    for (line=0; line<score.getNumLines(); line++) {
@@ -4365,7 +4277,6 @@ void HumdrumFile::analyzeSonorityQuality(Array<ChordQuality>& cq) {
       Convert::noteSetToChordQuality(cq[line], notes);
    }
 
-   cq.allowGrowth(0);
 }
 
 
@@ -4377,11 +4288,11 @@ void HumdrumFile::analyzeSonorityQuality(Array<ChordQuality>& cq) {
 //   Default value: flag = AFLAG_BASE40_PITCH
 //
 
-void HumdrumFile::analyzeSonorityRoot(Array<int>& roots, int flag) {
+void HumdrumFile::analyzeSonorityRoot(vector<int>& roots, int flag) {
    int base12Q = flag & (0x01 << PITCH_BASE_BIT);
-   Array<int> notes;
+   vector<int> notes;
    HumdrumFile& score = *this;
-   roots.setSize(score.getNumLines());
+   roots.resize(score.getNumLines());
    ChordQuality cq;
 
    int line;
@@ -4395,7 +4306,6 @@ void HumdrumFile::analyzeSonorityRoot(Array<int>& roots, int flag) {
       }
    }
 
-   roots.allowGrowth(0);
 }
 
 
@@ -4409,52 +4319,50 @@ void HumdrumFile::analyzeSonorityRoot(Array<int>& roots, int flag) {
 //      default value: binaryQ = 0
 //      default value: tracknum = -1 (examine all spines of music)
 
-int HumdrumFile::analyzeKeyKS(Array<double>& scores, int startindex, 
+int HumdrumFile::analyzeKeyKS(vector<double>& scores, int startindex, 
       int stopindex, int rhythmQ, int binaryQ, int tracknum) {
 
-   Array<double> absbeat;
-   Array<int>    pitches;
-   Array<double> durations;
-   Array<double> levels;
+   vector<double> absbeat;
+   vector<int>    pitches;
+   vector<double> durations;
+   vector<double> levels;
    getNoteArray(absbeat, pitches, durations, levels, startindex, stopindex,
       tracknum);
 
-   scores.setSize(24);
-   Array<double> distribution(12);
+   scores.resize(24);
+   vector<double> distribution(12);
 
    int i;
-   for (i=0; i<pitches.getSize(); i++) {
+   for (i=0; i<(int)pitches.size(); i++) {
       pitches[i] = Convert::base40ToMidiNoteNumber(pitches[i]);
    }
 
-   return ::analyzeKeyKS(scores.getBase(), distribution.getBase(), 
-      pitches.getBase(), durations.getBase(), pitches.getSize(),
-            rhythmQ, binaryQ);
+   return ::analyzeKeyKS(scores.data(), distribution.data(), pitches.data(), 
+         durations.data(), pitches.size(), rhythmQ, binaryQ);
 }
 
 
-int HumdrumFile::analyzeKeyKS2(Array<double>& scores, int startindex, 
+int HumdrumFile::analyzeKeyKS2(vector<double>& scores, int startindex, 
       int stopindex, double* majorprofile, double* minorprofile, int rhythmQ,
       int binaryQ, int tracknum) {
 
-   Array<double> absbeat;
-   Array<int>    pitches;
-   Array<double> durations;
-   Array<double> levels;
+   vector<double> absbeat;
+   vector<int>    pitches;
+   vector<double> durations;
+   vector<double> levels;
    getNoteArray(absbeat, pitches, durations, levels, startindex, stopindex,
       tracknum);
 
-   scores.setSize(24);
-   Array<double> distribution(12);
+   scores.resize(24);
+   vector<double> distribution(12);
 
    int i;
-   for (i=0; i<pitches.getSize(); i++) {
+   for (i=0; i<(int)pitches.size(); i++) {
       pitches[i] = Convert::base40ToMidiNoteNumber(pitches[i]);
    }
 
-   return ::analyzeKeyKS2(scores.getBase(), distribution.getBase(), 
-      pitches.getBase(), durations.getBase(), pitches.getSize(),
-            rhythmQ, majorprofile, minorprofile);
+   return ::analyzeKeyKS2(scores.data(), distribution.data(), pitches.data(), 
+         durations.data(), pitches.size(), rhythmQ, majorprofile, minorprofile);
 }
 
 
@@ -4466,8 +4374,8 @@ int HumdrumFile::analyzeKeyKS2(Array<double>& scores, int startindex,
 // Default value: attackQ = 0
 //
 
-void HumdrumFile::getNormalForm(Array<int>& norm, int line, int attackQ) {
-   Array<int> base12;
+void HumdrumFile::getNormalForm(vector<int>& norm, int line, int attackQ) {
+   vector<int> base12;
    this->getBase12PitchList(base12, line, attackQ);
    Convert::base12ToNormalForm(norm, base12);
 }
@@ -4487,10 +4395,10 @@ void HumdrumFile::getNormalForm(Array<int>& norm, int line, int attackQ) {
 //    Default value: attackQ = 0
 //
 
-void HumdrumFile::getBase12PitchList(Array<int>& list, int line, int attackQ) {
+void HumdrumFile::getBase12PitchList(vector<int>& list, int line, int attackQ) {
    HumdrumRecord& arecord = (*this)[line];
-   list.setSize(arecord.getFieldCount());
-   list.setSize(0);
+   list.reserve(arecord.getFieldCount());
+   list.resize(0);
    int j, k;
    int ii, jj;
    int tcount;
@@ -4526,7 +4434,7 @@ void HumdrumFile::getBase12PitchList(Array<int>& list, int line, int attackQ) {
             continue;
          }
          value = Convert::kernToMidiNoteNumber(buffer);
-         list.append(value);
+         list.push_back(value);
       }
    }
 }
@@ -4538,8 +4446,8 @@ void HumdrumFile::getBase12PitchList(Array<int>& list, int line, int attackQ) {
 // HumdrumFile::getIntervalVector --
 //
 
-void HumdrumFile::getIntervalVector(Array<int>& iv, int line, int attackQ) {
-   Array<int> base12;
+void HumdrumFile::getIntervalVector(vector<int>& iv, int line, int attackQ) {
+   vector<int> base12;
    this->getBase12PitchList(base12, line, attackQ);
    Convert::base12ToIntervalVector(iv, base12);
 }
@@ -4558,7 +4466,7 @@ void HumdrumFile::getIntervalVector(Array<int>& iv, int line, int attackQ) {
 //
 
 const char* HumdrumFile::getTnSetName(int line, int attackQ) {
-   Array<int> base12;
+   vector<int> base12;
    this->getBase12PitchList(base12, line, attackQ);
    return Convert::base12ToTnSetName(base12);
 }
@@ -4570,11 +4478,11 @@ const char* HumdrumFile::getTnSetName(int line, int attackQ) {
 // HumdrumFile::getTnSetNameAllSubsets --
 //
 
-void HumdrumFile::getTnSetNameAllSubsets(Array<int>& list, int line, 
+void HumdrumFile::getTnSetNameAllSubsets(vector<int>& list, int line, 
       int attackQ) {
-   Array<int> base12;
+   vector<int> base12;
    this->getBase12PitchList(base12, line, attackQ);
-   list.setSize(0);
+   list.resize(0);
    Convert::base12ToTnSetNameAllSubsets(list, base12);
 }
 
@@ -4585,8 +4493,8 @@ void HumdrumFile::getTnSetNameAllSubsets(Array<int>& list, int line,
 // HumdrumFile::getTnNormalForm -- 0-transposed normal form.
 //
 
-void HumdrumFile::getTnNormalForm(Array<int>& tnorm, int line, int attackQ) {
-   Array<int> base12;
+void HumdrumFile::getTnNormalForm(vector<int>& tnorm, int line, int attackQ) {
+   vector<int> base12;
    this->getBase12PitchList(base12, line, attackQ);
    Convert::base12ToTnNormalForm(tnorm, base12);
 }
@@ -4599,11 +4507,11 @@ void HumdrumFile::getTnNormalForm(Array<int>& tnorm, int line, int attackQ) {
 //
 
 const char* HumdrumFile::getForteSetName(int line) {
-   Array<int> iv;
-   Array<int> base12;
+   vector<int> iv;
+   vector<int> base12;
    HumdrumRecord& arecord = (*this)[line];
-   base12.setSize(arecord.getFieldCount());
-   base12.setSize(0);
+   base12.reserve(arecord.getFieldCount());
+   base12.resize(0);
    int j, k;
    int ii, jj;
    int tcount;
@@ -4629,13 +4537,13 @@ const char* HumdrumFile::getForteSetName(int line) {
       for (k=0; k<tcount; k++) {
          (*this)[ii].getToken(buffer, jj, k);
          value = Convert::kernToMidiNoteNumber(buffer);
-         base12.append(value);
+         base12.push_back(value);
       }
    }
 
-   if (base12.getSize() == 0) {
+   if (base12.size() == 0) {
       return "0-0";
-   } else if (base12.getSize() == 1) {
+   } else if (base12.size() == 1) {
       return "1-0";
    }
 

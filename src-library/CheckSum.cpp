@@ -15,21 +15,11 @@
 #include <string.h>
 #include <assert.h>
 
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>     /* for Windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-   
+#include <sstream>
+#include <string>
+
+using namespace std;
+
 
 //////////////////////////////
 //
@@ -461,23 +451,23 @@ void CheckSum::Decode (unsigned long *output, unsigned char *input,
 // CheckSum::getMD5Sum -- interface to the previous functions.
 //
 
-void CheckSum::getMD5Sum(Array<char>& md5sum, Array<char>& data) {
+void CheckSum::getMD5Sum(string& md5sum, string& data) {
    MD5_CTX context;
    MD5Init(&context);
 
    int i;
-   int count    = (data.getSize()-1) / 64;
-   int leftover = (data.getSize()-1) % 64;
+   int count    = ((int)data.size()-1) / 64;
+   int leftover = ((int)data.size()-1) % 64;
 
    for (i=0; i<count; i++) {
-      MD5Update(&context, (unsigned char*)data.getBase() + i * 64, 64);
+      MD5Update(&context, (unsigned char*)data.c_str() + i * 64, 64);
 
    }
    if (leftover > 0) {
-      MD5Update(&context, (unsigned char*)data.getBase() + count*64, leftover);
+      MD5Update(&context, (unsigned char*)data.c_str() + count*64, leftover);
    }
 
-   SSTREAM outvalue;
+   stringstream outvalue;
    unsigned char digest[16] = {0};
    MD5Final(digest, &context);
    for (i=0; i<16; i++) {
@@ -487,8 +477,7 @@ void CheckSum::getMD5Sum(Array<char>& md5sum, Array<char>& data) {
       outvalue << hex << (int)digest[i] << dec;
    }
    outvalue << ends;
-   md5sum.setSize(strlen(outvalue.CSTRING) + 1);
-   strcpy(md5sum.getBase(), outvalue.CSTRING);
+   md5sum = outvalue.str();
 }
 
 
@@ -498,25 +487,22 @@ void CheckSum::getMD5Sum(Array<char>& md5sum, Array<char>& data) {
 // CheckSum::getMD5Sum -- interface to the previous functions.
 //
 
-void CheckSum::getMD5Sum(ostream& out, SSTREAM& data) {
-   Array<unsigned char> buffer;
-   buffer.setSize(data.str().length()+1);
-   buffer[buffer.getSize()-1] = '\0';
-   strncpy((char*)buffer.getBase(), data.CSTRING, data.str().length());
+void CheckSum::getMD5Sum(ostream& out, stringstream& data) {
+   string buffer = data.str();
 
    MD5_CTX context;
    MD5Init(&context);
 
    int i;
-   int count    = (buffer.getSize()-1) / 64;
-   int leftover = (buffer.getSize()-1) % 64;
+   int count    = ((int)buffer.size()-1) / 64;
+   int leftover = ((int)buffer.size()-1) % 64;
 
    for (i=0; i<count; i++) {
-      MD5Update(&context, buffer.getBase() + i * 64, 64);
+      MD5Update(&context, (unsigned char*)buffer.c_str() + i * 64, 64);
 
    }
    if (leftover > 0) {
-      MD5Update(&context, buffer.getBase() + count * 64, leftover);
+      MD5Update(&context, (unsigned char*)buffer.c_str() + count * 64, leftover);
    }
 
    unsigned char digest[16] = {0};

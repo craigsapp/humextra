@@ -21,14 +21,11 @@
 #include <stdio.h>
 #include <cctype>
 
-#ifndef OLDCPP
-   #include <fstream>
-   #include <iostream>
-   using namespace std;
-#else
-   #include <fstream.h>
-   #include <iostream.h>
-#endif
+#include <fstream>
+#include <iostream>
+#include <vector>
+
+using namespace std;
    
 
 
@@ -39,8 +36,8 @@
 //     and fills an array of scores for each possible root.
 //
 
-int HumdrumFile::measureChordRoot(Array<double>& scores,
-      Array<double>& parameters, int startindex, int stopindex, int
+int HumdrumFile::measureChordRoot(vector<double>& scores,
+      vector<double>& parameters, int startindex, int stopindex, int
       algorithmno, int debug) {
 
    NoteListArray notelist;
@@ -49,7 +46,7 @@ int HumdrumFile::measureChordRoot(Array<double>& scores,
    if (debug) {
       cout << "START INDEX = " << startindex
            << "\tSTOP INDEX = " << stopindex << "\n";
-      for (int i=0; i<notelist.getSize(); i++) {
+      for (int i=0; i<(int)notelist.size(); i++) {
          cout << "i=" << i << "\t" << notelist[i] << "\n";
       }
    }
@@ -77,8 +74,8 @@ int HumdrumFile::measureChordRoot(Array<double>& scores,
 }
 
 
-int HumdrumFile::measureChordRoot(Array<double>& scores,
-      Array<double>& parameters, double startbeat, double stopbeat, 
+int HumdrumFile::measureChordRoot(vector<double>& scores,
+      vector<double>& parameters, double startbeat, double stopbeat, 
       int algorithmno, int debug) {
 
    int start = getStartIndex(startbeat);
@@ -96,8 +93,8 @@ int HumdrumFile::measureChordRoot(Array<double>& scores,
 // static HumdrumFile::measureChordRoot0 -- starting algorithm
 //
 
-int HumdrumFile::measureChordRoot0(Array<double>& scores, 
-      Array<double>& parameters, NoteListArray& notelist) {
+int HumdrumFile::measureChordRoot0(vector<double>& scores, 
+      vector<double>& parameters, NoteListArray& notelist) {
    return measureChordRoot1(scores, parameters, notelist);
 }
 
@@ -109,8 +106,8 @@ int HumdrumFile::measureChordRoot0(Array<double>& scores,
 //      algorithm 0
 //
 
-int HumdrumFile::measureChordRoot1(Array<double>& scores, 
-      Array<double>& parameters, NoteListArray& notelist) {
+int HumdrumFile::measureChordRoot1(vector<double>& scores, 
+      vector<double>& parameters, NoteListArray& notelist) {
 
    int vx[40] = {0, 7, 7, 1000, 4, 4, 4, 4, 4, 1000, 8, 1, 1, 8, 8, 5, 5,
 		5, 5, 5, 1000, 9, 2, 2, 2, 9, 1000, 6, 6, 6, 6, 6, 1000, 3,
@@ -122,18 +119,18 @@ int HumdrumFile::measureChordRoot1(Array<double>& scores,
    double& alpha  = parameters[0];
    double& delta  = parameters[1];
    double& lambda = parameters[2];
-   scores.setSize(40);
-   scores.zero();
+   scores.resize(40);
+   fill(scores.begin(), scores.end(), 0);
 
    int i, j;
    int p;
-   int count = notelist.getSize();
+   int count = notelist.size();
    double asum, bsum;
    double I;
    int max = 0;
 
-// cout << "Notelist size is: " << notelist.getSize() << endl;
-// cout << "Scores size is: " << scores.getSize() << endl;
+// cout << "Notelist size is: " << notelist.size() << endl;
+// cout << "Scores size is: " << scores.size() << endl;
 
    for (i=0; i<40; i++) {
       asum = bsum = 0.0;
@@ -185,8 +182,8 @@ int HumdrumFile::measureChordRoot1(Array<double>& scores,
 //    and metric level by addition
 //
 
-int HumdrumFile::measureChordRoot2(Array<double>& scores, 
-      Array<double>& parameters, NoteListArray& notelist) {
+int HumdrumFile::measureChordRoot2(vector<double>& scores, 
+      vector<double>& parameters, NoteListArray& notelist) {
 
    int vx[40] = {0, 7, 7, 1000, 4, 4, 4, 4, 4, 1000, 8, 1, 1, 8, 8, 5, 5,
 		5, 5, 5, 1000, 9, 2, 2, 2, 9, 1000, 6, 6, 6, 6, 6, 1000, 3,
@@ -198,19 +195,19 @@ int HumdrumFile::measureChordRoot2(Array<double>& scores,
    double& alpha   = parameters[0];
    double& delta   = parameters[1];
    double& lambda  = parameters[2];
-   scores.setSize(40);
-   scores.zero();
+   scores.resize(40);
+   fill(scores.begin(), scores.end(), 0);
 
    int i, j;
    int p;
-   int count = notelist.getSize();
+   int count = notelist.size();
    double asum, bsum;
    double I;
    int max = 0;
 
    double offset = 0.0;
    double testv;
-   for (i=0; i<notelist.getSize(); i++) {
+   for (i=0; i<(int)notelist.size(); i++) {
       testv = -log(notelist[i].getDur())/log(2.0);
       if (testv > offset) {
          offset = testv;
@@ -222,8 +219,8 @@ int HumdrumFile::measureChordRoot2(Array<double>& scores,
    }
    offset = offset * 2;
 
-// cout << "Notelist size is: " << notelist.getSize() << endl;
-// cout << "Scores size is: " << scores.getSize() << endl;
+// cout << "Notelist size is: " << notelist.size() << endl;
+// cout << "Scores size is: " << scores.size() << endl;
    for (i=0; i<40; i++) {
       asum = bsum = 0.0;
       for (j=0; j<count; j++) {
@@ -254,8 +251,8 @@ int HumdrumFile::measureChordRoot2(Array<double>& scores,
 // static HumdrumFile::measureChordRoot3 -- 
 //
 
-int HumdrumFile::measureChordRoot3(Array<double>& scores, 
-      Array<double>& parameters, NoteListArray& notelist) {
+int HumdrumFile::measureChordRoot3(vector<double>& scores, 
+      vector<double>& parameters, NoteListArray& notelist) {
 
    return 0;
 }
@@ -267,8 +264,8 @@ int HumdrumFile::measureChordRoot3(Array<double>& scores,
 // static HumdrumFile::measureChordRoot4 -- 
 //
 
-int HumdrumFile::measureChordRoot4(Array<double>& scores, 
-      Array<double>& parameters, NoteListArray& notelist) {
+int HumdrumFile::measureChordRoot4(vector<double>& scores, 
+      vector<double>& parameters, NoteListArray& notelist) {
 
    return 0;
 }
@@ -280,8 +277,8 @@ int HumdrumFile::measureChordRoot4(Array<double>& scores,
 // static HumdrumFile::measureChordRoot5 -- 
 //
 
-int HumdrumFile::measureChordRoot5(Array<double>& scores, 
-      Array<double>& parameters, NoteListArray& notelist) {
+int HumdrumFile::measureChordRoot5(vector<double>& scores, 
+      vector<double>& parameters, NoteListArray& notelist) {
 
    return 0;
 }
@@ -293,8 +290,8 @@ int HumdrumFile::measureChordRoot5(Array<double>& scores,
 // static HumdrumFile::measureChordRoot6 -- 
 //
 
-int HumdrumFile::measureChordRoot6(Array<double>& scores, 
-      Array<double>& parameters, NoteListArray& notelist) {
+int HumdrumFile::measureChordRoot6(vector<double>& scores, 
+      vector<double>& parameters, NoteListArray& notelist) {
 
    return 0;
 }
@@ -306,8 +303,8 @@ int HumdrumFile::measureChordRoot6(Array<double>& scores,
 // static HumdrumFile::measureChordRoot7 -- 
 //
 
-int HumdrumFile::measureChordRoot7(Array<double>& scores, 
-      Array<double>& parameters, NoteListArray& notelist) {
+int HumdrumFile::measureChordRoot7(vector<double>& scores, 
+      vector<double>& parameters, NoteListArray& notelist) {
 
    return 0;
 }
@@ -319,8 +316,8 @@ int HumdrumFile::measureChordRoot7(Array<double>& scores,
 // static HumdrumFile::measureChordRoot8 -- 
 //
 
-int HumdrumFile::measureChordRoot8(Array<double>& scores, 
-      Array<double>& parameters, NoteListArray& notelist) {
+int HumdrumFile::measureChordRoot8(vector<double>& scores, 
+      vector<double>& parameters, NoteListArray& notelist) {
 
    return 0;
 }
@@ -332,8 +329,8 @@ int HumdrumFile::measureChordRoot8(Array<double>& scores,
 // static HumdrumFile::measureChordRoot9 -- 
 //
 
-int HumdrumFile::measureChordRoot9(Array<double>& scores, 
-      Array<double>& parameters, NoteListArray& notelist) {
+int HumdrumFile::measureChordRoot9(vector<double>& scores, 
+      vector<double>& parameters, NoteListArray& notelist) {
 
    return 0;
 }
@@ -367,15 +364,13 @@ void HumdrumFile::generateNoteList(NoteListArray& notelist,
    }
 
    // estimate the largest amount necessary:
-   notelist.setSize(score.getNumLines() * score.getMaxTracks() * 10);
-   notelist.setGrowth(score.getNumLines());
-   notelist.setSize(0);
-   notelist.allowGrowth(1);
+   notelist.reserve(score.getNumLines() * score.getMaxTracks() * 10);
+   notelist.resize(0);
 
    NoteList currentlist;
    currentlist.clear();
 
-   Array<int> scorelevels;
+   vector<int> scorelevels;
    score.analyzeMetricLevel(scorelevels);
    
    int firsttime = 1;
@@ -455,7 +450,7 @@ void HumdrumFile::generateNoteList(NoteListArray& notelist,
                currentlist.setTrack(track);
                currentlist.setSpine(spine);
                currentlist.setToken(token);
-               notelist.append(currentlist);
+               notelist.push_back(currentlist);
                currentlist.clear();
  
             } // end of a chord
@@ -465,11 +460,9 @@ void HumdrumFile::generateNoteList(NoteListArray& notelist,
  
    } // end of the music selection   
 
-   notelist.allowGrowth(0);
-
 // cout << "Notes: " << endl;
 // char xxx[128] = {0};
-// for (int z=0; z<notelist.getSize(); z++) {
+// for (int z=0; z<(int)notelist.size(); z++) {
 // cout << "\t(" << notelist[z].getPitch() << " - " <<
 // notelist[z].getPitch()%40 << ") " << Convert::base40ToKern(xxx,
 // ((notelist[z].getPitch()) % 40)+3*40) << endl;
@@ -491,8 +484,8 @@ void HumdrumFile::generateNoteList(NoteListArray& notelist,
 //       points in terms of absolute beats.
 //
 
-int HumdrumFile::analyzeChordProbabilityDurNorm(Array<double>& coef, 
-      double startbeat, double stopbeat, Array<int>& scorelevels, 
+int HumdrumFile::analyzeChordProbabilityDurNorm(vector<double>& coef, 
+      double startbeat, double stopbeat, vector<int>& scorelevels, 
       double empirical1, double empirical2, double sx, double sy) {
 
    HumdrumFile& score = *this;
@@ -521,8 +514,8 @@ int HumdrumFile::analyzeChordProbabilityDurNorm(Array<double>& coef,
 //       points in terms of absolute beats.
 //
 
-int HumdrumFile::analyzeChordProbabilityDur(Array<double>& coef, 
-      double startbeat, double stopbeat, Array<int>& scorelevels, 
+int HumdrumFile::analyzeChordProbabilityDur(vector<double>& coef, 
+      double startbeat, double stopbeat, vector<int>& scorelevels, 
       double empirical1, double empirical2, double sx, double sy) {
 
    HumdrumFile& score = *this;
@@ -570,8 +563,8 @@ int HumdrumFile::analyzeChordProbabilityDur(Array<double>& coef,
 // Default value: empirical2 = -3.0
 //
 
-int HumdrumFile::analyzeChordProbability(Array<double>& coef, 
-      int start, int stop, Array<int>& scorelevels, double empirical1,
+int HumdrumFile::analyzeChordProbability(vector<double>& coef, 
+      int start, int stop, vector<int>& scorelevels, double empirical1,
       double empirical2, double sx, double sy) {
 
    int vectorx[40] = {
@@ -662,25 +655,22 @@ int HumdrumFile::analyzeChordProbability(Array<double>& coef,
 
    HumdrumFile& score = *this;
 
-   if (scorelevels.getSize() != score.getNumLines()) {
-      scorelevels.setSize(0);
+   if ((int)scorelevels.size() != score.getNumLines()) {
+      scorelevels.resize(0);
       score.analyzeMetricLevel(scorelevels);
    }
 
-   Array<double> pitches;
-   Array<double> durs;
-   Array<double> levels;
+   vector<double> pitches;
+   vector<double> durs;
+   vector<double> levels;
 
    int linecount = stop - start + 1;
-   pitches.setSize(linecount * 32);
-   durs.setSize(linecount * 32);
-   levels.setSize(linecount * 32);
-   pitches.setSize(0);
-   durs.setSize(0);
-   levels.setSize(0);
-   pitches.allowGrowth();
-   durs.allowGrowth();
-   levels.allowGrowth();
+   pitches.reserve(linecount * 32);
+   durs.reserve(linecount * 32);
+   levels.reserve(linecount * 32);
+   pitches.resize(0);
+   durs.resize(0);
+   levels.resize(0);
 
    double pitch;
    double duration;
@@ -755,9 +745,9 @@ int HumdrumFile::analyzeChordProbability(Array<double>& coef,
 // cout << "Pitch= " << buffer << " (" << pitch << ")\t";
 // cout << "Dur=" << duration << "\t";
 // cout << "Lev=" << level << "\n";
-               durs.append(duration);
-               levels.append(level);
-               pitches.append(pitch);
+               durs.push_back(duration);
+               levels.push_back(level);
+               pitches.push_back(pitch);
 
             } // end of a chord
          }
@@ -768,7 +758,7 @@ int HumdrumFile::analyzeChordProbability(Array<double>& coef,
 
    // now process the measured data to get it in a good form:
    // double empirical = -3;
-   for (i=0; i<pitches.getSize(); i++) {
+   for (i=0; i<(int)pitches.size(); i++) {
       if (pitches[i] >= 40) {
          cout << "Error in pitch " <<pitches[i] <<" inside chord anal" <<endl;
          exit(1);
@@ -780,27 +770,27 @@ int HumdrumFile::analyzeChordProbability(Array<double>& coef,
    }
      
    // exit if there are no notes to analyze
-   if (pitches.getSize() == 0) {
+   if (pitches.size() == 0) {
       return -1;
    }
 
    // now measure the chord probablility for all roots 
    double suma;
    double sumb;
-   coef.setSize(40);
+   coef.resize(40);
    int rootindex = 0;
    double normvalue;
-   for (i=0; i<coef.getSize(); i++) {
+   for (i=0; i<(int)coef.size(); i++) {
       suma = 0.0;
       sumb = 0.0;
-      for (j=0; j<pitches.getSize(); j++) {
+      for (j=0; j<(int)pitches.size(); j++) {
          rootindex = ((int)pitches[j] - i + 40) % 40;
          normvalue = sqrt(vectorx[rootindex] * vectorx[rootindex] * sx * sx +
                      vectory[rootindex] * vectory[rootindex] * sy * sy);
          suma += normvalue * durs[j];
          sumb += normvalue * levels[j];
       }
-      coef[i] = sqrt(suma * suma + sumb * sumb) / (double)pitches.getSize();
+      coef[i] = sqrt(suma * suma + sumb * sumb) / (double)pitches.size();
    }
 
    return 0;

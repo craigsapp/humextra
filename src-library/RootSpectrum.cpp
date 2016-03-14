@@ -29,9 +29,8 @@
 //
 
 RootSpectrum::RootSpectrum(void) { 
-   values.setSize(40);
-   values.allowGrowth(0);
-   values.setAll(100000.0);
+   values.resize(40);
+   fill(values.begin(), values.end(), 100000.0);
    power = 1.0;
    rhythmOn();
    melodyOn();
@@ -52,7 +51,7 @@ RootSpectrum::RootSpectrum(void) {
 //
 
 RootSpectrum::~RootSpectrum() { 
-   values.setSize(0);
+   values.resize(0);
 }
 
 
@@ -351,7 +350,7 @@ double RootSpectrum::getNormInvScore(int index) {
 //
 
 int RootSpectrum::getSize(void) { 
-   return values.getSize();
+   return values.size();
 }
 
 
@@ -502,7 +501,7 @@ ostream& RootSpectrum::printHumdrum(ostream& out, int type,
    double value = 0.0;
    int findex;
    char buffer[64] = {0};
-   Array<int> bestorder;
+   vector<int> bestorder;
    getBestOrdering(bestorder);
    if (durationQ) {
       out << "!! duration weighting: " << getDurationWeight() << "\n";
@@ -557,16 +556,16 @@ ostream& RootSpectrum::printHumdrum(ostream& out, int type,
 
 class _index_value { public: double value; int index; };
 
-void RootSpectrum::getBestOrdering(Array<int>& bestordering) {
-   Array<_index_value> iv(40);
+void RootSpectrum::getBestOrdering(vector<int>& bestordering) {
+   vector<_index_value> iv(40);
    int i;
-   for (i=0; i<iv.getSize(); i++) {
+   for (i=0; i<(int)iv.size(); i++) {
       iv[i].index = i;
       iv[i].value = values[i];
    }
-   qsort(iv.getBase(), iv.getSize(), sizeof(_index_value), minfloat);
-   bestordering.setSize(40);
-   for (i=0; i<bestordering.getSize(); i++) {
+   qsort(iv.data(), iv.size(), sizeof(_index_value), minfloat);
+   bestordering.resize(40);
+   for (i=0; i<(int)bestordering.size(); i++) {
       bestordering[i] = iv[i].index;
    }
 }
@@ -610,7 +609,7 @@ ostream& RootSpectrum::printXfig(ostream& out, const char* title, int type) {
    double max = getInvScore(bestIndex());
    double pointsize = 0.007 * max;
    int justify = -1;   // left
-   Array<int> bestorder;
+   vector<int> bestorder;
    getBestOrdering(bestorder);
    int count = 0;
    double fontsize = 14.0;
@@ -715,18 +714,18 @@ int RootSpectrum::calculate(IntervalWeight& distances, HumdrumFile& infile,
    int i;
    int j;
 
-   Array<double>& rootscores = values;
+   vector<double>& rootscores = values;
 
    double chordstartbeat = infile[startline].getAbsBeat();
    double chordendbeat   = infile[stopline].getAbsBeat();
 
    // extract note data
-   Array<double> absbeat;
-   Array<int>    pitches;
-   Array<double> durations;
-   Array<double> levels;
-   Array<Array<int> > lastpitches;   // pitches which approach note
-   Array<Array<int> > nextpitches;   // pitches which leave note
+   vector<double> absbeat;
+   vector<int>    pitches;
+   vector<double> durations;
+   vector<double> levels;
+   vector<vector<int> > lastpitches;   // pitches which approach note
+   vector<vector<int> > nextpitches;   // pitches which leave note
 
 
    char buffer[64] = {0};
@@ -741,7 +740,7 @@ int RootSpectrum::calculate(IntervalWeight& distances, HumdrumFile& infile,
            << "!! **absbeat = absolute beat position of note from start (beat 0)\n"
            << "!! **level   = metric level of the note on linear scale\n";
          cout << "**kern\t**dur\t**level\t**absbeat\n";
-         for (i=0; i<pitches.getSize(); i++) {
+         for (i=0; i<(int)pitches.size(); i++) {
             cout << Convert::base40ToKern(buffer, pitches[i]) << "\t";
             cout << durations[i] << "\t";
             cout << levels[i]    << "\t";
@@ -760,27 +759,27 @@ int RootSpectrum::calculate(IntervalWeight& distances, HumdrumFile& infile,
            << "!! **absbeat = absolute beat position of note from start (beat 0)\n"
            << "!! **level   = metric level of the note on linear scale\n";
          cout << "**kern\t**last\t**next\t**dur\t**level\t**absbeat\n";
-         for (i=0; i<pitches.getSize(); i++) {
+         for (i=0; i<(int)pitches.size(); i++) {
             cout << Convert::base40ToKern(buffer, pitches[i]) << "\t";
    
-            if (lastpitches[i].getSize() == 0) {
+            if (lastpitches[i].size() == 0) {
                cout << "." << "\t";
             } else {
-               for (j=0; j<lastpitches[i].getSize(); j++) {
+               for (j=0; j<(int)lastpitches[i].size(); j++) {
                   cout << Convert::base40ToKern(buffer, lastpitches[i][j]); 
-                  if (j<lastpitches[i].getSize() - 1) {
+                  if (j<(int)lastpitches[i].size() - 1) {
                      cout << " ";
                   }
                }
                cout << "\t";
             }
    
-            if (nextpitches[i].getSize() == 0) {
+            if (nextpitches[i].size() == 0) {
                cout << "." << "\t";
             } else {
-               for (j=0; j<nextpitches[i].getSize(); j++) {
+               for (j=0; j<(int)nextpitches[i].size(); j++) {
                   cout << Convert::base40ToKern(buffer, nextpitches[i][j]); 
-                  if (j<nextpitches[i].getSize() - 1) {
+                  if (j<(int)nextpitches[i].size() - 1) {
                      cout << " ";
                   }
                }
@@ -795,18 +794,18 @@ int RootSpectrum::calculate(IntervalWeight& distances, HumdrumFile& infile,
       }
    }
 
-   if (pitches.getSize() == 0) {
+   if (pitches.size() == 0) {
       // give up if there are no notes in the specified region
-      values.setAll(100000.0);
+      fill(values.begin(), values.end(), 100000.0);
       return -1;
    }
 
-   rootscores.setSize(40);
-   rootscores.setAll(0.0);
+   rootscores.resize(40);
+   fill(rootscores.begin(), rootscores.end(), 0.0);
    double melodyscaling;
 
-   for (i=0; i<rootscores.getSize(); i++) {
-      for (j=0; j<pitches.getSize(); j++) {
+   for (i=0; i<(int)rootscores.size(); i++) {
+      for (j=0; j<(int)pitches.size(); j++) {
          if (melodyQ) {
             melodyscaling = getMelodicScaling(i, pitches[j], 
                lastpitches[j], nextpitches[j], distances, 
@@ -890,7 +889,7 @@ int RootSpectrum::nonchordtoneQno7th(int root, int note) {
 //
 
 double RootSpectrum::getMelodicScaling(int root, int note, 
-      Array<int>& lastpitches, Array<int>& nextpitches, 
+      vector<int>& lastpitches, vector<int>& nextpitches, 
       IntervalWeight& distances, double absbeat, double chordstartbeat, 
       double chordendbeat, double duration) {
 
@@ -901,7 +900,7 @@ double RootSpectrum::getMelodicScaling(int root, int note,
 
    double scalefactor = getMelodyScaleFactor();
 
-   if (lastpitches.getSize() == 0 && nextpitches.getSize() == 0) {
+   if (lastpitches.size() == 0 && nextpitches.size() == 0) {
       // check to see if the note is non-harmonic with respect to root
       if (nonchordtoneQ(root, note)) {
          return nonresolutionscaling;
@@ -915,7 +914,7 @@ double RootSpectrum::getMelodicScaling(int root, int note,
    int testnonharmn;
 
    // check to see if there is a non-harmonic candidate in lastpitches.
-   for (i=0; i<lastpitches.getSize(); i++) {
+   for (i=0; i<(int)lastpitches.size(); i++) {
         testnonharmn = ((note-2) - root + 400) % 40;
         testchordn = ((lastpitches[i]-2) - root + 400) % 40;
 
@@ -959,7 +958,7 @@ double RootSpectrum::getMelodicScaling(int root, int note,
    }
 
    // check to see if there is a non-harmonic candidate in nextpitches.
-   for (i=0; i<nextpitches.getSize(); i++) {
+   for (i=0; i<(int)nextpitches.size(); i++) {
       testnonharmn = ((note-2) - root + 400) % 40;
       testchordn = ((nextpitches[i]-2) - root + 400) % 40;
 

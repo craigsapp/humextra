@@ -2,23 +2,22 @@
 // Copyright 1998-2000 by Craig Stuart Sapp, All Rights Reserved.
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Jun  8 00:38:46 PDT 1998
-// Last Modified: Fri May  5 12:18:44 PDT 2000 (added kernToMidiNoteNumber())
-// Last Modified: Tue Jun  6 13:51:55 PDT 2000 (durationToKernRhythm() improved)
-// Last Modified: Thu Jun 29 20:41:04 PDT 2000 (fixed strange bug in inversion)
-// Last Modified: Tue Nov 14 12:18:50 PST 2000 (added kernToDiatonicPitch())
-// Last Modified: Wed Jan  2 12:40:12 PST 2002 (added kotoToDuration)
-// Last Modified: Sat Mar  9 23:29:28 PST 2002 (durationToKernRhythm() breve)
-// Last Modified: Sat Jul 19 19:32:05 PDT 2003 (added some SCORE functions)
-// Last Modified: Wed Aug 20 15:47:15 PDT 2003 (allow chords in kotoToDuration)
-// Last Modified: Fri Mar 26 16:12:31 PST 2004 (kernToDuration fixed for grace)
-// Last Modified: Tue Oct 14 16:56:54 PDT 2008 (added 'Q' groupetto parsing)
-// Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
-// Last Modified: Sun Jun 21 11:35:40 PDT 2009 (updated for GCC 4.3)
-// Last Modified: Wed Nov 18 16:40:33 PST 2009 (added base40/trans converts)
-// Last Modified: Sat May 22 11:05:59 PDT 2010 (added RationalNumber)
-// Last Modified: Sun Dec 26 04:54:46 PST 2010 (added kernClefToBaseline)
-// Last Modified: Sat Jan 22 17:13:36 PST 2011 (added kernToDurationNoDots)
-// Last Modified: Thu Jan 26 18:10:29 PST 2012 (fixed kotoToDurationR)
+// Last Modified: Fri May  5 12:18:44 PDT 2000 Added kernToMidiNoteNumber()
+// Last Modified: Tue Jun  6 13:51:55 PDT 2000 DurationToKernRhythm() improved
+// Last Modified: Thu Jun 29 20:41:04 PDT 2000 Fixed strange bug in inversion
+// Last Modified: Tue Nov 14 12:18:50 PST 2000 Added kernToDiatonicPitch()
+// Last Modified: Wed Jan  2 12:40:12 PST 2002 Added kotoToDuration
+// Last Modified: Sat Mar  9 23:29:28 PST 2002 DurationToKernRhythm() breve
+// Last Modified: Sat Jul 19 19:32:05 PDT 2003 Added some SCORE functions
+// Last Modified: Wed Aug 20 15:47:15 PDT 2003 Allow chords in kotoToDuration
+// Last Modified: Fri Mar 26 16:12:31 PST 2004 KernToDuration fixed for grace
+// Last Modified: Tue Oct 14 16:56:54 PDT 2008 Added 'Q' groupetto parsing
+// Last Modified: Sun Jun 21 11:35:40 PDT 2009 Updated for GCC 4.3
+// Last Modified: Wed Nov 18 16:40:33 PST 2009 Added base40/trans converts
+// Last Modified: Sat May 22 11:05:59 PDT 2010 Added RationalNumber
+// Last Modified: Sun Dec 26 04:54:46 PST 2010 Added kernClefToBaseline
+// Last Modified: Sat Jan 22 17:13:36 PST 2011 Added kernToDurationNoDots
+// Last Modified: Thu Jan 26 18:10:29 PST 2012 Fixed kotoToDurationR
 // Filename:      ...sig/src/sigInfo/Convert.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/Convert.cpp
 // Syntax:        C++ 
@@ -890,7 +889,7 @@ ChordQuality Convert::chordQualityStringToValue(const char* aString) {
 
 int Convert::chordQualityToBaseNote(const ChordQuality& aQuality) {
 
-   SigCollection<int> notes;
+   vector<int> notes;
    chordQualityToNoteSet(notes, aQuality);
    return notes[aQuality.getInversion()] % 40;
 }
@@ -902,57 +901,88 @@ int Convert::chordQualityToBaseNote(const ChordQuality& aQuality) {
 // Convert::chordQualityToNoteSet --
 //
 
-void Convert::chordQualityToNoteSet(SigCollection<int>& noteSet, 
+void Convert::chordQualityToNoteSet(vector<int>& noteSet, 
      const ChordQuality& aQuality) {
 
-   SigCollection<int>& output = noteSet;
-   output.setSize(0);
-   output.allowGrowth();
-   output[0] = 0;
+   vector<int>& output = noteSet;
+   output.resize(0);
+   output.push_back(0);
    
    switch (aQuality.getType()) {
       case E_chord_rest:     break;
       case E_chord_note:     break;
-      case E_chord_incmin:   output[1] = 11; break;
-      case E_chord_incmaj:   output[1] = 12; break;
-      case E_chord_incmajx3: output[1] = 23; break;
+      case E_chord_incmin:   output.push_back(11); 
+                             break;
+      case E_chord_incmaj:   output.push_back(12); 
+                             break;
+      case E_chord_incmajx3: output.push_back(23); 
+                             break;
       case E_chord_secsev:
-      case E_chord_dim:      output[1] = 11; output[2] = 22; break;
-      case E_chord_min:      output[1] = 11; output[2] = 23; break;
+      case E_chord_dim:      output.push_back(11); 
+                             output.push_back(22); 
+                             break;
+      case E_chord_min:      output.push_back(11); 
+                             output.push_back(23); 
+                             break;
       case E_chord_neopol: 
       case E_chord_secdom:
-      case E_chord_maj:      output[1] = 12; output[2] = 23; break;
-      case E_chord_aug:      output[1] = 12; output[2] = 24; break;
-      case E_chord_minminx5: output[1] = 11; output[2] = 34; break;
-      case E_chord_domsevx5: output[1] = 12; output[2] = 34; break;
+      case E_chord_maj:      output.push_back(12); 
+                             output.push_back(23); 
+                             break;
+      case E_chord_aug:      output.push_back(12); 
+                             output.push_back(24); 
+                             break;
+      case E_chord_minminx5: output.push_back(11); 
+                             output.push_back(34); 
+                             break;
+      case E_chord_domsevx5: output.push_back(12); 
+                             output.push_back(34); 
+                             break;
       
       case E_chord_secsevo:
-      case E_chord_fullydim: output[1] = 11; output[2] = 22; output[3] = 33;
+      case E_chord_fullydim: output.push_back(11); 
+                             output.push_back(22); 
+                             output.push_back(33);
                              break;
       case E_chord_secsevc:
-      case E_chord_halfdim:  output[1] = 11; output[2] = 22; output[3] = 34;
+      case E_chord_halfdim:  output.push_back(11); 
+                             output.push_back(22); 
+                             output.push_back(34);
                              break;
-      case E_chord_minmin:   output[1] = 11; output[2] = 23; output[3] = 34;
+      case E_chord_minmin:   output.push_back(11); 
+                             output.push_back(23); 
+                             output.push_back(34);
                              break;
-      case E_chord_minmaj:   output[1] = 11; output[2] = 23; output[3] = 35;
+      case E_chord_minmaj:   output.push_back(11); 
+                             output.push_back(23); 
+                             output.push_back(35);
                              break;
       case E_chord_secdomsev:
-      case E_chord_domsev:   output[1] = 12; output[2] = 23; output[3] = 34;
+      case E_chord_domsev:   output.push_back(12); 
+                             output.push_back(23); 
+                             output.push_back(34);
                              break;
-      case E_chord_majmaj:   output[1] = 12; output[2] = 23; output[3] = 35;
+      case E_chord_majmaj:   output.push_back(12); 
+                             output.push_back(23); 
+                             output.push_back(35);
                              break;
-      case E_chord_frensix:  output[1] = 12; output[2] = 18; output[3] = 30;
+      case E_chord_frensix:  output.push_back(12); 
+                             output.push_back(18); 
+                             output.push_back(30);
                              break;
-      case E_chord_germsix:  output[1] = 12; output[2] = 23; output[3] = 30;
+      case E_chord_germsix:  output.push_back(12); 
+                             output.push_back(23); 
+                             output.push_back(30);
                              break;
-      case E_chord_italsix:  output[1] = 12; output[2] = 30; break;
+      case E_chord_italsix:  output.push_back(12); 
+                             output.push_back(30); break;
       default:
-         cerr << "Error: unknown type of chord quality: " << aQuality.getType()
-              << endl;
+         cerr << "Error: unknown type of chord quality: " 
+              << aQuality.getType() << endl;
    }
 
    // add bass offset
-   for (int i=0; i<output.getSize(); i++) {
+   for (int i=0; i<(int)output.size(); i++) {
       output[i] += aQuality.getRoot();
       output[i] = (output[i] + 40) % 40;
    }
@@ -1006,15 +1036,15 @@ int Convert::chordQualityToType(const char* aQuality) {
 //
 
 void Convert::noteSetToChordQuality(ChordQuality& cq, 
-      const SigCollection<int>& aSet) {
+      const vector<int>& aSet) {
 
    ChordQuality& output = cq;
-   SigCollection<int> newnotes(aSet.getSize());
+   vector<int> newnotes(aSet.size());
    int i, k;
 
    // remove rests and find the lowest note
    int index = 0;
-   for (i=0; i<aSet.getSize(); i++) {
+   for (i=0; i<(int)aSet.size(); i++) {
       if (aSet[i] > E_root_rest) {
          newnotes[index] = aSet[i];
          index++;
@@ -1026,21 +1056,21 @@ void Convert::noteSetToChordQuality(ChordQuality& cq,
       output.setRoot(E_blank);
       return;
    } else {
-      newnotes.setSize(index);
+      newnotes.resize(index);
    }
 
-   qsort(newnotes.getBase(), newnotes.getSize(), sizeof(int), intcompare);
+   qsort(newnotes.data(), newnotes.size(), sizeof(int), intcompare);
    int basenote = BASE40_PITCHCLASS(newnotes[0]);
 
 
    // remove octave values
-   for (i=0; i<newnotes.getSize(); i++) {
+   for (i=0; i<(int)newnotes.size(); i++) {
       newnotes[i] = BASE40_PITCHCLASS(newnotes[i]);
    }
-   qsort(newnotes.getBase(), newnotes.getSize(), sizeof(int), intcompare);
+   qsort(newnotes.data(), newnotes.size(), sizeof(int), intcompare);
 
    // remove redundant notes
-   int uniqcount = newnotes.getSize();
+   int uniqcount = newnotes.size();
    for (i=1; i<uniqcount; i++) {
       while (newnotes[i] == newnotes[i-1] && i < uniqcount) {
          for (k=i-1; k<uniqcount-1; k++) {
@@ -1049,7 +1079,7 @@ void Convert::noteSetToChordQuality(ChordQuality& cq,
          uniqcount--;
       }
    }
-   newnotes.setSize(uniqcount);
+   newnotes.resize(uniqcount);
 
    int root = E_unknown;
    int chordFound = E_unknown;
@@ -2279,13 +2309,13 @@ char* Convert::base40ToTrans(char* buffer, int base40) {
 // Convert::keyToScaleDegrees --
 //
 
-SigCollection<int> Convert::keyToScaleDegrees(int aKey, int aMode) {
-   SigCollection<int> output;
+vector<int> Convert::keyToScaleDegrees(int aKey, int aMode) {
+   vector<int> output;
    
    switch (aMode) {
       case E_mode_major:
       case E_mode_ionian:
-         output.setSize(7);
+         output.resize(7);
          output[0] = aKey;
          output[1] = aKey + E_base40_maj2;
          output[2] = aKey + E_base40_maj3;
@@ -2318,7 +2348,7 @@ SigCollection<int> Convert::keyToScaleDegrees(int aKey, int aMode) {
    }
 
    // keep the pitches in the primary octave
-   for (int i=0; i<output.getSize(); i++) {
+   for (int i=0; i<(int)output.size(); i++) {
       output[i] = output[i] % 40;
    }
 
@@ -2671,11 +2701,11 @@ int Convert::calculateInversion(int aType, int bassNote, int root) {
    }
 
    ChordQuality cq(aType, 0, root);
-   SigCollection<int> notes;
+   vector<int> notes;
    chordQualityToNoteSet(notes, cq);
    bassNote = bassNote % 40;
    int i;
-   for (i=0; i<notes.getSize(); i++) {
+   for (i=0; i<(int)notes.size(); i++) {
       if (notes[i] == bassNote) {
          return i;
       }
@@ -2695,15 +2725,15 @@ int Convert::calculateInversion(int aType, int bassNote, int root) {
 // checkChord --
 //
 
-int Convert::checkChord(const SigCollection<int>& aSet) {
+int Convert::checkChord(const vector<int>& aSet) {
 
    int output;
-   SigCollection<int> inval(aSet.getSize()-1);
-   for (int i=0; i<inval.getSize(); i++) {
+   vector<int> inval((int)aSet.size()-1);
+   for (int i=0; i<(int)inval.size(); i++) {
       inval[i] = aSet[i+1] - aSet[0];
    }
 
-   switch (inval.getSize()) {
+   switch (inval.size()) {
       case 0:
          output = E_chord_note;
          break;
@@ -2791,13 +2821,13 @@ int Convert::intcompare(const void* a, const void* b) {
 //     on the top
 //
 
-void Convert::rotatechord(SigCollection<int>& aChord) {
+void Convert::rotatechord(vector<int>& aChord) {
 
    int temp = aChord[0];
-   for (int i=1; i<aChord.getSize(); i++) {
+   for (int i=1; i<(int)aChord.size(); i++) {
       aChord[i-1] = aChord[i];
    }
-   aChord[aChord.getSize()-1] = temp + 40;
+   aChord[(int)aChord.size()-1] = temp + 40;
 }
 
 
@@ -2808,16 +2838,16 @@ void Convert::rotatechord(SigCollection<int>& aChord) {
 //      interval vector.
 //
 
-void Convert::base40ToIntervalVector(Array<int>& iv, Array<int>& base40) {
-   iv.setSize(6);
-   iv.setAll(0);
-   if (base40.getSize() <= 1) {
+void Convert::base40ToIntervalVector(vector<int>& iv, vector<int>& base40) {
+   iv.resize(6);
+   fill(iv.begin(), iv.end(), 0);
+   if (base40.size() <= 1) {
       return;
    }
-   Array<int> base12;
-   base12.setSize(base40.getSize());
+   vector<int> base12;
+   base12.resize(base40.size());
    int i;
-   for (i=0; i<base12.getSize(); i++) {
+   for (i=0; i<(int)base12.size(); i++) {
       base12[i] = Convert::base40ToMidiNoteNumber(base40[i]);
    }
    Convert::base12ToIntervalVector(iv, base12);
@@ -2831,17 +2861,17 @@ void Convert::base40ToIntervalVector(Array<int>& iv, Array<int>& base40) {
 //     into an interval vector.
 //
 
-void Convert::base12ToIntervalVector(Array<int>& iv, Array<int>& base12) {
-   iv.setSize(6);
-   iv.setAll(0);
-   if (base12.getSize() <= 1) {
+void Convert::base12ToIntervalVector(vector<int>& iv, vector<int>& base12) {
+   iv.resize(6);
+   fill(iv.begin(), iv.end(), 0);
+   if ((int)base12.size() <= 1) {
       return;
    }
 
-   Array<int> pitchclass(12);
-   pitchclass.setAll(0);
+   vector<int> pitchclass(12);
+   fill(pitchclass.begin(), pitchclass.end(), 0);
    int i, j;
-   for (i=0; i<base12.getSize(); i++) {
+   for (i=0; i<(int)base12.size(); i++) {
       pitchclass[base12[i] % 12] = 1;
    }
    int value;
@@ -2867,19 +2897,19 @@ void Convert::base12ToIntervalVector(Array<int>& iv, Array<int>& base12) {
 // Convert::base12ToTnNormalForm --
 //
 
-void Convert::base12ToTnNormalForm(Array<int>& tnorm, Array<int>& base12) {
-   if (base12.getSize() == 0) {
-      tnorm.setSize(0);
+void Convert::base12ToTnNormalForm(vector<int>& tnorm, vector<int>& base12) {
+   if (base12.size() == 0) {
+      tnorm.resize(0);
       return;
-   } else if (base12.getSize() == 0) {
-      tnorm.setSize(1);
+   } else if (base12.size() == 0) {
+      tnorm.resize(1);
       tnorm[0] = 0;
       return;
    }
    Convert::base12ToNormalForm(tnorm, base12);
    int i;
    int reference = tnorm[0];
-   for (i=0; i<tnorm.getSize(); i++) {
+   for (i=0; i<(int)tnorm.size(); i++) {
       tnorm[i] = (tnorm[i] - reference + 144) % 12;
    }
 }
@@ -2906,27 +2936,26 @@ void Convert::base12ToTnNormalForm(Array<int>& tnorm, Array<int>& base12) {
 //    Note: transpostion is currently always set to 0, so need to add later.
 //
 
-void Convert::base12ToTnSetNameAllSubsets(Array<int>& list, Array<int>& notes) {
-   Array<int> tnorm;
+void Convert::base12ToTnSetNameAllSubsets(vector<int>& list, vector<int>& notes) {
+   vector<int> tnorm;
 
    // calculate the transposed normal form.  This makes the pitch-classes
    // unique and compacts them while preserving the original pitch-class
    // value (normal form would transpose the first pitch-class in the
    // transposed normal form to 0.  
    Convert::base12ToTnNormalForm(tnorm, notes);
-   int pcount = tnorm.getSize();
+   int pcount = tnorm.size();
 
    int i;
    // generate all possible combinations of the pitch classes in tnorm;
-   Array<Array<int> > combinations;
-   combinations.setSize(1 << pcount); // leaving some extra space
-   list.setSize(combinations.getSize());
-   combinations.setSize(0);
-   list.setSize(0);
-   combinations.append(tnorm);
-   Array<int> temp;
+   vector<vector<int> > combinations;
+   combinations.reserve(1 << pcount); // leaving some extra space
+   list.reserve(1 << pcount);
+   list.resize(0);
+   combinations.push_back(tnorm);
+   vector<int> temp;
    for (i=pcount-1; i>1; i--) {
-      temp.setSize(i);
+      temp.resize(i);
       addCombinations(combinations, tnorm, temp);
    }
 
@@ -2935,7 +2964,7 @@ void Convert::base12ToTnSetNameAllSubsets(Array<int>& list, Array<int>& notes) {
    int cardinality;
    int enumeration;
    int number;
-   for (i=0; i<combinations.getSize(); i++) {
+   for (i=0; i<(int)combinations.size(); i++) {
       name = Convert::base12ToTnSetName(combinations[i]);
       if (sscanf(name, "%d-%d", &cardinality, &enumeration)) {
          number = cardinality * 100000 + enumeration * 1000;
@@ -2948,7 +2977,7 @@ void Convert::base12ToTnSetNameAllSubsets(Array<int>& list, Array<int>& notes) {
       tnlist[number]++;
    }
 
-   list.setSize(tnlist.size());
+   list.resize(tnlist.size());
    i = 0;
    for (map<int,int>::iterator it=tnlist.begin(); it != tnlist.end(); it++ ) {
       list[i++] = it->first;
@@ -2969,12 +2998,12 @@ void Convert::base12ToTnSetNameAllSubsets(Array<int>& list, Array<int>& notes) {
 //     default values: q=0, r=0
 //
 
-void Convert::addCombinations(Array<Array<int> >& combinations,
-      Array<int>& input, Array<int>& temp, int q, int r) {
-   if (q == temp.getSize()) {
-      combinations.append(temp);
+void Convert::addCombinations(vector<vector<int> >& combinations,
+      vector<int>& input, vector<int>& temp, int q, int r) {
+   if (q == (int)temp.size()) {
+      combinations.push_back(temp);
    } else {
-      for(int i=r; i<input.getSize(); i++) {
+      for(int i=r; i<(int)input.size(); i++) {
          temp[q]=input[i];
          addCombinations(combinations, input, temp, q+1, i+1);
       }
@@ -2989,11 +3018,11 @@ void Convert::addCombinations(Array<Array<int> >& combinations,
 // the Tn set name for that unsorted collection (which may contain repeats)
 //
 
-const char* Convert::base12ToTnSetName(Array<int>& base12) {
-   Array<int> tnorm;
+const char* Convert::base12ToTnSetName(vector<int>& base12) {
+   vector<int> tnorm;
    Convert::base12ToTnNormalForm(tnorm, base12);
-   int pcount = tnorm.getSize();
-   Array<int>& x = tnorm;
+   int pcount = tnorm.size();
+   vector<int>& x = tnorm;
 
    switch (pcount) {
       case 0:
@@ -3376,7 +3405,7 @@ const char* Convert::base12ToTnSetName(Array<int>& base12) {
    }
 
 //int z;
-//for (z=0; z<x.getSize(); z++) {
+//for (z=0; z<x.size(); z++) {
 //cout << "UNKNOWN: ";
 //cout << x[z] << " ";
 //}
@@ -3393,61 +3422,61 @@ const char* Convert::base12ToTnSetName(Array<int>& base12) {
 //     into a normal form.
 //
 
-void Convert::base12ToNormalForm(Array<int>& nform, Array<int>& base12) {
+void Convert::base12ToNormalForm(vector<int>& nform, vector<int>& base12) {
    int i;
-   if (base12.getSize() == 0) {
-      nform.setSize(0);
+   if (base12.size() == 0) {
+      nform.resize(0);
       return;
-   } else if (base12.getSize() == 1) {
-      nform.setSize(1);
+   } else if (base12.size() == 1) {
+      nform.resize(1);
       nform[0] = base12[0] % 12;
       return;
    }
 
    // first sort pitch classes into normal form
-   Array<int> pcs(12);
-   pcs.setAll(0);
-   for (i=0; i<base12.getSize(); i++) {
+   vector<int> pcs(12);
+   fill(pcs.begin(), pcs.end(), 0);
+   for (i=0; i<(int)base12.size(); i++) {
       pcs[base12[i]%12] = 1;
    }
-   Array<int> values(12);
-   values.setSize(0);
-   for (i=0; i<pcs.getSize(); i++) {
+   vector<int> values(12);
+   values.resize(0);
+   for (i=0; i<(int)pcs.size(); i++) {
       if (pcs[i]) {
-         values.append(i);
+         values.push_back(i);
       }
    }
 
    // now find the best rotation
-   Array<int> bestanswer(12);
-   bestanswer.setSize(1);
+   vector<int> bestanswer(12);
+   bestanswer.resize(1);
    bestanswer[0] = 0;
    int test;
-   int min = values.last() - values[0];
-   int sizem1 = values.getSize() - 1;
+   int min = (int)values.back() - (int)values[0];
+   int sizem1 = (int)values.size() - 1;
    int asize = sizem1 + 1;
-   for (i=1; i<values.getSize(); i++) {
+   for (i=1; i<(int)values.size(); i++) {
       test = ((values[(i+sizem1)%asize] - values[i])+144)%12;
       if (test < min) {
-         bestanswer.setSize(0);
-         bestanswer.append(i);
+         bestanswer.resize(0);
+         bestanswer.push_back(i);
          min = test;
       } else if (test == min) {
-         bestanswer.append(i);
+         bestanswer.push_back(i);
       }
    }
 
    int bestone;
-   if (bestanswer.getSize() == 1) {
+   if (bestanswer.size() == 1) {
       bestone = bestanswer[0];
    } else {
-      bestone = findBestNormalRotation(values, values.getSize()-1, bestanswer);
+      bestone = findBestNormalRotation(values, (int)values.size()-1, bestanswer);
    }
 
    // store the final result
-   nform.setSize(values.getSize());
-   int thesize = values.getSize();
-   for (i=0; i<nform.getSize(); i++) {
+   nform.resize(values.size());
+   int thesize = values.size();
+   for (i=0; i<(int)nform.size(); i++) {
       nform[i] = values[(i+bestone)%thesize];
    }
 }
@@ -3459,31 +3488,31 @@ void Convert::base12ToNormalForm(Array<int>& nform, Array<int>& base12) {
 // Convert::findBestNormalRotation -- used with base12ToNormalForm().
 //
 
-int Convert::findBestNormalRotation(Array<int>& input, int asize, 
-      Array<int>& choices) {
-   Array<int> newchoices(choices.getSize());
-   newchoices.setSize(0);
+int Convert::findBestNormalRotation(vector<int>& input, int asize, 
+      vector<int>& choices) {
+   vector<int> newchoices(choices.size());
+   newchoices.resize(0);
 
    int test;
-   newchoices.setSize(1);
+   newchoices.resize(1);
    newchoices[0] = choices[0];
    int sizem1 = asize - 1;
-   int thesize = input.getSize();
+   int thesize = input.size();
    int min = (input[(choices[0]+sizem1)%thesize] - input[choices[0]] + 144)%12;
 
    int i;
-   for (i=1; i<choices.getSize(); i++ ) {
+   for (i=1; i<(int)choices.size(); i++ ) {
       test = (input[(choices[i]+sizem1)%thesize] - input[choices[i]] + 144)%12;
       if (test < min) {
-         newchoices.setSize(0);
-         newchoices.append(choices[i]);
+         newchoices.resize(0);
+         newchoices.push_back(choices[i]);
          min = test;
       } else if (test == min) {
-         newchoices.append(choices[i]);
+         newchoices.push_back(choices[i]);
       }
    }
 
-   if (newchoices.getSize() == 1) {
+   if (newchoices.size() == 1) {
       return newchoices[0];
    }
 

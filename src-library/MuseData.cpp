@@ -14,28 +14,16 @@
 #include "Enum_muserec.h"
 #include "PerlRegularExpression.h"
 
-
 #include <string.h>
 #include <cctype>
 #include <stdlib.h>
 
-#ifndef OLDCPP
-   #include <sstream>
-   #include <fstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>     /* for Windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #include <fstream.h>
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-   
+#include <sstream>
+#include <fstream>
+#include <vector>
+
+using namespace std;
+
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -50,14 +38,12 @@
 
 MuseEventSet::MuseEventSet (void) { 
    clear(); 
-   events.setGrowth(20);
 }
 
 
 MuseEventSet::MuseEventSet(RationalNumber atime) { 
    setTime(atime);
-   events.setSize(0);
-   events.setGrowth(20);
+   events.resize(0);
 }
 
 
@@ -71,10 +57,10 @@ MuseData& MuseData::operator=(MuseData& input) {
    if (this == &input) {
       return *this;
    }
-   data.setSize(input.data.getSize());
+   data.resize(input.data.size());
    MuseRecord* temprec;
    int i;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       temprec = new MuseRecord;
       *temprec = *(input.data[i]);
       data[i] = temprec;
@@ -92,7 +78,7 @@ MuseData& MuseData::operator=(MuseData& input) {
 //
 
 void MuseEventSet::clear(void) { 
-   events.setSize(0);
+   events.resize(0);
    absbeat.setValue(0,1);
 }
 
@@ -128,7 +114,7 @@ RationalNumber MuseEventSet::getTime(void) {
 //
 
 void MuseEventSet::appendRecord(MuseRecord* arecord) { 
-   events.append(arecord);
+   events.push_back(arecord);
 }
 
 
@@ -155,9 +141,8 @@ MuseEventSet MuseEventSet::operator=(MuseEventSet& anevent) {
    }
 
    this->absbeat = anevent.absbeat;
-   this->events.setSize(anevent.events.getSize());
-   int i;
-   for (i=0; i<this->events.getSize(); i++) {
+   this->events.resize(anevent.events.size());
+   for (int i=0; i<(int)this->events.size(); i++) {
       this->events[i] = anevent.events[i];
    }
    return *this;
@@ -171,7 +156,7 @@ MuseEventSet MuseEventSet::operator=(MuseEventSet& anevent) {
 //
 
 int MuseEventSet::getEventCount(void) {
-   return events.getSize();
+   return events.size();
 }
 
 
@@ -188,25 +173,23 @@ int MuseEventSet::getEventCount(void) {
 //
 
 MuseData::MuseData(void) {
-   data.setSize(100000);
-   data.setGrowth(999999);
-   data.setSize(0);
-   sequence.setSize(0);
-   name.setSize(1);
-   name[0] = '\0';
+   data.reserve(100000);
+   data.resize(0);
+   sequence.resize(0);
+   name = "";
 }
 
 MuseData::MuseData(MuseData& input) {
-   data.setSize(input.data.getSize());
+   data.resize(input.data.size());
    MuseRecord* temprec;
    int i;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       temprec  = new MuseRecord;
       *temprec = *(input.data[i]);
       data[i]  = temprec;
    }
-   sequence.setSize(input.sequence.getSize());
-   for (i=0; i<input.sequence.getSize(); i++) {
+   sequence.resize(input.sequence.size());
+   for (i=0; i<(int)input.sequence.size(); i++) {
      sequence[i] = new MuseEventSet;
      *(sequence[i]) = *(input.sequence[i]);
    }
@@ -223,16 +206,14 @@ MuseData::MuseData(MuseData& input) {
 
 MuseData::~MuseData() {
    int i;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       if (data[i] != NULL) {
          delete data[i];
          data[i] = NULL;
       }
    }
-  data.setSize(0);
-  name.setSize(1);
-  name[0] = '\0';
-  name.setSize(0);
+  data.resize(0);
+  name = "";
 }
 
 
@@ -243,7 +224,7 @@ MuseData::~MuseData() {
 //
 
 int MuseData::getLineCount(void) {
-   return data.getSize();
+   return data.size();
 }
 
 
@@ -257,36 +238,36 @@ int MuseData::append(MuseRecord& arecord) {
    MuseRecord* temprec;
    temprec = new MuseRecord;
    *temprec = arecord;
-   data.append(temprec);
-   return data.getSize()-1;
+   data.push_back(temprec);
+   return (int)data.size()-1;
 }
 
 
 int MuseData::append(MuseData& musedata) {
    int i;
-   int oldsize = data.getSize();
+   int oldsize = data.size();
    int newlinecount = musedata.getLineCount();
    if (newlinecount <= 0) {
       return -1;
    }
 
-   data.setSize(data.getSize()+newlinecount);
+   data.resize(data.size()+newlinecount);
    for (i=0; i<newlinecount; i++) {
       data[i+oldsize] = new MuseRecord;
       *(data[i+oldsize]) = musedata[i];
    }
-   return data.getSize()-1;
+   return (int)data.size()-1;
 }
 
 
-int MuseData::append(Array<char>& charstring) {
+int MuseData::append(string& charstring) {
    MuseRecord* temprec;
    temprec = new MuseRecord;
    temprec->setString(charstring);
    temprec->setType(E_muserec_unknown);
    temprec->setAbsBeat(0);
-   data.append(temprec);
-   return data.getSize()-1;
+   data.push_back(temprec);
+   return (int)data.size()-1;
 }
 
 
@@ -305,9 +286,9 @@ void MuseData::insert(int lindex, MuseRecord& arecord) {
    temprec = new MuseRecord;
    *temprec = arecord;
 
-   data.setSize(data.getSize()+1);
+   data.resize(data.size()+1);
    int i;
-   for (i=data.getSize()-1; i>lindex; i--) {
+   for (i=(int)data.size()-1; i>lindex; i--) {
       data[i] = data[i-1];
    }
    data[i] = temprec;
@@ -322,22 +303,20 @@ void MuseData::insert(int lindex, MuseRecord& arecord) {
 
 void MuseData::clear(void) {
    int i;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       if (data[i] != NULL) {
          delete data[i];
          data[i] = NULL;
       }
    }
-   for (i=0; i<sequence.getSize(); i++) {
+   for (i=0; i<(int)sequence.size(); i++) {
       sequence[i]->clear();
       delete sequence[i];
       sequence[i] = NULL;
    }
-   data.setSize(0);
-   sequence.setSize(0);
-   name.setSize(1);
-   name[0] = '\0';
-   name.setSize(0);
+   data.resize(0);
+   sequence.resize(0);
+   name = "";
 }
 
 
@@ -385,10 +364,8 @@ MuseRecord& MuseData::getRecord(int eindex, int erecord) {
 //
 
 void MuseData::read(istream& input) {
-   Array<char> dataline;
-   dataline.setSize(81);
-   dataline.setGrowth(100000);
-   dataline.setSize(0);
+   string dataline;
+   dataline.reserve(81);
    int character;
    char value;
    int  isnewline;
@@ -398,9 +375,9 @@ void MuseData::read(istream& input) {
       character = input.get();
       if (input.eof()) {
          // end of file found without a newline termination on last line.
-         if ((dataline.getSize() > 0) && (strlen(dataline.getBase()) > 0)) {
-            MuseData::append(dataline);
-            dataline.setSize(0);
+         if (dataline.size() > 0) {
+            MuseData::push_back(dataline);
+            dataline.resize(0);
             break;
          }
       }
@@ -420,15 +397,15 @@ void MuseData::read(istream& input) {
       }
 	       
       if (isnewline) {
-         MuseData::append(dataline);
-         dataline.setSize(0);
+         MuseData::push_back(dataline);
+         dataline.resize(0);
       } else {
-         dataline.append(value);
+         dataline.push_back(value);
       }
    }
 
    int i;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       data[i]->setLineIndex(i);
    }
 
@@ -472,7 +449,7 @@ void MuseData::doAnalyses(void) {
 
 void MuseData::analyzePitch() {
    int i;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       data[i]->setMarkupPitch(data[i]->getBase40());
    }
 }
@@ -488,7 +465,7 @@ void MuseData::analyzeTies(void) {
    int i;
    int j;
 
-   for (i=0; i<sequence.getSize(); i++) {
+   for (i=0; i<(int)sequence.size(); i++) {
       for (j=0; j<sequence[i]->getEventCount(); j++) {
          if (!getEvent(i)[j].tieQ()) {
             continue;
@@ -641,7 +618,7 @@ int MuseData::searchForPitch(int eventindex, int b40, int track) {
 int MuseData::getNextEventIndex(int startindex, RationalNumber target) {
    int i;
    int output = -1;
-   for (i=startindex; i<sequence.getSize(); i++) {
+   for (i=startindex; i<(int)sequence.size(); i++) {
       if (sequence[i]->getTime() == target) {
          output = i;
          break;
@@ -670,7 +647,7 @@ MuseRecord& MuseData::last(void) {
 //
 
 int MuseData::isEmpty(void) {
-   return !data.getSize();
+   return !data.size();
 }
 
 
@@ -786,7 +763,7 @@ void MuseData::analyzeRhythm(void) {
    RationalNumber primarychordnoteduration(0,1);  // needed for chord notes
   
    int i;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       if (data[i]->getType() == E_muserec_musical_attributes) {
          if (pre.search(data[i]->getLine(), "Q:(\\d+)", "")) {
             tpq = atoi(pre.getSubmatch(1));
@@ -827,7 +804,7 @@ void MuseData::analyzeRhythm(void) {
 
    // adjust Sound and Print records so that they occur at the same
    // absolute time as the note they affect.
-   for (i=1; i<data.getSize(); i++) {
+   for (i=1; i<(int)data.size(); i++) {
       switch (data[i]->getType()) {
          case E_muserec_print_suggestion:
          case E_muserec_sound_directives:
@@ -847,14 +824,14 @@ void MuseData::analyzeRhythm(void) {
 
 int MuseData::getInitialTPQ(void) {
    int output = 0;
-   if (data.getSize() == 0) {
+   if (data.size() == 0) {
       return output;
    }
    PerlRegularExpression pre;
    int i;
    if (data[0]->getType() == E_muserec_unknown) {
       // search for first line which starts with '$':
-      for (i=0; i<data.getSize(); i++) {
+      for (i=0; i<(int)data.size(); i++) {
          if (data[i]->getLength() <= 0) {
             continue;
          }
@@ -866,7 +843,7 @@ int MuseData::getInitialTPQ(void) {
          }
       }
    } else {
-      for (i=0; i<data.getSize(); i++) {
+      for (i=0; i<(int)data.size(); i++) {
          if (data[i]->getType() == E_muserec_musical_attributes) {
             if (pre.search(data[i]->getLine(), "Q:(\\d+)", "")) {
                output = atoi(pre.getSubmatch(1));
@@ -894,7 +871,7 @@ void MuseData::constructTimeSequence(void) {
    // * allocate the size to match number of lines (* 2 probably).
 
    MuseData& thing = *this;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       insertEventBackwards(thing[i].getAbsBeatR(), &thing[i]);
    }
 }
@@ -908,7 +885,7 @@ void MuseData::constructTimeSequence(void) {
 //
 
 int MuseData::getEventCount(void) {
-   return sequence.getSize();
+   return sequence.size();
 }
 
 
@@ -940,9 +917,9 @@ MuseEventSet& MuseData::getEvent(int eindex) {
 //
 //
 
-void printSequenceTimes(Array<MuseEventSet*>& sequence) {
+void printSequenceTimes(vector<MuseEventSet*>& sequence) {
    int i;
-   for (i=0; i<sequence.getSize(); i++) {
+   for (i=0; i<(int)sequence.size(); i++) {
       cout << sequence[i]->getTime().getFloat() << " ";
    }
    cout << endl;
@@ -952,15 +929,15 @@ void printSequenceTimes(Array<MuseEventSet*>& sequence) {
 void MuseData::insertEventBackwards(RationalNumber atime, MuseRecord* arecord) {
    int i, j;
 
-   if (sequence.getSize() == 0) {
+   if (sequence.size() == 0) {
       MuseEventSet* anevent = new MuseEventSet;
       anevent->setTime(atime);
       anevent->appendRecord(arecord);
-      sequence.append(anevent);
+      sequence.push_back(anevent);
       return;
    }
 
-   for (i=sequence.getSize()-1; i>=0; i--) {
+   for (i=(int)sequence.size()-1; i>=0; i--) {
       if (sequence[i]->getTime() == atime) {
          sequence[i]->appendRecord(arecord);
          return;
@@ -969,15 +946,15 @@ void MuseData::insertEventBackwards(RationalNumber atime, MuseRecord* arecord) {
          MuseEventSet* anevent = new MuseEventSet;
          anevent->setTime(atime);
          anevent->appendRecord(arecord);
-         if (i == sequence.getSize()-1) {
+         if (i == (int)sequence.size()-1) {
             // just append the event at the end of the list
-            sequence.append(anevent);
+            sequence.push_back(anevent);
 	    return;
          } else {
             // event has to be inserted before end of list, so move
             // later ones up in list.
-            sequence.setSize(sequence.getSize()+1);
-            for (j=sequence.getSize()-1; j>i+1; j--) {
+            sequence.resize(sequence.size()+1);
+            for (j=(int)sequence.size()-1; j>i+1; j--) {
                sequence[j] = sequence[j-1];
             }
             // store the newly created event entry in sequence:
@@ -1170,9 +1147,7 @@ int MuseData::getLineTickDuration(int lindex) {
 //
 
 void MuseData::setFilename(const char* filename) {
-   int len = strlen(filename);
-   name.setSize(len+1);
-   strcpy(name.getBase(), filename);
+   name = filename;
 }
 
 
@@ -1183,7 +1158,7 @@ void MuseData::setFilename(const char* filename) {
 //
 
 const char* MuseData::getFilename(void) {
-   return name.getBase();
+   return name.c_str();
 }
 
 
@@ -1196,25 +1171,22 @@ const char* MuseData::getFilename(void) {
 
 const char* MuseData::getPartName(char* buffer, int maxx) {
    buffer[0] = '\0';
-   Array<char> output;
+   string output;
    int line = getPartNameIndex();
    if (line < 0) {
       return buffer;
    }
    PerlRegularExpression pre;
-   output.setSize(strlen(data[line]->getLine())+1);
-   strcpy(output.getBase(), data[line]->getLine());
+   output = data[line]->getLine();
    pre.sar(output, "^\\s+", "", "");
    pre.sar(output, "\\s+$", "", "");
-   strncpy(buffer, output.getBase(), maxx);
+   strncpy(buffer, output.c_str(), maxx);
 
 
-   Array<char> instrument;
-   instrument.setSize(strlen(buffer)+1);
-   strcpy(instrument.getBase(), buffer);
+   string instrument = buffer;
    pre.sar(instrument, "^\\s*", "", "");
    pre.sar(instrument, "\\s*$", "", "");
-   strcpy(buffer, instrument.getBase());
+   strcpy(buffer, instrument.c_str());
 
    return buffer;
 }
@@ -1230,7 +1202,7 @@ const char* MuseData::getPartName(char* buffer, int maxx) {
 int MuseData::getPartNameIndex(void) {
    int i;
    int output = -1;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       if (data[i]->getType() == E_muserec_header_part_name) {
          return i;
       }
@@ -1249,7 +1221,7 @@ int MuseData::getPartNameIndex(void) {
 
 int MuseData::isMember(const char* mstring) {
    int i;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       if (data[i]->getType() == E_muserec_group_memberships) {
          if (strstr(data[i]->getLine(), mstring) != NULL) {
             return 1;          
@@ -1282,7 +1254,7 @@ int MuseData::getMembershipPartNumber(const char* mstring) {
    strcat(searchstring, ":");
    PerlRegularExpression pre;
    int i;
-   for (i=0; i<data.getSize(); i++) {
+   for (i=0; i<(int)data.size(); i++) {
       if (data[i]->getType() == E_muserec_header_12) {
          if (pre.search(data[i]->getLine(), searchstring, "")) {
             if (pre.search(data[i]->getLine(), 
