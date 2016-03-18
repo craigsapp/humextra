@@ -2563,6 +2563,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
    if (getOption("lyric")) {
       addLyrics(hfile, staffno);
    }
+
 }
 
 
@@ -2584,6 +2585,7 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
          }
       }
    }
+
    // cout << "!! Adding Lyrics to " << staffno << " total = "
    //      << lyriccount << endl;
    if (lyriccount > MAXLYRIC) {
@@ -2694,14 +2696,13 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
          continue;
       }
 
-
       getLyricText(buffer, (CXMLObject*)partdata[staffno][i].obj);
       if (hfile[match->line].getType() == E_humrec_data_measure) {
          // temporary bug fix from unusual line error
          hfile[match->line-1].changeField(
            hfile[match->line].getFieldCount()-lyriccount+lyricnum-1,
            buffer);
-      } else {
+      } else if (hfile[match->line].isData()) {
          // fix strange case where there is no **text data but, text
          // is expected. [20151228]
          int slen = strlen(buffer);
@@ -2717,7 +2718,6 @@ void MusicXmlFile::addLyrics(HumdrumFile& hfile, int staffno) {
       }
 
    }
-
 
 }
 
