@@ -4415,7 +4415,7 @@ aligned full measure breve rest without this other complication, use
          // hidden accidental
          arecord.getColumn(19) = ' ';
       }
-      if (kk == 0) {
+      if (kk == tokencount - 1) {
          addLyrics(arecord, infile, row, col, TextAssignment, TextElisions,
                lastVerse);
       }
