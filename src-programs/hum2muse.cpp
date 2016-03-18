@@ -4415,10 +4415,12 @@ aligned full measure breve rest without this other complication, use
          // hidden accidental
          arecord.getColumn(19) = ' ';
       }
-      if (kk == tokencount - 1) {
+      // Maybe need to add lyric to every single note in the chord?
+      // Otherwise Buf3056 and Duf3001 are mutually excusive in their display bugs.
+      // if (kk == tokencount - 1) {
          addLyrics(arecord, infile, row, col, TextAssignment, TextElisions,
                lastVerse);
-      }
+      // }
       tempdata.append(arecord);
       if (!psuggestion.isEmpty()) {
          tempdata.append(psuggestion);
