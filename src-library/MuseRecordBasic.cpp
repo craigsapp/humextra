@@ -438,6 +438,9 @@ void MuseRecordBasic::shrink(void) {
 
 void MuseRecordBasic::insertString(int column, const char* string) {
    int len = strlen(string);
+   if (len == 0) {
+      return;
+   }
    int index = column - 1;
    // make sure that record has text data up to the end of sring in
    // final location by preallocating the end location of string:
