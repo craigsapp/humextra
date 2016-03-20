@@ -49,8 +49,6 @@
 
 using namespace std;
 
-typedef vector<char> ArrayChar;
-
 //////////////////////////////////////////////////////////////////////////
 
 class NoteObject {
@@ -167,7 +165,7 @@ void      getKey              (const char* key_str, string *output);
 void      printMeasure        (ostream& out, MeasureObject *measure);
 
 // input functions
-void      getAtRecordKeyValue (vector<char>& key, vector<char>& value, 
+void      getAtRecordKeyValue (string& key, string& value, 
                                const char* input);
 
 
@@ -183,8 +181,8 @@ int       quiet2Q = 0;               // used with -Q option
 
 // Global variables:
 char data_line[10001] = {0};
-vector<char> data_key;
-vector<char> data_value;
+string data_key;
+string data_value;
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -214,13 +212,13 @@ int main(int argc, char** argv) {
       }
       //std::cout << "LINE: " << line << endl;
       getAtRecordKeyValue(data_key, data_value, data_line);
-      if (strcmp(data_key.data(),"start")==0) {
+      if (strcmp(data_key.c_str(),"start")==0) {
       
          if (!stdoutQ) {
-            if (strlen(data_value.data())==0) {
+            if (strlen(data_value.c_str())==0) {
                sprintf(outfilename, "%s%015d", outdir, i);
             } else {
-               sprintf(outfilename, "%s%s", outdir, data_value.data());
+               sprintf(outfilename, "%s%s", outdir, data_value.c_str());
             }
             // add extention
             strcat(outfilename, ".");  
@@ -242,8 +240,8 @@ int main(int argc, char** argv) {
             convertPlainAndEasyToKern(infile, cout);
          }
 
-         //std::cout << "\tKEY:   " << key.data()   << endl;
-         //std::cout << "\tVALUE: " << value.data() << endl;
+         //std::cout << "\tKEY:   " << key.c_str()   << endl;
+         //std::cout << "\tVALUE: " << value.c_str() << endl;
          i++;
       }
    }
@@ -290,20 +288,20 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
          exit(1);
       }
       getAtRecordKeyValue(data_key, data_value, data_line);
-      if (strcmp(data_key.data(),"end")==0) {   
+      if (strcmp(data_key.c_str(),"end")==0) {   
          break;
-      } else if (strcmp(data_key.data(),"clef")==0) { 
-         strcpy(c_clef, data_value.data());
-      } else if (strcmp(data_key.data(),"key")==0) { 
-         strcpy(c_key, data_value.data());
-      } else if (strcmp(data_key.data(),"keysig")==0) { 
-         strcpy(c_keysig, data_value.data());
-      } else if (strcmp(data_key.data(),"timesig")==0) { 
-         strcpy(c_timesig, data_value.data());
-      } else if (strcmp(data_key.data(),"alttimesig")==0) { 
-         strcpy(c_alttimesig, data_value.data());
-      } else if (strcmp(data_key.data(),"data")==0) { 
-         strcpy(incipit, data_value.data());
+      } else if (strcmp(data_key.c_str(),"clef")==0) { 
+         strcpy(c_clef, data_value.c_str());
+      } else if (strcmp(data_key.c_str(),"key")==0) { 
+         strcpy(c_key, data_value.c_str());
+      } else if (strcmp(data_key.c_str(),"keysig")==0) { 
+         strcpy(c_keysig, data_value.c_str());
+      } else if (strcmp(data_key.c_str(),"timesig")==0) { 
+         strcpy(c_timesig, data_value.c_str());
+      } else if (strcmp(data_key.c_str(),"alttimesig")==0) { 
+         strcpy(c_alttimesig, data_value.c_str());
+      } else if (strcmp(data_key.c_str(),"data")==0) { 
+         strcpy(incipit, data_value.c_str());
       } else if (strncmp(data_line,"!!", 2) == 0) { 
             out << data_line << "\n";
       }
@@ -1581,7 +1579,7 @@ void printMeasure(ostream& out, MeasureObject *measure) {
 //   only one per line
 //
 
-void getAtRecordKeyValue(vector<char>& key, vector<char>& value,
+void getAtRecordKeyValue(string& key, string& value,
      const char* input) {
 
   #define SKIPSPACE while((index<length)&&isspace(input[index])){index++;}
@@ -1640,8 +1638,7 @@ void getAtRecordKeyValue(vector<char>& key, vector<char>& value,
   key.push_back(EMPTY); // terminate the string for regular C use of char*
   index++;
   SKIPSPACE
-  value.resize(length - index + 1);
-  strcpy(value.data(), &input[index]);
+  value = &input[index];
   int i;
   for (i=value.size()-2; i>0; i--) {
      if (isspace(value[i])) {
@@ -1686,7 +1683,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1695,9 +1692,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    
    debugQ = opts.getBoolean("debug");
    stdoutQ = opts.getBoolean("stdout");
-   strcpy(outdir, opts.getString("outdir").data());
-   strcpy(extension, opts.getString("extension").data());
-   strcpy(hum2abc, opts.getString("hum2abc").data());
+   strcpy(outdir, opts.getString("outdir").c_str());
+   strcpy(extension, opts.getString("extension").c_str());
+   strcpy(hum2abc, opts.getString("hum2abc").c_str());
    quiet2Q = opts.getBoolean("Quiet");
    quietQ  = opts.getBoolean("quiet");
    if (quiet2Q) {
@@ -1729,25 +1726,4 @@ void usage(const char* command) {
 }
 
 
-
-
-//////////////////////////////
-//
-// getLineIndex -- get the index location of the given string.
-//
-
-int getLineIndex(vector<ArrayChar>& pieces, const char* string) {
-   int index = -1;
-   int i;
-   for (i=0; i<(int)pieces.size(); i++) {
-      if (strstr(pieces[i].data(), string) != NULL) {
-         index = i;
-         break;
-      }
-   }
-   return index;
-}
-
-
-
-// md5sum: 61e32ce8b251d8ad807d4704cd1b92fa pae2kern.cpp [20151120]
+// md5sum: ecb4732ea87a1c655b917eda2de1769e pae2kern.cpp [20160320]

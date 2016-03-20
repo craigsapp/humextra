@@ -742,4 +742,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 4cf2c8c44c347783d892ada8d3f2a3bc serialize.cpp [20160312]
+// md5sum: 3c27ed7b7aca34e87f12a04b3738c5b2 serialize.cpp [20160320]

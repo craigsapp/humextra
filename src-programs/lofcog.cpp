@@ -797,4 +797,4 @@ double getAverage(HumdrumFile& infile, vector<vector<double> >& data,
 
 
 
-// md5sum: 1151e458bd559a0d53d9a9d9151410fa lofcog.cpp [20151120]
+// md5sum: eb5a1888c40059aec1ab5168d18865bd lofcog.cpp [20160320]

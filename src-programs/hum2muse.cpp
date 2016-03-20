@@ -9918,4 +9918,4 @@ getNewLine:
 
 */
 
-// md5sum: 10ea8af6fa215e490103a188ae8d1c31 hum2muse.cpp [20160125]
+// md5sum: 9b00a333fd2d852b9bc1c94cdfaefa5e hum2muse.cpp [20160320]
