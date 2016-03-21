@@ -26,37 +26,22 @@
 // Description:   Converts Humdrum files into MuseData files.
 //
 
+#include "humdrum.h"
+#include "CheckSum.h"
+#include "MuseData.h"
+#include "MuseDataSet.h"
+#include "PerlRegularExpression.h"
+
+#include <string.h>
 #include <math.h>
 #include <time.h>    /* for current time/date */
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
 
-#include "string.h"
-
-#include "humdrum.h"
-#include "PerlRegularExpression.h"
-#include "MuseData.h"
-#include "MuseDataSet.h"
-#include "CheckSum.h"
-#include "SigString.h"
-
+using namespace std;
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -555,6 +540,7 @@ void  adjustRscales            (HumdrumFile& infile, int line,
 void  getNoteState             (Array<int>& states, HumdrumFile& infile, 
                                int startline, int endline);
 void  analyzeTacet             (Array<Array<int> >& tacet, HumdrumFile& infile);
+string getInstrumentAbbreviation(HumdrumFile& infile, int track);
 
 
 Array<Array<Array<char> > > TieConditionsForward;
@@ -572,6 +558,7 @@ int    metQ         = 1;          // used with --no-met option
 int    verselimit   = 5;          // used with --vl option
 int    mensuralQ    = 0;          // used with --mensural option
 int    abbreviationQ = 0;         // used with --abbreviation option
+int    sysabbrQ     = 0;          // used with -a option
 int    mensural2Q   = 0;          // used with --mensural2 option
 int    referenceQ   = 1;          // used with -R option
 int    noinvisibleQ = 0;          // used with --no-invisible option
@@ -1371,7 +1358,7 @@ void addHumdrumVeritas(MuseData& musedata, HumdrumFile& infile) {
 //
 
 void printWithMd5sum(MuseData& datafile) {
-   SSTREAM tempstream;
+   stringstream tempstream;
    int i;
    for (i=0; i<datafile.getLineCount(); i++) {
       tempstream << datafile[i] << NEWLINE;
@@ -1379,8 +1366,8 @@ void printWithMd5sum(MuseData& datafile) {
    // tempstream << datafile;
    tempstream << ends;
    Array<char> data;
-   data.setSize(strlen(tempstream.CSTRING)+1);
-   strcpy(data.getBase(), tempstream.CSTRING);
+   data.setSize(strlen(tempstream.str().c_str())+1);
+   strcpy(data.getBase(), tempstream.str().c_str());
    PerlRegularExpression pre;
 
    if (checksumQ) {
@@ -1436,7 +1423,7 @@ void setupTextAssignments(HumdrumFile& infile, int& textQ,
    }
    int foundtext = 0;
 
-   SigString exinterp;
+   string exinterp;
    PerlRegularExpression pre;
 
 
@@ -1476,7 +1463,7 @@ void setupTextAssignments(HumdrumFile& infile, int& textQ,
             exinterp = "\\b";
             exinterp += (infile[i].getExInterp(j)+2);
             exinterp += "\\b";
-            if (pre.search(textspines.data(), exinterp.getBase(), "")) {
+            if (pre.search(textspines, exinterp, "")) {
                track = infile[i].getPrimaryTrack(j);
                foundtext = 1;
                TextAssignment[lastkern].append(track);
@@ -1878,8 +1865,8 @@ void printMuse2PsOptions(HumdrumFile& infile) {
    int hastitle = 0;
    int hascomposer = 0;
 
-   SSTREAM globaldefaults;
-   SSTREAM localdefaults;
+   stringstream globaldefaults;
+   stringstream localdefaults;
    Array<char> tempdata;
    Array<char> temp2;
 
@@ -2065,17 +2052,17 @@ void printMuse2PsOptions(HumdrumFile& infile) {
    
    // print global default options
    globaldefaults << ends;
-   Array<char> globals(strlen(globaldefaults.CSTRING)+1);
-   strcpy(globals.getBase(), globaldefaults.CSTRING);
+   Array<char> globals(strlen(globaldefaults.str().c_str())+1);
+   strcpy(globals.getBase(), globaldefaults.str().c_str());
    if ((globals.getSize() > 1) && textvaddQ) {
       addTextVertcialSpace(globals, infile);
    }
-   // cout << globaldefaults.CSTRING;
+   // cout << globaldefaults.str().c_str();
    cout << globals;
 
    // print local default options
    localdefaults << ends;
-   cout << localdefaults.CSTRING;
+   cout << localdefaults.str().c_str();
 
 }
 
@@ -2534,6 +2521,13 @@ void convertTrackToMuseData(MuseData& musedata, int track,
       musedata.append(arecord2);
    }
 
+   if (sysabbrQ) {
+      MuseRecord arecord3;
+      string suggestion = "P C0:z33" + getInstrumentAbbreviation(infile, track);
+      arecord3.insertString(1, suggestion.c_str());
+      musedata.append(arecord3);
+   }
+
    int founddataQ = 0;  // needed to suppress first $ record from being
                        // reprinted (the first one was needed above
                        // with the Q: field added).
@@ -2549,6 +2543,32 @@ void convertTrackToMuseData(MuseData& musedata, int track,
       musedata.append(tempdata);
    }
 
+}
+
+
+
+//////////////////////////////
+//
+// getInstrumentAbbreviation --
+//
+
+string getInstrumentAbbreviation(HumdrumFile& infile, int track) {
+   string output;
+   int i, j;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isInterpretation()) {
+         continue;
+      }
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         if (track != infile[i].getPrimaryTrack(j)) {
+            continue;
+         }
+         if (strncmp(infile[i][j], "*I'", 3) == 0) {
+            output = &infile[i][j][3];
+         }
+      }
+   }
+   return output;
 }
 
 
@@ -2983,11 +3003,11 @@ int appendTimeSignature(char* buffer, HumdrumFile& infile, int line,
          timebot = 1;
          timetop *= 2;
       }
-      SSTREAM temps;
+      stringstream temps;
       temps << "T:";
       temps << timetop << "/" << timebot;
       temps << ends;
-      strcat(buffer, temps.CSTRING);
+      strcat(buffer, temps.str().c_str());
    } else {
       // no time signature found in interpretation region.
       // currently print the time signature 9/0 which functions
@@ -3104,11 +3124,11 @@ void insertHeaderRecords(HumdrumFile& infile, MuseData& tempdata,
    tempdata.append(arecord);
 
    // Record 12: 		<name1>: part <x> of <number in group>
-   SSTREAM partnum;
+   stringstream partnum;
    partnum << "score: part " << (total - counter)+1 << " of " << total;
    partnum << ends;
    arecord.clear();
-   arecord.insertString(1, partnum.CSTRING);
+   arecord.insertString(1, partnum.str().c_str());
    tempdata.append(arecord);
 }
 
@@ -5184,6 +5204,29 @@ void convertHtmlTextToMuseData(Array<char> & text) {
    pre.sar(text, "\\xc5\\x9b", "s'", "g");   // s acute
    pre.sar(text, "\\xc5\\xba", "z'", "g");   // z acute
    pre.sar(text, "\\xc5\\xbc", "z.", "g");   // z dot
+
+   // <i></i> goes to !42|  ... !40|  (for 11 point font)
+   // Currently T and u (subtitle) entries have to be on separate option lines.
+   //
+   // Font numbers and sizes:
+   // 31 = regular 8 point
+   // 32 = bold 8 point
+   // 33 = italic 8 point
+   // 34 = regular 9 point
+   // 37 = regular 10 point
+   // 40 = regular 11 point 
+   // 43 = regular 12 point
+   // 46 = regular 14 point
+   // 48 = italic 14 point
+   // (you fill in the gaps in this)
+   //
+   if (pre.search(text, "T\\^")) {
+      pre.sar(text, "<i>", "!42|", "g");
+      pre.sar(text, "</i>", "!40|", "g");
+   } else if (pre.search(text, "u\\^")) {
+      pre.sar(text, "<i>", "!36|", "g");
+      pre.sar(text, "</i>", "!34|", "g");
+   }
 
 }
 
@@ -8396,13 +8439,13 @@ int verifyPart(MuseData& part) {
    part[timestampindex].appendString(pre.getSubmatch(1));
    part[timestampindex].appendString(pre.getSubmatch(3));
     
-   SSTREAM tstream;
+   stringstream tstream;
    for (i=startline; i<=stopline; i++) {
       tstream << part[i] << LNEWLINE;
    }
    tstream << ends;
-   Array<char> partdata(strlen(tstream.CSTRING)+1);
-   strcpy(partdata.getBase(), tstream.CSTRING);
+   Array<char> partdata(strlen(tstream.str().c_str())+1);
+   strcpy(partdata.getBase(), tstream.str().c_str());
 
    Array<char> newmd5sum;
    CheckSum::getMD5Sum(newmd5sum, partdata);
@@ -8454,7 +8497,7 @@ void updateMuseDataFileTimeStamps(Options& options) {
 void removeOldTimeStamps(MuseData& part) {
    int i;
    int atend = 0;
-   SSTREAM tstream;
+   stringstream tstream;
    for (i=0; i<part.getLineCount(); i++) {
       if (strncmp(part[i].getLine(), "/END", 4) == 0) {
          atend = 1;
@@ -8749,13 +8792,13 @@ void getCheckSum(Array<char>& checksum, MuseData& part, Array<char>& newline) {
 
    Array<char>& LNEWLINE = newline;
 
-   SSTREAM tstream;
+   stringstream tstream;
    for (i=startline; i<=stopline; i++) {
       tstream << part[i] << LNEWLINE;
    }
    tstream << ends;
-   Array<char> partdata(strlen(tstream.CSTRING)+1);
-   strcpy(partdata.getBase(), tstream.CSTRING);
+   Array<char> partdata(strlen(tstream.str().c_str())+1);
+   strcpy(partdata.getBase(), tstream.str().c_str());
 
    Array<char>& newmd5sum = checksum;
    CheckSum::getMD5Sum(newmd5sum, partdata);
@@ -8842,7 +8885,8 @@ void checkOptions(Options& opts, int argc, char** argv) {
    // tuplet-bracket no longer being used:
    opts.define("tb|tuplet-bracket=b", "print brackets on tuplet");
    opts.define("vz=b", "only display explicit tuplet marks");
-   opts.define("abbreviation|a=b", "Use instrument abbreviations");
+   opts.define("abbreviation=b", "Use instrument abbreviations");
+   opts.define("sysabbr|a=b", "Show instrument abbreviations on every system");
    opts.define("nm|nomet|nomen|no-met|no-men=b",  "do not print metrical symbols instead of time signatures");
    opts.define("nd|no-dynamics|no-dynamic|no-dyn|nodynamics|nodyn|nodynamic=b", "do not convert dynamics");
    opts.define("nb|no-beams|no-beam|nobeam|nobeams=b", "do not convert beams");
@@ -8920,6 +8964,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
    extensionQ    = !opts.getBoolean("no-extensions");
    sepbracketQ   =  opts.getBoolean("sepbracket");
    abbreviationQ =  opts.getBoolean("abbreviation");
+   sysabbrQ      =  opts.getBoolean("sysabbr");
    mensural2Q    =  opts.getBoolean("mensural2");
    if (mensural2Q) {
       mensuralQ  = 1;
