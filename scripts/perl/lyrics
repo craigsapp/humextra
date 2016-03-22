@@ -1,0 +1,295 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Mon Mar 21 17:06:33 PDT 2016
+# Last Modified: Mon Mar 21 19:12:56 PDT 2016
+# Filename:      lyrics
+# Syntax:        perl 5
+#
+# Description:   This script extracts lyrics from **text spines in
+#                Humdrum files and merges syllables into words.
+#
+# Options:       -h print as HTML table
+#                -b print HTML table with full HTML page
+#                -v indicate verse numbers.
+#
+# Usage:         lyrics [-h [-b]] file(s) > output
+#                lyrics file(s) | fmt > output
+#                
+# Example        lyrics -vhb jrp://Ano3001 > index.html
+#
+
+use strict;
+use Getopt::Long;
+
+my $htmlQ  = 0;   # display as html
+my $bodyQ  = 0;   # embed HTML code in full page
+my $verseQ = 0;   # display verse numbers
+
+Getopt::Long::Configure("bundling");
+GetOptions (
+   'h|html'  => \$htmlQ,
+   'b|body'  => \$bodyQ,
+   'v|verse' => \$verseQ
+);
+
+my @files = @ARGV;
+
+printHeader() if $bodyQ;
+printStyle() if $htmlQ;
+
+foreach my $file (@files) {
+   if (@files > 1) {
+      if ($htmlQ) {
+         print "\n<h2> $file <hr noshade> </h2>\n";
+      } else {    
+         print "\n========= Lyrics for $file\n\n";
+      }
+   }
+   printFileLyrics($file);
+}
+
+printFooter() if $bodyQ;
+
+
+exit(0);
+
+###########################################################################
+
+
+##############################
+##
+## printFileLyrics --
+##
+
+sub printFileLyrics {
+   my ($file) = @_;
+   my $line;
+   my $counter = 0;
+   my $tcounter = 0;
+   my @contents = `humcat $file | extractx -r | serialize`;
+   for (my $i=0; $i<@contents; $i++) {
+      $line = $contents[$i];
+      chomp $line;
+      if (!$counter && !$tcounter) {
+         if ($line =~ /^\!\!\!OTL[^\s]*:\s*(.*)\s*$/) {
+            my $title = $1;
+            if ($htmlQ) {
+               print "<h2>$title</h2>\n";
+            } else {
+               print "TITLE: $title\n\n";
+            }
+            $tcounter++;
+         }
+      }
+      if ($line eq "**kern") {
+         if (!$counter) {
+            print "\n<table class=\"lyrics\">\n" if $htmlQ;
+            $counter++;
+         }
+         processPart($i, @contents);
+      }
+   }
+   print "\n</table>\n" if $htmlQ;
+}
+
+
+
+##############################
+##
+## processPart --
+##
+
+sub processPart {
+   my ($index, @contents) = @_;
+   my $i = $index + 1;
+   my $vcount = 1;
+   chomp $contents[$i];
+   while (($i < @contents) && ($contents[$i] !~ /\*\*kern/)) {
+      if ($contents[$i] =~ /^\*I"(.*)/) {
+         if ($htmlQ) {
+            print "\n<tr><td class=\"partname\" colspan=\"2\">$1</td></tr>\n";
+         } else {
+            print "\n== $1 ==";
+         }
+         $i++;
+         chomp $contents[$i];
+         next;
+      }
+      if ($contents[$i] eq "**text") {
+         if ($htmlQ) {
+            print "\n\n<tr><td class=\"verse\">verse&nbsp;$vcount</td><td>\n\t";
+         } elsif ($verseQ) {
+            print "\n" if $vcount == 1;
+            print "\n\tverse $vcount: ";
+         } else {
+            print "\n" if $vcount == 1;
+            print "\n\t";
+         }
+         $vcount++;
+         $i = processVerse($i, @contents);
+         $i--;
+         if ($htmlQ) {
+            print "</td></tr>\n";
+         }
+      }
+      return if $contents[$i] =~ /\*\*kern/;
+      return if $i == @contents;
+      $i++;
+      return if $i == @contents;
+      chomp $contents[$i];
+      return if $contents[$i] =~ /\*\*kern/;
+   }
+   
+   print "\n";
+}
+
+
+
+##############################
+##
+## processVerse --
+##
+
+sub processVerse {
+   my ($index, @contents) = @_;
+   my $i = $index + 1;
+   my $hasdash = 0;
+   my $line = $contents[$i];
+   chomp $line;
+   my $output = "";
+   while (($i < @contents) && ($line ne "**kern") && ($line ne "**text")) {
+      if ($line eq "**text") {
+         printVerse($output);
+         return $i;
+      }
+      if ($line eq "**kern") {
+         printVerse($output);
+         return $i;
+      }
+      if ($line =~ /^[*!=]/) {
+         $i++;
+         $line = $contents[$i];
+         chomp $line;
+         next;
+      }
+      if ($line eq ".") {
+         $i++;
+         $line = $contents[$i];
+         chomp $line;
+         next;
+      }
+      if (!$hasdash) {
+         $output .= " ";
+         if ($line =~ /^-/) {
+            $output .= "-";
+         }
+      }
+      if ($line =~ s/-$//) {
+         $hasdash = 1;
+      } else {
+         $hasdash = 0;
+      }
+
+      $line =~ s/^-//;
+      $output .= $line;
+      
+      $i++;
+      $line = $contents[$i];
+      chomp $line;
+   }
+   printVerse($output);
+   return $i;
+}
+
+
+
+##############################
+##
+## printVerse --
+##
+
+sub printVerse {
+   my ($verse) = @_;
+   $verse =~ s/</&lt;/g;
+   $verse =~ s/>/&gt;/g;
+   print $verse;
+   print "\n";
+}
+
+
+
+##############################
+##
+## printStyle --
+##
+
+sub printStyle {
+   my $visibility = "   visibility: hidden;";
+   $visibility = "" if $verseQ;
+   print<<"EOT";
+
+<style>
+
+table.lyrics {
+   max-width: 1000px;
+}
+
+.lyrics td {
+   vertical-align: top;
+}
+
+td.partname {
+   background: #eee;
+   font-family: Helvetica;
+}
+
+td.verse {
+   color: #aaa;
+   padding-right: 20px;
+   font-family: Helvetica;
+   $visibility
+}
+
+body {
+   margin: 50px;
+}
+
+</style>
+
+EOT
+}
+
+
+
+##############################
+##
+## printHeader --
+##
+
+sub printHeader {
+   print <<"EOT";
+<html>
+<head>
+<title>Lyrics</title>
+</head>
+<body>
+EOT
+}
+
+
+
+##############################
+##
+## printFooter --
+##
+
+sub printFooter {
+   print <<"EOT";
+</body>
+</html>
+EOT
+}
+
+
+
