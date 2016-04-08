@@ -3,7 +3,7 @@
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Thu Apr  7 21:26:29 PDT 2016
 # Last Modified: Thu Apr  7 23:35:38 PDT 2016
-# Filename:      intospect
+# Filename:      selfsearch
 # Syntax:        perl 5
 #
 # Description:   Search a work for patterns which occur within the work.
@@ -19,14 +19,18 @@ my $mincount = 2;     # minimum count for a pattern to trigger search
 my $maxcount = 99999; # maximum count for a pattern to suppress search
 my $piecesQ  = 0;     # show list of patterns and their occurrence count
 my $svgQ     = 0;     # print results as SVG image
+my $pm       = 0;     # minimum percentage which has to be present
+my $px       = 100;   # maximum percentage which has to be present
 Getopt::Long::Configure("bundling");
 GetOptions (
-   'f|feature=s'    => \$feature,
-   'n|length=s'     => \$n,
-   'm|min-count=s'  => \$mincount,
-   'x|max-count=s'  => \$maxcount,
-   'p|pieces'       => \$piecesQ,
-   's|svg'          => \$svgQ
+   'f|feature=s'      => \$feature,
+   'n|length=s'       => \$n,
+   'm|min-count=s'    => \$mincount,
+   'x|max-count=s'    => \$maxcount,
+   'p|pieces'         => \$piecesQ,
+   'pm|percent-min=s' => \$pm,
+   'px|percent-max=s' => \$px,
+   's|svg'            => \$svgQ
 );
 
 # Add more features here:
@@ -122,8 +126,19 @@ sub parseResult {
    }
 
    @percentages = sort @percentages;
-   my $toutput = join(" ", @percentages);
-   return "$output$toutput\n";
+   my $found = 0;
+   for (my $i=0; $i<@percentages; $i++) {
+      if (($percentages[$i] >= $pm) && ($percentages[$i] <= $px)) {
+         $found = 1;
+         last;
+      }
+   }
+   if ($found) {
+      my $toutput = join(" ", @percentages);
+      return "$output$toutput\n";
+   } else {
+      return "";
+   }
 }
 
 
@@ -232,6 +247,8 @@ sub printSvg {
    print "\@length:\t$n\n";
    print "\@mincount:\t$mincount\n";
    print "\@maxcount:\t$maxcount\n";
+   print "\@minpercent\t$pm\n";
+   print "\@maxpercent\t$px\n";
    print "\@file\t$File\n";
    print "\n";
    print $data;
