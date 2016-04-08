@@ -3,7 +3,7 @@
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Thu Apr  7 21:26:29 PDT 2016
 # Last Modified: Thu Apr  7 23:35:38 PDT 2016
-# Filename:      selfsearch
+# Filename:      intospect
 # Syntax:        perl 5
 #
 # Description:   Search a work for patterns which occur within the work.
