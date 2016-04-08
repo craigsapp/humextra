@@ -1,36 +1,37 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Oct 24 10:39:47 PDT 1999
-// Last Modified: Sat Nov 25 20:17:58 PST 2000 added instrument selection
-// Last Modified: Tue Feb 20 19:20:09 PST 2001 add articulation interpretation
-// Last Modified: Sat Aug 23 08:57:54 PDT 2003 added *free/*strict control
-// Last Modified: Wed Mar 24 19:56:04 PST 2004 fixed initial *MM ignore
-// Last Modified: Wed Apr  7 16:22:38 PDT 2004 grace-note noteoff hack
-// Last Modified: Tue Sep  7 03:31:49 PDT 2004 added extra space at end
-// Last Modified: Tue Sep  7 03:43:09 PDT 2004 more grace-note noteoff fixing
-// Last Modified: Tue Sep  7 20:58:38 PDT 2004 initial dynamics processing
-// Last Modified: Fri Sep 10 02:26:59 PDT 2004 added padding option
-// Last Modified: Fri Sep 10 19:46:53 PDT 2004 added cresc. decresc. control
-// Last Modified: Sun Sep 12 05:20:44 PDT 2004 added human and metric volume
-// Last Modified: Wed Mar 23 00:35:18 PST 2005 added constant volume back
-// Last Modified: Sat Dec 17 22:46:11 PST 2005 added **time processing
-// Last Modified: Sat Jun  3 10:35:29 PST 2005 added **tempo processing
-// Last Modified: Sun Jun  4 19:32:22 PDT 2006 added PerfViz match files
-// Last Modified: Tue Sep 12 19:36:08 PDT 2006 added **idyn processing
-// Last Modified: Sun Oct  1 21:04:35 PDT 2006 continued work in **idyn
-// Last Modified: Thu May  3 22:55:15 PDT 2007 added *pan controls
-// Last Modified: Thu Oct 30 12:42:35 PST 2008 added --no-rest option
-// Last Modified: Thu Nov 20 08:19:40 PST 2008 added **Dcent interpretation
-// Last Modified: Sun Nov 23 22:49:15 PST 2008 added --temperament option
-// Last Modified: Tue May 12 12:14:09 PDT 2009 added rhythmic scaling factor
-// Last Modified: Tue Feb 22 13:23:24 PST 2011 added --stdout
-// Last Modified: Fri Feb 25 13:00:02 PST 2011 added --met
-// Last Modified: Fri Feb 25 15:15:09 PST 2011 added --timbres and --autopan
-// Last Modified: Wed Oct 12 16:23:02 PDT 2011 fixed --temperament pc 0 prob.
-// Last Modified: Fri Aug  3 16:09:29 PDT 2012 added DEFAULT for --timbres
-// Last Modified: Tue Oct 16 21:02:56 PDT 2012 added getTitle/song title
-// Last Modified: Mon Nov 18 13:04:44 PST 2013 default output as ASCII MIDI
-// Last Modified: Wed Dec 11 22:24:36 PST 2013 added !!midi-transpose: 
+// Last Modified: Sat Nov 25 20:17:58 PST 2000 Added instrument selection
+// Last Modified: Tue Feb 20 19:20:09 PST 2001 Add articulation interpretation
+// Last Modified: Sat Aug 23 08:57:54 PDT 2003 Added *free/*strict control
+// Last Modified: Wed Mar 24 19:56:04 PST 2004 Fixed initial *MM ignore
+// Last Modified: Wed Apr  7 16:22:38 PDT 2004 Grace-note noteoff hack
+// Last Modified: Tue Sep  7 03:31:49 PDT 2004 Added extra space at end
+// Last Modified: Tue Sep  7 03:43:09 PDT 2004 More grace-note noteoff fixing
+// Last Modified: Tue Sep  7 20:58:38 PDT 2004 Initial dynamics processing
+// Last Modified: Fri Sep 10 02:26:59 PDT 2004 Added padding option
+// Last Modified: Fri Sep 10 19:46:53 PDT 2004 Added cresc. decresc. control
+// Last Modified: Sun Sep 12 05:20:44 PDT 2004 Added human and metric volume
+// Last Modified: Wed Mar 23 00:35:18 PST 2005 Added constant volume back
+// Last Modified: Sat Dec 17 22:46:11 PST 2005 Added **time processing
+// Last Modified: Sat Jun  3 10:35:29 PST 2005 Added **tempo processing
+// Last Modified: Sun Jun  4 19:32:22 PDT 2006 Added PerfViz match files
+// Last Modified: Tue Sep 12 19:36:08 PDT 2006 Added **idyn processing
+// Last Modified: Sun Oct  1 21:04:35 PDT 2006 Continued work in **idyn
+// Last Modified: Thu May  3 22:55:15 PDT 2007 Added *pan controls
+// Last Modified: Thu Oct 30 12:42:35 PST 2008 Added --no-rest option
+// Last Modified: Thu Nov 20 08:19:40 PST 2008 Added **Dcent interpretation
+// Last Modified: Sun Nov 23 22:49:15 PST 2008 Added --temperament option
+// Last Modified: Tue May 12 12:14:09 PDT 2009 Added rhythmic scaling factor
+// Last Modified: Tue Feb 22 13:23:24 PST 2011 Added --stdout
+// Last Modified: Fri Feb 25 13:00:02 PST 2011 Added --met
+// Last Modified: Fri Feb 25 15:15:09 PST 2011 Added --timbres and --autopan
+// Last Modified: Wed Oct 12 16:23:02 PDT 2011 Fixed --temperament pc 0 prob
+// Last Modified: Fri Aug  3 16:09:29 PDT 2012 Added DEFAULT for --timbres
+// Last Modified: Tue Oct 16 21:02:56 PDT 2012 Added getTitle/song title
+// Last Modified: Mon Nov 18 13:04:44 PST 2013 Default output as ASCII MIDI
+// Last Modified: Wed Dec 11 22:24:36 PST 2013 Added !!midi-transpose: 
+// Last Modified: Wed Mar 30 23:12:38 PDT 2016 Added embedded options
 // Filename:      ...sig/examples/all/hum2mid.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2mid.cpp
 // Syntax:        C++; museinfo
@@ -220,6 +221,9 @@ void      getTitle           (string& title, HumdrumFile& infile);
 void      addMonoTemperamentAdjustment(MidiFile& outfile, int track, 
                               int channel, int ticktime, int midinote, 
                               double* bendbypc);
+void      defineOptions      (Options& opts, int argc, char* argv[]);
+void      processOptions     (Options& opts, int argc, char* argv[]);
+void      checkEmbeddedOptions(HumdrumFile& infile, int argc, char* argv[]);
 
 // PerfViz related functions:
 void      writePerfVizMatchFile(const char* filename, stringstream& contents);
@@ -288,6 +292,8 @@ int main(int argc, char* argv[]) {
       } else {
          infile.read(options.getArg(i+1));
       }
+
+      checkEmbeddedOptions(infile, argc, argv);
 
       // analyze the input file according to command-line options
       infile.analyzeRhythm("4", debugQ);
@@ -397,6 +403,48 @@ int main(int argc, char* argv[]) {
 
 
 //////////////////////////////////////////////////////////////////////////
+
+
+
+//////////////////////////////
+//
+// checkEmbeddedOptions --
+//
+
+void checkEmbeddedOptions(HumdrumFile& infile, int argc, char* argv[]) {
+   vector<int> oline;;
+   int i;
+   PerlRegularExpression pre;
+	string ostring;
+
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isGlobalComment()) {
+         continue;
+      }
+      if (pre.search(infile[i][0], "^\\!\\!hum2mid:\\s*(.*)\\s*$")) {
+			oline.push_back(i);
+		}
+   }
+
+	if (oline.size() == 0) {
+      return;
+   }
+
+   Options localoptions;
+	defineOptions(localoptions, argc, argv);
+
+   for (i=0; i<(int)oline.size(); i++) {
+      if (pre.search(infile[oline[i]][0], "^\\!\\!hum2mid:\\s*(.*)\\s*$")) {
+			ostring = pre.getSubmatch(1);
+         localoptions.appendOptions(ostring);
+		}
+   }
+
+   localoptions.process();
+
+   processOptions(localoptions, argc, argv);
+}
+
 
 
 //////////////////////////////
@@ -854,6 +902,12 @@ double checkForTempo(HumdrumRecord& record) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
+	defineOptions(opts, argc, argv);
+	processOptions(opts, argc, argv);
+}
+
+
+void defineOptions(Options& opts, int argc, char* argv[]) {
    opts.define("C|nocomments=b",  "Do not store comments as meta text");
    opts.define("D|nodynamics=b",  "Do not encode dynamics found in file");
    opts.define("showdynamics=b",  "Show the calculated dynamics by input line");
@@ -880,6 +934,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("P|nopad=b",        "Do not pad ending with spacer note");
    opts.define("met=d:232",        "Tempo control from metrical symbols");
    opts.define("met2=d:336",       "Tempo control from metrical symbols, older era");
+   opts.define("no-met=b",         "Do not use --met option");
+   opts.define("no-met2=b",        "Do not use --met2 option");
    opts.define("hv|humanvolume=i:5","Apply a random adjustment to volumes");
    opts.define("mv|metricvolume=i:3","Apply metric accentuation to volumes");
    opts.define("fs|sforzando=i:20","Increase sforzandos by specified amount");
@@ -900,7 +956,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b", "example usages");   
    opts.define("h|help=b",  "short description");
    opts.process(argc, argv);
-   
+}
+
+
+
+void processOptions(Options& opts, int argc, char* argv[]) {
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -929,12 +990,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       storeCommentQ = 1;
    }
 
-   if (opts.getBoolean("met")) {
+   if (opts.getBoolean("met") && !opts.getBoolean("no-met")) {
       metQ = int(opts.getDouble("met")+0.5);
    } else {
       metQ = 0;
    }
-   if (opts.getBoolean("met2")) {
+
+   if (opts.getBoolean("met2") && !opts.getBoolean("no-met2")) {
       met2Q = int(opts.getDouble("met2")+0.5);
       metQ  = met2Q;
    } else {

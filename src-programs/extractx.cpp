@@ -8,6 +8,7 @@
 // Last Modified: Sat Apr  6 00:48:21 PDT 2013 Enabled multiple segment input
 // Last Modified: Thu Oct 24 12:32:47 PDT 2013 Switch to HumdrumStream class
 // Last Modified: Sat Mar 12 18:34:05 PST 2016 Switch to STL
+// Last Modified: Sat Mar 12 18:34:05 PST 2016 Add -k option
 // Filename:      ...sig/examples/all/extractx.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/extractx.cpp
 // Syntax:        C++; museinfo
@@ -94,22 +95,23 @@ void    fillFieldDataByGrep     (vector<int>& field, vector<int>& subfield,
                                  HumdrumFile& infile, int state);
 
 // global variables
-Options      options;            // database for command-line arguments
-int          excludeQ = 0;       // used with -x option
-int          expandQ  = 0;       // used with -e option
-string       expandInterp = "";  // used with -E option
-int          interpQ  = 0;       // used with -i option
-string       interps  = "";      // used with -i option
-int          debugQ   = 0;       // used with --debug option
-int          fieldQ   = 0;       // used with -f or -p option
-string       fieldstring = "";   // used with -f or -p option
-vector<int>   field;              // used with -f or -p option
-vector<int>   subfield;           // used with -f or -p option
-vector<int>   model;              // used with -p, or -e options and similar
-int          countQ   = 0;       // used with -C option
-int          traceQ   = 0;       // used with -t option
-string       tracefile = "";     // used with -t option
-int          reverseQ = 0;       // used with -r option
+Options      options;             // database for command-line arguments
+int          excludeQ = 0;        // used with -x option
+int          expandQ  = 0;        // used with -e option
+string       expandInterp = "";   // used with -E option
+int          interpQ  = 0;        // used with -i option
+string       interps  = "";       // used with -i option
+int          debugQ   = 0;        // used with --debug option
+int          kernQ    = 0;        // used with -k option
+int          fieldQ   = 0;        // used with -f or -p option
+string       fieldstring = "";    // used with -f or -p option
+vector<int>  field;               // used with -f or -p option
+vector<int>  subfield;            // used with -f or -p option
+vector<int>  model;               // used with -p, or -e options and similar
+int          countQ   = 0;        // used with -C option
+int          traceQ   = 0;        // used with -t option
+string       tracefile = "";      // used with -t option
+int          reverseQ = 0;        // used with -r option
 string       reverseInterp = "**kern"; // used with -r and -R options.
 // sub-spine "b" expansion model: how to generate data for a secondary
 // spine if the primary spine is not divided.  Models are:
@@ -117,7 +119,7 @@ string       reverseInterp = "**kern"; // used with -r and -R options.
 //    'n': null = use a null token
 //    'r': rest = use a rest instead of a primary spine note (in **kern)
 //         data.  'n' will be used for non-kern spines when 'r' is used.
-int          submodel = 'd';     // used with -m option
+int          submodel = 'd';       // used with -m option
 const char* editorialInterpretation = "yy";
 string      cointerp = "**kern";   // used with -c option
 int         comodel  = 0;          // used with -M option
@@ -524,6 +526,7 @@ void fillFieldData(vector<int>& field, vector<int>& subfield,
       tempstr = buffer.c_str() + start;
       value = pre.search(tempstr, "^([^,]+,?)");
    }
+
 }
 
 
@@ -540,6 +543,13 @@ void processFieldEntry(vector<int>& field, vector<int>& subfield,
       vector<int>& model, const char* astring, HumdrumFile& infile) {
 
    int maxtrack = infile.getMaxTracks();
+
+   vector<int> ktracks;
+	infile.getKernTracks(ktracks);
+   if (kernQ) {
+      maxtrack = ktracks.size();
+	}
+
    int modletter;
    int subletter;
 
@@ -550,7 +560,7 @@ void processFieldEntry(vector<int>& field, vector<int>& subfield,
    pre.sar(buffer, ",", "", "g");
 
    // first remove $ symbols and replace with the correct values
-   removeDollarsFromString(buffer, infile.getMaxTracks());
+   removeDollarsFromString(buffer, maxtrack);
 
    int zero = 0;
    if (pre.search(buffer, "^(\\d+)-(\\d+)$")) {
@@ -640,7 +650,54 @@ void processFieldEntry(vector<int>& field, vector<int>& subfield,
          model.push_back(modletter);
       }
    }
+
+	if (!kernQ) {
+		return;
+	}
+
+   maxtrack = infile.getMaxTracks();
+
+	// Fields to next kern track.
+	// Needs some more bug fixing
+	// Most just needs a fix to preserve old field data
+	// For secondary passes into thi function.
+	vector<int> newfield;
+	vector<int> newsubfield;
+	vector<int> newmodel;
+   int i, j;
+
+   for (i=0; i<(int)field.size(); i++) {
+      if (field[i] != 0) {
+		   field[i] = ktracks[field[i] - 1];
+      }
+   }
+
+	int start, stop;
+   for (i=0; i<(int)field.size(); i++) {
+      newfield.push_back(field[i]);
+      newsubfield.push_back(subfield[i]);
+      newmodel.push_back(model[i]);
+		start = field[i] + 1;
+      if (i < (int)field.size()-1) {
+		   stop = field[i+1];
+		} else {
+         stop = maxtrack+1;
+		}
+      for (j=start; j<stop; j++) {
+         if (strcmp(infile.getTrackExInterp (j), "**kern") == 0) {
+				break;
+			}
+         newfield.push_back(j);
+         newsubfield.push_back(zero);
+         newmodel.push_back(zero);
+      }
+   }
+
+   field    = newfield;
+   subfield = newsubfield;
+   model    = newmodel;
 }
+
 
 
 
@@ -1836,6 +1893,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("R=s:**kern", "reverse order of spine by exinterp group");
    opts.define("t|trace=s:", "use a trace file to extract data");
    opts.define("e|expand=b", "expand spines with subspines");
+   opts.define("k|kern=s", "Extract by kern spine group");
    opts.define("E|expand-interp=s:", "expand subspines limited to exinterp");
    opts.define("m|model|method=s:d", "method for extracting secondary spines");
    opts.define("M|cospine-model=s:d", "method for extracting cospines");
@@ -1870,6 +1928,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    excludeQ    = opts.getBoolean("x");
    interpQ     = opts.getBoolean("i");
    interps     = opts.getString("i");
+   kernQ       = opts.getBoolean("k");
 
    interpstate = 1;
    if (!interpQ) {
@@ -1917,7 +1976,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       fieldstring = opts.getString("x");
    } else if (fieldQ) {
       fieldstring = opts.getString("f");
-   }
+   } else if (kernQ) {
+      fieldstring = opts.getString("k");
+		fieldQ = 1;
+	}
 
    grepQ = opts.getBoolean("grep");
    grepString = opts.getString("grep");

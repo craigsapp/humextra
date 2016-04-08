@@ -54,7 +54,7 @@ class MuseRecordBasic {
 
       MuseRecordBasic&  operator=          (MuseRecordBasic& aRecord);
       MuseRecordBasic&  operator=          (MuseRecordBasic* aRecord);
-      MuseRecordBasic&  operator=          (char* aRecord);
+      MuseRecordBasic&  operator=          (const char* aRecord);
       char&             operator[]         (int index);
       void              setLine            (const char* aString); 
       void              setType            (int aType);

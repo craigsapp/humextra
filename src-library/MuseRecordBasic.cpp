@@ -328,7 +328,7 @@ MuseRecordBasic& MuseRecordBasic::operator=(MuseRecordBasic* aRecord) {
 }
 
 
-MuseRecordBasic& MuseRecordBasic::operator=(char* aLine) {
+MuseRecordBasic& MuseRecordBasic::operator=(const char* aLine) {
    setLine(aLine);
    setType(aLine[0]);
    lineindex = -1;

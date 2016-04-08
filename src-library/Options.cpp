@@ -855,7 +855,6 @@ void Options::appendOptions(const string& strang) {
 
    int length = strang.size();
    for (i=0; i<length; i++) {
-
       if (!singlequote && (strang[i] == '"')) {
          if ((i>0) && (strang[i-1] != '\\')) {
             doublequote = !doublequote;
@@ -878,8 +877,8 @@ void Options::appendOptions(const string& strang) {
             if (singlequote == 0) {
                // finished a singlequote section of data, so store
                // even if it is the empty string
-               ch = '\0';
-               tempvalue += ch;
+               // ch = '\0';
+               // tempvalue += ch;
                tokens.push_back(tempvalue);
                tempvalue.clear();
                continue;
@@ -890,10 +889,8 @@ void Options::appendOptions(const string& strang) {
          }
       }
 
-
       if ((!doublequote && !singlequote) && std::isspace(strang[i])) {
          if (tempvalue.size() > 0) {
-            tempvalue += ch;
             tokens.push_back(tempvalue);
             tempvalue.clear();
          }
@@ -909,8 +906,7 @@ void Options::appendOptions(const string& strang) {
 
    // now that the input string has been chopped up into pieces,
    // assemble the argv structure
-
-   tempargv.reserve(tokens.size());
+   tempargv.resize(tokens.size());
    for (i=0; i<(int)tempargv.size(); i++) {
       tempargv[i] = tokens[i];
    }

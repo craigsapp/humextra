@@ -1,0 +1,243 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Thu Apr  7 21:26:29 PDT 2016
+# Last Modified: Thu Apr  7 23:35:38 PDT 2016
+# Filename:      selfsearch
+# Syntax:        perl 5
+#
+# Description:   Search a work for patterns which occur within the work.
+#
+
+use strict;
+use IPC::Open3;
+use Getopt::Long;
+
+my $feature = "12I";  # default feature type
+my $n = 3;            # default feature length
+my $mincount = 2;     # minimum count for a pattern to trigger search
+my $maxcount = 99999; # maximum count for a pattern to suppress search
+my $piecesQ  = 0;     # show list of patterns and their occurrence count
+my $svgQ     = 0;     # print results as SVG image
+Getopt::Long::Configure("bundling");
+GetOptions (
+   'f|feature=s'    => \$feature,
+   'n|length=s'     => \$n,
+   'm|min-count=s'  => \$mincount,
+   'x|max-count=s'  => \$maxcount,
+   'p|pieces'       => \$piecesQ,
+   's|svg'          => \$svgQ
+);
+
+# Add more features here:
+my %marker = ("PCH", "J", "12I", "{");
+
+$n = 1 if $n < 1;
+$n = 1000 if $n > 1000;
+
+my $File    = $ARGV[0];
+my $command = "tindex -f $feature $File";
+my $index   = `$command`;
+
+my @tokens;
+if ($feature == "PCH") {
+   @tokens = processPitch($marker{$feature}, $index);
+} elsif ($feature == "12I") {
+   @tokens = process12interval($marker{$feature}, $index);
+}
+
+doAnalysis($feature, $n, $File, @tokens);
+
+exit(0);
+
+
+###########################################################################
+
+
+##############################
+##
+## doAnalysis --
+##
+
+sub doAnalysis {
+   my ($feature, $count, @tokens) = @_;
+   my %queries;
+   my $query;
+   for (my $i=0; $i<@tokens - $count; $i++) {
+      $query = $tokens[$i];
+      for (my $j=1; $j<$count; $j++) {
+         $query .= " $tokens[$i+$j]";
+      }
+      $queries{$query}++;
+   }
+   if ($piecesQ) {
+      foreach $query (keys %queries) {
+         print "$query\t$queries{$query}\n";
+      }
+      exit(0);
+   }
+
+   my $output = "";
+   my $result;
+   my $command = "themax --loc --$feature ";
+   my $command2 = " | theloc --all";
+   my $finalcommand;
+   foreach $query (keys %queries) {
+      next if $queries{$query} < $mincount;
+      next if $queries{$query} > $maxcount;
+      my $pid = open3(\*INPUT, \*OUTPUT, \*ERROR, 
+            "$command \"$query\" $command2")
+	    or die "themax setup failed $!";
+      print INPUT "$index";
+      close (INPUT);
+      $output .= parseResult($query, $queries{$query}, <OUTPUT>);
+   }
+   if ($svgQ) {
+      printSvg($output);
+   } else {
+      print $output;
+   }
+}
+
+
+
+##############################
+##
+## parseResult --
+##
+
+sub parseResult {
+   my ($query, $count, @voices) = @_;
+   my $output = "$query\t$count\t";
+   my @percentages;
+   foreach my $line (@voices) {
+      $line =~ s/.*\t//;
+      chomp $line;
+      my @data = split(/\s+/, $line);
+      foreach my $match (@data) {
+         if ($match =~ /P([\d.]+)/) {
+            $percentages[@percentages] = $1;
+         }
+      }
+   }
+
+   @percentages = sort @percentages;
+   my $toutput = join(" ", @percentages);
+   return "$output$toutput\n";
+}
+
+
+
+##############################
+##
+## process12interval --
+##
+
+sub process12interval {
+   my ($marker, $index) = @_;
+   my @output;
+   my @data;
+   my $line;
+   my $token;
+   my @lines = split(/\n/, $index);
+   foreach $line (@lines) {
+      $line =~ s/p/ /g;
+      $line =~ s/m/ -/g;
+      @data = split(/\t/, $line);
+      foreach $token (@data) {
+         next if $token !~ /^$marker/;
+         $token =~ s/^$marker//;
+         push(@output, split(/ /, $token));
+      }
+   }
+   return @output;
+}
+
+
+
+##############################
+##
+## processPitch -- 
+##
+
+sub processPitch {
+   my ($marker, $index) = @_;
+   my @output;
+   my @data;
+   my $line;
+   my $token;
+   my @lines = split(/\n/, $index);
+   foreach $line (@lines) {
+      $line =~ s/b/-/g;
+      @data = split(/\t/, $line);
+      foreach $token (@data) {
+         next if $token !~ /^$marker/;
+         $token =~ s/^$marker//;
+         push(@output, split(/ /, $token));
+      }
+   }
+   return @output;
+}
+
+
+
+############################
+##
+## printSvg --
+##
+
+sub printSvg {
+   my ($data) = @_;
+   my @lines = split(/\n/, $data);
+   my @percent;
+
+   print "<svg version=\"1.1\"";
+   print " xmlns=\"http://www.w3.org/2000/svg\"";
+   print " xmlns:xlink=\"http://www.w3.org/1999/xlink\"";
+   print " viewBox=\"0 0 100 100\"";
+   print " width=\"400\"";
+   print " height=\"400\"";
+   print " style=\"display: block;\">\n";
+
+   print "<g";
+   print " transform=\"scale(1, 1)  translate(0, 100)\"";
+   print " stroke-width=\"0.05\"";
+   print " fill=\"transparent\" stroke=\"black\" >\n";
+
+   my $i;
+   my $j;
+   my $midpoint;
+   my $radius;
+   foreach my $line (@lines) {
+      chomp $line;
+      $line =~ s/.*\t//;
+      @percent = split(/\s+/, $line);
+      next if @percent < 2;
+      for ($i=0; $i<@percent; $i++) {
+         for ($j=$i+1; $j<@percent; $j++) {
+            $midpoint = ($percent[$i] + $percent[$j])/2.0;
+            $radius = $percent[$j] - $midpoint;
+            print "\t<path d=\"";
+            print "M$percent[$i],0 ";
+            print "A$radius,$radius 0 0,1 ";
+            print "$percent[$j], 0";
+            print "\"/>\n";
+         }
+      }
+   }
+   print "</g>\n";
+
+   print "\n<?data\n";
+   print "\@feature:\t$feature\n";
+   print "\@length:\t$n\n";
+   print "\@mincount:\t$mincount\n";
+   print "\@maxcount:\t$maxcount\n";
+   print "\@file\t$File\n";
+   print "\n";
+   print $data;
+   print "\n?>\n";
+   print "</svg>\n";
+}
+
+
+

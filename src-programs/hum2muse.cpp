@@ -3829,6 +3829,7 @@ void processGlobalComment(HumdrumFile& infile, int line, MuseData& tempdata,
    if (strncmp(infile[line][0], "!!LO:", 5) != 0) {
       return;
    }
+   
    LayoutParameters lp;
    Array<Coord> coords(1);
    coords[0].i = line;
@@ -3843,9 +3844,24 @@ void processGlobalComment(HumdrumFile& infile, int line, MuseData& tempdata,
             printRehearsalMark(tempdata, lp, i);
          }
       }
+      if (strcmp("MD", lp.getCode(i).getBase()) == 0) {
+         int jdex = lp.hasKeyName(i, "P");
+         if (jdex > 0) {
+            jdex--;
+            string value;
+            value = lp.getValue(i, jdex).getBase();
+				pre.sar(value, "&colon;", ":", "g");
+            if (value.size() > 0) {
+               value.insert(0, "P ");
+               MuseRecord arecord;
+               arecord.setLine(value.c_str());
+               tempdata.append(arecord);
+            }
+         }
+      }
    }
-
 }
+
 
 
 //////////////////////////////
