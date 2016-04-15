@@ -1,0 +1,271 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Thu Apr 14 11:30:07 PDT 2016
+# Last Modified: Thu Apr 14 21:34:13 PDT 2016
+# Filename:      sdmarkov
+# Syntax:        perl 5
+#
+# Description:   Generate scale-degree markov transition tables from
+#                **kern data.  The input can be polyphonic, but only the
+#                first note in chords will be considered, and only the
+#                first sub-spine will be followed if spines split.
+#
+# Options:
+#    -v   == convert context tokens to variables, such as "3 4" to "t3_4".
+#    -h   == print histogram of input data, then exit
+#    -c   == preserve chromatic alterations (such as "3-" which is flat 3).
+#    -b   == print only base of filename (JRPID).
+#    -n # == n-gram length to generate with context.
+#    --csv == output CSV data rather than TSV.
+#    --humdrum == output Humdrum data rather than TSV.
+#    --min-count # == exclude files which have few than this number of context
+#            tokens (default is 100).
+#    --count == show data as counts rather than percentages.
+#    --space string == convert spaces to this character with -v option
+#                      (default is "_");
+#    --prefix string == add this to start of token when using -v option
+#                      (default is "t");
+#    --postfix string == add this to end of token when using -v option
+#                      (default is "");
+
+use strict;
+use Getopt::Long;
+
+my $Prefix     = "t";
+my $Postfix    = "";
+my $Space      = "_";
+my $Separator  = "\t";
+my $variableQ  = 0;
+my $countQ     = 0;
+my $context    = 2;
+my $baseQ      = 0;
+my $chromaticQ = 0;
+my $histogramQ = 0;
+my $debugQ     = 0;
+my $csvQ       = 0;
+my $humdrumQ   = 0;
+my $MinCount   = 1;
+Getopt::Long::Configure("bundling");
+GetOptions (
+   'h|histogramQ'     => \$histogramQ,
+   'v|variables'      => \$variableQ,
+   'd|debug'          => \$debugQ,
+   'space=s'          => \$Space,
+   'prefix=s'         => \$Prefix,
+   'postfix=s'        => \$Postfix,
+   'min-count=s'      => \$MinCount,
+   'csv'              => \$csvQ,
+   'humdrum'          => \$humdrumQ,
+   'c|chromatic'      => \$chromaticQ,
+   'b|base|file-base' => \$baseQ,
+   'n|context=s'      => \$context
+);
+$context = 2 if $context < 2;  # can't be 1 in input to context
+$context = 2 if $context > 100;
+$Separator = "," if $csvQ;
+$Prefix = "**$Prefix" if $humdrumQ;
+
+my @files = @ARGV;
+my %TOKENS; 
+my %RESULTS;
+getTokens(@files);
+
+if ($histogramQ) {
+   my $sum = getHistogramSum(%TOKENS);
+   foreach my $key (sort keys %TOKENS) {
+      my $percent = $TOKENS{$key} / $sum * 100.0;
+      my $token = prepareToken($key);
+      print "$token\t$TOKENS{$key}\n";
+   }
+   exit(0);
+}
+
+# generate data for each work
+my @order = sort keys %TOKENS;
+printColumnHeader(@order);
+
+my @files = sort keys %RESULTS;
+foreach my $file (@files) {
+   printFileRowData($file, $RESULTS{$file}, @order);
+}
+
+printColumnFooter(@order);
+
+exit(0);
+
+###########################################################################
+
+
+##############################
+##
+## printFileRowData -- Print a row of data for a particular file
+##
+
+sub printFileRowData {
+   my ($file, $results, @order) = @_;
+   my %data;
+   my @tokens = parseTokensFromResults($results);
+   my $sum = 0;
+   for (my $i=0; $i<@tokens; $i++) {
+      $data{$tokens[$i]}++;
+      $sum++;
+   }
+   return if $sum < $MinCount;
+   print "$file";
+   for (my $i=0; $i<@order; $i++) {
+      my $key = $order[$i];
+      my $value = $data{$key};
+      $value = 0 if !$value;
+      my $percent = int($value / $sum * 100000.0 + 0.5) / 1000.0;
+      # my $token = prepareToken($key);
+      print "$Separator$percent";
+   }
+   print "\n";
+}
+
+
+
+##############################
+##
+## printColumnHeader --
+##
+
+sub printColumnHeader {
+   my @tokens = @_;
+   if ($humdrumQ) {
+      print "**file";
+   } else {
+      print "FILENAME";
+   }
+   foreach my $token (@tokens) {
+      $token = prepareToken($token);
+      print "$Separator$token";
+   }
+   print "\n";
+}
+
+
+
+##############################
+##
+## printColumnFooter --
+##
+
+sub printColumnFooter {
+   my @order = @_;
+   return if !$humdrumQ;
+   print "*-";
+   for (my $i=0; $i<@order; $i++) {
+      print "$Separator*-";
+   }
+   print "\n";
+}
+
+
+
+##############################
+##
+## prepareToken -- Convert context token into variable if -v option given.
+##
+
+sub prepareToken {
+   my ($token) = @_;
+   return $token if !$variableQ;
+   $token =~ s/\s/$Space/g;
+   $token =~ s/^/$Prefix/g;
+   $token =~ s/$/$Postfix/g;
+   return $token;
+}
+
+
+
+##############################
+##
+## getHistogramSum -- Sum all counts in the token histogram.
+##
+
+sub getHistogramSum {
+   my %data = @_;
+   my $sum = 0;
+   foreach my $token (keys %data) {
+      $sum += $data{$token};
+   }
+   return $sum;
+}
+
+
+
+##############################
+##
+## getTokens -- get a list of all context tokens foun in the data files.
+##
+
+sub getTokens {
+   my @filelist = @_;
+   foreach my $file (@filelist) {
+      processFile($file);
+   }
+}
+
+
+
+##############################
+##
+## processFile -- Do finalis/scale-degree/context analysis.
+##
+
+sub processFile {
+   my ($file) = @_;
+   my $base = $file;
+   $base =~s/-.*//;
+
+   # ignore chromatic alterations of the scale degree:
+   my $removeaccidentals = " | sed s/[+-]//g";
+   if ($chromaticQ) {
+      $removeaccidentals = "";   
+   }
+
+   my $command = "";
+   $command .= " finalis-tonic $file | extractx -i '**kern' | deg -a";
+   $command .= " | grep -v '[=]'";
+   $command .= " | serialize -L | context -n $context | ridx -H";
+   $command .= $removeaccidentals;
+   # scale degrees should not be linked if separated by rests:
+   $command .= " | grep -v r ";
+
+   my $result = `$command`;
+   if ($debugQ) {
+      print "Processing file $file\n";
+      print "Result = $result\n";
+   }
+   if ($baseQ) {
+      $RESULTS{$base} = $result;
+   } else {
+      $RESULTS{$file} = $result;
+   }
+   my @tokens = parseTokensFromResults($result);
+   for (my $i=0; $i<@tokens; $i++) {
+      $TOKENS{$tokens[$i]}++;
+   }
+}
+
+
+
+##############################
+##
+## parseTokensFromResults -- Extract the list of tokens for a paticular file.
+##
+
+sub parseTokensFromResults {
+   my ($result) = @_;
+   my @tokens = split(/\n/, $result);
+   my @output;
+   foreach my $token (@tokens) {
+      $output[@output] = $token;
+   }
+   return @output;
+}
+
+
+
