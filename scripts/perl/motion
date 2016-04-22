@@ -1,0 +1,140 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Thu Apr 21 19:50:19 PDT 2016
+# Last Modified: Fri Apr 22 06:50:36 PDT 2016
+# Filename:      motion
+# Syntax:        perl 5
+# vim:           ts=3
+#
+# Description:   Count occurrences of similar, contrary and oblique motion
+#                in counterpoint modules.
+#
+# Options:
+#    -l       == Long listing -- show subcategories of motion.
+#
+
+use strict;
+
+my $longQ = 0;
+
+use Getopt::Long;
+Getopt::Long::Configure("bundling");
+GetOptions (
+	'l|long' => \$longQ
+);
+
+my $contrary_in         = 0;
+my $contrary_out        = 0;
+my $similar_up          = 0;
+my $similar_down        = 0;
+my $oblique_top_up      = 0;
+my $oblique_top_down    = 0;
+my $oblique_bottom_up   = 0;
+my $oblique_bottom_down = 0;
+my $repetition          = 0;
+my $sum                 = 0;
+my $count;
+my $percent;
+
+my $files = join(" ", @ARGV);
+my @data = `cint $files --raw -H -t -s`;
+
+my ($m1, $m2);
+foreach my $line (@data) {
+	next if $line !~ /([-\d]+)[sx]*\s+([-\d]+)/; # skip if rest in module
+	$m1 = $1;
+	$m2 = $2;
+	if    (($m1 == 1) && ($m2 == 1)) { $repetition++; }
+	elsif (($m1 == 1) && ($m2 > 1))  { $oblique_top_up++; }
+	elsif (($m1 == 1) && ($m2 < 1))  { $oblique_top_down++; }
+	elsif (($m2 == 1) && ($m1 > 1))  { $oblique_bottom_up++; }
+	elsif (($m2 == 1) && ($m1 < 1))  { $oblique_bottom_down++; }
+	elsif (($m1 > 1)  && ($m2 > 1))  { $similar_up++; }
+	elsif (($m1 < 1)  && ($m2 < 1))  { $similar_down++; }
+	elsif (($m1 < 1)  && ($m2 > 1))  { $contrary_out++; }
+	elsif (($m1 > 1)  && ($m2 < 1))  { $contrary_in++; }
+	else { print "!!Error: $m1 $m2\n"; }
+	$sum++;
+}
+
+
+print "**type\t**count\t**percent\n";
+
+# Oblique motion:
+$count = $oblique_top_up + $oblique_top_down
+		 + $oblique_bottom_up + $oblique_bottom_down;
+$percent = percentage($count, $sum);
+print "oblique\t$count\t$percent\n";
+
+if ($longQ) {
+	$count = $oblique_top_up + $oblique_top_down;
+	$percent = percentage($count, $sum);
+	print "oblique-top\t$count\t$percent\n";
+
+	$count = $oblique_top_up + $oblique_bottom_up;
+	$percent = percentage($count, $sum);
+	print "oblique-up\t$count\t$percent\n";
+
+	$count = $oblique_bottom_up + $oblique_bottom_down;
+	$percent = percentage($count, $sum);
+	print "oblique-bottom\t$count\t$percent\n";
+
+	$count = $oblique_top_down + $oblique_bottom_down;
+	$percent = percentage($count, $sum);
+	print "oblique-down\t$count\t$percent\n";
+}
+
+
+# Contrary Motion:
+$count = $contrary_out + $contrary_in;
+$percent = percentage($count, $sum);
+print "contrary\t$count\t$percent\n";
+
+if ($longQ) {
+	$percent = percentage($contrary_out, $sum);
+	print "contrary-out\t$contrary_out\t$percent\n";
+
+	$percent = percentage($contrary_in, $sum);
+	print "contrary-in\t$contary_in\t$percent\n";
+}
+
+
+# Similar Motion:
+$percent = percentage($count, $sum);
+print "similar\t$count\t$percent\n";
+
+if ($longQ) {
+	$percent = percentage($similar_up, $sum);
+	print "similar-up\t$similar_up\t$percent\n";
+
+	$percent = percentage($similar_down, $sum);
+	print "similar-down\t$similar_down\t$percent\n";
+}
+
+
+# Repeated notes:
+$percent = percentage($repetition, $sum);
+print "repetition\t$repetition\t$percent\n";
+
+print "*-\t*-\t*-\n";
+print "!!total-modules: $sum\n";
+
+exit(0)
+
+
+###########################################################################
+
+
+##############################
+##
+## percentage -- Multiply by 100 and round to 2 significant digits.
+##
+
+sub percentage {
+	my ($value, $sum) = @_;
+	return int ($value / $sum * 10000.0 + 0.5) / 100.0;
+}
+
+
+
