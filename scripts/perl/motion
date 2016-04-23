@@ -2,7 +2,7 @@
 #
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Thu Apr 21 19:50:19 PDT 2016
-# Last Modified: Fri Apr 22 06:50:36 PDT 2016
+# Last Modified: Fri Apr 22 22:56:16 PDT 2016 Added more options.
 # Filename:      motion
 # Syntax:        perl 5
 # vim:           ts=3
@@ -12,118 +12,242 @@
 #
 # Options:
 #    -l       == Long listing -- show subcategories of motion.
+#    -f       == List motions counts by file.
+#    -p       == Listings by file given by percentage rather than count.
 #
 
 use strict;
 
-my $longQ = 0;
+my $longQ    = 0;
+my $fileQ    = 0;
+my $percentQ = 0;
 
 use Getopt::Long;
 Getopt::Long::Configure("bundling");
 GetOptions (
-	'l|long' => \$longQ
+	'l|long'    => \$longQ,
+	'p|percent' => \$percentQ,
+	'f|file'    => \$fileQ
 );
 
-my $contrary_in         = 0;
-my $contrary_out        = 0;
-my $similar_up          = 0;
-my $similar_down        = 0;
-my $oblique_top_up      = 0;
-my $oblique_top_down    = 0;
-my $oblique_bottom_up   = 0;
-my $oblique_bottom_down = 0;
-my $repetition          = 0;
-my $sum                 = 0;
+my @data;
 my $count;
 my $percent;
+my %motion;
 
-my $files = join(" ", @ARGV);
-my @data = `cint $files --raw -H -t -s`;
+my @files = @ARGV;
+my $filelist = join(" ", @files);
 
-my ($m1, $m2);
-foreach my $line (@data) {
-	next if $line !~ /([-\d]+)[sx]*\s+([-\d]+)/; # skip if rest in module
-	$m1 = $1;
-	$m2 = $2;
-	if    (($m1 == 1) && ($m2 == 1)) { $repetition++; }
-	elsif (($m1 == 1) && ($m2 > 1))  { $oblique_top_up++; }
-	elsif (($m1 == 1) && ($m2 < 1))  { $oblique_top_down++; }
-	elsif (($m2 == 1) && ($m1 > 1))  { $oblique_bottom_up++; }
-	elsif (($m2 == 1) && ($m1 < 1))  { $oblique_bottom_down++; }
-	elsif (($m1 > 1)  && ($m2 > 1))  { $similar_up++; }
-	elsif (($m1 < 1)  && ($m2 < 1))  { $similar_down++; }
-	elsif (($m1 < 1)  && ($m2 > 1))  { $contrary_out++; }
-	elsif (($m1 > 1)  && ($m2 < 1))  { $contrary_in++; }
-	else { print "!!Error: $m1 $m2\n"; }
-	$sum++;
+if ($fileQ) {
+   printDataHeader();
+	foreach my $file (@files) {
+		initializeMotion(\%motion);
+		@data = `cint $file --raw -H -t -s`;
+		processCintRawData(\%motion, \@data);
+		print "$file";
+		printMotionLine(%motion);
+	}
+   printDataFooter();
+} else {
+	initializeMotion(\%motion);
+	@data = `cint $filelist --raw -H -t -s`;
+	processCintRawData(\%motion, \@data);
+	printMotionSummary(%motion);
 }
 
-
-print "**type\t**count\t**percent\n";
-
-# Oblique motion:
-$count = $oblique_top_up + $oblique_top_down
-		 + $oblique_bottom_up + $oblique_bottom_down;
-$percent = percentage($count, $sum);
-print "oblique\t$count\t$percent\n";
-
-if ($longQ) {
-	$count = $oblique_top_up + $oblique_top_down;
-	$percent = percentage($count, $sum);
-	print "oblique-top\t$count\t$percent\n";
-
-	$count = $oblique_top_up + $oblique_bottom_up;
-	$percent = percentage($count, $sum);
-	print "oblique-up\t$count\t$percent\n";
-
-	$count = $oblique_bottom_up + $oblique_bottom_down;
-	$percent = percentage($count, $sum);
-	print "oblique-bottom\t$count\t$percent\n";
-
-	$count = $oblique_top_down + $oblique_bottom_down;
-	$percent = percentage($count, $sum);
-	print "oblique-down\t$count\t$percent\n";
-}
-
-
-# Contrary Motion:
-$count = $contrary_out + $contrary_in;
-$percent = percentage($count, $sum);
-print "contrary\t$count\t$percent\n";
-
-if ($longQ) {
-	$percent = percentage($contrary_out, $sum);
-	print "contrary-out\t$contrary_out\t$percent\n";
-
-	$percent = percentage($contrary_in, $sum);
-	print "contrary-in\t$contary_in\t$percent\n";
-}
-
-
-# Similar Motion:
-$percent = percentage($count, $sum);
-print "similar\t$count\t$percent\n";
-
-if ($longQ) {
-	$percent = percentage($similar_up, $sum);
-	print "similar-up\t$similar_up\t$percent\n";
-
-	$percent = percentage($similar_down, $sum);
-	print "similar-down\t$similar_down\t$percent\n";
-}
-
-
-# Repeated notes:
-$percent = percentage($repetition, $sum);
-print "repetition\t$repetition\t$percent\n";
-
-print "*-\t*-\t*-\n";
-print "!!total-modules: $sum\n";
-
-exit(0)
+exit(0);
 
 
 ###########################################################################
+
+
+##############################
+##
+## printDataFooter --  Print spine terminators for listing by filenames.
+##
+
+sub printDataFooter {
+	my $counter = $longQ ? 14 : 6;
+	print "*-";
+	for (my $i=1; $i<$counter; $i++) {
+		print "\t*-";
+	}
+	print "\n";
+}
+
+
+
+##############################
+##
+## printDataHeader -- Print exclusive interpretations for listing by
+##     filenames.
+##
+
+sub printDataHeader {
+	print "**file";
+	print "\t**ob";
+	if ($longQ) {
+		print "\t**obtop";
+		print "\t**obup";
+		print "\t**obbottom";
+		print "\t**obdown";
+	}
+	print "\t**cont";
+	if ($longQ) {
+		print "\t**contout";
+		print "\t**contin";
+	}
+	print "\t**sim";
+	if ($longQ) {
+		print "\t**simup";
+		print "\t**simdown";
+	}
+	print "\t**rep";
+	print "\t**sum";
+	print "\n";
+}
+
+
+
+##############################
+##
+## printMotionLine -- Print summary statistics on a single line.
+##
+
+sub printMotionLine {
+	my %data = @_;
+
+	# Oblique motion:
+	$count = $data{'oblique_top_up'} + $data{'oblique_top_down'}
+	       + $data{'oblique_bottom_up'} + $data{'oblique_bottom_down'};
+	$percent = percentage($count, $data{'sum'});
+	printChoice($count, $percent);
+
+	if ($longQ) {
+		$count = $data{'oblique_top_up'} + $data{'oblique_top_down'};
+		$percent = percentage($count, $data{'sum'});
+		printChoice($count, $percent);
+
+		$count = $data{'oblique_top_up'} + $data{'oblique_bottom_up'};
+		$percent = percentage($count, $data{'sum'});
+		printChoice($count, $percent);
+
+		$count = $data{'oblique_bottom_up'} + $data{'oblique_bottom_down'};
+		$percent = percentage($count, $data{'sum'});
+		printChoice($count, $percent);
+
+		$count = $data{'oblique_top_down'} + $data{'oblique_bottom_down'};
+		$percent = percentage($count, $data{'sum'});
+		printChoice($count, $percent);
+	}
+
+	# Contrary Motion:
+	$count = $data{'contrary_out'} + $data{'contrary_in'};
+	$percent = percentage($count, $data{'sum'});
+	printChoice($count, $percent);
+
+	if ($longQ) {
+		$percent = percentage($data{'contrary_out'}, $data{'sum'});
+		printChoice($data{'contrary_out'}, $percent);
+
+		$percent = percentage($data{'contrary_in'}, $data{'sum'});
+		printChoice($data{'contrary_in'}, $percent);
+	}
+
+	# Similar Motion:
+	$count = $data{'similar_up'} + $data{'similar_down'};
+	$percent = percentage($count, $data{'sum'});
+	printChoice($count, $percent);
+
+	if ($longQ) {
+		$percent = percentage($data{'similar_up'}, $data{'sum'});
+		printChoice($data{'similar_up'}, $percent);
+
+		$percent = percentage($data{'similar_down'}, $data{'sum'});
+		printChoice($data{'similar_down'}, $percent);
+	}
+
+	# Repeated notes:
+	$percent = percentage($data{'repetition'}, $data{'sum'});
+	printChoice($data{'repetition'}, $percent);
+
+	print "\t$data{'sum'}\n";
+}
+
+
+
+##############################
+##
+## printMotionSummary -- Print a list of the motion types with their
+##    counts and precentages in the input data.
+##
+
+sub printMotionSummary {
+	my %data = @_;
+
+	print "**type\t**count\t**percent\n";
+
+	# Oblique motion:
+	$count = $data{'oblique_top_up'} + $data{'oblique_top_down'}
+		 	+ $data{'oblique_bottom_up'} + $data{'oblique_bottom_down'};
+	$percent = percentage($count, $data{'sum'});
+	print "oblique\t$count\t$percent\n";
+
+	if ($longQ) {
+		$count = $data{'oblique_top_up'} + $data{'oblique_top_down'};
+		$percent = percentage($count, $data{'sum'});
+		print "oblique-top\t$count\t$percent\n";
+
+		$count = $data{'oblique_top_up'} + $data{'oblique_bottom_up'};
+		$percent = percentage($count, $data{'sum'});
+		print "oblique-up\t$count\t$percent\n";
+
+		$count = $data{'oblique_bottom_up'} + $data{'oblique_bottom_down'};
+		$percent = percentage($count, $data{'sum'});
+		print "oblique-bottom\t$count\t$percent\n";
+
+		$count = $data{'oblique_top_down'} + $data{'oblique_bottom_down'};
+		$percent = percentage($count, $data{'sum'});
+		print "oblique-down\t$count\t$percent\n";
+	}
+
+
+	# Contrary Motion:
+	$count = $data{'contrary_out'} + $data{'contrary_in'};
+	$percent = percentage($count, $data{'sum'});
+	print "contrary\t$count\t$percent\n";
+
+	if ($longQ) {
+		$percent = percentage($data{'contrary_out'}, $data{'sum'});
+		print "contrary-out\t$data{'contrary_out'}\t$percent\n";
+
+		$percent = percentage($data{'contrary_in'}, $data{'sum'});
+		print "contrary-in\t$data{'contrary_in'}\t$percent\n";
+	}
+
+
+	# Similar Motion:
+	$count = $data{'similar_up'} + $data{'similar_down'};
+	$percent = percentage($count, $data{'sum'});
+	print "similar\t$count\t$percent\n";
+
+	if ($longQ) {
+		$percent = percentage($data{'similar_up'}, $data{'sum'});
+		print "similar-up\t$data{'similar_up'}\t$percent\n";
+
+		$percent = percentage($data{'similar_down'}, $data{'sum'});
+		print "similar-down\t$data{'similar_down'}\t$percent\n";
+	}
+
+
+	# Repeated notes:
+	$percent = percentage($data{'repetition'}, $data{'sum'});
+	print "repetition\t$data{'repetition'}\t$percent\n";
+
+	print "*-\t*-\t*-\n";
+	print "!!total-modules: $data{'sum'}\n";
+}
+
 
 
 ##############################
@@ -134,6 +258,73 @@ exit(0)
 sub percentage {
 	my ($value, $sum) = @_;
 	return int ($value / $sum * 10000.0 + 0.5) / 100.0;
+}
+
+
+
+##############################
+##
+## initializeMotion -- Set all motion counting variables to 0.
+##
+
+sub initializeMotion {
+	my ($motion_ref) = @_;
+	$$motion_ref{'contrary_in'}         = 0;
+	$$motion_ref{'contrary_out'}        = 0;
+	$$motion_ref{'similar_up'}          = 0;
+	$$motion_ref{'similar_down'}        = 0;
+	$$motion_ref{'oblique_top_up'}      = 0;
+	$$motion_ref{'oblique_top_down'}    = 0;
+	$$motion_ref{'oblique_bottom_up'}   = 0;
+	$$motion_ref{'oblique_bottom_down'} = 0;
+	$$motion_ref{'repetition'}          = 0;
+	$$motion_ref{'sum'}                 = 0;
+}
+
+
+
+##############################
+##
+## processCintRawData -- Count motions by categories.
+##
+
+sub processCintRawData {
+	my ($mref, $dref) = @_;
+	my ($m1, $m2);
+	foreach my $line (@$dref) {
+		next if $line !~ /([-\d]+)[sx]*\s+([-\d]+)/; # skip if rest in module
+		$m1 = $1;
+		$m2 = $2;
+		if    (($m1 == 1) && ($m2 == 1)) { $$mref{'repetition'}++;          }
+		elsif (($m1 == 1) && ($m2 > 1))  { $$mref{'oblique_top_up'}++;      }
+		elsif (($m1 == 1) && ($m2 < 1))  { $$mref{'oblique_top_down'}++;    }
+		elsif (($m2 == 1) && ($m1 > 1))  { $$mref{'oblique_bottom_up'}++;   }
+		elsif (($m2 == 1) && ($m1 < 1))  { $$mref{'oblique_bottom_down'}++; }
+		elsif (($m1 > 1)  && ($m2 > 1))  { $$mref{'similar_up'}++;          }
+		elsif (($m1 < 1)  && ($m2 < 1))  { $$mref{'similar_down'}++;        }
+		elsif (($m1 < 1)  && ($m2 > 1))  { $$mref{'contrary_out'}++;        }
+		elsif (($m1 > 1)  && ($m2 < 1))  { $$mref{'contrary_in'}++;         }
+		else { print "!!Error: $m1 $m2\n"; }
+		$$mref{'sum'}++;
+	}
+}
+
+
+
+##############################
+##
+## printChoice --
+##
+
+sub printChoice {
+	my ($count, $percent) = @_;
+	print "\t";
+	if ($percentQ) {
+		print $percent;
+	} else {
+		print $count;
+	}
+
 }
 
 
