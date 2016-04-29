@@ -30,11 +30,8 @@
 #include "Enum_humdrumRecord.h"
 #include "RationalNumber.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-#else
-   #include <iostream.h>
-#endif
+#include <vector>
+#include <iostream>
 
 class HumdrumRecord {
    public:
@@ -113,6 +110,9 @@ class HumdrumRecord {
                                               int buffersize = -1, 
                                               char separator = ' ');
       void              getTokens          (Array<Array<char> >& tokens, 
+                                              int fieldIndex, 
+                                              char separator = ' ');
+      void              getTokens          (vector<string>& tokens, 
                                               int fieldIndex, 
                                               char separator = ' ');
       char*             getToken           (Array<char>& buffer, 

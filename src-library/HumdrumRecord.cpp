@@ -1084,6 +1084,17 @@ void HumdrumRecord::getTokens(Array<Array<char> >& tokens, int fieldIndex,
 }
 
 
+void HumdrumRecord::getTokens(vector<string>& tokens, int fieldIndex, 
+      char separator) {
+   Array<Array<char> > xtokens;
+   HumdrumRecord::getTokens(xtokens, fieldIndex, separator);
+   tokens.resize(0);
+   string tok;
+   for (int i=0; i<xtokens.getSize(); i++) {
+      tok = xtokens[i].getBase();
+      tokens.push_back(tok);
+   }
+}
 
 
 //////////////////////////////
