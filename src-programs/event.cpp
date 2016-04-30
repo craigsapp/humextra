@@ -92,6 +92,9 @@ void processFile(vector<int>& eventnums, HumdrumFile& infile) {
          }
          infile[i].getTokens(toks, j);
          for (k=0; k<(int)toks.size(); k++) {
+            if (toks[k] == ".") {
+               continue;
+            }
             if (toks[k].find("r") != string::npos) {
                continue;
             }
