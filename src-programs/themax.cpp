@@ -1001,7 +1001,15 @@ void getTargetEnds(Array<int>& targetend, Array<int>& target, string& line) {
       }
    }
 
-   // (P12toneintervalQ) needs to be converted
+   if (P12toneintervalQ) {
+      getSeparatorLocationFETEnd(temptarget, line, P12toneinterval,
+            P_12TONE_INTERVAL_MARKER, target, ' ');
+      for (i=0; i<temptarget.getSize(); i++) {
+         if (temptarget[i] > targetend[i]) {
+            targetend[i] = temptarget[i];
+         }
+      }
+   }
 
    if (PpitchclassQ) {
       getSeparatorLocationFETEnd(temptarget, line, Ppitchclass,

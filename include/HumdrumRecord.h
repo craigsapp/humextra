@@ -237,6 +237,7 @@ class HumdrumRecord {
                                               const char* interpretation);
       void              setLine            (const char* aString); 
       void              setToken           (int index, const char* aString);
+      void              setToken           (int index, const string& aString);
       void              setLineNum         (int aLine);
       void              setSpineID         (int index, const char* anID);
       void              setSpineWidth      (int aSize);

@@ -96,6 +96,11 @@ class Convert {
       static int       base40IntervalToDiatonic   (int base40interval);
       static int       kernToBase40               (const char* kernfield);
       static int       kernToBase40Class          (const char* kernfield);
+      static string    kernToScientificNotation   (const string& kernfield,
+											const string& flat = "b",
+                                 const string& sharp = "#",
+		                           const string& doubleflat = "bb",
+		                           const string& doublesharp = "x");
       static int       kernNoteToBase40           (const char* name);
       static SigCollection<int> keyToScaleDegrees (int aKey, int aMode);
       static int       museToBase40               (const char* pitchString);

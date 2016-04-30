@@ -146,6 +146,83 @@ int Convert::kernToMidiNoteNumber(const char* aKernString) {
 
 //////////////////////////////
 //
+// Convert::kernToScientificNotation --
+//
+// Default values:
+//     flat   = b
+//     sharp  = #
+//     doubleflat   = b
+//     doublesharp  = x
+//
+
+string Convert::kernToScientificNotation(const string& kernfield, 
+      const string& flat, const string& sharp, const string& doubleflat,
+      const string& doublesharp) {
+   int  ucount = 0;
+   int  lcount = 0;
+   int  scount = 0;
+   int  fcount = 0;
+   char  pitch = 'X';
+   int i;
+   for (i=0; i<(int)kernfield.size(); i++) {
+      switch (kernfield[i]) {
+			case 'A': ucount++; pitch = 'A'; break;
+			case 'B': ucount++; pitch = 'B'; break;
+			case 'C': ucount++; pitch = 'C'; break;
+			case 'D': ucount++; pitch = 'D'; break;
+			case 'E': ucount++; pitch = 'E'; break;
+			case 'F': ucount++; pitch = 'F'; break;
+			case 'G': ucount++; pitch = 'G'; break;
+			case 'a': lcount++; pitch = 'A'; break;
+			case 'b': lcount++; pitch = 'B'; break;
+			case 'c': lcount++; pitch = 'C'; break;
+			case 'd': lcount++; pitch = 'D'; break;
+			case 'e': lcount++; pitch = 'E'; break;
+			case 'f': lcount++; pitch = 'F'; break;
+			case 'g': lcount++; pitch = 'G'; break;
+			case '-': fcount++; break;
+			case '#': ucount++; break;
+		}
+   }
+
+   string output;
+   output += pitch;
+   if (fcount > 0) {
+      if (fcount == 1) {
+            output += flat;
+      } else if (fcount == 2) {
+            output += doubleflat;
+      } else {
+         for (i=0; i<fcount; i++) {
+            output += flat;
+         } 
+      }
+   } else if (scount > 0) {
+      if (scount == 1) {
+            output += sharp;
+      } else if (scount == 2) {
+            output += doublesharp;
+      } else {
+         for (i=0; i<scount; i++) {
+            output += sharp;
+         } 
+      }
+   }
+   if (lcount > 0) {
+      output += to_string(3 + lcount);
+   } else if (ucount > 0) {
+      output += to_string(4 - ucount);
+   } else {
+      output = "R";
+   }
+
+   return output;
+}
+
+
+
+//////////////////////////////
+//
 // Convert::durationRToKernRhythm -- not allowed to have more than
 //	three rhythmic dots.
 //	default value: timebase = 1;

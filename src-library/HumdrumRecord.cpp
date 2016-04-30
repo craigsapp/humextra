@@ -2265,6 +2265,11 @@ void HumdrumRecord::setToken(int index, const char* aString) {
 }
    
 
+void HumdrumRecord::setToken(int index, const string& aString) {
+   HumdrumRecord::setToken(index, aString.c_str());
+}
+
+
 
 //////////////////////////////
 //
