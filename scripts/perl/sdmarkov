@@ -2,7 +2,7 @@
 #
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Thu Apr 14 11:30:07 PDT 2016
-# Last Modified: Thu Apr 14 21:34:13 PDT 2016
+# Last Modified: Sat Apr 30 14:45:36 PDT 2016
 # Filename:      sdmarkov
 # Syntax:        perl 5
 #
@@ -16,6 +16,7 @@
 #    -h   == print histogram of input data, then exit
 #    -c   == preserve chromatic alterations (such as "3-" which is flat 3).
 #    -b   == print only base of filename (JRPID).
+#    -a   == display all possible transitions, including 0 count cases.
 #    -n # == n-gram length to generate with context.
 #    --csv == output CSV data rather than TSV.
 #    --humdrum == output Humdrum data rather than TSV.
@@ -40,6 +41,7 @@ my $variableQ  = 0;
 my $countQ     = 0;
 my $context    = 2;
 my $baseQ      = 0;
+my $noZerosQ      = 0;
 my $chromaticQ = 0;
 my $histogramQ = 0;
 my $debugQ     = 0;
@@ -48,8 +50,9 @@ my $humdrumQ   = 0;
 my $MinCount   = 1;
 Getopt::Long::Configure("bundling");
 GetOptions (
-   'h|histogramQ'     => \$histogramQ,
+   'h|histogram'      => \$histogramQ,
    'v|variables'      => \$variableQ,
+   'z|no-zeros'       => \$noZerosQ,
    'd|debug'          => \$debugQ,
    'space=s'          => \$Space,
    'prefix=s'         => \$Prefix,
@@ -69,6 +72,18 @@ $Prefix = "**$Prefix" if $humdrumQ;
 my @files = @ARGV;
 my %TOKENS; 
 my %RESULTS;
+
+
+# Allow for all possibilities for transitions:
+if (!$noZerosQ) {
+   for (my $i=1; $i<=7; $i++) {
+      for (my $j=1; $j<=7; $j++) {
+         my $tag = "$i $j";
+         $TOKENS{$tag} = 0;
+      }
+   }
+}
+
 getTokens(@files);
 
 if ($histogramQ) {
