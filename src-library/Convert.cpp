@@ -187,6 +187,8 @@ string Convert::kernToScientificNotation(const string& kernfield,
 
    string output;
    output += pitch;
+   int value;
+   char buffer[32] = {0};
    if (fcount > 0) {
       if (fcount == 1) {
             output += flat;
@@ -209,9 +211,13 @@ string Convert::kernToScientificNotation(const string& kernfield,
       }
    }
    if (lcount > 0) {
-      output += to_string(3 + lcount);
+      value = 3 + lcount;
+      sprintf(buffer, "%d", value);
+      output += buffer;
    } else if (ucount > 0) {
-      output += to_string(4 - ucount);
+      value = 4 - ucount;
+      sprintf(buffer, "%d", value);
+      output += buffer;
    } else {
       output = "R";
    }
