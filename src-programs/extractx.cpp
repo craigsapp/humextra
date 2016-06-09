@@ -236,7 +236,7 @@ void fillFieldDataByGrep(vector<int>& field, vector<int>& subfield,
          continue;
       }
       for (j=0; j<infile[i].getFieldCount(); j++) {
-         if (pre.search(infile[i][j], searchstring.data(), "")) {
+         if (pre.search(infile[i][j], searchstring.c_str(), "")) {
             track = infile[i].getPrimaryTrack(j);
             tracks[track] = 1;
          }
@@ -437,7 +437,7 @@ void reverseSpines(vector<int>& field, vector<int>& subfield, vector<int>& model
    int t;
 
    for (t=1; t<=infile.getMaxTracks(); t++) {
-      if (strcmp(infile.getTrackExInterp(t), exinterp.data()) == 0) {
+      if (infile.getTrackExInterp(t) == exinterp) {
          target[t] = 1;
       }
    }
@@ -684,7 +684,7 @@ void processFieldEntry(vector<int>& field, vector<int>& subfield,
          stop = maxtrack+1;
 		}
       for (j=start; j<stop; j++) {
-         if (strcmp(infile.getTrackExInterp (j), "**kern") == 0) {
+         if (infile.getTrackExInterp(j) == "**kern") {
 				break;
 			}
          newfield.push_back(j);
@@ -972,7 +972,7 @@ void dealWithCospine(vector<int>& field, vector<int>& subfield, vector<int>& mod
    subspineindex.resize(0);
 
    for (j=0; j<infile[line].getFieldCount(); j++) {
-      if (strcmp(infile[line].getExInterp(j), cointerp.data()) != 0) {
+      if (strcmp(infile[line].getExInterp(j), cointerp.c_str()) != 0) {
          continue;
       }
       if (strcmp(infile[line][j], ".") == 0) {
@@ -1010,7 +1010,7 @@ void dealWithCospine(vector<int>& field, vector<int>& subfield, vector<int>& mod
 
    int start = 0;
    for (i=0; i<(int)field.size(); i++) {
-      if (strcmp(infile.getTrackExInterp(field[i]), cointerp.data()) != 0) {
+      if (infile.getTrackExInterp(field[i]) == cointerp) {
          continue;
       }
 
@@ -1673,7 +1673,7 @@ void getTraceData(vector<int>& startline, vector<vector<int> >& fields,
    fields.resize(0);
 
    ifstream input;
-   input.open(tracefile.data());
+   input.open(tracefile.c_str());
    if (!input.is_open()) {
       cerr << "Error: cannot open file for reading: " << tracefile << endl;
       exit(1);
@@ -1850,8 +1850,8 @@ void extractInterpretations(HumdrumFile& infile, string& interps) {
                buffer = infile[i].getExInterp(j);
                buffer += "\\b";  // word boundary marker
                pre.sar(buffer, "\\*", "\\\\*", "g");
-               if (pre.search(interps.data(), buffer.getBase()) == 0) {
-               // if (strstr(interps.data(), infile[i].getExInterp(j)) == NULL) {
+               if (pre.search(interps.c_str(), buffer.getBase()) == 0) {
+               // if (strstr(interps.c_str(), infile[i].getExInterp(j)) == NULL) {
                   continue;
                }
                if (column != 0) {
@@ -1918,7 +1918,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1944,9 +1944,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    tracefile   = opts.getString("trace");
    reverseQ    = opts.getBoolean("reverse");
    expandQ     = opts.getBoolean("expand") || opts.getBoolean("E");
-   submodel    = opts.getString("model").data()[0];
+   submodel    = opts.getString("model").c_str()[0];
    cointerp    = opts.getString("cointerp");
-   comodel     = opts.getString("cospine-model").data()[0];
+   comodel     = opts.getString("cospine-model").c_str()[0];
 
    if (opts.getBoolean("no-editoral-rests")) {
       editorialInterpretation = "";

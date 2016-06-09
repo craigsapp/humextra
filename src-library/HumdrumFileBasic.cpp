@@ -207,10 +207,7 @@ HumdrumFileBasic::HumdrumFileBasic(void) {
    records.allowGrowth();          
    records.setGrowth(1000000);      // grow in increments of 1000000 lines
    maxtracks = 0;
-   fileName.setSize(1); fileName[0] = '\0';
    segmentLevel = 0;
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(0);
 }
 
 
@@ -220,10 +217,7 @@ HumdrumFileBasic::HumdrumFileBasic(const HumdrumFileBasic& aHumdrumFileBasic) {
    records.allowGrowth();          
    records.setGrowth(1000000);      // grow in increments of 1000000 lines
    maxtracks = 0;
-   fileName.setSize(1); fileName[0] = '\0';
    segmentLevel = 0;
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(0);
 
    *this = aHumdrumFileBasic;
 }
@@ -235,16 +229,9 @@ HumdrumFileBasic::HumdrumFileBasic(const char* filename) {
    records.allowGrowth();          
    records.setAllocSize(1000000);    // grow in increments of 1000000 lines
    maxtracks = 0;
-   fileName.setSize(1); fileName[0] = '\0';
    segmentLevel = 0;
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(0);
 
-   #ifndef OLDCPP
-      ifstream infile(filename, ios::in);
-   #else
-      ifstream infile(filename, ios::in | ios::nocreate);
-   #endif
+   ifstream infile(filename, ios::in);
 
    if (!infile) {
       cerr << "Error: cannot open file: " << filename << endl;
@@ -275,16 +262,9 @@ HumdrumFileBasic::HumdrumFileBasic(const string& filename) {
    records.allowGrowth();          
    records.setAllocSize(1000000);    // grow in increments of 1000000 lines
    maxtracks = 0;
-   fileName.setSize(1); fileName[0] = '\0';
    segmentLevel = 0;
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(0);
 
-   #ifndef OLDCPP
-      ifstream infile(filename.data(), ios::in);
-   #else
-      ifstream infile(filename.data(), ios::in | ios::nocreate);
-   #endif
+   ifstream infile(filename.data(), ios::in);
 
    if (!infile) {
       cerr << "Error: cannot open file: " << filename << endl;
@@ -407,16 +387,8 @@ void HumdrumFileBasic::clear(void) {
    }
    records.setSize(0);
    maxtracks = 0;
-   fileName.setSize(1); fileName[0] = '\0';
    segmentLevel = 0;
-   for (i=0; i<trackexinterp.getSize(); i++) {
-      if (trackexinterp[i] != NULL) {
-         delete [] trackexinterp[i];
-         trackexinterp[i] = NULL;
-      }
-   }
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(0);
+   trackexinterp.clear();
 }
 
 
@@ -439,8 +411,13 @@ void HumdrumFileBasic::changeField(HumdrumFileAddress& add,
 //     (used by HumdrumStream class management).
 //
 
-void HumdrumFileBasic::setFilename(const char* filename) {
+void HumdrumFileBasic::setFilename(const string& filename) {
    fileName = filename;
+}
+
+void HumdrumFileBasic::setFilename(const char* filename) {
+   string tempstring = filename;
+   fileName = tempstring;
 }
 
 
@@ -451,8 +428,8 @@ void HumdrumFileBasic::setFilename(const char* filename) {
 //    Returns "" if no filename set (such as when reading from cin).
 //
 
-const char* HumdrumFileBasic::getFilename(void) {
-   return fileName.getBase();
+string HumdrumFileBasic::getFilename(void) {
+   return fileName;
 }
 
 
@@ -464,7 +441,7 @@ const char* HumdrumFileBasic::getFilename(void) {
 
 ostream& HumdrumFileBasic::printSegmentLabel(ostream& out) {
    out << "!!!!SEGMENT";
-   const char* filename = getFilename();
+   string filename = getFilename();
    int segment = getSegmentLevel();
    if (segment != 0) {
       if (segment < 0) {
@@ -477,13 +454,15 @@ ostream& HumdrumFileBasic::printSegmentLabel(ostream& out) {
    return out;
 }
 
+
+
 //////////////////////////////
 //
 // HumdrumFileBasic::printNonemptySegmentLabel --
 //
 
 ostream& HumdrumFileBasic::printNonemptySegmentLabel(ostream& out) {
-   if (strlen(getFilename()) > 0) {
+   if (getFilename().size() > 0) {
       printSegmentLabel(out);
    } 
    return out;
@@ -607,7 +586,7 @@ int HumdrumFileBasic::getMaxTracks(void) {
 // HumdrumFileBasic::getTrackExInterp --
 //
 
-const char* HumdrumFileBasic::getTrackExInterp(int track) {
+string HumdrumFileBasic::getTrackExInterp(int track) {
    return trackexinterp[track-1];
 }
 
@@ -619,16 +598,16 @@ const char* HumdrumFileBasic::getTrackExInterp(int track) {
 //
 
 int HumdrumFileBasic::getTracksByExInterp(Array<int>& tracks, 
-      const char* exinterp) {
+      const string& exinterp) {
    int maxsize = getMaxTracks();
    tracks.setSize(maxsize);
    tracks.setSize(0);
    int i;
-   for (i=0; i<trackexinterp.getSize(); i++) {
-      if (strcmp(trackexinterp[i], exinterp) == 0) {
+   for (i=0; i<(int)trackexinterp.size(); i++) {
+      if (trackexinterp[i] == exinterp) {
          tracks.append(i);
          tracks.last()++;
-      } else if (strcmp(trackexinterp[i]+2, exinterp) == 0) {
+      } else if (strcmp(trackexinterp[i].c_str()+2, exinterp.c_str()) == 0) {
          tracks.append(i);
          tracks.last()++;
       }
@@ -638,16 +617,16 @@ int HumdrumFileBasic::getTracksByExInterp(Array<int>& tracks,
 }
 
 int HumdrumFileBasic::getTracksByExInterp(vector<int>& tracks, 
-      const char* exinterp) {
+      const string& exinterp) {
    int maxsize = getMaxTracks();
    tracks.reserve(maxsize);
    tracks.resize(0);
    int i;
-   for (i=0; i<trackexinterp.getSize(); i++) {
-      if (strcmp(trackexinterp[i], exinterp) == 0) {
+   for (i=0; i<(int)trackexinterp.size(); i++) {
+      if (trackexinterp[i] == exinterp) {
          tracks.push_back(i);
          tracks.back()++;
-      } else if (strcmp(trackexinterp[i]+2, exinterp) == 0) {
+      } else if (strcmp(trackexinterp[i].c_str()+2, exinterp.c_str()) == 0) {
          tracks.push_back(i);
          tracks.back()++;
       }
@@ -655,7 +634,6 @@ int HumdrumFileBasic::getTracksByExInterp(vector<int>& tracks,
 
    return tracks.size();
 }
-
 
 
 //////////////////////////////
@@ -822,19 +800,10 @@ HumdrumFileBasic& HumdrumFileBasic::operator=(const HumdrumFileBasic& aFile) {
 
    maxtracks = aFile.maxtracks;
 
-   for (i=0; i<trackexinterp.getSize(); i++) {
-      if (trackexinterp[i] != NULL) {
-         delete [] trackexinterp[i];
-         trackexinterp[i] = NULL;
-      }
-   }
-   trackexinterp.setSize(aFile.trackexinterp.getSize());
-   trackexinterp.allowGrowth(0);
-   int length;
-   for (i=0; i<aFile.trackexinterp.getSize(); i++) {
-      length = strlen(aFile.trackexinterp[i]);
-      trackexinterp[i] = new char[length+1];
-      strcpy(trackexinterp[i], aFile.trackexinterp[i]);
+   trackexinterp.clear();
+   trackexinterp.resize(aFile.trackexinterp.size());
+   for (i=0; i<(int)aFile.trackexinterp.size(); i++) {
+      trackexinterp[i] = aFile.trackexinterp[i];
    }
    return *this;
 }
@@ -1088,46 +1057,25 @@ ostream& operator<<(ostream& out, HumdrumFileBasic& aHumdrumFileBasic) {
 //
 
 void HumdrumFileBasic::privateSpineAnalysis(void) {
-   
-   int init = 0;
+   int init    = 0;
    int spineid = 0;
+   vector<string> spineinfo;
+   vector<int>    exinterps;
 
-   SigCollection<char*> spineinfo;
-   SigCollection<int> exinterps;
-
-   exinterps.setSize(100);
-   exinterps.setAllocSize(100);
-   exinterps.setSize(1);
+   spineinfo.reserve(1000);
+   exinterps.reserve(100);
+   exinterps.resize(1);
    exinterps[0] = 0;
-   exinterps.allowGrowth();
-
-   spineinfo.setSize(1000);
-   spineinfo.setAllocSize(1000);
-   spineinfo.setSize(0);
-   spineinfo.allowGrowth();
 
    int currentwidth = 0;
-
    int prediction = 0;
-   int length;
-   int tlen = 0;
    int i, n;
    int type;
-   char* tptr = NULL;
    char buffer[1024] = {0};
-   char* bp;
+   string bp;
 
-   for (i=0; i<trackexinterp.getSize(); i++) {
-      if (trackexinterp[i] != NULL) {
-         delete [] trackexinterp[i];
-         trackexinterp[i] = NULL;
-      }
-   }
-   trackexinterp.setSize(100);
-   trackexinterp.setGrowth(1000);
-   trackexinterp.setSize(0);
-   trackexinterp.allowGrowth(1);
-
+   trackexinterp.clear();
+   trackexinterp.reserve(100);
 
    int linecount = getNumLines();
    for (n=0; n<linecount; n++) {
@@ -1155,7 +1103,7 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
                cout << (*this) << endl;
                exit(1);
             }
-            if (spineinfo.getSize() != 0) {
+            if (spineinfo.size() != 0) {
                cout << "Error on line " << n+1 << endl;
                exit(1);
             }
@@ -1163,28 +1111,24 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
                if (strncmp("**", getRecord(n)[i], 2) != 0) {
                   cout << "Error on line " << n+1 << ": nonexclusive" << endl;
                }
-               tlen = strlen(getRecord(n)[i]);
-               tptr = new char[tlen + 1];
-               strcpy(tptr, getRecord(n)[i]); 
-               trackexinterp.append(tptr);
+               string tstring = getRecord(n)[i];
+               trackexinterp.push_back(tstring);
                spineid++;
                sprintf(buffer, "%d", spineid);
-               length = strlen(buffer);
-               bp = new char[length + 1];
-               strcpy(bp, buffer);
-               spineinfo.append(bp);
+               bp = buffer;
+               spineinfo.push_back(bp);
                int value;
                value = Convert::exint.getValue(getRecord(n)[i]);
-               if (spineid != exinterps.getSize()) {
+               if (spineid != (int)exinterps.size()) {
                   cout << "Error in exclusive interpretation allocation.";
                   cout << "Line: " << n+1 << endl;
                   exit(1);
                }
                if (value == E_unknown) {
                   value = Convert::exint.add(getRecord(n)[i]);
-                  exinterps.append(value);
+                  exinterps.push_back(value);
                } else {
-                  exinterps.append(value);
+                  exinterps.push_back(value);
                }
             }
             ((*this)[n]).copySpineInfo(spineinfo, n+1);
@@ -1236,15 +1180,7 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
       }
    }
 
-   // delete the contents of spineinfo
-   for (i=0; i<spineinfo.getSize(); i++) {
-      if (spineinfo[i] != NULL) {
-         delete [] spineinfo[i];   
-         spineinfo[i] = NULL;
-      }
-   }
-
-   spineinfo.setSize(0);
+   spineinfo.clear();
 
    // provide Exclusive Interpretations ownerships to the record spines
    
@@ -1256,7 +1192,7 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
       type = ((*this)[n]).getType(); 
       if ((type & E_humrec_data) == E_humrec_data) {
          for (m=0; m<getSpineCount(n); m++) {
-            ptr = ((*this)[n]).getSpineInfo(m);
+            ptr = ((*this)[n]).getSpineInfo(m).c_str();
             while (ptr[0] != '\0' && !std::isdigit(ptr[0])) {
                ptr++;
             }
@@ -1267,7 +1203,6 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
    }
 
    maxtracks = spineid;
-   trackexinterp.allowGrowth(0);
 }
 
 
@@ -1279,17 +1214,13 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
 //    line that has at least one path indicator
 //
 
-void HumdrumFileBasic::makeNewSpineInfo(SigCollection<char*>&spineinfo, 
+void HumdrumFileBasic::makeNewSpineInfo(vector<string>& spineinfo, 
    HumdrumRecord& aRecord, int newsize, int& spineid,
-   SigCollection<int>& ex) {
+   vector<int>& ex) {
 
-   SigCollection<char*> newinfo;
-   newinfo.setSize(newsize);
+   vector<string> newinfo;
+   newinfo.resize(newsize);
    int i, j;
-   for (i=0; i<newsize; i++) {
-      newinfo[i] = new char[1024];
-      newinfo[i][0] = '\0';
-   }
 
    int spinecount = aRecord.getFieldCount();
    int subcount;
@@ -1298,37 +1229,37 @@ void HumdrumFileBasic::makeNewSpineInfo(SigCollection<char*>&spineinfo,
 
    for (inindex=0; inindex<spinecount; inindex++) {
       if (strcmp("*^", aRecord[inindex]) == 0) {
-         strcpy(newinfo[outindex], "(");
-         strcat(newinfo[outindex], spineinfo[inindex]);
-         strcat(newinfo[outindex], ")a");
+         newinfo[outindex] = "(";
+         newinfo[outindex] += spineinfo[inindex];
+         newinfo[outindex] += ")a";
          outindex++;
-         strcpy(newinfo[outindex], "(");
-         strcat(newinfo[outindex], spineinfo[inindex]);
-         strcat(newinfo[outindex], ")b");
+         newinfo[outindex] = "(";
+         newinfo[outindex] += spineinfo[inindex];
+         newinfo[outindex] += ")b";
          outindex++;
       } else if (strcmp("*-", aRecord[inindex]) == 0) {
          // don't increment outindex
       } else if (strcmp("*+", aRecord[inindex]) == 0) {
-         strcpy(newinfo[outindex], spineinfo[inindex]);
+         newinfo[outindex] = spineinfo[inindex];
          outindex++;
          spineid++;
-         sprintf(newinfo[outindex], "%d", spineid);
+         newinfo[outindex] += to_string(spineid);
          outindex++;
       } else if (strcmp("*x", aRecord[inindex]) == 0) {
-         strcpy(newinfo[outindex], spineinfo[inindex+1]);
+         newinfo[outindex] = spineinfo[inindex+1];
          outindex++;
-         strcpy(newinfo[outindex], spineinfo[inindex]);
+         newinfo[outindex] = spineinfo[inindex];
          outindex++;
          inindex++;
       } else if (strcmp("*v", aRecord[inindex]) == 0) {
          subcount = 1;
-         strcpy(newinfo[outindex], spineinfo[inindex]);
+         newinfo[outindex] = spineinfo[inindex];
          for (j=inindex+1; j<spinecount; j++) {
             if (strcmp("*v", aRecord[j]) == 0) {
                subcount++;
                if (subcount > 1) {
-                  strcat(newinfo[outindex], " ");
-                  strcat(newinfo[outindex], spineinfo[inindex+subcount-1]);
+                  newinfo[outindex] += " ";
+                  newinfo[outindex] += spineinfo[inindex+subcount-1];
                   simplifySpineString(newinfo[outindex]);
                } 
             } else {
@@ -1351,55 +1282,45 @@ void HumdrumFileBasic::makeNewSpineInfo(SigCollection<char*>&spineinfo,
       } else if (strncmp("**", aRecord[inindex], 2) == 0) {
          int value;
          value = Convert::exint.getValue(aRecord[inindex]);
-         if (spineid != ex.getSize()) {
+         if (spineid != (int)ex.size()) {
             cout << "Error in exclusive interpretation allocation" 
                  << endl;
             exit(1);
          }
          if (value == E_unknown) {
             value = Convert::exint.add(aRecord[inindex]);
-            ex.append(value);
+            ex.push_back(value);
          } else {
-            ex.append(value);
+            ex.push_back(value);
          }
-         strcpy(newinfo[outindex], spineinfo[inindex]);
+         newinfo[outindex] = spineinfo[inindex];
          outindex++;
       } else {
-         strcpy(newinfo[outindex], spineinfo[inindex]);
+         newinfo[outindex] = spineinfo[inindex];
          outindex++;
       }
    }
 
-   if (outindex != newinfo.getSize()) {
+   if (outindex != (int)newinfo.size()) {
       cout << "Error in HumdrumFileBasic path parsing" << endl;
       exit(1);
    }
 
-   if (inindex != spineinfo.getSize()) {
+   if (inindex != (int)spineinfo.size()) {
       cout << "Error in HumdrumFileBasic path parsing" << endl;
       exit(1);
    }
 
    // delete the old information:
-   for (i=0; i<spineinfo.getSize(); i++) {
-      if (spineinfo[i] != NULL) {
-         delete [] spineinfo[i];
-         spineinfo[i] = NULL;
-      }
-   }
-   spineinfo.setSize(newinfo.getSize());
+   spineinfo.clear();
 
    // copy the new spine path indicators
-   int length;
-   for (i=0; i<spineinfo.getSize(); i++) {
-      length = strlen(newinfo[i]);
-      spineinfo[i] = new char[length + 1];
-      strcpy(spineinfo[i], newinfo[i]);
-      delete [] newinfo[i];
-      newinfo[i] = NULL;
+   spineinfo.resize(newinfo.size());
+   for (i=0; i<(int)spineinfo.size(); i++) {
+      spineinfo[i] = newinfo[i];
    }
 
-   newinfo.setSize(0);
+   newinfo.clear();
 }
 
 
@@ -1410,23 +1331,23 @@ void HumdrumFileBasic::makeNewSpineInfo(SigCollection<char*>&spineinfo,
 //     function added Sat May  8 12:57:37 PDT 2004
 //
 
-void HumdrumFileBasic::simplifySpineString(char* spinestring) {
-   int length = strlen(spinestring);
+void HumdrumFileBasic::simplifySpineString(string& spinestring) {
+   int length = (int)spinestring.size();
    if (spinestring[length-1] == ' ') {
-      spinestring[length-1] = '\0';
+      spinestring.resize(length-1);
    }
 
-   if (strchr(spinestring, ' ') == NULL) {
+   if (strchr(spinestring.c_str(), ' ') == NULL) {
       // no multiple sources, so already in simplest form
       return;
    }
-   if (strchr(spinestring, '(') == NULL) {
+   if (strchr(spinestring.c_str(), '(') == NULL) {
       // no sub-spine data, so already in simplest form
       return;
    }
 
    char buffer[1024] = {0};
-   strcpy(buffer, spinestring);
+   strcpy(buffer, spinestring.c_str());
    Array<char*> ptrs;
    Array<int> lengths;
 
@@ -1453,16 +1374,19 @@ void HumdrumFileBasic::simplifySpineString(char* spinestring) {
       for (j=i+1; j<lengths.getSize(); j++) {
          if (lengths[i] == lengths[j]) {
             if (strncmp(ptrs[i], ptrs[j], lengths[i]-1) == 0) {
-               spinestring[0] = '\0';
+               spinestring = "";
                for (k=0; k<ptrs.getSize(); k++) {
                   if (k == j) continue;
                   if (k == i) {
-                     strncat(spinestring, &(ptrs[k][1]), lengths[k]-3);
-                     strcat(spinestring, " ");
+                     char buff[128] = {0};
+                     buff[0] = '\0';
+                     strncat(buff, &(ptrs[k][1]), lengths[k]-3);
+                     spinestring += buff;
+                     spinestring += " ";
                      continue;
                   }
-                  strcat(spinestring, ptrs[k]);
-                  strcat(spinestring, " ");
+                  spinestring += ptrs[k];
+                  spinestring += " ";
                }
                simplifySpineString(spinestring);
                goto endofspinefunction;
@@ -1472,9 +1396,9 @@ void HumdrumFileBasic::simplifySpineString(char* spinestring) {
    }
 
 endofspinefunction:
-   length = strlen(spinestring);
+   length = (int)spinestring.size();
    if (spinestring[length-1] == ' ') {
-      spinestring[length-1] = '\0';
+      spinestring.resize(length-1);
    }
 
    return;
@@ -1493,13 +1417,13 @@ endofspinefunction:
 //                       1b 1a 2 simplifies to 1 2
 //
 
-void HumdrumFileBasic::simplifySpineInfo(SigCollection<char*>& info, 
+void HumdrumFileBasic::simplifySpineInfo(vector<string>& info, 
       int index) {
    char* temp;
    int length;
-   length = strlen(info[index]);
+   length = (int)info[index].size();
    temp = new char[length + 1];
-   strcpy(temp, info[index]);
+   strcpy(temp, info[index].c_str());
    int count = 0;
    int i;
    for (i=0; i<length; i++) {
@@ -1525,7 +1449,7 @@ void HumdrumFileBasic::simplifySpineInfo(SigCollection<char*>& info,
          p2[len2-2] = '\0';
    
          if (strcmp(p1, p2) == 0) {
-            strcpy(info[index], p1);
+            info[index] = p1;
          }
       }
    }

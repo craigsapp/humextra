@@ -30,8 +30,9 @@
 // Last Modified: Fri Aug  3 16:09:29 PDT 2012 Added DEFAULT for --timbres
 // Last Modified: Tue Oct 16 21:02:56 PDT 2012 Added getTitle/song title
 // Last Modified: Mon Nov 18 13:04:44 PST 2013 Default output as ASCII MIDI
-// Last Modified: Wed Dec 11 22:24:36 PST 2013 Added !!midi-transpose: 
+// Last Modified: Wed Dec 11 22:24:36 PST 2013 Added !!midi-transpose:
 // Last Modified: Wed Mar 30 23:12:38 PDT 2016 Added embedded options
+// Last Modified: Mon May 23 21:42:33 PDT 2016 Reversed track numbers
 // Filename:      ...sig/examples/all/hum2mid.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2mid.cpp
 // Syntax:        C++; museinfo
@@ -40,9 +41,9 @@
 //                Standard MIDI File format.
 //
 // Todo:
-// 	* Check to make sure input files are not the same as the -o filename
-// 	* Allow multiple input / outputs
-// 	* Allow multiple inputs one output (already done?)
+//    * Check to make sure input files are not the same as the -o filename
+//    * Allow multiple input / outputs
+//    * Allow multiple inputs one output (already done?)
 //
 
 #include "museinfo.h"
@@ -78,11 +79,10 @@ using namespace std;
 #define DYN_PPP  23
 #define DYN_PPPP 10
 
-
 // PerfViz data structure
 
 class PerfVizNote {
-   public:   
+   public:
       int pitch;           // pitch name of note (in base40 notation)
       int beat;            // beat number in measure of note
       int vel;             // MIDI attack velocity of note
@@ -93,7 +93,7 @@ class PerfVizNote {
 
       double beatfrac;     // starting fraction of beat
       double beatdur;      // duration of note in beats
-    
+
       static int sid;      // serial number id
       static int bar;      // current measure number
       static int key;      // used to print key signatures
@@ -117,6 +117,8 @@ int   trackcount  = 0;           // number of tracks in MIDI file
 int   track       = 0;           // track number starting at 0
 int   Offset      = 0;           // start-time offset in ticks
 int   tempo       = 60;          // default tempo
+vector<int> Rtracks;
+vector<int> Ktracks;
 
 // user interface variables
 Options options;
@@ -180,30 +182,30 @@ void      example           (void);
 int       makeVLV           (uchar *buffer, int number);
 void      reviseInstrumentMidiNumbers(const char* string);
 int       setMidiPlusVolume (const char* kernnote);
-void      storeMetaText     (MidiFile& mfile, int track, const string& string, 
+void      storeMetaText     (MidiFile& mfile, int track, const string& string,
                                int tick, int metaType = 1);
 void      storeMidiData     (HumdrumFile& infile, MidiFile& outfile);
-void      storeInstrument   (int ontick, MidiFile& mfile, HumdrumFile& infile, 
+void      storeInstrument   (int ontick, MidiFile& mfile, HumdrumFile& infile,
                              int line, int row, int pcQ);
 void      usage             (const char* command);
 void      storeFreeNote     (vector<vector<int> >& array,int ptrack,int midinote);
 void      getDynamics       (HumdrumFile& infile, vector<string>& dynamics,
                              int defaultdynamic);
 void      getDynamicAssignments(HumdrumFile& infile, vector<int>& assignments);
-void      getStaffValues    (HumdrumFile& infile, int staffline, 
+void      getStaffValues    (HumdrumFile& infile, int staffline,
                              vector<vector<int> >& staffvalues);
-void      getNewDynamics    (vector<int>& currentdynamic, 
-                             vector<int>& assignments, 
-                             HumdrumFile& infile, int line, 
+void      getNewDynamics    (vector<int>& currentdynamic,
+                             vector<int>& assignments,
+                             HumdrumFile& infile, int line,
                              vector<string>& crescendos,
                              vector<string>& accentuation);
-void      processCrescDecresc(HumdrumFile& infile, 
-                              vector<string>& dynamics, 
+void      processCrescDecresc(HumdrumFile& infile,
+                              vector<string>& dynamics,
                               vector<string>& crescendos);
-void      interpolateDynamics(HumdrumFile& infile, string& dyn, 
+void      interpolateDynamics(HumdrumFile& infile, string& dyn,
                              string& cresc);
-void      generateInterpolation(HumdrumFile& infile, string& dyn, 
-                             string& cresc, int startline, int stopline, 
+void      generateInterpolation(HumdrumFile& infile, string& dyn,
+                             string& cresc, int startline, int stopline,
                              int direction);
 int       findtermination    (string& dyn, string& cresc, int start);
 char      adjustVolumeHuman  (int startvol, int delta);
@@ -211,19 +213,22 @@ char      adjustVolumeMetric (int startvol, int delta, double metricpos);
 char      applyAccentuation  (int dynamic, int accent);
 int       getMillisecondTime (HumdrumFile& infile, int line);
 int       getFileDurationInMilliseconds(HumdrumFile& infile);
-int       getMillisecondDuration(HumdrumFile& infile, int row, int col, 
+int       getMillisecondDuration(HumdrumFile& infile, int row, int col,
                              int subcol);
 void      addTempoTrack      (HumdrumFile& infile, MidiFile& outfile);
 void      getBendByPcData    (double* bendbypc, const char* filename);
 void      insertBendData     (MidiFile& outfile, double* bendbypc);
 void      getKernTracks      (vector<int>& tracks, HumdrumFile& infile);
 void      getTitle           (string& title, HumdrumFile& infile);
-void      addMonoTemperamentAdjustment(MidiFile& outfile, int track, 
-                              int channel, int ticktime, int midinote, 
+void      addMonoTemperamentAdjustment(MidiFile& outfile, int track,
+                              int channel, int ticktime, int midinote,
                               double* bendbypc);
 void      defineOptions      (Options& opts, int argc, char* argv[]);
 void      processOptions     (Options& opts, int argc, char* argv[]);
 void      checkEmbeddedOptions(HumdrumFile& infile, int argc, char* argv[]);
+void      checkForTimeSignature(MidiFile& outfile, HumdrumFile& infile,
+                                int line);
+string    getInstrumentName   (HumdrumFile& infile, int ptrack);
 
 // PerfViz related functions:
 void      writePerfVizMatchFile(const char* filename, stringstream& contents);
@@ -232,13 +237,13 @@ void     printPerfVizKey       (int key);
 void     printPerfVizTimeSig   (int tstop, int tsbottom);
 void     printPerfVizTempo     (double approxtempo);
 void     printRational          (ostream& out, double value);
-void     storePan              (int ontime, MidiFile& outfile, 
+void     storePan              (int ontime, MidiFile& outfile,
                                 HumdrumFile& infile, int row, int column);
 void     adjustEventTimes      (MidiFile& outfile, int starttick);
-void     checkForBend          (MidiFile& outfile, int notetick, int channel, 
-                                HumdrumFile& infile, int row, int col, 
+void     checkForBend          (MidiFile& outfile, int notetick, int channel,
+                                HumdrumFile& infile, int row, int col,
                                 double scalefactor);
-void     storeTimbres          (vector<string>& name, vector<int>& value, 
+void     storeTimbres          (vector<string>& name, vector<int>& value,
                                 vector<int>& volumes, const string& string);
 void     autoPan               (MidiFile& outfile, HumdrumFile& infile);
 
@@ -253,10 +258,10 @@ int tpq = TICKSPERQUARTERNOTE;
 int main(int argc, char* argv[]) {
    VolumeMapping.resize(0);
 
-   // for humanizing processes 
+   // for humanizing processes
    #ifndef VISUAL
       srand48(time(NULL));
-   # else 
+   # else
       srand(time(NULL));
    #endif
 
@@ -298,16 +303,24 @@ int main(int argc, char* argv[]) {
       // analyze the input file according to command-line options
       infile.analyzeRhythm("4", debugQ);
 
+      infile.getKernTracks(Ktracks);
+      reverse(Ktracks.begin(), Ktracks.end());
+      Rtracks.resize(infile.getMaxTracks() + 1);
+      fill(Rtracks.begin(), Rtracks.end(), -1);
+      for (i=0; i<(int)Ktracks.size(); i++) {
+         Rtracks[Ktracks[i]] = i + 1;
+      }
+
       if (perfvizQ) {
          perfviz = new stringstream[1];
-	 const char *filename = NULL;
-	 PVIZ = perfviz;
+         const char *filename = NULL;
+         PVIZ = perfviz;
          perfviz[0] << "info(matchFileVersion,2.0).\n";
          if (numinputs < 1) {
             perfviz[0] << "info(scoreFileName,'STDIN').\n";
          } else {
             perfviz[0] << "info(scoreFileName,'";
-	    filename = strrchr(options.getArg(i+1).c_str(), '/');
+            filename = strrchr(options.getArg(i+1).c_str(), '/');
             if (filename == NULL) {
                filename = options.getArg(i+1).c_str();
             } else {
@@ -318,7 +331,7 @@ int main(int argc, char* argv[]) {
          }
          if (options.getBoolean("output")) {
             perfviz[0] << "info(midiFileName,'";
-	    filename = strrchr(options.getString("output").c_str(), '/');
+            filename = strrchr(options.getString("output").c_str(), '/');
             if (filename == NULL) {
                filename = options.getString("output").c_str();
             } else {
@@ -334,21 +347,20 @@ int main(int argc, char* argv[]) {
          perfviz[0] << "info(midiClockRate,500000).\n";
       }
 
-      trackcount = infile.getMaxTracks();
-      tracknamed.resize(trackcount + 1);
-      trackchannel.resize(trackcount + 1);
-      for (int j=0; j<trackcount+1; j++) {
+      tracknamed.resize(Ktracks.size() + 1);
+      trackchannel.resize(Ktracks.size() + 1);
+      for (int j=0; j<(int)trackchannel.size(); j++) {
          tracknamed[j]   = 0;
          trackchannel[j] = fixedChannel;
       }
       if (multitimbreQ) {
          assignTracks(infile, trackchannel);
       }
-      outfile.addTrack(trackcount);
+      outfile.addTrack(Ktracks.size());
       outfile.absoluteTicks();
 
       /*
-      // removed this code because of all of the lousy free MIDI 
+      // removed this code because of all of the lousy free MIDI
       // sequencing programs that choke on system exclusive messages.
 
       // store the "General MIDI activation" system exclusive:
@@ -357,18 +369,19 @@ int main(int argc, char* argv[]) {
          vector<uchar> gmsysex;
          gmsysex.resize(6);
          gmsysex[0] = 0xf0;     // Start of SysEx
-         gmsysex[1] = 0x7e;     // Universal (reserved) ID number 
+         gmsysex[1] = 0x7e;     // Universal (reserved) ID number
          gmsysex[2] = 0x7f;     // Device ID (general transmission)
-         gmsysex[3] = 0x09;     // Means 'This is a message about General MIDI' 
-         gmsysex[4] = 0x01;     // Means 'Turn General MIDI On'. 02 means 'Off' 
+         gmsysex[3] = 0x09;     // Means 'This is a message about General MIDI'
+         gmsysex[4] = 0x01;     // Means 'Turn General MIDI On'. 02 means 'Off'
          gmsysex[5] = 0xf7;     // End of SysEx
          outfile.addEvent(0, 0, gmsysex);
       }
-      */ 
+      */
 
       if (bendpcQ) {
          insertBendData(outfile, bendbypc);
-      } 
+      }
+
       storeMidiData(infile, outfile);
 
       if (tempospineQ) {
@@ -415,29 +428,29 @@ void checkEmbeddedOptions(HumdrumFile& infile, int argc, char* argv[]) {
    vector<int> oline;;
    int i;
    PerlRegularExpression pre;
-	string ostring;
+   string ostring;
 
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isGlobalComment()) {
          continue;
       }
       if (pre.search(infile[i][0], "^\\!\\!hum2mid:\\s*(.*)\\s*$")) {
-			oline.push_back(i);
-		}
+         oline.push_back(i);
+      }
    }
 
-	if (oline.size() == 0) {
+   if (oline.size() == 0) {
       return;
    }
 
    Options localoptions;
-	defineOptions(localoptions, argc, argv);
+   defineOptions(localoptions, argc, argv);
 
    for (i=0; i<(int)oline.size(); i++) {
       if (pre.search(infile[oline[i]][0], "^\\!\\!hum2mid:\\s*(.*)\\s*$")) {
-			ostring = pre.getSubmatch(1);
+         ostring = pre.getSubmatch(1);
          localoptions.appendOptions(ostring);
-		}
+      }
    }
 
    localoptions.process();
@@ -506,7 +519,7 @@ void insertBendData(MidiFile& outfile, double* bendbypc) {
 //    an note is tured on in a
 //
 
-void addMonoTemperamentAdjustment(MidiFile& outfile, int track, int channel, 
+void addMonoTemperamentAdjustment(MidiFile& outfile, int track, int channel,
    int ticktime, int midinote, double* bendbypc) {
    double bendvalue = bendbypc[midinote % 12];
    outfile.addPitchBend(track, ticktime, channel, bendvalue);
@@ -527,7 +540,7 @@ void adjustEventTimes(MidiFile& outfile, int starttick) {
    int minval = 1000000000;
    for (i=0; i<outfile.getTrackCount(); i++) {
       for (j=0; j<outfile.getNumEvents(i); j++) {
-	      eventptr = &outfile.getEvent(i, j);
+         eventptr = &outfile.getEvent(i, j);
          if (eventptr->size() <= 0) {
             continue;
          }
@@ -536,7 +549,7 @@ void adjustEventTimes(MidiFile& outfile, int starttick) {
                minval = eventptr->tick;
             }
             break;
-         } 
+         }
       }
    }
 
@@ -562,7 +575,7 @@ void adjustEventTimes(MidiFile& outfile, int starttick) {
 
 //////////////////////////////
 //
-// addTempoTrack -- 
+// addTempoTrack --
 //
 
 void addTempoTrack(HumdrumFile& infile, MidiFile& outfile) {
@@ -587,7 +600,7 @@ void addTempoTrack(HumdrumFile& infile, MidiFile& outfile) {
                   mididata[0] = 0xff;
                   mididata[1] = 0x51;
                   mididata[2] = 3;
-                  ttempo = (int)(60000000.0 / tempo + 0.5);   
+                  ttempo = (int)(60000000.0 / tempo + 0.5);
                   mididata[3] = (uchar)((ttempo >> 16) & 0xff);
                   mididata[4] = (uchar)((ttempo >> 8) & 0xff);
                   mididata[5] = (uchar)(ttempo & 0xff);
@@ -614,9 +627,9 @@ void addTempoTrack(HumdrumFile& infile, MidiFile& outfile) {
 void assignTracks(HumdrumFile& infile, vector<int>& trackchannel) {
    int i, j;
 
-
    vector<int> instruments;        // MIDI instruments indicated in track
-   trackchannel.resize(infile.getMaxTracks() + 1);
+   // trackchannel.resize(infile.getMaxTracks() + 1);
+   trackchannel.resize(Ktracks.size() + 1);
    instruments.resize(trackchannel.size());
    for (i=0; i<(int)instruments.size(); i++) {
       if (forcedQ) {
@@ -632,11 +645,13 @@ void assignTracks(HumdrumFile& infile, vector<int>& trackchannel) {
    int instcount = 0;
    PerlRegularExpression pre2;
 
-   VolumeMapping.resize(infile.getMaxTracks()+1);
+   // VolumeMapping.resize(infile.getMaxTracks()+1);
+   VolumeMapping.resize(Ktracks.size() + 1);
    fill(VolumeMapping.begin(), VolumeMapping.end(), 64);
    if (idynQ) {
       VolumeMapping.resize(0);
    }
+
    for (i=0; i<infile.getNumLines(); i++) {
       if (debugQ) {
          cout << "line " << i+1 << ":\t" << infile[i] << endl;
@@ -650,10 +665,9 @@ void assignTracks(HumdrumFile& infile, vector<int>& trackchannel) {
       }
 
       for (j=0; j<infile[i].getFieldCount(); j++) {
-         track = infile[i].getPrimaryTrack(j);
+         track = Rtracks[infile[i].getPrimaryTrack(j)];
          if (strncmp(infile[i][j], "*I", 2) == 0) {
             if (timbresQ) {
-
                PerlRegularExpression pre;
                if (!pre.search(infile[i][j], "^\\*I\"\\s*(.*)\\s*", "")) {
                   inst = -1;
@@ -696,9 +710,9 @@ void assignTracks(HumdrumFile& infile, vector<int>& trackchannel) {
             } else {
                inst = instrumentnumber;
             }
- 
+
             if (inst != -1) {
-               ptrack = infile[i].getPrimaryTrack(j);
+               ptrack = Rtracks[infile[i].getPrimaryTrack(j)];
                if (instruments[ptrack] == -1) {
                   if (!forcedQ) {
                      instruments[ptrack] = inst;
@@ -706,7 +720,7 @@ void assignTracks(HumdrumFile& infile, vector<int>& trackchannel) {
                      instruments[ptrack] = instrumentnumber;
                   }
                   instcount++;
-               } 
+               }
             }
          }
       }
@@ -722,8 +736,8 @@ void assignTracks(HumdrumFile& infile, vector<int>& trackchannel) {
          if (instruments[i] == -1) {
             trackchannel[i] = 0;
          } else {
-	    if (nextChannel == 9) {
-              // avoid percussion channel
+            if (nextChannel == 9) {
+               // avoid percussion channel
                nextChannel++;
             }
             trackchannel[i] = nextChannel++;
@@ -735,7 +749,7 @@ void assignTracks(HumdrumFile& infile, vector<int>& trackchannel) {
          }
       }
    } else {
-      // need to conserve channels:  place duplicate instrument tracks on the 
+      // need to conserve channels:  place duplicate instrument tracks on the
       // same channel.
       nextChannel = 1;     // channel 0 is for undefined instrument spines
       int foundDup = -1;
@@ -743,7 +757,7 @@ void assignTracks(HumdrumFile& infile, vector<int>& trackchannel) {
          foundDup = -1;
          for (j=0; j<i; j++) {
             if (instruments[j] == instruments[i]) {
-               foundDup = j; 
+               foundDup = j;
             }
          }
          if (instruments[i] == -1) {
@@ -751,7 +765,7 @@ void assignTracks(HumdrumFile& infile, vector<int>& trackchannel) {
          } else if (foundDup != -1) {
             trackchannel[i] = trackchannel[foundDup];
          } else {
-	    if (nextChannel == 10) {
+            if (nextChannel == 10) {
                // avoid percussion channel
                nextChannel++;
             }
@@ -775,15 +789,15 @@ void assignTracks(HumdrumFile& infile, vector<int>& trackchannel) {
 
    }
 
-   vector<int> kerntracks;
-   getKernTracks(kerntracks, infile);
-
    // don't conserve tracks if there is enough to go around
-   if (kerntracks.size() < 13) { 
-      for (i=0; i<(int)kerntracks.size(); i++) {
-         trackchannel[kerntracks[i]] = i;
-         if (i>8) {   // avoid general midi drum track channel
-            trackchannel[kerntracks[i]] = i+1;
+   if (Ktracks.size() < 13) {
+      if (trackchannel.size() > 0) {
+         trackchannel[0] = 0;
+         for (i=1; i<(int)Ktracks.size(); i++) {
+            trackchannel[i] = i-1;
+            if (i>=10) {   // avoid general midi drum track channel
+               trackchannel[i] = i;
+            }
          }
       }
    }
@@ -835,7 +849,7 @@ double checkForTempo(HumdrumRecord& record) {
       // O/3         = 110 bpm
       // C|2, Cr     = 144 bpm (previously 220 bpm but too fast)
       char mensuration[1024] = {0};
-      if (record.isGlobalComment() && pre.search(record[0], 
+      if (record.isGlobalComment() && pre.search(record[0],
             "^\\!+primary-mensuration:.*met\\((.*?)\\)\\s*$")) {
          strcpy(mensuration, pre.getSubmatch(1));
       } else if (record.isInterpretation() && record.equalFieldsQ("**kern")) {
@@ -846,7 +860,7 @@ double checkForTempo(HumdrumRecord& record) {
                }
                break;
             }
-         }    
+         }
       }
 
       if (strcmp(mensuration, "O") == 0) {
@@ -898,12 +912,12 @@ double checkForTempo(HumdrumRecord& record) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-	defineOptions(opts, argc, argv);
-	processOptions(opts, argc, argv);
+   defineOptions(opts, argc, argv);
+   processOptions(opts, argc, argv);
 }
 
 
@@ -951,9 +965,9 @@ void defineOptions(Options& opts, int argc, char* argv[]) {
    opts.define("timbres=s",      "Timbral assignments by instrument name");
    opts.define("autopan=b",      "Pan tracks from left to right");
 
-   opts.define("author=b",  "author of program"); 
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("h|help=b",  "short description");
    opts.process(argc, argv);
 }
@@ -1022,12 +1036,12 @@ void processOptions(Options& opts, int argc, char* argv[]) {
    } else if (defaultvolume > 127) {
       defaultvolume = 127;
    }
-   
+
    tscaling = opts.getDouble("tempo-scaling");
    if (tscaling < 0.001) {
       tscaling = 1.0;
    } else if (tscaling > 1000.0) {
-      tscaling = 1.0; 
+      tscaling = 1.0;
    }
    // tscaling = 1.0 / tscaling;
    instrumentQ = !opts.getBoolean("noinstrument");
@@ -1037,10 +1051,10 @@ void processOptions(Options& opts, int argc, char* argv[]) {
       fixedChannel = opts.getInteger("channel") - 1;
       if (fixedChannel < 0) {
          fixedChannel = 0;
-      } 
+      }
       if (fixedChannel > 15) {
          fixedChannel = 15;
-      } 
+      }
       instrumentQ = 0;
    } else {
       multitimbreQ  = 1;
@@ -1058,7 +1072,7 @@ void processOptions(Options& opts, int argc, char* argv[]) {
       instrumentnumber = opts.getInteger("forceinstrument");
       if (instrumentnumber < 0 || instrumentnumber > 127) {
          instrumentnumber = 0;
-      } 
+      }
    } else {
       instrumentnumber = -1;
    }
@@ -1107,7 +1121,7 @@ void processOptions(Options& opts, int argc, char* argv[]) {
 
    timbresQ = opts.getBoolean("timbres");
    if (timbresQ) {
-      storeTimbres(TimbreName, TimbreValue, TimbreVolume, 
+      storeTimbres(TimbreName, TimbreValue, TimbreVolume,
             opts.getString("timbres"));
    } else {
       TimbreName.resize(0);
@@ -1158,9 +1172,9 @@ void getBendByPcData(double* bendbypc, const char* filename) {
          } else if (strcmp(td[i].getExInterp(j), "**Dcent") == 0) {
             if (strcmp(td[i][j], ".") == 0) {
                // determine value of null tokens
-	       sscanf(td.getDotValue(i,j), "%lf", &dcent);
+               sscanf(td.getDotValue(i,j), "%lf", &dcent);
             } else {
-	       sscanf(td[i][j], "%lf", &dcent);
+               sscanf(td[i][j], "%lf", &dcent);
             }
          }
       }
@@ -1213,7 +1227,7 @@ void storeMetaText(MidiFile& mfile, int track, const string& text, int tick,
 
 //////////////////////////////
 //
-// makeVLV -- 
+// makeVLV --
 //
 
 int makeVLV(uchar *buffer, int number) {
@@ -1221,10 +1235,10 @@ int makeVLV(uchar *buffer, int number) {
    unsigned long value = (unsigned long)number;
 
    if (value >= (1 << 28)) {
-      cout << "Error: number too large to handle" << endl; 
+      cout << "Error: number too large to handle" << endl;
       exit(1);
    }
-  
+
    buffer[0] = (value >> 21) & 0x7f;
    buffer[1] = (value >> 14) & 0x7f;
    buffer[2] = (value >>  7) & 0x7f;
@@ -1265,7 +1279,7 @@ int makeVLV(uchar *buffer, int number) {
 // getIdynDynamics -- extracts **idyn amplitude values for notes.
 //
 
-void getIdynDynamics(HumdrumFile& infile, vector<string>& dynamics, 
+void getIdynDynamics(HumdrumFile& infile, vector<string>& dynamics,
       double idynoffset) {
    int i, j, k;
    int intdyn;
@@ -1306,7 +1320,7 @@ void getIdynDynamics(HumdrumFile& infile, vector<string>& dynamics,
             if (intdyn > 127) {
                intdyn = 127;
             }
-	    cdyn = char(intdyn);
+            cdyn = char(intdyn);
             dynamics[i].push_back(cdyn);
          }
       }
@@ -1324,7 +1338,7 @@ void getIdynDynamics(HumdrumFile& infile, vector<string>& dynamics,
    }
 
 }
-            
+
 
 
 //////////////////////////////
@@ -1369,7 +1383,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
       getDynamics(infile, dynamics, defaultvolume);
    }
 
-   // store a default tempo marking if the tempo scaling option 
+   // store a default tempo marking if the tempo scaling option
    // was used.
    if (tscaling != 1.0) {
       ttempo = (int)(100 * tscaling);
@@ -1378,7 +1392,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
          mididata[0] = 0xff;
          mididata[1] = 0x51;
          mididata[2] = 3;
-         ttempo = (int)(60000000.0 / ttempo + 0.5);   
+         ttempo = (int)(60000000.0 / ttempo + 0.5);
          mididata[3] = (uchar)((ttempo >> 16) & 0xff);
          mididata[4] = (uchar)((ttempo >> 8) & 0xff);
          mididata[5] = (uchar)(ttempo & 0xff);
@@ -1396,7 +1410,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
       mididata[0] = 0xff;
       mididata[1] = 0x51;
       mididata[2] = 3;
-      ttempo = (int)(60000000.0 / 120.0 + 0.5);   
+      ttempo = (int)(60000000.0 / 120.0 + 0.5);
       mididata[3] = (uchar)((ttempo >> 16) & 0xff);
       mididata[4] = (uchar)((ttempo >> 8) & 0xff);
       mididata[5] = (uchar)(ttempo & 0xff);
@@ -1430,7 +1444,6 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
          }
       }
 
-
       if (storeCommentQ && (infile[i].getType() == E_humrec_global_comment)) {
          if (timeQ || perfvizQ) {
             ontick = getMillisecondTime(infile, i);
@@ -1460,9 +1473,8 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
          } else if (storeCommentQ) {
             storeMetaText(outfile, 0, infile[i].getLine(), ontick + Offset);
          }
-      } 
+      }
       if (infile[i].isInterpretation() || infile[i].isGlobalComment()) {
-
          tempo = (int)checkForTempo(infile[i]);
          if (tempo > 0 && !tempospineQ && !perfvizQ) {
             // cout << "The tempo read was " <<  tempo << endl;
@@ -1471,7 +1483,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             mididata[0] = 0xff;
             mididata[1] = 0x51;
             mididata[2] = 3;
-            ttempo = (int)(60000000.0 / ttempo + 0.5);   
+            ttempo = (int)(60000000.0 / ttempo + 0.5);
             mididata[3] = (uchar)((ttempo >> 16) & 0xff);
             mididata[4] = (uchar)((ttempo >> 8) & 0xff);
             mididata[5] = (uchar)(ttempo & 0xff);
@@ -1489,8 +1501,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             tempo = -1;
          }
 
-
-         for (j=0; j<infile[i].getFieldCount(); j++) {
+         for (j=infile[i].getFieldCount()-1; j>=0; j--) {
             if (timeQ || perfvizQ) {
                ontick = getMillisecondTime(infile, i);
                if (perfvizQ) {
@@ -1500,7 +1511,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                absbeat = infile.getAbsBeat(i);
                ontick = int(absbeat * outfile.getTicksPerQuarterNote());
             }
-            int track = infile[i].getPrimaryTrack(j);
+            int track = Rtracks[infile[i].getPrimaryTrack(j)];
 
             if (strcmp(infile[i][j], "**kern") == 0 && forcedQ && !bendpcQ) {
                vector<uchar> mididata;
@@ -1512,17 +1523,16 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             }
 
             if (strncmp(infile[i][j], "*I", 2) == 0) {
-               storeInstrument(ontick + Offset, outfile, infile, i, j, 
+               storeInstrument(ontick + Offset, outfile, infile, i, j,
                      instrumentQ);
                continue;
-            } 
-
+            }
             if ((!autopanQ) && (strncmp(infile[i][j], "*pan=", 5) == 0)) {
                storePan(ontick + Offset, outfile, infile, i, j);
                continue;
-            } 
-	    
-	    // capture info data for PerfViz:
+            }
+
+            // capture info data for PerfViz:
             int length = strlen(infile[i][j]);
             int key;
             if (infile[i][j][length-1] == ':') {
@@ -1538,7 +1548,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             int tstop;
             int tsbottom;
             if (sscanf(infile[i][j], "*M%d/%d", &tstop, &tsbottom) == 2) {
-               if (tstop != PerfVizNote::tstop || 
+               if (tstop != PerfVizNote::tstop ||
                    tsbottom != PerfVizNote::tsbottom) {
                   printPerfVizTimeSig(tstop, tsbottom);
                   PerfVizNote::tstop = tstop;
@@ -1557,7 +1567,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             // info(tempoIndication,[andante]).
             // info(subtitle,[]).
 
-            
+
             if (strcmp(infile[i][j], "*free") == 0) {
                freeQ[infile[i].getPrimaryTrack(j)-1] = 1;
             } else if (strcmp(infile[i][j], "*strict") == 0) {
@@ -1565,14 +1575,15 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
 
                // turn off any previous notes in the track
                // started during a free rhythm section
-               ptrack = infile[i].getPrimaryTrack(j) - 1;
+               // why minus 1? [20150523]
+               ptrack = Rtracks[infile[i].getPrimaryTrack(j) - 1];
                for (ii=0; ii<(int)freenotestate[ptrack].size(); ii++) {
                   // turn off the note if it is zero or above
                   if (freenotestate[ptrack][ii] >= 0) {
                      mididata.resize(3);
                      if (bendpcQ) {
                         int pcchan = freenotestate[ptrack][ii] % 12;
-                        if (pcchan >= 9) { 
+                        if (pcchan >= 9) {
                            pcchan++;
                         }
                         mididata[0] = 0x80 | pcchan;
@@ -1597,8 +1608,9 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
       } else if (infile[i].getType() == E_humrec_data_measure) {
          PerfVizNote::bar += 1;
       } else if (infile[i].getType() == E_humrec_data) {
+         checkForTimeSignature(outfile, infile, i);
          idyncounter = 0;
-         for (j=0; j<infile[i].getFieldCount(); j++) {
+         for (j=infile[i].getFieldCount()-1; j>=0; j--) {
             if (strcmp(infile[i][j], ".") == 0) {
                continue;
             }
@@ -1608,16 +1620,16 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
 
             if (idynQ) {
               if ((int)dynamics[i].size() > idyncounter) {
-                 volume = dynamics[i][idyncounter]; 
+                 volume = dynamics[i][idyncounter];
               } else {
                 //  cout << "Warning: bad volume data on line " << i+1 << endl;
-		//  cout << "Size of dynamics array is: " 
+                //  cout << "Size of dynamics array is: "
                 //       << dynamics[i].size() << endl;
                 //  cout << "Note counter on line: " << idyncounter << endl;
                 //  volume = 64;
               }
             } else {
-               volume = dynamics[infile[i].getPrimaryTrack(j)-1][i];
+               volume = dynamics[Rtracks[infile[i].getPrimaryTrack(j)]-1][i];
             }
 
             if (strcmp(infile[i][j], ".") == 0) {
@@ -1634,7 +1646,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                   absbeat = infile.getAbsBeat(i);
                   ontick = int(absbeat * outfile.getTicksPerQuarterNote());
                }
-               track = infile[i].getPrimaryTrack(j);
+               track = Rtracks[infile[i].getPrimaryTrack(j)];
                if (storeTextQ) {
                   storeMetaText(outfile, track, infile[i][j], ontick+Offset);
                }
@@ -1642,9 +1654,9 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
             } else {
                // process **kern note events
 
-               track      = infile[i].getPrimaryTrack(j);
+               track      = Rtracks[infile[i].getPrimaryTrack(j)];
                tokencount = infile[i].getTokenCount(j);
-               ptrack     = infile[i].getPrimaryTrack(j) - 1;
+               ptrack     = Rtracks[infile[i].getPrimaryTrack(j)] - 1;
 
                if (freeQ[ptrack] != 0) {
                   // turn off any previous notes in the track
@@ -1655,7 +1667,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                         mididata.resize(3);
                         if (bendpcQ) {
                            int pcchan = freenotestate[ptrack][ii] % 12;
-                           if (pcchan >= 9) { 
+                           if (pcchan >= 9) {
                               pcchan++;
                            }
                            mididata[0] = 0x90 | pcchan;
@@ -1678,17 +1690,17 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                // [20130424]
                // But needs to be here so that --timbre volumes work [20131012]
                if (VolumeMapping.size() > 0) {
-                  volume = VolumeMapping[infile[i].getPrimaryTrack(j)];
+                  volume = VolumeMapping[Rtracks[infile[i].getPrimaryTrack(j)]];
                }
                for (k=0; k<tokencount; k++) {
-                  infile[i].getToken(buffer1, j, k); 
+                  infile[i].getToken(buffer1, j, k);
 
                   // skip tied notes
                   if (strchr(buffer1, '_') || strchr(buffer1, ']')) {
                      continue;
                   }
 
-                  if (timeQ) { 
+                  if (timeQ) {
                      duration = getMillisecondDuration(infile, i, j, k);
                   } else if (perfvizQ) {
                      duration = getMillisecondDuration(infile, i, j, k);
@@ -1709,8 +1721,8 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                         duration = rhysc * Convert::kernToDuration(buffer1);
                      }
                   }
-                  midinote = Convert::kernToMidiNoteNumber(buffer1); 
-                  // skip rests 
+                  midinote = Convert::kernToMidiNoteNumber(buffer1);
+                  // skip rests
                   if (midinote < 0) {
                      continue;
                   }
@@ -1731,7 +1743,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                      // treat spiccatos as staccatos (maybe shorten later?)
                      staccatoQ |= strchr(buffer1, 's') == NULL ? 0 : 1;
                   }
-   
+
                   if (shortenQ) {
                      duration -= shortenamount;
                      if (duration < mine) {
@@ -1754,7 +1766,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                   if (volume < 1) {
                      volume = 1;
                   }
-   
+
                   if (plusQ) {
                      volume = setMidiPlusVolume(buffer1);
                   }
@@ -1763,12 +1775,12 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                      offtick = (int)(ontick + duration + 0.5);
                   } else if (perfvizQ) {
                      ontick  = int(getMillisecondTime(infile,i)*tickfactor+0.5);
-                     offtick = int(getMillisecondTime(infile,i)*tickfactor + 
+                     offtick = int(getMillisecondTime(infile,i)*tickfactor +
                                 duration*tickfactor + 0.5);
                   } else {
                      absbeat = infile.getAbsBeat(i);
                      ontick  = int(absbeat * outfile.getTicksPerQuarterNote());
-                     offtick = int(duration * 
+                     offtick = int(duration *
                            outfile.getTicksPerQuarterNote()) + ontick;
                   }
                   if (shortenQ) {
@@ -1789,12 +1801,12 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                      }
                   } else {
                      if (offtick <= ontick) {
-                        offtick = ontick + (int)(infile[i].getDuration() 
+                        offtick = ontick + (int)(infile[i].getDuration()
                                    * outfile.getTicksPerQuarterNote()+0.5);
                      }
                      // in case the duration of the line is 0:
                      if (offtick <= ontick) {
-                        offtick = ontick + 12; 
+                        offtick = ontick + 12;
                      }
                   }
 
@@ -1807,7 +1819,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                   mididata.resize(3);
                   if (bendpcQ) {
                      int pcchan = midinote % 12;
-                     if (pcchan >= 9) { 
+                     if (pcchan >= 9) {
                         pcchan++;
                      }
                      mididata[0] = 0x90 | pcchan;
@@ -1827,13 +1839,13 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                   idyncounter++;
                   if (perfvizQ && PVIZ != NULL) {
                      PerfVizNote pvnote;
-                     pvnote.pitch	= base40note;
+                     pvnote.pitch       = base40note;
                      pvnote.scoredur    = pvscoredur;
                      pvnote.absbeat     = infile[i].getAbsBeat();
-                     pvnote.beat	= int(infile[i].getBeat());
+                     pvnote.beat        = int(infile[i].getBeat());
                      pvnote.beatfrac    = infile[i].getBeat() - pvnote.beat;
                      pvnote.beatdur     = pvscoredur;
-                     pvnote.vel		= volume;
+                     pvnote.vel         = volume;
                      pvnote.ontick      = ontick;
                      pvnote.offtick     = offtick;
                      PVIZ[0] << pvnote;
@@ -1842,7 +1854,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                      // don't specify the note off duration when rhythm is free.
                      if (bendpcQ) {
                         int pcchan = midinote % 12;
-                        if (pcchan >= 9) { 
+                        if (pcchan >= 9) {
                            pcchan++;
                         }
                         mididata[0] = 0x80 | pcchan;
@@ -1850,8 +1862,8 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                         mididata[0] = 0x80 | trackchannel[track];
                      }
                      if (monotuneQ) {
-                        addMonoTemperamentAdjustment(outfile, track, 
-                              trackchannel[track], offtick+Offset, 
+                        addMonoTemperamentAdjustment(outfile, track,
+                              trackchannel[track], offtick+Offset,
                               midinote, bendbypc);
                      }
                      outfile.addEvent(track, offtick + Offset, mididata);
@@ -1869,7 +1881,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
    // end at the same time.
 
    mididata.resize(3);
-   
+
    if (timeQ) {
       ontick = getFileDurationInMilliseconds(infile);
       ontick += 1000;
@@ -1880,12 +1892,12 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
    } else {
       absbeat = infile.getAbsBeat(infile.getNumLines()-1);
       ontick = int(absbeat * outfile.getTicksPerQuarterNote());
-      // note that extra time is added so that the last note will not get 
-      // cut off by the MIDI player.  
+      // note that extra time is added so that the last note will not get
+      // cut off by the MIDI player.
       ontick += 120;
    }
 
-   // stupid Microsoft Media player (et al.) will still cut off early, 
+   // stupid Microsoft Media player (et al.) will still cut off early,
    // so add a dummy note-off at end as well...
 
    if (options.getBoolean("type0")) {
@@ -1903,8 +1915,8 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
    } else {  // type 1 MIDI file
       int trackcount = outfile.getNumTracks();
       for (i=0; i<trackcount; i++) {
-         // Skip padding the first track, because Windows Media Player 
-	 // won't play the MIDI file otherwise.
+         // Skip padding the first track, because Windows Media Player
+         // won't play the MIDI file otherwise.
          if (i > 0 && padQ) {
             mididata[0] = 0x90;
             mididata[1] = 0x00;
@@ -1917,6 +1929,144 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
          outfile.addEvent(i, ontick+Offset, mididata);
       }
    }
+}
+
+
+
+//////////////////////////////
+//
+// checkForTimeSignature -- Search backwards from the previous line
+//     for a time signature.  The time signature must be the same in every
+//     part; otherwise, find a line such as
+//         !!primary-mensuration: met(C|)
+//     which can be used to convert to a time signature.
+//
+
+void checkForTimeSignature(MidiFile& outfile, HumdrumFile& infile, int line) {
+   int i;
+   int foundsig = -1;
+   int foundprimary = -1;
+   // int foundline = -1;
+   string primary;
+   PerlRegularExpression pre;
+   PerlRegularExpression pre2;
+   for (i=line-1; i>0; i--) {
+      if (infile[i].isData()) {
+         break;
+      }
+      if (infile[i].isGlobalComment()) {
+         if (pre.search(infile[i][0],
+               "!!primary-mensuration:\\s*met\\(([^)]+)\\)\\s*$")) {
+            foundprimary = i;
+            primary = pre.getSubmatch(1);
+            // cerr << "PRIMARY MENSURATION " << primary << endl;
+            break;
+         }
+      } else if (strncmp(infile[i][0], "**", 2) == 0) {
+         // found nothing to the start of the data stream.
+         break;
+      } else if (infile[i].isInterpretation()) {
+         int firstkern = -1;
+         for (int j=0; j<infile[i].getFieldCount(); j++) {
+            if (infile[i].isExInterp(j, "**kern")) {
+               if (firstkern == -1) {
+                  if (pre2.search(infile[i][j],
+                        "^\\*M(\\d+)/(\\d+)%?(\\d*)$")) {
+                     // extract the matches later.
+                  } else {
+                     break;
+                  }
+                  firstkern = j;
+               } else {
+                  if (strcmp(infile[i][firstkern], infile[i][j]) != 0) {
+                     firstkern  = -1;
+                  } else {
+                     // all is well, so continue
+                  }
+               }
+            }
+         }
+         if (firstkern >= 0) {
+            foundsig = firstkern;
+            break;
+         }
+      }
+      if ((foundprimary >= 0) || (foundsig >= 0)) {
+         break;
+      }
+   }
+
+   if ((foundprimary < 0) && (foundsig < 0)) {
+      return;
+   }
+
+   int ontick = 0;
+   if (timeQ) {
+      ontick = getMillisecondTime(infile, line);
+   } else {
+      double absbeat = infile.getAbsBeat(i);
+      ontick = int(absbeat * outfile.getTicksPerQuarterNote());
+   }
+
+   int top = 4;
+   int bottom = 1;
+   int bottom2 = 0;
+   int cticks = 24;
+
+   if (foundsig >= 0) {
+      top     = atoi(pre2.getSubmatch(1));
+      bottom  = atoi(pre2.getSubmatch(2));
+      bottom2 = atoi(pre2.getSubmatch(3));
+   } else if (foundprimary >= 0) {
+      if (
+            (primary == "C|")  ||
+            (primary == "C.")  ||
+            (primary == "C")   ||
+            (primary == "C2")
+         ) {
+         top    = 2;
+         bottom = 1;
+      }
+      if (
+            (primary == "3")    ||
+            (primary == "3/2")  ||
+            (primary == "C|3")  ||
+            (primary == "C3")   ||
+            (primary == "O|")   ||
+            (primary == "O")    ||
+            (primary == "O2")   ||
+            (primary == "O/3")  ||
+            (primary == "O3/2")
+         ) {
+         top    = 3;
+         bottom = 1;
+      }
+   }
+
+   int ispow2 = ((bottom & (bottom - 1)) == 0);
+   if (bottom2 > 0) {
+      if ((top == 3) && (bottom == 3) && (bottom2 == 2)) {
+         // 2/1 with coloration
+         outfile.addTimeSignature(0, ontick, 2, 1, 64);
+      }
+      // MenCircle with coloration should go here.
+   } else if (ispow2) {
+      if (bottom == 0) {
+         // bottom represent a breve (double-whole note).
+         bottom = -1;
+      } else {
+         cticks = cticks * 4.0 / bottom;
+      }
+      if ((top != 3) && (top % 3 == 0)) {
+         outfile.addTimeSignature(0, ontick, top, bottom, cticks * 3);
+      } else {
+         outfile.addTimeSignature(0, ontick, top, bottom, cticks);
+      }
+   } else {
+      // denominator is not a power of 2, so cannot represent
+      // in MIDI...
+   }
+
 }
 
 
@@ -1972,10 +2122,10 @@ void getTitle(string& title, HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// checkForBend -- 
+// checkForBend --
 //
 
-void checkForBend(MidiFile& outfile, int notetick, int channel, 
+void checkForBend(MidiFile& outfile, int notetick, int channel,
       HumdrumFile& infile, int row, int col, double scalefactor) {
    double bendvalue = 0;
 
@@ -1993,8 +2143,8 @@ void checkForBend(MidiFile& outfile, int notetick, int channel,
          bendvalue = bendvalue / scalefactor;
          // store one tick before the expected note location
          // but this can cause an audible pitch aberation...
-	 //notetick = notetick - 1;
-	 //if (notetick < 0) {
+         //notetick = notetick - 1;
+         //if (notetick < 0) {
          //   notetick = 0;
          // }
          outfile.addPitchBend(track, notetick, channel, bendvalue);
@@ -2051,7 +2201,7 @@ void reviseInstrumentMidiNumbers(const char* string) {
       }
       instnum = 0;
       sscanf(pointer, "%d", &instnum);
-      
+
       if (instnum < 0 || instnum > 127) {
          continue;
       }
@@ -2183,9 +2333,9 @@ int setMidiPlusVolume(const char* kernnote) {
          }
          break;
    }
-     
+
    output |= acheck;
-   return output; 
+   return output;
 }
 
 
@@ -2195,7 +2345,7 @@ int setMidiPlusVolume(const char* kernnote) {
 // storePan --
 //
 
-void storePan(int ontime, MidiFile& outfile, HumdrumFile& infile, 
+void storePan(int ontime, MidiFile& outfile, HumdrumFile& infile,
    int row, int column) {
    double value = 0.5;
    int mvalue = 64;
@@ -2210,9 +2360,9 @@ void storePan(int ontime, MidiFile& outfile, HumdrumFile& infile,
    } else if (mvalue < 0) {
       mvalue = 0;
    }
-      
-   int track = infile[row].getPrimaryTrack(column);
-   int channel = 0x0f & trackchannel[track];   
+
+   int track = Rtracks[infile[row].getPrimaryTrack(column)];
+   int channel = 0x0f & trackchannel[track];
 
    //ontime = ontime - 1;
    //if (ontime < 0) {
@@ -2237,26 +2387,28 @@ void autoPan(MidiFile& outfile, HumdrumFile& infile) {
 
    vector<int> kerntracks;
    getKernTracks(kerntracks, infile);
+   reverse(kerntracks.begin(), kerntracks.end());
 
    double value = 0.0;
    int    mval  = 0;
    // vector<int> trackchannel;    // channel of each track
-   
+
    vector<uchar> mididata;
    mididata.resize(3);
-   
+
    long ontime = 0;
    int i;
    int channel;
    int track;
    for (i=0; i<(int)kerntracks.size(); i++) {
-      track = kerntracks[i];
+      // track = kerntracks[i];  Check later if reversed
+      track = i;
       channel = trackchannel[track];
       value = 127.0 * i/(kerntracks.size()-1);
       if (value < 0.0) { value = 0.0; }
       if (value > 127.0) { value = 127.0; }
       mval = (int)value;
-      
+
       mididata[0] = 0xb0 | channel;
       mididata[1] = 10;
       mididata[2] = (char)mval;
@@ -2272,12 +2424,13 @@ void autoPan(MidiFile& outfile, HumdrumFile& infile) {
 // storeInstrument --
 //
 
-void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile, 
+void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
       int line, int row, int pcQ) {
 
    PerlRegularExpression pre;
    PerlRegularExpression pre2;
 
+   int i;
    if (timbresQ && !forcedQ) {
 
       if (!pre.search(infile[line][row], "^\\*I\"\\s*(.*)\\s*", "")) {
@@ -2285,7 +2438,6 @@ void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
       }
       string targetname;
       targetname = pre.getSubmatch(1);
-      int i;
       int pc = -1;
       for (i=0; i<(int)TimbreName.size(); i++) {
          if (pre2.search(targetname, TimbreName[i], "i")) {
@@ -2303,8 +2455,8 @@ void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
       }
       if (pc >= 0) {
          int track = -1;
-         track = infile[line].getPrimaryTrack(row);
-         int channel = 0x0f & trackchannel[track];   
+         track = Rtracks[infile[line].getPrimaryTrack(row)];
+         int channel = 0x0f & trackchannel[track];
 
          vector<uchar> mididata;
          mididata.resize(2);
@@ -2315,14 +2467,16 @@ void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
 
    } else {
       static HumdrumInstrument huminst;
-      int track = infile[line].getPrimaryTrack(row);
-      const char* trackname = huminst.getName(infile[line][row]);
+      int track = Rtracks[infile[line].getPrimaryTrack(row)];
+      // const char* trackname = huminst.getName(infile[line][row]);
+      string trackname = getInstrumentName(infile,
+            Rtracks[infile[line].getPrimaryTrack(row)]);
       int pc = huminst.getGM(infile[line][row]);
       if (forcedQ) {
          pc = instrumentnumber;
       }
-      int channel = 0x0f & trackchannel[track];   
-   
+      int channel = 0x0f & trackchannel[track];
+
       // store the program change if requested:
       vector<uchar> mididata;
       mididata.resize(2);
@@ -2336,9 +2490,40 @@ void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
          tracknamed[track] = 1;
          storeMetaText(mfile, track, trackname, 0, 3);    // Track Name
       }
-      storeMetaText(mfile, track, trackname + Offset, ontick, 4);  // Inst. Name
+      // storeMetaText(mfile, track, trackname, ontick + Offset, 4);  // Inst. Name
    }
 
+}
+
+
+
+//////////////////////////////
+//
+// getInstrumentName --
+//
+
+string getInstrumentName(HumdrumFile& infile, int ptrack) {
+   int track;
+   int i, j;
+   PerlRegularExpression pre;
+   for (i=0; i<infile.getNumLines(); i++) {
+      if (infile[i].isData()) {
+         return "";
+      }
+      if (!infile[i].isInterpretation()) {
+         continue;
+      }
+      for (j=0; j<infile[i].getFieldCount(); j++) {
+         track = Rtracks[infile[i].getPrimaryTrack(j)];
+         if (track != ptrack) {
+            continue;
+         }
+         if (pre.search(infile[i][j], "^\\*I\"(.*)")) {
+            return pre.getSubmatch(1);
+         }
+      }
+   }
+   return "";
 }
 
 
@@ -2358,7 +2543,7 @@ void usage(const char* command) {
 // getDynamics --
 //
 
-void getDynamics(HumdrumFile& infile, vector<string>& dynamics, 
+void getDynamics(HumdrumFile& infile, vector<string>& dynamics,
       int defaultdynamic) {
    int maxtracks = infile.getMaxTracks();
    vector<int> currentdynamic;
@@ -2376,7 +2561,7 @@ void getDynamics(HumdrumFile& infile, vector<string>& dynamics,
 
    dynamics.resize(maxtracks);
 
-   int i; 
+   int i;
    int j;
    for (i=0; i<(int)dynamics.size(); i++) {
       dynamics[i].resize(infile.getNumLines());
@@ -2392,7 +2577,7 @@ void getDynamics(HumdrumFile& infile, vector<string>& dynamics,
 
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].getType() == E_humrec_data) {
-         getNewDynamics(currentdynamic, assignments, infile, i, crescendos, 
+         getNewDynamics(currentdynamic, assignments, infile, i, crescendos,
               accentuation);
       }
       for (j=0; j<(int)currentdynamic.size(); j++) {
@@ -2415,18 +2600,18 @@ void getDynamics(HumdrumFile& infile, vector<string>& dynamics,
       for (j=0; j<(int)dynamics.size(); j++) {
          if (dynamics[j][i] < 0) {
             dynamics[j][i] = -dynamics[j][i];
-         } 
+         }
          if (humanvolumeQ) {
             dynamics[j][i] = adjustVolumeHuman(dynamics[j][i], humanvolumeQ);
          }
          if (metricvolumeQ) {
-            dynamics[j][i] = adjustVolumeMetric(dynamics[j][i], 
+            dynamics[j][i] = adjustVolumeMetric(dynamics[j][i],
                               metricvolumeQ, -metlev[i]);
          }
          if (dynamicsQ) {
             // probably should change accentuation of this type
             // into a continuous controller....
-            dynamics[j][i] = applyAccentuation(dynamics[j][i], 
+            dynamics[j][i] = applyAccentuation(dynamics[j][i],
                                                      accentuation[j][i]);
          }
          if (dynamicsQ > 1) {
@@ -2447,7 +2632,7 @@ void getDynamics(HumdrumFile& infile, vector<string>& dynamics,
 
 //////////////////////////////
 //
-// applyAccentuation -- 
+// applyAccentuation --
 //
 
 char applyAccentuation(int dynamic, int accent) {
@@ -2460,7 +2645,7 @@ char applyAccentuation(int dynamic, int accent) {
    if (dynamic > 127) {
       dynamic = 127;
    } else if (dynamic <= 0) {
-      dynamic = 1; 
+      dynamic = 1;
    }
 
    return (char)dynamic;
@@ -2471,7 +2656,7 @@ char applyAccentuation(int dynamic, int accent) {
 ///////////////////////////////
 //
 // adjustVolumeMetric -- adjust the attack volume based on the
-//  metric position of the note (on the beat, off the beat, on 
+//  metric position of the note (on the beat, off the beat, on
 //  a metrically strong beat).
 //
 
@@ -2481,13 +2666,13 @@ char adjustVolumeMetric(int startvol, int delta, double metricpos) {
    } else if (metricpos < 0) {
       startvol -= delta;
    }
- 
+
    if (startvol <= 0) {
       startvol = 1;
    } else if (startvol > 127) {
       startvol = 127;
    }
-   
+
    return (char)startvol;
 }
 
@@ -2525,7 +2710,7 @@ char adjustVolumeHuman(int startvol, int delta) {
 //    crescendos and decrescendos found in the file.
 //
 
-void processCrescDecresc(HumdrumFile& infile, vector<string>& dynamics, 
+void processCrescDecresc(HumdrumFile& infile, vector<string>& dynamics,
    vector<string>& crescendos) {
 
    int i;
@@ -2541,12 +2726,12 @@ void processCrescDecresc(HumdrumFile& infile, vector<string>& dynamics,
 // interpolateDynamics --
 //
 
-void interpolateDynamics(HumdrumFile& infile, string& dyn, 
+void interpolateDynamics(HumdrumFile& infile, string& dyn,
       string& cresc) {
    int direction = 0;
    int i;
    int ii;
-  
+
    for (i=0; i<(int)dyn.size(); i++) {
       if (cresc[i] != 0) {
          if (cresc[i] > 0) {
@@ -2573,10 +2758,10 @@ void interpolateDynamics(HumdrumFile& infile, string& dyn,
 // generateInterpolation -- do the actual interpolation work.
 //
 
-void generateInterpolation(HumdrumFile& infile, string& dyn, 
+void generateInterpolation(HumdrumFile& infile, string& dyn,
       string& cresc, int startline, int stopline, int direction) {
 
-   double startbeat = infile[startline].getAbsBeat();  
+   double startbeat = infile[startline].getAbsBeat();
    double stopbeat  = infile[stopline].getAbsBeat();
 
    if (startbeat == stopbeat) {
@@ -2605,7 +2790,7 @@ void generateInterpolation(HumdrumFile& infile, string& dyn,
    double slope = (double)(stopvel-startvel)/(double)(stopbeat-startbeat);
    double currvel = 0.0;
    double currbeat = 0.0;
-   for (i=startline+1; i<stopline && i<(int)dyn.size(); i++) { 
+   for (i=startline+1; i<stopline && i<(int)dyn.size(); i++) {
       currbeat = infile[i].getAbsBeat();
       currvel  = slope * (currbeat - startbeat) + startvel;
       if (currvel > 127.0) {
@@ -2635,7 +2820,7 @@ int findtermination(string& dyn, string& cresc, int start) {
          break;
       }
    }
-   
+
    if (i>=(int)dyn.size()) {
       i = dyn.size()-1;
    }
@@ -2649,7 +2834,7 @@ int findtermination(string& dyn, string& cresc, int start) {
 // getNewDynamics --
 //
 
-void getNewDynamics(vector<int>& currentdynamic, vector<int>& assignments, 
+void getNewDynamics(vector<int>& currentdynamic, vector<int>& assignments,
       HumdrumFile& infile, int line, vector<string>& crescendos,
       vector<string>& accentuation) {
 
@@ -2692,7 +2877,7 @@ void getNewDynamics(vector<int>& currentdynamic, vector<int>& assignments,
       }
       buffer[k] = '\0';
 
-      track = infile[line].getPrimaryTrack(i) - 1;
+      track = Rtracks[infile[line].getPrimaryTrack(i)] - 1;
 
       if (strstr(buffer, "ffff") != NULL) {
          dval = DYN_FFFF;
@@ -2727,11 +2912,11 @@ void getNewDynamics(vector<int>& currentdynamic, vector<int>& assignments,
       if (strchr(infile[line][i], 'v') != NULL) {
          accent = 'v';
       }
-      
+
       if (dval > 0 || cresval !=0) {
          for (j=0; j<(int)assignments.size(); j++) {
             if (assignments[j] == track) {
-               // mark new dynamics with a minus sign 
+               // mark new dynamics with a minus sign
                // which will be removed after cresc/decresc processing
                if (dval > 0) {
                   currentdynamic[j] = -dval;
@@ -2822,7 +3007,7 @@ void getDynamicAssignments(HumdrumFile& infile, vector<int>& assignments) {
          }
          for (k=0; k<(int)staffvalues[j].size(); k++) {
             if (staffvalues[i][0] == staffvalues[j][k]) {
-               assignments[infile[exinterp].getPrimaryTrack(i)-1] = 
+               assignments[infile[exinterp].getPrimaryTrack(i)-1] =
                   infile[exinterp].getPrimaryTrack(j)-1;
             }
          }
@@ -2843,7 +3028,7 @@ void getDynamicAssignments(HumdrumFile& infile, vector<int>& assignments) {
 // getStaffValues --
 //
 
-void getStaffValues(HumdrumFile& infile, int staffline, 
+void getStaffValues(HumdrumFile& infile, int staffline,
       vector<vector<int> >& staffvalues) {
 
    staffvalues.resize(infile[staffline].getFieldCount());
@@ -2895,7 +3080,7 @@ int getMillisecondTime(HumdrumFile& infile, int line) {
    double output = -100;
    int i;
 
-   while ((line < infile.getNumLines()) && 
+   while ((line < infile.getNumLines()) &&
           (infile[line].getType() != E_humrec_data)) {
       line++;
    }
@@ -2908,7 +3093,7 @@ int getMillisecondTime(HumdrumFile& infile, int line) {
          if (strcmp(infile[line][i], ".") == 0) {
             cout << "Error on line " << line + 1 << ": no time value" << endl;
             exit(1);
-         }         
+         }
          //if (strcmp(infile[line][i], ".") == 0) {
          //   output = -1.0;
          //} else {
@@ -2950,7 +3135,7 @@ int getMillisecondDuration(HumdrumFile& infile, int row, int col, int subcol) {
       // total tied note durations
       duration = infile.getTiedDuration(row, col, subcol);
    } else {
-      infile[row].getToken(buffer1, col, subcol); 
+      infile[row].getToken(buffer1, col, subcol);
       duration = rhysc * Convert::kernToDuration(buffer1);
    }
 
@@ -2994,10 +3179,10 @@ int getMillisecondDuration(HumdrumFile& infile, int row, int col, int subcol) {
 int getFileDurationInMilliseconds(HumdrumFile& infile) {
 
    int lastdataline = infile.getNumLines() - 1;
-   while ((lastdataline > 0) && 
+   while ((lastdataline > 0) &&
           (infile[lastdataline].getType() != E_humrec_data)) {
       lastdataline--;
-   } 
+   }
 
    double ctime = getMillisecondTime(infile, lastdataline);
    double cbeat = infile[lastdataline].getAbsBeat();
@@ -3060,41 +3245,41 @@ int getFileDurationInMilliseconds(HumdrumFile& infile) {
 
 ostream& operator<<(ostream& out, PerfVizNote& note) {
 
-   int anchor		= ++note.sid;
-   int measure 		= note.bar;
-   int beat   		= note.beat;
-   int velocity		= note.vel;
-   int onset		= note.ontick;   // tick on time for note
-   int offset		= note.offtick;  // tick off time for note
-   int adjoffset	= offset;        // not taking pedalling into account
-   double absbeaton     = note.absbeat;
-   double absbeatoff	= note.absbeat + note.scoredur;
+   int anchor        = ++note.sid;
+   int measure       = note.bar;
+   int beat          = note.beat;
+   int velocity      = note.vel;
+   int onset         = note.ontick;   // tick on time for note
+   int offset        = note.offtick;  // tick off time for note
+   int adjoffset     = offset;        // not taking pedalling into account
+   double absbeaton  = note.absbeat;
+   double absbeatoff = note.absbeat + note.scoredur;
    char pitchname[1024] = {0};
    Convert::base40ToPerfViz(pitchname, note.pitch);
-   double soffset	= note.beatfrac;
-   double dur		= note.beatdur;
-   
+   double soffset    = note.beatfrac;
+   double dur        = note.beatdur;
+
    out << "snote(n"
-       << anchor	<< ","
-       << pitchname	<< ","
-       << measure	<< ":"
-       << beat		<< ",";
+       << anchor     << ","
+       << pitchname  << ","
+       << measure    << ":"
+       << beat       << ",";
 
    printRational(out, soffset);
    out << ",";
    printRational(out, dur);
    out << ",";
 
-   out << absbeaton	<< ","
-       << absbeatoff	<< ","
+   out << absbeaton   << ","
+       << absbeatoff  << ","
        << "[])-";
    out << "note("
-       << anchor	<< ","
-       << pitchname	<< ","
-       << onset		<< ","
-       << offset	<< ","
-       << adjoffset	<< ","
-       << velocity	
+       << anchor      << ","
+       << pitchname   << ","
+       << onset       << ","
+       << offset      << ","
+       << adjoffset   << ","
+       << velocity
        << ").\n";
 
    return out;
@@ -3211,9 +3396,7 @@ void printPerfVizTimeSig(int tstop, int tsbottom) {
    if (PVIZ == NULL) {
       return;
    }
-
    PVIZ[0] << "info(timeSignature," << tstop << "/" << tsbottom << ").\n";
-
 }
 
 
@@ -3227,7 +3410,7 @@ void printPerfVizTempo(double approxtempo) {
    if (PVIZ == NULL) {
       return;
    }
-   
+
    PVIZ[0] << "info(approximateTempo," << approxtempo << ").\n";
 
 }
@@ -3239,7 +3422,7 @@ void printPerfVizTempo(double approxtempo) {
 // storeTimbres --
 //
 
-void storeTimbres(vector<string>& name, vector<int>& value, 
+void storeTimbres(vector<string>& name, vector<int>& value,
       vector<int>& volumes, const string& input) {
    PerlRegularExpression pre;
    vector<string> tokens;
@@ -3255,7 +3438,6 @@ void storeTimbres(vector<string>& name, vector<int>& value,
    int temp;
    int i;
    for (i=0; i<(int)tokens.size(); i++) {
-
       if (pre.search(tokens[i], "(.*)\\s*:\\s*i?(\\d+),v(\\d+)", "")) {
          temp = atoi(pre.getSubmatch(2));
          value.push_back(temp);
@@ -3269,7 +3451,6 @@ void storeTimbres(vector<string>& name, vector<int>& value,
          tempstr = pre.getSubmatch(1);
          name.push_back(tempstr);
       }
-
    }
 }
 
@@ -3279,7 +3460,7 @@ void storeTimbres(vector<string>& name, vector<int>& value,
 //
 // getKernTracks --  Return a list of the **kern primary tracks found
 //     in the Humdrum data.  Currently all tracks are independent parts.
-//     No grand staff parts are considered if the staves are separated 
+//     No grand staff parts are considered if the staves are separated
 //     into two separate spines.
 //
 //
@@ -3289,7 +3470,7 @@ void getKernTracks(vector<int>& tracks, HumdrumFile& infile) {
    tracks.resize(0);
    int i;
    for (i=1; i<=infile.getMaxTracks(); i++) {
-      if (strcmp(infile.getTrackExInterp(i), "**kern") == 0) {
+      if (infile.getTrackExInterp(i) == "**kern") {
          tracks.push_back(i);
       }
    }

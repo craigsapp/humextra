@@ -85,10 +85,7 @@ HumdrumRecord::HumdrumRecord(void) {
    interpretation.setGrowth(132);
    interpretation.setSize(0);
 
-   spineids.allowGrowth(1);
-   spineids.setSize(32);
-   spineids.setGrowth(132);
-   spineids.setSize(0);
+   spineids.reserve(32);
 
    dotline.setSize(32);
    dotline.setGrowth(132);
@@ -122,10 +119,9 @@ HumdrumRecord::HumdrumRecord(const char* aLine, int aLineNum) {
    recordFields.setSize(32);
    recordFields.setGrowth(132);
    recordFields.setSize(0);
-   spineids.allowGrowth(1);
-   spineids.setSize(32);
-   spineids.setGrowth(132);
-   spineids.setSize(0);
+
+   spineids.reserve(32);
+
    dotline.allowGrowth(1);
    dotline.setSize(0);
    dotline.setSize(32);
@@ -155,7 +151,7 @@ HumdrumRecord::HumdrumRecord(const HumdrumRecord& aRecord) {
    interpretation.setSize(aRecord.interpretation.getSize());
    recordFields.allowGrowth();
    recordFields.setSize(aRecord.recordFields.getSize());
-   spineids.setSize(aRecord.spineids.getSize());
+   spineids.resize(aRecord.spineids.size());
    dotline.setSize(aRecord.dotline.getSize());
    dotspine.setSize(aRecord.dotspine.getSize());
 
@@ -164,9 +160,8 @@ HumdrumRecord::HumdrumRecord(const HumdrumRecord& aRecord) {
       interpretation[i] = aRecord.interpretation[i];
       recordFields[i] = new char[strlen(aRecord.recordFields[i]) + 1];
       strcpy(recordFields[i], aRecord.recordFields[i]);
-      spineids[i] = new char[strlen(aRecord.spineids[i]) + 1];
-      strcpy(spineids[i], aRecord.spineids[i]);
-      dotline[i] = aRecord.dotline[i];
+      spineids[i] = aRecord.spineids[i];
+      dotline[i]  = aRecord.dotline[i];
       dotspine[i] = aRecord.dotspine[i];
    }
 }
@@ -192,13 +187,7 @@ HumdrumRecord::~HumdrumRecord() {
    }
    recordFields.setSize(0);
 
-   for (i=0; i<spineids.getSize(); i++) {
-      if (spineids[i] != NULL) {
-         delete [] spineids[i];
-         spineids[i] = NULL;
-      }
-   }
-   spineids.setSize(0);
+   spineids.clear();
 
    dotline.setSize(0);
    dotspine.setSize(0);
@@ -265,11 +254,11 @@ void HumdrumRecord::changeField(int aField, const char* aString) {
 //     Default value: line = 0;
 //
 
-void HumdrumRecord::copySpineInfo(char** info, int size, int line) {
+void HumdrumRecord::copySpineInfo(vector<string>& info, int line) {
+   int size = (int)info.size();
    if (size != getFieldCount()) {
       cout << "Error: new spine information is not the right size" << endl;
-      int i;
-      for (i=0; i<size; i++) {
+      for (int i=0; i<size; i++) {
          cout << info[i];
          if (i<size-1) {
             cout << '\t';
@@ -283,28 +272,15 @@ void HumdrumRecord::copySpineInfo(char** info, int size, int line) {
       exit(1);
    }
 
-   // delete the old spine info
-   int i;
-   for (i=0; i<size; i++) {
-      if (spineids[i] != NULL) {
-         delete [] spineids[i];
-         spineids[i] = new char[strlen(info[i]) + 1];
-         strcpy(spineids[i], info[i]);
-      }
+   // replace the old spine info
+   for (int i=0; i<size; i++) {
+      spineids[i] = info[i];
    }
 }
 
 
 void HumdrumRecord::copySpineInfo(HumdrumRecord& aRecord, int line) {
-   int size = aRecord.spineids.getSize();
-   char** base = aRecord.spineids.getBase();
-   copySpineInfo(base, size, line);
-}
-
-void HumdrumRecord::copySpineInfo(SigCollection<char*>& aCollection, int line) {
-   int size = aCollection.getSize();
-   char** base = aCollection.getBase();
-   copySpineInfo(base, size, line);
+   copySpineInfo(aRecord.spineids, line);
 }
 
 
@@ -840,7 +816,7 @@ int HumdrumRecord::getSpinePrediction(void) {
 //
 
 double HumdrumRecord::getTrack(int spineNumber) {
-   const char* info = getSpineInfo(spineNumber);
+   const string& info = getSpineInfo(spineNumber);
    int i = 0;
    while (info[i] != '\0' && !std::isdigit(info[i])) {
       i++;
@@ -851,7 +827,7 @@ double HumdrumRecord::getTrack(int spineNumber) {
    output = inttrack;
    i++;
    int subtrack = 0;
-   if (info[i] != '\0') {
+   if (i < (int)info.size()) {
       i++;
       if (std::isalpha(info[i])) {
          subtrack = std::tolower(info[i]) - 'a';
@@ -897,7 +873,7 @@ int HumdrumRecord::getPrimaryTrack(int spineNumber) {
    if (spineNumber < 0 || spineNumber >= getFieldCount()) {
       return 0;
    }
-   const char* info = getSpineInfo(spineNumber);
+   const string& info = getSpineInfo(spineNumber);
    int i = 0;
    while (info[i] != '\0' && !std::isdigit(info[i])) {
       i++;
@@ -916,7 +892,7 @@ int HumdrumRecord::getPrimaryTrack(int spineNumber) {
 // HumdrumRecord::getSpineInfo --
 //
 
-const char* HumdrumRecord::getSpineInfo(int index) const {
+const string& HumdrumRecord::getSpineInfo(int index) const {
    return spineids[index];
 }
 
@@ -1944,7 +1920,8 @@ void HumdrumRecord::insertField(int index, const char* aField, int anInterp,
       index = getFieldCount();
    }      
    recordFields[recordFields.getSize()] = NULL;
-   spineids[spineids.getSize()] = NULL;
+   spineids.resize(spineids.size()+1); 
+   // spineids[spineids.getSize()] = NULL;
 
    interpretation.setSize(interpretation.getSize()+1);
    interpretation[interpretation.getSize()-1] = E_unknown;
@@ -1962,9 +1939,8 @@ void HumdrumRecord::insertField(int index, const char* aField, int anInterp,
    // add the field
    interpretation[index] = anInterp;
    recordFields[index]   = new char[strlen(aField)+1];
-   spineids[index]       = new char[strlen(spinetrace)+1];
    strcpy(recordFields[index], aField);
-   strcpy(spineids[index], spinetrace);
+   spineids[index] = spinetrace;
 
    int dummy = -1;
    dotline.append(dummy);
@@ -2027,15 +2003,9 @@ HumdrumRecord& HumdrumRecord::operator=(const HumdrumRecord& aRecord) {
       }
    }
 
-   for (i=0; i<spineids.getSize(); i++) {
-      if (spineids[i] != NULL) {
-         delete [] spineids[i];
-         spineids[i] = NULL;
-      }
-   }
-
    recordFields.setSize(aRecord.recordFields.getSize());
-   spineids.setSize(aRecord.spineids.getSize());
+   spineids.clear();
+   spineids.resize(aRecord.spineids.size());
 
    int allocSize = 0;
    for (i=0; i<aRecord.getFieldCount(); i++) {
@@ -2047,8 +2017,7 @@ HumdrumRecord& HumdrumRecord::operator=(const HumdrumRecord& aRecord) {
       recordFields[i] = new char[allocSize];
       strcpy(recordFields[i], aRecord.recordFields[i]);
 
-      spineids[i] = new char[strlen(aRecord.spineids[i]) + 1];
-      strcpy(spineids[i], aRecord.spineids[i]);
+      spineids[i] = aRecord.spineids[i];
    }
  
    return *this;
@@ -2300,15 +2269,7 @@ void HumdrumRecord::setLine(const char* aLine) {
       recordFields.setSize(0);
    }
 
-   if (spineids.getSize() != 0) {
-      for (i=0; i<spineids.getSize(); i++) {
-         if (spineids[i] != NULL) {
-            delete spineids[i];
-            spineids[i] = NULL;
-         }
-      }
-      spineids.setSize(0);
-   }
+   spineids.clear();
 
    type = determineType(recordString);
    int fieldCount = determineFieldCount(recordString);
@@ -2335,8 +2296,7 @@ void HumdrumRecord::setLine(const char* aLine) {
       strcpy(temp, recordString);
       index = recordFields.getSize(); 
       recordFields[index] = temp;
-      spineids[index] = new char[1];
-      spineids[index][0] = '\0';
+      spineids.push_back("");
    } else {
       while (recordString[i] != '\0') {
          if (recordString[i] != '\t') {
@@ -2347,8 +2307,7 @@ void HumdrumRecord::setLine(const char* aLine) {
             temp[stop-start] = '\0';
             index = recordFields.getSize(); 
             recordFields[index] = temp;
-            spineids[index] = new char[1];
-            spineids[index][0] = '\0';
+            spineids.push_back("");
             start = stop = i+1;
          }
          i++;
@@ -2358,8 +2317,7 @@ void HumdrumRecord::setLine(const char* aLine) {
       temp[stop-start] = '\0';
       index = recordFields.getSize();
       recordFields[index] = temp;
-      spineids[index] = new char[1];
-      spineids[index][0] = '\0';
+      spineids.push_back("");
    }
 
    dotline.setSize(fieldCount);
@@ -2389,11 +2347,7 @@ void HumdrumRecord::setLineNum(int aNumber) {
 //
 
 void HumdrumRecord::setSpineID(int index, const char* anID) {
-   if (index < spineids.getSize() && spineids[index] != NULL) {
-      delete [] spineids[index];
-   }
-   spineids[index] = new char[strlen(anID) + 1];
-   strcpy(spineids[index], anID);
+   spineids[index] = anID;
 }
 
 
@@ -4422,10 +4376,7 @@ void HumdrumRecord::setSize(int asize) {
    recordFields.setGrowth(132);   
    recordFields.setSize(asize);   
 
-   spineids.allowGrowth(1);
-   spineids.setSize(asize*4);
-   spineids.setGrowth(132);
-   spineids.setSize(asize);
+   spineids.resize(asize);
 
    interpretation.allowGrowth(1);
    interpretation.setSize(asize*4);
@@ -4443,14 +4394,11 @@ void HumdrumRecord::setSize(int asize) {
 
    char buffer[32] = {0};
    int i;
-   int len;
    for (i=0; i<recordFields.getSize(); i++) {
       recordFields[i] = new char[2];
       strcpy(recordFields[i], ".");
       sprintf(buffer, "%d", i+1);
-      len = strlen(buffer);
-      spineids[i] = new char[len+1];
-      strcpy(spineids[i], buffer);
+      spineids[i] = buffer;
    }
   
    dotline.setAll(-1);

@@ -48,10 +48,7 @@ class HumdrumRecord {
                                              const char* anInterp = "**unknown",
                                              const char* spinetrace = "");
       void              changeField        (int aField, const char* aString);
-      void              copySpineInfo      (char** info, int size,
-                                              int line = 0);
-      void              copySpineInfo      (SigCollection<char*>& aCollection,
-                                              int line = 0);
+      void              copySpineInfo      (vector<string>& info, int line = 0);
       void              copySpineInfo      (HumdrumRecord& aRecord,
                                               int line = 0);
 
@@ -97,7 +94,7 @@ class HumdrumRecord {
       int               getPrimaryTrack    (int spineNumber);
       double            getTrack           (int spineNumber);
       int               getTrackColumn     (int track);
-      const char*       getSpineInfo       (int index) const;
+      const string&     getSpineInfo       (int index) const;
       int               getSpinePrediction (void);
       int               getSpineWidth      (void);
       void              changeToken        (int spineIndex, int tokenIndex,  
@@ -250,7 +247,7 @@ class HumdrumRecord {
       char*                recordString;   // record string
       int                  modifiedQ;      // boolen for if need to make Rstring
       SigCollection<char*> recordFields;   // data for humdrum text record
-      SigCollection<char*> spineids;       // spine tracing ids
+      vector<string>       spineids;       // spine tracing ids
       Array<int>           interpretation; // exclusive interpretation of data
 
       Array<int>           dotline;        // for resolving meaning of "."'s

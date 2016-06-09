@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
       }
       Exstart = 0;
       if ((infiles.getCount() > 1) && 
-          (strcmp(infiles[i].getFilename(), "") != 0)) {
+          (infiles[i].getFilename().size() > 0)) {
          cout << "!!!!SEGMENT: " << infiles[i].getFilename() << endl;
       }
       printOutput(infiles[i]);

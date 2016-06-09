@@ -6,7 +6,7 @@
 // Last Modified: Mon Feb 28 06:30:23 PST 2011 Added --footer
 // Last Modified: Mon Mar  7 19:19:44 PST 2011 Added LO:N:smx/Y;bmx/Y
 // Last Modified: Fri Mar 25 11:37:46 PDT 2011 Macro expansion adjustments
-// Last Modified: Fri Apr  1 07:54:48 PDT 2011 Hanging tie endings 
+// Last Modified: Fri Apr  1 07:54:48 PDT 2011 Hanging tie endings
 // Last Modified: Wed Apr  6 19:54:37 PDT 2011 Added --vz
 // Last Modified: Thu Apr 14 21:44:11 PDT 2011 Added *rscale processing
 // Last Modified: Thu Aug 18 14:43:25 PDT 2011 Added segno sign on barlines
@@ -19,7 +19,7 @@
 // Last Modified: Mon Aug 19 15:12:09 PDT 2013 Added *elision controls
 // Last Modified: Fri Jan  3 14:34:21 PST 2014 Added RDF**kern:j tied group
 // Last Modified: Wed Jan  6 19:51:34 PST 2016 Added left/right quotes
-// Filename:      ...sig/examples/all/hum2muse.cpp 
+// Filename:      ...sig/examples/all/hum2muse.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2muse.cpp
 // Syntax:        C++; museinfo
 //
@@ -79,7 +79,7 @@ class LayoutParameters {
       Array<char>& getKey        (int i1, int i2) { return key[i1][i2];   }
       Array<char>& getValue      (int i1, int i2) { return value[i1][i2]; }
       int          appendCode    (const char* codeName);
-      int          addKeyValue   (int index, const char* keystr, 
+      int          addKeyValue   (int index, const char* keystr,
                                   const char* valuestr);
       int          hasKeyName    (int codeindex, const char* kname);
       int          getKeyValueInt(int codeindex, const char* kname);
@@ -177,7 +177,7 @@ int LayoutParameters::appendCode(const char* codeName) {
    return code.getSize() - 1;
 }
 
-int LayoutParameters::addKeyValue(int index, const char* keystr, 
+int LayoutParameters::addKeyValue(int index, const char* keystr,
       const char* valuestr) {
 
    key[index].increase(1);
@@ -214,7 +214,7 @@ void LayoutParameters::parseLayout(HumdrumFile& infile, Array<Coord>& layout) {
 }
 
 
-void LayoutParameters::addEntry(LayoutParameters& param, int index) { 
+void LayoutParameters::addEntry(LayoutParameters& param, int index) {
    code.increase(1);
    code.last().setSize(strlen(param.getCode(index).getBase())+1);
    strcpy(code.last().getBase(), param.getCode(index).getBase());
@@ -289,43 +289,43 @@ void LayoutParameters::prepareCode(const char* xcode, const char* params) {
 void  checkOptions             (Options& opts, int argc, char** argv);
 void  example                  (void);
 void  usage                    (const char* command);
-void  convertData              (Array<MuseData*>& outfiles, 
+void  convertData              (Array<MuseData*>& outfiles,
                                 HumdrumFile& infile);
 void  getKernTracks            (Array<int>& tracks, HumdrumFile& infile);
-void  convertTrackToMuseData   (MuseData& musedata, int track, 
-                                HumdrumFile& infile, Array<int>& tpq, 
-                                int& tickpos, int counter, int total, 
+void  convertTrackToMuseData   (MuseData& musedata, int track,
+                                HumdrumFile& infile, Array<int>& tpq,
+                                int& tickpos, int counter, int total,
                                 int printFirstMeasureQ);
 void  getMeasureInfo           (Array<int>& measures, HumdrumFile& infile);
-void  getMeasureData           (MuseData& tempdata, int track, 
-                                HumdrumFile& infile, int startline, 
+void  getMeasureData           (MuseData& tempdata, int track,
+                                HumdrumFile& infile, int startline,
                                 int stopline, int tpq, int& tickpos,
                                 int& measuresuppress, int& founddataQ,
                                 Array<Array<char> >& lastVerse);
-int   getMaxVoices             (HumdrumFile& infile, int startline, 
+int   getMaxVoices             (HumdrumFile& infile, int startline,
                                 int stopline, int track);
-void  addMeasureEntry          (MuseData& tempdata, HumdrumFile& infile, 
+void  addMeasureEntry          (MuseData& tempdata, HumdrumFile& infile,
                                 int line, int spine);
-void  processVoice             (MuseData& tempdata, HumdrumFile& infile, 
-                                int startline, int stopline, int track, 
+void  processVoice             (MuseData& tempdata, HumdrumFile& infile,
+                                int startline, int stopline, int track,
                                 int voice, int tpq, int& tickpos,
                                 int& measuresuppress, int& founddataQ,
                                 int starttick, int stoptick,
                                 Array<Array<char> >& lastVerse);
 int   getGlobalTicksPerQuarter   (HumdrumFile& infile);
 int   getTick                  (int tpq, HumdrumFile& infile, int line);
-int   addNoteToEntry           (MuseData& tempdata, HumdrumFile& infile, 
-                                int row, int col, int tpq, int voice, 
+int   addNoteToEntry           (MuseData& tempdata, HumdrumFile& infile,
+                                int row, int col, int tpq, int voice,
                                 int opentie, Array<Array<char> >& lastVerse);
-int   getTickDur               (int tpq, HumdrumFile& infile, int row, 
+int   getTickDur               (int tpq, HumdrumFile& infile, int row,
                                 int col);
 void  addBackup                (MuseData& tempdata, int backticks, int tpq);
-void  checkColor               (Array<char>& colorchar, MuseRecord& arecord, 
+void  checkColor               (Array<char>& colorchar, MuseRecord& arecord,
                                 const char* token, Array<char>& colorout);
 void  setColorCharacters       (HumdrumFile& infile, Array<char>& colorchar,
                                 Array<char>& colorout);
 void  setNoteheadShape         (MuseRecord& arecord, const char* token);
-void  insertHeaderRecords      (HumdrumFile& infile, MuseData& tempdata, 
+void  insertHeaderRecords      (HumdrumFile& infile, MuseData& tempdata,
                                 int track, int counter, int total);
 void  addCopyrightLine         (HumdrumFile& infile, MuseData& tempdata);
 void  addControlNumber         (HumdrumFile& infile, MuseData& tempdata);
@@ -335,76 +335,76 @@ void  addWorkNumberInfo        (HumdrumFile& infile, MuseData& tempdata);
 void  addSourceRecord          (HumdrumFile& infile, MuseData& tempdata);
 void  addWorkTitle             (HumdrumFile& infile, MuseData& tempdata);
 void  addMovementTitle         (HumdrumFile& infile, MuseData& tempdata);
-void  addPartName              (HumdrumFile& infile, int track, 
+void  addPartName              (HumdrumFile& infile, int track,
                                 MuseData& tempdata);
-void  insertDollarRecord       (HumdrumFile& infile, int line, 
-                                MuseData& musedata, int track, int counter, 
+void  insertDollarRecord       (HumdrumFile& infile, int line,
+                                MuseData& musedata, int track, int counter,
                                 int total, int tpq);
-int   appendKeySignature       (char* buffer, HumdrumFile& infile, int line, 
+int   appendKeySignature       (char* buffer, HumdrumFile& infile, int line,
                                 int track);
-int   appendClef               (char* buffer, HumdrumFile& infile, int line, 
+int   appendClef               (char* buffer, HumdrumFile& infile, int line,
                                 int track);
 int   isBarlineBeforeData      (HumdrumFile& infile, int startindex);
 char  getColorCategory         (const char* color);
-int   appendTimeSignature      (char* buffer, HumdrumFile& infile, int line, 
+int   appendTimeSignature      (char* buffer, HumdrumFile& infile, int line,
                                 int track, int tpq);
 void  printMuse2PsOptions      (HumdrumFile& infile);
-void  getPartNames             (HumdrumFile& infile, 
+void  getPartNames             (HumdrumFile& infile,
                                 Array<Array<char> >& PartNames);
-void  addChordLevelArtic       (MuseData& tempdata, MuseRecord&  arecord, 
-                                MuseRecord& printsuggestion, 
-                                HumdrumFile& infile, int row, int col, 
+void  addChordLevelArtic       (MuseData& tempdata, MuseRecord&  arecord,
+                                MuseRecord& printsuggestion,
+                                HumdrumFile& infile, int row, int col,
                                 int voice);
-void  addNoteLevelArtic        (MuseRecord&  arecord, HumdrumFile& infile, 
+void  addNoteLevelArtic        (MuseRecord&  arecord, HumdrumFile& infile,
                                 int row, int col, int tnum);
 void  setupMusicaFictaVariables(HumdrumFile& infile);
-void  getBeamState             (Array<Array<Array<char> > >& beams, 
-                                Array<Array<Array<Coord> > >& layout, 
+void  getBeamState             (Array<Array<Array<char> > >& beams,
+                                Array<Array<Array<Coord> > >& layout,
                                 Array<Array<Coord> >& glayout,
                                 Array<Array<Coord> >& clefs,
                                 HumdrumFile& infile);
-void  countBeamStuff           (const char* token, int& start, int& stop, 
+void  countBeamStuff           (const char* token, int& start, int& stop,
                                 int& flagr, int& flagl);
-void  getMeasureDuration       (HumdrumFile& infile, 
+void  getMeasureDuration       (HumdrumFile& infile,
                                 Array<RationalNumber>& rns);
 int   isPowerOfTwo             (RationalNumber& rn);
-void  getTupletState           (Array<int>& hasTuplet, 
-                                Array<Array<char> >& TupletState, 
-                                Array<Array<int> >& TupletTopNum, 
-                                Array<Array<int> >& TupletBotNum, 
+void  getTupletState           (Array<int>& hasTuplet,
+                                Array<Array<char> >& TupletState,
+                                Array<Array<int> >& TupletTopNum,
+                                Array<Array<int> >& TupletBotNum,
                                 HumdrumFile& infile);
 void  primeFactorization       (Array<int>& factors, int input);
 char  getBase36                (int value);
 int   getTupletTop             (HumdrumFile& infile, int row, int col);
-void  storeLayoutInformation   (HumdrumFile& infile, int line, 
-                                Array<Array<Array<Coord> > >& laystate, 
+void  storeLayoutInformation   (HumdrumFile& infile, int line,
+                                Array<Array<Array<Coord> > >& laystate,
                                 Array<Array<Array<Coord> > >& layout,
                                 int initializeQ);
-void  addLayoutInfo            (HumdrumFile& infile, int line, 
+void  addLayoutInfo            (HumdrumFile& infile, int line,
                                 Array<Array<Array<Coord> > > &laystate);
-void  handleLayoutInfoChord    (MuseData& tempdata, HumdrumFile& infile, 
-                                int row, int col, LayoutParameters& lp, 
+void  handleLayoutInfoChord    (MuseData& tempdata, HumdrumFile& infile,
+                                int row, int col, LayoutParameters& lp,
                                 int voice);
 void  insertSlurUpPrintSug     (MuseData& data, MuseRecord& prec);
 void  insertSlurDownPrintSug   (MuseData& data, MuseRecord& prec);
-void  insertStaccatoSuggestion (MuseData& indata, MuseRecord& prec, 
+void  insertStaccatoSuggestion (MuseData& indata, MuseRecord& prec,
                                 int direction);
-void  getPitches               (Array<int>& pitches, HumdrumFile& infile, 
+void  getPitches               (Array<int>& pitches, HumdrumFile& infile,
                                 int row, int col);
 int   numbersort               (const void* A, const void* B);
 int   numberRsort              (const void* A, const void* B);
-void  getChordMapping          (Array<int>& chordmapping, HumdrumFile& infile, 
+void  getChordMapping          (Array<int>& chordmapping, HumdrumFile& infile,
                                 int row, int col);
-void  getDynamicsAssignment    (HumdrumFile& infile, 
+void  getDynamicsAssignment    (HumdrumFile& infile,
                                 Array<int>& DynamicsAssignment, int& dynamicsQ);
-void  addDynamics              (HumdrumFile& infile, int row, int col, 
-                                MuseData& indata, MuseRecord& prec, 
+void  addDynamics              (HumdrumFile& infile, int row, int col,
+                                MuseData& indata, MuseRecord& prec,
                                 Array<int>& DynamicsAssignment,
                                 LayoutParameters& lp);
 void  addMovementDesignation   (char* buffer, HumdrumFile& infile, int line);
 void  convertKernLODYtoMusePS  (char* buffer, Array<Array<char> >& keys,
                                 Array<Array<char> >& values);
-void  processDynamicsLayout    (int loc, MuseRecord& prec, 
+void  processDynamicsLayout    (int loc, MuseRecord& prec,
                                 LayoutParameters& lp);
 int   rnsort                   (const void* A, const void* B);
 void  getRhythms               (Array<RationalNumber>& rns, HumdrumFile& infile,
@@ -413,76 +413,76 @@ void  prepareLocalTickChanges  (HumdrumFile& infile, Array<int>& ticks);
 int   LCM                      (Array<int>& rhythms);
 int   GCD                      (int a, int b);
 int   getTPQByRhythmSet        (Array<RationalNumber>& rhys);
-void  adjustClefState          (HumdrumFile& infile, int line, 
+void  adjustClefState          (HumdrumFile& infile, int line,
                                 Array<Coord>& clefstate);
-void  storeClefInformation     (HumdrumFile& infile, int line, 
-                                Array<Coord>& clefstate, 
+void  storeClefInformation     (HumdrumFile& infile, int line,
+                                Array<Coord>& clefstate,
                                 Array<Array<Coord> >& clefs);
-void  insertArpeggio           (MuseData& tempdata, HumdrumFile& infile, 
+void  insertArpeggio           (MuseData& tempdata, HumdrumFile& infile,
                                 int row, int col);
-int   getScoreStaffVerticalPos (int note, int line, int row, 
-                                Array<Array<Coord> >& clefs, 
+int   getScoreStaffVerticalPos (int note, int line, int row,
+                                Array<Array<Coord> >& clefs,
                                 HumdrumFile& infile);
-void  processMeasureLayout     (MuseData& tempdata, HumdrumFile& infile, 
-                                int line, int col, 
+void  processMeasureLayout     (MuseData& tempdata, HumdrumFile& infile,
+                                int line, int col,
                                 LayoutParameters& lp,
                                 LayoutParameters& glp);
-void  storeGlobalLayoutInfo    (HumdrumFile& infile, int line, 
-                                Array<Coord>& glaystate, 
+void  storeGlobalLayoutInfo    (HumdrumFile& infile, int line,
+                                Array<Coord>& glaystate,
                                 Array<Array<Coord> >& glayout);
-void  addGlobalLayoutInfo      (HumdrumFile& infile, int line, 
+void  addGlobalLayoutInfo      (HumdrumFile& infile, int line,
                                 Array<Coord>& glaystate);
 void  handleMeasureLayoutParam (MuseData& tempdata, HumdrumFile& infile,
                                 LayoutParameters& lp, int index);
-void  addHairpinStops          (MuseData& tempdata, HumdrumFile& infile, 
+void  addHairpinStops          (MuseData& tempdata, HumdrumFile& infile,
                                 int row, int col);
-void  addHairpinStarts         (MuseData& tempdata, HumdrumFile& infile, 
+void  addHairpinStarts         (MuseData& tempdata, HumdrumFile& infile,
                                 int row, int col);
 void  addDecrescendoStop       (MuseData& tempdata, LayoutParameters& lp);
 void  addCrescendoStop         (MuseData& tempdata, LayoutParameters& lp);
 void  addCrescendoStart        (MuseData& tempdata, LayoutParameters& lp);
 void  addDecrescendoStart      (MuseData& tempdata, LayoutParameters& lp);
-void  getXxYy                  (Array<int>& vals, Array<int>& states, 
+void  getXxYy                  (Array<int>& vals, Array<int>& states,
                                 Array<Array<char> >& keys,
                                 Array<Array<char> >& values);
-void  addPositionInfo          (MuseData& tempdata, int column, 
+void  addPositionInfo          (MuseData& tempdata, int column,
                                 LayoutParameters lp, const char* code);
-void  addCrescText             (MuseData& tempdata, HumdrumFile& infile, 
-                                int row, int col, int dcol, 
+void  addCrescText             (MuseData& tempdata, HumdrumFile& infile,
+                                int row, int col, int dcol,
                                 LayoutParameters& lp, const char* text);
-void  addPositionParameters    (MuseData& tempdata, int column, 
-                                Array<Array<char> >& keys, 
+void  addPositionParameters    (MuseData& tempdata, int column,
+                                Array<Array<char> >& keys,
                                 Array<Array<char> >& values);
-void  addTextLayout            (MuseData& tempdata, HumdrumFile& infile, 
-                                int row, int col, LayoutParameters& lp, 
+void  addTextLayout            (MuseData& tempdata, HumdrumFile& infile,
+                                int row, int col, LayoutParameters& lp,
                                 const char* code);
-void  addText                  (MuseData& tempdata, Array<Array<char> >& keys, 
+void  addText                  (MuseData& tempdata, Array<Array<char> >& keys,
                                 Array<Array<char> >& values);
-int   addDashing               (MuseData& tempdata, int column, int track, 
+int   addDashing               (MuseData& tempdata, int column, int track,
                                 LayoutParameters& lp);
-void  addUnDash                (MuseData& tempdata, HumdrumFile& infile, 
-                                int row, int col, int dcol, 
+void  addUnDash                (MuseData& tempdata, HumdrumFile& infile,
+                                int row, int col, int dcol,
                                 LayoutParameters& lpd);
-void  setupTextAssignments     (HumdrumFile& infile, int& textQ, 
+void  setupTextAssignments     (HumdrumFile& infile, int& textQ,
                                 Array<Array<int> >& TextAssignment,
                                 Array<Array<int> >& TextElisions,
                                 string& textspines);
-void  track2column             (Array<int>& trackcol, HumdrumFile& infile, 
+void  track2column             (Array<int>& trackcol, HumdrumFile& infile,
                                 int row);
-void  addLyrics                (MuseRecord& arecord, HumdrumFile& infile, 
-                                int row, int col, 
+void  addLyrics                (MuseRecord& arecord, HumdrumFile& infile,
+                                int row, int col,
                                 Array<Array<int> >& TextAssignment,
                                 Array<Array<int> >& TextElisions,
                                 Array<Array<char> >& lastVerse);
 void  convertHumdrumTextToMuseData(Array<char> & text);
 void  convertHtmlTextToMuseData(Array<char> & text);
-void  getWorkAndMovement       (Array<char>& work, Array<char>& movment, 
+void  getWorkAndMovement       (Array<char>& work, Array<char>& movment,
                                 HumdrumFile& infile);
 void  printWithMd5sum          (MuseData& datafile);
 void  appendReferenceRecords   (MuseData& musedata, HumdrumFile& infile);
 RationalNumber getDuration     (const char* input, const char* def);
 RationalNumber getDurationNoDots(const char* input, const char* def);
-void  processLyricsSpines      (Array<Array<int> >& spineinfo, 
+void  processLyricsSpines      (Array<Array<int> >& spineinfo,
                                 HumdrumFile& infile, const char* data);
 void  verifyMuseDataFile       (const char* filename);
 void  verifyMuseDataFile       (istream& input);
@@ -496,25 +496,25 @@ void  updateFileTimeStamps     (const char* filename,  Options& options);
 void  updateFileTimeStamps     (istream& input, Options& options);
 void  doUpdateWork             (MuseDataSet& mds);
 void  updatePart               (MuseData& part);
-void  getCheckSum              (Array<char>& checksum, MuseData& part, 
+void  getCheckSum              (Array<char>& checksum, MuseData& part,
                                 Array<char>& newline);
 void  appendToEndOfPart        (MuseData& md, MuseRecord& arecord);
 void  addHumdrumVeritas        (MuseData& musedata, HumdrumFile& infile);
 void  setGracenoteVisualRhythm (MuseRecord& arecord, const char* token);
 void  convertKernLONtoMusePS   (char* buffer, Array<Array<char> >& keys,
                                 Array<Array<char> >& values, const char* token);
-void  printFooter              (MuseData& musedata, HumdrumFile& infile, 
+void  printFooter              (MuseData& musedata, HumdrumFile& infile,
                                 const char* footertext);
 void  cleanFooterField         (Array<char>& footerline, HumdrumFile& infile);
-void  substituteReferenceRecord(Array<char>& string, const char* refstring, 
+void  substituteReferenceRecord(Array<char>& string, const char* refstring,
                                 const char* extension, HumdrumFile& infile);
-void  getReferenceValue        (Array<char>& value, Array<char>& refkey, 
+void  getReferenceValue        (Array<char>& value, Array<char>& refkey,
                                 HumdrumFile& infile);
 void  hideNotesAfterLong       (HumdrumFile& infile, int row, int col);
-void  analyzeForwardTieConditions     (Array<Array<Array<char> > >& tiestate, 
+void  analyzeForwardTieConditions     (Array<Array<Array<char> > >& tiestate,
                                 HumdrumFile& infile);
 void  flipNameComma            (Array<char>& value);
-void  getRscaleState           (HumdrumFile& infile, 
+void  getRscaleState           (HumdrumFile& infile,
                                 Array<Array<RationalNumber> >& rscale);
 void  filterOptions            (Array<char>& options, const char* filter);
 void  addRepeatLines           (MuseData& tempdata, HumdrumFile& infile,
@@ -522,22 +522,22 @@ void  addRepeatLines           (MuseData& tempdata, HumdrumFile& infile,
 int   isTopStaffOnSystem       (HumdrumFile& infile, int row, int col);
 int   isTopStaffOnSystem       (int track);
 int   isBottomStaffOnSystem    (HumdrumFile& infile, int row, int col);
-void  processGlobalComment     (HumdrumFile& infile, int line, 
+void  processGlobalComment     (HumdrumFile& infile, int line,
                                 MuseData& tempdata, int track);
-void  printRehearsalMark       (MuseData& tempdata, LayoutParameters& lp, 
+void  printRehearsalMark       (MuseData& tempdata, LayoutParameters& lp,
                                 int index);
-int   printUnterminatedTies    (MuseData& tempdata, HumdrumFile& infile, 
+int   printUnterminatedTies    (MuseData& tempdata, HumdrumFile& infile,
                                 int line, int track);
-void  printPrehangTie          (MuseRecord& arecord, const char* buffer, 
-                                HumdrumFile& infile, int row, int col, 
+void  printPrehangTie          (MuseRecord& arecord, const char* buffer,
+                                HumdrumFile& infile, int row, int col,
                                 int voice);
 void  addTextVertcialSpace     (Array<char>& ostring, HumdrumFile& infile);
-int   needsWordExtension       (HumdrumFile& infile, int row, int notecol, 
+int   needsWordExtension       (HumdrumFile& infile, int row, int notecol,
                                 int versecol, Array<char>& verse);
 void  markAllNotesInTiedGroup  (HumdrumFile& infile, char groupchar);
-void  adjustRscales            (HumdrumFile& infile, int line, 
+void  adjustRscales            (HumdrumFile& infile, int line,
                                 Array<RationalNumber>& rscales);
-void  getNoteState             (Array<int>& states, HumdrumFile& infile, 
+void  getNoteState             (Array<int>& states, HumdrumFile& infile,
                                int startline, int endline);
 void  analyzeTacet             (Array<Array<int> >& tacet, HumdrumFile& infile);
 string getInstrumentAbbreviation(HumdrumFile& infile, int track);
@@ -610,7 +610,7 @@ Array<char> NEWLINE;               // used to control the newline style
 Array<Array<int> > TextAssignment;  // used to keep track of lyics by staff
 Array<Array<int> > TextElisions;    // used to keep track of elision display
 
-Array<int> DynamicsAssignment;    
+Array<int> DynamicsAssignment;
 Array<Array<Coord> > ClefState;     // which clef is being used for every note
 Array<int> DashState;               // used for turning off dashed lines
 Array<Array<RationalNumber> > RscaleState;  // used for *rscale processing
@@ -635,7 +635,7 @@ unsigned int kflag = 0;
 #define k_chord    (1 << 10)  // on = mixed rhythm chords
 #define k_hidekey  (1 << 11)  // on = hide key signatures
 #define k_clef     (1 << 12)  // on = clef changes are normal size not cue size
-  
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -661,12 +661,12 @@ int main(int argc, char** argv) {
    DashState.setAll(0);
    getKernTracks(KernTracks, infile);
 
-   setupTextAssignments(infile, textQ, TextAssignment, TextElisions, 
+   setupTextAssignments(infile, textQ, TextAssignment, TextElisions,
       TextSpines);
    setupMusicaFictaVariables(infile);
    getBeamState(BeamState, LayoutInfo, GlobalLayoutInfo, ClefState, infile);
    getTupletState(hasTuplet, TupletState, TupletTopNum, TupletBotNum, infile);
-   getMeasureDuration(infile, MeasureDur); 
+   getMeasureDuration(infile, MeasureDur);
    Array<MuseData*> outfiles;
    outfiles.setSize(0);
    getRscaleState(infile, RscaleState);
@@ -696,10 +696,10 @@ int main(int argc, char** argv) {
       // cout << *(outfiles[i]);
       delete outfiles[i];
       outfiles[i] = NULL;
-      cout << "/eof" << NEWLINE << flush; 
+      cout << "/eof" << NEWLINE << flush;
    }
    // end of all data file marker (two slashes on a line by themselves):
-   cout << "//" << NEWLINE << flush; 
+   cout << "//" << NEWLINE << flush;
    outfiles.setSize(0);
 
    return 0;
@@ -717,7 +717,7 @@ int main(int argc, char** argv) {
 
 void analyzeTacet(Array<Array<int> >& tacet, HumdrumFile& infile) {
    int maxtrack = infile.getMaxTracks();
-   tacet.setSize(infile.getNumLines());   
+   tacet.setSize(infile.getNumLines());
    int i;
    for (i=0; i<tacet.getSize(); i++) {
       tacet[i].setSize(maxtrack+1);
@@ -747,14 +747,14 @@ void analyzeTacet(Array<Array<int> >& tacet, HumdrumFile& infile) {
             }
          }
 			startline = endline;
-      } 
+      }
    }
 	endline = infile.getNumLines();
    getNoteState(tacetState, infile, startline, endline);
    tacetcount++;
 
-   // If there is only one tacet region, then don't apply auto taceting.  
-   // This is typically for an incipit, and muse2ps will otherwise 
+   // If there is only one tacet region, then don't apply auto taceting.
+   // This is typically for an incipit, and muse2ps will otherwise
    // hide the fully tacet part in this case.
    if ((startline != 0) || (tacetcount > 1)) {
       for (ii=startline; ii<endline; ii++) {
@@ -818,7 +818,7 @@ void getNoteState(Array<int>& states, HumdrumFile& infile, int startline,
 //     dots from dotted rhythms (e.g., q. -> q).
 //
 
-void getRscaleState(HumdrumFile& infile, 
+void getRscaleState(HumdrumFile& infile,
     Array<Array<RationalNumber> >& rscale) {
 
    int tracks = infile.getMaxTracks();
@@ -827,7 +827,7 @@ void getRscaleState(HumdrumFile& infile,
    Array<RationalNumber> current;
    current.setSize(tracks+1);
    current.setAll(1);
-   
+
    PerlRegularExpression pre;
    RationalNumber rnum;
    int track;
@@ -835,13 +835,13 @@ void getRscaleState(HumdrumFile& infile,
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].isInterpretation()) {
          for (j=0; j<infile[i].getFieldCount(); j++) {
-            if (pre.search(infile[i][j], "^\\*rscale\\s*:\\s*(\\d+)/(\\d+)", 
+            if (pre.search(infile[i][j], "^\\*rscale\\s*:\\s*(\\d+)/(\\d+)",
                   "")) {
                rnum = atoi(pre.getSubmatch(1));
                rnum /= atoi(pre.getSubmatch(2));
                track = infile[i].getPrimaryTrack(j);
                current[track] = rnum;
-            } else if (pre.search(infile[i][j], 
+            } else if (pre.search(infile[i][j],
                   "^\\*rscale\\s*:\\s*(\\d+)",  "")) {
                rnum = atoi(pre.getSubmatch(1));
                track = infile[i].getPrimaryTrack(j);
@@ -864,8 +864,8 @@ void getRscaleState(HumdrumFile& infile,
 
 //////////////////////////////
 //
-// analyzeForwardTieConditions -- check to see if a tie has a matching 
-//    start/end.  If the tie is not ended at the end of the music add codes 
+// analyzeForwardTieConditions -- check to see if a tie has a matching
+//    start/end.  If the tie is not ended at the end of the music add codes
 //    to the output data to draw a hanging tie.
 //
 // Here is a complicated example with two layers on the staff, with one
@@ -889,7 +889,7 @@ void getRscaleState(HumdrumFile& infile,
 // in column 17.
 //
 
-void analyzeForwardTieConditions(Array<Array<Array<char> > >& tiestate, 
+void analyzeForwardTieConditions(Array<Array<Array<char> > >& tiestate,
       HumdrumFile& infile) {
 
    tiestate.setSize(infile.getNumLines());
@@ -937,7 +937,7 @@ void analyzeForwardTieConditions(Array<Array<Array<char> > >& tiestate,
             b40 = Convert::kernToBase40(buffer);
             if (strchr(buffer, '[') != NULL) {
                currentState[track][b40]++;
-            } 
+            }
             if (strchr(buffer, ']') != NULL) {
                if (currentState[track][b40]) {
                   // this if statement is needed so that this method
@@ -949,7 +949,7 @@ void analyzeForwardTieConditions(Array<Array<Array<char> > >& tiestate,
                   currentState[track][b40+1]--;
                } else if (currentState[track][b40-1]) {
                   currentState[track][b40-1]--;
-               } 
+               }
             }
          }
       }
@@ -964,8 +964,8 @@ void analyzeForwardTieConditions(Array<Array<Array<char> > >& tiestate,
          for (j=0; j<tiestate[i].getSize(); j++) {
             for (k=0; k<tiestate[i][j].getSize(); k++) {
                if (tiestate[i][j][k] != 0) {
-                  cout << j << ":" 
-                       << Convert::base40ToKern(buffer, k) 
+                  cout << j << ":"
+                       << Convert::base40ToKern(buffer, k)
                        << "=" << (int)tiestate[i][j][k]
                        << " ";
                }
@@ -1037,8 +1037,8 @@ void printFooter(MuseData& musedata, HumdrumFile& infile, const char* footertext
    musedata.append(arecord); arecord.clear();
 
    // extra control parameters, should start with @:
-   if (tokens.getSize() >= 7) { 
-      arecord.appendString(tokens[6].getBase()); 
+   if (tokens.getSize() >= 7) {
+      arecord.appendString(tokens[6].getBase());
       musedata.append(arecord); arecord.clear();
    }
 
@@ -1058,11 +1058,11 @@ void cleanFooterField(Array<char>& footerline, HumdrumFile& infile) {
    pre.sar(footerline, "^\\s+", "", "");  // remove leading spaces
    pre.sar(footerline, "\\s+$", "", "");  // remove trailing spaces
    Array<char> buf1;
- 
+
    while (pre.search(footerline, "(@\\{[^}]+\\})(\\{[^}]*\\})?", "")) {
       buf1.setSize(strlen(pre.getSubmatch(1))+1);
       strcpy(buf1.getBase(), pre.getSubmatch(1));
-      substituteReferenceRecord(footerline, buf1.getBase(), 
+      substituteReferenceRecord(footerline, buf1.getBase(),
             pre.getSubmatch(2), infile);
    }
 }
@@ -1074,7 +1074,7 @@ void cleanFooterField(Array<char>& footerline, HumdrumFile& infile) {
 // substituteReferenceRecord --
 //
 
-void substituteReferenceRecord(Array<char>& string, const char* refstring, 
+void substituteReferenceRecord(Array<char>& string, const char* refstring,
       const char* extension, HumdrumFile& infile) {
 
    Array<char> refkey;
@@ -1134,7 +1134,7 @@ void substituteReferenceRecord(Array<char>& string, const char* refstring,
       // get rid of extra text marker as well
       pre.sar(string, extension, "", "");
    } else {
-      // found reference record 
+      // found reference record
       // also insert conditional text
       pre.sar(tref, "$", "\\{([^}]+)\\}", "");
       if (pre.search(string, tref.getBase(), "")) {
@@ -1153,7 +1153,7 @@ void substituteReferenceRecord(Array<char>& string, const char* refstring,
 //      in the name.
 //
 
-void getReferenceValue(Array<char>& value, Array<char>& refkey, 
+void getReferenceValue(Array<char>& value, Array<char>& refkey,
       HumdrumFile& infile) {
    int i;
    char buffer[1024] = {0};
@@ -1165,7 +1165,7 @@ void getReferenceValue(Array<char>& value, Array<char>& refkey,
          continue;
       }
       if (strcmp(infile[i].getBibKey(buffer), refkey.getBase()) != 0) {
-         continue; 
+         continue;
       }
       infile[i].getBibValue(buffer);
       value.setSize(strlen(buffer)+1);
@@ -1179,8 +1179,8 @@ void getReferenceValue(Array<char>& value, Array<char>& refkey,
    }
 
    //  record was not found, search without any @ qualifiers:
-  
-   Array<char> refkey2 = refkey;  
+
+   Array<char> refkey2 = refkey;
    PerlRegularExpression pre;
    pre.sar(refkey2, "@.*", "");
 
@@ -1189,7 +1189,7 @@ void getReferenceValue(Array<char>& value, Array<char>& refkey,
          continue;
       }
       if (!pre.search(infile[i].getBibKey(buffer), refkey2.getBase(), "")) {
-         continue; 
+         continue;
       }
       infile[i].getBibValue(buffer);
       value.setSize(strlen(buffer)+1);
@@ -1228,14 +1228,14 @@ void flipNameComma(Array<char>& value) {
 //////////////////////////////
 //
 // appendReferenceRecords --
-// 
+//
 
 void appendReferenceRecords(MuseData& musedata, HumdrumFile& infile) {
    int i;
    /*  Always print reference records if being printed: if no VTS, then
     *  generate one.
     *
-    
+
    int hasbib = 0;
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].isBibliographic()) {
@@ -1280,7 +1280,7 @@ void appendReferenceRecords(MuseData& musedata, HumdrumFile& infile) {
       }
 
       if (!endfound && startfound) {
-         testabs = infile[i].getAbsBeatR(); 
+         testabs = infile[i].getAbsBeatR();
          if (testabs != lastabs) {
             arecord.clear();
             arecord.append("sr", "@@POSITION:", &testabs);
@@ -1289,11 +1289,11 @@ void appendReferenceRecords(MuseData& musedata, HumdrumFile& infile) {
             lastabs = testabs;
          }
       }
-      
+
       arecord.clear();
       arecord.append("ss", "@", infile[i][0]);
       musedata.append(arecord);
-    
+
    }
 
    addHumdrumVeritas(musedata, infile);
@@ -1315,12 +1315,12 @@ void addHumdrumVeritas(MuseData& musedata, HumdrumFile& infile) {
    int hasVtsData = 0;
    int i;
    for (i=0; i<infile.getNumLines(); i++) {
-      if (!infile[i].isBibliographic()) { 
+      if (!infile[i].isBibliographic()) {
          continue;
       }
       if (strncmp(infile[i][0], "!!!VTS:", strlen("!!!VTS:")) == 0) {
          hasVts = 1;
-      } else if (strncmp(infile[i][0], "!!!VTS-data:", 
+      } else if (strncmp(infile[i][0], "!!!VTS-data:",
             strlen("!!!VTS-data:")) == 0) {
          hasVtsData = 1;
       }
@@ -1377,7 +1377,7 @@ void printWithMd5sum(MuseData& datafile) {
       char newlinestring[1024] = {0};
       char buffer[32] = {0};
       for (i=0; i<NEWLINE.getSize(); i++) {
-         if ((i==NEWLINE.getSize()-1) && (NEWLINE[i] == '\0')) { 
+         if ((i==NEWLINE.getSize()-1) && (NEWLINE[i] == '\0')) {
             break;
          }
          sprintf(buffer, "%02x", (int)NEWLINE[i]);
@@ -1400,15 +1400,15 @@ void printWithMd5sum(MuseData& datafile) {
 
 //////////////////////////////
 //
-// setupTextAssignments --  Currently attach **text spines to the 
+// setupTextAssignments --  Currently attach **text spines to the
 //   first **kern spine found on their left.  The order of the spines
 //   indiate which verse the **text belongs to, left most spine is the
 //   first verse for a **kern spine.
 //
 
-void setupTextAssignments(HumdrumFile& infile, int& textQ, 
-      Array<Array<int> >& TextAssignment, 
-      Array<Array<int> >& TextElisions, 
+void setupTextAssignments(HumdrumFile& infile, int& textQ,
+      Array<Array<int> >& TextAssignment,
+      Array<Array<int> >& TextElisions,
       string& textspines) {
    int i, j, track;
    TextAssignment.setSize(infile.getMaxTracks()+1);
@@ -1443,7 +1443,7 @@ void setupTextAssignments(HumdrumFile& infile, int& textQ,
       for (i=0; i<kerntracks.getSize(); i++) {
          for (j=0; j<lyricspines[kerntracks[i]].getSize(); j++) {
             TextAssignment[kerntracks[i]].append(lyricspines[kerntracks[i]][j]);
-            TextElisions[kerntracks[i]].append(zero); 
+            TextElisions[kerntracks[i]].append(zero);
             foundtext++;
          }
       }
@@ -1473,7 +1473,7 @@ void setupTextAssignments(HumdrumFile& infile, int& textQ,
          break;
       }
    }
-   
+
    if (foundtext && textQ) {
       textQ = 1;
    } else {
@@ -1587,24 +1587,24 @@ void setupMusicaFictaVariables(HumdrumFile& infile) {
    for (i=infile.getNumLines()-1; i>=0; i--) {
       if (!infile[i].isBibliographic()) {
          continue;
-      }       
-      if (pre.search(infile[i][0], 
+      }
+      if (pre.search(infile[i][0],
             "^!!!RDF\\*\\*kern\\s*:\\s*([^\\s=])\\s*=.*musica ficta", "i")) {
          // "musica ficta"
          hasFictaQ = 1;
          FictaChar = pre.getSubmatch(1)[0];
-      } else if (pre.search(infile[i][0], 
+      } else if (pre.search(infile[i][0],
             "^!!!RDF\\*\\*kern\\s*:\\s*([^\\s=])\\s*=.*editorial", "i")) {
          // "editorial accidental"
          hasFictaQ = 1;
          FictaChar = pre.getSubmatch(1)[0];
       }
-      if (pre.search(infile[i][0], 
+      if (pre.search(infile[i][0],
             "^!!!RDF\\*\\*kern\\s*:\\s*([^\\s=])\\s*=.*long", "i")) {
          hasLongQ = 1;
          LongChar = pre.getSubmatch(1)[0];
       }
-      if (pre.search(infile[i][0], 
+      if (pre.search(infile[i][0],
          "^!!!RDF\\*\\*kern\\s*:\\s*([^\\s=])\\s*=.*single.*notehead", "i")) {
          tiedgroupQ = 1;
          TiedGroupChar = pre.getSubmatch(1)[0];
@@ -1655,7 +1655,7 @@ void markAllNotesInTiedGroup(HumdrumFile& infile, char groupchar) {
             lastpitch[track] = base40;
             continue;
          }
-         if ((strchr(infile[i][j], '_') != NULL) || 
+         if ((strchr(infile[i][j], '_') != NULL) ||
              (strchr(infile[i][j], ']') != NULL)) {
             base40 = Convert::kernToBase40(infile[i][j]);
             if (base40 == lastpitch[track]) {
@@ -1730,7 +1730,7 @@ void getPartNames(HumdrumFile& infile, Array<Array<char> >& PartNames) {
 
       }
    }
-   
+
    // if no part name, set to "part name" (for debugging purposes):
    //for (i=1; i<=infile.getMaxTracks(); i++) {
    //   if (strcmp(PartNames[i].getBase(), "") == 0) {
@@ -1746,7 +1746,7 @@ void getPartNames(HumdrumFile& infile, Array<Array<char> >& PartNames) {
 //////////////////////////////
 //
 // filterOptions -- removed specified options from an embedded option string.
-//     can only handle single-character options.  Will need to be adjusted 
+//     can only handle single-character options.  Will need to be adjusted
 //     when/if double-letter parameters are allowed.
 //
 
@@ -1768,7 +1768,7 @@ void filterOptions(Array<char>& options, const char* filter) {
          break;
       }
    }
- 
+
    // splits the options string into separate components.
    for (i=startindex; i<olength; i++) {
       singles.setSize(singles.getSize()+1);
@@ -1793,7 +1793,7 @@ void filterOptions(Array<char>& options, const char* filter) {
          }
       } else if (std::isdigit(options[i+1])) {
          // read one or more integers, separated by commas
-         while ((i < olength) && (std::isdigit(options[i]) 
+         while ((i < olength) && (std::isdigit(options[i])
                || (options[i] == ','))) {
             singles.last().append(options[i++]);
          }
@@ -1815,10 +1815,10 @@ void filterOptions(Array<char>& options, const char* filter) {
    for (i=0; i<startindex; i++) {
       temp.append(options[i]);
    }
-  
+
    int flength = strlen(filter);
    int ignore = 0;
-   
+
    for (i=0; i<singles.getSize(); i++) {
       ignore = 0;
       for (j=0; j<flength; j++) {
@@ -1851,7 +1851,7 @@ void filterOptions(Array<char>& options, const char* filter) {
 //
 // printMuse2PsOptions -- print any lines in the Humdrum file
 // which have the form !!!muse2ps:, !!muse2ps:, !!!muse2psv1:, !!muse2psv1:
-// 
+//
 // Always converts v\d+ to v1. May need to change in future.
 //
 
@@ -1874,15 +1874,15 @@ void printMuse2PsOptions(HumdrumFile& infile) {
       if (!(infile[i].isGlobalComment() || infile[i].isBibliographic())) {
          continue;
       }
-      
+
       tempdata.setSize(strlen(infile[i][0])+1);
       strcpy(tempdata.getBase(), infile[i][0]);
       if (excludeQ && (strstr(infile[i][0], "muse2ps") != NULL)) {
          filterOptions(tempdata, excludeString);
       }
       cleanFooterField(tempdata, infile);
-      if (pre.search(tempdata, 
-            "^!!!?\\s*muse2ps(?:v\\d+)?\\s*:\\s*['\"]*=?(.*)\\s*['\"]*\\s*$", 
+      if (pre.search(tempdata,
+            "^!!!?\\s*muse2ps(?:v\\d+)?\\s*:\\s*['\"]*=?(.*)\\s*['\"]*\\s*$",
             "i")) {
          if (pre2.search(pre.getSubmatch(1), "^=", "")) {
            // a global option
@@ -1911,13 +1911,13 @@ void printMuse2PsOptions(HumdrumFile& infile) {
             // already a title so don't try to add one
             hascomposer = 1;
          }
-      } else if ((titleline < 0) && pre.search(tempdata, 
+      } else if ((titleline < 0) && pre.search(tempdata,
             "^!!!OTL[^:]*:\\s*.+", "")) {
          titleline = i;
-      } else if ((composerline < 0) && pre.search(tempdata, 
+      } else if ((composerline < 0) && pre.search(tempdata,
             "^!!!COM[^:]*:\\s*.+", "")) {
          composerline = i;
-      } else if ((dateline < 0) && pre.search(tempdata, 
+      } else if ((dateline < 0) && pre.search(tempdata,
             "^!!!CDT[^:]*:\\s*.+", "")) {
          dateline = i;
       }
@@ -1931,9 +1931,9 @@ void printMuse2PsOptions(HumdrumFile& infile) {
          Array<char> title;
          title.setSize(strlen(pre.getSubmatch(1))+1);
          strcpy(title.getBase(), pre.getSubmatch());
-         // deal with HTML accented characters converted into MuseData 
+         // deal with HTML accented characters converted into MuseData
          // equivalents here...
-         
+
          // title cannot contain ^ character
          pre2.sar(title, "\\^", "", "g");
          convertHtmlTextToMuseData(title);
@@ -1945,7 +1945,7 @@ void printMuse2PsOptions(HumdrumFile& infile) {
 
    // Print composer if not found in muse2ps options, but found in file.
    if (composerQ && (!hascomposer) && (composerline >= 0)) {
-      if (pre.search(infile[composerline][0], 
+      if (pre.search(infile[composerline][0],
             "^!!!COM[^:]*:\\s*(.*)\\s*$", "")) {
          Array<char> composer;
          composer.setSize(strlen(pre.getSubmatch(1))+1);
@@ -1967,9 +1967,9 @@ void printMuse2PsOptions(HumdrumFile& infile) {
          pre2.sar(composer, "Ludwig van Beethoven", "L. van Beethoven", "");
          convertHtmlTextToMuseData(composer);
 
-         // deal with HTML accented characters converted into MuseData 
+         // deal with HTML accented characters converted into MuseData
          // equivalents here...
-         
+
          // composer cannot contain ^ character
          pre2.sar(composer, "\\^", "", "g");
 
@@ -2049,7 +2049,7 @@ void printMuse2PsOptions(HumdrumFile& infile) {
       }
       cout << "@muse2psv1" << ostring << NEWLINE;
    }
-   
+
    // print global default options
    globaldefaults << ends;
    Array<char> globals(strlen(globaldefaults.str().c_str())+1);
@@ -2094,14 +2094,14 @@ void setColorCharacters(HumdrumFile& infile, Array<char>& colorchar,
          continue;
       }
       // !!!RDF**kern: N= mark color="#ff0000", root
-      if (pre.search(infile[i].getLine(), 
+      if (pre.search(infile[i].getLine(),
             "^!!!RDF\\*\\*kern:\\s*([^\\s])\\s*=\\s*match", "i") ||
-          pre.search(infile[i].getLine(), 
+          pre.search(infile[i].getLine(),
             "^!!!RDF\\*\\*kern:\\s*([^\\s])\\s*=\\s*mark", "i")
          ) {
          value = pre.getSubmatch(1)[0];
          colorchar.append(value);
-         if (pre.search(infile[i].getLine(), 
+         if (pre.search(infile[i].getLine(),
                "color\\s*=\\s*\"?#([a-f0-9]{6})\"?", "i")) {
             value = getColorCategory(pre.getSubmatch(1));
             colorout.append(value);
@@ -2199,7 +2199,7 @@ int isBarlineBeforeData(HumdrumFile& infile, int startindex) {
 
 //////////////////////////////
 //
-// convertData -- Extract all spines of **kern data into separate 
+// convertData -- Extract all spines of **kern data into separate
 //     musedata files which are serially appended to the program output.
 //
 
@@ -2223,11 +2223,11 @@ void convertData(Array<MuseData*>& outfiles, HumdrumFile& infile) {
       }
       outfiles[reversei] = new MuseData;
       tickpos = 0;
-      convertTrackToMuseData(*(outfiles[reversei]), 
-            kerntracks[i], infile, ticksperquarter, tickpos, i+1, 
+      convertTrackToMuseData(*(outfiles[reversei]),
+            kerntracks[i], infile, ticksperquarter, tickpos, i+1,
             kerntracks.getSize(), printfirstmeasureQ);
 
-      // add an "/END" record to indicate the end of the file (there can 
+      // add an "/END" record to indicate the end of the file (there can
       // be free-form comments after this
       if (referenceQ) {
          appendReferenceRecords(*outfiles[reversei], infile);
@@ -2341,7 +2341,7 @@ void prepareLocalTickChanges(HumdrumFile& infile, Array<int>& ticks) {
    int curtpq = mtpq[0];
    int lcm;
    RationalNumber maxdur = mticks[0];  // keep track of the maximum rhy value
-   maxdur /= mtpq[0];                 
+   maxdur /= mtpq[0];
    RationalNumber tmax;
    RationalNumber tdur;                // test new maximum rhy duration
    Array<int> twonum(2);
@@ -2383,7 +2383,7 @@ void prepareLocalTickChanges(HumdrumFile& infile, Array<int>& ticks) {
    }
 
 
-   // travel backwards in newtpq, setting any values that are 0 to the 
+   // travel backwards in newtpq, setting any values that are 0 to the
    // next higher index value which is non-zero.
    for (i=newtpq.getSize()-2; i>=0; i--) {
       if (newtpq[i] == 0) {
@@ -2391,12 +2391,12 @@ void prepareLocalTickChanges(HumdrumFile& infile, Array<int>& ticks) {
       }
    }
 
-   
+
 
    if (debugQ) {
       RationalNumber rn;
       for (i=0; i<newtpq.getSize()-1; i++) {
-         cout << "START:" << measurelines[i] << "\tSTOP:" << measurelines[i+1] 
+         cout << "START:" << measurelines[i] << "\tSTOP:" << measurelines[i+1]
               << "\ttpq = " << mtpq[i]  << "(" << newtpq[i] << ")";
          cout << "\tmaxticks = " << mticks[i];
          rn = mticks[i];
@@ -2442,7 +2442,7 @@ int getTPQByRhythmSet(Array<RationalNumber>& rhys) {
 //
 // getGlobalTicksPerQuarter -- Returns the number of ticks per quarter
 //     which would be the result of all rhythms found in the file.
-//     If the ticks per quarter will generate a note duration longer than 
+//     If the ticks per quarter will generate a note duration longer than
 //     999 ticks, then a local tick system needs to be done.
 //
 
@@ -2472,7 +2472,7 @@ int getGlobalTicksPerQuarter(HumdrumFile& infile) {
    if (debugQ) {
       cout << "Ticks per quarter: " << rn << NEWLINE;
    }
-   
+
    // should be simplified automatically.
    return rn.getNumerator() * rn.getDenominator();
 }
@@ -2485,8 +2485,8 @@ int getGlobalTicksPerQuarter(HumdrumFile& infile) {
 //     a MuseData file.  Successive measures are processed one at a time.
 //
 
-void convertTrackToMuseData(MuseData& musedata, int track, 
-      HumdrumFile& infile, Array<int>& tpq, int& tickpos, int counter, 
+void convertTrackToMuseData(MuseData& musedata, int track,
+      HumdrumFile& infile, Array<int>& tpq, int& tickpos, int counter,
       int total, int printFirstMeasureQ) {
    Array<int> measures;
 
@@ -2503,7 +2503,7 @@ void convertTrackToMuseData(MuseData& musedata, int track,
    insertHeaderRecords(infile, musedata, track, counter, total);
    LastTPQPrinted = tpq[0];
    insertDollarRecord(infile, 0, musedata, track, counter, total, tpq[0]);
-   
+
    if (hasTuplet[track]) {
       // add a style which places no tuplet slur on beamed notes
       MuseRecord arecord;
@@ -2535,10 +2535,10 @@ void convertTrackToMuseData(MuseData& musedata, int track,
    for (i=0; i<measures.getSize()-1; i++) {
       tempdata.clear();
       if (debugQ) {
-         cout << "Extracting data for measure starting at line: " 
+         cout << "Extracting data for measure starting at line: "
               << measures[i] << NEWLINE;
       }
-      getMeasureData(tempdata, track, infile, measures[i], measures[i+1], 
+      getMeasureData(tempdata, track, infile, measures[i], measures[i+1],
             tpq[i], tickpos, printFirstMeasureQ, founddataQ, lastVerse);
       musedata.append(tempdata);
    }
@@ -2597,7 +2597,7 @@ string getInstrumentAbbreviation(HumdrumFile& infile, int track) {
 // D: directive (last field on data line)
 //
 
-void insertDollarRecord(HumdrumFile& infile, int line, MuseData& musedata, 
+void insertDollarRecord(HumdrumFile& infile, int line, MuseData& musedata,
       int track, int counter, int total, int tpq) {
 
    MuseRecord arecord;
@@ -2610,7 +2610,7 @@ void insertDollarRecord(HumdrumFile& infile, int line, MuseData& musedata,
       // place extra space?
       strcat(buffer, " ");
    }
-   
+
    // key signature
    if (appendKeySignature(buffer, infile, line, track)) {
       strcat(buffer, "   ");
@@ -2645,11 +2645,11 @@ void insertDollarRecord(HumdrumFile& infile, int line, MuseData& musedata,
    // occur later can be also printed...
    // if (tpq > 0) {
       addMovementDesignation(buffer, infile, line);
-   // } 
+   // }
 
    // [20111016] If the $ record contains no content, then do not add it
    // into the output data.
-   
+
    arecord.insertString(4, buffer);
    PerlRegularExpression pre;
    if (pre.search(arecord.getLine(), "^.\\s*$")) {
@@ -2722,8 +2722,8 @@ void addMovementDesignation(char* buffer, HumdrumFile& infile, int line) {
 //////////////////////////////
 //
 // appendClef --  Append a clef marker to a Music Attribute
-// record if there is a key signature intepretation somewhere between the 
-// current line and the first data line found after that line -- in the 
+// record if there is a key signature intepretation somewhere between the
+// current line and the first data line found after that line -- in the
 // specified primary track.
 //
 
@@ -2797,7 +2797,7 @@ int appendClef(char* buffer, HumdrumFile& infile, int line, int track) {
       strcat(buffer, "C:31");
    } else {
       strcat(buffer, "C:4"); // use default of treble clef
-      // although auto-detecting the range of the data in the spine 
+      // although auto-detecting the range of the data in the spine
       // might be better (so that bass clef might be selected automatically).
    }
 
@@ -2809,8 +2809,8 @@ int appendClef(char* buffer, HumdrumFile& infile, int line, int track) {
 //////////////////////////////
 //
 // appendTimeSignature --  Append a time signature marker to a Music Attribute
-// record if there is a time signature intepretation somewhere between the 
-// current line and the first data line found after that line -- in the 
+// record if there is a time signature intepretation somewhere between the
+// current line and the first data line found after that line -- in the
 // specified primary track.  If there is a *met() code, then use that instead
 // of the *M attribute.
 //
@@ -2849,7 +2849,7 @@ int appendClef(char* buffer, HumdrumFile& infile, int line, int track) {
 //          circle w/small-o   *met(Oo)      3/1      T:121/0       Y
 //
 
-int appendTimeSignature(char* buffer, HumdrumFile& infile, int line, 
+int appendTimeSignature(char* buffer, HumdrumFile& infile, int line,
       int track, int tpq) {
    int metrow = -1;
    int metcol = -1;
@@ -3032,8 +3032,8 @@ int appendTimeSignature(char* buffer, HumdrumFile& infile, int line,
 //////////////////////////////
 //
 // appendKeySignature --  Append a key signature marker to a Music Attribute
-// record if there is a key signature intepretation somewhere between the 
-// current line and the first data line found after that line -- in the 
+// record if there is a key signature intepretation somewhere between the
+// current line and the first data line found after that line -- in the
 // specified primary track.
 //
 
@@ -3080,44 +3080,44 @@ int appendKeySignature(char* buffer, HumdrumFile& infile, int line, int track) {
 // insertHeaderRecords --
 //
 
-void insertHeaderRecords(HumdrumFile& infile, MuseData& tempdata, 
+void insertHeaderRecords(HumdrumFile& infile, MuseData& tempdata,
      int track, int counter, int total) {
 
    MuseRecord arecord;
 
    // Record 1: 		Copyright notice
    addCopyrightLine(infile, tempdata);
- 
+
    // Record 2: 		Control number
    addControlNumber(infile, tempdata);
 
    // Record 3: 		Timestamp
    addTimeStamp(tempdata);
-   
+
    // Record 4: 		<date> <name of encoder>
    addDateAndEncoder(infile, tempdata);
 
    // Record 5: 		WKn:<work number> MVn:<movement number>
    addWorkNumberInfo(infile, tempdata);
-   
+
    // Record 6: 		<source>
    addSourceRecord(infile, tempdata);
-   
+
    // Record 7: 		<work title>
    addWorkTitle(infile, tempdata);
-   
+
    // Record 8: 		<movement title>
    addMovementTitle(infile, tempdata);
-   
+
    // Record 9: 		<name of part>
    addPartName(infile, track, tempdata);
-   
-   // Record 10:                miscellaneous designations 
+
+   // Record 10:                miscellaneous designations
    // such as          [mode], [movement type] and [voice]
    arecord.clear();
    arecord.insertString(1, "Header Record 10");
    tempdata.append(arecord);
-   
+
    // Record 11: 		group memberships: <name1> <name2> . . .
    arecord.clear();
    arecord.insertString(1, "Group memberships: score");
@@ -3214,7 +3214,7 @@ void addTimeStamp(MuseData& tempdata) {
    if (day < 10) {
       dptr = "0";
    }
-   arecord.append("ssssisis", "TIMESTAMP: ", ptr, "/", dptr, day, 
+   arecord.append("ssssisis", "TIMESTAMP: ", ptr, "/", dptr, day,
          "/", year, " []");
    tempdata.append(arecord);
 }
@@ -3234,7 +3234,7 @@ void addDateAndEncoder(HumdrumFile& infile, MuseData& tempdata) {
    int eevline = -1;
    int i;
    for (i=0; i<infile.getNumLines(); i++) {
-      if (!infile[i].isBibliographic()){ 
+      if (!infile[i].isBibliographic()){
          continue;
       }
       if (strncmp(infile[i][0], "!!!END:", 7) == 0) {  // encoding date
@@ -3260,11 +3260,11 @@ void addDateAndEncoder(HumdrumFile& infile, MuseData& tempdata) {
 
       if (pre.search(infile[endline][0], "(\\d{4})/0*(\\d+)/0*(\\d+)", "")) {
          year  = atoi(pre.getSubmatch(1));
-         month = atoi(pre.getSubmatch(2)); 
+         month = atoi(pre.getSubmatch(2));
          day   = atoi(pre.getSubmatch(3));
       } else if (pre.search(infile[endline][0], "(\\d{4})/0*(\\d+)", "")) {
          year  = atoi(pre.getSubmatch(1));
-         month = atoi(pre.getSubmatch(2)); 
+         month = atoi(pre.getSubmatch(2));
          day   = 0;
       } else if (pre.search(infile[endline][0], "(\\d{4})", "")) {
          year  = atoi(pre.getSubmatch(1));
@@ -3276,11 +3276,11 @@ void addDateAndEncoder(HumdrumFile& infile, MuseData& tempdata) {
 
       if (pre.search(infile[eevline][0], "(\\d{4})/0*(\\d+)/0*(\\d+)", "")) {
          year  = atoi(pre.getSubmatch(1));
-         month = atoi(pre.getSubmatch(2)); 
+         month = atoi(pre.getSubmatch(2));
          day   = atoi(pre.getSubmatch(3));
       } else if (pre.search(infile[eevline][0], "(\\d{4})/0*(\\d+)", "")) {
          year  = atoi(pre.getSubmatch(1));
-         month = atoi(pre.getSubmatch(2)); 
+         month = atoi(pre.getSubmatch(2));
          day   = 0;
       } else if (pre.search(infile[eevline][0], "(\\d{4})", "")) {
          year  = atoi(pre.getSubmatch(1));
@@ -3363,7 +3363,7 @@ void addWorkNumberInfo(HumdrumFile& infile, MuseData& tempdata) {
 // getWorkAndMovement --
 //
 
-void getWorkAndMovement(Array<char>& work, Array<char>& movement, 
+void getWorkAndMovement(Array<char>& work, Array<char>& movement,
       HumdrumFile& infile) {
 
    movement.setSize(2);
@@ -3418,7 +3418,7 @@ void getWorkAndMovement(Array<char>& work, Array<char>& movement,
 
    // if there is a BWV in SCT, then use that as the work # and any
    // slash after the first number after BWV as the movment number.
-   if ((sctline >= 0) && pre.search(infile[sctline][0], 
+   if ((sctline >= 0) && pre.search(infile[sctline][0],
          "^!!!SCT[^:]*:\\s*(.+)\\s*$", "")) {
 
       if (pre2.search(pre.getSubmatch(1), "BWV\\s+(\\d+)/(\\d+)", "i")) {
@@ -3439,7 +3439,7 @@ void getWorkAndMovement(Array<char>& work, Array<char>& movement,
 
    // if there is an opus number, then use that as the work number
    // handle onm line later...
-   if ((opsline >= 0) && pre2.search(infile[opsline][0], 
+   if ((opsline >= 0) && pre2.search(infile[opsline][0],
          "^!!!OPS[^:]*:\\s*(\\d[^\\s]*)", "")) {
       work.setSize(strlen(pre2.getSubmatch(1)) + 1);
       strcpy(work.getBase(), pre2.getSubmatch());
@@ -3452,7 +3452,7 @@ void getWorkAndMovement(Array<char>& work, Array<char>& movement,
 
 //////////////////////////////
 //
-// addSourceRecord -- add fixed header record 6, which is the 
+// addSourceRecord -- add fixed header record 6, which is the
 // original source for this particular digital encoding.
 //
 
@@ -3470,7 +3470,7 @@ void addSourceRecord(HumdrumFile& infile, MuseData& tempdata) {
          smsline = i;
          break;
       }
-      
+
    }
    if (smsline < 0) {
       arecord.insertString(1, "Header Record 6: source");
@@ -3507,7 +3507,7 @@ void addWorkTitle(HumdrumFile& infile, MuseData& tempdata) {
          otlline = i;
          break;
       }
-      
+
    }
    if (otlline < 0) {
       arecord.insertString(1, "Header Record 7: work title");
@@ -3543,7 +3543,7 @@ void addMovementTitle(HumdrumFile& infile, MuseData& tempdata) {
          omdline = i;
          break;
       }
-      
+
    }
    if (omdline < 0) {
       arecord.insertString(1, "Header Record 8: movement title");
@@ -3564,7 +3564,7 @@ void addMovementTitle(HumdrumFile& infile, MuseData& tempdata) {
 // addPartName -- add fixed header record 9 which is the instrumental
 // name of the part.  This name can be set explicitly with *I" tandem
 // interpretations in the data.  Otherwise, the part name will be
-// (eventually) extracted automatically from the *I instrument 
+// (eventually) extracted automatically from the *I instrument
 // code names.
 //
 
@@ -3586,8 +3586,8 @@ void addPartName(HumdrumFile& infile, int track, MuseData& tempdata) {
 //     part (track).
 //
 
-void getMeasureData(MuseData& tempdata, int track, HumdrumFile& infile, 
-      int startline, int stopline, int tpq, int& tickpos, 
+void getMeasureData(MuseData& tempdata, int track, HumdrumFile& infile,
+      int startline, int stopline, int tpq, int& tickpos,
       int& measuresuppress, int& founddataQ, Array<Array<char> >& lastVerse) {
    int maxvoice = getMaxVoices(infile, startline, stopline, track);
    if (debugQ) {
@@ -3607,7 +3607,7 @@ void getMeasureData(MuseData& tempdata, int track, HumdrumFile& infile,
 
    int voice;
    for (voice=0; voice<maxvoice; voice++) {
-      processVoice(tempdata, infile, startline, stopline, track, voice+1, 
+      processVoice(tempdata, infile, startline, stopline, track, voice+1,
             tpq, tickpos, measuresuppress, founddataQ, starttick, stoptick,
             lastVerse);
    }
@@ -3620,8 +3620,8 @@ void getMeasureData(MuseData& tempdata, int track, HumdrumFile& infile,
 // processVoice --
 //
 
-void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline, 
-      int stopline, int track, int voice, int tpq, int& tickpos, 
+void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
+      int stopline, int track, int voice, int tpq, int& tickpos,
       int& measuresuppress, int& founddataQ, int starttick, int stoptick,
 		Array<Array<char> >& lastVerse) {
    int tpqtest = -1;
@@ -3629,7 +3629,7 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
       tpqtest = tpq;
       LastTPQPrinted = tpq;
       // hack for variable tpq:
-      tickpos = -1;    
+      tickpos = -1;
    }
 
    PerlRegularExpression pre;
@@ -3637,7 +3637,7 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
    // int starttick = getTick(tpq, infile, startline);
    // int stoptick  = getTick(tpq, infile, stopline);
    if (debugQ) {
-      cout << "STARTTICK = " << starttick 
+      cout << "STARTTICK = " << starttick
            << "\tSTOPTICK = " << stoptick << NEWLINE;
    }
 
@@ -3656,7 +3656,7 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
    }
 
    if ((!ignoreTickError) && (tickpos != starttick)) {
-      cerr << "Error: tick mismatch: " << tickpos 
+      cerr << "Error: tick mismatch: " << tickpos
            << " " << starttick << NEWLINE;
       cerr << "on line " << startline + 1 << NEWLINE;
       exit(1);
@@ -3684,7 +3684,7 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
          if (debugQ) {
             cout << "J = " << j << endl;
          }
-        
+
          if (infile[i].isGlobalComment()) {
             processGlobalComment(infile, i, tempdata, track);
          }
@@ -3719,7 +3719,7 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
          }
 
          if (founddataQ) {
-            if ((curvoice == 1) && (!dollarprint) && 
+            if ((curvoice == 1) && (!dollarprint) &&
                   infile[i].isInterpretation()) {
                if (pre.search(infile[i][j], "^\\*M\\d+/\\d+")) {
                   dollarprint = 1;
@@ -3759,7 +3759,7 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
          }
          founddataQ = 1;
          dollarprint = 0;
-      
+
          // if tpqtest is not -1, then a dollar record with the updated
          // ticks per quarter must be printed now.
          if (tpqtest > 0) {
@@ -3770,7 +3770,7 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
             tempdata.append(dchange);
             tpqtest = -1;
          }
- 
+
          int currtick  = getTick(tpq, infile, i);
          if (currtick > tickpos) {
             // a voice which does not start at the beginning of the measure.
@@ -3785,7 +3785,7 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
          // time that the next note is expected, and emit a
          // forward marker if needed.
          if (strcmp(infile[i][j], ".") != 0) {
-            tickpos += addNoteToEntry(tempdata, infile, i, j, tpq, 
+            tickpos += addNoteToEntry(tempdata, infile, i, j, tpq,
                              voice, firstitem & startingmeasure & hangtieQ,
                              lastVerse);
             firstitem = 0;
@@ -3805,7 +3805,7 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
       tempdata.append(forward);
       tickpos += stoptick - tickpos;
    } else if ((!ignoreTickError) && (tickpos > stoptick)) {
-      cerr << "Error: duration of music is too large on line " 
+      cerr << "Error: duration of music is too large on line "
            << startline+1 << NEWLINE;
       cerr << "Tickpos = " << tickpos << "\tStoptick = " << stoptick << NEWLINE;
       cerr << "The first number should be smaller or "
@@ -3829,7 +3829,7 @@ void processGlobalComment(HumdrumFile& infile, int line, MuseData& tempdata,
    if (strncmp(infile[line][0], "!!LO:", 5) != 0) {
       return;
    }
-   
+
    LayoutParameters lp;
    Array<Coord> coords(1);
    coords[0].i = line;
@@ -3972,7 +3972,7 @@ int getTick(int tpq, HumdrumFile& infile, int line) {
 //    and the note does not have a duration, then use the default duration
 //    which can be set by the --dd option (the default duration if none
 //    exists is a quarter note).  This is used to display music with no
-//    durations (primarily monophonic, but also polyphonic as long as 
+//    durations (primarily monophonic, but also polyphonic as long as
 //    all parts have the same rhythmn).
 //
 
@@ -3998,7 +3998,7 @@ RationalNumber getDuration(const char* input, const char* def) {
 
 //////////////////////////////
 //
-// getDurationNoDots -- 
+// getDurationNoDots --
 //
 
 RationalNumber getDurationNoDots(const char* input, const char* def) {
@@ -4009,7 +4009,7 @@ RationalNumber getDurationNoDots(const char* input, const char* def) {
    pre.sar(strang, "\\s.*", "", "");
 
 
-   
+
    if (pre.search(strang, "(\\d+)%(\\d+)", "")) {
       // handle a rational value in the rhythm
       RationalNumber rn;
@@ -4039,7 +4039,7 @@ RationalNumber getDurationNoDots(const char* input, const char* def) {
 
 /////////////////////////////
 //
-// addNoteToEntry --  Add a note or a chord to the data. 
+// addNoteToEntry --  Add a note or a chord to the data.
 //
 
 int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
@@ -4128,7 +4128,7 @@ int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
          }
       }
    }
-   
+
    if (voice == 1) {
       addHairpinStarts(tempdata, infile, row, col);
    }
@@ -4221,7 +4221,7 @@ int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
                if (rn * RscaleState[i][j] == 4) {
                   arecord.getColumn(17) = 'w';
                } else if (rn * RscaleState[i][j] == 8) {
-/* 
+/*
 1. to get a centered whole measure rest, either a whole-note or a breve
 rest, depending on the length of the measure. YOU SHOULD LAVE A " "
 (BLANK) IN COLUMN 17, NOT A "B".
@@ -4238,7 +4238,7 @@ IN THE CASE WHERE THE  LINE IS EMPTY.   If you simply want a down-beat
 aligned full measure breve rest without this other complication, use
 "b" instead of "B".
 */
-                  // for rests   b = 
+                  // for rests   b =
                   arecord.getColumn(17) = ' ';
                }
             } else {
@@ -4251,12 +4251,12 @@ aligned full measure breve rest without this other complication, use
             arecord.setPitch("rest");
          }
 
-         // added 20110815 so that column 20 tuplet info is filled in for 
+         // added 20110815 so that column 20 tuplet info is filled in for
          // rests:
          addNoteLevelArtic(arecord, infile, row, col, k);
 
          // added 20110815 so that rests can start/end tuplet brackets
-         addChordLevelArtic(tempdata, arecord, psuggestion, 
+         addChordLevelArtic(tempdata, arecord, psuggestion,
                infile, row, col, voice);
 
          tempdata.append(arecord);
@@ -4283,7 +4283,7 @@ aligned full measure breve rest without this other complication, use
                arecord.setNoteheadLong();
             // }
             // current usage of the longa will not desire an
-            // augmentation dot.  If it is ever needed, then 
+            // augmentation dot.  If it is ever needed, then
             // there should be an option added to suppress
             // the dot in other cases.  Ideally, the addition of
             // an augmentation dot for longs should be an option
@@ -4353,10 +4353,10 @@ aligned full measure breve rest without this other complication, use
                arecord.setDots(1);
                tiedur = 1; tiedur /= 2;
             } else if (tiedur == dotted16th) {
-               arecord.setDots(1);  
+               arecord.setDots(1);
                tiedur = 1; tiedur /= 4;
             } else if (tiedur == dotted32nd) {
-               arecord.setDots(1); 
+               arecord.setDots(1);
                tiedur = 1; tiedur /= 8;
             } else if (tiedur == dotted64th) {
                arecord.setDots(1);
@@ -4374,10 +4374,10 @@ aligned full measure breve rest without this other complication, use
             }
             // might need to deal with tuplets...
             arecord.setNoteheadShape(tiedur);
-             
+
             arecord.setTie(1); // hide tie
             tiemark = 1;
-         } else if ((strchr(infile[row][col], '_') != NULL) || 
+         } else if ((strchr(infile[row][col], '_') != NULL) ||
                     (strchr(infile[row][col], ']') != NULL)) {
             // tie continuation: hide note
             temp.setSize(strlen(infile[row][col]+3));
@@ -4388,10 +4388,10 @@ aligned full measure breve rest without this other complication, use
       }
 
       if (strchr(buffer, '/') != NULL) {   // stem up
-         arecord.setStemUp();    
+         arecord.setStemUp();
       }
       if (strchr(buffer, '\\') != NULL) {   // stem down
-         arecord.setStemDown();    
+         arecord.setStemDown();
       }
 
       if (!tiemark) {
@@ -4414,7 +4414,7 @@ aligned full measure breve rest without this other complication, use
             if ((strstr(buffer, "yy") != NULL) || (strstr(buffer, "_y") != NULL)) {
                arecord.setTie(1);
             } else {
-               if (hidetieQ) { 
+               if (hidetieQ) {
                   arecord.setTie(hidetie);
                } else {
                   arecord.setTie(!tieQ);
@@ -4423,7 +4423,7 @@ aligned full measure breve rest without this other complication, use
          }
          if ((opentie) && (strchr(buffer, ']') != NULL)) {
             // this closing tie has no opening, so show a tie going
-            // off to the left which is not tied to anything. 
+            // off to the left which is not tied to anything.
             printPrehangTie(arecord, buffer, infile, row, col, voice);
          }
       }
@@ -4436,7 +4436,7 @@ aligned full measure breve rest without this other complication, use
 
       if (kk == 0) {
          // handle artculations
-         addChordLevelArtic(tempdata, arecord, psuggestion, 
+         addChordLevelArtic(tempdata, arecord, psuggestion,
                infile, row, col, voice);
       }
 
@@ -4472,7 +4472,7 @@ aligned full measure breve rest without this other complication, use
    if (voice == 1) {
       addHairpinStops(tempdata, infile, row, col);
    }
-   
+
    return tickdur;
 }
 
@@ -4487,15 +4487,15 @@ aligned full measure breve rest without this other complication, use
 //    If single voice on staff, then use stem direction to determine which
 //    of J,K to use.  If there is no stem direction, then determine the clef
 //    and then the staff position of the note (but input into this program
-//    required a stem direction).  
+//    required a stem direction).
 //
-//    If there are two voices, then the first voice will be stem up (use J), 
+//    If there are two voices, then the first voice will be stem up (use J),
 //    and the second will be down (use K)
 //
 //
 //
 
-void printPrehangTie(MuseRecord& arecord, const char* buffer, 
+void printPrehangTie(MuseRecord& arecord, const char* buffer,
       HumdrumFile& infile, int row, int col, int voice) {
 
    if (!tieQ) {
@@ -4562,7 +4562,7 @@ int isTopStaffOnSystem(int track) {
    if (track != KernTracks.last()) {
       return 0;
    }
-   return 1; 
+   return 1;
 }
 
 
@@ -4587,7 +4587,7 @@ int isTopStaffOnSystem(HumdrumFile& infile, int row, int col) {
 //////////////////////////////
 //
 // isBottomStaffOnSystem -- return true if the primary track of the given
-//    cell is the bottom part on the system.  Will not match to secondary 
+//    cell is the bottom part on the system.  Will not match to secondary
 //    tracks other than the first one.
 //
 
@@ -4605,7 +4605,7 @@ int isBottomStaffOnSystem(HumdrumFile& infile, int row, int col) {
    if (strchr(infile[row].getSpineInfo(col), 'b') != NULL) {
       return 0;
    }
-   return 1; 
+   return 1;
 }
 
 
@@ -4625,10 +4625,10 @@ void hideNotesAfterLong(HumdrumFile& infile, int row, int col) {
    int track = infile[row].getPrimaryTrack(col);
    RationalNumber endtime = infile[row].getAbsBeatR();
    endtime += infile.getTiedDurationR(row,col);
- 
+
    int j;
    int i = row+1;
-   char buffer[1024] = {0}; 
+   char buffer[1024] = {0};
    while ((i<infile.getNumLines()) && (endtime >= infile[i].getAbsBeatR())) {
       if (infile[i].isMeasure()) {
          // hide measure
@@ -4643,7 +4643,7 @@ void hideNotesAfterLong(HumdrumFile& infile, int row, int col) {
       }
       if (!infile[i].isData()) {
          i++;
-         continue; 
+         continue;
       }
       for (j=0; j<infile[i].getFieldCount(); j++) {
          if (track != infile[i].getPrimaryTrack(j)) {
@@ -4654,7 +4654,7 @@ void hideNotesAfterLong(HumdrumFile& infile, int row, int col) {
             continue;
          }
 
-         if ((strchr(infile[i][j], ']') != NULL) && 
+         if ((strchr(infile[i][j], ']') != NULL) &&
              (strchr(infile[i][j], '_') != NULL)) {
             // no tie on note for some reason
             continue;
@@ -4683,7 +4683,7 @@ void hideNotesAfterLong(HumdrumFile& infile, int row, int col) {
 // addLyrics --
 //
 
-void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col, 
+void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
       Array<Array<int> >& TextAssignment, Array<Array<int> >& TextElisions,
       Array<Array<char> >& lastVerse) {
    int track = infile[row].getPrimaryTrack(col);
@@ -4722,7 +4722,7 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
          // don't print null records, but keep track of verse
          ptr = "";
       }
- 
+
       // skip verse if blank.  This will need to be fixed later
       // to avoid verse ordering to get mixed up.
       if (lastVerse.getSize() != versecount) {
@@ -4768,20 +4768,20 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
          // if the verse syllable starts with a digit, then it will not be
          // printed by default in MuseData muse2ps program.  Adding
          // the string "\+" without quote in front of the number will
-         // allow the number to be printed.  Likewise, < and . characters 
+         // allow the number to be printed.  Likewise, < and . characters
          // need to be forced to print in a similar manner.
          if (std::isdigit(verses[i].getBase()[0]) && (strcmp(ptr, "") != 0)) {
             strcat(buffer, "\\+");
          }
-         else if ((verses[i].getBase()[0] == '<') && (strcmp(ptr, "") != 0)) { 
-            strcat(buffer, "\\+"); 
+         else if ((verses[i].getBase()[0] == '<') && (strcmp(ptr, "") != 0)) {
+            strcat(buffer, "\\+");
          }
-         else if ((verses[i].getBase()[0] == '.') && (strcmp(ptr, "") != 0)) { 
-            strcat(buffer, "\\+"); 
+         else if ((verses[i].getBase()[0] == '.') && (strcmp(ptr, "") != 0)) {
+            strcat(buffer, "\\+");
          }
 
          extensionneeded = 0;
-         if (extensionQ && needsWordExtension(infile, row, col, textcol, 
+         if (extensionQ && needsWordExtension(infile, row, col, textcol,
                verses[i])) {
             extensionneeded = 1;
 				if (i < lastVerse.getSize()) {
@@ -4822,7 +4822,7 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
 
          pre3.sar(verses[i], "\\\\", "", "g");
          // cannot print pipes (because it is a verse separator).
-         pre3.sar(verses[i], "\\|", "", "g"); 
+         pre3.sar(verses[i], "\\|", "", "g");
          // [change 20111222]
          pre3.sar(verses[i], "^\\s*$", "\\+", "");
          pre3.sar(verses[i], "^\\.$", "\\+", "");
@@ -4835,12 +4835,12 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
             strcat(buffer, "\\+");
          }
          // same for "<"
-         else if ((verses[i].getBase()[0] == '<') && (strcmp(ptr, "") != 0)) { 
-            strcat(buffer, "\\+"); 
+         else if ((verses[i].getBase()[0] == '<') && (strcmp(ptr, "") != 0)) {
+            strcat(buffer, "\\+");
          }
 
          extensionneeded = 0;
-         if (extensionQ && needsWordExtension(infile, row, col, textcol, 
+         if (extensionQ && needsWordExtension(infile, row, col, textcol,
                verses[i])) {
             extensionneeded = 1;
          }
@@ -4907,7 +4907,7 @@ void addLyrics(MuseRecord& arecord, HumdrumFile& infile, int row, int col,
 // needsWordExtension --
 //
 
-int needsWordExtension(HumdrumFile& infile, int row, int notecol, 
+int needsWordExtension(HumdrumFile& infile, int row, int notecol,
          int versecol, Array<char>& verse) {
    PerlRegularExpression pre;
 
@@ -4931,7 +4931,7 @@ int needsWordExtension(HumdrumFile& infile, int row, int notecol,
    if (strcmp(verse.getBase(), "\\+") == 0) {
       // don't print if only a space character.
       return 0;
-   } 
+   }
 
    int i, j;
    int ntrack = infile[row].getPrimaryTrack(notecol);
@@ -4992,7 +4992,7 @@ void convertHumdrumTextToMuseData(Array<char> & text) {
    //    // a blank syllable
    //    return;
    // }
- 
+
    pre.sar(text, " \\*", ".", "g"); // convert period      " *" -> "."
    pre.sar(text, " ,",   ",", "g"); // convert comma       " ," -> ","
    pre.sar(text, " \\?", "?", "g"); // convert question    " ?" -> "?"
@@ -5079,14 +5079,14 @@ void convertHumdrumTextToMuseData(Array<char> & text) {
    // cedilla: 5
 
    // pre.sar(text, "\\s+", "\\0", "g"); // word elision character doesn't work
- 
+
    pre.sar(text, "\\|", "", "g");  // disable dashes for now.
 
 }
 
 void convertHtmlTextToMuseData(Array<char> & text) {
    PerlRegularExpression pre;
-   
+
    pre.sar(text, "&auml;", "\\a3", "g");   // umlaut
    pre.sar(text, "&euml;", "\\e3", "g");   // umlaut
    pre.sar(text, "&iuml;", "\\i3", "g");   // umlaut
@@ -5230,7 +5230,7 @@ void convertHtmlTextToMuseData(Array<char> & text) {
    // 33 = italic 8 point
    // 34 = regular 9 point
    // 37 = regular 10 point
-   // 40 = regular 11 point 
+   // 40 = regular 11 point
    // 43 = regular 12 point
    // 46 = regular 14 point
    // 48 = italic 14 point
@@ -5260,7 +5260,7 @@ void track2column(Array<int>& trackcol, HumdrumFile& infile, int row) {
       track = infile[row].getPrimaryTrack(j);
       if (trackcol[track] < 0) {
          // don't process sub-spines other than the first
-         trackcol[track] = j; 
+         trackcol[track] = j;
        }
    }
 }
@@ -5272,7 +5272,7 @@ void track2column(Array<int>& trackcol, HumdrumFile& infile, int row) {
 // addTextLayout -- add some free-form text to the music
 //
 
-void addTextLayout(MuseData& tempdata, HumdrumFile& infile, int row, int col, 
+void addTextLayout(MuseData& tempdata, HumdrumFile& infile, int row, int col,
       LayoutParameters& lp, const char* code) {
    int i;
    for (i=0; i<lp.getSize(); i++) {
@@ -5295,7 +5295,7 @@ void addTextLayout(MuseData& tempdata, HumdrumFile& infile, int row, int col,
 // t = text
 //
 
-void addText(MuseData& tempdata, Array<Array<char> >& keys, 
+void addText(MuseData& tempdata, Array<Array<char> >& keys,
       Array<Array<char> >& values) {
 
    int i;
@@ -5328,7 +5328,7 @@ void addText(MuseData& tempdata, Array<Array<char> >& keys,
          justification = 'C';
       } else if (strcmp(keys[i].getBase(), "hide") == 0) {
          // don't print text, it is turned off for some reason
-         return;  
+         return;
       } else if (strcmp(keys[i].getBase(), "sz") == 0) {
          if (strcmp(values[i].getBase(), "l") == 0) {
             dsize += 4;
@@ -5397,14 +5397,14 @@ void addText(MuseData& tempdata, Array<Array<char> >& keys,
 //     hairpin, but these are handled in handleLayoutInfoChord.
 //
 
-void addHairpinStarts(MuseData& tempdata, HumdrumFile& infile, 
+void addHairpinStarts(MuseData& tempdata, HumdrumFile& infile,
       int row, int col) {
 
 
    PerlRegularExpression pre;
 
    Array<int>& da = DynamicsAssignment;
-   int j; 
+   int j;
    int track = infile[row].getPrimaryTrack(col);
    int targettrack = da[track];
    if (targettrack <= 0) {
@@ -5474,8 +5474,8 @@ void addHairpinStarts(MuseData& tempdata, HumdrumFile& infile,
    // The "X" character after a crescendo or decrescendo start mark
    // indidates that a text version of the symbol should be printed.
    // (note that the crescento or descrescendo stop mark needs to
-   // be suppresed in these cases, so also add an "X" to the end 
-   // of the cresc/decresc (otherwise muse2ps will currently 
+   // be suppresed in these cases, so also add an "X" to the end
+   // of the cresc/decresc (otherwise muse2ps will currently
    // quit without producing any output).
    if (strcmp(">", pre.getSubmatch(1)) == 0) {
       addDecrescendoStart(tempdata, lpd);
@@ -5495,7 +5495,7 @@ void addHairpinStarts(MuseData& tempdata, HumdrumFile& infile,
 // addUnDash -- turn off a dashing which was previously turned on.
 //
 
-void addUnDash(MuseData& tempdata, HumdrumFile& infile, int row, int col, 
+void addUnDash(MuseData& tempdata, HumdrumFile& infile, int row, int col,
       int dcol, LayoutParameters& lpd) {
    int track = infile[row].getPrimaryTrack(col);
    if (!DashState[track]) {
@@ -5516,15 +5516,15 @@ void addUnDash(MuseData& tempdata, HumdrumFile& infile, int row, int col,
 
 //////////////////////////////
 //
-// addCrescText -- place the word "cresc." in the music (instead of a 
+// addCrescText -- place the word "cresc." in the music (instead of a
 //    crescendo symbol).  If the layout code contains the parameter
 //    "dash", then add a dash, and keep track of it for later turning
 //    off with the paired [X.  The "text" input parameter is the
-//    default text to display, unless there is some alternate text 
+//    default text to display, unless there is some alternate text
 //    in the "t" layout parameters.
 //
 
-void addCrescText(MuseData& tempdata, HumdrumFile& infile, int row, int col, 
+void addCrescText(MuseData& tempdata, HumdrumFile& infile, int row, int col,
       int dcol, LayoutParameters& lp, const char* text) {
 
    int i;
@@ -5548,7 +5548,7 @@ void addCrescText(MuseData& tempdata, HumdrumFile& infile, int row, int col,
    // B = right-justified
    arecord.getColumn(column) = 'D';
    arecord.insertString(25, text);
-   tempdata.append(arecord); 
+   tempdata.append(arecord);
    int dQ = addDashing(tempdata,column+1, infile[row].getPrimaryTrack(col), lp);
 
    int fontnumber = 33;  // 33 = italic
@@ -5569,13 +5569,13 @@ void addCrescText(MuseData& tempdata, HumdrumFile& infile, int row, int col,
 // addDashing --
 //
 
-int addDashing(MuseData& tempdata, int column, int track, 
+int addDashing(MuseData& tempdata, int column, int track,
       LayoutParameters& lp) {
    // check for a "DY" code with a "dash" key
    int dashQ = 0;
    int i, j;
    for (i=0; i<lp.getSize(); i++) {
-      if ((strcmp(lp.getCode(i).getBase(), "DY") != 0) && 
+      if ((strcmp(lp.getCode(i).getBase(), "DY") != 0) &&
           (strcmp(lp.getCode(i).getBase(), "HP") != 0)
             ) {
          continue;
@@ -5603,7 +5603,7 @@ int addDashing(MuseData& tempdata, int column, int track,
       cerr << arecord << NEWLINE;
    }
    if (DashState[track]) {
-      cerr << "Error dashed line in track " << track 
+      cerr << "Error dashed line in track " << track
            << " while another is being started " << NEWLINE;
       exit(1);
    }
@@ -5646,7 +5646,7 @@ void addDecrescendoStart(MuseData& tempdata, LayoutParameters& lp) {
 // addPositionInfo --
 //
 
-void addPositionInfo(MuseData& tempdata, int column, LayoutParameters lp, 
+void addPositionInfo(MuseData& tempdata, int column, LayoutParameters lp,
       const char* code) {
 
    int i;
@@ -5671,7 +5671,7 @@ void addPositionInfo(MuseData& tempdata, int column, LayoutParameters lp,
 // elsewhere if parameter list from layout message has been extracted.
 //
 
-void addPositionParameters(MuseData& tempdata, int column, 
+void addPositionParameters(MuseData& tempdata, int column,
       Array<Array<char> >& keys, Array<Array<char> >& values) {
 
    Array<int> vals;
@@ -5690,17 +5690,17 @@ void addPositionParameters(MuseData& tempdata, int column,
       // no position information so don't do anything
       return;
    }
-  
+
    if (xQ) {
-      sprintf(nbuff, "%d", x); 
-      strcat(buffer, "x"); 
+      sprintf(nbuff, "%d", x);
+      strcat(buffer, "x");
       strcat(buffer, nbuff);
    } else if (XQ) {
       sprintf(nbuff, "%d", X);
       strcat(buffer, "x");     // X does not seem to work, to remap to x
       strcat(buffer, nbuff);
    }
-  
+
    if (yQ) {
       sprintf(nbuff, "%d", y); strcat(buffer, "y"); strcat(buffer, nbuff);
    } else if (YQ) {
@@ -5714,7 +5714,7 @@ void addPositionParameters(MuseData& tempdata, int column,
 
    char buffer2[128] = {0};
    sprintf(buffer2, " C%d:%s", column, buffer);
-   
+
    // if there is already a print suggestion line, then the new
    // print suggestion must occur on the same line (appended to end).
    if ((!tempdata.isEmpty()) && (tempdata.last().getColumn(1) == 'P')) {
@@ -5810,12 +5810,12 @@ void addCrescendoStop(MuseData& tempdata, LayoutParameters& lp) {
 //     hairpin, but these are handled in handleLayoutInfoChord.
 //
 
-void addHairpinStops(MuseData& tempdata, HumdrumFile& infile, int row, 
+void addHairpinStops(MuseData& tempdata, HumdrumFile& infile, int row,
       int col) {
    PerlRegularExpression pre;
 
    Array<int>& da = DynamicsAssignment;
-   int j; 
+   int j;
    int track = infile[row].getPrimaryTrack(col);
    int targettrack = da[track];
    if (targettrack <= 0) {
@@ -5903,9 +5903,9 @@ void addHairpinStops(MuseData& tempdata, HumdrumFile& infile, int row,
 //    note in the chord list being the one on the stem side of the chord.
 //
 
-void getChordMapping(Array<int>& chordmapping, HumdrumFile& infile, int row, 
+void getChordMapping(Array<int>& chordmapping, HumdrumFile& infile, int row,
       int col) {
-  
+
    Array<int> pitches;
    getPitches(pitches, infile, row, col);
 
@@ -5913,9 +5913,9 @@ void getChordMapping(Array<int>& chordmapping, HumdrumFile& infile, int row,
    if (strchr(infile[row][col], '\\') != NULL) {
       stemdir = -1;
    }
-   // do automatic analysis for whole notes here, but this will involve 
+   // do automatic analysis for whole notes here, but this will involve
    // knowing the clef which the notes are placed...
-   
+
    Array<Coord> tempp;
    tempp.setSize(pitches.getSize());
    int i;
@@ -6005,7 +6005,7 @@ void getPitches(Array<int>& pitches, HumdrumFile& infile, int row, int col) {
 //     currently the last item in the tempdata.
 //
 
-void handleLayoutInfoChord(MuseData& indata, HumdrumFile& infile, int row, 
+void handleLayoutInfoChord(MuseData& indata, HumdrumFile& infile, int row,
       int col, LayoutParameters& lp, int voice) {
 
    PerlRegularExpression pre;
@@ -6048,7 +6048,7 @@ void handleLayoutInfoChord(MuseData& indata, HumdrumFile& infile, int row,
          }
 
          else if (strcmp(lp.getCode(i).getBase(), "N") == 0)  {
-            convertKernLONtoMusePS(notepsbuffer, lp.getKeys(i),lp.getValues(i), 
+            convertKernLONtoMusePS(notepsbuffer, lp.getKeys(i),lp.getValues(i),
                   tbuffer);
          }
       }
@@ -6065,7 +6065,7 @@ void handleLayoutInfoChord(MuseData& indata, HumdrumFile& infile, int row,
    if (strlen(notepsbuffer) > 0) {
       prec.append("ss", "  C1:", notepsbuffer);
    }
-    
+
    if ((voice == 1) && dynamicsQ) {
       addDynamics(infile, row, col, indata, prec, DynamicsAssignment, lp);
    }
@@ -6085,8 +6085,8 @@ void handleLayoutInfoChord(MuseData& indata, HumdrumFile& infile, int row,
 //   dynamic on the current line according to the DynamicsAssignment.
 //
 
-void addDynamics(HumdrumFile& infile, int row, int col, MuseData& indata, 
-      MuseRecord& prec, Array<int>& DynamicsAssignment, 
+void addDynamics(HumdrumFile& infile, int row, int col, MuseData& indata,
+      MuseRecord& prec, Array<int>& DynamicsAssignment,
       LayoutParameters& lp) {
 
    PerlRegularExpression pre;
@@ -6113,7 +6113,7 @@ void addDynamics(HumdrumFile& infile, int row, int col, MuseData& indata,
    }
 
    Array<int>& da = DynamicsAssignment;
-   int j; 
+   int j;
    int track = infile[row].getPrimaryTrack(col);
    int targettrack = da[track];
    if (targettrack <= 0) {
@@ -6201,7 +6201,7 @@ void processDynamicsLayout(int loc, MuseRecord& prec, LayoutParameters& lp) {
 
 //////////////////////////////
 //
-// getXxYy -- return the X, x, Y, and y MuseData parameters from 
+// getXxYy -- return the X, x, Y, and y MuseData parameters from
 //      the Humdrum Layut paramters, X, x, Y, y, Z, z
 //
 //      X=1:y=-54:z=56.34
@@ -6226,32 +6226,32 @@ void getXxYy(Array<int>& vals, Array<int>& states, Array<Array<char> >& keys,
    int i;
 
    for (i=0; i<keys.getSize(); i++) {
-      if ((strcmp(keys[i].getBase(), "x") == 0) && 
+      if ((strcmp(keys[i].getBase(), "x") == 0) &&
             (strlen(values[i].getBase()) > 0)) {
          value = strtod(values[i].getBase(), NULL);
-         x = int(value); 
+         x = int(value);
          xQ = 1;
-      } else if ((strcmp(keys[i].getBase(), "y") == 0) && 
+      } else if ((strcmp(keys[i].getBase(), "y") == 0) &&
             (strlen(values[i].getBase()) > 0)) {
          value = strtod(values[i].getBase(), NULL);
-         y = int(value); 
+         y = int(value);
          yQ = 1;
-      } else if ((strcmp(keys[i].getBase(), "z") == 0) && 
+      } else if ((strcmp(keys[i].getBase(), "z") == 0) &&
             (strlen(values[i].getBase()) > 0)) {
          value = strtod(values[i].getBase(), NULL);
-         y = -1 * int(value); 
+         y = -1 * int(value);
          yQ = 1;
-      } else if ((strcmp(keys[i].getBase(), "X") == 0) && 
+      } else if ((strcmp(keys[i].getBase(), "X") == 0) &&
             (strlen(values[i].getBase()) > 0)) {
          value = strtod(values[i].getBase(), NULL);
-         X = int(value); 
+         X = int(value);
          XQ = 1;
-      } else if ((strcmp(keys[i].getBase(), "Y") == 0) && 
+      } else if ((strcmp(keys[i].getBase(), "Y") == 0) &&
             (strlen(values[i].getBase()) > 0)) {
          value = strtod(values[i].getBase(), NULL);
          Y = int(value) + 40;
          YQ = 1;
-      } else if ((strcmp(keys[i].getBase(), "Z") == 0) && 
+      } else if ((strcmp(keys[i].getBase(), "Z") == 0) &&
             (strlen(values[i].getBase()) > 0)) {
          value = strtod(values[i].getBase(), NULL);
          Y = -int(value);
@@ -6362,7 +6362,7 @@ void convertKernLONtoMusePS(char* buffer, Array<Array<char> >& keys,
             sprintf(buffer2, " C26:y%d", value); strcat(buffer, buffer2);
          }
       }
-  
+
    }
 
 }
@@ -6374,7 +6374,7 @@ void convertKernLONtoMusePS(char* buffer, Array<Array<char> >& keys,
 // insertStaccatoSuggestion --
 //
 
-void insertStaccatoSuggestion(MuseData& data, MuseRecord& prec, 
+void insertStaccatoSuggestion(MuseData& data, MuseRecord& prec,
       int direction) {
    int last = data.getLineCount() - 1;
 
@@ -6459,10 +6459,10 @@ char getBase36(int value) {
 //
 // addNoteLevelArtic -- might not make senese always in a chord note,
 // but print anyway...
-// 
+//
 //
 
-void addNoteLevelArtic(MuseRecord&  arecord, HumdrumFile& infile, 
+void addNoteLevelArtic(MuseRecord&  arecord, HumdrumFile& infile,
       int row, int col, int tnum) {
    const char* token = infile[row][col];
 
@@ -6517,9 +6517,9 @@ void addNoteLevelArtic(MuseRecord&  arecord, HumdrumFile& infile,
 
    if (strchr(token, ':') != NULL) {
       // arpeggio
-      // and arpeggio is handled as a chord-level articulation 
-      // (as a dummy grace note), Adding an 'S' to the 
-      // additional notations section of the note.  But this 
+      // and arpeggio is handled as a chord-level articulation
+      // (as a dummy grace note), Adding an 'S' to the
+      // additional notations section of the note.  But this
       // does not actually print an arpeggio in the muse2ps program
       // output, so can't really use.
       // arecord.addAdditionalNotation('S');
@@ -6534,8 +6534,8 @@ void addNoteLevelArtic(MuseRecord&  arecord, HumdrumFile& infile,
 // addChordLevelArtic --
 //
 
-void addChordLevelArtic(MuseData& tempdata, MuseRecord&  arecord, 
-      MuseRecord& printsuggestion, HumdrumFile& infile, 
+void addChordLevelArtic(MuseData& tempdata, MuseRecord&  arecord,
+      MuseRecord& printsuggestion, HumdrumFile& infile,
       int row, int col, int voice) {
    const char* token = infile[row][col];
    printsuggestion.clear();
@@ -6648,8 +6648,8 @@ void addChordLevelArtic(MuseData& tempdata, MuseRecord&  arecord,
    }
 
    if (slurQ) {
-     
-      // have to keep track of slurs when occur between 
+
+      // have to keep track of slurs when occur between
       // two separate levels...
 
       if (strchr(token, ')') != NULL) {
@@ -6690,7 +6690,7 @@ void addChordLevelArtic(MuseData& tempdata, MuseRecord&  arecord,
 //
 // insertArpeggio -- and arpeggio mark is a grace note before the
 //    note(s) to which is applies.  The pitch of the grace note is arbitrary
-//    and is only used to position the arpeggio sign.  If the arpeggio 
+//    and is only used to position the arpeggio sign.  If the arpeggio
 //    is to be placed in normal spacing, place the grace note pitch outside
 //    stem region of the grace note  (place above highest pitch in chord if
 //    the stem is down, or below the lowest pitch if the stem is down). This
@@ -6734,9 +6734,9 @@ void insertArpeggio(MuseData& tempdata, HumdrumFile& infile, int row, int col) {
    int lastvpos;  // vertical postion of note closest  to the stem side
                   // of the chord.
 
-   firstvpos = getScoreStaffVerticalPos(firstpitch, i, j, 
+   firstvpos = getScoreStaffVerticalPos(firstpitch, i, j,
          ClefState, infile);
-   lastvpos = getScoreStaffVerticalPos(lastpitch, i, j, 
+   lastvpos = getScoreStaffVerticalPos(lastpitch, i, j,
          ClefState, infile);
 
    int gracepitch;   // pitch of dummy notes to mark arpeggio
@@ -6747,7 +6747,7 @@ void insertArpeggio(MuseData& tempdata, HumdrumFile& infile, int row, int col) {
 
    if (firstvpos > lastvpos) {
       // chord is stem down
-      
+
       // set grace note pitch above top (first) note in chord.
       gracepitch = firstpitch + 23;
 
@@ -6762,11 +6762,11 @@ void insertArpeggio(MuseData& tempdata, HumdrumFile& infile, int row, int col) {
       } else {                             // note is on a line
          pbot = (12-lastvpos+1) / 2.0;     // 1/2 space lower than note
       }
- 
+
       if      (pbot > 0) { posbot = int(pbot+0.5); }
       else if (pbot < 0) { posbot = int(pbot); }
       else               { posbot = 0; }
-   
+
       if      (ptop > 0) { postop = int(ptop+0.5); }
       else if (ptop < 0) { postop = int(ptop); }
       else               { postop = 0; }
@@ -6775,7 +6775,7 @@ void insertArpeggio(MuseData& tempdata, HumdrumFile& infile, int row, int col) {
       // chord is stem up (or is a single note, or multiple
       // notes at the same diatonic pitch level, which may
       // cause problems).
-      
+
       // set grace note pitch below bottom (first) note in chord.
       gracepitch = firstpitch - 23;
       pbot = int(12-firstvpos+1) / 2.0;
@@ -6796,7 +6796,7 @@ void insertArpeggio(MuseData& tempdata, HumdrumFile& infile, int row, int col) {
       if      (pbot > 0) { posbot = int(pbot+0.5); }
       else if (pbot < 0) { posbot = int(pbot); }
       else               { posbot = 0; }
-   
+
       if      (ptop > 0) { postop = int(ptop+0.5); }
       else if (ptop < 0) { postop = int(ptop); }
       else               { postop = 0; }
@@ -6818,15 +6818,15 @@ void insertArpeggio(MuseData& tempdata, HumdrumFile& infile, int row, int col) {
    // column 17/20 works (maybe also column 18/21).
 
    char buffer[32] = {0};
-   
+
    MuseRecord arecord;
    // column 1: "g" for grace note:
-   arecord.getColumn(1) = 'g'; 
+   arecord.getColumn(1) = 'g';
    // columns 2-5: pitch (used to space arpeggio, not a real note)
    arecord.insertString(2, Convert::base40ToMuse(gracepitch, buffer));
    // columns 6-7 blank
    // columns 8: "X" which means grace-note is a dummy for arpeggios
-   arecord.getColumn(8) = 'X';   
+   arecord.getColumn(8) = 'X';
    // columns 9-12 blank
    // columns 13-15: footnote, level, track number
    // columns 16 blank
@@ -6841,7 +6841,7 @@ void insertArpeggio(MuseData& tempdata, HumdrumFile& infile, int row, int col) {
    // column 22-23 blank
    // column 24 = staff number (space is 1).
    // columns 25 to end: not used
-   
+
    tempdata.append(arecord);
 }
 
@@ -6850,15 +6850,15 @@ void insertArpeggio(MuseData& tempdata, HumdrumFile& infile, int row, int col) {
 //////////////////////////////
 //
 // getScoreStaffVerticalPos --
-// 
+//
 
-int getScoreStaffVerticalPos(int note, int line, int row, 
+int getScoreStaffVerticalPos(int note, int line, int row,
       Array<Array<Coord> >& clefs, HumdrumFile& infile) {
 
    const char* clef = "*clefG2";  // default clef if none specified.
    int i = clefs[line][row].i;
    int j = clefs[line][row].j;
-   
+
    if ((i < 0) || (j < 0)) {
       // use the default clef
    } else {
@@ -6966,8 +6966,8 @@ void setNoteheadShape(MuseRecord& arecord, const char* token) {
 
 //////////////////////////////
 //
-// setGracenoteVisualRhythm -- set the grace note as a quarter, eighth, 
-//     sixteenth, etc. 
+// setGracenoteVisualRhythm -- set the grace note as a quarter, eighth,
+//     sixteenth, etc.
 //
 //     q = slash on note
 //     Q = no slash on note (probably a appogiatura)
@@ -6987,7 +6987,7 @@ void setGracenoteVisualRhythm(MuseRecord& arecord, const char* token) {
    } else {
       rn = Convert::kernToDurationR(strang.getBase());
    }
-   if (rn == 0) { 
+   if (rn == 0) {
      rn = 1;
      rn /= 8;   // 1/2 = eighth note
    }
@@ -7008,7 +7008,7 @@ void setGracenoteVisualRhythm(MuseRecord& arecord, const char* token) {
 // checkColor --
 //
 
-void checkColor(Array<char>& colorchar, MuseRecord& arecord, 
+void checkColor(Array<char>& colorchar, MuseRecord& arecord,
       const char* token, Array<char>& colorout) {
    int i;
    for (i=0; i<colorchar.getSize(); i++) {
@@ -7053,7 +7053,7 @@ int getTickDur(int tpq, HumdrumFile& infile, int row, int col) {
 //    afterwards.
 //
 
-void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line, 
+void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line,
       int col) {
 
    MuseRecord arecord;
@@ -7069,7 +7069,7 @@ void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line,
       strcpy(buffer, "mdotted");
    } else if (pre.search(infile[line][col], "^==", "")) {
       strcpy(buffer, "mheavy2");
-   } 
+   }
 
    if (pre.search(infile[line][col], "^=.*?(\\d+)", "")) {
       measurenum = atoi(pre.getSubmatch(1));
@@ -7077,12 +7077,12 @@ void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line,
         strcat(buffer, " ");
         strcat(buffer, pre.getSubmatch());
       }
-   } 
+   }
 
    int track = infile[line].getPrimaryTrack(col);
    int hasUnterminatedTies = 0;
    if (hangtieQ) {
-      hasUnterminatedTies = printUnterminatedTies(tempdata, infile, line, 
+      hasUnterminatedTies = printUnterminatedTies(tempdata, infile, line,
          track);
       if (hasUnterminatedTies) {
          // add a marker to indicate that there are unterminated ties
@@ -7148,7 +7148,7 @@ void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line,
 // addMeasureFlag("stop-end#1")
 // addMeasureFlag("start-end#2")
 // addMeasureFlag("disc-end#2")
-  
+
    char mbuffer[1024] = {0};
    int ii;
    int ending;
@@ -7227,7 +7227,7 @@ void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line,
 // printUnterminatedTies --
 //
 
-int printUnterminatedTies(MuseData& tempdata, HumdrumFile& infile, 
+int printUnterminatedTies(MuseData& tempdata, HumdrumFile& infile,
       int line, int track) {
 
    if (!tieQ) {
@@ -7253,7 +7253,7 @@ int printUnterminatedTies(MuseData& tempdata, HumdrumFile& infile,
    //*               X       C5
    // this is the last barline in the data, so print any
    // * records marking a tie which is not finished.
-   
+
    int output = 0;
    char buffer[1024] = {0};
    for (i=0; i<TieConditionsForward[line][track].getSize(); i++) {
@@ -7274,11 +7274,11 @@ int printUnterminatedTies(MuseData& tempdata, HumdrumFile& infile,
 
 //////////////////////////////
 //
-// processMeasureLayout -- The last line of tempdata should contain the 
+// processMeasureLayout -- The last line of tempdata should contain the
 //    barline.
 //
 
-void processMeasureLayout(MuseData& tempdata, HumdrumFile& infile, int line, 
+void processMeasureLayout(MuseData& tempdata, HumdrumFile& infile, int line,
       int col, LayoutParameters& lp, LayoutParameters& glp) {
 
    int i;
@@ -7467,7 +7467,7 @@ int getMaxVoices(HumdrumFile& infile, int startline, int stopline, int track) {
       for (j=0; j<infile[i].getFieldCount(); j++) {
          if (infile[i].getPrimaryTrack(j) == track) {
             tcount++;
-         }      
+         }
       }
       if (output < tcount) {
          output = tcount;
@@ -7554,7 +7554,7 @@ void getMeasureInfo(Array<int>& measures, HumdrumFile& infile) {
 //
 // getKernTracks --  Return a list of the **kern primary tracks found
 //     in the Humdrum data.  Currently all tracks are independent parts.
-//     No grand staff parts are considered if the staves are separated 
+//     No grand staff parts are considered if the staves are separated
 //     into two separate spines.
 //
 //
@@ -7564,7 +7564,7 @@ void getKernTracks(Array<int>& tracks, HumdrumFile& infile) {
    tracks.setSize(0);
    int i;
    for (i=1; i<=infile.getMaxTracks(); i++) {
-      if (strcmp(infile.getTrackExInterp(i), "**kern") == 0) {
+      if (infile.getTrackExInterp(i) == "**kern") {
          tracks.append(i);
       }
    }
@@ -7572,7 +7572,7 @@ void getKernTracks(Array<int>& tracks, HumdrumFile& infile) {
    if (debugQ) {
       cout << "\t**kern tracks:\n";
       for (i=0; i<tracks.getSize(); i++) {
-         cout << "\t" << tracks[i] << NEWLINE; 
+         cout << "\t" << tracks[i] << NEWLINE;
       }
    }
 }
@@ -7586,8 +7586,8 @@ void getKernTracks(Array<int>& tracks, HumdrumFile& infile) {
 // manner
 //
 
-void getTupletState(Array<int>& hasTuplet, Array<Array<char> >& TupletState, 
-      Array<Array<int> >& TupletTopNum, 
+void getTupletState(Array<int>& hasTuplet, Array<Array<char> >& TupletState,
+      Array<Array<int> >& TupletTopNum,
       Array<Array<int> >& TupletBotNum, HumdrumFile& infile) {
    char tupletstart = '*';
    // char tupletstop = '!';
@@ -7619,10 +7619,10 @@ void getTupletState(Array<int>& hasTuplet, Array<Array<char> >& TupletState,
    int layer;
    int track;
    RationalNumber rn;
-   
+
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].isMeasure()) {
-         // don't allow tuplets across barlines.  
+         // don't allow tuplets across barlines.
          for (ii=0; ii<tstate.getSize(); ii++) {
             layer = 1;
             lasti = lastrow[ii][layer];
@@ -7699,7 +7699,7 @@ int getTupletTop(HumdrumFile& infile, int row, int col) {
    rn = getDurationNoDots(infile[row][col], defaultDur);
    // basic algorithm when works for most simple tuplets:
    // extract all prime factors which are not 2.
-   
+
 
    if (rn.getNumerator() != 1) {
       if (rn.isEqualTo(32,3)) {
@@ -7801,11 +7801,11 @@ int getTupletTop(HumdrumFile& infile, int row, int col) {
 // differ will cause problems.
 //
 // The GlobalLayout (glayout) is for layout information stored in global
-// comments.  These get stored at the next line in the file which contains 
+// comments.  These get stored at the next line in the file which contains
 // data or measures.
 //
 
-void getBeamState(Array<Array<Array<char> > >& beams, 
+void getBeamState(Array<Array<Array<char> > >& beams,
     Array<Array<Array<Coord> > >& layout,  Array<Array<Coord> >& glayout,
     Array<Array<Coord> >& clefs, HumdrumFile& infile) {
    int i, j, t;
@@ -7871,7 +7871,7 @@ void getBeamState(Array<Array<Array<char> > >& beams,
       layout[i].setSize(infile[i].getFieldCount());
 
       if (infile[i].isMeasure()) {
-         // don't allow beams across barlines.  Mostly for 
+         // don't allow beams across barlines.  Mostly for
          // preventing buggy beams from propagating...
          for (t=1; t<=infile.getMaxTracks(); t++) {
             beamstate[t].setAll(0);
@@ -7927,12 +7927,12 @@ void getBeamState(Array<Array<Array<char> > >& beams,
          if (strcmp(infile[i][j], ".") == 0) {
             // ignore null tokens
             continue;
-         }         
+         }
          if (strchr(infile[i][j], 'r') != NULL) {
             // ignore rests.  Might be useful to not ignore
             // rests if beams extent over rests...
             continue;
-         }         
+         }
          rn = Convert::kernToDurationR(infile[i][j]);
          rn *= rscales[track];
          if (rn >= 1) {
@@ -7962,7 +7962,7 @@ void getBeamState(Array<Array<Array<char> > >& beams,
             contin = gracestate[track][curlayer[track]];
             contin -= stop;
             gbinfo.setAll(0);
-            for (ii=0; ii<contin; ii++) { 
+            for (ii=0; ii<contin; ii++) {
                gbinfo[ii] = '=';
             }
             if (start > 0) {
@@ -8014,7 +8014,7 @@ void getBeamState(Array<Array<Array<char> > >& beams,
             contin = beamstate[track][curlayer[track]];
             contin -= stop;
             gbinfo.setAll(0);
-            for (ii=0; ii<contin; ii++) { 
+            for (ii=0; ii<contin; ii++) {
                gbinfo[ii] = '=';
             }
             if (start > 0) {
@@ -8054,7 +8054,7 @@ void getBeamState(Array<Array<Array<char> > >& beams,
 // adjustRscales -- update rscale settings.
 //
 
-void adjustRscales(HumdrumFile& infile, int line, 
+void adjustRscales(HumdrumFile& infile, int line,
       Array<RationalNumber>& rscales) {
    PerlRegularExpression pre;
 
@@ -8089,7 +8089,7 @@ void adjustRscales(HumdrumFile& infile, int line,
 // addGlobalLayoutInfo --
 //
 
-void addGlobalLayoutInfo(HumdrumFile& infile, int line, 
+void addGlobalLayoutInfo(HumdrumFile& infile, int line,
       Array<Coord>& glaystate) {
    if (strncmp(infile[line][0], "!!LO:", 5) != 0) {
       return;
@@ -8106,7 +8106,7 @@ void addGlobalLayoutInfo(HumdrumFile& infile, int line,
 // storeGlobalLayoutInfo --
 //
 
-void storeGlobalLayoutInfo(HumdrumFile& infile, int line, 
+void storeGlobalLayoutInfo(HumdrumFile& infile, int line,
    Array<Coord>& glaystate, Array<Array<Coord> >& glayout) {
    int i;
    glayout[line].setSize(glaystate.getSize());
@@ -8124,7 +8124,7 @@ void storeGlobalLayoutInfo(HumdrumFile& infile, int line,
 // storeClefInformation --
 //
 
-void storeClefInformation(HumdrumFile& infile, int line, 
+void storeClefInformation(HumdrumFile& infile, int line,
       Array<Coord>& clefstate, Array<Array<Coord> >& clefs) {
 
    int j;
@@ -8144,7 +8144,7 @@ void storeClefInformation(HumdrumFile& infile, int line,
 // adjustClefState --
 //
 
-void adjustClefState(HumdrumFile& infile, int line, 
+void adjustClefState(HumdrumFile& infile, int line,
       Array<Coord>& clefstate) {
    int j;
    int track;
@@ -8162,11 +8162,11 @@ void adjustClefState(HumdrumFile& infile, int line,
 //////////////////////////////
 //
 // addLayoutInfo -- accumulate layot info for a note, rest or measure token
-//    into the current layout buffer.  storeLayoutInfo() function actually 
+//    into the current layout buffer.  storeLayoutInfo() function actually
 //    stores it in the final data structure.
 //
 
-void addLayoutInfo(HumdrumFile& infile, int line, 
+void addLayoutInfo(HumdrumFile& infile, int line,
       Array<Array<Array<Coord> > > &laystate) {
 
    int track;
@@ -8198,8 +8198,8 @@ void addLayoutInfo(HumdrumFile& infile, int line,
 //    gets processed into track 0.
 //
 
-void storeLayoutInformation(HumdrumFile& infile, int line, 
-      Array<Array<Array<Coord> > >& laystate, 
+void storeLayoutInformation(HumdrumFile& infile, int line,
+      Array<Array<Array<Coord> > >& laystate,
       Array<Array<Array<Coord> > >& layout,
       int layoutisinitQ) {
 
@@ -8248,7 +8248,7 @@ void storeLayoutInformation(HumdrumFile& infile, int line,
 // countBeamStuff --
 //
 
-void countBeamStuff(const char* token, int& start, int& stop, int& flagr, 
+void countBeamStuff(const char* token, int& start, int& stop, int& flagr,
       int& flagl) {
    int i = 0;
    start = stop = flagr = flagl = 0;
@@ -8411,7 +8411,7 @@ int verifyPart(MuseData& part) {
    PerlRegularExpression pre2;
    if (!pre2.search(checksum, ":?([^:]+)$", "")) {
       return 0;
-      cerr << "Cannot find checksum on timestamp line, here is the checksum: " 
+      cerr << "Cannot find checksum on timestamp line, here is the checksum: "
            <<  checksum << endl;
    }
    Array<char> oldmd5sum(strlen(pre2.getSubmatch(1))+1);
@@ -8454,7 +8454,7 @@ int verifyPart(MuseData& part) {
    part[timestampindex].clear();
    part[timestampindex].appendString(pre.getSubmatch(1));
    part[timestampindex].appendString(pre.getSubmatch(3));
-    
+
    stringstream tstream;
    for (i=startline; i<=stopline; i++) {
       tstream << part[i] << LNEWLINE;
@@ -8525,11 +8525,11 @@ void removeOldTimeStamps(MuseData& part) {
          tstream << part[i] << "\n";  // newline version does not matter
          continue;
       }
-      if (strncmp(part[i].getLine(), "@SUPERSEDES:", 
+      if (strncmp(part[i].getLine(), "@SUPERSEDES:",
             strlen("@SUPERSEDES:")) == 0) {
          continue;
       }
-      if (strncmp(part[i].getLine(), "@REASON:", 
+      if (strncmp(part[i].getLine(), "@REASON:",
             strlen("@REASON:")) == 0) {
          continue;
       }
@@ -8546,7 +8546,7 @@ void removeOldTimeStamps(MuseData& part) {
 
 //////////////////////////////
 //
-// getTimeStampLine -- return the line in the header which starts with 
+// getTimeStampLine -- return the line in the header which starts with
 //     "TIMESTAMP".  Returns -1 if there is no timestamp.
 //
 
@@ -8645,7 +8645,7 @@ void doUpdateWork(MuseDataSet& mds) {
          arecord.clear();
          // need to keep track of /eof and // lines and insert before them.
          // just appending for now.
-         if ((!options.getBoolean("remove-old")) && 
+         if ((!options.getBoolean("remove-old")) &&
                   (!options.getBoolean("no-append"))) {
 
             arecord.append("ss", "@SUPERSEDES: ", trecord.getLine());
@@ -8675,7 +8675,7 @@ void appendToEndOfPart(MuseData& md, MuseRecord& arecord) {
       if (strncmp(md[i].getLine(), "//", 2) == 0) {
          mend.append(md[i]);
          continue;
-      } 
+      }
       if (strncmp(md[i].getLine(), "/eof", 2) == 0) {
          mend.append(md[i]);
          continue;
@@ -8836,7 +8836,7 @@ void getCheckSum(Array<char>& checksum, MuseData& part, Array<char>& newline) {
 //
 
 void getNewLine(Array<char>& newline, MuseData& part) {
-  
+
    // default style:
    newline.setSize(3);
    newline[0] = (char)0x0d;
@@ -8856,7 +8856,7 @@ void getNewLine(Array<char>& newline, MuseData& part) {
    }
 
    PerlRegularExpression pre;
-   if (!pre.search(part[timestampindex].getLine(), 
+   if (!pre.search(part[timestampindex].getLine(),
          "^.*\\[[^:]*?:([^:]+):.*\\].*$", "")) {
       return;
    }
@@ -8888,7 +8888,7 @@ void getNewLine(Array<char>& newline, MuseData& part) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char** argv) {
@@ -8929,7 +8929,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
    opts.define("ro|removeoold|remove-old=b", "remove old timestamps");
    opts.define("na|noappend|no-append=b", "do not append old timestamp");
    opts.define("ls|lyrics-spines=s:", "spines to display as lyrics");
-   opts.define("dd|dr|default-duration|default-rhythm=s:4", 
+   opts.define("dd|dr|default-duration|default-rhythm=s:4",
        "rhythm to use if note does not have a rhythm and is not a grace note");
    opts.define("mo|muse2ps-options=s:", "muse2ps option string to append to data");
    opts.define("encoder=s:", "Person to place on line fixed header line 4");
@@ -9049,7 +9049,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
 //     as lyrics.
 //
 
-void processLyricsSpines(Array<Array<int> >& spineinfo, 
+void processLyricsSpines(Array<Array<int> >& spineinfo,
       HumdrumFile& infile, const char* data) {
    spineinfo.setSize(infile.getMaxTracks()+1);
    int i, j;
@@ -9096,7 +9096,7 @@ void processLyricsSpines(Array<Array<int> >& spineinfo,
 //
 // GCD -- greatest common divisor
 //
- 
+
 int GCD(int a, int b) {
    if (b == 0) {
       return a;
@@ -9105,11 +9105,11 @@ int GCD(int a, int b) {
    a = b;
    b = z;
    int output = GCD(a, b);
-   if (debugQ) {  
+   if (debugQ) {
       cout << "GCD of " << a << " and " << b << " is " << output << NEWLINE;
    }
    return output;
-}    
+}
 
 
 
@@ -9190,16 +9190,16 @@ void primeFactorization(Array<int>& factors, int input) {
 //////////////////////////////
 //
 // getRhythms -- returns a list of rhythms found in the given range
-// in the score.  The output is sorted by largest duration rhythm first, 
-// towards the shortest.  zero-length notes are ignored (grace notes).  
-// A quarter note is always reported to be present, since this function 
+// in the score.  The output is sorted by largest duration rhythm first,
+// towards the shortest.  zero-length notes are ignored (grace notes).
+// A quarter note is always reported to be present, since this function
 // is intended to be used with the Q: field of $ records in MuseData files.
 //
 // If the stop index is -1, then use the last line of the file ast tne
 // stopping index.
 //
 
-void getRhythms(Array<RationalNumber>& rns, HumdrumFile& infile, 
+void getRhythms(Array<RationalNumber>& rns, HumdrumFile& infile,
        int startindex, int stopindex) {
    if (stopindex < 0) {
       stopindex = infile.getNumLines() - 1;
@@ -9301,7 +9301,7 @@ void usage(const char* command) {
 //////////////////////////////
 //
 // addTextVerticalSpace -- add extra vertical spacing based on the
-//     number of verses underneath each staff.  
+//     number of verses underneath each staff.
 //
 
 void addTextVertcialSpace(Array<char>& ostring, HumdrumFile& infile) {
@@ -9332,7 +9332,7 @@ void addTextVertcialSpace(Array<char>& ostring, HumdrumFile& infile) {
 
    int kindex = -1;
    for (i=0; i<infile.getMaxTracks(); i++) {
-      if (strcmp(infile.getTrackExInterp(i+1), "**kern") == 0) {
+      if (infile.getTrackExInterp(i+1) == "**kern") {
          kindex++;
          continue;
       }
@@ -9343,7 +9343,7 @@ void addTextVertcialSpace(Array<char>& ostring, HumdrumFile& infile) {
          break;
       }
 
-      if (strcmp(infile.getTrackExInterp(i+1), "**text") == 0) {
+      if (infile.getTrackExInterp(i+1) == "**text") {
          lyrics[lyrics.getSize() - kindex - 1]++;
       }
    }
@@ -9357,7 +9357,7 @@ void addTextVertcialSpace(Array<char>& ostring, HumdrumFile& infile) {
          tvalue += lyrics[i] * otherv;
          values[i] = tvalue;
       }
-   }   
+   }
 
    char buff1[1024] = {0};
    char buff2[1024] = {0};
@@ -9366,7 +9366,7 @@ void addTextVertcialSpace(Array<char>& ostring, HumdrumFile& infile) {
       sprintf(buff1, "%d", values[i]);
       if (i > 0) {
          strcat(buff2, ",");
-      } 
+      }
       strcat(buff2, buff1);
    }
 

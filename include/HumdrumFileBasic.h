@@ -108,9 +108,10 @@ class HumdrumFileBasic {
       void                   changeField      (HumdrumFileAddress& add,
                                                const char* newField);
       void                   clear            (void);
+      void                   setFilename      (const string& filename);
       void                   setFilename      (const char* filename);
-      const char*            getFilename      (void);
-      const char*            getFileName      (void) { return getFilename(); }
+      string                 getFilename      (void);
+      string                 getFileName      (void) { return getFilename(); }
       void                   setSegmentLevel  (int level = 0);
       int                    getSegmentLevel  (void);
       ostream&               printSegmentLabel(ostream& out);
@@ -124,10 +125,10 @@ class HumdrumFileBasic {
       HumdrumRecord&         getRecord        (int index);
       int                    getSegmentCount  (void);
       int                    getSpineCount    (int index);
-      int                    getTracksByExInterp(Array<int>& tracks, 
-                                                  const char* exinterp);
       int                    getTracksByExInterp(vector<int>& tracks, 
-                                                  const char* exinterp);
+                                                 const string& exinterp);
+      int                    getTracksByExInterp(Array<int>& tracks, 
+                                                 const string& exinterp);
 		int                    getKernTracks    (Array<int>& tracks);
 		int                    getKernTracks    (vector<int>& tracks);
       int                    getType          (int index);
@@ -151,15 +152,15 @@ class HumdrumFileBasic {
       void                   analyzeSpines    (void);
       void                   analyzeDots      (void);
       int                    getMaxTracks     (void);
-      const char*            getTrackExInterp (int track);
+      string                 getTrackExInterp (int track);
 
    protected:
-      Array<char>   fileName;      // storage for input file's name
-      int           segmentLevel;  // storage for input file's segment level
-      SigCollection<HumdrumRecord*>  records;
-      int           maxtracks;           // max exclusive interpretation count
-      Array<char*>  trackexinterp;
-      static char   empty[1];
+      string         fileName;      // storage for input file's name
+      int            segmentLevel;  // storage for input file's segment level
+      SigCollection  <HumdrumRecord*>  records;
+      int            maxtracks;           // max exclusive interpretation count
+      vector<string> trackexinterp;
+      static char    empty[1];
 
    private:
       static int intcompare(const void* a, const void* b);
@@ -167,11 +168,11 @@ class HumdrumFileBasic {
       // spine analysis functions:
       void       privateSpineAnalysis(void);
       int        predictNewSpineCount(HumdrumRecord& aRecord);
-      void       makeNewSpineInfo(SigCollection<char*>&spineinfo, 
+      void       makeNewSpineInfo(vector<string>& spineinfo, 
                     HumdrumRecord& aRecord, int newsize, int& spineid,
-                    SigCollection<int>& ex);
-      void       simplifySpineString(char* spinestring);
-      void       simplifySpineInfo(SigCollection<char*>& info, int index);
+                    vector<int>& ex);
+      void       simplifySpineString(string& spinestring);
+      void       simplifySpineInfo(vector<string>& info, int index);
 
       // determining the meaning of dots (null records)
       void       privateDotAnalysis(void);

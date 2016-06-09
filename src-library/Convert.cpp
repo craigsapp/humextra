@@ -28,34 +28,21 @@
 //                type of data into another.
 //                
 
-#include <math.h>
-#include <cctype>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "Convert.h"
 #include "HumdrumEnumerations.h"
 #include "PerlRegularExpression.h"
 
-#ifndef OLDCPP
-   #include <map>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <map.h>
-   #ifdef VISUAL
-      #include <strstrea.h>     /* for Windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-   
-#endif
-   
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <map>
+#include <sstream>
+#include <vector>
+#include <cctype>
+
+using namespace std;
 
 
 EnumerationEI         Convert::exint;
@@ -1088,6 +1075,15 @@ int Convert::chordQualityToType(const char* aQuality) {
 // Convert::noteSetToChordQuality --
 //
 
+void Convert::noteSetToChordQuality(ChordQuality& cq, const vector<int>& aSet) {
+   SigCollection<int> tempdata(aSet.size());
+   for (int i=0; i<tempdata.getSize(); i++) {
+      tempdata[i] = aSet[i];
+   }
+   Convert::noteSetToChordQuality(cq, tempdata);
+}
+
+
 void Convert::noteSetToChordQuality(ChordQuality& cq, 
       const SigCollection<int>& aSet) {
 
@@ -1919,9 +1915,9 @@ char* Convert::base40ToKernTranspose(char* output, int transpose,
 //      diaton += 7 * (abs(transpose) % 40);
    }
     
-   SSTREAM tempoutput;
+   stringstream tempoutput;
    tempoutput << "d" << diaton << "c" << chrom << ends;
-   strcpy(output, tempoutput.CSTRING);
+   strcpy(output, tempoutput.str().c_str());
     
    return output; 
 }

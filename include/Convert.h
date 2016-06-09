@@ -29,6 +29,7 @@
 #include "ChordQuality.h"
 #include "SigCollection.h"
 #include "RationalNumber.h"
+#include <vector>
 
 
 class Convert {
@@ -84,6 +85,8 @@ class Convert {
       static int       chordQualityToType        (const char* aQuality);
       static void      noteSetToChordQuality     (ChordQuality& cq, 
                                                   const SigCollection<int>& aSet);
+      static void      noteSetToChordQuality     (ChordQuality& cq, 
+                                                  const vector<int>& aSet);
 
    // conversions dealing with base 40 system of notation
 
