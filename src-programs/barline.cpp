@@ -206,7 +206,7 @@ void cutNotesAcrossBarline(HumdrumFile& infile, int barline, int trackline,
 //   int track; 
    int j;
    for (j=0; j<infile[dataline].getFieldCount(); j++) {
-      if (strcmp(infile.getTrackExInterp(tracknum[j]), "**kern") != 0) {
+      if (strcmp(infile.getTrackExInterp(tracknum[j]).c_str(), "**kern") != 0) {
          continue;
       }
       if (strcmp(infile[dataline][j], ".") != 0) {

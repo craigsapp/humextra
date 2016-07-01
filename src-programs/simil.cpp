@@ -221,7 +221,7 @@ int chooseSpine(const char* interp, HumdrumFile& infile) {
    int maxtracks = infile.getMaxTracks();
    int i;
    for (i=1; i<=maxtracks; i++) {
-      if (strcmp(interp, infile.getTrackExInterp(i)) == 0) {
+      if (infile.getTrackExInterp(i) == interp) {
          return i;
       }
    }

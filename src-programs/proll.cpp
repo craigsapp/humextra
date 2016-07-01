@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
       infile.read(cin);
    }
 
-   if (strcmp(infile.getFilename(), "") == 0) {
+   if (infile.getFilename().size() == 0) {
       infile.setFilename(optionfilename);
    }
 

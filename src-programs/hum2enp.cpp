@@ -1628,7 +1628,7 @@ void getKernTracks(Array<int>& tracks, HumdrumFile& infile) {
    tracks.setSize(0);
    int i;
    for (i=1; i<=infile.getMaxTracks(); i++) {
-      if (strcmp(infile.getTrackExInterp(i), "**kern") == 0) {
+      if (infile.getTrackExInterp(i) == "**kern") {
          tracks.append(i);
       }
    }

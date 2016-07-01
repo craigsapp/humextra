@@ -154,7 +154,7 @@ SigString& NoteNode::getId(void) {
 void      checkOptions         (Options& opts, int argc, char* argv[]);
 void      example              (void);
 void      usage                (const char* command);
-int       processFile          (HumdrumFile& infile, const char* filename,
+int       processFile          (HumdrumFile& infile, const string& filename,
                                 Options& opts);
 void      getKernTracks        (Array<int>& ktracks, HumdrumFile& infile);
 int       validateInterval     (Array<Array<NoteNode> >& notes, 
@@ -215,12 +215,12 @@ int       printCombinationsSuspensions(Array<Array<NoteNode> >& notes,
                                 HumdrumFile& infile, Array<int>& ktracks, 
                                 Array<int>& reverselookup, int n,
                                 Array<Array<SigString> >& retrospective);
-int       printCombinationModule(ostream& out, const char* filename, 
+int       printCombinationModule(ostream& out, const string& filename, 
                                 Array<Array<NoteNode> >& notes, 
                                 int n, int startline, int part1, int part2,
                                 Array<Array<SigString> >& retrospective,
                                 char& notemarker, int markstate = 0);
-int       printCombinationModulePrepare(ostream& out, const char* filename,
+int       printCombinationModulePrepare(ostream& out, const string& filename,
                                 Array<Array<NoteNode> >& notes, int n, 
                                 int startline, int part1, int part2,
                                 Array<Array<SigString> >& retrospective,
@@ -326,7 +326,7 @@ int main(int argc, char** argv) {
 // processFile -- Do requested analysis on a given file.
 //
 
-int processFile(HumdrumFile& infile, const char* filename, Options& options) {
+int processFile(HumdrumFile& infile, const string& filename, Options& options) {
 
    Array<Array<NoteNode> > notes;
    Array<Array<char> >     names;
@@ -659,7 +659,7 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
       Array<Array<SigString> >& retrospective) {
 
    int fileline = line;
-   const char* filename = infile.getFilename();
+   string filename = infile.getFilename();
 
    while ((currentindex < notes[0].getSize()) 
          && (fileline > notes[0][currentindex].line)) {
@@ -756,7 +756,7 @@ int printModuleCombinations(HumdrumFile& infile, int line, Array<int>& ktracks,
 // printCombinationModulePrepare --
 //
 
-int printCombinationModulePrepare(ostream& out, const char* filename,
+int printCombinationModulePrepare(ostream& out, const string& filename,
        Array<Array<NoteNode> >& notes, int n, int startline, int part1, 
        int part2, Array<Array<SigString> >& retrospective, 
 		HumdrumFile& infile) {
@@ -1128,7 +1128,7 @@ int getOctaveAdjustForCombinationModule(Array<Array<NoteNode> >& notes, int n,
 //      (--attacks will gnereate a variable length module chain).
 //
 
-int printCombinationModule(ostream& out, const char* filename, 
+int printCombinationModule(ostream& out, const string& filename, 
       Array<Array<NoteNode> >& notes, int n, int startline, int part1, 
       int part2, Array<Array<SigString> >& retrospective, char& notemarker, 
       int markstate) {

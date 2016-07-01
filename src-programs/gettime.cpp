@@ -32,7 +32,7 @@ void   usage                    (const char* command);
 void   interpolateGeometric     (HumdrumFile& infile, Array<double>& tempo, 
                                  int startindex, int stopindex);
 int    getNextTempoIndex        (HumdrumFile& infile, int startindex);
-void   printtime                (const char* filename, double totaldur);
+void   printtime                (const string& filename, double totaldur);
 void   doLinearInterpolation    (HumdrumFile& infile, int setcount);
 void   interpolateTimings       (Array<double>& timings, HumdrumFile& infile,
                                  int startindex, int endindex);
@@ -277,7 +277,7 @@ void interpolateTimings(Array<double>& timings, HumdrumFile& infile,
 // printtime --
 //
 
-void printtime(const char* filename, double totaldur) {
+void printtime(const string& filename, double totaldur) {
    if (filename[0] != '\0') {
       cout << filename << ":\t";
    } else {

@@ -32,7 +32,7 @@ int     getHumdrumSegmentCount (HumdrumStream& streamer);
 void    extractSegment         (HumdrumFile& infile, HumdrumStream& streamer, 
                                 int extractNum);
 void    saveToDisk             (HumdrumFile& infile, int count);
-int     fileExists             (Array<char>& filename);
+int     fileExists             (const string& filename);
 
 // global variables
 Options      options;            // database for command-line arguments
@@ -91,12 +91,12 @@ int main(int argc, char* argv[]) {
 //
 
 void saveToDisk(HumdrumFile& infile, int count) {
-   Array<char> writename;
+   string writename;
    writename = infile.getFilename();
    PerlRegularExpression pre;
    pre.sar(writename, ".*/", "");   // remove old directory path (or URI)
 
-   if (strlen(writename.getBase()) == 0) {
+   if (writename.size() == 0) {
       // There is no file, so create a synthetic one: count.humsplit
       char filename[1024] = {0};
       char format[32] = {0};
@@ -128,7 +128,7 @@ void saveToDisk(HumdrumFile& infile, int count) {
    }
 
    ofstream output;
-   output.open(writename.getBase());
+   output.open(writename.c_str());
    if (!output.is_open()) {
       cerr << "Warning: " << writename 
            << " could not be written.  Skipping..." << endl;
@@ -156,9 +156,9 @@ void saveToDisk(HumdrumFile& infile, int count) {
 // fileExists -- see if the file exists.
 //
 
-int fileExists(Array<char>& filename) {
+int fileExists(const string& filename) {
    struct stat buf;
-   return stat(filename.getBase(), &buf) == -1 ? 0 : 1;
+   return stat(filename.c_str(), &buf) == -1 ? 0 : 1;
 }
 
 

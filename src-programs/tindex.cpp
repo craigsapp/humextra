@@ -196,7 +196,7 @@ class ISTN {
 void      checkOptions           (Options& opts, int argc, char** argv);
 void      example                (void);
 void      usage                  (const char* command);
-void      createIndex            (HumdrumFile& infile, const char* filename);
+void      createIndex            (HumdrumFile& infile, const string& xfilename);
 void      createIndexEnding      (HumdrumFile& infile, int track, int layer);
 void      extractPitchSequence   (Array<int>& pitches, HumdrumFile& infile,
                                   int track, int layer);
@@ -235,7 +235,7 @@ int       is_file                (const char* path);
 void      processArgument        (const char* path);
 void      fillIstnDatabase       (Array<ISTN>& istndatabase, 
                                   const char* istnfile);
-const char* getIstn              (const char* filename);
+string    getIstn                (const string& filename);
 int       bibsort                (const void* a, const void* b);
 void      processBibRecords      (ostream& out, HumdrumFile &infile,
                                   const char* bibfilter);
@@ -243,7 +243,7 @@ void      printInstrument        (HumdrumFile& infile, int track);
 char      identifyLongMarker     (HumdrumFile& infile);
 void      printSpineNoteInfo(HumdrumFile& infile, int track, int subtrack);
 char*     getOriginalFileName    (char* buffer, HumdrumFile& infile, 
-                                  const char* filename);
+                                  const string& filename);
 
 
 // User interface variables:
@@ -268,7 +268,7 @@ int         limit    = 20;     // used with -l option
 int         istnQ    = 0;      // used with --istn option
 int         bibQ     = 0;      // used with -b option
 int         fileQ    = 0;      // used with --file option
-const char* Filename = "";     // used with --file option
+string      Filename = "";     // used with --file option
 char        FileBuffer[1024] = {0}; // used with !!original-filename:
 int         instrumentQ = 0;   // used with -i option
 int         dirprefixQ = 0;    // used with -d option
@@ -375,7 +375,7 @@ void processArgument(const char* path) {
    struct dirent* entry;
    int namelen = 0;
    int valid = 0;
-   const char* filename;
+   string filename;
 
    if (is_file(path)) {
       namelen = strlen(path);
@@ -400,7 +400,7 @@ void processArgument(const char* path) {
       int i;
       for (i=0; i<infiles.getCount(); i++) {
          filename = infiles[i].getFilename();
-         if (strlen(filename) == 0) {
+         if (filename.empty()) {
             filename = path;
          }
          createIndex(infiles[i], filename);
@@ -464,17 +464,17 @@ int is_directory(const char* path) {
 // getIstn --
 //
 
-const char* getIstn(const char* filename) {
+string getIstn(const string& filename) {
    int i;
-   const char* output = NULL;
+   string output;
    for (i=0; i<istndatabase.getSize(); i++) {
-      if (strcmp(istndatabase[i].filename, filename) == 0) {
+      if (filename == istndatabase[i].filename) {
          output = istndatabase[i].istn;
          break;
       }
    }
 
-   if (output == NULL) {
+   if (output.empty()) {
       output = filename;
    }
 
@@ -489,9 +489,10 @@ const char* getIstn(const char* filename) {
 // is: [Zz] { # : % } j J M
 //
 
-void createIndex(HumdrumFile& infile, const char* filename) {
+void createIndex(HumdrumFile& infile, const string& xfilename) {
    int i;
    int maxtracks = infile.getMaxTracks();
+	string filename = xfilename;
 
    if (fileQ) {
       // used to spoof filename for standard input
@@ -501,28 +502,24 @@ void createIndex(HumdrumFile& infile, const char* filename) {
    }
 
    PerlRegularExpression pre;
-   Array<char> printname;
+   string printname;
    if (dirprefixQ) {
       // remove the directory given with the filename
       pre.search(filename, "([^\\/]*)$", "");
-      printname.setSize(strlen(dirprefix.getBase()) + 
-            strlen(pre.getSubmatch(1)) + 1);
-      strcpy(printname.getBase(), dirprefix.getBase());
-      strcat(printname.getBase(), pre.getSubmatch());
+		printname = dirprefix.getBase();
+		printname += pre.getSubmatch();
    } else if (!dirQ) {
       pre.search(filename, "([^\\/]*)$", "");
-      printname.setSize(strlen(pre.getSubmatch(1)) + 1);
-      strcpy(printname.getBase(), pre.getSubmatch());
+		printname = pre.getSubmatch();
    } else {
-      printname.setSize(strlen(filename) + 1);
-      strcpy(printname.getBase(), filename);
+		printname = filename;
    }
 
    pre.sar(printname, ":", "&colon;", "g");
 
    if (polyQ) {
       for (i=1; i<=maxtracks; i++) {
-         if (strcmp("**kern", infile.getTrackExInterp(i)) != 0) {
+         if (infile.getTrackExInterp(i) != "**kern") {
             continue;
          }
          if (istnQ) {
@@ -537,14 +534,14 @@ void createIndex(HumdrumFile& infile, const char* filename) {
          // cout << ":" << i;
          cout << ":";
          printSpineNoteInfo(infile, i, 1);
-         if (strcmp("**kern", infile.getTrackExInterp(i)) == 0) {
+         if (infile.getTrackExInterp(i) == "**kern") {
             createIndexEnding(infile, i, 1);
             cout << "\n";
          }
       }
    } else if (poly2Q) {
       for (i=1; i<=maxtracks; i++) {
-         if (strcmp("**kern", infile.getTrackExInterp(i)) != 0) {
+         if (infile.getTrackExInterp(i) != "**kern") {
             continue;
          }
          if (istnQ) {
@@ -593,7 +590,7 @@ void createIndex(HumdrumFile& infile, const char* filename) {
          cout << printname;
       }
       for (i=1; i<=maxtracks; i++) {
-         if (strcmp("**kern", infile.getTrackExInterp(i)) == 0) {
+         if (infile.getTrackExInterp(i) == "**kern") {
             createIndexEnding(infile, i, 1);
             cout << "\n";
             break;
@@ -613,7 +610,7 @@ void createIndex(HumdrumFile& infile, const char* filename) {
 //
 
 char* getOriginalFileName(char* buffer, HumdrumFile& infile, 
-      const char* filename) {
+      const string& filename) {
    int i;
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isGlobalComment()) {
@@ -626,7 +623,7 @@ char* getOriginalFileName(char* buffer, HumdrumFile& infile,
          return buffer;
       }
    }
-   strcpy(buffer, filename);
+   strcpy(buffer, filename.c_str());
    return buffer;
 }
 

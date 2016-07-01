@@ -39,8 +39,8 @@ void      checkOptions        (Options& opts, int argc, char** argv);
 void      example             (void);
 void      usage               (const char* command);
 void      doSearch            (const char* searchstring, HumdrumFile& infile, 
-                               const char* filename);
-void      printPreInfo        (const char* filename, HumdrumFile& infile, 
+                               const string& filename);
+void      printPreInfo        (const string& filename, HumdrumFile& infile, 
                                double measure, int line, int spine = -1);
 char*     searchAndReplace    (char* buffer, const char* searchstring,
                                const char* replacestring, 
@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
 //
 
 void doSearch(const char* searchstring, HumdrumFile& infile, 
-      const char* filename) {
+      const string& filename) {
    regex_t re;
    int flags = 0;
    double measure = 1;
@@ -408,8 +408,8 @@ int singleTokenSearch(int& column, HumdrumFile& infile, int line, regex_t& re,
          continue;
       }
 
-      if ((strchr(infile[line].getSpineInfo(j), 'b') != NULL) || 
-          (strstr(infile[line].getSpineInfo(j), "((") != NULL)) {
+      if ((strchr(infile[line].getSpineInfo(j).c_str(), 'b') != NULL) || 
+          (strstr(infile[line].getSpineInfo(j).c_str(), "((") != NULL)) {
          if (primaryQ) {
             continue;
          }
@@ -521,7 +521,7 @@ char* searchAndReplace(char* buffer, const char* searchstring,
 //    default value: spine = -1
 //
 
-void printPreInfo(const char* filename, HumdrumFile& infile, double measure, 
+void printPreInfo(const string& filename, HumdrumFile& infile, double measure, 
       int line, int spine) {
    if (fileQ) {
       cout << filename << separator;

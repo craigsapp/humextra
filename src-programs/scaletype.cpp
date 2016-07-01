@@ -21,7 +21,7 @@ void   usage                    (const char* command);
 void   analyzeFile              (HumdrumFile& infile, Array<int>& pc12,
                                  Array<int>& pc40);
 void   printAnalysis            (HumdrumFile& infile, Array<int>& pc12, 
-                                 Array<int>& pc40, const char* filename);
+                                 Array<int>& pc40, const string& filename);
 int    countPitchClasses        (Array<int>& pc12);
 void   printPitches             (Array<int>& pc40);
 
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
    // process the command-line options
    checkOptions(options, argc, argv);
 
-   const char* filename = "";
+   string filename = "";
    int i;
 
    Array<int> pc12;  // twelve-tone pitch-class note histogram
@@ -88,13 +88,13 @@ int main(int argc, char* argv[]) {
 //
 
 void printAnalysis(HumdrumFile& infile, Array<int>& pc12, 
-      Array<int>& pc40, const char* filename) {
+      Array<int>& pc40, const string& filename) {
 
    int setcount = countPitchClasses(pc12);
 
    if (filename[0] != '\0') {
-      if (shortQ && (strrchr(filename, '/') != NULL)) { 
-         cout << strrchr(filename, '/')+1 << ":\t";
+      if (shortQ && (strrchr(filename.c_str(), '/') != NULL)) { 
+         cout << strrchr(filename.c_str(), '/')+1 << ":\t";
       } else {
          cout << filename << ":\t";
       }

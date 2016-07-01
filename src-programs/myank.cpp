@@ -1194,8 +1194,7 @@ void reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
    if (infile[index1].getFieldCount() == infile[index2].getFieldCount()) {
       int same = 1;
       for (i=0; i<infile[index1].getFieldCount(); i++) {
-         if (strcmp(infile[index1].getSpineInfo(i), 
-               infile[index2].getSpineInfo(i)) != 0) {
+         if (infile[index1].getSpineInfo(i) != infile[index2].getSpineInfo(i)) {
             same = 0;
          }
       }
@@ -1214,14 +1213,14 @@ void reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
    int hassplit = 0;
    for (i=0; i<infile[index1].getFieldCount(); i++) {
       strcpy(buff1, "(");
-      strcat(buff1, infile[index1].getSpineInfo(i));
+      strcat(buff1, infile[index1].getSpineInfo(i).c_str());
       strcat(buff1, ")");
       strcpy(buff2, buff1);
       strcat(buff1, "a");
       strcat(buff2, "b");
       for (j=0; j<infile[index2].getFieldCount()-1; j++) {
-         if ((strcmp(buff1, infile[index2].getSpineInfo(j)) == 0) 
-               && (strcmp(buff2, infile[index2].getSpineInfo(j+1)) == 0)) {
+         if ((strcmp(buff1, infile[index2].getSpineInfo(j).c_str()) == 0) 
+               && (strcmp(buff2, infile[index2].getSpineInfo(j+1).c_str()) == 0)) {
             splits[i] = 1;
             hassplit++;
          }
@@ -1266,7 +1265,7 @@ void reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
       // found an "a" and "b" portion of a spine split, now search
       // through the target line for a joint of those two sub-spines
       for (j=0; j<infile[index2].getFieldCount(); j++) {
-         if (strcmp(infile[index2].getSpineInfo(j), pre1.getSubmatch()) != 0) {
+         if (strcmp(infile[index2].getSpineInfo(j).c_str(), pre1.getSubmatch()) != 0) {
             continue;
          }
          // found a simple binary spine join: emmit a spine manipulator line

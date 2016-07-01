@@ -219,7 +219,7 @@ void getTransformation(HumdrumFile& hfile, Array<int>& transform) {
       int i;
 
       for (i=0; i<hfile.getMaxTracks(); i++) {
-         if (strcmp(hfile.getTrackExInterp(i+1), "**kern") == 0) {
+         if (hfile.getTrackExInterp(i+1) == "**kern") {
             if (findex == -1) {
                findex = i;
             }
@@ -241,11 +241,11 @@ void getTransformation(HumdrumFile& hfile, Array<int>& transform) {
          }
          // reverse data by kern (or primary spine type) blocks
          for (i=maxspine; i>0; i--) {
-            if (strcmp(hfile.getTrackExInterp(i), "**kern") == 0) {
+            if (hfile.getTrackExInterp(i) == "**kern") {
                transform.append(i);
                j = i+1;
                while ((j <= maxspine) && 
-                      (strcmp(hfile.getTrackExInterp(j), "**kern") != 0)) {
+                      (hfile.getTrackExInterp(j) != "**kern")) {
                   transform.append(j);
                   j++;
                }
@@ -278,11 +278,11 @@ void getTransformation(HumdrumFile& hfile, Array<int>& transform) {
       strcat(buffer, primaryspine);
    }
    for (i=maxspine; i>0; i--) {
-      if (strcmp(hfile.getTrackExInterp(i), buffer) == 0) {
+      if (hfile.getTrackExInterp(i) == buffer) {
          transform.append(i);
          j = i+1;
          while ((j <= maxspine) && 
-                (strcmp(hfile.getTrackExInterp(j), buffer) != 0)) {
+                (hfile.getTrackExInterp(j) != buffer)) { 
             transform.append(j);
             j++;
          }

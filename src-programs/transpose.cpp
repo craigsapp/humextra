@@ -1123,7 +1123,7 @@ void doAutoTransposeAnalysis(HumdrumFile& infile) {
 
    int i;
    for (i=1; i<=infile.getMaxTracks(); i++) {
-      if (strcmp(infile.getTrackExInterp(i), "**kern") == 0) {
+      if (infile.getTrackExInterp(i) == "**kern") {
          ktracks[i] = 1 + i;
       }
    }

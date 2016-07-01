@@ -4575,7 +4575,7 @@ int isTopStaffOnSystem(HumdrumFile& infile, int row, int col) {
    int track = infile[row].getPrimaryTrack(col);
 
    // only return true if there is no "b" character in the track string
-   if (strchr(infile[row].getSpineInfo(col), 'b') != NULL) {
+   if (strchr(infile[row].getSpineInfo(col).c_str(), 'b') != NULL) {
       return 0;
    }
 
@@ -4602,7 +4602,7 @@ int isBottomStaffOnSystem(HumdrumFile& infile, int row, int col) {
       return 0;
    }
    // only return true if there is no "b" character in the track string
-   if (strchr(infile[row].getSpineInfo(col), 'b') != NULL) {
+   if (strchr(infile[row].getSpineInfo(col).c_str(), 'b') != NULL) {
       return 0;
    }
    return 1;

@@ -331,7 +331,7 @@ void getNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
          if (!infile[i].isExInterp(j, "**kern")) {
             continue;
          }
-         if (strchr(infile[i].getSpineInfo(j), 'b') != NULL) {
+         if (strchr(infile[i].getSpineInfo(j).c_str(), 'b') != NULL) {
             // ignore notes non-primary tracks
             continue;
          }

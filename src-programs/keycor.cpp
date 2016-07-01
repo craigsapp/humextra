@@ -24,7 +24,7 @@
 void   checkOptions             (Options& opts, int argc, char* argv[]);
 void   example                  (void);
 void   printAnalysis            (int bestkey, Array<double>& scores,
-                                 Array<double>& durhist, const char* filename,
+                                 Array<double>& durhist, const string& filename,
                                  Array<int>& b40hist, HumdrumFile& infile);
 void   usage                    (const char* command);
 void   readWeights              (const char* filename);
@@ -259,7 +259,7 @@ int main(int argc, char* argv[]) {
    Array<double> level;
    Array<double> distribution(12);
    Array<double> scores(24);
-   const char* filename = "";
+   string filename;
 
    Array<int> b40hist;
 
@@ -786,7 +786,7 @@ void addToHistogramDouble(Array<Array<double> >& histogram, int pc,
 //
 
 void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist,
-      const char* filename, Array<int>& b40hist, HumdrumFile& infile) {
+      const string& filename, Array<int>& b40hist, HumdrumFile& infile) {
    char buffer[64] = {0};
 
    if (mmaQ) {

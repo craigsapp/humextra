@@ -351,7 +351,7 @@ void expandSpines(vector<int>& field, vector<int>& subfield, vector<int>& model,
       }
 
       for (j=0; j<infile[i].getFieldCount(); j++) {
-         if (std::strchr(infile[i].getSpineInfo(j).c_str(), '(') != NULL) {
+         if (strchr(infile[i].getSpineInfo(j).c_str(), '(') != NULL) {
             splits[infile[i].getPrimaryTrack(j)] = 1;
          }
       }
@@ -610,22 +610,22 @@ void processFieldEntry(vector<int>& field, vector<int>& subfield,
       int value = strtol(pre.getSubmatch(1), NULL, 10);
       modletter = 0;
       subletter = 0;
-      if (std::strchr(pre.getSubmatch(2), 'a') != NULL) {
+      if (strchr(pre.getSubmatch(2), 'a') != NULL) {
          subletter = 'a';
       }
-      if (std::strchr(pre.getSubmatch(), 'b') != NULL) {
+      if (strchr(pre.getSubmatch(), 'b') != NULL) {
          subletter = 'b';
       }
-      if (std::strchr(pre.getSubmatch(), 'c') != NULL) {
+      if (strchr(pre.getSubmatch(), 'c') != NULL) {
          subletter = 'c';
       }
-      if (std::strchr(pre.getSubmatch(), 'd') != NULL) {
+      if (strchr(pre.getSubmatch(), 'd') != NULL) {
          modletter = 'd';
       }
-      if (std::strchr(pre.getSubmatch(), 'n') != NULL) {
+      if (strchr(pre.getSubmatch(), 'n') != NULL) {
          modletter = 'n';
       }
-      if (std::strchr(pre.getSubmatch(), 'r') != NULL) {
+      if (strchr(pre.getSubmatch(), 'r') != NULL) {
          modletter = 'r';
       }
 
@@ -982,7 +982,7 @@ void dealWithCospine(vector<int>& field, vector<int>& subfield, vector<int>& mod
       for (k=0; k<count; k++) {
          infile[line].getToken(buffer, j, k, 1000);
          if (comodel == 'r') {
-            if (std::strchr(buffer, 'r') != NULL) {
+            if (strchr(buffer, 'r') != NULL) {
                continue;
             }
          }
@@ -1020,16 +1020,16 @@ void dealWithCospine(vector<int>& field, vector<int>& subfield, vector<int>& mod
          }
          if (subfield[i] == 'a') {
             getSearchPat(buff, field[i], "a");
-            if ((std::strchr(infile[line].getSpineInfo(j).c_str(), '(') == NULL) ||
-               (std::strstr(infile[line].getSpineInfo(j).c_str(), buff.c_str()) != NULL)) {
+            if ((strchr(infile[line].getSpineInfo(j).c_str(), '(') == NULL) ||
+               (strstr(infile[line].getSpineInfo(j).c_str(), buff.c_str()) != NULL)) {
                printCotokenInfo(start, infile, line, j, cotokens, spineindex,
                      subspineindex);
             }
          } else if (subfield[i] == 'b') {
             // this section may need more work...
             getSearchPat(buff, field[i], "b");
-            if ((std::strchr(infile[line].getSpineInfo(j).c_str(), '(') == NULL) ||
-               (std::strstr(infile[line].getSpineInfo(j).c_str(), buff.c_str()) != NULL)) {
+            if ((strchr(infile[line].getSpineInfo(j).c_str(), '(') == NULL) ||
+               (strstr(infile[line].getSpineInfo(j).c_str(), buff.c_str()) != NULL)) {
                printCotokenInfo(start, infile, line, j, cotokens, spineindex,
                      subspineindex);
             }
@@ -1123,9 +1123,9 @@ void dealWithSecondarySubspine(vector<int>& field, vector<int>& subfield,
          } else if (submodel == 'r') {
             if (strcmp(infile[i][j], ".") == 0) {
                cout << ".";
-            } else if (std::strchr(infile[i][j], 'q') != NULL) {
+            } else if (strchr(infile[i][j], 'q') != NULL) {
                cout << ".";
-            } else if (std::strchr(infile[i][j], 'Q') != NULL) {
+            } else if (strchr(infile[i][j], 'Q') != NULL) {
                cout << ".";
             } else {
                buffer = infile[i][j];
@@ -1851,7 +1851,7 @@ void extractInterpretations(HumdrumFile& infile, string& interps) {
                buffer += "\\b";  // word boundary marker
                pre.sar(buffer, "\\*", "\\\\*", "g");
                if (pre.search(interps.c_str(), buffer.getBase()) == 0) {
-               // if (std::strstr(interps.c_str(), infile[i].getExInterp(j)) == NULL) {
+               // if (strstr(interps.c_str(), infile[i].getExInterp(j)) == NULL) {
                   continue;
                }
                if (column != 0) {

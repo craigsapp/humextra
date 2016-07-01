@@ -123,7 +123,7 @@ void printTrack(ostream& out, int voice, int vcount, int track,
    infile.analyzeRhythm("4");
    int i, j;
    PerlRegularExpression pre;
-   Array<char> tag;
+   string tag;
    if (pre.search(infile.getFilename(), "([A-Z][a-z][a-z]\\d{4}[^-]*)-")) {
       tag = pre.getSubmatch(1);
    } else if (pre.search(infile.getFilename(), "([A-Z][a-z][a-z]\\d{4}[^-]*)$")) {

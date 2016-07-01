@@ -20,7 +20,7 @@
 void      checkOptions         (Options& opts, int argc, char* argv[]);
 void      example              (void);
 void      usage                (const char* command);
-void      processFile          (HumdrumFile& infile, const char* filename);
+void      processFile          (HumdrumFile& infile, const string& filename);
 int       getVoiceCount        (HumdrumFile& infile, int line);
 int       getNoteCount         (HumdrumFile& infile, int line);
 void      printExclusiveInterpretation(void);
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
 // processFile -- Do requested analysis on a given file.
 //
 
-void processFile(HumdrumFile& infile, const char* filename) {
+void processFile(HumdrumFile& infile, const string& filename) {
    int i;
    if (SEGMENTS && !summaryQ) {
       cout << "!!!!SEGMENT: " << infile.getFileName() << endl;

@@ -326,7 +326,7 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
          if (subtracks == 1) {
             out << " " << prefix << "Tok ";
             out << " " << prefix << "SS";
-            out << infile.getTrackExInterp(track)+2;
+            out << infile.getTrackExInterp(track).c_str()+2;
          }
          out << " " << prefix << "Tr" << track;
          if (track < infile.getMaxTracks()) {
@@ -349,7 +349,7 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
                if (strcmp(infile[i][j], ".") == 0) {
                   markNullToken(strang);
                } else if (kernQ && infile[i].isData() && 
-                   (strcmp(infile.getTrackExInterp(track), "**kern")==0)) {
+                   (infile.getTrackExInterp(track) == "**kern")) {
                  markupKernToken(strang, infile, i, j);
                } else {
                   strang.setSize(strlen(infile[i][j])+1);
@@ -370,7 +370,7 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
                   out << " class=\"";
                   out << " " << prefix << "Tok ";
                   out << " " << prefix << "SS";
-                  out << infile.getTrackExInterp(track)+2;
+                  out << infile.getTrackExInterp(track).c_str()+2;
                   if (counter < subtracks - 1) {
                      out << " " << prefix << "Subtrackpad";
                   }
@@ -391,7 +391,7 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
                if (strcmp(infile[i][j], ".") == 0) {
                   markNullToken(strang);
                } else if (kernQ && infile[i].isData() && 
-                   (strcmp(infile.getTrackExInterp(track), "**kern")==0)) {
+                   (infile.getTrackExInterp(track) == "**kern")) {
                  markupKernToken(strang, infile, i, j);
                } else {
                   strang.setSize(strlen(infile[i][j])+1);
