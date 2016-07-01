@@ -508,9 +508,10 @@ int HumdrumFile::analyzeChordProbabilityDurNorm(Array<double>& coef,
       stop--;
    }
 
+   return -1;
 
-   return analyzeChordProbabilityDurNorm(coef, start, stop, scorelevels, 
-        empirical1, empirical2, sx, sy);
+   // return analyzeChordProbabilityDurNorm(coef, start, stop, scorelevels, 
+   //     empirical1, empirical2, sx, sy);
 }
 
 

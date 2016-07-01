@@ -1021,7 +1021,7 @@ void dealWithCospine(vector<int>& field, vector<int>& subfield, vector<int>& mod
          if (subfield[i] == 'a') {
             getSearchPat(buff, field[i], "a");
             if ((strchr(infile[line].getSpineInfo(j), '(') == NULL) ||
-               (strstr(infile[line].getSpineInfo(j), buff.c_str()) != NULL)) {
+               (std::strstr(infile[line].getSpineInfo(j).c_str(), buff.c_str()) != NULL)) {
                printCotokenInfo(start, infile, line, j, cotokens, spineindex,
                      subspineindex);
             }
@@ -1029,7 +1029,7 @@ void dealWithCospine(vector<int>& field, vector<int>& subfield, vector<int>& mod
             // this section may need more work...
             getSearchPat(buff, field[i], "b");
             if ((strchr(infile[line].getSpineInfo(j), '(') == NULL) ||
-               (strstr(infile[line].getSpineInfo(j), buff.c_str()) != NULL)) {
+               (std::strstr(infile[line].getSpineInfo(j).c_str(), buff.c_str()) != NULL)) {
                printCotokenInfo(start, infile, line, j, cotokens, spineindex,
                      subspineindex);
             }
@@ -1851,7 +1851,7 @@ void extractInterpretations(HumdrumFile& infile, string& interps) {
                buffer += "\\b";  // word boundary marker
                pre.sar(buffer, "\\*", "\\\\*", "g");
                if (pre.search(interps.c_str(), buffer.getBase()) == 0) {
-               // if (strstr(interps.c_str(), infile[i].getExInterp(j)) == NULL) {
+               // if (std::strstr(interps.c_str(), infile[i].getExInterp(j)) == NULL) {
                   continue;
                }
                if (column != 0) {
