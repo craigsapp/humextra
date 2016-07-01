@@ -1,0 +1,190 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Thu Jun 30 21:19:02 PDT 2016
+# Last Modified: Thu Jun 30 22:31:39 PDT 2016
+# Filename:      hummath
+# Syntax:        perl 5
+# vim:           ts=3
+#
+# Description:   Perform mathematical operations on one or more
+#                spines.
+# Options:
+#   -a  == append calculation spine to end of input data.
+#   -p  == prepend calculation spine to start of input data.
+#   -s  == output a sum and end of data.
+#   -n  == extract embedded number in data tokens.
+#   -e  == evaluation string, field numbers indexed from 1 and prefixed with "@".
+#   -o  == output interpretation name (default **calc)
+#
+# The evaluation string is required and includes references to 
+# field numbers in the input Humdrum data generating a mathematical
+# expression. (Be careful of spine splits/joines, as the program currently
+# does not track them).
+# Examples:
+#   Add fields 2 and 3 on each data line:  hummath -e "@2 + @3" file.hmd
+#   Return the smaller number:   hummath -e "@2 < @3 ? @2 : @3" file.hmd
+# Example input:
+# 
+# **kern  **num1  **num2
+# *M4/4   *       *
+# *clefG2 *       *
+# *k[f#]  *       *
+# =1-     =1      =1
+# 4c      1       8
+# 4d      2       7
+# 4e      3       6
+# 4f      4       5
+# =2      =2      =2
+# 4g      5       4
+# 4a      6       3
+# 4b      7       2
+# 4cc     8       1
+# ==      =       =
+# *-      *-      *-
+#
+# Exmaple output (the square of the minimum of the two values in
+# fields 2 and 3 squared), in an output interpretation spine called
+# **minsq:
+#
+# hummath -e "(@2<@3?@2:@3)**2" test.krn -a -o minsq
+#
+# **kern  **num1  **num2  **minsq
+# *M4/4   *       *       *
+# *clefG2 *       *       *
+# *k[f#]  *       *       *
+# =1-     =1      =1      =1-
+# 4c      1       8       1
+# 4d      2       7       4
+# 4e      3       6       9
+# 4f      4       5       16
+# =2      =2      =2      =2
+# 4g      5       4       16
+# 4a      6       3       9
+# 4b      7       2       4
+# 4cc     8       1       1
+# ==      =       =       ==
+# *-      *-      *-      *-
+# 
+#
+#
+
+use strict;
+use Getopt::Long;
+Getopt::Long::Configure("bundling");
+
+my $estring = "";
+my $outInterp = "**calc";
+my $appendQ = 0;
+my $prependQ = 0;
+my $numberQ = 0;
+my $sumQ = 0;
+GetOptions (
+	'a|append'          => \$appendQ,
+	'p|prepend'         => \$prependQ,
+	's|sum'             => \$sumQ,
+	'n|extract-number'  => \$numberQ,
+	'e|evaluation=s'    => \$estring,
+	'o|output-interp=s' => \$outInterp
+);
+
+if ($outInterp !~ /^\*\*/) {
+	$outInterp = "**$outInterp";
+}
+
+die "Usage: $0 -e 'string' file(s)\n" if $estring =~ /^\s*$/;
+my @EvalList = getEvalList($estring);
+die "Evaluation string must contain \$# variables\n" if !@EvalList;
+
+my @output;
+my $sum = 0;
+my @contents = <>;
+chomp @contents;
+
+foreach my $line (@contents) {
+	if ($line =~ /^$/)    { $output[@output] = "\n";         next; }
+	if ($line =~ /^!!/)   { $output[@output] = "$line";      next; }
+	if ($line =~ /^\*\*/) { $output[@output] = "$outInterp"; next; }
+	if ($line =~ /^!/)    { $output[@output] = "!";          next; }
+	if ($line =~ /^\*-/)  { $output[@output] = "*-";         next; }
+	if ($line =~ /^\*/)   { $output[@output] = "*";          next; }
+	if ($line =~ /^=/)    { 
+		$line =~ /^(=[^\t]+)/;
+		$output[@output] = $1;
+		next; 
+	}
+	my $value = evaluateString($line, $estring, @EvalList);
+	$output[@output] = $value;
+	next if $value eq ".";
+	$sum += $value if $sumQ;
+}
+
+
+for (my $i=0; $i<@output; $i++) {
+	my $token = $output[$i];
+	if ($token =~ /^$/)    { print "\n";         next; }
+	if ($token =~ /^!!/)   { print "$token\n";   next; }
+
+	print "$contents[$i]\t" if $appendQ;
+	print $token;
+	print "\t$contents[$i]" if $prependQ;
+	print "\n";
+}
+print "!!sum:\t$sum\n" if $sumQ;
+
+exit(0);
+
+
+###########################################################################
+
+
+##############################
+##
+## evaluateString --
+##
+
+sub evaluateString {
+	my ($line, $estring, @elist) = @_;
+	my @fields = split /\t/, $line;
+	foreach my $number (@EvalList) {
+		if ($number > @fields) {
+			print STDERR "Error field number $number too large for line:\n";
+			print STDERR "$line\n";
+			exit(1);
+		}
+		my $index = $number - 1;
+		next if $index < 0;
+		my $value = $fields[$index];
+		if ($numberQ) {
+			if ($value =~ /([-+]?\d+\.?\d*)/) {
+				$value = $1;
+			} elsif ($value =~ /([-+]?\d*\.\d+)/) {
+				$value = $1;
+			} else {
+				return ".";
+			}
+		}
+		if ($value == ".") {
+			return ".";
+		}
+		$estring =~ s/\@$number\b/$value/g;
+	}
+	return eval($estring);
+}
+
+
+
+##############################
+##
+## getEvalList -- Extract list of @ references in evaluation string.
+##
+
+sub getEvalList {
+	my ($estring) = @_;
+	my %output;
+	@output{ $estring =~ /\@(\d+)/g } = 1;
+	return sort { $a <=> $b } keys %output;
+}
+
+
+
