@@ -507,7 +507,7 @@ RationalNumber RationalNumber::convert_to_fraction(char *strNum) {
       this->_num = atol(temp);
       this->_den = 1;
    }
-   delete temp;
+   delete[] temp;
    return *this;
 }
 
@@ -804,7 +804,8 @@ istream& operator>>(istream& input, RationalNumber &p ) {
       Q.convert_to_fraction(tmp);
    }
    p = P/Q;
-   delete tmp; delete buff;
+   delete [] tmp; 
+	delete [] buff;
    return input;
 } 
 

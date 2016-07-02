@@ -701,7 +701,7 @@ int getKernTrack(int number, HumdrumFile& infile) {
    int i;
 
    for (i=1; i<=infile.getMaxTracks(); i++) {
-      if (strcmp("**kern", infile.getTrackExInterp(i)) == 0) {
+      if (infile.getTrackExInterp(i) == "**kern") {
          counter++;
       }
       if (counter == number) {
