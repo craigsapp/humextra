@@ -304,7 +304,9 @@ int main(int argc, char* argv[]) {
       infile.analyzeRhythm("4", debugQ);
 
       infile.getKernTracks(Ktracks);
+
       reverse(Ktracks.begin(), Ktracks.end());
+
       Rtracks.resize(infile.getMaxTracks() + 1);
       fill(Rtracks.begin(), Rtracks.end(), -1);
       for (i=0; i<(int)Ktracks.size(); i++) {
@@ -1522,6 +1524,11 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
                continue;
             }
 
+            // [20160813] skip over non-kern spines otherwise there will
+            // be a segmentation in the track assignments.
+            if (!infile[i].isExInterp(j, "**kern")) {
+               continue;
+            }
             if (strncmp(infile[i][j], "*I", 2) == 0) {
                storeInstrument(ontick + Offset, outfile, infile, i, j,
                      instrumentQ);
@@ -2425,7 +2432,7 @@ void autoPan(MidiFile& outfile, HumdrumFile& infile) {
 //
 
 void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
-      int line, int row, int pcQ) {
+      int line, int col, int pcQ) {
 
    PerlRegularExpression pre;
    PerlRegularExpression pre2;
@@ -2433,7 +2440,7 @@ void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
    int i;
    if (timbresQ && !forcedQ) {
 
-      if (!pre.search(infile[line][row], "^\\*I\"\\s*(.*)\\s*", "")) {
+      if (!pre.search(infile[line][col], "^\\*I\"\\s*(.*)\\s*", "")) {
          return;
       }
       string targetname;
@@ -2455,7 +2462,7 @@ void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
       }
       if (pc >= 0) {
          int track = -1;
-         track = Rtracks[infile[line].getPrimaryTrack(row)];
+         track = Rtracks[infile[line].getPrimaryTrack(col)];
          int channel = 0x0f & trackchannel[track];
 
          vector<uchar> mididata;
@@ -2467,11 +2474,12 @@ void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
 
    } else {
       static HumdrumInstrument huminst;
-      int track = Rtracks[infile[line].getPrimaryTrack(row)];
-      // const char* trackname = huminst.getName(infile[line][row]);
+      int track = Rtracks[infile[line].getPrimaryTrack(col)];
+
+      // const char* trackname = huminst.getName(infile[line][col]);
       string trackname = getInstrumentName(infile,
-            Rtracks[infile[line].getPrimaryTrack(row)]);
-      int pc = huminst.getGM(infile[line][row]);
+            Rtracks[infile[line].getPrimaryTrack(col)]);
+      int pc = huminst.getGM(infile[line][col]);
       if (forcedQ) {
          pc = instrumentnumber;
       }

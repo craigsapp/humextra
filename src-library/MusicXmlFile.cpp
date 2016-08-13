@@ -261,7 +261,7 @@ ostream& MusicXmlFile::printGraceNoteRhythm(ostream& out, _MusicXmlItem& item) {
 //////////////////////////////
 //
 // printGraceMarker -- print "q" if the grace note requires a slash.
-//     print "Q" if the grace note does not require a slash.
+//     print "q" if the grace note does not require a slash.
 //
 
 ostream& MusicXmlFile::printGraceMarker(ostream& out, _MusicXmlItem& item) {
@@ -285,7 +285,7 @@ ostream& MusicXmlFile::printGraceMarker(ostream& out, _MusicXmlItem& item) {
       entry = entry->GetNext();
    }
 
-   out << "Q";
+   out << "q";
    return out;
 }
 
@@ -1366,6 +1366,8 @@ void MusicXmlFile::parseMeasure(CXMLObject* entry, int partnum,
 
 void MusicXmlFile::parseDirection(CXMLObject* object, int partnum,
       long& ticktime) {
+cerr << "GOT HERE " << endl;
+return;
    if (object == NULL) {
       return;
    }
