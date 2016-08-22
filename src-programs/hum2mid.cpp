@@ -112,7 +112,7 @@ double PerfVizNote::approxtempo =  0;
 
 
 // global variables:
-const char *outlocation = NULL;
+string outlocation;
 int   trackcount  = 0;           // number of tracks in MIDI file
 int   track       = 0;           // track number starting at 0
 int   Offset      = 0;           // start-time offset in ticks
@@ -216,7 +216,7 @@ int       getFileDurationInMilliseconds(HumdrumFile& infile);
 int       getMillisecondDuration(HumdrumFile& infile, int row, int col,
                              int subcol);
 void      addTempoTrack      (HumdrumFile& infile, MidiFile& outfile);
-void      getBendByPcData    (double* bendbypc, const char* filename);
+void      getBendByPcData    (double* bendbypc, const string& filename);
 void      insertBendData     (MidiFile& outfile, double* bendbypc);
 void      getKernTracks      (vector<int>& tracks, HumdrumFile& infile);
 void      getTitle           (string& title, HumdrumFile& infile);
@@ -231,7 +231,7 @@ void      checkForTimeSignature(MidiFile& outfile, HumdrumFile& infile,
 string    getInstrumentName   (HumdrumFile& infile, int ptrack);
 
 // PerfViz related functions:
-void      writePerfVizMatchFile(const char* filename, stringstream& contents);
+void      writePerfVizMatchFile(const string& filename, stringstream& contents);
 ostream& operator<<            (ostream& out, PerfVizNote& note);
 void     printPerfVizKey       (int key);
 void     printPerfVizTimeSig   (int tstop, int tsbottom);
@@ -315,7 +315,7 @@ int main(int argc, char* argv[]) {
 
       if (perfvizQ) {
          perfviz = new stringstream[1];
-         const char *filename = NULL;
+			string filename;
          PVIZ = perfviz;
          perfviz[0] << "info(matchFileVersion,2.0).\n";
          if (numinputs < 1) {
@@ -323,10 +323,10 @@ int main(int argc, char* argv[]) {
          } else {
             perfviz[0] << "info(scoreFileName,'";
             filename = strrchr(options.getArg(i+1).c_str(), '/');
-            if (filename == NULL) {
-               filename = options.getArg(i+1).c_str();
+            if (filename == "") {
+               filename = options.getArg(i+1);
             } else {
-               filename = filename + 1;
+               filename.erase(0, 1);
             }
             perfviz[0] << filename;
             perfviz[0] << "').\n";
@@ -334,10 +334,10 @@ int main(int argc, char* argv[]) {
          if (options.getBoolean("output")) {
             perfviz[0] << "info(midiFileName,'";
             filename = strrchr(options.getString("output").c_str(), '/');
-            if (filename == NULL) {
-               filename = options.getString("output").c_str();
+            if (filename == "") {
+               filename = options.getString("output");
             } else {
-               filename = filename + 1;
+               filename.erase(0, 1);
             }
             perfviz[0] << filename;
             perfviz[0] << "').\n";
@@ -396,7 +396,7 @@ int main(int argc, char* argv[]) {
       }
       if (stdoutQ) {
          outfile.write(cout);
-      } else if (outlocation == NULL) {
+      } else if (outlocation == "") {
          // outfile.printHex(cout);
          cout << outfile;
       } else if (infoQ) {
@@ -1064,9 +1064,7 @@ void processOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (opts.getBoolean("output")) {
-      outlocation = opts.getString("output").c_str();
-   } else {
-      outlocation = NULL;
+      outlocation = opts.getString("output");
    }
 
    forcedQ = opts.getBoolean("forceinstrument");
@@ -1142,7 +1140,7 @@ void processOptions(Options& opts, int argc, char* argv[]) {
 // getBendByPcData --
 //
 
-void getBendByPcData(double* bendbypc, const char* filename) {
+void getBendByPcData(double* bendbypc, const string& filename) {
    int i, j;
    for (i=0; i<12; i++) {
       bendbypc[i] = 0.0;
@@ -3342,8 +3340,8 @@ void printRational(ostream& out, double value) {
 // writePerfVizMatchFile --
 //
 
-void writePerfVizMatchFile(const char* filename, stringstream& contents) {
-   ofstream outputfile(filename);
+void writePerfVizMatchFile(const string& filename, stringstream& contents) {
+   ofstream outputfile(filename.c_str());
    contents   << ends;
    outputfile << contents.str();
    outputfile.close();
