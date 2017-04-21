@@ -16,12 +16,8 @@
 #include <string.h>
 #include <sys/stat.h>   /* for stat function in fileExists */
 
-#ifndef OLDCPP
-   #include <iostream>
-   using namespace std;
-#else
-   #include <iostream.h>
-#endif
+#include <iostream>
+using namespace std;
 
 
 // function declarations
@@ -42,11 +38,11 @@ int          extractNum    = 0;  // used with -x option
 int          segmentLabelQ = 0;  // used with -s option
 int          overwriteQ    = 0;  // used with -O option (capital O)
 int          directoryQ    = 0;  // used with -d option
-Array<char>  Directory;          // used with -d option
+string       Directory;          // used with -d option
 int          extensionQ    = 0;  // used with -e option
-Array<char>  Extension;          // used with -e option
+string       Extension;          // used with -e option
 int          prefixQ       = 0;  // used with -p option
-Array<char>  Prefix;             // used with -p option
+string       Prefix;             // used with -p option
 int          Width         = 5;  // used with -w option
 int          Start         = 1;  // used with -n option
 
@@ -108,16 +104,16 @@ void saveToDisk(HumdrumFile& infile, int count) {
    if (extensionQ) {
       // remove old filename extension and replace with new one
       pre.sar(writename, "\\.[^.]*$", "");
-      pre.sar(writename, "$", Extension.getBase());
+      pre.sar(writename, "$", Extension.c_str());
    }
    if (prefixQ) {
       // prefix to give to filename (useful for auto-naming).
-      pre.sar(writename, "^", Prefix.getBase());
+      pre.sar(writename, "^", Prefix.c_str());
    }
    if (directoryQ) {
       // place in new directory if requested
       pre.sar(Directory, "/*$", "/");
-      pre.sar(writename, "^", Directory.getBase());
+      pre.sar(writename, "^", Directory.c_str());
    }
 
    if (!overwriteQ && fileExists(writename)) {
@@ -232,7 +228,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -244,12 +240,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    extractNum     = opts.getInteger("extract");
    segmentLabelQ  = opts.getBoolean("segment");
    directoryQ     = opts.getBoolean("directory");
-   Directory      = opts.getString("directory").data();
+   Directory      = opts.getString("directory").c_str();
    overwriteQ     = opts.getBoolean("overwrite");
    extensionQ     = opts.getBoolean("extension");
-   Extension      = opts.getString("extension").data();
+   Extension      = opts.getString("extension").c_str();
    prefixQ        = opts.getBoolean("prefix");
-   Prefix         = opts.getString("prefix").data();
+   Prefix         = opts.getString("prefix").c_str();
    Width          = opts.getInteger("width");
    Start          = opts.getInteger("number");
 }

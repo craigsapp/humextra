@@ -83,7 +83,7 @@ int       Gpartinit = 0;       // for identifying the first part in the file.
 
 int main(int argc, char** argv) {
    checkOptions(options, argc, argv);  // process the command-line options
-   HumdrumFile hfile(options.getArg(1).data());
+   HumdrumFile hfile(options.getArg(1).c_str());
    hfile.analyzeRhythm();
    convertToGMN(hfile);
    return 0;
@@ -119,7 +119,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();

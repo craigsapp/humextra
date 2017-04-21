@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
    for (int i=0; i<infiles.getCount(); i++) {
 
       // analyze the input file according to command-line options
-      infiles[i].analyzeRhythm(beatbase.data());
+      infiles[i].analyzeRhythm(beatbase.c_str());
 
       Array<int> tickanalysis;
       tickanalysis.setSize(infiles[i].getNumLines());
@@ -1280,7 +1280,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1351,7 +1351,7 @@ void fillSearchString(Array<double>& searcher, const string& astring) {
    int len = astring.size();
    char* tempstr;
    tempstr = new char[len+1];
-   strcpy(tempstr, astring.data());
+   strcpy(tempstr, astring.c_str());
    char* ptr;
    ptr = strtok(tempstr, " \t\n:;,");
    double value;

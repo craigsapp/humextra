@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
       } else {
          infile.read(options.getArg(i+1));
 	 if (fileQ) {
-            Filename = options.getArg(i+1).data();
+            Filename = options.getArg(i+1).c_str();
          }
       }
       initialize(infile);
@@ -244,7 +244,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -266,7 +266,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       errorCheck[i] = 1;
    }
    if (opts.getBoolean("exclude")) {
-      const char* pointer = opts.getString("exclude").data();
+      const char* pointer = opts.getString("exclude").c_str();
       int length = strlen(pointer);
       int i;
       for (i=0; i<length; i++) {
@@ -280,7 +280,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       for (i=0; i<8; i++) {
          errorCheck[i] = 0;
       }
-      const char* pointer = opts.getString("rule").data();
+      const char* pointer = opts.getString("rule").c_str();
       int length = strlen(pointer);
       int i;
       for (i=0; i<length; i++) {
@@ -291,11 +291,11 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (opts.getBoolean("print-rules")) {
-      printRules(opts.getString("print-rules").data());
+      printRules(opts.getString("print-rules").c_str());
       exit(0);
    }
 
-   marker = opts.getString("marker").data();
+   marker = opts.getString("marker").c_str();
    fileQ  = opts.getBoolean("filename");
    idQ    = opts.getBoolean("id");
    rawQ   = opts.getBoolean("raw");

@@ -156,6 +156,7 @@ int     starttick        =   0;    // used with --no-rest option
 int     bendQ            =   0;    // used with --bend option
 int     metQ             =   0;    // used with --met option
 int     met2Q            =   0;    // used with --met2 option
+int     tassoQ           =   0;    // used with --tasso option
 int     infoQ            =   0;    // used with --info option
 int     timbresQ         =   0;    // used with --timbres option
 vector<string> TimbreName;         // used with --timbres option
@@ -833,7 +834,30 @@ double checkForTempo(HumdrumRecord& record) {
       }
 
    // } else {
-   if (metQ) {
+   if (tassoQ) {
+      // C  = 132 bpm
+      // C| = 176 bpm
+
+      char mensuration[1024] = {0};
+      if (record.isGlobalComment() && pre.search(record[0],
+            "^\\!+primary-mensuration:.*omet\\((.*?)\\)\\s*$")) {
+         strcpy(mensuration, pre.getSubmatch(1));
+      } else if (record.isInterpretation() && record.equalFieldsQ("**kern")) {
+         for (i=0; i<record.getFieldCount(); i++) {
+            if (record.isExInterp(i, "**kern")) {
+               if (pre.search(record[i], "omet\\((.*?)\\)")) {
+                  strcpy(mensuration, pre.getSubmatch(1));
+               }
+               break;
+            }
+         }
+      }
+      if (strcmp(mensuration, "C") == 0) {
+         return 132.0;
+      } else if (strcmp(mensuration, "C|") == 0) {
+         return 176.0;
+      }
+   } else if (metQ) {
 
       // mensural tempo scalings
       // O           = 58 bpm
@@ -850,6 +874,7 @@ double checkForTempo(HumdrumRecord& record) {
       // O3/2        = 58 * 1.5 = 87 bpm
       // O/3         = 110 bpm
       // C|2, Cr     = 144 bpm (previously 220 bpm but too fast)
+
       char mensuration[1024] = {0};
       if (record.isGlobalComment() && pre.search(record[0],
             "^\\!+primary-mensuration:.*met\\((.*?)\\)\\s*$")) {
@@ -948,6 +973,7 @@ void defineOptions(Options& opts, int argc, char* argv[]) {
    opts.define("s|shorten=i:0",    "Shortening tick value for note durations");
    opts.define("p|plain=b",        "Play with articulation interpretation");
    opts.define("P|nopad=b",        "Do not pad ending with spacer note");
+   opts.define("tasso=b",          "Default tempo by omet mensuration for Tasso music");
    opts.define("met=d:232",        "Tempo control from metrical symbols");
    opts.define("met2=d:336",       "Tempo control from metrical symbols, older era");
    opts.define("no-met=b",         "Do not use --met option");
@@ -1004,6 +1030,10 @@ void processOptions(Options& opts, int argc, char* argv[]) {
       storeCommentQ = 0;
    } else {
       storeCommentQ = 1;
+   }
+
+   if (opts.getBoolean("tasso")) {
+      tassoQ = 1;
    }
 
    if (opts.getBoolean("met") && !opts.getBoolean("no-met")) {

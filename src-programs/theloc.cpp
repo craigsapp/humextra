@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
       if (numinputs < 1) {
          processData(cin);
       } else {
-         input.open(options.getArg(i+1).data());
+         input.open(options.getArg(i+1).c_str());
          processData(input);
          input.close();
       }
@@ -970,7 +970,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -993,7 +993,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    doubleQ     = opts.getBoolean("mstart");
    fileQ       = opts.getBoolean("file");
    if (fileQ) {
-      Filename = opts.getString("file").data();
+      Filename = opts.getString("file").c_str();
    }
    markQ       = opts.getBoolean("fixedmark");
    matchlen    = opts.getInteger("fixedmark");
@@ -1009,8 +1009,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    if (!markQ) {
       matchlistQ = 1;
    }
-   marker =  opts.getString("markchar").data();
-   graceQ = !opts.getString("no-grace").data();
+   marker =  opts.getString("markchar").c_str();
+   graceQ = !opts.getString("no-grace").c_str();
 
    if (opts.getBoolean("all")) {
       dispLineQ    = 1;  // used with -l option
@@ -1023,7 +1023,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       dispBeatQ    = 1;  // used with -B option
    }
    
-   prepareSearchPaths(paths, opts.getString("path").data());
+   prepareSearchPaths(paths, opts.getString("path").c_str());
 }
 
 

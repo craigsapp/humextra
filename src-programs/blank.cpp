@@ -390,7 +390,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -425,7 +425,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       Count = 1000;
    }
    PerlRegularExpression pre;
-   pre.getTokens(Exinterps, "[\\s,\\*]+", opts.getString("exinterp").data());
+   pre.getTokens(Exinterps, "[\\s,\\*]+", opts.getString("exinterp").c_str());
 }
   
 
@@ -482,7 +482,7 @@ void fillFieldData(Array<int>& field, Array<int>& subfield, Array<int>& model,
    PerlRegularExpression pre;
    Array<char> buffer;
    buffer.setSize(fieldstring.size()+1);
-   strcpy(buffer.getBase(), fieldstring.data());
+   strcpy(buffer.getBase(), fieldstring.c_str());
    pre.sar(buffer, "\\s", "", "gs");
    int start = 0;
    int value = 0;

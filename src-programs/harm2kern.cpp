@@ -16,6 +16,8 @@
 #include <string.h>
 #include <cctype>
 
+#include <string>
+
 // function declarations
 void      checkOptions      (Options& opts, int argc, char* argv[]);
 void      example           (void);
@@ -44,9 +46,9 @@ int       rhythmQ      = 1;  // used with --RR option
 int       rootQ        = 1;  // used with -r option 
 int       recip        = -1; // used with -R option
 int       recipField   = -1; // used with -R option
-const char *instrument = ""; // used with -I option
-const char *Prefix     = ""; // used with -P option
-int        prefixQ     = 0;  // used with -P option
+string    instrument   = ""; // used with -I option
+string    Prefix       = ""; // used with -P option
+int       prefixQ      = 0;  // used with -P option
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -385,7 +387,7 @@ void printChordInfo(const char* token,  int root,
    }
 
    if (prefixQ) {
-      strcat(dbuffer, Prefix);
+      strcat(dbuffer, Prefix.c_str());
    }
 
    Array<int> pitches;
@@ -752,7 +754,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -764,9 +766,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    rhythmQ    = !opts.getBoolean("no-rhythm");
    octave     =  opts.getInteger("octave");
    rootQ      =  opts.getBoolean("root");
-   instrument =  opts.getString("instrument").data();
+   instrument =  opts.getString("instrument").c_str();
    recip      =  opts.getInteger("recip");
-   Prefix     =  opts.getString("prefix").data();
+   Prefix     =  opts.getString("prefix").c_str();
    prefixQ    =  opts.getBoolean("prefix");
 }
 

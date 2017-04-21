@@ -757,7 +757,7 @@ void checkOptions(void) {
    shortenamount = options.getInteger("shorten");
 
    colorQ = !options.getBoolean("color");
-   colormode = options.getString("color").data()[0];
+   colormode = options.getString("color").c_str()[0];
    if ((colormode != 'b') && (colormode != 'w')) {
       colormode = 'w';
    }

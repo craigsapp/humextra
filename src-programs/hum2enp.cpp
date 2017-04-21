@@ -10,24 +10,13 @@
 //                files.
 //
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+using namespace std;
+
+
 
 #include "humdrum.h"
 #include "PerlRegularExpression.h"
@@ -96,10 +85,10 @@ void  printTieDot              (ostream& out, HumdrumFile& infile, int line,
                                 int field);
 void  checkMarks               (HumdrumFile& infile, Array<char>& marks, 
                                 Array<Array<char> >& markcolors);
-void  getNoteAttributes        (SSTREAM& attributes, HumdrumFile& infile, 
+void  getNoteAttributes        (stringstream& attributes, HumdrumFile& infile, 
                                 int line, int field, int subfield, 
                                 const char* kernnote, int keysig);
-void  getNoteExpressions       (SSTREAM& expressions, HumdrumFile& infile, 
+void  getNoteExpressions       (stringstream& expressions, HumdrumFile& infile, 
                                 int line, int field, int subfield, 
                                 const char* kernnote);
 void  getSubspines             (Array<int>& subtracks, HumdrumFile& infile, 
@@ -1213,13 +1202,13 @@ void printMidiNotes(ostream& out, HumdrumFile& infile, int line, int field,
       if (k > 0) {
          out << " ";
       }
-      SSTREAM slots;
+      stringstream slots;
       getNoteAttributes(slots, infile, line, field, k, buffer, keysig);
       slots << ends;
-      if (strlen(slots.CSTRING) > 0) {
+      if (strlen(slots.str().c_str()) > 0) {
          out << "(";
          out << base12;
-         out << slots.CSTRING;
+         out << slots.str().c_str();
          out << ")";
       } else {
          out << base12;
@@ -1233,7 +1222,7 @@ void printMidiNotes(ostream& out, HumdrumFile& infile, int line, int field,
 // getNoteAttributes -- returns a list of attributes for a note (if any)
 //
 
-void getNoteAttributes(SSTREAM& attributes, HumdrumFile& infile, int line, 
+void getNoteAttributes(stringstream& attributes, HumdrumFile& infile, int line, 
       int field, int subfield, const char* kernnote, int keysig) {
 
    // if the note is supposed to be shows as a flatted note, then
@@ -1250,11 +1239,11 @@ void getNoteAttributes(SSTREAM& attributes, HumdrumFile& infile, int line,
 */
 
 /* Temporarily get rid of enharmonics:
-   SSTREAM enharmonic;
+   stringstream enharmonic;
    getEnharmonic(enharmonic, kernnote, keysig);
    enharmonic << ends;
-   if (strlen(enharmonic.CSTRING) > 0) {
-      attributes << " :enharmonic " << enharmonic.CSTRING;
+   if (strlen(enharmonic.str().c_str()) > 0) {
+      attributes << " :enharmonic " << enharmonic.str().c_str();
    }
 */
 
@@ -1278,13 +1267,13 @@ void getNoteAttributes(SSTREAM& attributes, HumdrumFile& infile, int line,
       }
    }
 
-   SSTREAM expressions;
+   stringstream expressions;
    getNoteExpressions(expressions, infile, line, field, subfield, kernnote);
    
    expressions << ends;
-   if (strlen(expressions.CSTRING) > 0) {
+   if (strlen(expressions.str().c_str()) > 0) {
       attributes << " :expressions (";
-      attributes << expressions.CSTRING;      
+      attributes << expressions.str().c_str();      
       attributes << ")";
    }
 
@@ -1351,7 +1340,7 @@ void getEnharmonic(ostream& out, const char* note, int keysig) {
 // getNoteExpressions --
 //
 
-void getNoteExpressions(SSTREAM& expressions, HumdrumFile& infile, int line, 
+void getNoteExpressions(stringstream& expressions, HumdrumFile& infile, int line, 
       int field, int subfield, const char* kernnote) {
 
    PerlRegularExpression pre;
@@ -1722,7 +1711,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();

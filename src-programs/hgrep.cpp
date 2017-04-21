@@ -60,7 +60,7 @@ void      markKernNotes       (HumdrumFile& infile, int line);
 
 // User interface variables:
 Options     options;
-const char* searchstring    = "";    // first argument
+string      searchstring    = "";    // first argument
 int         kernQ           = 0;     // used with -k option
 int         dataQ           = 0;     // used with -d option
 int         tandemQ         = 0;     // used with -t option
@@ -81,7 +81,7 @@ int         formQ           = 0;     // used with -F option
 int         tokenizeQ       = 0;     // used with -T option
 int         datastopQ       = 0;     // used with -D option
 int         markQ           = 0;     // used with --mark option
-const char* exinterps       = "";    // used with -x option
+string      exinterps       = "";    // used with -x option
 char        separator[1024] = {0};   // used with --sep option
 Array<regex_t> Andlist;              // used with --and option
 Array<Array<char> > Andexinterp;     // used with --and option
@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
       infiles.read(cin);
    } else {
       for (i=1; i<numinputs+1; i++) {
-         infiles.readAppend(options.getArg(i+1).data());
+         infiles.readAppend(options.getArg(i+1).c_str());
       }
    }
 
@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
          infiles[i].analyzeRhythm("4");
       }
 
-      doSearch(searchstring, infiles[i], infiles[i].getFilename());
+      doSearch(searchstring.c_str(), infiles[i], infiles[i].getFilename());
       if (markQ) {
          cout << infiles[i];
          if (MarkerCount) {
@@ -445,7 +445,7 @@ int tokenSearch(int& column, HumdrumFile& infile, int line, regex_t& re) {
    if (kernQ) {
       matchfound = singleTokenSearch(column, infile, line, re, "**kern");
    } else {
-      matchfound = singleTokenSearch(column, infile, line, re, exinterps);
+      matchfound = singleTokenSearch(column, infile, line, re, exinterps.c_str());
    } 
 
    if (matchfound != 0) {
@@ -662,7 +662,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -673,7 +673,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cerr << "Error: you must supply a search string\n";
       exit(1);
     }
-   searchstring  =  opts.getArg(1).data();
+   searchstring  =  opts.getArg(1).c_str();
    basicQ        =  opts.getBoolean("basic-regexp");
    fileQ         =  opts.getBoolean("with-filename");
    matchfilesQ   =  opts.getBoolean("files-with-match");
@@ -702,9 +702,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    datastopQ     =  opts.getBoolean("data-stop");
    markQ         =  opts.getBoolean("mark");
    exinterpQ     =  opts.getBoolean("exinterp");
-   exinterps     =  opts.getString("exinterp").data();
+   exinterps     =  opts.getString("exinterp").c_str();
    char tempbuffer[1024] = {0};
-   searchAndReplace(tempbuffer, "[\\]t", "	", opts.getString("separator").data());
+   searchAndReplace(tempbuffer, "[\\]t", "	", opts.getString("separator").c_str());
    searchAndReplace(separator, "[\\]n", "\n", tempbuffer);
 
    if (matchfilesQ && nomatchfilesQ) {
@@ -714,7 +714,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    Andlist.setSize(0);
    Andexinterp.setSize(0);
    if (opts.getBoolean("and")) {
-      fillAndSearches(Andlist, Andexinterp, opts.getString("and").data());
+      fillAndSearches(Andlist, Andexinterp, opts.getString("and").c_str());
    }
 }
 

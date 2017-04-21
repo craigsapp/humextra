@@ -23,30 +23,13 @@
 #include "PDFFile.h"
 #include "CheckSum.h"
 
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   #include <iostream>
-   #include <fstream>
-   #include <string>
-   #include <cassert>
-   #include <cstring>
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>     /* for windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #include <iostream.h>
-   #include <fstream.h>
-   #include <string.h>
-   #include <cassert.h>
-   #include <cstring.h>
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cassert>
+#include <cstring>
+using namespace std;
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -58,16 +41,16 @@ void      example             (void);
 void      usage               (const char* command);
 void      printMimeEncoding   (ostream& out, int count, char char1, char char2, 
                                char char3);
-void      createStreamData    (ostream& out, SSTREAM& datatoencode,
+void      createStreamData    (ostream& out, stringstream& datatoencode,
                                const char* filename);
-int       printStreamObject   (ostream& out, int objnum, SSTREAM& datatoencode, 
+int       printStreamObject   (ostream& out, int objnum, stringstream& datatoencode, 
                                const char* filename, Array<int>& objectindex,
                                Array<int>& offsetindex, int initialoffset);
-int       createFileEntry     (SSTREAM& out, HumdrumFile& infile, 
+int       createFileEntry     (stringstream& out, HumdrumFile& infile, 
                                const char* filename, int nextobject,
                                Array<int>& objectindex, 
                                Array<int>& offsetindex, int initialoffset);
-int       generateNewXref     (SSTREAM& out, Array<int>& objectindex, 
+int       generateNewXref     (stringstream& out, Array<int>& objectindex, 
                                Array<int>& offsetindex, int filesize);
 void      printPdfDate        (ostream& out, struct tm* date);
 void      addTrailerPrev      (Array<char>& trailerstring, int newprevoffset);
@@ -89,7 +72,7 @@ int       getSequentialObjectCount(Array<int>& list, int starti);
 
 // global variables:
 Options     options;
-const char* pdffilename = "";  // used with -p option
+string      pdffilename = "";  // used with -p option
 int         footerQ  = 0;      // used with -A option
 int         keepdirQ = 0;      // used with -D option
 int         hiddenQ  = 0;      // used with --hidden option (not active)
@@ -106,7 +89,7 @@ int main(int argc, char** argv) {
 
    istream *file;
    ifstream filestream;
-   if (strcmp(pdffilename, "") == 0) {
+   if (pdffilename == "") {
       // read standard input if no -p option given
       file = &cin;
    } else {
@@ -140,7 +123,7 @@ int main(int argc, char** argv) {
    // figure out the number of input files to process
    int numinputs = options.getArgCount();
 
-   Array<SSTREAM*> filesegments;  // temporary storage for embedded files
+   Array<stringstream*> filesegments;  // temporary storage for embedded files
    if (numinputs <= 0) {
       filesegments.setSize(1);
    } else {
@@ -148,7 +131,7 @@ int main(int argc, char** argv) {
    }
    filesegments.allowGrowth(0);
    for (i=0; i<filesegments.getSize(); i++) {
-      filesegments[i] = new SSTREAM;
+      filesegments[i] = new stringstream;
    }
 
    Array<int> objectindex(1000);
@@ -162,7 +145,7 @@ int main(int argc, char** argv) {
    int fcounter = 0;
    for (i=0; i<numinputs; i++) {
       infile.clear();
-      filename = options.getArg(i+1).data();
+      filename = options.getArg(i+1).c_str();
       infile.read(filename);
       nextobject = createFileEntry(*filesegments[fcounter], infile, 
             filename, nextobject, objectindex, offsetindex, initialoffset);
@@ -186,7 +169,7 @@ int main(int argc, char** argv) {
    if (!hiddenQ) {
       // If "hidden", the file will disappear if Save As... is used to save,
       // because the document root does not know about it.
-      SSTREAM rootlink;
+      stringstream rootlink;
       nextobject = linkToRootObject(rootlink, objectindex, offsetindex, 
 		         initialoffset, trailerstring, xrefoffset, *file, 
 			 nextobject, pdffile);
@@ -204,7 +187,7 @@ int main(int argc, char** argv) {
    // new one
    addTrailerPrev(trailerstring, xrefoffset);
 
-   SSTREAM xrefstream;
+   stringstream xrefstream;
 
    int newxrefoffset = generateNewXref(xrefstream, objectindex, 
 		   offsetindex, filesize);
@@ -366,7 +349,7 @@ int linkToRootObject(ostream& out, Array<int>& objectindex,
       }
    }
 
-   SSTREAM rootstream;
+   stringstream rootstream;
 
    getObject(rootstream, file, rootoffset);
 
@@ -392,7 +375,7 @@ int linkToRootObject(ostream& out, Array<int>& objectindex,
    } else {
       // update Root dictionary to add /Names entry, create Names dictionary
       // and create the list of Embedded files in another object.
-      SSTREAM newroot;
+      stringstream newroot;
       nextobject = updateRootObject(newroot, rootindex, initialoffset, pdffile,
          rootstring, objectindex, offsetindex, embedcount, nextobject);
       initialoffset += newroot.str().length();
@@ -425,7 +408,7 @@ int updateRootObject(ostream& out, int rootobjnum, int initialoffset,
       PDFFile& pdffile, Array<char>& rootstring, Array<int>& objectindex, 
       Array<int>& offsetindex, int embedcount, int nextobject) {
 
-   SSTREAM newroot;
+   stringstream newroot;
    newroot << "\n";
    // objectoffsets[rootobjnum] = initialoffset + newroot.str().length();
    objectindex.append(rootobjnum);
@@ -452,7 +435,7 @@ int updateRootObject(ostream& out, int rootobjnum, int initialoffset,
 
    // create a name dictionary for the root object:
 
-   SSTREAM namedict;
+   stringstream namedict;
    namedict << "\n";
    objectindex.append(ndobjectnumber);
    int tempoffset = initialoffset + namedict.str().length();
@@ -473,7 +456,7 @@ int updateRootObject(ostream& out, int rootobjnum, int initialoffset,
    // add the embedded file listing:
 
    objectindex.append(embedlistobjnum);
-   SSTREAM embedlist;
+   stringstream embedlist;
    embedlist << "\n";
    tempoffset = initialoffset + embedlist.str().length();
    offsetindex.append(tempoffset);
@@ -536,7 +519,7 @@ int updateNamesObject(ostream& out, Array<int>& objectindex,
       Array<int>& offsetindex, int initialoffset, ifstream& file, 
       int nextobject, int ndoffset) {
 
-   SSTREAM ndstream;
+   stringstream ndstream;
    getObject(ndstream, file, ndoffset);
    Array<char> ndstring;
    ndstring.setSize(ndstream.str().length()+1);
@@ -679,10 +662,10 @@ void getObject(ostream& out, istream& file, int offset) {
 //    filesize == size in bytes of original file.
 //
 
-int generateNewXref(SSTREAM& finalout, Array<int>& objectindex, 
+int generateNewXref(stringstream& finalout, Array<int>& objectindex, 
       Array<int>& offsetindex, int filesize) {
 
-   SSTREAM out;
+   stringstream out;
 
    // temporary code for testing:
    // filesize = 0;
@@ -860,10 +843,10 @@ void addTrailerPrev(Array<char>& trailerstring, int newprevoffset) {
 //
 //
 
-int createFileEntry(SSTREAM& out, HumdrumFile& infile, const char* filename,
+int createFileEntry(stringstream& out, HumdrumFile& infile, const char* filename,
        int nextobject, Array<int>& objectindex, Array<int>& offsetindex,
        int initialoffset) {
-   SSTREAM datatoencode;
+   stringstream datatoencode;
    infile.write(datatoencode);
    nextobject = printStreamObject(out, nextobject, datatoencode, filename,
                       objectindex, offsetindex, initialoffset);
@@ -877,11 +860,11 @@ int createFileEntry(SSTREAM& out, HumdrumFile& infile, const char* filename,
 // printStreamObject --
 //
 
-int printStreamObject(ostream& finalout, int objnum, SSTREAM& datatoencode, 
+int printStreamObject(ostream& finalout, int objnum, stringstream& datatoencode, 
       const char* filename, Array<int>& objectindex, Array<int>& offsetindex,
       int initialoffset) {
-   SSTREAM streamcontents;
-   SSTREAM out;
+   stringstream streamcontents;
+   stringstream out;
    createStreamData(streamcontents, datatoencode, filename);
    int contentsize = streamcontents.str().length();
    char newline = 0x0a;
@@ -1019,13 +1002,13 @@ int value  = 0;
 // createStreamData --
 //
 
-void createStreamData(ostream& out, SSTREAM& datatoencode, 
+void createStreamData(ostream& out, stringstream& datatoencode, 
       const char* filename) {
    out << datatoencode.str();
 }
 
 
-void createStreamDataOld(ostream& out, SSTREAM& datatoencode, 
+void createStreamDataOld(ostream& out, stringstream& datatoencode, 
       const char* filename) {
    datatoencode << ends;
 
@@ -1121,7 +1104,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1129,7 +1112,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (opts.getBoolean("pdf")) {
-      pdffilename = opts.getString("pdf").data();
+      pdffilename = opts.getString("pdf").c_str();
    } else {
       //// No -p option is now allowed.  It means that the PDF will be
       //// coming into the program from standard input.
@@ -1142,7 +1125,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    keepdirQ = opts.getBoolean("keep-directory");
    prefixQ  = opts.getBoolean("prefix");
    if (prefixQ) {
-      prefix = opts.getString("prefix").data();
+      prefix = opts.getString("prefix").c_str();
       keepdirQ = 0;
    }
 }

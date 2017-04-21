@@ -547,47 +547,47 @@ Array<Array<Array<char> > > TieConditionsForward;
 
 // User interface variables:
 Options options;
-int    debugQ       = 0;          // used with --debug option
-int    roundQ       = 0;          // used with --round option
-int    slurQ        = 1;          // used with --no-slurs option
-int    dynamicsQ    = 1;          // used with --no-dynamics option
-int    sfzQ         = 1;          // used with --no-dynamics option
-int    textQ        = 1;          // used with --no-text option
-string TextSpines   = "";         // used with --text option
-int    metQ         = 1;          // used with --no-met option
-int    verselimit   = 5;          // used with --vl option
-int    mensuralQ    = 0;          // used with --mensural option
-int    abbreviationQ = 0;         // used with --abbreviation option
-int    sysabbrQ     = 0;          // used with -a option
-int    mensural2Q   = 0;          // used with --mensural2 option
-int    referenceQ   = 1;          // used with -R option
-int    noinvisibleQ = 0;          // used with --no-invisible option
-int    beamQ        = 1;          // used with --no-beams option
-int    tieQ         = 1;          // used with --no-ties option
-int    excludeQ     = 0;          // used with -x option
-const char* excludeString = "";   // used with -x option
-int    tupletQ      = 1;          // used with -no-tuplets option
-int    vzQ          = 0;          // used with --vz option
-int    hangtieQ     = 1;          // used with --no-hang-tie option
-int    composerQ    = 1;          // used with -C option
-int    titleQ       = 1;          // used with -T option
-int    checksumQ    = 0;          // used with --no-checksum option
-int    textvaddQ    = 0;          // used with --textvadd option
-int    sepbracketQ  = 0;          // used with --sepbracket option
-int    extensionQ   = 1;          // used with --no-extentions option
-int    ignoreTickError = 0;       // used with --dd option
-int    footerQ    = 0;            // used with --footer option
-const char* workNumber = "";      // used with --wk option
-const char* movementNumber = "";  // used with --mv option
-const char* footertext = "";      // used with --footer option
-const char* defaultDur  = "4";    // used with --dd option
-const char* LyricSpines = "";     // used with --ls option
-const char* Encoder = "";         // used with --encoder option
-int encoderQ = 0;                 // used with --encoder option
-int copyrightQ = 0;               // used with --copyright option
-const char* Copyright = "";       // used with --copyright option
-Array<char> Colorchar;            // charcter in **kern data which causes color
-Array<char> Colorout;             // converted charcter in col 14 of MuseData
+int    debugQ          = 0;   // used with --debug option
+int    roundQ          = 0;   // used with --round option
+int    slurQ           = 1;   // used with --no-slurs option
+int    dynamicsQ       = 1;   // used with --no-dynamics option
+int    sfzQ            = 1;   // used with --no-dynamics option
+int    textQ           = 1;   // used with --no-text option
+string TextSpines      = "";  // used with --text option
+int    metQ            = 1;   // used with --no-met option
+int    verselimit      = 5;   // used with --vl option
+int    mensuralQ       = 0;   // used with --mensural option
+int    abbreviationQ   = 0;   // used with --abbreviation option
+int    sysabbrQ        = 0;   // used with -a option
+int    mensural2Q      = 0;   // used with --mensural2 option
+int    referenceQ      = 1;   // used with -R option
+int    noinvisibleQ    = 0;   // used with --no-invisible option
+int    beamQ           = 1;   // used with --no-beams option
+int    tieQ            = 1;   // used with --no-ties option
+int    excludeQ        = 0;   // used with -x option
+string excludeString   = "";  // used with -x option
+int    tupletQ         = 1;   // used with -no-tuplets option
+int    vzQ             = 0;   // used with --vz option
+int    hangtieQ        = 1;   // used with --no-hang-tie option
+int    composerQ       = 1;   // used with -C option
+int    titleQ          = 1;   // used with -T option
+int    checksumQ       = 0;   // used with --no-checksum option
+int    textvaddQ       = 0;   // used with --textvadd option
+int    sepbracketQ     = 0;   // used with --sepbracket option
+int    extensionQ      = 1;   // used with --no-extentions option
+int    ignoreTickError = 0;   // used with --dd option
+int    footerQ         = 0;   // used with --footer option
+string workNumber      = "";  // used with --wk option
+string movementNumber  = "";  // used with --mv option
+string footertext      = "";  // used with --footer option
+string defaultDur      = "4"; // used with --dd option
+string LyricSpines     = "";  // used with --ls option
+string Encoder         = "";  // used with --encoder option
+int    encoderQ        = 0;   // used with --encoder option
+int    copyrightQ      = 0;   // used with --copyright option
+const char* Copyright  = "";  // used with --copyright option
+Array<char> Colorchar;        // charcter in **kern data which causes color
+Array<char> Colorout;         // converted charcter in col 14 of MuseData
 Array<Array<char> > PartNames;
 int hasFictaQ = 0;                // used with !!!RDF**kern: i=musica ficta
 char FictaChar = 'i';
@@ -653,7 +653,7 @@ int main(int argc, char** argv) {
    if (options.getArgCount() < 1) {
       infile.read(cin);
    } else {
-      infile.read(options.getArg(1).data());
+      infile.read(options.getArg(1).c_str());
    }
    infile.analyzeRhythm("4");
    setColorCharacters(infile, Colorchar, Colorout);
@@ -1433,10 +1433,10 @@ void setupTextAssignments(HumdrumFile& infile, int& textQ,
    }
 
    int zero = 1;
-   if (strlen(LyricSpines) > 0) {
+   if (strlen(LyricSpines.c_str()) > 0) {
       textQ = 1;
       Array<Array<int> > lyricspines;
-      processLyricsSpines(lyricspines, infile, LyricSpines);
+      processLyricsSpines(lyricspines, infile, LyricSpines.c_str());
       Array<int> kerntracks;
       getKernTracks(kerntracks, infile);
 
@@ -1878,7 +1878,7 @@ void printMuse2PsOptions(HumdrumFile& infile) {
       tempdata.setSize(strlen(infile[i][0])+1);
       strcpy(tempdata.getBase(), infile[i][0]);
       if (excludeQ && (strstr(infile[i][0], "muse2ps") != NULL)) {
-         filterOptions(tempdata, excludeString);
+         filterOptions(tempdata, excludeString.c_str());
       }
       cleanFooterField(tempdata, infile);
       if (pre.search(tempdata,
@@ -2233,7 +2233,7 @@ void convertData(Array<MuseData*>& outfiles, HumdrumFile& infile) {
          appendReferenceRecords(*outfiles[reversei], infile);
       }
       if (footerQ) {
-         printFooter(*outfiles[reversei], infile, footertext);
+         printFooter(*outfiles[reversei], infile, footertext.c_str());
       }
       // place abouve appendReferenceRecord when the =M preserves post-END comments
       endrecord.clear();
@@ -2459,7 +2459,7 @@ int getGlobalTicksPerQuarter(HumdrumFile& infile) {
 
    // hacky case where the minrhy is 0 and there is a defaultDur
    if (rn == 0) {
-      rn = getDuration("", defaultDur);
+      rn = getDuration("", defaultDur.c_str());
       rn.invert();
       Array<int> rhythms(2);
       rhythms[0] = rn.getNumerator();
@@ -3328,7 +3328,7 @@ void addDateAndEncoder(HumdrumFile& infile, MuseData& tempdata) {
       }
    }
    if (encoderQ) {
-      strcpy(encoder, Encoder);
+      strcpy(encoder, Encoder.c_str());
    } else if (strlen(encoder) == 0) {
       strcpy(encoder, "hum2muse");
    }
@@ -3372,12 +3372,12 @@ void getWorkAndMovement(Array<char>& work, Array<char>& movement,
    strcpy(work.getBase(),     "1");
 
    if (workNumber[0] != '\0') {
-      work.setSize(strlen(workNumber)+1);
-      strcpy(work.getBase(), workNumber);
+      work.setSize(strlen(workNumber.c_str())+1);
+      strcpy(work.getBase(), workNumber.c_str());
    }
    if (movementNumber[0] != '\0') {
-      movement.setSize(strlen(movementNumber)+1);
-      strcpy(movement.getBase(), movementNumber);
+      movement.setSize(strlen(movementNumber.c_str())+1);
+      strcpy(movement.getBase(), movementNumber.c_str());
    }
 
    int omvline = -1;
@@ -4051,7 +4051,7 @@ int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
    if (roundQ) {
       arecord.setRoundedBreve();
    }
-   RationalNumber rn = getDuration(infile[row][col], defaultDur);
+   RationalNumber rn = getDuration(infile[row][col], defaultDur.c_str());
    int  tokencount   = infile[row].getTokenCount(col);
    char buffer[128]  = {0};
    int tickdur = getTickDur(tpq, infile, row, col);
@@ -6922,7 +6922,7 @@ void setNoteheadShape(MuseRecord& arecord, const char* token) {
    PerlRegularExpression pre;
    if ((!pre.search(token, "\\d", "")) && (!pre.search(token, "q", "i"))) {
       // look at the default duration for a dot.
-      token = defaultDur;
+      token = defaultDur.c_str();
    }
    int len = strlen(token);
 
@@ -6939,7 +6939,7 @@ void setNoteheadShape(MuseRecord& arecord, const char* token) {
 
 
    RationalNumber rn;
-   rn = getDurationNoDots(token, defaultDur);
+   rn = getDurationNoDots(token, defaultDur.c_str());
    //if (dotcount == 1) {
    //   rn *= 2;
    //   rn /= 3;
@@ -7027,7 +7027,7 @@ void checkColor(Array<char>& colorchar, MuseRecord& arecord,
 //
 
 int getTickDur(int tpq, HumdrumFile& infile, int row, int col) {
-   RationalNumber rn = getDuration(infile[row][col], defaultDur);
+   RationalNumber rn = getDuration(infile[row][col], defaultDur.c_str());
    rn *= tpq;
 
    if (rn.getNumerator() == 0) {
@@ -7659,7 +7659,7 @@ void getTupletState(Array<int>& hasTuplet, Array<Array<char> >& TupletState,
          if (strcmp(infile[i][j], ".") == 0) {
             continue;
          }
-         rn = getDurationNoDots(infile[i][j], defaultDur);
+         rn = getDurationNoDots(infile[i][j], defaultDur.c_str());
          if (!isPowerOfTwo(rn)) {
             hasTuplet[track] = 1;
             // The note is a tuplet
@@ -7696,7 +7696,7 @@ void getTupletState(Array<int>& hasTuplet, Array<Array<char> >& TupletState,
 
 int getTupletTop(HumdrumFile& infile, int row, int col) {
    RationalNumber rn;
-   rn = getDurationNoDots(infile[row][col], defaultDur);
+   rn = getDurationNoDots(infile[row][col], defaultDur.c_str());
    // basic algorithm when works for most simple tuplets:
    // extract all prime factors which are not 2.
 
@@ -8277,7 +8277,7 @@ void verifyMuseDataFiles(Options& options) {
       verifyMuseDataFile(std::cin);
    } else {
       for (i=0; i<options.getArgCount(); i++) {
-         verifyMuseDataFile(options.getArg(i+1).data());
+         verifyMuseDataFile(options.getArg(i+1).c_str());
       }
    }
 }
@@ -8497,7 +8497,7 @@ void updateMuseDataFileTimeStamps(Options& options) {
    } else {
       int i;
       for (i=0; i<options.getArgCount(); i++) {
-         updateFileTimeStamps(options.getArg(i+1).data(), options);
+         updateFileTimeStamps(options.getArg(i+1).c_str(), options);
       }
    }
 }
@@ -8627,7 +8627,7 @@ void doUpdateWork(MuseDataSet& mds) {
    MuseRecord arecord;
    MuseRecord rrecord;
    if (options.getBoolean("reason")) {
-      rrecord.append("ss", "@REASON: ", options.getString("reason").data());
+      rrecord.append("ss", "@REASON: ", options.getString("reason").c_str());
    }
 
    for (i=0; i<mds.getPartCount(); i++) {
@@ -8955,7 +8955,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
       cout << MUSEINFO_VERSION << NEWLINE;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -8994,20 +8994,20 @@ void checkOptions(Options& opts, int argc, char** argv) {
    beamQ         = !opts.getBoolean("no-beams");
    tieQ          = !opts.getBoolean("no-ties");
    excludeQ      =  opts.getBoolean("exclude");
-   excludeString = opts.getString("exclude").data();
+   excludeString = opts.getString("exclude").c_str();
    noinvisibleQ  = opts.getBoolean("no-invisible");
    textvaddQ     = opts.getBoolean("textvadd");
 
    if (opts.getBoolean("work")) {
-      workNumber = opts.getString("work").data();
+      workNumber = opts.getString("work").c_str();
    }
    if (opts.getBoolean("movement")) {
-      movementNumber = opts.getString("movement").data();
+      movementNumber = opts.getString("movement").c_str();
    }
 
    footerQ    =  opts.getBoolean("footer");
    if (footerQ) {
-      footertext = opts.getString("footer").data();
+      footertext = opts.getString("footer").c_str();
    }
    tupletQ    = !opts.getBoolean("no-tuplets");
    vzQ        =  opts.getBoolean("vz");
@@ -9015,19 +9015,19 @@ void checkOptions(Options& opts, int argc, char** argv) {
       // only draw explicit tuplets
       tupletQ = 0;
    }
-   defaultDur =  opts.getString("default-duration").data();
+   defaultDur =  opts.getString("default-duration").c_str();
    verselimit =  opts.getInteger("verse-limit");
    if (opts.getBoolean("encoder")) {
       encoderQ = 1;
-      Encoder  = opts.getString("encoder").data();
+      Encoder  = opts.getString("encoder").c_str();
    }
    if (opts.getBoolean("copyright")) {
       copyrightQ = 1;
-      Copyright = opts.getString("copyright").data();
+      Copyright = opts.getString("copyright").c_str();
    }
    sfzQ = dynamicsQ;
-   muse2psoptionstring = opts.getString("muse2ps-options").data();
-   LyricSpines  = opts.getString("lyrics-spines").data();
+   muse2psoptionstring = opts.getString("muse2ps-options").c_str();
+   LyricSpines  = opts.getString("lyrics-spines").c_str();
 
    if (opts.getBoolean("unix")) {
       NEWLINE.setSize(2);

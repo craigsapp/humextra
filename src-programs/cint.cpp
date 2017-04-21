@@ -335,7 +335,7 @@ int processFile(HumdrumFile& infile, const string& filename, Options& options) {
 
    infile.getTracksByExInterp(ktracks, "**kern");
    if (koptionQ) {
-      adjustKTracks(ktracks, options.getString("koption").data());
+      adjustKTracks(ktracks, options.getString("koption").c_str());
    }
    notes.setSize(ktracks.getSize());
    reverselookup.setSize(infile.getMaxTracks()+1);
@@ -2791,7 +2791,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -2867,7 +2867,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    retroQ       = opts.getBoolean("retrospective");
    NoteMarker   = 0;
    if (opts.getBoolean("note-marker")) {
-      NoteMarker = opts.getString("note-marker").data()[0];
+      NoteMarker = opts.getString("note-marker").c_str()[0];
    }
    if (Chaincount < 0) {
       Chaincount = 0;
@@ -2888,7 +2888,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    if (searchQ) {
-      SearchString.initializeSearchAndStudy(opts.getString("search").data());
+      SearchString.initializeSearchAndStudy(opts.getString("search").c_str());
    }
 
 }

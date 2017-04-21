@@ -1627,6 +1627,7 @@ char* Convert::base40ToKern(char* output, int aPitch) {
    }
    if (repeat > 12) {
       cerr << "Error: unreasonable octave value: " << octave << endl;
+		cerr << "For input base-40 pitch: " << aPitch << endl;
       exit(1);
    }
    output[0] = base;
@@ -2524,6 +2525,7 @@ char* Convert::base12ToKern(char* output, int aPitch) {
    int octave = aPitch / 12 - 1;  // possible bug fix or bug creation
    if (octave > 12 || octave < -1) {
       cerr << "Error: unreasonable octave value: " << octave << endl;
+		cerr << "For base-12 input pitch " << aPitch << endl;
       exit(1);
    }
    int chroma = aPitch % 12;
@@ -2598,6 +2600,7 @@ char* Convert::base12ToPitch(char* output, int aPitch) {
    int octave = aPitch / 12 - 1;  // possible bug fix or bug creation
    if (octave > 12 || octave < -1) {
       cerr << "Error: unreasonable octave value: " << octave << endl;
+		cerr << "For base-12 input pitch: " << aPitch << endl;
       exit(1);
    }
    int chroma = aPitch % 12;

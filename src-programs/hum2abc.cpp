@@ -101,22 +101,9 @@
 #include <string.h>
 #include <dirent.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <iostream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <iostream>
+#include <sstream>
+using namespace std;
 
 #include "PerlRegularExpression.h"
 #include "CheckSum.h"
@@ -196,7 +183,7 @@ class MeasureInfo {
       int measurenum;             // an explicit number found for the barline
       int currkey;
       int newkey;                 
-      const char* kernkey;        // for printing ABC modality with --key option
+      string kernkey;             // for printing ABC modality with --key option
       int fullrest;               // -1 or 0 if not a full measure of rest
                                   // otherwise a count of the number of
                                   // full measures of rests including
@@ -281,243 +268,243 @@ void      checkOptions         (Options& opts, int argc, char** argv,
                                 int fcount, HumdrumFile& cinfile);
 void      storeOptionSet       (Options& opts);
 void      example              (void);
-void      usage                (const char* command);
+void      usage                (const string& command);
 void      printHeader          (ostream& out, HumdrumFile& infile,
-                                Array<char*>& header,
-                                Array<MeasureInfo>& measures, int xval, 
-                                const char* filename);
-void      parseBibliographic   (Array<char*>& header, HumdrumFile& infile);
+                                string& header,
+                                vector<MeasureInfo>& measures, int xval, 
+                                const string& filename);
+void      parseBibliographic   (string& header, HumdrumFile& infile);
 void      convertHumdrumToAbc  (ostream& out, HumdrumFile& infile, int xval,
-                                const char* filename);
+                                const string& filename);
 void      calculateBestRhythmUnit(HumdrumFile& infile, int& Ltop, int& Lbot);
-void      getBibPieces         (const char* string, const char* string2, 
-		                  Array<char>& marker,  Array<char>& contents);
-void      storeHeaderRecord    (Array<char*>& header, char recordletter, 
-                                const char* string);
-void      translateSpecialCharacters(Array<char>& output, const char* input);
-void      calculateQRecord     (Array<char>& QRecord, double tempo, 
-                                const char* omdstring, int top, int bot);
+void      getBibPieces         (const string& string, const string* string2, 
+		                  string& marker,  string& contents);
+void      storeHeaderRecord    (string& header, char recordletter, 
+                                const string& string);
+void      translateSpecialCharacters(string& output, const string& input);
+void      calculateQRecord     (string& QRecord, double tempo, 
+                                const string& omdstring, int top, int bot);
 void      printBody            (ostream& out, HumdrumFile& infile,
-                                Array<MeasureInfo>& measures);
-void      createVoiceMap       (Array<VoiceMap>& voicemap, HumdrumFile& infile);
+                                vector<MeasureInfo>& measures);
+void      createVoiceMap       (vector<VoiceMap>& voicemap, HumdrumFile& infile);
 void      printVoiceDeclaration(ostream& out, VoiceMap vmap, int voicenum, 
                                 HumdrumFile& infile);
-void      getMeasureInfo       (Array<MeasureInfo>& measures, 
+void      getMeasureInfo       (vector<MeasureInfo>& measures, 
                                 HumdrumFile& infile);
 void      printMeasures        (ostream& out, HumdrumFile& infile, 
-                                Array<MeasureInfo>& measures, 
+                                vector<MeasureInfo>& measures, 
                                 int startmeasure, int endmeasure,
-				Array<VoiceMap>& voicemap);
-void      printSingleMeasure   (ostream& out, const Array<VoiceMap>& voiceinfo, 
+				vector<VoiceMap>& voicemap);
+void      printSingleMeasure   (ostream& out, const vector<VoiceMap>& voiceinfo, 
                                 int vindex, int vmapsize, 
-                                Array<MeasureInfo>& measureinfo, 
+                                vector<MeasureInfo>& measureinfo, 
                                 int mindex, HumdrumFile& infile, 
                                 int staffnumber);
-void      buildNoteAddresses   (Array<Array<Coordinate> >& noteaddresses,
+void      buildNoteAddresses   (vector<vector<Coordinate> >& noteaddresses,
                                 HumdrumFile& infile, const VoiceMap& voiceinfo, 
                                 const MeasureInfo& measureinfo);
 void      printLayer           (int layer, ostream& out, 
                                 const VoiceMap& voiceinfo, 
                                 const MeasureInfo& measureinfo, 
                                 HumdrumFile& infile, 
-                                Array<Array<Coordinate> >& address,
-                                Array<Coordinate>& meterclef);
+                                vector<vector<Coordinate> >& address,
+                                vector<Coordinate>& meterclef);
 int       getMaxLayer          (int track, int start, int endd, 
                                 HumdrumFile& infile);
 void      printMeasureLine     (ostream& out, HumdrumFile& infile, int line,
                                 int primary, int staffnumber,
-                                Array<MeasureInfo>& measureinfo, int mindex,
+                                vector<MeasureInfo>& measureinfo, int mindex,
                                 int vindex);
-void      getNoteDurations     (Array<double>& notedurations, 
-		                Array<int>& iindex, int layer, 
-                                Array<Array<Coordinate> >& address, 
+void      getNoteDurations     (vector<double>& notedurations, 
+		                vector<int>& iindex, int layer, 
+                                vector<vector<Coordinate> >& address, 
                                 HumdrumFile& infile);
 void      printKernTokenAsAbc  (ostream& out, HumdrumFile& infile, int row, 
-                                int col, Array<int>& accident, double notedur, 
+                                int col, vector<int>& accident, double notedur, 
                                 int brokenq, double brokendur, int top, 
                                 int bot, int& slursuppress, int groupflag);
-void      getBrokenRhythms     (Array<int>& broken, Array<double>& brokendurs, 
-                                Array<Coordinate>& nogracelist, 
-                                Array<double>& nogracedurs, 
+void      getBrokenRhythms     (vector<int>& broken, vector<double>& brokendurs, 
+                                vector<Coordinate>& nogracelist, 
+                                vector<double>& nogracedurs, 
                                 HumdrumFile& infile);
-int       getBeamState         (const char* token);
+int       getBeamState         (const string& token);
 char*     base40ToAbcPitch     (char* buffer, int base40);
 int       countDots            (char* buffer);
-int       getRhythm            (const char* buffer);
+int       getRhythm            (const string& buffer);
 void      printKeySignature    (ostream& out, HumdrumFile& infile);
-void      setAccidentals       (Array<int>& accident, int key);
+void      setAccidentals       (vector<int>& accident, int key);
 void      printAbcKeySignature (ostream& out, int keynum);
-void      printAbcKeySignature (ostream& out, const char* kernkey);
-void      printAccidental      (ostream& out, int base40, const char* token, 
-                                Array<int>& accident);
-void      adjustAccidentalStates(Array<int>& accident, int step, 
-                                Array<Array<Coordinate> >& address, 
+void      printAbcKeySignature (ostream& out, const string& kernkey);
+void      printAccidental      (ostream& out, int base40, const string& token, 
+                                vector<int>& accident);
+void      adjustAccidentalStates(vector<int>& accident, int step, 
+                                vector<vector<Coordinate> >& address, 
                                 HumdrumFile& infile);
-void      adjustAccidentalStates2(Array<int>& accident, HumdrumFile& infile, 
+void      adjustAccidentalStates2(vector<int>& accident, HumdrumFile& infile, 
                                 int row, int col);
-void      printArticulations   (ostream& out, const char* string);
-void      getMeterAndClefChanges(Array<Coordinate>& meterchanges, 
+void      printArticulations   (ostream& out, const string& string);
+void      getMeterAndClefChanges(vector<Coordinate>& meterchanges, 
                                 HumdrumFile& infile, const VoiceMap& voiceinfo,
                                 const MeasureInfo& measureinfo);
 void      printMeterAndClefChanges(ostream& out, int testrow, 
-                                Array<Coordinate>& meterclef, 
+                                vector<Coordinate>& meterclef, 
                                 HumdrumFile& infile);
-void      printAbcClef         (ostream& out, const char* string, int track,
-                                Array<int>& cleftranspose);
-void      printAbcMeter        (ostream& out, const char* string);
+void      printAbcClef         (ostream& out, const string& string, int track,
+                                vector<int>& cleftranspose);
+void      printAbcMeter        (ostream& out, const string& string);
 int       checkForAllTies      (HumdrumFile& infile, int row, int col);
-int       findRecord           (const char* key, Array<char>& value, 
-                                HumdrumFile& infile, Array<int>& bibfields);
-int       findMultipleRecords  (const char* key, Array<Array<char> >& values, 
-                                HumdrumFile& infile, Array<int>& bibfields);
+int       findRecord           (const string& key, string& value, 
+                                HumdrumFile& infile, vector<int>& bibfields);
+int       findMultipleRecords  (const string& key, vector<string>& values, 
+                                HumdrumFile& infile, vector<int>& bibfields);
 void      printAbcExtendedInformationFields(ostream& out, HumdrumFile& infile);
-void      primeFactorization   (Array<int>& factors, int input);
+void      primeFactorization   (vector<int>& factors, int input);
 void      printRhythm1         (ostream& out, char* buffer, int top, int bot);
 int       printRhythm2         (ostream& out, double dur, int brokenstate, 
                                 double brokendur, int top, int bot, 
-                                int chordQ, const char* token);
+                                int chordQ, const string& token);
 void      simplifyFraction     (int& top, int& bot);
 void      printDurationAsRhythm(ostream& out, double dur, int top, int bot);
-void      getNoGraceList       (Array<Coordinate>& notelist, 
-                                Array<Array<Coordinate> >& address, 
+void      getNoGraceList       (vector<Coordinate>& notelist, 
+                                vector<vector<Coordinate> >& address, 
                                 int layer, HumdrumFile& infile);
-void      getNoGraceDurs       (Array<double>& nogracedurs, 
-                                Array<double>& notedurs, 
-                                Array<Array<Coordinate> >& address, 
+void      getNoGraceDurs       (vector<double>& nogracedurs, 
+                                vector<double>& notedurs, 
+                                vector<vector<Coordinate> >& address, 
                                 int layer);
-void      identifyTuplets      (Array<TupletInfo>& tupletstuff, 
-                                Array<double>& nogracedurs, 
-                                Array<Coordinate>& nogracelist, 
-	                        HumdrumFile& infile, Array<int>& broken, 
-                                Array<double>& brokendurs,
-                                Array<BeamInfo>& beaminfo);
+void      identifyTuplets      (vector<TupletInfo>& tupletstuff, 
+                                vector<double>& nogracedurs, 
+                                vector<Coordinate>& nogracelist, 
+	                        HumdrumFile& infile, vector<int>& broken, 
+                                vector<double>& brokendurs,
+                                vector<BeamInfo>& beaminfo);
 int       getTupletInfo        (TupletInfo& tupletsutff, 
                                 Coordinate& nogracelist, HumdrumFile& infile);
-int       getNonDuplePrimes    (Array<int>& factors);
-int       getDuplePrimes       (Array<int>& factors);
+int       getNonDuplePrimes    (vector<int>& factors);
+int       getDuplePrimes       (vector<int>& factors);
 int       getNextLowerPowerOfTwo(int number);
-void      identifyTupletShortCuts(Array<TupletInfo>& tupletstuff,
-                                Array<BeamInfo>& beaminfo, 
-                                Array<double>& nogracedurs,
-                                Array<Coordinate>& nogracelist,
+void      identifyTupletShortCuts(vector<TupletInfo>& tupletstuff,
+                                vector<BeamInfo>& beaminfo, 
+                                vector<double>& nogracedurs,
+                                vector<Coordinate>& nogracelist,
                                 HumdrumFile& infile);
 void      printTupletInfo      (ostream& out, TupletInfo& tinfo);
-void      flipCommaParts       (Array<char>& contents);
+void      flipCommaParts       (string& contents);
 int       roundTempoToNearestStandard(double tempo);
-int       characterCount       (const char* string, char character);
-void      getBeamInfo          (Array<BeamInfo>& beaminfo, 
-                                Array<Coordinate>& nogracelist, 
+int       characterCount       (const string& string, char character);
+void      getBeamInfo          (vector<BeamInfo>& beaminfo, 
+                                vector<Coordinate>& nogracelist, 
                                 HumdrumFile& infile);
-void      separateCountsByBeams(Array<TupletInfo>& tupletstuff, 
-                                Array<BeamInfo>& beaminfo,
-                                Array<Coordinate>& nogracelist,
+void      separateCountsByBeams(vector<TupletInfo>& tupletstuff, 
+                                vector<BeamInfo>& beaminfo,
+                                vector<Coordinate>& nogracelist,
                                 HumdrumFile& infile);
-void      identifyWholeRestsInMeasures(Array<MeasureInfo>& measures, 
+void      identifyWholeRestsInMeasures(vector<MeasureInfo>& measures, 
                                 VoiceMap& voicemap, HumdrumFile& infile);
 int       checkForWholeRestInMeasure(int startline, int endline, int primary,
                                 HumdrumFile& infile);
-void      printMultiRest       (ostream& out, Array<MeasureInfo>& measureinfo, 
+void      printMultiRest       (ostream& out, vector<MeasureInfo>& measureinfo, 
                                 int mindex);
 void      printInvisibleRest   (ostream& out, double duration);
-void      getRepeatInfo        (Array<int>& segments, Array<int>& repeatinfo, 
+void      getRepeatInfo        (vector<int>& segments, vector<int>& repeatinfo, 
                                 HumdrumFile& infile);
-int       checkForRepeatMeasure(HumdrumFile& infile, Array<int>& segments, 
-                                Array<int>& repeatinfo, int mindex);
+int       checkForRepeatMeasure(HumdrumFile& infile, vector<int>& segments, 
+                                vector<int>& repeatinfo, int mindex);
 int       getFirstMeasureNumber(HumdrumFile& infile);
 void      printVoiceClef       (ostream& out, VoiceMap voicemap, 
 		                HumdrumFile& infile);
-void      getRestInfo          (Array<int>& rests, 
-                                Array<Coordinate>& nogracelist, 
+void      getRestInfo          (vector<int>& rests, 
+                                vector<Coordinate>& nogracelist, 
                                 HumdrumFile& infile);
 void     printVeritas          (ostream& out, HumdrumFile& infile);
-void     prepareBibliographicData(Array<Array<char> >& markers, 
-                                Array<Array<char> >& contentses, 
+void     prepareBibliographicData(vector<string>& markers, 
+                                vector<string>& contentses, 
                                 HumdrumFile& infile);
-void     addContentToString    (Array<char>& newtitle, Array<char>& key, 
-                                Array<Array<char> >& markers, 
-                                Array<Array<char> >& contentses);
-void     printNumberFromString (ostream& out, const char* filename, 
-                                const char* ending);
-void     printFilenameBase     (ostream& out, const char* filename);
-int      norhythm              (const char* buffer);
-void     getFileListing        (Array<Array<char> >& filelist, 
-		                const char* directoryname, 
-                                const char* filemask);
+void     addContentToString    (string& newtitle, string& key, 
+                                vector<string>& markers, 
+                                vector<string>& contentses);
+void     printNumberFromString (ostream& out, const string& filename, 
+                                const string& ending);
+void     printFilenameBase     (ostream& out, const string& filename);
+int      norhythm              (const string& buffer);
+void     getFileListing        (vector<string>& filelist, 
+		                          const string& directoryname, 
+                                const stirng& filemask);
 int      sortfiles             (const void* a, const void* b);
-void     printGraceRhythm      (ostream& out, const char* buffer, 
+void     printGraceRhythm      (ostream& out, const string& buffer, 
 		                int top, int bot, int groupflag);
-int     getGraceNoteGroupFlag  (Array<double>& notedurs, int index);
+int     getGraceNoteGroupFlag  (vector<double>& notedurs, int index);
 void    checkForLineBreak      (ostream& out, HumdrumFile& infile, 
                                 int row, int col);
 void    getColorAssignment     (double& red, double& green, double& blue, 
-                                const char* line);
+                                const string& line);
 void    checkMarks             (HumdrumFile& infile);
-int     getMarkState           (Array<char>& marks, HumdrumFile& infile);
-void    printMarks             (ostream& out, const char* buffer, 
-                                Array<char>& marks,
-                                Array<Array<double> > markcolors, 
+int     getMarkState           (string& marks, HumdrumFile& infile);
+void    printMarks             (ostream& out, const string& buffer, 
+                                string& marks,
+                                vector<vector<double> > markcolors, 
                                 int notecount);
-void    printMarkCodes         (ostream& out, Array<char>& marks, 
-                                Array<Array<double> >& markcolors);
-void    printNoteHeadShape     (ostream& out, const char* buffer, int mindex);
-void    getNoteShape           (RationalNumber&, const char* buffer);
+void    printMarkCodes         (ostream& out, string& marks, 
+                                vector<vector<double> >& markcolors);
+void    printNoteHeadShape     (ostream& out, const string& buffer, int mindex);
+void    getNoteShape           (RationalNumber&, const string& buffer);
 
 // User interface variables:
 Options options;
-int    debugQ    = 0;             // used with --debug option
-int    labelQ    = 0;             // used with --label option
-int    veritasQ  = 1;             // used with --no-veritas option
-int    continueQ = 1;             // used with --no-autoformat option
-int    boxQ      = 0;             // used with --box option
-int    notespacingQ = 0;          // used with --spacing option
-double notespacing  = 0;          // used with --spacing option
-int    linemeasure  = 4;          // used with -m option
-int    barnumberingstyle = 0;     // used with -n option
-int    invisibleQ   = 1;          // used with --no-invisible
-int    footerQ      = 0;          // used with -f option
-const char* footer   = "";        // used with -f option
-int    headerQ      = 0;          // used with -h option
-const char* header   = "";        // used with -h option
-int    musicscaleQ  = 0;          // used with -s option
-double musicscale   = 0.75;       // used with -s option
-int    landscapeQ   = 0;          // used with --landscape option
-const char* parameterstring = ""; // used with -p option
-const char* invisiblerest = "x";  // used with --no-invisible option
-int    filenumQ     = 0;          // used with --filenum option
-const char* filenumstring = "";   // used with --filenum option
-int    filenametitleQ = 0;        // used with --filetitle option
-int    titleexpansionQ = 0;       // used with --TT option
-const char* titleexpansion = "";  // used with --TT option
-int    graceQ = 1;                // used with --no-grace option
-int    directoryQ = 0;            // used with --dir option
-const char* directoryname = ".";  // used with --dir option
-const char* filemask = ".krn";    // used with --mask option
-int    nonaturalQ    = 0;         // used with --nn option
-int    linebreakQ    = 0;         // used with --linebreak option
-int    notempoQ      = 0;         // used with --no-tempo option
-int    slurQ         = 1;         // used with --no-slur option
-int    databarnumQ   = 0;         // used with --data-barnum option
-int    commentbarnumQ = 0;        // used with --comment-barnum option
-int    keyQ           = 0;        // used with --key option
+int    debugQ            = 0;      // used with --debug option
+int    labelQ            = 0;      // used with --label option
+int    veritasQ          = 1;      // used with --no-veritas option
+int    continueQ         = 1;      // used with --no-autoformat option
+int    boxQ              = 0;      // used with --box option
+int    notespacingQ      = 0;      // used with --spacing option
+double notespacing       = 0;      // used with --spacing option
+int    linemeasure       = 4;      // used with -m option
+int    barnumberingstyle = 0;      // used with -n option
+int    invisibleQ        = 1;      // used with --no-invisible
+int    footerQ           = 0;      // used with -f option
+string footer            = "";     // used with -f option
+int    headerQ           = 0;      // used with -h option
+strong header            = "";     // used with -h option
+int    musicscaleQ       = 0;      // used with -s option
+double musicscale        = 0.75;   // used with -s option
+int    landscapeQ        = 0;      // used with --landscape option
+string parameterstring   = "";     // used with -p option
+string invisiblerest     = "x";    // used with --no-invisible option
+int    filenumQ          = 0;      // used with --filenum option
+string filenumstring     = "";     // used with --filenum option
+int    filenametitleQ    = 0;      // used with --filetitle option
+int    titleexpansionQ   = 0;      // used with --TT option
+string titleexpansion    = "";     // used with --TT option
+int    graceQ            = 1;      // used with --no-grace option
+int    directoryQ        = 0;      // used with --dir option
+string directoryname     = ".";    // used with --dir option
+string filemask          = ".krn"; // used with --mask option
+int    nonaturalQ        = 0;      // used with --nn option
+int    linebreakQ        = 0;      // used with --linebreak option
+int    notempoQ          = 0;      // used with --no-tempo option
+int    slurQ             = 1;      // used with --no-slur option
+int    databarnumQ       = 0;      // used with --data-barnum option
+int    commentbarnumQ    = 0;      // used with --comment-barnum option
+int    keyQ              = 0;      // used with --key option
 
 // mark data
 int    markQ       = 1;           // used with --no-mark option
 int    hasmarksQ   = 0;           // used with markQ
-Array<char> marks;                // marking characters in **kern data
-Array<Array<double> > markcolors; // color for markings in **kern data
-Array<Array<int> > usedMarks;     // keep track of which noteheads used.
+string marks;                // marking characters in **kern data
+vector<vector<double> > markcolors; // color for markings in **kern data
+vector<vector<int> > usedMarks;     // keep track of which noteheads used.
 const int USEDSIZE  = 9;
 int    usedAnnotation = 0;        // keep track of whether annotation code
                                   // needs to be added to header
 
-Array<char*> Header;
+string Header;
 
 // score variables
 int Ltop = 1;              // used for creating rhythm values
 int Lbot = 4;              // used for creating rhythm values
 int StartKey = 0;          
-Array<VoiceMap> Voicemap;  // used printing polyphonic data
-Array<int> clefstates;     // keep track of transpositions for tenor clef
+vector<VoiceMap> Voicemap;  // used printing polyphonic data
+vector<int> clefstates;     // keep track of transpositions for tenor clef
 int stemlessQ = 0;         // used with -p "%%nostems" spoofing
 
 //////////////////////////////////////////////////////////////////////////
@@ -534,22 +521,22 @@ int main(int argc, char** argv) {
    int i = 0;
    int j;
    if (directoryQ) {
-      Array<Array<char> > filelist;
+      vector<string> filelist;
       getFileListing(filelist, directoryname, filemask);
 
-      for (i=0; i<filelist.getSize(); i++) {
+      for (i=0; i<(int)filelist.size(); i++) {
          infiles.read(filelist[i].getBase());
          for (j=0; j<infiles.getCount(); j++) {
             checkMarks(infiles[j]);
             checkOptions(options, argc, argv, i+1, infiles[j]);
             convertHumdrumToAbc(cout, infiles[j], i+1, filelist[i].getBase());
             if (j<infiles.getCount()-1) {
-               if (i < filelist.getSize() - 1) {
+               if (i < (int)filelist.size() - 1) {
                   cout << "\n\n\n";
                }
             }
          }
-         if (i < filelist.getSize() - 1) {
+         if (i < (int)filelist.size() - 1) {
             cout << "\n\n\n";
          }
       }
@@ -558,7 +545,7 @@ int main(int argc, char** argv) {
          // process the command-line options
          // checkOptions(options, argc, argv, i, infiles[i]);
          checkMarks(infiles[i]);
-         convertHumdrumToAbc(cout, infiles[i], i, options.getArg(i).data());
+         convertHumdrumToAbc(cout, infiles[i], i, options.getArg(i).c_str());
          if (i < infiles.getCount()-1) {
             cout << "\n\n\n";
          }
@@ -578,15 +565,15 @@ int main(int argc, char** argv) {
 
 void checkMarks(HumdrumFile& infile) {
    if (!markQ) {
-      marks.setSize(0);
-      markcolors.setSize(0);
+      marks.resize(0);
+      markcolors.resize(0);
       hasmarksQ = 0;
       return;
    }
 
-   Array<char> mchar; // list of characters which are marks
-   marks.setSize(0);
-   markcolors.setSize(0);
+   string mchar; // list of characters which are marks
+   marks.resize(0);
+   markcolors.resize(0);
    int i;
    char target;
    double red   = 0; 
@@ -600,22 +587,22 @@ void checkMarks(HumdrumFile& infile) {
       if (pre.search(infile[i][0], 
             "!!!RDF\\*\\*kern\\s*:\\s*([^=])\\s*=\\s*match", "i")) {
          target = pre.getSubmatch(1)[0];
-         marks.append(target);
+         marks.push_back(target);
          // check for color assignment
          getColorAssignment(red, green, blue, infile[i][0]);
-         markcolors.setSize(markcolors.getSize()+1);
-         markcolors.last().setSize(3);
+         markcolors.resize(markcolors.size()+1);
+         markcolors.last().resize(3);
          markcolors.last()[0] = red;
          markcolors.last()[1] = green;
          markcolors.last()[2] = blue;
       } else if (pre.search(infile[i][0], 
             "!!!RDF\\*\\*kern\\s*:\\s*([^=])\\s*=\\s*mark", "i")) {
          target = pre.getSubmatch(1)[0];
-         marks.append(target);
+         marks.push_back(target);
          // check for color assignment
          getColorAssignment(red, green, blue, infile[i][0]);
-         markcolors.setSize(markcolors.getSize()+1);
-         markcolors.last().setSize(3);
+         markcolors.resize(markcolors.size()+1);
+         markcolors.last().resize(3);
          markcolors.last()[0] = red;
          markcolors.last()[1] = green;
          markcolors.last()[2] = blue;
@@ -625,7 +612,7 @@ void checkMarks(HumdrumFile& infile) {
 
    // if the markcount is greater than 1, then print %%postscript code
    // in abc plus header.
-   if (marks.getSize() <= 0) {
+   if ((int)marks.size() <= 0) {
       hasmarksQ = 0;
    } else {
       hasmarksQ = getMarkState(marks, infile);
@@ -633,9 +620,9 @@ void checkMarks(HumdrumFile& infile) {
 
    // keep track of what noteheads have been displayed in the score
    // so that only the ones used will be printed in the header.
-   usedMarks.setSize(marks.getSize());
-   for (i=0; i<usedMarks.getSize(); i++) {
-      usedMarks[i].setSize(USEDSIZE);
+   usedMarks.resize(marks.size());
+   for (i=0; i<(int)usedMarks.size(); i++) {
+      usedMarks[i].resize(USEDSIZE);
       usedMarks[i].setAll(0);
    }
 
@@ -648,7 +635,7 @@ void checkMarks(HumdrumFile& infile) {
 // getMarkState -- return true if there are marks in the **kern data, otherwise
 //     false.
 
-int getMarkState(Array<char>& marks, HumdrumFile& infile) {
+int getMarkState(string& marks, HumdrumFile& infile) {
    const char* str;
    int i, j, k, m;
    for (i=0; i<infile.getNumLines(); i++) {
@@ -660,7 +647,7 @@ int getMarkState(Array<char>& marks, HumdrumFile& infile) {
             k=0;
             str = infile[i][j];
             while (str[k] != '\0') {
-               for (m=0; m<marks.getSize(); m++) {
+               for (m=0; m<(int)marks.size(); m++) {
                   if (str[k] == marks[m]) {
                      return 1;
                   }
@@ -725,12 +712,11 @@ void getColorAssignment(double& red, double& green, double& blue,
 // getFileListing --
 //
 
-void getFileListing(Array<Array<char> >& filelist, const char* directoryname, 
+void getFileListing(vector<string>& filelist, const char* directoryname, 
       const char* filemask) {
 
-   filelist.setSize(1000000);
-   filelist.setGrowth(1000000);
-   filelist.setSize(0);
+   filelist.reserve(1000000);
+   filelist.resize(0);
    int length;
    int dirlen = strlen(directoryname);
    const char* connector = "/";
@@ -755,20 +741,16 @@ void getFileListing(Array<Array<char> >& filelist, const char* directoryname,
          // ignore files which do not match to mask.
          continue;
       }
-      filelist.setSize(filelist.getSize()+1);
-      length = strlen(dir->d_name);
-      storlen = length + dirlen + conlen + 1;
-      filelist[filelist.getSize()-1].setSize(storlen);
-      strcpy(filelist[filelist.getSize()-1].getBase(), directoryname);
-      strcat(filelist[filelist.getSize()-1].getBase(), connector);
-      strcat(filelist[filelist.getSize()-1].getBase(), dir->d_name);
+      filelist.push_back(directoryname);
+		filelist.back() += connector;
+		filelist.back() += dir->d_name;
    }
    closedir(d);
 
 
    // sort the filelist (it is not sorted currently)
    
-   qsort(filelist.getBase(), filelist.getSize(), sizeof(Array<char>), 
+   qsort(filelist.getBase(), filelist.size(), sizeof(string), 
       sortfiles); 
 
 }
@@ -780,7 +762,7 @@ void getFileListing(Array<Array<char> >& filelist, const char* directoryname,
 // sortfiles --
 //
 
-typedef Array<char> chararray;
+typedef string chararray;
 
 int sortfiles(const void* a, const void* b) {
    return strcmp((((chararray*)a))->getBase(), (((chararray*)b))->getBase());
@@ -795,17 +777,16 @@ int sortfiles(const void* a, const void* b) {
 
 void convertHumdrumToAbc(ostream& out, HumdrumFile& infile, int xval,
       const char* filename) {
-   clefstates.setSize(infile.getMaxTracks()+1);
+   clefstates.resize(infile.getMaxTracks()+1);
    clefstates.setAll(0);
-   clefstates.allowGrowth(0);
    infile.analyzeRhythm("4");
-   Array<MeasureInfo> measures;
+   vector<MeasureInfo> measures;
    createVoiceMap(Voicemap, infile);
    getMeasureInfo(measures, infile);
 
-   SSTREAM sheader;
-   SSTREAM smarks;
-   SSTREAM sbody;
+   stringstream sheader;
+   stringstream smarks;
+   stringstream sbody;
 
    printHeader(sheader, infile, Header, measures, xval, filename);
    printBody(sbody, infile, measures);
@@ -818,9 +799,9 @@ void convertHumdrumToAbc(ostream& out, HumdrumFile& infile, int xval,
    smarks << ends;
    sbody << ends;
 
-   out << sheader.CSTRING;
-   out << smarks.CSTRING;
-   out << sbody.CSTRING;
+   out << sheader.str().c_str();
+   out << smarks.str().c_str();
+   out << sbody.str().c_str();
    out << flush;
 }
 
@@ -832,7 +813,7 @@ void convertHumdrumToAbc(ostream& out, HumdrumFile& infile, int xval,
 //
 
 void printBody(ostream& out, HumdrumFile& infile, 
-      Array<MeasureInfo>& measures) {
+      vector<MeasureInfo>& measures) {
 
    // print on a single line if requested by the
    // user here; otherwise, currently print in
@@ -842,7 +823,7 @@ void printBody(ostream& out, HumdrumFile& infile,
    if (debugQ) {
       out << "%\n% Measure information in input file:\n";
       out << "%\tindex\tnumber\tstart\tstop\tlines\tcurkey\tnewkey\n";
-      for (i=0; i<measures.getSize(); i++) {
+      for (i=0; i<(int)measures.size(); i++) {
          out << "%\tM:" << i << "\t" 
              << measures[i].measurenum << "\t"
              << measures[i].startline  << "\t"
@@ -857,10 +838,10 @@ void printBody(ostream& out, HumdrumFile& infile,
 
    int increment = linemeasure;
    int maxmeasure;
-   for (i=0; i<measures.getSize(); i+=increment) {
+   for (i=0; i<(int)measures.size(); i+=increment) {
       maxmeasure = i+increment;
-      if (maxmeasure >= measures.getSize()) {
-         maxmeasure = measures.getSize();
+      if (maxmeasure >= (int)measures.size()) {
+         maxmeasure = (int)measures.size();
       }
       printMeasures(out, infile, measures, i, maxmeasure, Voicemap);
    }
@@ -874,42 +855,42 @@ void printBody(ostream& out, HumdrumFile& infile,
 //
 
 void printMeasures(ostream& out, HumdrumFile& infile, 
-      Array<MeasureInfo>& measures, int startmeasure, int stopmeasure, 
-      Array<VoiceMap>& voicemap) {
+      vector<MeasureInfo>& measures, int startmeasure, int stopmeasure, 
+      vector<VoiceMap>& voicemap) {
  
    int i, j;
-   int asize = voicemap.getSize();
-   SSTREAM *pstaves[asize];
+   int asize = (int)voicemap.size();
+   stringstream *pstaves[asize];
    for (i=0; i<asize; i++) {
-      pstaves[i] = new SSTREAM;
+      pstaves[i] = new stringstream;
    }
-   // SSTREAM staves[voicemap.getSize()];
+   // stringstream staves[voicemap.size()];
 
    for (i=startmeasure; i<stopmeasure; i++) {
-      for (j=0; j<voicemap.getSize(); j++) {
+      for (j=0; j<(int)voicemap.size(); j++) {
          if (commentbarnumQ && (j==0)) {
             if (measures[i].measurenum > 0) {
                out << "%BAR: " << measures[i].measurenum << "\n";
             }
          }
-         printSingleMeasure(*(pstaves[j]), voicemap, j, voicemap.getSize(), 
+         printSingleMeasure(*(pstaves[j]), voicemap, j, (int)voicemap.size(), 
                measures, i, infile, j);
       }
    }
 
-   for (i=0; i<voicemap.getSize(); i++) {
+   for (i=0; i<(int)voicemap.size(); i++) {
       (*(pstaves[i])) << ends;
-      if ((*(pstaves[i])).CSTRING[0] == '\0') {
+      if ((*(pstaves[i])).str().c_str()[0] == '\0') {
          continue;
       }
-      if (voicemap.getSize() > 1) {
+      if ((int)voicemap.size() > 1) {
          out << "[V:" << voicemap[i].voicenumber << "] ";
-         out << (*(pstaves[i])).CSTRING << "\n";
+         out << (*(pstaves[i])).str().c_str() << "\n";
       } else {
          // multi-line rests will generate blank lines, so
          // suppress them here when blank lines occur.
-         if (strlen((*(pstaves[i])).CSTRING) > 0) {
-            out << (*(pstaves[i])).CSTRING << "\n";
+         if (strlen((*(pstaves[i])).str().c_str()) > 0) {
+            out << (*(pstaves[i])).str().c_str() << "\n";
          }
       }
    }
@@ -927,8 +908,8 @@ void printMeasures(ostream& out, HumdrumFile& infile,
 // printSingleMeasure --
 //
 
-void printSingleMeasure(ostream& out, const Array<VoiceMap>& voiceinfo, 
-      int vindex, int vmapsize, Array<MeasureInfo>& measureinfo, int mindex, 
+void printSingleMeasure(ostream& out, const vector<VoiceMap>& voiceinfo, 
+      int vindex, int vmapsize, vector<MeasureInfo>& measureinfo, int mindex, 
       HumdrumFile& infile, int staffnumber) {
 
    MeasureInfo& MI = measureinfo[mindex];
@@ -950,22 +931,22 @@ void printSingleMeasure(ostream& out, const Array<VoiceMap>& voiceinfo,
       }
    }
 
-   Array<Coordinate> meterclef;
+   vector<Coordinate> meterclef;
    getMeterAndClefChanges(meterclef, infile, voiceinfo[vindex], MI);
 
-   Array<Array<Coordinate> > noteaddresses;
-   noteaddresses.setSize(maxlayers);
+   vector<vector<Coordinate> > noteaddresses;
+   noteaddresses.size(maxlayers);
    noteaddresses.allowGrowth(0);
    buildNoteAddresses(noteaddresses, infile, voiceinfo[vindex], MI);
 
-   if (noteaddresses.getSize() == 0) {
+   if ((int)noteaddresses.size() == 0) {
       // no notes to print in this measure
       return;
    }
 
    int multirestQ = 0;
    if ((vmapsize == 1) && measureinfo[mindex].fullrest > 1) {
-      if (mindex < measureinfo.getSize() - 1) {
+      if (mindex < (int)measureinfo.size() - 1) {
          if (measureinfo[mindex+1].fullrest < 1) {
             multirestQ = 1;
          } else {
@@ -991,7 +972,7 @@ void printSingleMeasure(ostream& out, const Array<VoiceMap>& voiceinfo,
       } 
    } else if (measureinfo[mindex].fullrest > 1) {
       // do nothing;
-   } else if ((mindex < measureinfo.getSize() - 1) && 
+   } else if ((mindex < (int)measureinfo.size() - 1) && 
               (measureinfo[mindex+1].fullrest > 1) ) {
       // do nothing; still waiting for end of multi rest
    } else {
@@ -1020,7 +1001,7 @@ void printSingleMeasure(ostream& out, const Array<VoiceMap>& voiceinfo,
 // printMultiRest --
 //
 
-void printMultiRest(ostream& out, Array<MeasureInfo>& measureinfo, int mindex) {
+void printMultiRest(ostream& out, vector<MeasureInfo>& measureinfo, int mindex) {
    int count = 0;
    int i;
    for (i=mindex; i>=0; i--) {
@@ -1044,12 +1025,11 @@ void printMultiRest(ostream& out, Array<MeasureInfo>& measureinfo, int mindex) {
 //    for the particular measure and voice.
 //
 
-void getMeterAndClefChanges(Array<Coordinate>& meterchanges, 
+void getMeterAndClefChanges(vector<Coordinate>& meterchanges, 
       HumdrumFile& infile, const VoiceMap& voiceinfo, 
       const MeasureInfo& measureinfo) {
 
-   Array<Coordinate> temp;
-   temp.setSize(0);
+   vector<Coordinate> temp;
    Coordinate tcord;
    int top;
    int bot;
@@ -1064,43 +1044,43 @@ void getMeterAndClefChanges(Array<Coordinate>& meterchanges,
             if (sscanf(infile[i][j], "*M%d/%d", &top, &bot) == 2) {
                tcord.row = i;
                tcord.col = j;
-               temp.append(tcord);
+               temp.push_back(tcord);
             } else if (strcmp(infile[i][j], "*met(C)") == 0) {
                tcord.row = i;
                tcord.col = j;
-               if (temp.getSize() == 0) {
-                  temp.append(tcord);
+               if (temp.size() == 0) {
+                  temp.push_back(tcord);
                } else {
-                  temp[temp.getSize()-1] = tcord;
+                  temp.back() = tcord;
                }
             } else if (strcmp(infile[i][j], "*met(c)") == 0) {
                tcord.row = i;
                tcord.col = j;
-               if (temp.getSize() == 0) {
-                  temp.append(tcord);
+               if (temp.size() == 0) {
+                  temp.push_back(tcord);
                } else {
-                  temp[temp.getSize()-1] = tcord;
+                  temp.back() = tcord;
                }
             } else if (strcmp(infile[i][j], "*met(C|)") == 0) {
                tcord.row = i;
                tcord.col = j;
-               if (temp.getSize() == 0) {
-                  temp.append(tcord);
+               if (temp.size() == 0) {
+                  temp.push_back(tcord);
                } else {
-                  temp[temp.getSize()-1] = tcord;
+                  temp.back() = tcord;
                }
             } else if (strcmp(infile[i][j], "*met(c|)") == 0) {
                tcord.row = i;
                tcord.col = j;
-               if (temp.getSize() == 0) {
-                  temp.append(tcord);
+               if (temp.size() == 0) {
+                  temp.push_back(tcord);
                } else {
-                  temp[temp.getSize()-1] = tcord;
+                  temp.bac() = tcord;
                }
             } else if (strncmp(infile[i][j], "*clef", 5) == 0) {
                tcord.row = i;
                tcord.col = j;
-               temp.append(tcord);
+               temp.push_back(tcord);
             }
             break;
          }
@@ -1110,11 +1090,11 @@ void getMeterAndClefChanges(Array<Coordinate>& meterchanges,
    // reverse the order of the meter and key changes 
    // so that they can be popped off of the array after being
    // printed.
-   meterchanges.setSize(temp.getSize());
-   meterchanges.setSize(0);
-   for (i=temp.getSize()-1; i>=0; i--) {
+   meterchanges.resize(0);
+   meterchanges.reserve(temp.size());
+   for (i=(int)temp.size()-1; i>=0; i--) {
       tcord = temp[i];
-      meterchanges.append(tcord);
+      meterchanges.push_back(tcord);
    }
 }
 
@@ -1138,7 +1118,7 @@ void getMeterAndClefChanges(Array<Coordinate>& meterchanges,
 //
 
 void printMeasureLine(ostream& out, HumdrumFile& infile, int line, 
-      int primary, int staffnumber, Array<MeasureInfo>& measureinfo,
+      int primary, int staffnumber, vector<MeasureInfo>& measureinfo,
       int mindex, int vindex) {
    if (infile[line].getType() != E_humrec_data_measure) {
       return;
@@ -1160,18 +1140,18 @@ void printMeasureLine(ostream& out, HumdrumFile& infile, int line,
    sscanf(token, "=%d", &measurenum);
 
    int mdiff = 0;
-   if (mindex < measureinfo.getSize() - 1) {
+   if (mindex < (int)measureinfo.size() - 1) {
       mdiff = measureinfo[mindex+1].measurenum -measureinfo[mindex].measurenum;
    }
 
    out << " ";  // separate barline from notes by a space
 
-   if ((staffnumber == 0) && databarnumQ && (mindex < measureinfo.getSize()-1)) {
+   if ((staffnumber == 0) && databarnumQ && (mindex < (int)measureinfo.size()-1)) {
       if (measureinfo[mindex+1].measurenum >= 0) {
          out << "[I:setbarnb " << measureinfo[mindex+1].measurenum << "]";
       }
    } else if ((staffnumber == 0) 
-         && ((mindex < measureinfo.getSize()-1) && 
+         && ((mindex < (int)measureinfo.size()-1) && 
              (measureinfo[mindex+1].measurenum >= 0))
          && ((mdiff > 1) || labelQ)) {
       out << "[I:setbarnb " << measureinfo[mindex+1].measurenum << "]";
@@ -1259,7 +1239,7 @@ int getMaxLayer(int track, int start, int endd, HumdrumFile& infile) {
 
 void printLayer(int layer, ostream& out, const VoiceMap& voiceinfo, 
       const MeasureInfo& measureinfo, HumdrumFile& infile,
-      Array<Array<Coordinate> >& address, Array<Coordinate>& meterclef) {
+      vector<vector<Coordinate> >& address, vector<Coordinate>& meterclef) {
 
    if (debugQ) {
       cout << "\%\% Printing measure";
@@ -1283,32 +1263,32 @@ void printLayer(int layer, ostream& out, const VoiceMap& voiceinfo,
    int ilayer = layer - 1;
    const char* token;
 
-   Array<int> accident(7*9);
+   vector<int> accident(7*9);
    accident.allowGrowth(0);
    accident.setAll(0);
    setAccidentals(accident, measureinfo.currkey);
 
-   Array<double> notedurs;   // duration of note events in layer, 
+   vector<double> notedurs;   // duration of note events in layer, 
                              // (including grace notes)
-   Array<int>    iindex;
+   vector<int>    iindex;
    getNoteDurations(notedurs, iindex, layer, address, infile);
 
    // note list contains a list of notes in the current layer
    // without the grace notes
-   Array<Coordinate> nogracelist;
+   vector<Coordinate> nogracelist;
    getNoGraceList(nogracelist, address, layer, infile);
-   Array<double> nogracedurs;
+   vector<double> nogracedurs;
    getNoGraceDurs(nogracedurs, notedurs, address, layer);
 
-   Array<BeamInfo> beaminfo;
+   vector<BeamInfo> beaminfo;
    getBeamInfo(beaminfo, nogracelist, infile);
 
    // broken rhythms are dotted rhythm patterns
-   Array<int> broken;   // stores the brokenness for the first of a broken pair
-   Array<double> brokendurs;  // store the revised duration for broken notes
+   vector<int> broken;   // stores the brokenness for the first of a broken pair
+   vector<double> brokendurs;  // store the revised duration for broken notes
    getBrokenRhythms(broken, brokendurs, nogracelist, nogracedurs, infile);
 
-   Array<TupletInfo> tupletstuff;
+   vector<TupletInfo> tupletstuff;
    identifyTuplets(tupletstuff, nogracedurs, nogracelist, infile, broken, 
 		         brokendurs, beaminfo);
 
@@ -1328,7 +1308,7 @@ void printLayer(int layer, ostream& out, const VoiceMap& voiceinfo,
    
    double currentbeat = infile[measureinfo.startline].getAbsBeat();
 
-   for (j=0; j<address[0].getSize(); j++) {
+   for (j=0; j<(int)address[0].size(); j++) {
       row = address[ilayer][j].row;
       col = address[ilayer][j].col;
       if (linebreakQ) {
@@ -1379,8 +1359,8 @@ void printLayer(int layer, ostream& out, const VoiceMap& voiceinfo,
 
 	 currentbeat = infile[row].getAbsBeat() + notedurs[counter];
 
-         if ((layer == 1) && (meterclef.getSize() > 0) &&
-             (row > meterclef[meterclef.getSize()-1].row)) {
+         if ((layer == 1) && ((int)meterclef.size() > 0) &&
+             (row > meterclef[(int)meterclef.size()-1].row)) {
             printMeterAndClefChanges(out, row, meterclef, infile);
          }
          token = infile[row][col];
@@ -1444,7 +1424,7 @@ void printLayer(int layer, ostream& out, const VoiceMap& voiceinfo,
          } 
 
          if (gracestate) {
-            if (counter == notedurs.getSize()-1) {
+            if (counter == (int)notedurs.size()-1) {
                out << "}";
                gracestate = 0;
             } else if (notedurs[counter+1] > 0.0) {
@@ -1469,7 +1449,7 @@ void printLayer(int layer, ostream& out, const VoiceMap& voiceinfo,
    }        
 
    // print any meter or clef changes at the end of a measure:
-   if ((layer == 1) && (meterclef.getSize() > 0)) {
+   if ((layer == 1) && ((int)meterclef.size() > 0)) {
       printMeterAndClefChanges(out, 100000, meterclef, infile);
    }
 }
@@ -1506,10 +1486,10 @@ void checkForLineBreak(ostream& out, HumdrumFile& infile, int row, int col) {
 //    when there is only one grace note...
 //
 
-int getGraceNoteGroupFlag(Array<double>& notedurs, int index) {
+int getGraceNoteGroupFlag(vector<double>& notedurs, int index) {
    int counter = 1;
    int i;
-   for (i=index+1; i<notedurs.getSize(); i++) {
+   for (i=index+1; i<(int)notedurs.size(); i++) {
       if (notedurs[i] < TOLERANCE) {
          counter++;
       } else {
@@ -1587,11 +1567,10 @@ void printInvisibleRest(ostream& out, double duration) {
 // getBeamInfo --
 //
 
-void getBeamInfo(Array<BeamInfo>& beaminfo, Array<Coordinate>& nogracelist, 
+void getBeamInfo(vector<BeamInfo>& beaminfo, vector<Coordinate>& nogracelist, 
       HumdrumFile& infile) {
 
-   beaminfo.setSize(nogracelist.getSize());
-   beaminfo.allowGrowth(0);
+   beaminfo.resize(nogracelist.size());
    int i;
    int Lcount;
    int Jcount;
@@ -1599,7 +1578,7 @@ void getBeamInfo(Array<BeamInfo>& beaminfo, Array<Coordinate>& nogracelist,
    int row;
    int col;
 
-   for (i=0; i<nogracelist.getSize(); i++) {
+   for (i=0; i<(int)nogracelist.size(); i++) {
       row = nogracelist[i].row;
       col = nogracelist[i].col;
       Lcount = characterCount(infile[row][col], 'L');
@@ -1612,7 +1591,7 @@ void getBeamInfo(Array<BeamInfo>& beaminfo, Array<Coordinate>& nogracelist,
       current += Lcount;
       beaminfo[i].right = current;
    }
-   beaminfo[beaminfo.getSize()-1].right = 0;
+   beaminfo[(int)beaminfo.size()-1].right = 0;
 }
 
 
@@ -1674,15 +1653,14 @@ void printTupletInfo(ostream& out, TupletInfo& tinfo) {
 //     print on the layer.
 //
 
-void identifyTuplets(Array<TupletInfo>& tupletstuff, 
-      Array<double>& nogracedurs, Array<Coordinate>& nogracelist, 
-      HumdrumFile& infile, Array<int>& broken, Array<double>& brokendurs,
-      Array<BeamInfo>& beaminfo) {
+void identifyTuplets(vector<TupletInfo>& tupletstuff, 
+      vector<double>& nogracedurs, vector<Coordinate>& nogracelist, 
+      HumdrumFile& infile, vector<int>& broken, vector<double>& brokendurs,
+      vector<BeamInfo>& beaminfo) {
 
-   tupletstuff.setSize(nogracelist.getSize());
-   tupletstuff.allowGrowth(0);
+   tupletstuff.resize(nogracelist.size());
 
-   if (tupletstuff.getSize() == 0) {
+   if (tupletstuff.size() == 0) {
       // no notes (other than perhaps grace notes) in the measure
       return;
    }
@@ -1694,7 +1672,7 @@ void identifyTuplets(Array<TupletInfo>& tupletstuff,
    if (debugQ) {
       cout << "%\n% TUPLET INFO INPUT\n";
       cout << "%tuptop\ttupbot\tcount\tshort\tnewdur\ttoken\n";
-      for (i=0; i<tupletstuff.getSize(); i++) {
+      for (i=0; i<(int)tupletstuff.size(); i++) {
          cout << "%" 
               << tupletstuff[i].top      << "\t"
               << tupletstuff[i].bot      << "\t"
@@ -1709,7 +1687,7 @@ void identifyTuplets(Array<TupletInfo>& tupletstuff,
 
    int scale;
 
-   for (i=0; i<nogracelist.getSize(); i++) {
+   for (i=0; i<(int)nogracelist.size(); i++) {
       dupleprimes = getTupletInfo(tupletstuff[i], nogracelist[i], infile);
       if (tupletstuff[i].top > 2) {
          newdur = 4.0 / (dupleprimes * tupletstuff[i].bot);
@@ -1740,7 +1718,7 @@ void identifyTuplets(Array<TupletInfo>& tupletstuff,
    if (debugQ) {
       cout << "%\n% TUPLET INFO OUTPUT\n";
       cout << "%tuptop\ttupbot\tcount\tshort\tbeam\tbrok\tbrkdur\tnewdur\ttoken\n";
-      for (i=0; i<tupletstuff.getSize(); i++) {
+      for (i=0; i<(int)tupletstuff.size(); i++) {
          cout << "%" 
               << tupletstuff[i].top      << "\t"
               << tupletstuff[i].bot      << "\t"
@@ -1766,14 +1744,14 @@ void identifyTuplets(Array<TupletInfo>& tupletstuff,
 //    maybe at the same time...
 //
 
-void separateCountsByBeams(Array<TupletInfo>& tupletstuff, 
-     Array<BeamInfo>& beaminfo, Array<Coordinate>& nogracelist,
+void separateCountsByBeams(vector<TupletInfo>& tupletstuff, 
+     vector<BeamInfo>& beaminfo, vector<Coordinate>& nogracelist,
      HumdrumFile& infile) {
    int i, j;
    // int counter;
-   Array<int> rests;
+   vector<int> rests;
    getRestInfo(rests, nogracelist, infile);
-   for (i=0; i<tupletstuff.getSize(); i++) {
+   for (i=0; i<(int)tupletstuff.size(); i++) {
       if ((tupletstuff[i].count > 0) && 
           ((beaminfo[i].right > 0) || rests[i])) {
          // counter = 1;
@@ -1794,11 +1772,11 @@ void separateCountsByBeams(Array<TupletInfo>& tupletstuff,
 // getRestInfo --
 //
 
-void getRestInfo(Array<int>& rests, Array<Coordinate>& nogracelist, 
+void getRestInfo(vector<int>& rests, vector<Coordinate>& nogracelist, 
       HumdrumFile& infile) {
-   rests.setSize(nogracelist.getSize());
+   rests.resize(nogracelist.size());
    int i;
-   for (i=0; i<nogracelist.getSize(); i++) {
+   for (i=0; i<(int)nogracelist.size(); i++) {
       if (strchr(infile[nogracelist[i].row][nogracelist[i].col], 'r') != NULL) {
          rests[i] = 1;
       } else {
@@ -1814,18 +1792,18 @@ void getRestInfo(Array<int>& rests, Array<Coordinate>& nogracelist,
 // identifyTupletShortCuts --
 //
 
-void identifyTupletShortCuts(Array<TupletInfo>& tupletstuff,
-      Array<BeamInfo>& beaminfo, Array<double>& nogracedurs,
-      Array<Coordinate>& nogracelist, HumdrumFile& infile) {
+void identifyTupletShortCuts(vector<TupletInfo>& tupletstuff,
+      vector<BeamInfo>& beaminfo, vector<double>& nogracedurs,
+      vector<Coordinate>& nogracelist, HumdrumFile& infile) {
    int top = -1;
    int bot = -1;
    int i;
-   int length = tupletstuff.getSize();
+   int length = tupletstuff.size();
    int counter = 1;
 
    top = tupletstuff[length-1].top;
    bot = tupletstuff[length-1].bot;
-   for (i=tupletstuff.getSize()-2; i>= 0; i--) {
+   for (i=(int)tupletstuff.size()-2; i>= 0; i--) {
       if ((top == tupletstuff[i].top) && (bot == tupletstuff[i].bot)) {
          counter++;
       } else {
@@ -1846,28 +1824,25 @@ void identifyTupletShortCuts(Array<TupletInfo>& tupletstuff,
       tupletstuff[0].count = counter;
    }
 
-   Array<TupletInfo>& t = tupletstuff;
+   vector<TupletInfo>& t = tupletstuff;
 
    // separateCountsByBeams(tupletstuff, beaminfo, nogracelist, infile);
 
 ////////////////////////////////////////////////////////////////////////
 
-   Array<double>& ng = nogracedurs;
+   vector<double>& ng = nogracedurs;
 
-   Array<double> metric;
-   Array<double> frac;
-   metric.setSize(nogracelist.getSize());
-   frac.setSize(nogracelist.getSize());
-   for (i=0; i<nogracelist.getSize(); i++) {
+   vector<double> metric(nogracelist.size());
+   vector<double> frac(nogracelist.size());
+   for (i=0; i<(int)nogracelist.size(); i++) {
       metric[i] = infile[nogracelist[i].row].getAbsBeat();
       frac[i] = metric[i] - (int)metric[i];
    }
 
-   Array<int> beamy;
-   beamy.setSize(nogracelist.getSize());
+   vector<int> beamy(nogracelist.size());
    beamy.setAll(0);
    int bcount = 0;
-   for (i=1; i<beaminfo.getSize(); i++) {
+   for (i=1; i<(int)beaminfo.size(); i++) {
       if (beaminfo[i].left == 0) {
          bcount++;
       }
@@ -1875,7 +1850,7 @@ void identifyTupletShortCuts(Array<TupletInfo>& tupletstuff,
    }
 
    // check for shortcuts
-   for (i=0; i<t.getSize(); i++) {
+   for (i=0; i<(int)t.size(); i++) {
       if ((t[i].top == 3) && (t[i].bot == 2) && (t[i].count == 3)) { 
          t[i].shortcut = 3;
          t[i].count = 0;    // shortcut, so don't use longcut
@@ -1925,7 +1900,7 @@ void identifyTupletShortCuts(Array<TupletInfo>& tupletstuff,
 
    // go back and fix tuplets which are beamed together:
    int lasti = -1;
-   for (i=0; i<nogracelist.getSize(); i++) {
+   for (i=0; i<(int)nogracelist.size(); i++) {
       if (t[i].shortcut == 3) {
          if (lasti < 0) {
             lasti = i;
@@ -1972,7 +1947,7 @@ int getTupletInfo(TupletInfo& tupletstuff, Coordinate& nogracelist,
    int nondupleprimes;
    int dupleprimes;
    int nextlowerpoweroftwo;
-   Array<int> factors;
+   vector<int> factors;
 
    infile[row].getToken(buffer, col, 0, 32);
    int i=0;
@@ -2033,10 +2008,10 @@ int getNextLowerPowerOfTwo(int number) {
 //    in the list are assumed to be prime numbers.
 //
 
-int getNonDuplePrimes(Array<int>& factors) {
+int getNonDuplePrimes(vector<int>& factors) {
    int i;
    int output = 1;
-   for (i=0; i<factors.getSize(); i++) {
+   for (i=0; i<(int)factors.size(); i++) {
       if (factors[i] <= 2) {
          continue;
       }
@@ -2055,10 +2030,10 @@ int getNonDuplePrimes(Array<int>& factors) {
 //    in the list are assumed to be prime numbers.
 //
 
-int getDuplePrimes(Array<int>& factors) {
+int getDuplePrimes(vector<int>& factors) {
    int i;
    int output = 1;
-   for (i=0; i<factors.getSize(); i++) {
+   for (i=0; i<(int)factors.size(); i++) {
       if (factors[i] != 2) {
          continue;
       }
@@ -2194,15 +2169,15 @@ void printDurationAsRhythm(ostream& out, double dur, int top, int bot) {
 //
 
 void simplifyFraction(int& top, int& bot) {
-   Array<int> factorstop;
-   Array<int> factorsbot;
+   vector<int> factorstop;
+   vector<int> factorsbot;
 
    primeFactorization(factorstop, top);
    primeFactorization(factorsbot, bot);
    int i;
    int j;
-   for (i=0; i<factorstop.getSize(); i++) {
-      for (j=0; j<factorsbot.getSize(); j++) {
+   for (i=0; i<(int)factorstop.size(); i++) {
+      for (j=0; j<(int)factorsbot.size(); j++) {
          if (factorstop[i] == factorsbot[j]) {
             factorstop[i] = 1;
             factorsbot[j] = 1;
@@ -2212,14 +2187,14 @@ void simplifyFraction(int& top, int& bot) {
    }
 
    top = 1;
-   for (i=0; i<factorstop.getSize(); i++) {
+   for (i=0; i<(int)factorstop.size(); i++) {
       if (factorstop[i] > 1) {
          top = top * factorstop[i];
       }
    }
 
    bot = 1;
-   for (i=0; i<factorsbot.getSize(); i++) {
+   for (i=0; i<(int)factorsbot.size(); i++) {
       if (factorsbot[i] > 1) {
          bot = bot * factorsbot[i];
       }
@@ -2236,18 +2211,18 @@ void simplifyFraction(int& top, int& bot) {
 //     factors.
 //
 
-void primeFactorization(Array<int>& factors, int input) {
+void primeFactorization(vector<int>& factors, int input) {
    int i   = 3;
    int c   = input;
    int two = 2;
-   factors.setSize(0);
+   factors.resize(0);
    while ((c >= 2) && ((c%2) == 0)) {
-      factors.append(two);
+      factors.push_back(two);
       c = c/2;
    }
    while (i <= (sqrt((double)c)+1)) {
       if ((c%i) == 0) {
-         factors.append(i);
+         factors.push_back(i);
          c = c/i;
       }
       else {
@@ -2255,7 +2230,7 @@ void primeFactorization(Array<int>& factors, int input) {
       }
    }
    if (c > 1) {
-      factors.append(c);
+      factors.push_back(c);
    }
 }
 
@@ -2267,23 +2242,23 @@ void primeFactorization(Array<int>& factors, int input) {
 //  grace notes in the current layer.
 //
 
-void getNoGraceDurs(Array<double>& nogracedurs, Array<double>& notedurs, 
-      Array<Array<Coordinate> >& address, int layer) {
+void getNoGraceDurs(vector<double>& nogracedurs, vector<double>& notedurs, 
+      vector<vector<Coordinate> >& address, int layer) {
    int i;
    int row;
    // int col;
    double tdur;
    int ilayer = layer - 1;
    int counter = 0;
-   nogracedurs.setSize(0);
+   nogracedurs.resize(0);
 
-   for (i=0; i<address[ilayer].getSize(); i++) {
+   for (i=0; i<(int)address[ilayer].size(); i++) {
       row = address[ilayer][i].row;
       // col = address[ilayer][i].col;
       if (row >= 0) {
          if (notedurs[counter] > 0) {
             tdur = notedurs[counter];
-            nogracedurs.append(tdur);
+            nogracedurs.push_back(tdur);
          }
 	 counter++;
       }
@@ -2298,20 +2273,20 @@ void getNoGraceDurs(Array<double>& nogracedurs, Array<double>& notedurs,
 //     ignoring the grace notes in the layer.
 // 
 
-void getNoGraceList(Array<Coordinate>& notelist, 
-      Array<Array<Coordinate> >& address, int layer, HumdrumFile& infile) {
+void getNoGraceList(vector<Coordinate>& notelist, 
+      vector<vector<Coordinate> >& address, int layer, HumdrumFile& infile) {
    Coordinate tcord;
    int ilayer = layer - 1;
    int i;
-   notelist.setSize(address[0].getSize());
-   notelist.setSize(0);
-   for (i=0; i<address[ilayer].getSize(); i++) {
+   notelist.resize(0);
+   notelist.reserve(address[0].size());
+   for (i=0; i<(int)address[ilayer].size(); i++) {
       tcord.row = address[ilayer][i].row;
       tcord.col = address[ilayer][i].col;
       if ((tcord.row > 0) && 
           (strchr(infile[tcord.row][tcord.col], 'q') == NULL) &&
           (strchr(infile[tcord.row][tcord.col], 'Q') == NULL)) {
-         notelist.append(tcord);
+         notelist.push_back(tcord);
       }
    }
 }
@@ -2324,15 +2299,15 @@ void getNoGraceList(Array<Coordinate>& notelist,
 //
 
 void printMeterAndClefChanges(ostream& out, int testrow, 
-      Array<Coordinate>& meterclef, HumdrumFile& infile) {
+      vector<Coordinate>& meterclef, HumdrumFile& infile) {
 
    int row;
    int col;
-   while ((meterclef.getSize() > 0) && 
-          (meterclef[meterclef.getSize()-1].row < testrow)) {
+   while ((meterclef.size() > 0) && 
+          (meterclef.back().row < testrow)) {
 
-         row = meterclef[meterclef.getSize()-1].row;
-         col = meterclef[meterclef.getSize()-1].col;
+         row = meterclef.back().row;
+         col = meterclef.back().col;
 
          if (strncmp(infile[row][col], "*clef", 5) == 0) {
             out << "[K:clef=";
@@ -2346,7 +2321,7 @@ void printMeterAndClefChanges(ostream& out, int testrow,
          }
 
       // shrink the array since the clef or meter signature at end was printed
-      meterclef.setSize(meterclef.getSize()-1);
+      meterclef.resize((int)meterclef.size()-1);
    }
 }
 
@@ -2398,7 +2373,7 @@ void printAbcMeter(ostream& out, const char* string) {
 //
 
 void printAbcClef(ostream& out, const char* string, int track, 
-      Array<int>& cleftranspose) {
+      vector<int>& cleftranspose) {
    if (strncmp(string, "*clef", 5) != 0) {
       out << "perc";
       cleftranspose[track] = 0;
@@ -2451,12 +2426,12 @@ void printAbcClef(ostream& out, const char* string, int track,
 //     notes at the current time (in all layers)
 //
 
-void adjustAccidentalStates(Array<int>& accident, int step, 
-       Array<Array<Coordinate> >& address, HumdrumFile& infile) {
+void adjustAccidentalStates(vector<int>& accident, int step, 
+       vector<vector<Coordinate> >& address, HumdrumFile& infile) {
 
    int i;
    int row, col;
-   for (i=0; i<address.getSize(); i++) { 
+   for (i=0; i<(int)address.size(); i++) { 
       if (address[i][step].row < 0) {
          continue;
       }
@@ -2473,7 +2448,7 @@ void adjustAccidentalStates(Array<int>& accident, int step,
 // adjustAccidentalStates2 --
 //
 
-void adjustAccidentalStates2(Array<int>& accident, HumdrumFile& infile, 
+void adjustAccidentalStates2(vector<int>& accident, HumdrumFile& infile, 
       int row, int col) {
 
    int count = infile[row].getTokenCount(col);
@@ -2512,7 +2487,7 @@ void adjustAccidentalStates2(Array<int>& accident, HumdrumFile& infile,
 // setAccidentals --
 //
 
-void setAccidentals(Array<int>& accident, int key) {
+void setAccidentals(vector<int>& accident, int key) {
    if (key < -7) {
       return;
    }
@@ -2524,7 +2499,7 @@ void setAccidentals(Array<int>& accident, int key) {
    #define XAX 5
    #define XBX 6
 
-   int octaves = accident.getSize() / 7;
+   int octaves = accident.size() / 7;
 
    for (int i=0; i<octaves; i++) {
       if (key <= -7) { accident[XFX+i*7] = -1; }
@@ -2554,7 +2529,7 @@ void setAccidentals(Array<int>& accident, int key) {
 //
 
 void printKernTokenAsAbc(ostream& out, HumdrumFile& infile, int row, int col,
-      Array<int>& accident, double notedur, int brokenq, double brokendur,
+      vector<int>& accident, double notedur, int brokenq, double brokendur,
       int top, int bot, int& slursuppress, int groupflag) {
    int count = infile[row].getTokenCount(col);
    char buffer[128] = {0};
@@ -2706,8 +2681,8 @@ void printKernTokenAsAbc(ostream& out, HumdrumFile& infile, int row, int col,
 //    Marked gracenotes which are halfnotes/wholenote etc probably don't work.
 //
 
-void printMarks(ostream& out, const char* buffer, Array<char>& marks,
-      Array<Array<double> > markcolors, int notecount) {
+void printMarks(ostream& out, const char* buffer, string& marks,
+      vector<vector<double> > markcolors, int notecount) {
 
    if (strchr(buffer, 'r') != NULL) {
       // no rests allowed.
@@ -2718,7 +2693,7 @@ void printMarks(ostream& out, const char* buffer, Array<char>& marks,
      return;
    }
 
-   SSTREAM firstmark;
+   stringstream firstmark;
 
    // print the first mark found on the note as a colored notehead
    // subsequence marks are circles on the note with increasing 
@@ -2729,7 +2704,7 @@ void printMarks(ostream& out, const char* buffer, Array<char>& marks,
    int markcount = 0;
    RationalNumber rn;
    while (buffer[i] != '\0') {
-      for (m=0; m<marks.getSize(); m++) {
+      for (m=0; m<(int)marks.size(); m++) {
          if ((markcount == 0) && (buffer[i] == marks[m])) {
             firstmark <<"!head-m" << m+1;
             printNoteHeadShape(firstmark, buffer, m);
@@ -2765,7 +2740,7 @@ void printMarks(ostream& out, const char* buffer, Array<char>& marks,
    }
 
    firstmark << ends;
-   out << firstmark.CSTRING;
+   out << firstmark.str().c_str();
 
 }
 
@@ -2851,9 +2826,8 @@ void getNoteShape(RationalNumber& rn, const char* buffer) {
 void printGraceRhythm(ostream& out, const char* buffer, int top, int bot,
       int groupflag) {
    int length = strlen(buffer);
-   Array<char> buff2;
-   buff2.setSize(length+1+20);
-   buff2.setSize(0);
+   string buff2;
+   buff2.reserve(length+1+20);
    int digitQ = 0;
    char ch;
 
@@ -2866,10 +2840,10 @@ void printGraceRhythm(ostream& out, const char* buffer, int top, int bot,
          digitQ = 1;
       }
       ch = buffer[i];
-      buff2.append(ch);
+      buff2.push_back(ch);
    }
    ch = '\0';
-   buff2.append(ch);
+   buff2.push_back(ch);
 
    if (digitQ == 0) {
       strcpy(buff2.getBase(), "8");
@@ -3041,7 +3015,7 @@ void printArticulations(ostream& out, const char* string) {
 //
 
 void printAccidental(ostream& out, int base40, const char* token, 
-      Array<int>& accident) {
+      vector<int>& accident) {
    if (base40 < 0) {
       return;  // ignore rests
    }
@@ -3196,12 +3170,12 @@ int countDots(char* buffer) {
 // getBrokenRhythm --
 //
 
-void getBrokenRhythms(Array<int>& broken, Array<double>& brokendurs, 
-      Array<Coordinate>& nogracelist, Array<double>& nogracedurs, 
+void getBrokenRhythms(vector<int>& broken, vector<double>& brokendurs, 
+      vector<Coordinate>& nogracelist, vector<double>& nogracedurs, 
       HumdrumFile& infile) {
 
-   broken.setSize(nogracelist.getSize());
-   brokendurs.setSize(nogracelist.getSize());
+   broken.resize(nogracelist.size());
+   brokendurs.resize(nogracelist.size());
    broken.setAll(0);
    brokendurs.setAll(0);
    int i;
@@ -3210,7 +3184,7 @@ void getBrokenRhythms(Array<int>& broken, Array<double>& brokendurs,
    int row2;
    int col2;
 
-   for (i=0; i<broken.getSize()-2; i++) {
+   for (i=0; i<(int)broken.size()-2; i++) {
       row = nogracelist[i].row;
       col = nogracelist[i].col;
       row2 = nogracelist[i+1].row;
@@ -3278,7 +3252,7 @@ void getBrokenRhythms(Array<int>& broken, Array<double>& brokendurs,
    if (debugQ) {
       cout << "%\n%BROKEN RHYTHM ANALYSIS:\n";
       cout << "%broken\tbrokdur\tdur\ttoken\n";
-      for (i=0; i<broken.getSize(); i++) {
+      for (i=0; i<(int)broken.size(); i++) {
          cout << "%"   << broken[i]
               << "\t"  << int(brokendurs[i] * 10000.0 + 0.5)/10000.0
               << "\t"  << int(nogracedurs[i] * 10000.0 + 0.5)/10000.0
@@ -3290,7 +3264,7 @@ void getBrokenRhythms(Array<int>& broken, Array<double>& brokendurs,
 
 
    // replace the non-brokendurs with the broken duration:
-   for (i=0; i<brokendurs.getSize(); i++) {
+   for (i=0; i<(int)brokendurs.size(); i++) {
       if (brokendurs[i] != 0.0) {
          nogracedurs[i] = brokendurs[i];
       }
@@ -3309,19 +3283,19 @@ void getBrokenRhythms(Array<int>& broken, Array<double>& brokendurs,
 //    to add...
 //
 
-void getBrokenRhythmsOld(Array<int>& broken, Array<int>& brokenrhythm, 
-      Array<double>& notedurations, HumdrumFile& infile) {
+void getBrokenRhythmsOld(vector<int>& broken, vector<int>& brokenrhythm, 
+      vector<double>& notedurations, HumdrumFile& infile) {
 
-   Array<double>& ND = notedurations;
+   vector<double>& ND = notedurations;
 
-   broken.setSize(ND.getSize());
+   broken.resize(ND.size());
    broken.setAll(0);
 
-   brokenrhythm.setSize(ND.getSize());
+   brokenrhythm.resize(ND.size());
    brokenrhythm.setAll(0);
 
    int i;
-   for (i=0; i<ND.getSize()-1; i++) {
+   for (i=0; i<(int)ND.size()-1; i++) {
       if (ND[i] + ND[i+1] == 1.0) {
 
          if ((ND[i] == 0.75) && (ND[i] == 0.25)) {
@@ -3382,7 +3356,7 @@ void getBrokenRhythmsOld(Array<int>& broken, Array<int>& brokenrhythm,
    }
 
    // don't allow for two broken rhythms in a row:
-   for (i=0; i<broken.getSize() - 1; i++) {
+   for (i=0; i<(int)broken.size() - 1; i++) {
       if (broken[i] && broken[i+1]) {
          broken[i+1] = 0;
          brokenrhythm[i+1] = 0;
@@ -3397,24 +3371,24 @@ void getBrokenRhythmsOld(Array<int>& broken, Array<int>& brokenrhythm,
 // getNoteDurations --
 //
 
-void getNoteDurations(Array<double>& notedurations, Array<int>& iindex, 
-      int layer, Array<Array<Coordinate> >& address, HumdrumFile& infile) {
+void getNoteDurations(vector<double>& notedurations, vector<int>& iindex, 
+      int layer, vector<vector<Coordinate> >& address, HumdrumFile& infile) {
 
    int ilayer = layer - 1;
-   notedurations.setSize(address[ilayer].getSize());
-   notedurations.setSize(0);
+   notedurations.resize(0);
+   notedurations.reserve(address[ilayer].size());
 
 
    // iindex is a list of the indices into address for each sequential
    // note in the layer.
-   iindex.setSize(address[ilayer].getSize());
-   iindex.setSize(0);
+   iindex.resize(0);
+   iindex.reserve(address[ilayer].size());
 
    char buffer[128] = {0};
    double dur;
    int row, col;
    int i;
-   for (i=0; i<address[ilayer].getSize(); i++) {
+   for (i=0; i<(int)address[ilayer].size(); i++) {
       if (address[ilayer][i].row >= 0) {
          row = address[ilayer][i].row;
          col = address[ilayer][i].col;
@@ -3424,15 +3398,15 @@ void getNoteDurations(Array<double>& notedurations, Array<int>& iindex,
          } else {
             dur = Convert::kernToDuration(buffer);
          }
-	 notedurations.append(dur);
-	 iindex.append(i);
+	 notedurations.push_back(dur);
+	 iindex.push_back(i);
       }
    }
 
    if (debugQ) {
       int tcount = 0;
       cout << "%dur\ttoken\n";
-      for (i=0; i<address[ilayer].getSize(); i++) {
+      for (i=0; i<(int)address[ilayer].size(); i++) {
          if (address[ilayer][i].row < 0) { 
             continue;
          }
@@ -3505,7 +3479,7 @@ int getBeamState(const char* token) {
 //    each note in the part;
 //
 
-void buildNoteAddresses(Array<Array<Coordinate> >& noteaddresses, 
+void buildNoteAddresses(vector<vector<Coordinate> >& noteaddresses, 
       HumdrumFile& infile, const VoiceMap& voiceinfo, 
       const MeasureInfo& measureinfo) {
 
@@ -3514,9 +3488,9 @@ void buildNoteAddresses(Array<Array<Coordinate> >& noteaddresses,
    // empty the previous contents, if any
    // the first dimension is given by the calling function and
    // represents the maximum voice layers in the part
-   for (i=0; i<noteaddresses.getSize(); i++) {
-      noteaddresses[i].setSize(maxlines);
-      noteaddresses[i].setSize(0);
+   for (i=0; i<(int)noteaddresses.size(); i++) {
+      noteaddresses[i].resize(0);
+      noteaddresses[i].reserve(maxlines);
    }
 
    // rowinfo is used to keep track of what notes are played
@@ -3524,9 +3498,7 @@ void buildNoteAddresses(Array<Array<Coordinate> >& noteaddresses,
    // If there are any notes for that voice on each line,
    // then store the note address data in the noteaddresses 
    // list.
-   Array<int> rowinfo;
-   rowinfo.setSize(noteaddresses.getSize());
-   rowinfo.allowGrowth(0);
+   vector<int> rowinfo(noteaddresses.size());
    int notesfound;
    int layercounter;
    Coordinate coord;
@@ -3550,14 +3522,14 @@ void buildNoteAddresses(Array<Array<Coordinate> >& noteaddresses,
          }
       }
       if (notesfound) {
-         for (j=0; j<rowinfo.getSize(); j++) {
+         for (j=0; j<(int)rowinfo.size(); j++) {
             coord.row  = -1;
             coord.col  = -1;
             if (rowinfo[j] >= 0) {
                coord.row = i;
                coord.col = rowinfo[j];
             }
-            noteaddresses[j].append(coord);
+            noteaddresses[j].push_back(coord);
          }
       }
    }
@@ -3571,14 +3543,14 @@ void buildNoteAddresses(Array<Array<Coordinate> >& noteaddresses,
 //     Also checks for repeat endings in a particular format.
 //
 
-void getMeasureInfo(Array<MeasureInfo>& measures, HumdrumFile& infile) {
+void getMeasureInfo(vector<MeasureInfo>& measures, HumdrumFile& infile) {
    int i;
    int lastmeasure = -1;
    double duration;
    PerlRegularExpression pre;
 
-   measures.setSize(infile.getNumLines());
-   measures.setSize(0);
+   measures.resize(0);
+   measures.reserve(infile.getNumLines());
    MeasureInfo mtemp;
    int measureno;
    int lastmeasureno = -1;
@@ -3587,8 +3559,8 @@ void getMeasureInfo(Array<MeasureInfo>& measures, HumdrumFile& infile) {
    int datafound = 0;
    int sindex;
 
-   Array<int> repeatinfo;
-   Array<int> segments;
+   vector<int> repeatinfo;
+   vector<int> segments;
    getRepeatInfo(segments, repeatinfo, infile);
 
    for (i=0; i<infile.getNumLines(); i++) {
@@ -3625,11 +3597,11 @@ void getMeasureInfo(Array<MeasureInfo>& measures, HumdrumFile& infile) {
             }
 
 	    if (duration > 0) {
-               measures.append(mtemp);
+               measures.push_back(mtemp);
             } else if (datafound && (mtemp.endline - mtemp.startline > 1)) {
                // also have to allow for non-rhythm notation
                // such as Gregorian chant...
-               measures.append(mtemp);
+               measures.push_back(mtemp);
             }
 	    currentKey = -100;
          }
@@ -3650,10 +3622,10 @@ void getMeasureInfo(Array<MeasureInfo>& measures, HumdrumFile& infile) {
 
 /// This code is now obsolete, since StartKey is a naughty global variable,
 /// and the getMeasureInfo is now called before StartKey is set...
-//   if (measures.getSize() > 0) {
+//   if (measures.size() > 0) {
 //      measures[0].currkey = StartKey;
 //   }
-   for (i=0; i<measures.getSize(); i++) {
+   for (i=0; i<(int)measures.size(); i++) {
       if (measures[i].newkey > -50) {
          measures[i].currkey = measures[i].newkey;
       } else if (i > 0) {
@@ -3664,13 +3636,13 @@ void getMeasureInfo(Array<MeasureInfo>& measures, HumdrumFile& infile) {
    // a key signature in the first measure is controlled by the
    // header K: field, so turn off any new key markers in the
    // first measure.
-   if (measures.getSize() > 0) {
+   if (measures.size() > 0) {
       measures[0].newkey = -100;
    }
 
-   if (Voicemap.getSize() == 1) {
+   if (Voicemap.size() == 1) {
       identifyWholeRestsInMeasures(measures, Voicemap[0], infile);
-      for (i=1; i<measures.getSize(); i++) {
+      for (i=1; i<(int)measures.size(); i++) {
          if (measures[i].fullrest) {
             measures[i].fullrest += measures[i-1].fullrest;
          }
@@ -3686,13 +3658,13 @@ void getMeasureInfo(Array<MeasureInfo>& measures, HumdrumFile& infile) {
 // checkForRepeatMeasure --
 //
 
-int checkForRepeatMeasure(HumdrumFile& infile, Array<int>& segments, 
-      Array<int>& repeatinfo, int mindex) {
+int checkForRepeatMeasure(HumdrumFile& infile, vector<int>& segments, 
+      vector<int>& repeatinfo, int mindex) {
 
    int i;
    double measuredur = infile[mindex].getAbsBeat();
    double sdur;
-   for (i=0; i<segments.getSize(); i++) {
+   for (i=0; i<(int)segments.size(); i++) {
       sdur = infile[segments[i]].getAbsBeat();
       if (fabs(sdur - measuredur) < TOLERANCE) {
          return i;
@@ -3709,13 +3681,13 @@ int checkForRepeatMeasure(HumdrumFile& infile, Array<int>& segments,
 // getRepeatInfo --
 //
 
-void getRepeatInfo(Array<int>& segments, Array<int>& repeatinfo, 
+void getRepeatInfo(vector<int>& segments, vector<int>& repeatinfo, 
       HumdrumFile& infile) {
    int i;
    int length;
 
-   segments.setSize(100);
-   segments.setSize(0);
+   segments.resize(0);
+   segments.reserve(100);
 
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].getType() == E_humrec_interpretation) {
@@ -3723,25 +3695,25 @@ void getRepeatInfo(Array<int>& segments, Array<int>& repeatinfo,
             continue;
          }
          if (strncmp(infile[i][0], "*>", 2) == 0) {
-            segments.append(i);
+            segments.push_back(i);
          }
       }
    }
 
-   repeatinfo.setSize(segments.getSize());
+   repeatinfo.resize(segments.size());
    repeatinfo.setAll(-1);
 
    int number;
    int base;
    int baselength;
-   for (i=1; i<segments.getSize(); i++) {
+   for (i=1; i<(int)segments.size(); i++) {
       length = strlen(infile[segments[i-1]][0]);
       if (strncmp(infile[segments[i]][0], infile[segments[i-1]][0],
             length) == 0) {
          base = i-1;
          baselength = length;
          length = strlen(infile[segments[i]][0]);
-         while ((i < segments.getSize()) && (length > baselength) && 
+         while ((i < (int)segments.size()) && (length > baselength) && 
                 (sscanf(&infile[segments[i]][0][length-1], "%d", 
                       &number) == 1) &&
                 (strncmp(infile[segments[i]][0], infile[segments[base]][0], 
@@ -3753,7 +3725,7 @@ void getRepeatInfo(Array<int>& segments, Array<int>& repeatinfo,
    }
 
 
-   for (i=1; i<repeatinfo.getSize(); i++) {
+   for (i=1; i<(int)repeatinfo.size(); i++) {
       if ((repeatinfo[i-1] > 0) && (repeatinfo[i] < 0)) {
          repeatinfo[i] = 0;
       }
@@ -3761,7 +3733,7 @@ void getRepeatInfo(Array<int>& segments, Array<int>& repeatinfo,
 
    if (debugQ) {
       cout << "% MUSIC SEGMENTS: " << endl;
-      for (i=0; i<repeatinfo.getSize(); i++) {
+      for (i=0; i<(int)repeatinfo.size(); i++) {
          cout << "% SEGMENT: " << infile[segments[i]][0] 
               << " number " << repeatinfo[i] << endl;
       }
@@ -3777,11 +3749,11 @@ void getRepeatInfo(Array<int>& segments, Array<int>& repeatinfo,
 // identifyWholeRestsInMeasures --
 //
 
-void identifyWholeRestsInMeasures(Array<MeasureInfo>& measures, 
+void identifyWholeRestsInMeasures(vector<MeasureInfo>& measures, 
       VoiceMap& voicemap, HumdrumFile& infile) {
    int i;
 
-   for (i=0; i<measures.getSize(); i++) {
+   for (i=0; i<(int)measures.size(); i++) {
       measures[i].fullrest = checkForWholeRestInMeasure(measures[i].startline, 
             measures[i].endline, voicemap.primary, infile);
    }
@@ -3834,8 +3806,8 @@ int checkForWholeRestInMeasure(int startline, int endline, int primary,
 // printHeader -- 
 //
 
-void printHeader(ostream& out, HumdrumFile& infile, Array<char*>& header,
-      Array<MeasureInfo>& measures, int xval, const char* filename) {
+void printHeader(ostream& out, HumdrumFile& infile, string& header,
+      vector<MeasureInfo>& measures, int xval, const char* filename) {
 
    parseBibliographic(header, infile);
 
@@ -3887,7 +3859,7 @@ void printHeader(ostream& out, HumdrumFile& infile, Array<char*>& header,
       out << "%%setbarnb " << firstmeasure << "\n";
    }
 
-   if (Voicemap.getSize() > 5) {
+   if (Voicemap.size() > 5) {
       // automatically suppress staff lines in music with more
       // than 5 staves when the line of music contains only
       // rests
@@ -3939,18 +3911,18 @@ void printHeader(ostream& out, HumdrumFile& infile, Array<char*>& header,
             }
       }
    }
-   if (Voicemap.getSize() > 1) {
+   if (Voicemap.size() > 1) {
       // polyphonic music
       
-      if (Voicemap.getSize() == 2) {
+      if (Voicemap.size() == 2) {
          // presume a piano staff brace. refine the decision later
          out << "%%staves {1 2}\n";
-      } else if (Voicemap.getSize() == 4) {
+      } else if (Voicemap.size() == 4) {
          // presume a string-quartet-like system with a brace
          out << "%%staves [1 2 3 4]\n";
       }
 
-      for (i=0; i<Voicemap.getSize(); i++) {
+      for (i=0; i<(int)Voicemap.size(); i++) {
          printVoiceDeclaration(out, Voicemap[i], i+1, infile);
       }
    }
@@ -3961,7 +3933,7 @@ void printHeader(ostream& out, HumdrumFile& infile, Array<char*>& header,
    } else {
       out << "K: " << header[KK];
    }
-   if (Voicemap.getSize() == 1) {
+   if (Voicemap.size() == 1) {
       printVoiceClef(out, Voicemap[0], infile);
    }
    out << "\n";
@@ -3974,12 +3946,12 @@ void printHeader(ostream& out, HumdrumFile& infile, Array<char*>& header,
 // printFilenameBase --
 //
 
-void printFilenameBase(ostream& out, const char* filename) {
-   Array<char> strang;
+void printFilenameBase(ostream& out, const string& filename) {
+   string strang;
    const char* cptr;
    char* ptr;
    int length = strlen(filename);
-   strang.setSize(length+1);
+   strang.resize(length+1);
 
    cptr = strrchr(filename, '/');
    if (cptr != NULL) {
@@ -4108,19 +4080,19 @@ int getFirstMeasureNumber(HumdrumFile& infile) {
 
 void printAbcExtendedInformationFields(ostream& out, HumdrumFile& infile) {
 
-   Array<int> bibfields;
+   vector<int> bibfields;
    bibfields.setSize(infile.getNumLines());
    bibfields.setSize(0);
 
    int i;
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].getType() == E_humrec_bibliography) {
-         bibfields.append(i);
+         bibfields.push_back(i);
       }
    }
 
-   Array<Array<char> > values;
-   Array<char> value;
+   vector<string> values;
+   string value;
    value[0] = EMPTY;
    value.setSize(0);
 
@@ -4163,12 +4135,12 @@ void printAbcExtendedInformationFields(ostream& out, HumdrumFile& infile) {
    }
 
    if (findMultipleRecords("EED", values, infile, bibfields)) {
-      for (i=0; i<values.getSize(); i++) {
+      for (i=0; i<(int)values.size(); i++) {
          out << "%%abc-edited-by " << values[i].getBase() << "\n";
       }
    } 
    if (findMultipleRecords("ENC", values, infile, bibfields)) {
-      for (i=0; i<values.getSize(); i++) {
+      for (i=0; i<(int)values.size(); i++) {
          out << "%%abc-edited-by " << values[i].getBase() << "\n";
       }
    }
@@ -4184,7 +4156,7 @@ void printAbcExtendedInformationFields(ostream& out, HumdrumFile& infile) {
    // before printing the following line:
    // doesn't look so good for monophonic parts, so turn off
    // if there is only one voice
-   if ((Voicemap.getSize() > 1) && graceQ) {   
+   if ((Voicemap.size() > 1) && graceQ) {   
       if ((parameterstring != NULL) && 
           (strstr(parameterstring, "gracespace") == NULL)) {
          // only print default gracespace if not in -p option
@@ -4225,7 +4197,7 @@ void printAbcExtendedInformationFields(ostream& out, HumdrumFile& infile) {
    }
 
    if (strlen(parameterstring) > 0) {
-      Array<char> cleanedstring; 
+      string cleanedstring; 
       translateSpecialCharacters(cleanedstring, parameterstring);
       out << cleanedstring.getBase() << "\n";
    }
@@ -4262,8 +4234,8 @@ void printAbcExtendedInformationFields(ostream& out, HumdrumFile& infile) {
 //     7: pflhd = flat note when clef is perc (percussion flat head)
 //     8: ghd = black head for grace notes (ornaments)
 
-void printMarkCodes(ostream& out, Array<char>& marks, 
-      Array<Array<double> >& markcolors) {
+void printMarkCodes(ostream& out, string& marks, 
+      vector<vector<double> >& markcolors) {
 
    if (usedAnnotation) {
       out << "%%postscript /cp {currentpoint}!\n";
@@ -4274,7 +4246,7 @@ void printMarkCodes(ostream& out, Array<char>& marks,
    }
 
    int i;
-   for (i=0; i<usedMarks.getSize(); i++) {
+   for (i=0; i<(int)usedMarks.size(); i++) {
 
       if (usedMarks[i][0]) {
          out << "%%postscript /mark" << i+1 << "hd {gsave ";
@@ -4350,7 +4322,7 @@ void printMarkCodes(ostream& out, Array<char>& marks,
 
    }
 
-   for (i=0; i<usedMarks.getSize(); i++) {
+   for (i=0; i<(int)usedMarks.size(); i++) {
       if (usedMarks[i][0]) {
          out << "%%deco head-m" << i+1 << "hd 0 mark" << i+1 << "hd 0 0 0 \n";
       }
@@ -4393,14 +4365,14 @@ void printVeritas(ostream& out, HumdrumFile& infile) {
    unsigned long veritas = 0;
    int i;
 
-   SSTREAM alllines;
-   SSTREAM onlydata;
+   stringstream alllines;
+   stringstream onlydata;
 
-   Array<char> marker;
+   string marker;
    marker[0] = EMPTY;
    marker.setSize(0);
 
-   Array<char> contents;
+   string contents;
    contents[0] = EMPTY;
    contents.setSize(0);
 
@@ -4439,11 +4411,11 @@ void printVeritas(ostream& out, HumdrumFile& infile) {
    alllines << ends;
    onlydata << ends;
 
-   int lenall = strlen(alllines.CSTRING);
-   int lendata = strlen(onlydata.CSTRING);
+   int lenall = strlen(alllines.str().c_str());
+   int lendata = strlen(onlydata.str().c_str());
 
-   unsigned long crcall  = CheckSum::crc32(alllines.CSTRING, lenall);
-   unsigned long crcdata = CheckSum::crc32(onlydata.CSTRING, lendata);
+   unsigned long crcall  = CheckSum::crc32(alllines.str().c_str(), lenall);
+   unsigned long crcdata = CheckSum::crc32(onlydata.str().c_str(), lendata);
 
    if (veritas != 0) {
       if (veritas == crcall) {
@@ -4466,23 +4438,19 @@ void printVeritas(ostream& out, HumdrumFile& infile) {
 // findMultipleRecords -- find multiple records with the same key
 //
 
-int findMultipleRecords(const char* key, Array<Array<char> >& values, 
-      HumdrumFile& infile, Array<int>& bibfields) {
+int findMultipleRecords(const char* key, vector<string>& values, 
+      HumdrumFile& infile, vector<int>& bibfields) {
 
-   values.setSize(bibfields.getSize());
-   values.setSize(0);
+   values.resize(0);
+   values.reserve(bibfields.size());
 
-   Array<char> marker;
-   Array<char> tempv;
-
-   tempv.setSize(1);
-   tempv[0] = EMPTY;
-   tempv.setSize(0);
+   string marker;
+   string tempv;
 
    const char* ptr;
    int keylen = strlen(key);
    int i;
-   for (i=0; i<bibfields.getSize(); i++) {
+   for (i=0; i<(int)bibfields.size(); i++) {
       ptr = &(infile[bibfields[i]][0][3]);
       if (strncmp(ptr, key, keylen) == 0) {
          if (infile[bibfields[i]].getFieldCount() > 1) {
@@ -4491,8 +4459,8 @@ int findMultipleRecords(const char* key, Array<Array<char> >& values,
          } else {
             getBibPieces(infile[bibfields[i]][0], "", marker, tempv);
          }
-	 if (tempv.getSize() > 1) {
-            values.append(tempv);
+	 if (tempv.size() > 1) {
+            values.push_back(tempv);
             tempv.setSize(1);
             tempv[0] = EMPTY;
             tempv.setSize(0);
@@ -4501,7 +4469,7 @@ int findMultipleRecords(const char* key, Array<Array<char> >& values,
          }
       }
    }
-   return values.getSize();
+   return (int)values.size();
 }
 
 
@@ -4511,10 +4479,10 @@ int findMultipleRecords(const char* key, Array<Array<char> >& values,
 // findRecord --
 //
 
-int findRecord(const char* key, Array<char>& value, HumdrumFile& infile,
-      Array<int>& bibfields) {
+int findRecord(const char* key, string& value, HumdrumFile& infile,
+      vector<int>& bibfields) {
 
-   Array<char> marker;
+   string marker;
    value.setSize(1);
    value[0] = EMPTY;
    value.setSize(0);
@@ -4522,7 +4490,7 @@ int findRecord(const char* key, Array<char>& value, HumdrumFile& infile,
    const char* ptr;
    int keylen = strlen(key);
    int i;
-   for (i=0; i<bibfields.getSize(); i++) {
+   for (i=0; i<(int)bibfields.size(); i++) {
       ptr = &(infile[bibfields[i]][0][3]);
       if (strncmp(ptr, key, keylen) == 0) {
          if (infile[bibfields[i]].getFieldCount() > 1) {
@@ -4531,7 +4499,7 @@ int findRecord(const char* key, Array<char>& value, HumdrumFile& infile,
          } else {
             getBibPieces(infile[bibfields[i]][0], "", marker, value);
          }
-	 if (value.getSize() > 0) {
+	 if (value.size() > 0) {
             return 1;
 	 } else {
             return 0;
@@ -4616,7 +4584,7 @@ void printAbcKeySignature(ostream& out, int keynum) {
 void printAbcKeySignature(ostream& out, const char* kernkey) {
    PerlRegularExpression pre;
 
-   Array<char> tonic;
+   string tonic;
    tonic.setSize(1);
    tonic[0] = '\0';
    if (pre.search(kernkey, "^\\*([A-Ga-g][-#]*):")) {
@@ -4718,7 +4686,7 @@ void printVoiceDeclaration(ostream& out, VoiceMap vmap, int voicenum,
 // createVoiceMap
 //
 
-void createVoiceMap(Array<VoiceMap>& voicemap, HumdrumFile& infile) {
+void createVoiceMap(vector<VoiceMap>& voicemap, HumdrumFile& infile) {
 
    voicemap.setSize(200);
    voicemap.setGrowth(200);
@@ -4741,13 +4709,13 @@ void createVoiceMap(Array<VoiceMap>& voicemap, HumdrumFile& infile) {
       for (j=infile[i].getFieldCount()-1; j>=0; j--) {
          if (infile[i].getExInterpNum(j) == E_KERN_EXINT) {
             vtemp.primary = j+1;             // primary tracks start at 1
-            voicemap.append(vtemp);
+            voicemap.push_back(vtemp);
          }
       }
       break;
    }
 
-   for (i=0; i<voicemap.getSize(); i++) {
+   for (i=0; i<(int)voicemap.size(); i++) {
       voicemap[i].voicenumber = i+1;
    }
 }
@@ -4781,25 +4749,25 @@ void createVoiceMap(Array<VoiceMap>& voicemap, HumdrumFile& infile) {
 //    Only the last  !!OMD record in the file will be used.
 //
 
-void parseBibliographic(Array<char*>& header, HumdrumFile& infile) {
+void parseBibliographic(string& header, HumdrumFile& infile) {
    int i;
-   Array<char> marker;
+   string marker;
    marker.setSize(100);
    marker.setGrowth(100);
    marker.setSize(0);
-   Array<char> contents;
+   string contents;
    contents.setSize(100);
    contents.setGrowth(100);
    contents.setSize(0);
    int length;
    char omdstring[1024] = {0};
 
-   Array<Array<char> > markers;
-   Array<Array<char> > contentses;
+   vector<string> markers;
+   vector<string> contentses;
 
    prepareBibliographicData(markers, contentses, infile);
 
-   for (i=0; i<markers.getSize(); i++) {
+   for (i=0; i<(int)markers.size(); i++) {
       marker = markers[i];
       contents = contentses[i];
       length = strlen(contents.getBase());
@@ -4890,7 +4858,7 @@ void parseBibliographic(Array<char*>& header, HumdrumFile& infile) {
    }
    
    if (!options.getBoolean("Q")) {
-      Array<char> QRecord;
+      string QRecord;
       QRecord.setSize(0);
       if (strcmp(header[QQ], "") == 0) {
          if (((!notempoQ) && (tempo > 0)) || ((strcmp(omdstring, "") != 0))) {
@@ -4900,7 +4868,7 @@ void parseBibliographic(Array<char*>& header, HumdrumFile& infile) {
                calculateQRecord(QRecord, tempo, omdstring, top, bot);
             }
          }
-         if (QRecord.getSize() > 0) {
+         if (QRecord.size() > 0) {
             storeHeaderRecord(header, 'Q', QRecord.getBase());
          }
       }
@@ -4917,8 +4885,8 @@ void parseBibliographic(Array<char*>& header, HumdrumFile& infile) {
 //      its parsed contents into the !!!OTL: record.
 //
 
-void prepareBibliographicData(Array<Array<char> >& markers, 
-      Array<Array<char> >& contentses, HumdrumFile& infile) {
+void prepareBibliographicData(vector<string>& markers, 
+      vector<string>& contentses, HumdrumFile& infile) {
 
    markers.setSize(infile.getNumLines());
    markers.setSize(0);
@@ -4926,8 +4894,8 @@ void prepareBibliographicData(Array<Array<char> >& markers,
    contentses.setSize(infile.getNumLines());
    contentses.setSize(0);
 
-   Array<char> marker;
-   Array<char> contents;
+   string marker;
+   string contents;
 
    int length;
    int titleindex = -1;
@@ -4948,12 +4916,12 @@ void prepareBibliographicData(Array<Array<char> >& markers,
       if (length == 0) {
          continue;
       }
-      markers.append(marker);
-      contentses.append(contents);
+      markers.push_back(marker);
+      contentses.push_back(contents);
       if (strcmp(marker.getBase(), "title") == 0) {
-         titleindex = markers.getSize()-1;
+         titleindex = (int)markers.size()-1;
       } else if (strncmp(marker.getBase(), "OTL", 3) == 0) {
-         OTLindex = markers.getSize()-1;
+         OTLindex = (int)markers.size()-1;
       } 
 //     cout << "% REF = " << marker.getBase() 
 //          << " : " << contents.getBase()
@@ -4965,67 +4933,67 @@ void prepareBibliographicData(Array<Array<char> >& markers,
       length = strlen("title");
       marker.setSize(length+1);
       strcpy(marker.getBase(), "title");
-      markers.append(marker);
+      markers.push_back(marker);
 
       length = strlen(titleexpansion);
       contents.setSize(length+1);
       strcpy(contents.getBase(), titleexpansion);
-      contentses.append(contents);
+      contentses.push_back(contents);
       
-      titleindex = markers.getSize() - 1;
+      titleindex = (int)markers.size() - 1;
    }
 
    if (titleindex < 0) {
       return;
    }
 
-   Array<char>& ct = contentses[titleindex];
+   string& ct = contentses[titleindex];
 
    int keyq = 0;
-   Array<char> key;
+   string key;
    key.setSize(100);
    key.setGrowth(100);
    key.setSize(0);
 
-   Array<char> newtitle;
+   string newtitle;
    newtitle.setSize(1000);
    newtitle.setGrowth(1000);
    newtitle.setSize(0);
    char ch;
 
-   for (i=0; i<ct.getSize(); i++) {
+   for (i=0; i<(int)ct.size(); i++) {
       ch = ct[i];
       if ((keyq == 0) && (ct[i] != '@')) {
-         newtitle.append(ch);
-      } else if ((ct[i] == '@') && (i < ct.getSize()-1) && (ct[i+1] == '{')) {
+         newtitle.push_back(ch);
+      } else if ((ct[i] == '@') && (i < (int)ct.size()-1) && (ct[i+1] == '{')) {
          keyq = 1;
          i++;
       } else if (keyq && (ct[i] == '}')) {
          keyq = 0;
          ch = '\0';
-         key.append(ch);
+         key.push_back(ch);
          addContentToString(newtitle, key, markers, contentses);
 	 key.setSize(0);
       } else if (keyq) {
-         key.append(ch);
+         key.push_back(ch);
       } else {
          ch = ct[i];
-         newtitle.append(ch);
+         newtitle.push_back(ch);
       }
    }
 
    ch = '\0';
-   newtitle.append(ch);
+   newtitle.push_back(ch);
 
    if (OTLindex < 0) {
       // create a new OTL record
-      Array<char> key;
+      string key;
       key.setSize(4);
       strcpy(key.getBase(), "OTL");
-      Array<char> con;
+      string con;
       con = newtitle;
-      markers.append(key);
-      contentses.append(con);
+      markers.push_back(key);
+      contentses.push_back(con);
    } else {
       // replace the OTL record
       contentses[OTLindex] = newtitle;
@@ -5039,19 +5007,19 @@ void prepareBibliographicData(Array<Array<char> >& markers,
 // addContentToString --
 //
 
-void addContentToString(Array<char>& newtitle, Array<char>& key, 
-      Array<Array<char> >& markers, Array<Array<char> >& contentses) {
+void addContentToString(string& newtitle, string& key, 
+      vector<string>& markers, vector<string>& contentses) {
    int i;
    int j;
    char ch;
-   for (i=0; i<markers.getSize(); i++) {
+   for (i=0; i<(int)markers.size(); i++) {
       if (strcmp(markers[i].getBase(), key.getBase()) == 0) {
-         for (j=0; j<contentses[i].getSize(); j++) {
+         for (j=0; j<(int)contentses[i].size(); j++) {
             if (contentses[i][j] == '\0') {
                break;
             } else {
                ch = contentses[i][j];
-               newtitle.append(ch);
+               newtitle.push_back(ch);
             }
          }
          break;
@@ -5068,11 +5036,11 @@ void addContentToString(Array<char>& newtitle, Array<char>& key,
 //    the composer's last and first names.
 //
 
-void flipCommaParts(Array<char>& contents) {
+void flipCommaParts(string& contents) {
    char* ptr1;  // the first occurence of a comma
    char* ptr2;  // the last occurence of a comma
    char* ptr3;  // the start of the string
-   int length = contents.getSize();
+   int length = (int)contents.size();
    char buffer[length*2];
    int i;
    for (i=0; i<length; i++) {
@@ -5146,7 +5114,7 @@ void flipCommaParts(Array<char>& contents) {
 //  decimal digits in the tempo as well?)
 //
 
-void calculateQRecord(Array<char>& QRecord, double tempo, 
+void calculateQRecord(string& QRecord, double tempo, 
       const char* omdstring, int top, int bot) {
 
    char ch;
@@ -5164,10 +5132,10 @@ void calculateQRecord(Array<char>& QRecord, double tempo,
       strcat(textbuffer, omdstring);
       strcat(textbuffer, "\"");
       translateSpecialCharacters(QRecord, textbuffer);
-      QRecord.setSize(QRecord.getSize()-1); // remove string terminator
+      QRecord.resize((int)QRecord.size()-1); // remove string terminator
       if (tempo > 0) {
          ch = ' ';
-         QRecord.append(ch);
+         QRecord.push_back(ch);
       }
    }
 
@@ -5214,12 +5182,12 @@ void calculateQRecord(Array<char>& QRecord, double tempo,
       length = strlen(tempostring);
       for (i=0; i<length; i++) {
          ch = tempostring[i];
-         QRecord.append(ch);
+         QRecord.push_back(ch);
       }
    }
    
    ch = EMPTY;
-   QRecord.append(ch);
+   QRecord.push_back(ch);
 }
 
 
@@ -5241,58 +5209,58 @@ int roundTempoToNearestStandard(double tempo) {
       return int(tempo+0.5);
    }
 
-   Array<int> standardtempos;
+   vector<int> standardtempos;
    standardtempos.setSize(100);
 
    int stm;  // a standard tempo mark
    standardtempos.setSize(0);
-   stm = 40; standardtempos.append(stm);
-   stm = 42; standardtempos.append(stm);
-   stm = 44; standardtempos.append(stm);
-   stm = 46; standardtempos.append(stm);
-   stm = 48; standardtempos.append(stm);
-   stm = 50; standardtempos.append(stm);
-   stm = 52; standardtempos.append(stm);
-   stm = 54; standardtempos.append(stm);
-   stm = 56; standardtempos.append(stm);
-   stm = 58; standardtempos.append(stm);
-   stm = 60; standardtempos.append(stm);
-   stm = 63; standardtempos.append(stm);
-   stm = 66; standardtempos.append(stm);
-   stm = 69; standardtempos.append(stm);
-   stm = 72; standardtempos.append(stm);
-   stm = 76; standardtempos.append(stm);
-   stm = 80; standardtempos.append(stm);
-   stm = 84; standardtempos.append(stm);
-   stm = 88; standardtempos.append(stm);
-   stm = 92; standardtempos.append(stm);
-   stm = 96; standardtempos.append(stm);
-   stm = 100; standardtempos.append(stm);
-   stm = 104; standardtempos.append(stm);
-   stm = 108; standardtempos.append(stm);
-   stm = 112; standardtempos.append(stm);
-   stm = 116; standardtempos.append(stm);
-   stm = 120; standardtempos.append(stm);
-   stm = 126; standardtempos.append(stm);
-   stm = 132; standardtempos.append(stm);
-   stm = 138; standardtempos.append(stm);
-   stm = 144; standardtempos.append(stm);
-   stm = 152; standardtempos.append(stm);
-   stm = 160; standardtempos.append(stm);
-   stm = 168; standardtempos.append(stm);
-   stm = 176; standardtempos.append(stm);
-   stm = 184; standardtempos.append(stm);
-   stm = 192; standardtempos.append(stm);
-   stm = 200; standardtempos.append(stm);
-   stm = 208; standardtempos.append(stm);
+   stm = 40; standardtempos.push_back(stm);
+   stm = 42; standardtempos.push_back(stm);
+   stm = 44; standardtempos.push_back(stm);
+   stm = 46; standardtempos.push_back(stm);
+   stm = 48; standardtempos.push_back(stm);
+   stm = 50; standardtempos.push_back(stm);
+   stm = 52; standardtempos.push_back(stm);
+   stm = 54; standardtempos.push_back(stm);
+   stm = 56; standardtempos.push_back(stm);
+   stm = 58; standardtempos.push_back(stm);
+   stm = 60; standardtempos.push_back(stm);
+   stm = 63; standardtempos.push_back(stm);
+   stm = 66; standardtempos.push_back(stm);
+   stm = 69; standardtempos.push_back(stm);
+   stm = 72; standardtempos.push_back(stm);
+   stm = 76; standardtempos.push_back(stm);
+   stm = 80; standardtempos.push_back(stm);
+   stm = 84; standardtempos.push_back(stm);
+   stm = 88; standardtempos.push_back(stm);
+   stm = 92; standardtempos.push_back(stm);
+   stm = 96; standardtempos.push_back(stm);
+   stm = 100; standardtempos.push_back(stm);
+   stm = 104; standardtempos.push_back(stm);
+   stm = 108; standardtempos.push_back(stm);
+   stm = 112; standardtempos.push_back(stm);
+   stm = 116; standardtempos.push_back(stm);
+   stm = 120; standardtempos.push_back(stm);
+   stm = 126; standardtempos.push_back(stm);
+   stm = 132; standardtempos.push_back(stm);
+   stm = 138; standardtempos.push_back(stm);
+   stm = 144; standardtempos.push_back(stm);
+   stm = 152; standardtempos.push_back(stm);
+   stm = 160; standardtempos.push_back(stm);
+   stm = 168; standardtempos.push_back(stm);
+   stm = 176; standardtempos.push_back(stm);
+   stm = 184; standardtempos.push_back(stm);
+   stm = 192; standardtempos.push_back(stm);
+   stm = 200; standardtempos.push_back(stm);
+   stm = 208; standardtempos.push_back(stm);
 
-   Array<int>& ST = standardtempos;
+   vector<int>& ST = standardtempos;
 
    double diff1;
    double diff2;
 
    int i;
-   for (i=1; i<ST.getSize(); i++) {
+   for (i=1; i<(int)ST.size(); i++) {
       diff1 = ST[i] - tempo;
       if (diff1 < 0) {
          continue;
@@ -5325,11 +5293,10 @@ int roundTempoToNearestStandard(double tempo) {
 // http://abc.sourceforge.net/standard/abc2-draft.html#Full%20table%20of%20accented%20letters
 //
 
-void translateSpecialCharacters(Array<char>& output, const char* input) {
+void translateSpecialCharacters(string& output, const char* input) {
    int length = strlen(input);
-   output.setSize(int(length * 1.5));
-   output.setGrowth(output.getSize());
-   output.setSize(0);
+   output.resize(0);
+   output.reserve(int(length * 1.5));
    char ch;
 
    int i;
@@ -5339,144 +5306,144 @@ void translateSpecialCharacters(Array<char>& output, const char* input) {
 
       // lower-case grave accented vowels:
       if (strncmp(&(input[i]), "&agrave;", strlen("&agrave;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '`'; output.append(ch);
-         ch = 'a'; output.append(ch);  i += strlen("&agrave;");
+         ch = '\\'; output.push_back(ch); ch = '`'; output.push_back(ch);
+         ch = 'a'; output.push_back(ch);  i += strlen("&agrave;");
       } else if (strncmp(&(input[i]), "&egrave;", strlen("&egrave;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '`'; output.append(ch);
-         ch = 'e'; output.append(ch);  i += strlen("&egrave;");
+         ch = '\\'; output.push_back(ch); ch = '`'; output.push_back(ch);
+         ch = 'e'; output.push_back(ch);  i += strlen("&egrave;");
       } else if (strncmp(&(input[i]), "&igrave;", strlen("&igrave;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '`'; output.append(ch);
-         ch = 'i'; output.append(ch);  i += strlen("&igrave;");
+         ch = '\\'; output.push_back(ch); ch = '`'; output.push_back(ch);
+         ch = 'i'; output.push_back(ch);  i += strlen("&igrave;");
       } else if (strncmp(&(input[i]), "&ograve;", strlen("&ograve;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '`'; output.append(ch);
-         ch = 'o'; output.append(ch);  i += strlen("&ograve;");
+         ch = '\\'; output.push_back(ch); ch = '`'; output.push_back(ch);
+         ch = 'o'; output.push_back(ch);  i += strlen("&ograve;");
       } else if (strncmp(&(input[i]), "&ugrave;", strlen("&ugrave;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '`'; output.append(ch);
-         ch = 'u'; output.append(ch);  i += strlen("&ugrave;");
+         ch = '\\'; output.push_back(ch); ch = '`'; output.push_back(ch);
+         ch = 'u'; output.push_back(ch);  i += strlen("&ugrave;");
 
       // upper-case grave accented vowels:
       } else if (strncmp(&(input[i]), "&Agrave;", strlen("&Agrave;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '`'; output.append(ch);
-         ch = 'A'; output.append(ch);  i += strlen("&Agrave;");
+         ch = '\\'; output.push_back(ch); ch = '`'; output.push_back(ch);
+         ch = 'A'; output.push_back(ch);  i += strlen("&Agrave;");
       } else if (strncmp(&(input[i]), "&Egrave;", strlen("&Egrave;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '`'; output.append(ch);
-         ch = 'E'; output.append(ch);  i += strlen("&Egrave;");
+         ch = '\\'; output.push_back(ch); ch = '`'; output.push_back(ch);
+         ch = 'E'; output.push_back(ch);  i += strlen("&Egrave;");
       } else if (strncmp(&(input[i]), "&Igrave;", strlen("&Igrave;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '`'; output.append(ch);
-         ch = 'I'; output.append(ch);  i += strlen("&Igrave;");
+         ch = '\\'; output.push_back(ch); ch = '`'; output.push_back(ch);
+         ch = 'I'; output.push_back(ch);  i += strlen("&Igrave;");
       } else if (strncmp(&(input[i]), "&Ograve;", strlen("&Ograve;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '`'; output.append(ch);
-         ch = 'O'; output.append(ch);  i += strlen("&Ograve;");
+         ch = '\\'; output.push_back(ch); ch = '`'; output.push_back(ch);
+         ch = 'O'; output.push_back(ch);  i += strlen("&Ograve;");
       } else if (strncmp(&(input[i]), "&Ugrave;", strlen("&Ugrave;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '`'; output.append(ch);
-         ch = 'U'; output.append(ch);  i += strlen("&Ugrave;");
+         ch = '\\'; output.push_back(ch); ch = '`'; output.push_back(ch);
+         ch = 'U'; output.push_back(ch);  i += strlen("&Ugrave;");
 
       // lower-case acute accented vowels:
       } else if (strncmp(&(input[i]), "&aacute;", strlen("&aacute;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'a'; output.append(ch);  i += strlen("&aacute;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'a'; output.push_back(ch);  i += strlen("&aacute;");
       } else if (strncmp(&(input[i]), "&eacute;", strlen("&eacute;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'e'; output.append(ch);  i += strlen("&eacute;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'e'; output.push_back(ch);  i += strlen("&eacute;");
       } else if (strncmp(&(input[i]), "&iacute;", strlen("&iacute;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'i'; output.append(ch);  i += strlen("&iacute;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'i'; output.push_back(ch);  i += strlen("&iacute;");
       } else if (strncmp(&(input[i]), "&oacute;", strlen("&oacute;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'o'; output.append(ch);  i += strlen("&oacute;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'o'; output.push_back(ch);  i += strlen("&oacute;");
       } else if (strncmp(&(input[i]), "&uacute;", strlen("&uacute;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'u'; output.append(ch);  i += strlen("&uacute;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'u'; output.push_back(ch);  i += strlen("&uacute;");
 
       // upper-case acute accented vowels:
       } else if (strncmp(&(input[i]), "&Aacute;", strlen("&Aacute;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'A'; output.append(ch);  i += strlen("&Aacute;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'A'; output.push_back(ch);  i += strlen("&Aacute;");
       } else if (strncmp(&(input[i]), "&Eacute;", strlen("&Eacute;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'E'; output.append(ch);  i += strlen("&Eacute;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'E'; output.push_back(ch);  i += strlen("&Eacute;");
       } else if (strncmp(&(input[i]), "&Iacute;", strlen("&Iacute;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'I'; output.append(ch);  i += strlen("&Iacute;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'I'; output.push_back(ch);  i += strlen("&Iacute;");
       } else if (strncmp(&(input[i]), "&Oacute;", strlen("&Oacute;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'O'; output.append(ch);  i += strlen("&Oacute;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'O'; output.push_back(ch);  i += strlen("&Oacute;");
       } else if (strncmp(&(input[i]), "&Uacute;", strlen("&Uacute;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'U'; output.append(ch);  i += strlen("&Uacute;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'U'; output.push_back(ch);  i += strlen("&Uacute;");
 
       // lower-case umlaut accented vowels:
       } else if (strncmp(&(input[i]), "&auml;", strlen("&auml;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\"'; output.append(ch);
-         ch = 'a'; output.append(ch);  i += strlen("&auml;");
+         ch = '\\'; output.push_back(ch); ch = '\"'; output.push_back(ch);
+         ch = 'a'; output.push_back(ch);  i += strlen("&auml;");
       } else if (strncmp(&(input[i]), "&euml;", strlen("&euml;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\"'; output.append(ch);
-         ch = 'e'; output.append(ch);  i += strlen("&euml;");
+         ch = '\\'; output.push_back(ch); ch = '\"'; output.push_back(ch);
+         ch = 'e'; output.push_back(ch);  i += strlen("&euml;");
       } else if (strncmp(&(input[i]), "&iuml;", strlen("&iuml;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\"'; output.append(ch);
-         ch = 'i'; output.append(ch);  i += strlen("&iuml;");
+         ch = '\\'; output.push_back(ch); ch = '\"'; output.push_back(ch);
+         ch = 'i'; output.push_back(ch);  i += strlen("&iuml;");
       } else if (strncmp(&(input[i]), "&ouml;", strlen("&ouml;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\"'; output.append(ch);
-         ch = 'o'; output.append(ch);  i += strlen("&ouml;");
+         ch = '\\'; output.push_back(ch); ch = '\"'; output.push_back(ch);
+         ch = 'o'; output.push_back(ch);  i += strlen("&ouml;");
       } else if (strncmp(&(input[i]), "&uuml;", strlen("&uuml;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\"'; output.append(ch);
-         ch = 'u'; output.append(ch);  i += strlen("&uuml;");
+         ch = '\\'; output.push_back(ch); ch = '\"'; output.push_back(ch);
+         ch = 'u'; output.push_back(ch);  i += strlen("&uuml;");
 
       // upper-case umlaut accented vowels:
       } else if (strncmp(&(input[i]), "&Auml;", strlen("&Auml;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'A'; output.append(ch);  i += strlen("&Auml;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'A'; output.push_back(ch);  i += strlen("&Auml;");
       } else if (strncmp(&(input[i]), "&Euml;", strlen("&Euml;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'E'; output.append(ch);  i += strlen("&Euml;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'E'; output.push_back(ch);  i += strlen("&Euml;");
       } else if (strncmp(&(input[i]), "&Iuml;", strlen("&Iuml;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'I'; output.append(ch);  i += strlen("&Iuml;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'I'; output.push_back(ch);  i += strlen("&Iuml;");
       } else if (strncmp(&(input[i]), "&Ouml;", strlen("&Ouml;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'O'; output.append(ch);  i += strlen("&Ouml;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'O'; output.push_back(ch);  i += strlen("&Ouml;");
       } else if (strncmp(&(input[i]), "&Uuml;", strlen("&Uuml;")) == 0) {
-         ch = '\\'; output.append(ch); ch = '\''; output.append(ch);
-         ch = 'U'; output.append(ch);  i += strlen("&Uuml;");
+         ch = '\\'; output.push_back(ch); ch = '\''; output.push_back(ch);
+         ch = 'U'; output.push_back(ch);  i += strlen("&Uuml;");
       
       // other types of accented characters ////////////////////////////
 
       // aring : a with a circle above it (for Nordic langauges):
       } else if (strncmp(&(input[i]), "&aring;", strlen("&aring;")) == 0) {
-         ch = '\\'; output.append(ch); ch = 'a'; output.append(ch);
-         ch = 'a'; output.append(ch);  i += strlen("&aring;");
+         ch = '\\'; output.push_back(ch); ch = 'a'; output.push_back(ch);
+         ch = 'a'; output.push_back(ch);  i += strlen("&aring;");
       } else if (strncmp(&(input[i]), "&Aring;", strlen("&Aring;")) == 0) {
-         ch = '\\'; output.append(ch); ch = 'a'; output.append(ch);
-         ch = 'a'; output.append(ch);  i += strlen("&Aring;");
+         ch = '\\'; output.push_back(ch); ch = 'a'; output.push_back(ch);
+         ch = 'a'; output.push_back(ch);  i += strlen("&Aring;");
 
 
       // accidental symbols in titles ///////////////////////////////////
       // \b --> flat sign does not work...
       } else if (strncmp(&(input[i]), "\\n", strlen("\\n")) == 0) {
-         ch = '\n'; output.append(ch); i += strlen("\\n");
+         ch = '\n'; output.push_back(ch); i += strlen("\\n");
       } else if (strncmp(&(input[i]), "-flat", strlen("-flat")) == 0) {
-         ch = '\\'; output.append(ch); ch = 'b'; output.append(ch);
+         ch = '\\'; output.push_back(ch); ch = 'b'; output.push_back(ch);
                                        i += strlen("-flat");
       // \# --> sharp sign in titles does work.
       } else if (strncmp(&(input[i]), "-sharp", strlen("-sharp")) == 0) {
-         ch = '\\'; output.append(ch); ch = '#'; output.append(ch);
+         ch = '\\'; output.push_back(ch); ch = '#'; output.push_back(ch);
                                        i += strlen("-sharp");
       // Haven't tested if \= --> natural sign works.
       } else if (strncmp(&(input[i]), "-natural", strlen("-natural")) == 0) {
-         ch = '\\'; output.append(ch); ch = '='; output.append(ch);
+         ch = '\\'; output.push_back(ch); ch = '='; output.push_back(ch);
                                        i += strlen("-natural");
 
 
       // other accented characters
       } else if (strncmp(&(input[i]), "&ccedil;", strlen("&ccedil;")) == 0) {
-         ch = '\\'; output.append(ch); ch = 'c'; output.append(ch);
-         ch = 'c'; output.append(ch);  i += strlen("&ccedil;");
+         ch = '\\'; output.push_back(ch); ch = 'c'; output.push_back(ch);
+         ch = 'c'; output.push_back(ch);  i += strlen("&ccedil;");
       } else if (strncmp(&(input[i]), "&Ccdeil;", strlen("&Ccdeil;")) == 0) {
-         ch = '\\'; output.append(ch); ch = 'C'; output.append(ch);
-         ch = 'C'; output.append(ch);  i += strlen("&Ccdeil;");
+         ch = '\\'; output.push_back(ch); ch = 'C'; output.push_back(ch);
+         ch = 'C'; output.push_back(ch);  i += strlen("&Ccdeil;");
       } else if (strncmp(&(input[i]), "&szlig;", strlen("&szlig;")) == 0) {
-         ch = '\\'; output.append(ch); ch = 's'; output.append(ch);
-         ch = 's'; output.append(ch);  i += strlen("&szlig;");
+         ch = '\\'; output.push_back(ch); ch = 's'; output.push_back(ch);
+         ch = 's'; output.push_back(ch);  i += strlen("&szlig;");
 
 
       }
@@ -5492,11 +5459,11 @@ void translateSpecialCharacters(Array<char>& output, const char* input) {
        */
          
       ch = input[i];
-      output.append(ch);
+      output.push_back(ch);
    }
 
    ch = EMPTY;
-   output.append(ch);
+   output.push_back(ch);
 }
 
 
@@ -5508,10 +5475,10 @@ void translateSpecialCharacters(Array<char>& output, const char* input) {
 
 typedef char const * charstring;
 
-void storeHeaderRecord(Array<char*>& header, char recordletter, 
+void storeHeaderRecord(string& header, char recordletter, 
       const char* inputstring) {
 
-   Array<char> parsedstring;
+   string parsedstring;
    translateSpecialCharacters(parsedstring, inputstring);
 
    int length = strlen(parsedstring.getBase());
@@ -5552,7 +5519,7 @@ void storeHeaderRecord(Array<char*>& header, char recordletter,
 //
 
 void getBibPieces(const char* string, const char* string2, 
-      Array<char>& marker, Array<char>& contents) {
+      string& marker, string& contents) {
 
    char bufftemp[strlen(string) + strlen(string2)];
    strcpy(bufftemp, string);
@@ -5576,23 +5543,23 @@ void getBibPieces(const char* string, const char* string2,
    int i = 3;
    while ((i<length) && (bufftemp[i] != '\0') && (bufftemp[i] != ':')) {
       ch = bufftemp[i];
-      marker.append(ch);
+      marker.push_back(ch);
       i++;
    }
    i++;
-   marker.append(empty);
+   marker.push_back(empty);
 
    while ((i<length) && (bufftemp[i] != '\0') && isspace(bufftemp[i])) {
       i++;
    }
    while ((i < length) && (bufftemp[i] != '\0')) {
       ch = bufftemp[i];
-      contents.append(ch);
+      contents.push_back(ch);
       i++;
    }
 
    
-   for (i=contents.getSize()-1; i>0; i--) {
+   for (i=(int)contents.size()-1; i>0; i--) {
       if (isspace(contents[i])) {
          contents[i] = empty;
 	 contents.setSize(i);
@@ -5609,7 +5576,7 @@ void getBibPieces(const char* string, const char* string2,
          break;
       }
    }
-   contents.append(empty);
+   contents.push_back(empty);
 
    char buffer[1024];
    strcpy(buffer, contents.getBase());
@@ -5629,7 +5596,7 @@ void calculateBestRhythmUnit(HumdrumFile& infile, int& Ltop, int& Lbot) {
    int i, j;
    int tcount;
    char buffer[128] = {0};
-   Array<int> rhythms;
+   vector<int> rhythms;
    rhythms.setSize(17);
    rhythms.allowGrowth(0);
    rhythms.setAll(0);
@@ -5853,8 +5820,8 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    }
 
    int i;
-   Array<char> marker;
-   Array<char> contents;
+   string marker;
+   string contents;
 
    opts.reset();
    storeOptionSet(opts);
@@ -5876,12 +5843,12 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
                   cout << "%Command-line addition: " << marker.getBase()
                        << " :: " << contents.getBase() << endl;
                }
-               opts.appendOptions(contents.getBase());
+               opts.push_backOptions(contents.getBase());
             }
          }
       }
    }
-   opts.appendOptions(argc-1, argv+1); // exclude the command name
+   opts.push_backOptions(argc-1, argv+1); // exclude the command name
    opts.process();
 
    // handle basic options:
@@ -5895,17 +5862,17 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
       exit(0);
    }
    
-   // Array<char*> header;
+   // string header;
    
    Header.setSize(26);
-   for (i=0; i<Header.getSize(); i++) {
+   for (i=0; i<(int)Header.size(); i++) {
       Header[i] = new char[1];
       Header[i][0] = EMPTY;
    }
@@ -5915,12 +5882,12 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    int length;
    for (i=0; i<26; i++) {
       optchar[0] = char('A'+i);
-      length = strlen(opts.getString(optchar).data());
+      length = strlen(opts.getString(optchar).c_str());
       if (length > 0) {
          delete [] Header[i];
          Header[i] = new char[length+1];
       }
-      storeHeaderRecord(Header, char('A'+i), opts.getString(optchar).data());
+      storeHeaderRecord(Header, char('A'+i), opts.getString(optchar).c_str());
    }
 
    debugQ =  opts.getBoolean("debug");
@@ -5931,7 +5898,7 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    }
 
    barnumberingstyle = opts.getInteger("barnums");
-   if (strcmp(opts.getString("barnums").data(), "none") == 0) {
+   if (strcmp(opts.getString("barnums").c_str(), "none") == 0) {
       barnumberingstyle = -1;
    }
 
@@ -5939,10 +5906,10 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    footerQ   = opts.getBoolean("footer");
    headerQ   = opts.getBoolean("header");
    if (footerQ) {
-      footer = opts.getString("footer").data();
+      footer = opts.getString("footer").c_str();
    }
    if (headerQ) {
-      header = opts.getString("header").data();
+      header = opts.getString("header").c_str();
    }
 
    labelQ     =  opts.getBoolean("label");
@@ -5955,7 +5922,7 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    commentbarnumQ = opts.getBoolean("comment-barnum");
    keyQ        = opts.getBoolean("key");
 
-   if (strchr(opts.getString("barnums").data(), 'b') != NULL) {
+   if (strchr(opts.getString("barnums").c_str(), 'b') != NULL) {
       // the presence of a b after the measure number option
       // indicates that the user wants the bar numbers enclosed
       // in a box.
@@ -5970,21 +5937,21 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    }
 
    directoryQ      = opts.getBoolean("directory");
-   directoryname   = opts.getString("directory").data();
-   filemask        = opts.getString("mask").data();
+   directoryname   = opts.getString("directory").c_str();
+   filemask        = opts.getString("mask").c_str();
 
    landscapeQ      = opts.getBoolean("landscape");
    musicscaleQ     = opts.getBoolean("scale");
    musicscale      = opts.getDouble("scale");
-   parameterstring = opts.getString("p").data();
+   parameterstring = opts.getString("p").c_str();
    if (strstr(parameterstring, "nostems") != NULL) {
       stemlessQ = 1;
    }
    filenumQ        = opts.getBoolean("filenum");
-   filenumstring   = opts.getString("filenum").data();
+   filenumstring   = opts.getString("filenum").c_str();
    filenametitleQ  = opts.getBoolean("filetitle");
    titleexpansionQ = opts.getBoolean("TT");
-   titleexpansion  = opts.getString("TT").data();
+   titleexpansion  = opts.getString("TT").c_str();
    nonaturalQ      = opts.getBoolean("no-auto-natural");
 
    linebreakQ      = opts.getBoolean("linebreak");
