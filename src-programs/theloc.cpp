@@ -6,6 +6,7 @@
 // Last Modified: Tue Jan 18 11:10:38 PST 2011 added --mstart option
 // Last Modified: Sun Feb 20 18:38:07 PST 2011 added --percent option
 // Last Modified: Thu Feb 24 17:10:34 PST 2011 added --file option
+// Last Modified: Thu Feb 24 17:10:34 PST 2011 C strings to C++ strings.
 // Filename:      ...sig/examples/all/theloc.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/theloc.cpp
 // Syntax:        C++; museinfo
@@ -24,53 +25,52 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-#endif
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+
+using namespace std;
 
 
 // Function declarations:
 void      checkOptions          (Options& opts, int argc, char** argv);
 void      example               (void);
-void      usage                 (const char* command);
+void      usage                 (const string& command);
 void      processData           (istream& input);
-void      extractDataFromInputLine(Array<char>& filename, 
-                                  Array<char>& voicename, int& track, 
-                                  int& subtrack, Array<int>& starts, 
-                                  Array<int>& endings, char* inputline);
-void      prepareSearchPaths    (Array<Array<char> >& paths, 
-                                 const char* pathlist);
-int       fileexists            (Array<char>& jointname, Array<char>& filename,
-                                 Array<char>& path);
-void      getFileAndPath        (Array<char>& fileandpath, 
-                                 Array<char>& filename, 
-                                 Array<Array<char> >& paths);
+void      extractDataFromInputLine(string& filename, 
+                                  string& voicename, int& track, 
+                                  int& subtrack, vector<int>& starts, 
+                                  vector<int>& endings, char* inputline);
+void      prepareSearchPaths    (vector<string>& paths, 
+                                 const string& pathlist);
+int       fileexists            (string& jointname, string& filename,
+                                 string& path);
+void      getFileAndPath        (string& fileandpath, 
+                                 string& filename, 
+                                 vector<string>& paths);
 int       findNote              (int nth, HumdrumFile& infile, int& cur, 
                                  int& row, int& col, int track, int subtrack,
                                  int& measure);
 void      fillMeterInfo         (HumdrumFile& infile, 
-                                 Array<RationalNumber>& meterbot, int track);
+                                 vector<RationalNumber>& meterbot, int track);
 void      markNotes             (HumdrumFile& infile, int row, int col, 
                                  int track, int subtrack, int matchlen, 
-                                 const char* marker);
-void      processDataLine       (HumdrumFile& infile, const char* inputline, 
-                                 Array<char>& filename, 
-                                 Array<char>& lastfilename, 
-                                 Array<char>& voicename, int track, 
-                                 int subtrack, Array<int>& starts, 
-                                 Array<int>& endings);
+                                 const string& marker);
+void      processDataLine       (HumdrumFile& infile, const string& inputline, 
+                                 string& filename, 
+                                 string& lastfilename, 
+                                 string& voicename, int track, 
+                                 int subtrack, vector<int>& starts, 
+                                 vector<int>& endings);
 void      printDash             (void);
 void      displayNoteLocationInfo(HumdrumFile& infile, int num, int row, 
                                 int col, int measure,
-                                Array<RationalNumber>& meterbot);
+                                vector<RationalNumber>& meterbot);
 
 // User interface variables:
 Options   options;
-Array<Array<char> > paths;
+vector<string> paths;
 int         debugQ       = 0;     // used with --debug option
 int         percentQ     = 0;     // used with -P option
 int         dirdropQ     = 0;     // used with -D option
@@ -90,9 +90,9 @@ int         tieQ         = 0;     // used with --tie option
 int         graceQ       = 1;     // used with -G option
 int         doubleQ      = 0;     // used with --mstart option
 int         fileQ        = 0;     // used with --file option
-const char* Filename     = "";    // used with --file option
+string      Filename     = "";    // used with --file option
 int         matchlen     = 1;     // used with --mark option
-const char* marker       = "@";   // used with --marker option
+string      marker       = "@";   // used with --marker option
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -127,15 +127,11 @@ int main(int argc, char** argv) {
 
 void processData(istream& input) {
    #define LINESIZE 100000
-   Array<char> filename;
-   Array<char> lastfilename;
-   lastfilename.setSize(1);
-   lastfilename[0] = '\0';
-   Array<int> starts;
-   Array<int> endings;
-   Array<char> voicename;
-   voicename.setSize(1);
-   voicename[0] = '\0';
+   string filename;
+   string lastfilename;
+   vector<int> starts;
+   vector<int> endings;
+   string voicename;
    int track;
    int subtrack;
    HumdrumFile infile;
@@ -177,8 +173,7 @@ void processData(istream& input) {
    }
 
    // flush any data needing to be printed (such as for markQ):
-   filename.setSize(1);
-   filename[0] = '\0';
+	filename = "";
    processDataLine(infile, "", filename, lastfilename, voicename, track, 
          subtrack, starts, endings);
 }
@@ -190,38 +185,36 @@ void processData(istream& input) {
 // processDataLine --
 //
 
-void processDataLine(HumdrumFile& infile, const char* inputline, 
-      Array<char>& filename, Array<char>& lastfilename, 
-      Array<char>& voicename, int track, int subtrack, Array<int>& starts, 
-      Array<int>& endings) {
+void processDataLine(HumdrumFile& infile, const string& inputline, 
+      string& filename, string& lastfilename, 
+      string& voicename, int track, int subtrack, vector<int>& starts, 
+      vector<int>& endings) {
 
    PerlRegularExpression pre;
    PerlRegularExpression pre2;
    PerlRegularExpression pre3;
 
-   Array<char> fileandpath;
+   string fileandpath;
    if (fileQ) {
-      filename.setSize(strlen(Filename)+1);
-      strcpy(filename.getBase(), Filename);
+		filename = Filename;
       pre.sar(filename, "&colon;", ":", "g");
    }
-   if (strcmp(filename.getBase(), "") != 0) {
+   if (filename != "") {
       getFileAndPath(fileandpath, filename, paths);
       if (debugQ) {
          cout << "FOUND FILE: " << fileandpath << endl;
       }
-      if (strlen(fileandpath.getBase()) == 0) {
+      if (fileandpath == "") {
          // print original line without processing content since file not found
          cout << inputline << endl;
          return;
       }
    }
 
-   Array<char> tempstr;
-   tempstr.setSize(1);
-   tempstr[0] = '\0';
-   if (strcmp(filename.getBase(), lastfilename.getBase()) != 0) {
-      if (strcmp(lastfilename.getBase(), "") != 0) {
+   string tempstr;
+	
+   if (filename != lastfilename) {
+      if (lastfilename != "") {
          if (markQ) {
             cout << infile;
             if (pre.search(marker, "^\\s*([^\\s])\\s+", "") ||
@@ -232,8 +225,7 @@ void processDataLine(HumdrumFile& infile, const char* inputline,
                if (pre.search(marker, 
                      "color\\s*=\\s*\"?([^\\s\"\\)\\(,;]+)\"?", "")) {
 
-                  tempstr.setSize(strlen(marker) + 1);
-                  strcpy(tempstr.getBase(), marker);
+						tempstr = marker;
                   pre3.sar(tempstr, "^\\s*[^\\s]\\s+", "", "");
                   pre3.sar(tempstr, "color\\s*=\\s*\"?[^\\s\"\\)\\(,;]+\"?", "", "g");
                   pre3.sar(tempstr, "^[\\s:,;-=]+", "", "");
@@ -253,7 +245,7 @@ void processDataLine(HumdrumFile& infile, const char* inputline,
                      cout << ", color=\"" << pre.getSubmatch(1) << "\"";
                   }
                }
-               if (strlen(tempstr.getBase()) > 0) {
+               if (tempstr.size() > 0) {
                   cout << " " << tempstr;
                }
                cout << endl;
@@ -261,21 +253,21 @@ void processDataLine(HumdrumFile& infile, const char* inputline,
             if (!mark2Q) {
                cout << "!!!MATCHLEN:\t" << matchlen << endl;
             }
-            if (strcmp(filename.getBase(), "") == 0) {
+            if (filename == "") {
                // empty filename is a dummy to force last line of 
                // input to be processed correctly if markQ or similar is used.
                return;
             }
          }
       }
-      if (strcmp(filename.getBase(), "") != 0) {
+      if (filename != "") {
          infile.clear();
-         infile.read(fileandpath.getBase());
+         infile.read(fileandpath.c_str());
          infile.analyzeRhythm("4"); // only by quarter-note beats for now
       }
    }
 
-   if (strcmp(filename.getBase(), "") == 0) {
+   if (filename =="") {
       // empty filename is a dummy, but shouldn't ever get here.
       return;
    }
@@ -285,8 +277,7 @@ void processDataLine(HumdrumFile& infile, const char* inputline,
    }
 
    if (fileQ) {
-      fileandpath.setSize(strlen(Filename)+1);
-      strcpy(fileandpath.getBase(), Filename);
+		fileandpath = Filename;
    }
 
    if (matchlistQ) {
@@ -313,8 +304,7 @@ void processDataLine(HumdrumFile& infile, const char* inputline,
       emeasure = 0;
    }
 
-   Array<RationalNumber> meterbot;
-   meterbot.setSize(0);
+   vector<RationalNumber> meterbot;
    if (dispBeatQ) {
       fillMeterInfo(infile, meterbot, track);
    }
@@ -322,20 +312,20 @@ void processDataLine(HumdrumFile& infile, const char* inputline,
    int i;
    int state;
    int estate;
-   for (i=0; i<starts.getSize(); i++) {
+   for (i=0; i<(int)starts.size(); i++) {
       state = findNote(starts[i], infile, cur, row, col, track, 
             subtrack, measure);
       if (state == 0) {
          continue;
       }
-      if ((endings.getSize() >0) && (endings[i] >= 0)) {
+      if (((int)endings.size() >0) && (endings[i] >= 0)) {
          estate = findNote(endings[i], infile, ecur, erow, ecol, 
          track, subtrack, emeasure);
       } else {
          estate = 0;
       }
       if (markQ) {
-         if ((endings.getSize() > 0) && (endings[i] >= 0)) {
+         if (((int)endings.size() > 0) && (endings[i] >= 0)) {
             markNotes(infile, row, col, track, subtrack, 
                   endings[i]-starts[i]+1, marker);
          } else {
@@ -344,7 +334,7 @@ void processDataLine(HumdrumFile& infile, const char* inputline,
       }
       if (matchlistQ) {
          displayNoteLocationInfo(infile, starts[i], row, col, measure, meterbot);
-         if ((endings.getSize() > 0) && (endings[i] >= 0) && estate) {
+         if (((int)endings.size() > 0) && (endings[i] >= 0) && estate) {
             printDash();
             displayNoteLocationInfo(infile, endings[i], erow, ecol, emeasure, 
                   meterbot);
@@ -352,7 +342,7 @@ void processDataLine(HumdrumFile& infile, const char* inputline,
       }
 
       if (matchlistQ) {
-         if (i < starts.getSize()-1) {
+         if (i < (int)starts.size()-1) {
             cout << " ";
          }
       }
@@ -386,7 +376,7 @@ void printDash(void) {
 //
 
 void displayNoteLocationInfo(HumdrumFile& infile, int num, int row, int col,
-      int measure, Array<RationalNumber>& meterbot) {
+      int measure, vector<RationalNumber>& meterbot) {
 
    RationalNumber four(4, 1);
 
@@ -449,7 +439,7 @@ void displayNoteLocationInfo(HumdrumFile& infile, int num, int row, int col,
 //
 
 void markNotes(HumdrumFile& infile, int row, int col, int track, int subtrack,
-      int matchlen, const char* marker) {
+      int matchlen, const string& marker) {
 
    PerlRegularExpression pre;
    char markchar[2] = {0};
@@ -459,10 +449,8 @@ void markNotes(HumdrumFile& infile, int row, int col, int track, int subtrack,
    }
 
    int tiestate = 0;
-   Array<char> newdata;
-   newdata.setSize(1000);
-   newdata.setGrowth(1000);
-   newdata.setSize(0);
+   string newdata;
+   newdata.reserve(1000);
    int foundcount = 0;
    int i, j;
    int scount = 0;
@@ -535,13 +523,12 @@ void markNotes(HumdrumFile& infile, int row, int col, int track, int subtrack,
             // already marked (perhaps overlapping match)
             break;
          }
-         newdata.setSize(strlen(infile[i][j]) + strlen(markchar) + 1);
-         strcpy(newdata.getBase(), infile[i][j]);
-         strcat(newdata.getBase(), markchar);
+			newdata = infile[i][j];
+			newdata += markchar;
          if (doubleQ && (foundcount == 1)) {
-            strcat(newdata.getBase(), markchar);
+				newdata += markchar;
          }
-         infile[i].changeField(j, newdata.getBase());
+         infile[i].changeField(j, newdata.c_str());
          break;
 
          if (foundcount >= matchlen) {
@@ -564,13 +551,13 @@ veryend: ;
 // fillMeterInfo --
 //
 
-void fillMeterInfo(HumdrumFile& infile, Array<RationalNumber>& meterbot, 
+void fillMeterInfo(HumdrumFile& infile, vector<RationalNumber>& meterbot, 
       int track) {
 
    int top;
    int bot;
 
-   meterbot.setSize(infile.getNumLines());
+   meterbot.resize(infile.getNumLines());
 
    RationalNumber current(4, 1);
    RationalNumber compound(3, 2);
@@ -702,46 +689,43 @@ int findNote(int nth, HumdrumFile& infile, int& cur, int& row, int& col,
 //    information and search again.  
 //
 
-void getFileAndPath(Array<char>& fileandpath, Array<char>& filename, 
-   Array<Array<char> >& paths) {
+void getFileAndPath(string& fileandpath, string& filename, 
+   vector<string>& paths) {
    PerlRegularExpression pre;
 
    pre.sar(filename, "&colon;", ":", "g");
    if (pre.search(filename, "://")) {
       // either a URL or a URI, so no path.
       fileandpath = filename;
-      paths.setSize(1);
-      paths[0].setSize(1);
-      paths[0][0] = '\0';
+      paths.resize(1);
+      paths[0] = "";
       return;
    }
 
    int i;
-   for (i=0; i<paths.getSize(); i++) {
+   for (i=0; i<(int)paths.size(); i++) {
       if (fileexists(fileandpath, filename, paths[i])) {
          return;
       }
    }
 
    if (!pre.search(filename, "/")) {
-      fileandpath.setSize(1);
-      fileandpath[0] = '\0';
+		fileandpath = "";
    }
 
    // check to see if removing the directory name already attached 
    // to the filename helps:
 
-   Array<char> tempfilename = filename;
+   string tempfilename = filename;
    pre.sar(tempfilename, ".*/", "", "");
 
-   for (i=0; i<paths.getSize(); i++) {
+   for (i=0; i<(int)paths.size(); i++) {
       if (fileexists(fileandpath, tempfilename, paths[i])) {
          return;
       }
    }
 
-   fileandpath.setSize(1);
-   fileandpath[0] = '\0';
+	fileandpath = "";
 }
 
 
@@ -752,30 +736,25 @@ void getFileAndPath(Array<char>& fileandpath, Array<char>& filename,
 //    create the filename is given back to the calling function.
 //
 
-void JoinDirToPath(Array<char>& jointname, Array<char>& path, 
-      Array<char>& filename) {
+void JoinDirToPath(string& jointname, string& path, 
+      string& filename) {
 
    PerlRegularExpression pre;
-   int len = strlen(filename.getBase());
    if (pre.search(path, "^\\./*$")) {
       // if searching in the current directory, then don't
       // add the current directory marker.
-      jointname.setSize(len+1);
-      strcpy(jointname.getBase(), filename.getBase());
+		jointname = filename;
    } else {
       // append "/" to directory name and then filename
-      len += strlen(path.getBase());
       if (pre.search(path, "/$", "")) {
          // don't need to add "/" to separate dir and file names.
-         jointname.setSize(len+1);
-         strcpy(jointname.getBase(), path.getBase());
-         strcat(jointname.getBase(), filename.getBase());
+			jointname = path;
+			jointname += filename;
       } else {
          // need to add "/" to separate dir and file names.
-         jointname.setSize(len+2);
-         strcpy(jointname.getBase(), path.getBase());
-         strcat(jointname.getBase(), "/");
-         strcat(jointname.getBase(), filename.getBase());
+         jointname = path;
+			jointname += "/";
+			jointname += filename;
       }
    }
 }
@@ -787,10 +766,10 @@ void JoinDirToPath(Array<char>& jointname, Array<char>& path,
 // fileexists --
 //
 
-int fileexists(Array<char>& jointname, Array<char>& filename, 
-      Array<char>& path) {
+int fileexists(string& jointname, string& filename, 
+      string& path) {
    JoinDirToPath(jointname, path, filename);
-   if (access(jointname.getBase(), F_OK) != -1) {
+   if (access(jointname.c_str(), F_OK) != -1) {
       return 1;
    } else {
       return 0;
@@ -808,26 +787,22 @@ int fileexists(Array<char>& jointname, Array<char>& filename,
 // extractDataFromInputLine --
 //
 
-void extractDataFromInputLine(Array<char>& filename, 
-      Array<char>& voicename, int& track, int& subtrack, Array<int>& starts, 
-      Array<int>& endings, char* inputline) {
-   filename.setSize(1);
-   filename[0] = '\0';
+void extractDataFromInputLine(string& filename, 
+      string& voicename, int& track, int& subtrack, vector<int>& starts, 
+      vector<int>& endings, char* inputline) {
+	filename = "";
    track = 0;
    subtrack = 1;
 
-   starts.setSize(1000);
-   starts.setGrowth(1000);
-   starts.setSize(0);
+   starts.resize(0);
+   starts.reserve(1000);
 
-   endings.setSize(1000);
-   endings.setGrowth(1000);
-   endings.setSize(0);
+   endings.resize(0);
+   endings.reserve(1000);
 
    int negone = -1;
 
    char* ptr = inputline;
-   int len;
    int value;
    PerlRegularExpression pre;
    PerlRegularExpression pre2;
@@ -835,13 +810,9 @@ void extractDataFromInputLine(Array<char>& filename,
 
    if (pre.search(ptr, "^([^\\t:]+)[^\\t]*:(\\d+)\\.?(\\d+)?\\t(\\d+)([^\\s]*\\s*)")) {
       if (fileQ) {
-         len = strlen(Filename);
-         filename.setSize(len + 1);
-         strcpy(filename.getBase(), Filename);
+			filename = Filename;
       } else {
-         len = strlen(pre.getSubmatch(1));
-         filename.setSize(len + 1);
-         strcpy(filename.getBase(), pre.getSubmatch());
+			filename = pre.getSubmatch(1);
       }
       track = atoi(pre.getSubmatch(2));
       if (strlen(pre.getSubmatch(3)) > 0) {
@@ -850,66 +821,60 @@ void extractDataFromInputLine(Array<char>& filename,
          subtrack = 1;
       }
       value = atoi(pre.getSubmatch(4));
-      starts.append(value);
+      starts.push_back(value);
       if (pre2.search(pre.getSubmatch(5), "-(\\d+)", "")) {
          value = atoi(pre2.getSubmatch(1));
-         endings.append(value);
+         endings.push_back(value);
       } else {
-         endings.append(negone);
+         endings.push_back(negone);
       }
       ptr = ptr + pre.getSubmatchEnd(5);
       while (pre.search(ptr, "^(\\d+)([^\\s]*\\s*)")) { 
          value = atoi(pre.getSubmatch(1));
-         starts.append(value);
+         starts.push_back(value);
          if (pre2.search(pre.getSubmatch(2), "-(\\d+)", "")) {
             value = atoi(pre2.getSubmatch(1));
-            endings.append(value);
+            endings.push_back(value);
          } else {
-            endings.append(negone);
+            endings.push_back(negone);
          }
          ptr = ptr + pre.getSubmatchEnd(2);
       }
       if (pre.search(inputline, "^[^\\t:]*:([^\\t:]*):")) {
-         voicename.setSize(strlen(pre.getSubmatch(1))+1);
-         strcpy(voicename.getBase(), pre.getSubmatch());
+         voicename = pre.getSubmatch(1);
       }
    } else if (pre.search(ptr, "^([^\\t:]+)\\t(\\d+)([^\\s]*\\s*)")) {
       // monophonic label (no spine information available).
       // search only on the first **kern column in the file.
       if (fileQ) {
-         len = strlen(Filename);
-         filename.setSize(len + 1);
-         strcpy(filename.getBase(), Filename);
+			filename = Filename;
       } else {
-         len = strlen(pre.getSubmatch(1));
-         filename.setSize(len + 1);
-         strcpy(filename.getBase(), pre.getSubmatch());
+			filename = pre.getSubmatch(1);
       }
       track = 1;
       value = atoi(pre.getSubmatch(2));
-      starts.append(value);
+      starts.push_back(value);
       if (pre2.search(pre.getSubmatch(3), "-(\\d+)", "")) {
          value = atoi(pre2.getSubmatch(1));
-         endings.append(value);
+         endings.push_back(value);
       } else {
-         endings.append(negone);
+         endings.push_back(negone);
       }
       ptr = ptr + pre.getSubmatchEnd(3);
       while (pre.search(ptr, "^(\\d+)([^\\s]*\\s*)")) { 
          value = atoi(pre.getSubmatch(1));
-         starts.append(value);
+         starts.push_back(value);
          if (pre2.search(pre.getSubmatch(2), "-(\\d+)", "")) {
             value = atoi(pre2.getSubmatch(1));
-            endings.append(value);
+            endings.push_back(value);
          } else {
-            endings.append(negone);
+            endings.push_back(negone);
          }
          ptr = ptr + pre.getSubmatchEnd(2);
       }
       if (pre.search(inputline, "^[^\\t:]*:([^\\t:]*):")) {
          // won't occur in this case
-         voicename.setSize(strlen(pre.getSubmatch(1))+1);
-         strcpy(voicename.getBase(), pre.getSubmatch());
+         voicename = pre.getSubmatch(1);
       }
    }
 
@@ -1034,24 +999,19 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 //     The list of paths is colon separated.
 //
 
-void prepareSearchPaths(Array<Array<char> >& paths, const char* pathlist) {
-   paths.setSize(100);
-   paths.setSize(0);
-   paths.setGrowth(1000);
+void prepareSearchPaths(vector<string>& paths, const string& pathlist) {
+   paths.resize(0);
+   paths.reserve(100);
    PerlRegularExpression pre;
-   int len;
-   const char* ptr = pathlist;
+   const char* ptr = pathlist.c_str();
    while (pre.search(ptr, "([^:]+):?")) {
-      len = strlen(pre.getSubmatch(1));
-      paths.setSize(paths.getSize()+1);
-      paths.last().setSize(len+1);
-      strcpy(paths[paths.getSize()-1].getBase(), pre.getSubmatch());
+		paths.push_back(pre.getSubmatch(1));
       ptr = ptr + pre.getSubmatchEnd(1);
    }
 
    if (debugQ) {
       cout << "Search Paths:" << endl;
-      for (int i=0; i<paths.getSize(); i++) {
+      for (int i=0; i<(int)paths.size(); i++) {
          cout << "search path " << i + 1 << ":\t" << paths[i] << endl;
       }
    }
@@ -1078,7 +1038,7 @@ void example(void) {
 // usage --
 //
 
-void usage(const char* command) {
+void usage(const string& command) {
 
 }
 
