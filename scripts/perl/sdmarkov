@@ -2,7 +2,7 @@
 #
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Thu Apr 14 11:30:07 PDT 2016
-# Last Modified: Sat Apr 30 14:45:36 PDT 2016
+# Last Modified: Thu May  4 10:42:24 PDT 2017 Added -d option for **deg input
 # Filename:      sdmarkov
 # Syntax:        perl 5
 #
@@ -15,6 +15,7 @@
 #    -v   == convert context tokens to variables, such as "3 4" to "t3_4".
 #    -h   == print histogram of input data, then exit
 #    -c   == preserve chromatic alterations (such as "3-" which is flat 3).
+#    -d   == starting with deg data already.
 #    -b   == print only base of filename (JRPID).
 #    -a   == display all possible transitions, including 0 count cases.
 #    -n # == n-gram length to generate with context.
@@ -45,6 +46,7 @@ my $noZerosQ      = 0;
 my $chromaticQ = 0;
 my $histogramQ = 0;
 my $debugQ     = 0;
+my $degQ       = 0;
 my $csvQ       = 0;
 my $humdrumQ   = 0;
 my $MinCount   = 1;
@@ -53,7 +55,8 @@ GetOptions (
    'h|histogram'      => \$histogramQ,
    'v|variables'      => \$variableQ,
    'z|no-zeros'       => \$noZerosQ,
-   'd|debug'          => \$debugQ,
+   'debug'            => \$debugQ,
+   'd|deg'            => \$degQ,
    'space=s'          => \$Space,
    'prefix=s'         => \$Prefix,
    'postfix=s'        => \$Postfix,
@@ -242,12 +245,27 @@ sub processFile {
    }
 
    my $command = "";
-   $command .= " finalis-tonic $file | extractx -i '**kern' | deg -a";
-   $command .= " | grep -v '[=]'";
-   $command .= " | serialize -L | context -n $context | ridx -H";
-   $command .= $removeaccidentals;
-   # scale degrees should not be linked if separated by rests:
-   $command .= " | grep -v r ";
+
+
+   if ($degQ) {
+
+      $command .= " cat $file";
+      $command .= " | grep -v '[=]'";
+      $command .= " | serialize -L | context -n $context | ridx -H";
+      $command .= $removeaccidentals;
+      # scale degrees should not be linked if separated by rests:
+      $command .= " | grep -v r ";
+   
+   } else {
+
+      $command .= " finalis-tonic $file | extractx -i '**kern' | deg -a";
+      $command .= " | grep -v '[=]'";
+      $command .= " | serialize -L | context -n $context | ridx -H";
+      $command .= $removeaccidentals;
+      # scale degrees should not be linked if separated by rests:
+      $command .= " | grep -v r ";
+
+   }
 
    my $result = `$command`;
    if ($debugQ) {
