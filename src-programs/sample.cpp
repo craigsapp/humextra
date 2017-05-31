@@ -246,18 +246,22 @@ void createDataLine(char* buffer, HumdrumFile& infile, int line,
             tokencount   = infile[dotline].getTokenCount(dotspine);
             for (k=0; k<tokencount; k++) {
                infile[dotline].getToken(tbuffer, dotspine, k);
+
                pitch = Convert::kernToBase40(tbuffer);
                if (pitch >= 0) {
                   Convert::base40ToKern(pbuffer, pitch);
                   strcat(buffer, dstring);
                } else {
-                  strcat(buffer, "r");
+                  strcpy(pbuffer, "r");
+                  strcat(buffer, dstring);
                }
-               if (style == 'r') {
-                  strcat(buffer, "r");
-               } else {
-                  strcat(buffer, pbuffer);
-               }
+
+               //if (style == 'r') {
+               //    strcat(buffer, "r");
+               ////} else {
+               //   strcat(buffer, pbuffer);
+               //}
+					strcat(buffer, pbuffer);
                if (k < tokencount - 1) {
                   strcat(buffer, " ");
                }
@@ -271,7 +275,8 @@ void createDataLine(char* buffer, HumdrumFile& infile, int line,
                   Convert::base40ToKern(pbuffer, pitch);
                   strcat(buffer, dstring);
                } else {
-                  strcat(buffer, "r");
+                  strcpy(pbuffer, "r");
+                  strcat(buffer, dstring);
                }
                if (style == 'r') {
                   strcat(buffer, "r");
