@@ -1,9 +1,10 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Nov 25 00:40:56 PST 2004
-// Last Modified: Tue Apr 14 13:41:35 PDT 2009 (fixed interpretations when
-//						not appending to original data)
-// Last Modified: Wed Jun 24 15:41:09 PDT 2009 (updated for GCC 4.4)
+// Last Modified: Tue Apr 14 13:41:35 PDT 2009 Fixed interpretations when
+//						not appending to original data
+// Last Modified: Wed Jun 24 15:41:09 PDT 2009 Updated for GCC 4.4
+// Last Modified: Mon Jun  5 04:36:52 PDT 2017 Convert to STL
 //
 // Filename:      ...sig/examples/all/tsroot.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/tsroot.cpp
@@ -53,12 +54,8 @@
 #include "time.h"
 #include "stdio.h"
 
-#ifndef OLDCPP
-   #include <fstream>
-   using namespace std;
-#else
-   #include <fstream.h>
-#endif
+#include <fstream>
+using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -66,29 +63,29 @@
 // function declarations
 void      checkOptions       (Options& opts, int argc, char* argv[]);
 void      example            (void);
-void      usage              (const char* command);
-void      processFile        (const char* filename, HumdrumFile& infile);
-void      analyzeTiming      (HumdrumFile& infile, Array<double>& timings,
-                              Array<double>& tempo);
-void      getAnalysisTimes   (Array<int>& analysistimes, 
+void      usage              (const string& command);
+void      processFile        (const string& filename, HumdrumFile& infile);
+void      analyzeTiming      (HumdrumFile& infile, vector<double>& timings,
+                              vector<double>& tempo);
+void      getAnalysisTimes   (vector<int>& analysistimes, 
                               HumdrumFile& rootanalysis);
 void      printAnalysis      (HumdrumFile& rootanalysis, 
                               HumdrumFile& romananalysis,
                               HumdrumFile& infile);
-int       getClosestRootLine (Array<int>& analysistimes, int targettime);
-void      getDataLineTimings (Array<int>& linetimes, HumdrumFile& infile);
-const char* getMatchRoot     (int matchline, HumdrumFile& hfile);
-void      createParameterFile(const char* parametertmpname);
-void      getRomanAnalysisTimes(Array<int>& romantimes, 
+int       getClosestRootLine (vector<int>& analysistimes, int targettime);
+void      getDataLineTimings (vector<int>& linetimes, HumdrumFile& infile);
+string    getMatchRoot     (int matchline, HumdrumFile& hfile);
+void      createParameterFile(const string& parametertmpname);
+void      getRomanAnalysisTimes(vector<int>& romantimes, 
                               HumdrumFile& romananalysis);
-void      getRomanAnalysisLines(Array<int>& romanlines, 
-                              Array<int>& romantimes, 
-                              Array<int>& linetimes, 
+void      getRomanAnalysisLines(vector<int>& romanlines, 
+                              vector<int>& romantimes, 
+                              vector<int>& linetimes, 
                               HumdrumFile& romananalysis);
-const char* getRomanData     (HumdrumFile& romananalysis, 
-                              Array<int>& romanlines, int target);
+string    getRomanData       (HumdrumFile& romananalysis, 
+                              vector<int>& romanlines, int target);
 void      printRomanKey      (HumdrumFile& romananalysis, 
-                              Array<int>& romanlines, int target, 
+                              vector<int>& romanlines, int target, 
                               HumdrumRecord& aRecord);
 
 double    dtempo = 120.0;
@@ -100,9 +97,9 @@ int       appendQ  = 0;       // used with -a option
 int       prependQ = 0;       // used with -p option
 int       verboseQ = 0;       // used with -v option
 int       harmonyQ = 0;       // used with -h option
-const char* tmpdir = "/tmp";  // used with --tmpdir option
-const char* meldir = "/usr/ccarh/melisma/bin";  // used with --meldir option
-const char* midir  = "/var/www/websites/museinfo/bin"; // used with --midir
+string tmpdir = "/tmp";  // used with --tmpdir option
+string meldir = "/usr/ccarh/melisma/bin";  // used with --meldir option
+string midir  = "/var/www/websites/museinfo/bin"; // used with --midir
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -119,15 +116,14 @@ int main(int argc, char* argv[]) {
    // process the command-line options
    checkOptions(options, argc, argv);
 
-   const char* filename;
-   infile.clear();
+   string filename;
    // if no command-line arguments read data file from standard input
    int numinputs = options.getArgCount();
    if (numinputs < 1) {
       cout << "Error: you must supply at least one input fileme" << endl;
       exit(1);
    } else {
-      filename = options.getArg(1).data();
+      filename = options.getArg(1);
       infile.read(options.getArg(1));
    }
    processFile(filename, infile);
@@ -142,19 +138,19 @@ int main(int argc, char* argv[]) {
 // processFile --
 //
 
-void processFile(const char* filename, HumdrumFile& infile) {
+void processFile(const string& filename, HumdrumFile& infile) {
    // first convert the file to melisma format
 
    if (verboseQ) {
       cout << "The filename is: " << filename << endl;
    }
-   char buffer[4096] = {0};
-   const char *ptr = NULL;
-   ptr = strrchr(filename, '/');
-   if (ptr != NULL) {
-      strcpy(buffer, ptr+1);
+   string buffer;
+
+   auto loc = filename.rfind("/");
+   if (loc != string::npos) {
+      buffer = filename.substr(loc+1);
    } else {
-      strcpy(buffer, filename);
+      buffer = filename;
    }
 
    if (verboseQ) {
@@ -166,40 +162,93 @@ void processFile(const char* filename, HumdrumFile& infile) {
    #else
       int randval = rand();
    #endif 
+
    if (verboseQ) {
       cout << "Random value is: " << randval << endl;
       cout << "Creating temporary Melisma file: " << endl;
       cout << "\t" << tmpdir << "/" << buffer << "." << randval << endl;
    }
-   char commandbuffer[20000] = {0};
-   char tmpname[1024] = {0};   // output from the harmony2humdrum command
-   char tmpname2[1024] = {0};  // output from the key2humdrum command
-   char parametertmpname[1024] = {0};  // key parameter file 
-   char harmonytmpname[1024] = {0};
+   string commandbuffer;
+   string tmpname;           // output from the harmony2humdrum command
+   string tmpname2;          // output from the key2humdrum command
+   string parametertmpname;  // key parameter file 
+   string harmonytmpname;
 
-   sprintf(tmpname, "%s/%s.%d", tmpdir, buffer, randval);
-   sprintf(harmonytmpname, "%s/%s-%s.%d", tmpdir, buffer, "harmony", randval);
-   sprintf(tmpname2, "%s/%s-%s.%d", tmpdir, buffer, "roman", randval);
-   sprintf(parametertmpname, "%s/%s-%s.%d", tmpdir, buffer, "parameters", randval);
+   tmpname  = tmpdir;
+   tmpname += "/";
+   tmpname += buffer;
+   tmpname += ".";
+   tmpname += to_string(randval);
+
+   harmonytmpname  = tmpdir;
+   harmonytmpname += "/";
+   harmonytmpname += buffer;
+   harmonytmpname += "-";
+   harmonytmpname += "harmony";
+   harmonytmpname += ".";
+   harmonytmpname += to_string(randval);
+
+   tmpname2 = tmpdir;
+   tmpname2 += "/";
+   tmpname2 += buffer;
+   tmpname2 += "-";
+   tmpname2 += "roman";
+   tmpname2 += ".";
+   tmpname2 += to_string(randval);
+
+   parametertmpname = tmpdir;
+   parametertmpname += "/";
+   parametertmpname += buffer;
+   parametertmpname += "-";
+   parametertmpname += "parameters";
+   parametertmpname += ".";
+   parametertmpname += to_string(randval);
 
    if (harmonyQ) {
       createParameterFile(parametertmpname);
-      
-      sprintf(commandbuffer, 
-            "%s/kern2melisma %s | egrep -v '(Reference|Comment|Info)' | %s/meter | %s/harmony > %s; %s/harmony2humdrum %s > %s; %s/key -p %s %s | %s/key2humdrum > %s",
-	    midir, filename, meldir, meldir, harmonytmpname, meldir, 
-            harmonytmpname, tmpname,
-            meldir, parametertmpname, harmonytmpname, meldir, tmpname2);
+      commandbuffer = midir;
+      commandbuffer += "/kern2melisma ";
+      commandbuffer += filename;
+      commandbuffer += " | egrep -v 'Reference|Comment|Info)' | ";
+      commandbuffer += meldir;
+      commandbuffer += "/meter | ";
+      commandbuffer += meldir;
+      commandbuffer += "/harmony > ";
+      commandbuffer += harmonytmpname;
+      commandbuffer += "; ";
+      commandbuffer += meldir;
+      commandbuffer += "/harmony2humdrum ";
+      commandbuffer += harmonytmpname;
+      commandbuffer += " > ";
+      commandbuffer += tmpname;
+      commandbuffer += "; ";
+      commandbuffer += meldir;
+      commandbuffer += "/key -p ";
+      commandbuffer += parametertmpname;
+      commandbuffer += " ";
+      commandbuffer += harmonytmpname;
+      commandbuffer += " | ";
+      commandbuffer += meldir;
+      commandbuffer += "/key2humdrum > ";
+      commandbuffer += tmpname2;
    } else {
-      sprintf(commandbuffer, 
-            "%s/kern2melisma %s | egrep -v '(Reference|Comment|Info)' | %s/meter | %s/harmony | %s/harmony2humdrum > %s",
-	    midir, filename, meldir, meldir, meldir, tmpname);
+      commandbuffer  = midir;
+      commandbuffer += "/kern2melisma ";
+      commandbuffer += filename;
+      commandbuffer += " | egrep -v '(Reference|Comment|Info)' | ";
+      commandbuffer += meldir;
+      commandbuffer += "/meter | ";
+      commandbuffer += meldir;
+      commandbuffer += "/harmony | ";
+      commandbuffer += meldir;
+      commandbuffer += "/harmony2humdrum > ";
+      commandbuffer += tmpname;
    }
 
    if (verboseQ) {
       cout << "COMMAND: " << commandbuffer << endl;
    }
-   int status = system(commandbuffer);
+   int status = system(commandbuffer.c_str());
    if (status < 0) {
       cout << "ERROR: command not successful:\n" << commandbuffer << endl;
       exit(1);
@@ -219,25 +268,25 @@ void processFile(const char* filename, HumdrumFile& infile) {
 
    // delete temporary files
    if (harmonyQ) {
-      sprintf(commandbuffer, "rm -f %s", tmpname);
-      if (system(commandbuffer) == -1) {
+      commandbuffer = "rm -f " + tmpname;
+      if (system(commandbuffer.c_str()) == -1) {
          exit(-1);
       }
-      sprintf(commandbuffer, "rm -f %s", tmpname2);
-      if (system(commandbuffer) == -1) {
+      commandbuffer = "rm -f " + tmpname2;
+      if (system(commandbuffer.c_str()) == -1) {
          exit(-1);
       }
-      sprintf(commandbuffer, "rm -f %s", harmonytmpname);
-      if (system(commandbuffer) == -1) {
+      commandbuffer = "rm -f " + harmonytmpname;
+      if (system(commandbuffer.c_str()) == -1) {
          exit(-1);
       }
-      sprintf(commandbuffer, "rm -f %s", parametertmpname);
-      if (system(commandbuffer) == -1) {
+      commandbuffer = "rm -f " + parametertmpname;
+      if (system(commandbuffer.c_str()) == -1) {
          exit(-1);
       }
    } else {
-      sprintf(commandbuffer, "rm -f %s", tmpname);
-      if (system(commandbuffer) == -1) {
+      commandbuffer = "rm -f " + tmpname;
+      if (system(commandbuffer.c_str()) == -1) {
          exit(-1);
       }
    }
@@ -250,7 +299,7 @@ void processFile(const char* filename, HumdrumFile& infile) {
 // createParameterFile --
 //
 
-void createParameterFile(const char* parametertmpname) {
+void createParameterFile(const string& parametertmpname) {
    ofstream pfile(parametertmpname);
 
    if (!pfile.is_open()) {
@@ -282,20 +331,20 @@ void createParameterFile(const char* parametertmpname) {
 
 void printAnalysis(HumdrumFile& rootanalysis, HumdrumFile& romananalysis, 
       HumdrumFile& infile) {
-   const char* romandatum = ".";
-   Array<int> analysistimes;
+   string romandatum = ".";
+   vector<int> analysistimes;
    getAnalysisTimes (analysistimes, rootanalysis);
-   Array<int> linetimes;
+   vector<int> linetimes;
    getDataLineTimings(linetimes, infile);
 
-   Array<int> romantimes;
-   Array<int> romanlines;
+   vector<int> romantimes;
+   vector<int> romanlines;
    if (harmonyQ) {
       getRomanAnalysisTimes(romantimes, romananalysis);
       getRomanAnalysisLines(romanlines, romantimes, linetimes, romananalysis);
    }
 
-   const char* matchroot;
+   string matchroot;
    int matchline;
    int i;
    for (i=0; i<infile.getNumLines(); i++) {
@@ -469,12 +518,12 @@ void printAnalysis(HumdrumFile& rootanalysis, HumdrumFile& romananalysis,
 // printRomanKey --
 //
 
-void printRomanKey(HumdrumFile& romananalysis, Array<int>& romanlines, 
+void printRomanKey(HumdrumFile& romananalysis, vector<int>& romanlines, 
    int target, HumdrumRecord& aRecord) {
 
    int i;
    int j;
-   for (i=0; i<romanlines.getSize(); i++) {
+   for (i=0; i<(int)romanlines.size(); i++) {
       if (romananalysis[i].getType() != E_humrec_interpretation) {
          continue;
       }
@@ -532,11 +581,11 @@ void printRomanKey(HumdrumFile& romananalysis, Array<int>& romanlines,
 // getRomanData --
 //
 
-const char* getRomanData(HumdrumFile& romananalysis, Array<int>& romanlines, 
+string getRomanData(HumdrumFile& romananalysis, vector<int>& romanlines, 
    int target) {
 
    int i;
-   for (i=0; i<romanlines.getSize(); i++) {
+   for (i=0; i<(int)romanlines.size(); i++) {
       if (romananalysis[i].getType() != E_humrec_data) {
          continue;
       }
@@ -569,19 +618,18 @@ const char* getRomanData(HumdrumFile& romananalysis, Array<int>& romanlines,
 // getRomanAnalysisLines --
 //
 
-void getRomanAnalysisLines(Array<int>& romanlines, Array<int>& romantimes, 
-   Array<int>& linetimes, HumdrumFile& romananalysis) {
+void getRomanAnalysisLines(vector<int>& romanlines, vector<int>& romantimes, 
+   vector<int>& linetimes, HumdrumFile& romananalysis) {
 
-   romanlines.setSize(romantimes.getSize());
-   romanlines.setAll(-1);
+   romanlines.resize(romantimes.size());
+   fill(romanlines.begin(), romanlines.end(), -1);
 
-   int i;
-   for (i=0; i<romantimes.getSize(); i++) {
+   for (int i=0; i<(int)romantimes.size(); i++) {
       romanlines[i] = getClosestRootLine(linetimes, romantimes[i]);
    }
 
    if (debugQ) {
-      for (i=0; i<romananalysis.getNumLines(); i++) {
+      for (int i=0; i<romananalysis.getNumLines(); i++) {
          cout << romananalysis[i] << "\t" << romantimes[i]
                                   << "\t" << romanlines[i] << "\n";
       }
@@ -595,10 +643,10 @@ void getRomanAnalysisLines(Array<int>& romanlines, Array<int>& romantimes,
 // getRomanAnalysisTimes --
 //
 
-void getRomanAnalysisTimes(Array<int>& romantimes, HumdrumFile& romananalysis) {
+void getRomanAnalysisTimes(vector<int>& romantimes, HumdrumFile& romananalysis) {
 
-   romantimes.setSize(romananalysis.getNumLines());
-   romantimes.setAll(-1);
+   romantimes.resize(romananalysis.getNumLines());
+   fill(romantimes.begin(), romantimes.end(), -1);
    int i, j;
    long timeval;
    for (i=0; i<romananalysis.getNumLines(); i++) {
@@ -623,13 +671,13 @@ void getRomanAnalysisTimes(Array<int>& romantimes, HumdrumFile& romananalysis) {
    int countother = 0;
    int endingtime = 0;
    double increment = 0.0;
-   for (i=0; i<romantimes.getSize(); i++) {
+   for (i=0; i<(int)romantimes.size(); i++) {
       if (romantimes[i] >= 0) {
          count = 0;
          countother = 0;
          endingtime = -1;
          j = i+1;
-         while (j < romantimes.getSize()) {
+         while (j < (int)romantimes.size()) {
             if (romantimes[j] < -10) {
                count++;
             } else if (romantimes[j] < 0) {
@@ -648,7 +696,7 @@ void getRomanAnalysisTimes(Array<int>& romantimes, HumdrumFile& romananalysis) {
 
          count = 0;
          k = i+1;
-         while (k<romantimes.getSize()) {
+         while (k < (int)romantimes.size()) {
             if (romantimes[k] < -10) {
                romantimes[k] = (int)(romantimes[i] + increment * count + 0.5);
                count++;
@@ -661,13 +709,13 @@ void getRomanAnalysisTimes(Array<int>& romantimes, HumdrumFile& romananalysis) {
       }
    }
 
-   for (i=romantimes.getSize()-2; i>=0; i--) {
+   for (i=(int)romantimes.size()-2; i>=0; i--) {
       if (romantimes[i] == -1) {
          romantimes[i] = romantimes[i+1];
       }
    }
 
-   for (i=1; i<romantimes.getSize(); i++) {
+   for (i=1; i<(int)romantimes.size(); i++) {
       if (romantimes[i] == -1) {
          romantimes[i] = romantimes[i-1];
       }
@@ -686,7 +734,7 @@ void getRomanAnalysisTimes(Array<int>& romantimes, HumdrumFile& romananalysis) {
 // getMatchRoot -- return the **tsroot spine info on the given line;
 //
 
-const char* getMatchRoot(int matchline, HumdrumFile& hfile) {
+string getMatchRoot(int matchline, HumdrumFile& hfile) {
    int i;
 
    if (hfile.getNumLines() <= matchline) {
@@ -698,7 +746,7 @@ const char* getMatchRoot(int matchline, HumdrumFile& hfile) {
    }
 
    for (i=0; i<hfile[i].getFieldCount(); i++) {
-      if (strcmp("**tsroot", hfile[matchline].getExInterp(i)) == 0) {
+      if (strcmp(hfile[matchline].getExInterp(i) ,"**tsroot") == 0) {
          return hfile[matchline][i];
       }
    }
@@ -716,12 +764,12 @@ const char* getMatchRoot(int matchline, HumdrumFile& hfile) {
 //    Returns -1 if there is no nearest time value.
 //
 
-int getClosestRootLine(Array<int>& analysistimes, int targettime) {
+int getClosestRootLine(vector<int>& analysistimes, int targettime) {
    int i;
    int diff = 0;
    int mindiff = 100000;
    int mindiffline = -1;
-   for (i=0; i<analysistimes.getSize(); i++) {
+   for (i=0; i<(int)analysistimes.size(); i++) {
       diff = targettime - analysistimes[i];
       if (diff < 0) {
          diff = -diff;
@@ -750,17 +798,16 @@ int getClosestRootLine(Array<int>& analysistimes, int targettime) {
 // getAnalysisTimes -- get the analysis times from the data
 //
 
-void getAnalysisTimes(Array<int>& analysistimes, HumdrumFile& rootanalysis) {
+void getAnalysisTimes(vector<int>& analysistimes, HumdrumFile& rootanalysis) {
    int i;
-   analysistimes.setSize(rootanalysis.getNumLines());
-   analysistimes.allowGrowth(0);
-   analysistimes.setAll(-10000);
+   analysistimes.resize(rootanalysis.getNumLines());
+   fill(analysistimes.begin(), analysistimes.end(), -10000);
    int j;
    int datavalue = 0;
    for (i=0; i<rootanalysis.getNumLines(); i++) {
       if (rootanalysis[i].getType() == E_humrec_data) {
          for (j=0; j<rootanalysis[i].getFieldCount(); j++) {
-            if (strcmp("**time", rootanalysis[i].getExInterp(j)) == 0) {
+            if (strcmp(rootanalysis[i].getExInterp(j), "**time") == 0) {
                // found a **time data record on the line, so store the data
                datavalue = atoi(rootanalysis[i][j]);
                analysistimes[i] = datavalue;
@@ -768,7 +815,6 @@ void getAnalysisTimes(Array<int>& analysistimes, HumdrumFile& rootanalysis) {
          }
       }
    }
-
 }
 
 
@@ -804,7 +850,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -812,9 +858,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    debugQ   = opts.getBoolean("debug");
-   tmpdir   = opts.getString("tmpdir").data();
-   meldir   = opts.getString("meldir").data();
-   midir    = opts.getString("midir").data();
+   tmpdir   = opts.getString("tmpdir").c_str();
+   meldir   = opts.getString("meldir").c_str();
+   midir    = opts.getString("midir").c_str();
    appendQ  = opts.getBoolean("append");
    prependQ = opts.getBoolean("prepend");
    harmonyQ = opts.getBoolean("roman");
@@ -844,7 +890,7 @@ void example(void) {
 // usage -- gives the usage statement for the program
 //
 
-void usage(const char* command) {
+void usage(const string& command) {
    cout <<
    "                                                                         \n"
    << endl;
@@ -858,15 +904,14 @@ void usage(const char* command) {
 //     line in the file. (Borrowed from the addtime program).
 // 
 
-void analyzeTiming(HumdrumFile& infile, Array<double>& timings,
-      Array<double>& tempo) {
-   infile.analyzeRhythm("4");
+void analyzeTiming(HumdrumFile& infile, vector<double>& timings,
+      vector<double>& tempo) {
 
-   timings.setSize(infile.getNumLines());
-   timings.setAll(0.0);
-   tempo.setSize(infile.getNumLines());
-   tempo.setAll(dtempo);
-   tempo[0] = dtempo;
+   infile.analyzeRhythm();
+   timings.resize(infile.getNumLines());
+   fill(timings.begin(), timings.end(), 0.0);
+   tempo.resize(infile.getNumLines());
+   fill(tempo.begin(), tempo.end(), dtempo);
    double currtempo = dtempo;
    double input = 0.0;
    int count;
@@ -900,19 +945,17 @@ void analyzeTiming(HumdrumFile& infile, Array<double>& timings,
 // getDataLineTimings --  borrowed and modified from addtime program.
 //
 
-void getDataLineTimings(Array<int>& linetimes, HumdrumFile& infile) {
-   Array<double>  timings;
-   Array<double>  tempo;
+void getDataLineTimings(vector<int>& linetimes, HumdrumFile& infile) {
+   vector<double>  timings;
+   vector<double>  tempo;
    analyzeTiming(infile, timings, tempo);
 
 
-   linetimes.setSize(infile.getNumLines());
-   linetimes.allowGrowth(0);
-   linetimes.setAll(-5000);
+   linetimes.resize(infile.getNumLines());
+   fill(linetimes.begin(), linetimes.end(), -5000);
 
-   int i;
    int offset = 0;
-   for (i=0; i<infile.getNumLines(); i++) {
+   for (int i=0; i<infile.getNumLines(); i++) {
       switch (infile[i].getType()) {
          case E_humrec_data:
             linetimes[i]  = (int)((timings[i] + offset + 0.0005) * 1000);
