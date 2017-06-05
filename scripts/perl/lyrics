@@ -25,6 +25,7 @@ use Getopt::Long;
 my $htmlQ  = 0;   # display as html
 my $bodyQ  = 0;   # embed HTML code in full page
 my $verseQ = 0;   # display verse numbers
+my $titleQ = 0;   # display the title
 
 Getopt::Long::Configure("bundling");
 GetOptions (
@@ -32,6 +33,16 @@ GetOptions (
    'b|body'  => \$bodyQ,
    'v|verse' => \$verseQ
 );
+
+if (@ARGV == 0) {
+   print "Options:\n";
+   print "\t-h\tEmbed output in HTML file\n";
+   print "\t-b\tEmbed output in HTML <body> element\n";
+   print "\t-v\tShow verse numbers\n";
+   print "\t-t\tShow title\n";
+   print "\n";
+   exit(1);
+}
 
 my @files = @ARGV;
 
@@ -74,10 +85,12 @@ sub printFileLyrics {
       if (!$counter && !$tcounter) {
          if ($line =~ /^\!\!\!OTL[^\s]*:\s*(.*)\s*$/) {
             my $title = $1;
-            if ($htmlQ) {
-               print "<h2>$title</h2>\n";
-            } else {
-               print "TITLE: $title\n\n";
+            if ($titleQ) {
+               if ($htmlQ) {
+                  print "<h2>$title</h2>\n";
+               } else {
+                  print "TITLE: $title\n\n";
+               }
             }
             $tcounter++;
          }

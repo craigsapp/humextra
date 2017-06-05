@@ -38,9 +38,10 @@ foreach $line (@contents) {
    $unique{$line}++;
 }
 
+my $sum = @contents;
 @keys = keys %unique;
 @keys = sort @keys if $alphabeticQ;
-$sum = @keys;
+
 
 if    ($humdrumQ && $percentQ)  { print "**pcent\t**data\n";  } 
 elsif ($humdrumQ && $fractionQ) { print "**frac\t**data\n";   } 
