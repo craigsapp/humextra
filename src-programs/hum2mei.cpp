@@ -2812,4 +2812,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 67286362a6cbd1bf08365d34aca6f4a9 hum2mei.cpp [20151120]
+// md5sum: 0557c621019b4f3a5cd0af457d14621e hum2mei.cpp [20170605]

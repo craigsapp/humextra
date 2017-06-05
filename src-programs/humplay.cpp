@@ -1198,5 +1198,5 @@ ostream& colormessage(ostream& out, int messagetype, int mode, int status) {
 }
 
 
-// md5sum: cea522f0a889b56a2e92d7b301ffc6a6 humplay.cpp [20090615]
+// md5sum: 8fcc7cb5a04397f6e8ae7aad5d256b10 humplay.cpp [20170605]
 

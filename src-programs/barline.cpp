@@ -566,4 +566,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: bc20fe488def24d8fc4d9bcfa45be13d barline.cpp [20140819]
+// md5sum: 909fef722b3461a6d54ee9b26ddb235f barline.cpp [20170605]

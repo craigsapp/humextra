@@ -242,4 +242,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 2228fa2bae8fb53a2d07a32d32d58f6e rnn-input.cpp [20160512]
+// md5sum: d334763f49d6209e549af51cc1a72ce6 rnn-input.cpp [20170605]

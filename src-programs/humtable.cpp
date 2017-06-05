@@ -781,4 +781,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: 7cb279e08eddbdcfbdbc051d5f9dd598 humtable.cpp [20151120]
+// md5sum: 1790292d3c46c0b1f40462824067fad0 humtable.cpp [20170605]

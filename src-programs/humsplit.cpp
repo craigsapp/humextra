@@ -278,4 +278,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: d45aa6566d9cd480d8f4fbc4d3c4518a humsplit.cpp [20151120]
+// md5sum: 5e3ec56ed6825512d85d8d3cf290bc1b humsplit.cpp [20170605]

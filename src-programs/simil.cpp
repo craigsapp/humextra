@@ -1051,4 +1051,4 @@ double dlvcharstar(char** set1, int len1, char** set2, int len2) {
 }
 
 
-// md5sum: 730cf30bdff764d6add4a1844feed0eb simil.cpp [20151120]
+// md5sum: 84841e2d00679b77fc833fb9c6b336c9 simil.cpp [20170605]

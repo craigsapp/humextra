@@ -2087,4 +2087,4 @@ transpose -b -80 file.krn
 */
 
 
-// md5sum: e678a6ed3d4d029752e9d9d57d76a1ec transpose.cpp [20151120]
+// md5sum: 991c9a96decb3d2b47c044390f388112 transpose.cpp [20170605]

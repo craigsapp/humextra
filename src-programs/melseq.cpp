@@ -294,4 +294,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: fc163c2ae2b24c9ff36c71c22481ace6 melseq.cpp [20140817]
+// md5sum: 46b155d34946b868b1095c9f87d63936 melseq.cpp [20170605]

@@ -435,4 +435,4 @@ void usage(const char* command) {
 
 
 
-// md5sum: ba324b54c1fb62db172744ded45a67b0 autodynam.cpp [20151120]
+// md5sum: 2b13870f33b0a18b314b9ffc30d92632 autodynam.cpp [20170605]

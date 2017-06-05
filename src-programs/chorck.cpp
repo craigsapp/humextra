@@ -1577,4 +1577,4 @@ void error8(void) {
 }
 
 
-// md5sum: 1c6966c7dd5c8e2a14cf61ce7d5aa6f6 chorck.cpp [20140205]
+// md5sum: d398828e33faf53bf3774f28e780457b chorck.cpp [20170605]

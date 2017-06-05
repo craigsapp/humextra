@@ -785,4 +785,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: eaa72b4edb93ea20b6700081bc71e5c7 gettime.cpp [20151120]
+// md5sum: 7d14b04b406a149037c509dcd0ca540f gettime.cpp [20170605]
