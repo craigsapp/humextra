@@ -864,6 +864,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    appendQ  = opts.getBoolean("append");
    prependQ = opts.getBoolean("prepend");
    harmonyQ = opts.getBoolean("roman");
+   verboseQ = opts.getBoolean("verbose");
    if (prependQ) {
       appendQ = 0;
    }
