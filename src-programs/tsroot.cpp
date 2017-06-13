@@ -88,7 +88,10 @@ void      printRomanKey      (HumdrumFile& romananalysis,
                               vector<int>& romanlines, int target, 
                               HumdrumRecord& aRecord);
 
-double    dtempo = 120.0;
+/////////////////////////////////////////////////////////////////
+// Setting the default tempo to the same one used by kern2melisma
+//
+double    dtempo = 60.0;
 
 // global variables
 Options   options;            // database for command-line arguments
