@@ -151,8 +151,9 @@ int     idynQ            =   0;    // used with -d option
 double  idynoffset       =   0.0;  // used with -d option
 int     timeinsecQ       =   0;    // used with --time-in-seconds option
 int     norestQ          =   0;    // used with --no-rest option
+int     fillpickupQ      =   0;    // used with --fill-pickup option
 int     stdoutQ          =   0;    // used with --stdout option
-int     starttick        =   0;    // used with --no-rest option
+int     starttick        =   0;    // used with --no-rest and --fill-pickup options
 int     bendQ            =   0;    // used with --bend option
 int     metQ             =   0;    // used with --met option
 int     met2Q            =   0;    // used with --met2 option
@@ -395,6 +396,21 @@ int main(int argc, char* argv[]) {
       if (norestQ) {
          adjustEventTimes(outfile, starttick);
       }
+      if (fillpickupQ) {
+			RationalNumber pup = 0;
+			for (int i=0; i<infile.getNumLines(); i++) {
+				if (!infile[i].isData()) {
+					continue;
+				}
+				pup = infile.getBeatR(i);
+				break;
+			}
+			if (pup > 0) {
+				pup *= tpq;
+				starttick = int(pup.getFloat() + 0.5);
+         	adjustEventTimes(outfile, starttick);
+			}
+      }
       if (stdoutQ) {
          outfile.write(cout);
       } else if (outlocation == "") {
@@ -533,7 +549,7 @@ void addMonoTemperamentAdjustment(MidiFile& outfile, int track, int channel,
 //////////////////////////////
 //
 // adjustEventTimes -- set the first event time to starttick and
-//    also subtrace that value from all events in the MIDI file;
+//    also subtract that value from all events in the MIDI file;
 //
 
 void adjustEventTimes(MidiFile& outfile, int starttick) {
@@ -569,7 +585,7 @@ void adjustEventTimes(MidiFile& outfile, int starttick) {
          if (atick < 0) {
             atick = 0;
          }
-         eventptr->tick = atick;
+         eventptr->tick = atick + starttick;
       }
    }
 }
@@ -929,7 +945,6 @@ double checkForTempo(HumdrumRecord& record) {
       } else if (strcmp(mensuration, "Cr") == 0) {
          return (double)metQ * 2.48276;
       }
-
    }
 
    return -1.0;
@@ -982,6 +997,7 @@ void defineOptions(Options& opts, int argc, char* argv[]) {
    opts.define("mv|metricvolume=i:3","Apply metric accentuation to volumes");
    opts.define("fs|sforzando=i:20","Increase sforzandos by specified amount");
    opts.define("no-rest=b",      "Do not put rests at start of midi");
+   opts.define("fp|fill-pickup|fill-pickups=b", "Fill in rests to make pickup bars complete");
    opts.define("pvm|perfviz=s:", "Create a PerfViz match file for MIDI output");
    opts.define("debug=b",        "Debugging turned on");
    opts.define("stdout=b",       "Print MIDI file to standard output");
@@ -1127,6 +1143,7 @@ void processOptions(Options& opts, int argc, char* argv[]) {
    idynQ         =  opts.getBoolean("dyn");
    idynoffset    =  opts.getDouble("dyn");
    norestQ       =  opts.getBoolean("no-rest");
+   fillpickupQ   =  opts.getBoolean("fill-pickup");
    autopanQ      =  opts.getBoolean("autopan");
    bendQ         =  opts.getBoolean("bend");
    infoQ         =  opts.getBoolean("info");
