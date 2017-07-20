@@ -402,7 +402,7 @@ int main(int argc, char* argv[]) {
 				if (!infile[i].isData()) {
 					continue;
 				}
-				pup = infile.getBeatR(i) - 1; // -1 for zero offset
+				pup = infile.getBeatR(i);
 				break;
 			}
 			if (pup > 0) {

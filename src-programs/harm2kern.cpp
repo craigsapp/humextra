@@ -42,8 +42,10 @@ Options   options;           // database for command-line arguments
 int       debugQ       = 0;  // used with --debug option
 int       appendQ      = 0;  // used with -a option
 int       octave       = 2;  // used with -o option
+int       boctave      = 3;  // used with -O option
 int       rhythmQ      = 1;  // used with --RR option
 int       rootQ        = 1;  // used with -r option 
+int       bassQ        = 0;  // used with -b option 
 int       recip        = -1; // used with -R option
 int       recipField   = -1; // used with -R option
 string    instrument   = ""; // used with -I option
@@ -142,6 +144,7 @@ void generateAnalysis(HumdrumFile& infile, Array<double>& durs) {
                if (strcmp(infile[i][j], ".") != 0) {
                   rootinterval = makeRootInterval(infile[i][j], keyroot, 
                         keymode);
+
                   if (rootQ) {
                      if (durs.getSize() > 0) {
                         Convert::durationToKernRhythm(buffer, durs[rindex++]);
@@ -152,6 +155,30 @@ void generateAnalysis(HumdrumFile& infile, Array<double>& durs) {
                      if (rootinterval >= 0) {
                         cout << Convert::base40ToKern(buffer, 
                               (keyroot + rootinterval) % 40 + octave * 40); 
+                     } else {
+                        cout << "r";
+                     }
+                     if (strchr(infile[i][j], ';') != NULL) {
+                        cout << ';';
+                     }
+                  } else if (bassQ) {
+   						int inversion = getInversion(infile[i][j]);
+							Array<int> pitches;
+							getChordPitches(pitches, infile[i][j], rootinterval, keyroot, keymode);
+							int bass = pitches[inversion] % 40 + boctave * 40;
+							
+//cerr << "Pitch IS " << pitches[inversion] << " FOR " << infile[i][j] << endl;
+
+                     if (durs.getSize() > 0) {
+                        Convert::durationToKernRhythm(buffer, durs[rindex++]);
+                        if (rhythmQ && buffer[0] != '-') {
+                           cout << buffer;
+                        }
+                     }
+                     if (rootinterval >= 0) {
+                        //cout << Convert::base40ToKern(buffer, 
+                        //      (keyroot + rootinterval) % 40 + boctave * 40); 
+                        cout << Convert::base40ToKern(buffer, bass);
                      } else {
                         cout << "r";
                      }
@@ -192,6 +219,8 @@ void generateAnalysis(HumdrumFile& infile, Array<double>& durs) {
          } else if (strncmp(infile[i][0], "**", 2) == 0) {
             if (rootQ) {
                cout << "**root";
+            } else if (bassQ) {
+               cout << "**bass";
             } else {
                cout << "**kern";
             }
@@ -654,22 +683,14 @@ int makeRootInterval(const char* harmdata, int keyroot, int keymode) {
 
    if (keymode) {
       // minor mode (harmonic minor)
-      if      (strstr(abuffer, "-vii") != 0) { output = E_base40_min7; }
-      else if (strstr(abuffer, "vii")  != 0) { output = E_base40_maj7; }
-      else if (strstr(abuffer, "-VII") != 0) { output = E_base40_min7; }
+           if (strstr(abuffer, "vii")  != 0) { output = E_base40_maj7; }
       else if (strstr(abuffer, "VII")  != 0) { output = E_base40_maj7; }
-      else if (strstr(abuffer, "#vi")  != 0) { output = E_base40_maj6; }
       else if (strstr(abuffer, "vi")   != 0) { output = E_base40_min6; }
-      else if (strstr(abuffer, "#VI")  != 0) { output = E_base40_maj6; }
       else if (strstr(abuffer, "VI")   != 0) { output = E_base40_min6; }
       else if (strstr(abuffer, "iv")   != 0) { output = E_base40_per4; }
       else if (strstr(abuffer, "IV")   != 0) { output = E_base40_per4; }
-      else if (strstr(abuffer, "#iii") != 0) { output = E_base40_maj3; }
-      else if (strstr(abuffer, "#III") != 0) { output = E_base40_maj3; }
       else if (strstr(abuffer, "iii")  != 0) { output = E_base40_min3; }
       else if (strstr(abuffer, "III")  != 0) { output = E_base40_min3; }
-      else if (strstr(abuffer, "-ii")  != 0) { output = E_base40_min2; }
-      else if (strstr(abuffer, "-II")  != 0) { output = E_base40_min2; }
       else if (strstr(abuffer, "ii")   != 0) { output = E_base40_maj2; }
       else if (strstr(abuffer, "II")   != 0) { output = E_base40_maj2; }
       else if (strstr(abuffer, "N")    != 0) { output = E_base40_min2; }
@@ -683,22 +704,14 @@ int makeRootInterval(const char* harmdata, int keyroot, int keymode) {
       else { output = E_base40_rest; }
    } else {
       // major mode
-      if      (strstr(abuffer, "-vii") != 0) { output = E_base40_min7; }
-      else if (strstr(abuffer, "vii")  != 0) { output = E_base40_maj7; }
-      else if (strstr(abuffer, "-VII") != 0) { output = E_base40_min7; }
+           if (strstr(abuffer, "vii")  != 0) { output = E_base40_maj7; }
       else if (strstr(abuffer, "VII")  != 0) { output = E_base40_maj7; }
-      else if (strstr(abuffer, "-vi")  != 0) { output = E_base40_min6; }
       else if (strstr(abuffer, "vi")   != 0) { output = E_base40_maj6; }
-      else if (strstr(abuffer, "-VI")  != 0) { output = E_base40_min6; }
       else if (strstr(abuffer, "VI")   != 0) { output = E_base40_maj6; }
       else if (strstr(abuffer, "iv")   != 0) { output = E_base40_per4; }
       else if (strstr(abuffer, "IV")   != 0) { output = E_base40_per4; }
-      else if (strstr(abuffer, "-iii") != 0) { output = E_base40_min3; }
-      else if (strstr(abuffer, "-III") != 0) { output = E_base40_min3; }
       else if (strstr(abuffer, "iii")  != 0) { output = E_base40_maj3; }
       else if (strstr(abuffer, "III")  != 0) { output = E_base40_maj3; }
-      else if (strstr(abuffer, "-ii")  != 0) { output = E_base40_min2; }
-      else if (strstr(abuffer, "-II")  != 0) { output = E_base40_min2; }
       else if (strstr(abuffer, "ii")   != 0) { output = E_base40_maj2; }
       else if (strstr(abuffer, "II")   != 0) { output = E_base40_maj2; }
       else if (strstr(abuffer, "N")    != 0) { output = E_base40_min2; }
@@ -712,9 +725,22 @@ int makeRootInterval(const char* harmdata, int keyroot, int keymode) {
       else { output = E_base40_rest; }
    }
 
+	int flatcount = 0;
+	int sharpcount = 0;
+	int slen = strlen(abuffer);
+	for (int i=0; i<slen; i++) {
+		if (abuffer[i] == '-') {
+			flatcount++;
+		} else if (abuffer[i] == '#') {
+			sharpcount++;
+		}
+	}
+
    if (output < 0) {
       return output;
    } else {
+		output += sharpcount;
+		output -= flatcount;
       return (output + offset) % 40;
    }
 }
@@ -728,12 +754,12 @@ int makeRootInterval(const char* harmdata, int keyroot, int keymode) {
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("a|append=b",         "append analysis data to input");
+   opts.define("b|bass=b",           "extract the bass note of the chord");
    opts.define("o|octave=i:2",       "octave to output root pitch");
    opts.define("RR|no-rhythm=b",     "don't try to do any rhythm analysis");
    opts.define("P|prefix=s",         "prefix string for each chordtone (such as rhythm)");
    opts.define("R|recip=i:-1",       "use **recip column for rhythm");
    opts.define("r|root=b",           "extract only root information");
-   opts.define("b|bass|bass-line=b", "extract only bass-line information");
    opts.define("I|instrument=s",     "instrument to play music on");
 
    opts.define("debug=b",          "trace input parsing");   
@@ -766,6 +792,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    rhythmQ    = !opts.getBoolean("no-rhythm");
    octave     =  opts.getInteger("octave");
    rootQ      =  opts.getBoolean("root");
+   bassQ      =  opts.getBoolean("bass");
    instrument =  opts.getString("instrument").c_str();
    recip      =  opts.getInteger("recip");
    Prefix     =  opts.getString("prefix").c_str();
