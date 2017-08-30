@@ -8,6 +8,7 @@
 // Last Modified: Thu Nov 14 14:01:01 PST 2013 Changed P3 to default output
 // Last Modified: Wed Aug 20 11:16:46 PDT 2014 Added JSON output
 // Last Modified: Mon Feb  2 00:13:08 PST 2015 Fixed due to new comp. restr.
+// Last Modified: Tue Aug 29 13:59:05 PDT 2017 Added physical time to JSON output
 // Filename:      ...sig/examples/all/proll.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/proll.cpp
 // Syntax:        C++; museinfo
@@ -48,16 +49,23 @@ const char* getInstrument       (HumdrumFile& infile, int spine);
 void   createJsonProll          (HumdrumFile& infile);
 void   printJsonNote            (ostream& out, int b40, RationalNumber& duration, 
                                  const char* kern, HumdrumFile& infile, int line, 
-                                 int field, int token);
+                                 int field, int token, Array<double>& tempos,
+		                           Array<double>& realtimes);
 void   printRationalNumber      (ostream& out, RationalNumber& rat);
 void   pi                       (ostream& out, int count);
 void   printJsonHeader          (HumdrumFile& infile, int indent, Array<int>& ktracks,
-                                 Array<int>& partmin, Array<int>& partmax);
+                                 Array<int>& partmin, Array<int>& partmax, Array<double>& tempos,
+		                           Array<double>& realtime);
 void   printPartNames           (HumdrumFile& infile);
 void   printPitch               (ostream& out, int b40, const char* kern);
-void   printBarlines            (ostream& out, HumdrumFile& infile, int indent);
+void   printBarlines            (ostream& out, HumdrumFile& infile, int indent, Array<double>& realtime);
 void   printSectionLabel        (ostream& out, HumdrumFile& infile, int line);
 void   printMensuration         (ostream& out, HumdrumFile& infile, int index);
+double checkForTempo            (HumdrumRecord& record);
+void   printTempos              (ostream& out, HumdrumFile& infile, int indent, Array<double>& tempos);
+void   calculateRealTimesFromTempos(Array<double>& realtimes, HumdrumFile& infile,
+	                              Array<double>& tempos);
+void calculateTempos            (HumdrumFile& infile, Array<double>& tempos);
 
 // global variables
 Options   options;                   // database for command-line arguments
@@ -154,6 +162,11 @@ void createJsonProll(HumdrumFile& infile) {
    Array<int> noteinit(ktracks.getSize());
    noteinit.setAll(0);
 
+	Array<double> tempos;
+	calculateTempos(infile, tempos);
+	Array<double> realtimes;
+	calculateRealTimesFromTempos(realtimes, infile, tempos);
+
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isData()) {
          continue;
@@ -194,7 +207,7 @@ void createJsonProll(HumdrumFile& infile) {
                staves[rktracks[track]] << "{\n";
             }
             printJsonNote(staves[rktracks[track]], b40, duration, buffer, 
-                  infile, i, j, k);
+                  infile, i, j, k, tempos, realtimes);
 
             if (b40 > partmax[rktracks[track]]) {
                partmax[rktracks[track]] = b40;
@@ -206,7 +219,8 @@ void createJsonProll(HumdrumFile& infile) {
       }
    }
 
-   printJsonHeader(infile, 0, ktracks, partmin, partmax);
+   printJsonHeader(infile, 0, ktracks, partmin, partmax, tempos, realtimes);
+
 
    pi(cout, 2);
    cout << "[\n";
@@ -252,6 +266,30 @@ void createJsonProll(HumdrumFile& infile) {
 
    delete [] staves;
 }
+
+
+
+//////////////////////////////
+//
+// calculateRealTimesFromTempos --
+//
+
+void calculateRealTimesFromTempos(Array<double>& realtimes, HumdrumFile& infile,
+	Array<double>& tempos) {
+
+	realtimes.setSize(infile.getNumLines());
+	realtimes.setAll(0.0);
+
+	double current = 0.0;
+	for (int i=0; i<infile.getNumLines(); i++) {
+		realtimes[i] = current;
+		if (tempos[i] == 0.0) {
+			cerr << "Warning, tempo is set to 0 for some reason at index " << i << endl;
+		}
+		current += infile[i].getDuration() * 60 / tempos[i];
+	}
+}
+
 
 
 
@@ -316,7 +354,7 @@ void printPartNames(HumdrumFile& infile) {
 //
 
 void printJsonHeader(HumdrumFile& infile, int indent, Array<int>& ktracks,
-      Array<int>& partmin, Array<int>& partmax) {
+      Array<int>& partmin, Array<int>& partmax, Array<double>& tempos, Array<double>& realtimes) {
    pi(cout, indent);
    cout << "{\n";
 
@@ -366,6 +404,11 @@ void printJsonHeader(HumdrumFile& infile, int indent, Array<int>& ktracks,
    cout << "\t\"scorelength\"\t:\t";
    RationalNumber value = infile[infile.getNumLines()-1].getAbsBeatR();
    printRationalNumber(cout, value);
+   cout << ",\n";
+
+   pi(cout, indent);
+   cout << "\t\"scorelengthsec\" :\t";
+	cout << realtimes.last();
    cout << ",\n";
 
    pi(cout, indent);
@@ -419,10 +462,106 @@ void printJsonHeader(HumdrumFile& infile, int indent, Array<int>& ktracks,
    }
    cout << "],\n";
 
-   printBarlines(cout, infile, indent);
+   printBarlines(cout, infile, indent, realtimes);
+	
+   printTempos(cout, infile, indent, tempos);
 
    pi(cout, indent);
    cout << "\t\"partdata\"\t:\n";
+}
+
+
+//////////////////////////////
+//
+// calculateTempos --
+//
+
+void calculateTempos(HumdrumFile& infile, Array<double>& tempos) {
+	tempos.setSize(infile.getNumLines());
+	tempos.setAll(0);
+   
+   for (int i=0; i<infile.getNumLines(); i++) {
+		if (infile[i].isData()) {
+			continue;
+		}
+		double tempo = checkForTempo(infile[i]);
+		if (tempo <= 0) {
+			continue;
+		}
+		tempos[i] = tempo;
+   }
+
+	if (tempos.getSize() == 0) {
+		return;
+	}
+	double value = tempos[0];
+
+	for (int i=1; i<tempos.getSize(); i++) {
+		if (tempos[i] == 0) {
+			tempos[i] = value;
+		} else {
+			value = tempos[i];
+		}
+	}
+
+	value = tempos[tempos.getSize() - 2];
+	for (int i=tempos.getSize()-2; i>=0; i--) {
+		if (tempos[i] == 0) {
+			tempos[i] = value;
+		} else {
+			value = tempos[i];
+		}
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// printTempos --
+//
+
+void printTempos(ostream& out, HumdrumFile& infile, int indent, Array<double>& tempos) {
+   pi(out, indent);
+   out << "\t\"tempos\"\t:\n";
+   
+   pi(out, indent);
+   out << "\t\t[\n";
+
+   indent++;
+   indent++;
+   
+   int barinit = 0;
+   PerlRegularExpression pre;
+   RationalNumber timeval;
+   RationalNumber measuredur;
+	double tempo;
+
+   for (int i=0; i<infile.getNumLines(); i++) {
+		if (infile[i].isData()) {
+			continue;
+		}
+		tempo = checkForTempo(infile[i]);
+		if (tempo <= 0) {
+			continue;
+		}
+
+      if (barinit) {
+         out << ",\n";
+      } else {
+         barinit = 1;
+      }
+   
+      pi(out, indent);
+      out << "{\"time\":";
+      timeval = infile[i].getAbsBeatR();
+      printRationalNumber(out, timeval);
+      out << ", \"tpq\":" << tempo;
+      out << "}";
+   }
+
+   out << "\n\t\t],\n";
 }
 
 
@@ -432,7 +571,7 @@ void printJsonHeader(HumdrumFile& infile, int indent, Array<int>& ktracks,
 // printBarlines --
 //
 
-void printBarlines(ostream& out, HumdrumFile& infile, int indent) {
+void printBarlines(ostream& out, HumdrumFile& infile, int indent, Array<double>& realtimes) {
    int i;
    pi(out, indent);
    out << "\t\"barlines\"\t:\n";
@@ -486,6 +625,7 @@ void printBarlines(ostream& out, HumdrumFile& infile, int indent) {
       out << "{\"time\":";
       timeval = infile[i].getAbsBeatR();
       printRationalNumber(out, timeval);
+      out << ", \"timesec\":" << realtimes[i];
       if (number >= 0) {
          out << ", \"label\":\"" << number << "\"";
       }
@@ -617,7 +757,8 @@ void printSectionLabel(ostream& out, HumdrumFile& infile, int line) {
 //
 
 void printJsonNote(ostream& out, int b40, RationalNumber& duration, const char* kern, 
-      HumdrumFile& infile, int line, int field, int token) {
+      HumdrumFile& infile, int line, int field, int token, Array<double>& tempos,
+		Array<double>& realtimes) {
    int indent = 4;
 
    RationalNumber metpos    = infile[line].getBeatR();
@@ -637,8 +778,20 @@ void printJsonNote(ostream& out, int b40, RationalNumber& duration, const char* 
    out << ",\n";
 
    pi(out, indent); 
+   out << "\t\"starttimesec\"\t:\t";
+   out << realtimes[line];
+   out << ",\n";
+
+   pi(out, indent); 
    out << "\t\"duration\"\t:\t";
    printRationalNumber(out, duration);
+   out << ",\n";
+
+	// assuming tempo does not change during note 
+	// (should mostly be true).
+   pi(out, indent); 
+   out << "\t\"durationsec\"\t:\t";
+	out << duration.getFloat() * 60.0 / tempos[line];
    out << ",\n";
 
    pi(out, indent); 
@@ -1232,6 +1385,138 @@ void getMarkChars(Array<char>& marks, HumdrumFile& infile) {
    }
 }
 
+
+
+//////////////////////////////
+//
+// checkForTempo --
+//
+
+double checkForTempo(HumdrumRecord& record) {
+	int tassoQ = false;
+	int timeQ = false;
+	double tscaling = 1.0;
+	int metQ = 252;
+	int met2Q = 0;
+
+   if (timeQ) {
+      // don't encode tempos if the --time option is set.
+      return -1.0;
+   }
+   int i;
+   float tempo = 60.0;
+   PerlRegularExpression pre;
+
+   // if (!metQ) {
+
+      for (i=0; i<record.getFieldCount(); i++) {
+         if (strncmp(record[i], "*MM", 3) == 0) {
+            sscanf(&(record[i][3]), "%f", &tempo);
+            // cout << "Found tempo marking: " << record[i] << endl;
+            return (double)tempo * tscaling;
+         }
+      }
+
+   // } else {
+   if (tassoQ) {
+      // C  = 132 bpm
+      // C| = 176 bpm
+
+      char mensuration[1024] = {0};
+      if (record.isGlobalComment() && pre.search(record[0],
+            "^\\!+primary-mensuration:.*omet\\((.*?)\\)\\s*$")) {
+         strcpy(mensuration, pre.getSubmatch(1));
+      } else if (record.isInterpretation() && record.equalFieldsQ("**kern")) {
+         for (i=0; i<record.getFieldCount(); i++) {
+            if (record.isExInterp(i, "**kern")) {
+               if (pre.search(record[i], "omet\\((.*?)\\)")) {
+                  strcpy(mensuration, pre.getSubmatch(1));
+               }
+               break;
+            }
+         }
+      }
+      if (strcmp(mensuration, "C") == 0) {
+         return 132.0;
+      } else if (strcmp(mensuration, "C|") == 0) {
+         return 176.0;
+      }
+   } else if (metQ) {
+
+      // mensural tempo scalings
+      // O           = 58 bpm
+      // O.          = 58 bpm
+      // C.          = 58 bpm
+      // C           = 58 bpm
+      // C|          = 72 bpm
+      // O2          = 75 bpm
+      // C2          = 75 bpm
+      // O|          = 76 bpm
+      // C|3, 3, 3/2 = 110 bpm
+      // C2/3        = 1.5 * 72 = 108 bpm
+      // C3          = 110 bpm
+      // O3/2        = 58 * 1.5 = 87 bpm
+      // O/3         = 110 bpm
+      // C|2, Cr     = 144 bpm (previously 220 bpm but too fast)
+
+      char mensuration[1024] = {0};
+      if (record.isGlobalComment() && pre.search(record[0],
+            "^\\!+primary-mensuration:.*met\\((.*?)\\)\\s*$")) {
+         strcpy(mensuration, pre.getSubmatch(1));
+      } else if (record.isInterpretation() && record.equalFieldsQ("**kern")) {
+         for (i=0; i<record.getFieldCount(); i++) {
+            if (record.isExInterp(i, "**kern")) {
+               if (pre.search(record[i], "met\\((.*?)\\)")) {
+                  strcpy(mensuration, pre.getSubmatch(1));
+               }
+               break;
+            }
+         }
+      }
+
+      if (strcmp(mensuration, "O") == 0) {
+         return (double)metQ * 1.0;
+      } else if (strcmp(mensuration, "C|") == 0) {
+         return (double)metQ * 1.241793;
+      } else if (strcmp(mensuration, "C.") == 0) {
+         return (double)metQ * 1.0;
+      } else if (strcmp(mensuration, "O.") == 0) {
+         return (double)metQ * 1.0;
+      } else if (strcmp(mensuration, "C") == 0) {
+         if (met2Q) {
+            return (double)metQ * 1.241793;
+         } else {
+            return (double)metQ * 1.0;
+         }
+      } else if (strcmp(mensuration, "O|") == 0) {
+         return (double)metQ * 1.310448;
+      } else if (strcmp(mensuration, "C|3") == 0) {
+         return (double)metQ * 1.8965517;
+      } else if (strcmp(mensuration, "C3") == 0) {
+         return (double)metQ * 1.2413793;
+      } else if (strcmp(mensuration, "C2/3") == 0) {
+         return (double)metQ * 1.8;
+      } else if (strcmp(mensuration, "3") == 0) {
+         return (double)metQ * 1.8965517;
+      } else if (strcmp(mensuration, "3/2") == 0) {
+         return (double)metQ * 1.8965517;
+      } else if (strcmp(mensuration, "O/3") == 0) {
+         return (double)metQ * 1.8965517;
+      } else if (strcmp(mensuration, "O2") == 0) {
+         return (double)metQ * 1.25;
+      } else if (strcmp(mensuration, "O3/2") == 0) {
+         return (double)metQ * 1.5;
+      } else if (strcmp(mensuration, "C2") == 0) {
+         return (double)metQ * 1.25;
+      } else if (strcmp(mensuration, "C|2") == 0) {
+         return (double)metQ * 2.48276;
+      } else if (strcmp(mensuration, "Cr") == 0) {
+         return (double)metQ * 2.48276;
+      }
+   }
+
+   return -1.0;
+}
 
 
 // md5sum: 5a65c2389a4836085c158305b8026093 proll.cpp [20170605]
