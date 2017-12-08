@@ -1548,12 +1548,21 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
    pline(lev, "<note>\n");
    lev++;
 
+   int slash = 0;
    int grace = 0;
    if (strchr(buffer, 'q') != NULL || strchr(buffer, 'Q') != NULL) {
       grace = 1;
+      slash = 1;
+      if (strstr(buffer, "qq") != NULL) {
+         slash = 0;
+      }
    }
    if (grace) {
-      pline(lev, "<grace/>\n");
+      pline(lev, "<grace");
+      if (slash) {
+         cout << " slash=\"yes\"";
+      }
+      cout << "/>\n";
    }
 
    if (chord) {
@@ -1639,7 +1648,6 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
 
    pline(lev, "<type>");
 
-   char durstring[32] = {0};
    PerlRegularExpression pre;
    Array<char> newbuffer;
    newbuffer.setSize(strlen(buffer)+1);
@@ -1666,23 +1674,22 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
    RationalNumber ratout = 1;
 
    // newduration should be in terms of quarter note durations
-   // whole = 4.0; half - 0.5, etc.
+   // whole = 4.0; half = 0.5, etc.
    double tempval = 0.0;
    if (newduration > 0.0) {
       double base2val =  log10(newduration)/log10(2);
       tempval = pow(2.0, floor(base2val + 0.99));
+      Convert::durationToKernRhythm(newbuffer.getBase(), tempval);
    }
 
-   Convert::durationToKernRhythm(durstring, tempval);
-   ratout = Convert::kernToDurationR(durstring);
-
-   printDurationType(durstring);
+   ratout = Convert::kernToDurationR(newbuffer.getBase());
+   printDurationType(newbuffer.getBase());
    // printDurationType(nodots.getBase());
 
    cout << "</type>\n";
 
    // print number of augmentation dots in duration ///////////////////
-   // printDots(durstring);
+   // printDots(newbuffer);
    printDots(newbuffer.getBase());
 
    /// WRITTEN ACCIDENTALS ////////////////////////////////////////////
