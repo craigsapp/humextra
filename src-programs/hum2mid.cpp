@@ -909,23 +909,28 @@ double checkForTempo(HumdrumRecord& record) {
       if (strcmp(mensuration, "O") == 0) {
          return (double)metQ * 1.0;
       } else if (strcmp(mensuration, "C|") == 0) {
-         return (double)metQ * 1.241793;
+         return (double)metQ * 1.25;
       } else if (strcmp(mensuration, "C.") == 0) {
          return (double)metQ * 1.0;
       } else if (strcmp(mensuration, "O.") == 0) {
          return (double)metQ * 1.0;
       } else if (strcmp(mensuration, "C") == 0) {
          if (met2Q) {
-            return (double)metQ * 1.241793;
+            return (double)metQ * 1.25;
          } else {
             return (double)metQ * 1.0;
          }
       } else if (strcmp(mensuration, "O|") == 0) {
-         return (double)metQ * 1.310448;
+         if (met2Q) {
+            return (double)metQ * 2.0;
+         } else {
+            return (double)metQ * 1.25;
+         }
+         return (double)metQ * 1.333;
       } else if (strcmp(mensuration, "C|3") == 0) {
          return (double)metQ * 1.8965517;
       } else if (strcmp(mensuration, "C3") == 0) {
-         return (double)metQ * 1.2413793;
+         return (double)metQ * 1.25;
       } else if (strcmp(mensuration, "C2/3") == 0) {
          return (double)metQ * 1.8;
       } else if (strcmp(mensuration, "3") == 0) {
@@ -941,9 +946,9 @@ double checkForTempo(HumdrumRecord& record) {
       } else if (strcmp(mensuration, "C2") == 0) {
          return (double)metQ * 1.25;
       } else if (strcmp(mensuration, "C|2") == 0) {
-         return (double)metQ * 2.48276;
+         return (double)metQ * 2.5;
       } else if (strcmp(mensuration, "Cr") == 0) {
-         return (double)metQ * 2.48276;
+         return (double)metQ * 2.5;
       }
    }
 
