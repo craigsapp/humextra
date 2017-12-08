@@ -84,6 +84,8 @@ int       style     = 'H';            // used with the -s option
 int       P3Q       = 1;              // used with -3 option
 int       P6Q       = 0;              // used with -6 option
 int       jsonQ     = 0;
+int       metQ      = 0;              // used with --met option
+int       met2Q     = 0;              // used with --met2 option
 const char* optionfilename = "";      // used with -f option
 const char* keyboardcolor = "151515"; // used with the -k option
 const char* bgcolor = "000000";       // used with the -b option
@@ -1284,6 +1286,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("3|p3|P3=b",           "output as P3 (ASCII) Portable anymap");
    opts.define("6|p6|P6=b",           "output as P6 (binary) Portable anymap");
    opts.define("j|json=b",            "output proll data in JSON format");
+   opts.define("met=d:232",           "tempo control from metrical symbols");
+   opts.define("met2=d:336",          "tempo control from metrical symbols, older era");
 
    opts.define("debug=b",          "trace input parsing");   
    opts.define("author=b",         "author of the program");   
@@ -1327,6 +1331,21 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    } else {
       P3Q = 1;
    }
+
+
+   metQ = int(opts.getDouble("met")+0.5);
+	if (metQ < 40) {
+		metQ = 40;
+	} else if (metQ > 4000) {
+		metQ = 4000;
+	}
+
+	if (opts.getBoolean("met2")) {
+		met2Q = 0;
+	} else {
+   	met2Q = int(opts.getDouble("met2")+0.5);
+   	metQ = met2Q;
+	}
 }
 
 
@@ -1396,8 +1415,8 @@ double checkForTempo(HumdrumRecord& record) {
 	int tassoQ = false;
 	int timeQ = false;
 	double tscaling = 1.0;
-	int metQ = 252;
-	int met2Q = 0;
+	// int metQ = 252;
+	// int met2Q = 0;
 
    if (timeQ) {
       // don't encode tempos if the --time option is set.
@@ -1477,19 +1496,23 @@ double checkForTempo(HumdrumRecord& record) {
       if (strcmp(mensuration, "O") == 0) {
          return (double)metQ * 1.0;
       } else if (strcmp(mensuration, "C|") == 0) {
-         return (double)metQ * 1.241793;
+         return (double)metQ * 1.25;
       } else if (strcmp(mensuration, "C.") == 0) {
          return (double)metQ * 1.0;
       } else if (strcmp(mensuration, "O.") == 0) {
          return (double)metQ * 1.0;
       } else if (strcmp(mensuration, "C") == 0) {
          if (met2Q) {
-            return (double)metQ * 1.241793;
+            return (double)metQ * 1.25;
          } else {
             return (double)metQ * 1.0;
          }
       } else if (strcmp(mensuration, "O|") == 0) {
-         return (double)metQ * 1.310448;
+			if (met2Q) {
+         	return (double)metQ * 2.0;
+			} else {
+         	return (double)metQ * 1.310448;
+			}
       } else if (strcmp(mensuration, "C|3") == 0) {
          return (double)metQ * 1.8965517;
       } else if (strcmp(mensuration, "C3") == 0) {
