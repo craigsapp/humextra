@@ -1690,7 +1690,7 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
 
    // print number of augmentation dots in duration ///////////////////
    // printDots(newbuffer);
-   printDots(newbuffer.getBase());
+   printDots(buffer);
 
    /// WRITTEN ACCIDENTALS ////////////////////////////////////////////
 
