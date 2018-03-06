@@ -851,8 +851,8 @@ double checkForTempo(HumdrumRecord& record) {
 
    // } else {
    if (tassoQ) {
-      // C  = 132 bpm
-      // C| = 176 bpm
+      // C  = 132 qpm
+      // C| = 176 qpm
 
       char mensuration[1024] = {0};
       if (record.isGlobalComment() && pre.search(record[0],
@@ -873,23 +873,28 @@ double checkForTempo(HumdrumRecord& record) {
       } else if (strcmp(mensuration, "C|") == 0) {
          return 176.0;
       }
+      if (pre.search(record[0], "^\\*M4/2$")) {
+         return 132.0;
+      } else if (pre.search(record[0], "^\\*M2/1$")) {
+         return 176.0;
+      }
    } else if (metQ) {
 
       // mensural tempo scalings
-      // O           = 58 bpm
-      // O.          = 58 bpm
-      // C.          = 58 bpm
-      // C           = 58 bpm
-      // C|          = 72 bpm
-      // O2          = 75 bpm
-      // C2          = 75 bpm
-      // O|          = 76 bpm
-      // C|3, 3, 3/2 = 110 bpm
-      // C2/3        = 1.5 * 72 = 108 bpm
-      // C3          = 110 bpm
-      // O3/2        = 58 * 1.5 = 87 bpm
-      // O/3         = 110 bpm
-      // C|2, Cr     = 144 bpm (previously 220 bpm but too fast)
+      // O           = 58 qpm
+      // O.          = 58 qpm
+      // C.          = 58 qpm
+      // C           = 58 qpm
+      // C|          = 72 qpm
+      // O2          = 75 qpm
+      // C2          = 75 qpm
+      // O|          = 76 qpm
+      // C|3, 3, 3/2 = 110 qpm
+      // C2/3        = 1.5 * 72 = 108 qpm
+      // C3          = 110 qpm
+      // O3/2        = 58 * 1.5 = 87 qpm
+      // O/3         = 110 qpm
+      // C|2, Cr     = 144 qpm (previously 220 qpm but too fast)
 
       char mensuration[1024] = {0};
       if (record.isGlobalComment() && pre.search(record[0],
