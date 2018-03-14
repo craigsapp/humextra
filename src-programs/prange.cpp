@@ -1026,7 +1026,7 @@ void printScoreVoice(string& voicestring, double hpos, vector<double>& midibins,
             printScoreEncodedText("<g><title>");
             printDiatonicPitchName(bottomquartile);
             cout << ": bottom quartile note";
-            if (voicestring.c_str() > 0) {
+            if (voicestring.size() > 0) {
                cout <<  " of " << voicestring << "\'s range";
             }
             printScoreEncodedText("</title>\n");
