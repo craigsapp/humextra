@@ -2053,13 +2053,13 @@ void checkForKeySignature(MidiFile& outfile, HumdrumFile& infile, int line) {
    if (timeQ) {
       ontick = getMillisecondTime(infile, line);
    } else {
-      double absbeat = infile.getAbsBeat(i);
+      double absbeat = infile.getAbsBeat(line);
       ontick = int(absbeat * outfile.getTicksPerQuarterNote());
    }
 
    uchar mode = 0; // major
 
-   if (islower(keysig[0])) {
+   if (islower(key[0])) {
       mode = 1; // minor
    }
 
@@ -2068,7 +2068,7 @@ void checkForKeySignature(MidiFile& outfile, HumdrumFile& infile, int line) {
    if (keynum >= 0) {
       accid = (uchar)keynum;
    } else {
-      accid = (uchar)(0x100 - keynum);
+      accid = (uchar)(0x100 + keynum);
    }
    
    vector<uchar> metadata;
@@ -2150,7 +2150,7 @@ void checkForTimeSignature(MidiFile& outfile, HumdrumFile& infile, int line) {
    if (timeQ) {
       ontick = getMillisecondTime(infile, line);
    } else {
-      double absbeat = infile.getAbsBeat(i);
+      double absbeat = infile.getAbsBeat(line);
       ontick = int(absbeat * outfile.getTicksPerQuarterNote());
    }
 
