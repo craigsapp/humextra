@@ -230,6 +230,8 @@ void      processOptions     (Options& opts, int argc, char* argv[]);
 void      checkEmbeddedOptions(HumdrumFile& infile, int argc, char* argv[]);
 void      checkForTimeSignature(MidiFile& outfile, HumdrumFile& infile,
                                 int line);
+void      checkForKeySignature(MidiFile& outfile, HumdrumFile& infile,
+                                int line);
 string    getInstrumentName   (HumdrumFile& infile, int ptrack);
 
 // PerfViz related functions:
@@ -1671,6 +1673,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
          PerfVizNote::bar += 1;
       } else if (infile[i].getType() == E_humrec_data) {
          checkForTimeSignature(outfile, infile, i);
+         checkForKeySignature(outfile, infile, i);
          idyncounter = 0;
          for (j=infile[i].getFieldCount()-1; j>=0; j--) {
             if (strcmp(infile[i][j], ".") == 0) {
@@ -1991,6 +1994,87 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
          outfile.addEvent(i, ontick+Offset, mididata);
       }
    }
+}
+
+
+
+//////////////////////////////
+//
+// checkForKeySignature -- Search backwards from the previous line
+//     for a key signature and key.
+//
+
+void checkForKeySignature(MidiFile& outfile, HumdrumFile& infile, int line) {
+   int i;
+   // int foundkeysig = -1;
+   // int foundkey = -1;
+
+   string primary;
+   string key;
+   string keysig;
+   PerlRegularExpression pre;
+   PerlRegularExpression pre2;
+   for (i=line-1; i>0; i--) {
+      if (infile[i].isData()) {
+         break;
+      }
+      if (strncmp(infile[i][0], "**", 2) == 0) {
+         // found nothing to the start of the data stream.
+         break;
+      } else if (infile[i].isInterpretation()) {
+         int firstkern = -1;
+         for (int j=0; j<infile[i].getFieldCount(); j++) {
+            if (infile[i].isExInterp(j, "**kern")) {
+               if (firstkern == -1) {
+                  if (pre2.search(infile[i][j], "^\\*([A-Ga-g][#-]*):")) {
+                     // extract the match later.
+                     key = pre2.getSubmatch(1);
+                  } else if (pre2.search(infile[i][j], "^(\\*k[[][A-Ga-g#-]*[]])")) {
+                     keysig = pre2.getSubmatch(1);
+                  }
+                  firstkern = j;
+               } else {
+                  if (strcmp(infile[i][firstkern], infile[i][j]) != 0) {
+                     firstkern  = -1;
+                  } else {
+                     // all is well, so continue
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   if (key.empty() || keysig.empty()) {
+      return;
+   }
+
+   int ontick = 0;
+   if (timeQ) {
+      ontick = getMillisecondTime(infile, line);
+   } else {
+      double absbeat = infile.getAbsBeat(i);
+      ontick = int(absbeat * outfile.getTicksPerQuarterNote());
+   }
+
+   uchar mode = 0; // major
+
+   if (islower(keysig[0])) {
+      mode = 1; // minor
+   }
+
+   int keynum = Convert::kernKeyToNumber(keysig.c_str());
+   uchar accid = 0;
+   if (keynum >= 0) {
+      accid = (uchar)keynum;
+   } else {
+      accid = (uchar)(0x100 - keynum);
+   }
+   
+   vector<uchar> metadata;
+   metadata.push_back(accid);
+   metadata.push_back(mode);
+   outfile.addMetaEvent(0, ontick, 0x59, metadata);
 }
 
 
