@@ -2,13 +2,14 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Apr 12 23:22:19 PDT 2004
 // Last Modified: Mon Apr 12 23:22:22 PDT 2004
-// Last Modified: Thu Feb 24 22:43:17 PST 2005 (added -k option)
-// Last Modified: Wed Jun 24 15:39:58 PDT 2009 (updated for GCC 4.4)
-// Last Modified: Sun Sep 13 12:34:51 PDT 2009 (added -s option)
-// Last Modified: Wed Nov 18 14:01:20 PST 2009 (added *Tr markers)
-// Last Modified: Thu Nov 19 14:08:32 PST 2009 (added -q, -d and -c options)
-// Last Modified: Thu Nov 19 15:12:01 PST 2009 (added -I options and *ITr marks)
-// Last Modified: Thu Nov 19 19:28:26 PST 2009 (added -W and -C options)
+// Last Modified: Thu Feb 24 22:43:17 PST 2005 Added -k option
+// Last Modified: Wed Jun 24 15:39:58 PDT 2009 Updated for GCC 4.4
+// Last Modified: Sun Sep 13 12:34:51 PDT 2009 Added -s option
+// Last Modified: Wed Nov 18 14:01:20 PST 2009 Added *Tr markers
+// Last Modified: Thu Nov 19 14:08:32 PST 2009 Added -q, -d and -c options
+// Last Modified: Thu Nov 19 15:12:01 PST 2009 Added -I options and *ITr marks
+// Last Modified: Thu Nov 19 19:28:26 PST 2009 Added -W and -C options
+// Last Modified: Sat Apr 28 08:49:41 PDT 2018 
 // Filename:      ...sig/examples/all/transpose.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/transpose.cpp
 // Syntax:        C++; museinfo
@@ -23,13 +24,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-#endif
+#include <iostream>
+#include <fstream>
 
 #define STYLE_CONCERT 0
 #define STYLE_WRITTEN 1
@@ -39,6 +35,7 @@ void      checkOptions          (Options& opts, int argc, char** argv);
 void      example               (void);
 void      usage                 (const char* command);
 void      printFile             (HumdrumFile& infile);
+void      processFile           (HumdrumFile& infile);
 void      processFile           (HumdrumFile& infile, Array<int>& spines);
 void      printNewKernString    (const char* string, int transval);
 void      printHumdrumKernToken (HumdrumRecord& record, int index, 
@@ -127,16 +124,24 @@ int         instrumentQ  = 0;    // used with -I option
 //////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv) {
-   // process the command-line options
    checkOptions(options, argc, argv);
-
+   HumdrumStream streamer(options);
    HumdrumFile infile;
-   if (options.getArgCount() > 0) {
-      infile.read(options.getArg(1));
-   } else {
-      infile.read(cin);
+
+   while (streamer.read(infile)) {
+      processFile(infile);
    }
 
+   return 0;
+}
+
+
+//////////////////////////////
+//
+// processFile --
+//
+
+void processFile(HumdrumFile& infile) {
    Array<int> spineprocess(infile.getMaxTracks());
    spineprocess.setGrowth(0);
    spineprocess.setAll(1);
@@ -177,8 +182,6 @@ int main(int argc, char** argv) {
    } else {
       processFile(infile, spineprocess);
    }
-
-   return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -948,7 +951,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -957,7 +960,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
    transval     = opts.getInteger("base40");
    ssetkeyQ     = opts.getBoolean("setkey");
-   ssetkey      = Convert::kernToBase40(opts.getString("setkey").data());
+   ssetkey      = Convert::kernToBase40(opts.getString("setkey").c_str());
    autoQ        = opts.getBoolean("auto");
    debugQ       = opts.getBoolean("debug");
    spineQ       = opts.getBoolean("spines");
@@ -985,7 +988,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    ssetkey = ssetkey % 40;
 
    if (opts.getBoolean("transpose")) {
-      transval = getBase40ValueFromInterval(opts.getString("transpose").data());
+      transval = getBase40ValueFromInterval(opts.getString("transpose").c_str());
    }
 
    transval += 40 * octave;
@@ -1670,7 +1673,7 @@ void fillFieldData(Array<int>& field, const string& fieldstring,
    PerlRegularExpression pre;
    Array<char> buffer;
    buffer.setSize(fieldstring.size()+1);
-   strcpy(buffer.getBase(), fieldstring.data());
+   strcpy(buffer.getBase(), fieldstring.c_str());
    pre.sar(buffer, "\\s", "", "gs");
    int start = 0;
    int value = 0;
