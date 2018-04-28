@@ -1,10 +1,11 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Oct 22 15:33:41 PDT 2000
-// Last Modified: Sun May 26 19:39:01 PDT 2002 (mostly finished)
-// Last Modified: Tue Mar 16 05:53:19 PST 2010 (added *M meter description)
-// Last Modified: Wed Apr 21 14:31:44 PDT 2010 (added search feature)
-// Last Modified: Wed May 19 15:30:49 PDT 2010 (added tick & rational values)
+// Last Modified: Sun May 26 19:39:01 PDT 2002 Mostly finished
+// Last Modified: Tue Mar 16 05:53:19 PST 2010 Added *M meter description
+// Last Modified: Wed Apr 21 14:31:44 PDT 2010 Added search feature
+// Last Modified: Wed May 19 15:30:49 PDT 2010 Added tick & rational values
+// Last Modified: Sat Apr 28 09:03:39 PDT 2018 Converted to HumdrumStream input
 // Filename:      ...sig/examples/all/beat.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/beat.cpp
 // Syntax:        C++; museinfo
@@ -31,85 +32,77 @@
 //
 
 #include "humdrum.h"
+
 #include <math.h>
-
 #include <string.h>
-#include <ctype.h>
 
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>     /* for windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-   
+#include <cctype>
+#include <vector>
+#include <sstream>
+#include <string>
+
+using namespace std;
+
 
 // function declarations
 void      checkOptions       (Options& opts, int argc, char* argv[]);
 void      example            (void);
 void      usage              (const char* command);
 void      printOutput        (HumdrumFile& file, 
-		              Array<RationalNumber>& Bfeatures, 
-                              Array<int>& Blines, 
-			      Array<RationalNumber>& Dfeatures, 
-			      Array<int>& Dlines, Array<int>& tickanalysis);
+                              vector<RationalNumber>& Bfeatures, 
+                              vector<int>& Blines, 
+                              vector<RationalNumber>& Dfeatures, 
+                              vector<int>& Dlines, vector<int>& tickanalysis);
 RationalNumber getPickupDuration (HumdrumFile& file);
-void      fillSearchString   (Array<double>& searcher, const string& astring);
+void      fillSearchString   (vector<double>& searcher, const string& astring);
 void      printSearchResults (HumdrumFile& infile, 
-		              Array<RationalNumber>& Bfeatures,
-                              Array<int>& Blines, 
-			      Array<RationalNumber>& Dfeatures,
-                              Array<int>& Dlines);
-void      printSearchResultsFinal(Array<int>& linematch, HumdrumFile& infile,
-                              Array<RationalNumber>& Bfeatures, 
-			      Array<int>& Blines, 
-                              Array<RationalNumber>& Dfeatures, 
-			      Array<int>& Dloines);
-void      doBeatSearch       (Array<int>& results, HumdrumFile& infile, 
-                              Array<double> search, 
-			      Array<RationalNumber>& Bfeatures,
-                              Array<int>& Blines);
-void      doDurSearch        (Array<int>& results, HumdrumFile& infile, 
-                              Array<double> search, 
-			      Array<RationalNumber>& Dfeatures,
-                              Array<int>& Dlines);
-void      doDurSearch        (Array<int>& results, HumdrumFile& infile, 
-                              Array<double> search, Array<double>& Dfeatures, 
-			      Array<int>& Dlines);
-void      mergeResults       (Array<int>& output, Array<int>& input1, 
-                              Array<int>& input2);
-void      printSequence      (Array<double>& pattern);
-void      printSequence      (Array<RationalNumber>& pattern);
-void      fillMeasureInfo    (HumdrumFile& infile, Array<double>& measures);
-void      doComparison       (Array<int>& results, Array<int>& line, 
-                              Array<double>& search, Array<double>& data,
+                              vector<RationalNumber>& Bfeatures,
+                              vector<int>& Blines, 
+                              vector<RationalNumber>& Dfeatures,
+                              vector<int>& Dlines);
+void      printSearchResultsFinal(vector<int>& linematch, HumdrumFile& infile,
+                              vector<RationalNumber>& Bfeatures, 
+                              vector<int>& Blines, 
+                              vector<RationalNumber>& Dfeatures, 
+                              vector<int>& Dloines);
+void      doBeatSearch       (vector<int>& results, HumdrumFile& infile, 
+                              vector<double> search, 
+                              vector<RationalNumber>& Bfeatures,
+                              vector<int>& Blines);
+void      doDurSearch        (vector<int>& results, HumdrumFile& infile, 
+                              vector<double> search, 
+                              vector<RationalNumber>& Dfeatures,
+                              vector<int>& Dlines);
+void      doDurSearch        (vector<int>& results, HumdrumFile& infile, 
+                              vector<double> search, vector<double>& Dfeatures, 
+                              vector<int>& Dlines);
+void      mergeResults       (vector<int>& output, vector<int>& input1, 
+                              vector<int>& input2);
+void      printSequence      (vector<double>& pattern);
+void      printSequence      (vector<RationalNumber>& pattern);
+void      fillMeasureInfo    (HumdrumFile& infile, vector<double>& measures);
+void      doComparison       (vector<int>& results, vector<int>& line, 
+                              vector<double>& search, vector<double>& data,
                               HumdrumFile& infile);
-int       checkForWildcard   (Array<double>& sequence);
-void      extractBeatFeatures(HumdrumFile& infile, Array<int>& line,
-                              Array<RationalNumber>& data);
-void      extractDurFeatures (HumdrumFile& infile, Array<int>& line,
-                              Array<RationalNumber>& data);
-void      printSequence      (Array<double>& features, Array<int>& lines, 
-                              Array<double>& search, int startline);
-void      printSequence      (Array<RationalNumber>& features, 
-		              Array<int>& lines, Array<RationalNumber>& search,
-			      int startline);
-void      printSequence      (Array<RationalNumber>& features, 
-		              Array<int>& lines, Array<double>& search, 
-			      int startline);
-void      printMatchesWithData(Array<int>& linematch, HumdrumFile& infile);
-void      fillAttackArray    (HumdrumFile& infile, Array<int>& attacks);
+int       checkForWildcard   (vector<double>& sequence);
+void      extractBeatFeatures(HumdrumFile& infile, vector<int>& line,
+                              vector<RationalNumber>& data);
+void      extractDurFeatures (HumdrumFile& infile, vector<int>& line,
+                              vector<RationalNumber>& data);
+void      printSequence      (vector<double>& features, vector<int>& lines, 
+                              vector<double>& search, int startline);
+void      printSequence      (vector<RationalNumber>& features, 
+                              vector<int>& lines, vector<RationalNumber>& search,
+                              int startline);
+void      printSequence      (vector<RationalNumber>& features, 
+                              vector<int>& lines, vector<double>& search, 
+                              int startline);
+void      printMatchesWithData(vector<int>& linematch, HumdrumFile& infile);
+void      fillAttackArray    (HumdrumFile& infile, vector<int>& attacks);
 int       getCountForLine    (HumdrumFile& infile, int line);
-int       doTickAnalysis     (Array<int>& tickanalysis, HumdrumFile& infile);
+int       doTickAnalysis     (vector<int>& tickanalysis, HumdrumFile& infile);
 RationalNumber getDurationOfFirstMeasure(HumdrumFile& file);
+void      analyzeFile        (HumdrumFile& infile);
 
 // global variables
 Options   options;             // database for command-line arguments
@@ -121,12 +114,12 @@ int       beatQ    = 0;        // used with -b option
 int       sumQ     = 0;        // used with -s option
 int       zeroQ    = 0;        // zero offset instead of 1 for first beat
 int       nullQ    = 0;        // used with -n option
-Array<double> Bsearch;         // used with -B option
-Array<double> Dsearch;         // used with -D option
+vector<double> Bsearch;         // used with -B option
+vector<double> Dsearch;         // used with -D option
 double    Rvalue   = -1.0;     // used with -R option
 double    Tolerance = 0.001;   // used for rounding
 int       Attack   = 1;        // used with -A option
-Array<int> Attacks;            // used with -A option
+vector<int> Attacks;            // used with -A option
 int       tickQ    = 0;        // used with -t option
 int       rationalQ= 0;        // used with -r option
 int       tpwQ     = 0;        // used with --tpw option
@@ -139,56 +132,66 @@ int       debugQ   = 0;        // used with --debug option
 
 int main(int argc, char* argv[]) {
    checkOptions(options, argc, argv);
-   HumdrumFileSet infiles;
-   infiles.read(options);
+   HumdrumStream streamer(options);
+   HumdrumFile infile;
 
-   Array<RationalNumber> Bfeatures; // used to extract beat data from input
-   Array<RationalNumber> Dfeatures; // used to extract duration data from input
-   Array<int>    Blines;            // used to extract beat data from input
-   Array<int>    Dlines;            // used to extract duration data from input
+   while (streamer.read(infile)) {
+		analyzeFile(infile);
+	}
 
-   for (int i=0; i<infiles.getCount(); i++) {
+	return 0;
+}
 
-      // analyze the input file according to command-line options
-      infiles[i].analyzeRhythm(beatbase.c_str());
 
-      Array<int> tickanalysis;
-      tickanalysis.setSize(infiles[i].getNumLines());
-      tickanalysis.setAll(0);
-      int tickfactor = 1;
 
-      if (tickQ) {
-         tickfactor = doTickAnalysis(tickanalysis, infiles[i]);
-      }
+//////////////////////////////
+//
+// analyzeFile --
+//
 
-      if (tpwQ) {
-         cout << infiles[i].getMinTimeBase() * tickfactor << endl;
-         exit(0);
-      } else if (tpqQ) {
-         cout << infiles[i].getMinTimeBase() * tickfactor /4.0 << endl;
-         exit(0);
-      }
+void analyzeFile(HumdrumFile& infile) {
 
-      fillAttackArray(infiles[i], Attacks);
-      extractBeatFeatures(infiles[i], Blines, Bfeatures);
-      if (debugQ) {
-         cout << "BEAT FEATURES ====================" << endl;
-         for (int ii=0; ii<Bfeatures.getSize(); ii++) {
-            cout << Bfeatures[ii].getFloat() << endl;
-         }
-         cout << "==================================" << endl;
-      }
-      extractDurFeatures(infiles[i], Dlines, Dfeatures);
+   vector<RationalNumber> Bfeatures; // used to extract beat data from input
+   vector<RationalNumber> Dfeatures; // used to extract duration data from input
+   vector<int>    Blines;            // used to extract beat data from input
+   vector<int>    Dlines;            // used to extract duration data from input
 
-      if (Bsearch.getSize() > 0 || Dsearch.getSize() > 0) {
-         printSearchResults(infiles[i], Bfeatures, Blines, Dfeatures, Dlines);
-      } else {
-         printOutput(infiles[i], Bfeatures, Blines, Dfeatures, Dlines, 
-               tickanalysis);
-      }
+   infile.analyzeRhythm(beatbase.c_str());
+
+   vector<int> tickanalysis;
+   tickanalysis.resize(infile.getNumLines());
+	std::fill(tickanalysis.begin(), tickanalysis.end(), 0);
+   int tickfactor = 1;
+
+   if (tickQ) {
+      tickfactor = doTickAnalysis(tickanalysis, infile);
    }
 
-   return 0;
+   if (tpwQ) {
+      cout << infile.getMinTimeBase() * tickfactor << endl;
+      exit(0);
+   } else if (tpqQ) {
+      cout << infile.getMinTimeBase() * tickfactor /4.0 << endl;
+      exit(0);
+   }
+
+   fillAttackArray(infile, Attacks);
+   extractBeatFeatures(infile, Blines, Bfeatures);
+   if (debugQ) {
+      cout << "BEAT FEATURES ====================" << endl;
+      for (int ii=0; ii<(int)Bfeatures.size(); ii++) {
+         cout << Bfeatures[ii].getFloat() << endl;
+      }
+      cout << "==================================" << endl;
+   }
+   extractDurFeatures(infile, Dlines, Dfeatures);
+
+   if (Bsearch.size() > 0 || Dsearch.size() > 0) {
+      printSearchResults(infile, Bfeatures, Blines, Dfeatures, Dlines);
+   } else {
+      printOutput(infile, Bfeatures, Blines, Dfeatures, Dlines, 
+            tickanalysis);
+   }
 }
 
 
@@ -201,11 +204,11 @@ int main(int argc, char* argv[]) {
 // doTickAnalysis --
 //
 
-int doTickAnalysis(Array<int>& tickanalysis, HumdrumFile& infile) {
+int doTickAnalysis(vector<int>& tickanalysis, HumdrumFile& infile) {
    int i;
-   tickanalysis.setSize(infile.getNumLines());
+   tickanalysis.resize(infile.getNumLines());
 
-   Array<RationalNumber> pretick(tickanalysis.getSize());
+   vector<RationalNumber> pretick(tickanalysis.size());
 
    int minrhy = infile.getMinTimeBase();
    if (minrhy <= 0.0) {
@@ -222,13 +225,13 @@ int doTickAnalysis(Array<int>& tickanalysis, HumdrumFile& infile) {
    }
 
    if (monitor == 0) {
-      for (i=0; i<pretick.getSize(); i++) {
+      for (i=0; i<(int)pretick.size(); i++) {
          tickanalysis[i] = pretick[i].getNumerator();
       }
       return 1;
    }
 
-   for (i=0; i<pretick.getSize(); i++) {
+   for (i=0; i<(int)pretick.size(); i++) {
       // estimate a multiplication of 4 to remove fractional part.
       tickanalysis[i] = pretick[i].getNumerator() * 4;
    }
@@ -243,11 +246,10 @@ int doTickAnalysis(Array<int>& tickanalysis, HumdrumFile& infile) {
 // fillAttackArray --
 //
 
-void fillAttackArray(HumdrumFile& infile, Array<int>& attacks) {
+void fillAttackArray(HumdrumFile& infile, vector<int>& attacks) {
    int i;
-   attacks.setSize(infile.getNumLines());
-   attacks.allowGrowth(0);
-   attacks.setAll(0);
+   attacks.clear();
+   attacks.reserve(infile.getNumLines());
 
    if (Attack <= 0) {
       // don't need to waste time analyzing the attack structure of the data...
@@ -317,22 +319,20 @@ int getCountForLine(HumdrumFile& infile, int line) {
 //   in the composition rhythmic data 
 //
 
-void printSearchResults(HumdrumFile& infile, Array<RationalNumber>& Bfeatures,
-      Array<int>& Blines, Array<RationalNumber>& Dfeatures, 
-      Array<int>& Dlines) {
-   Array<int> Bresults;
-   Array<int> Dresults;
-   Bresults.setSize(100000);
-   Bresults.setGrowth(100000);
-   Bresults.setSize(0);
-   Dresults.setSize(100000);
-   Dresults.setGrowth(100000);
-   Dresults.setSize(0);
+void printSearchResults(HumdrumFile& infile, vector<RationalNumber>& Bfeatures,
+      vector<int>& Blines, vector<RationalNumber>& Dfeatures, 
+      vector<int>& Dlines) {
+   vector<int> Bresults;
+   vector<int> Dresults;
+   Bresults.clear();
+   Bresults.reserve(100000);
+   Dresults.clear();
+   Dresults.reserve(100000);
 
-   if ((Bsearch.getSize() > 0) && (Dsearch.getSize() > 0)) {
+   if ((Bsearch.size() > 0) && (Dsearch.size() > 0)) {
       doBeatSearch(Bresults, infile, Bsearch, Bfeatures, Blines);
       doDurSearch(Dresults, infile, Dsearch, Dfeatures, Dlines);
-      Array<int> finalresults;
+      vector<int> finalresults;
       mergeResults(finalresults, Bresults, Dresults);
 
       cout << "!!parallel beat search: ";
@@ -344,14 +344,14 @@ void printSearchResults(HumdrumFile& infile, Array<RationalNumber>& Bfeatures,
 
       printSearchResultsFinal(finalresults, infile, Bfeatures, Blines,
             Dfeatures, Dlines);
-   } else if (Bsearch.getSize() > 0) {
+   } else if (Bsearch.size() > 0) {
       doBeatSearch(Bresults, infile, Bsearch, Bfeatures, Blines);
       cout << "!!beat search: ";
       printSequence(Bsearch);
       cout << endl;
       printSearchResultsFinal(Bresults, infile, Bfeatures, Blines,
             Dfeatures, Dlines);
-   } else if (Dsearch.getSize() > 0) {
+   } else if (Dsearch.size() > 0) {
       doDurSearch(Dresults, infile, Dsearch, Dfeatures, Dlines);
       cout << "!!duration search: ";
       printSequence(Dsearch);
@@ -371,29 +371,29 @@ void printSearchResults(HumdrumFile& infile, Array<RationalNumber>& Bfeatures,
 // printSequence --
 //
 
-void printSequence(Array<double>& pattern) {
+void printSequence(vector<double>& pattern) {
    int i;
-   for (i=0; i<pattern.getSize(); i++) {
+   for (i=0; i<(int)pattern.size(); i++) {
       if (pattern[i] < 0) {
          cout << "*";
       } else {
          cout << pattern[i];
       }
-      if (i < pattern.getSize()-1) {
+      if (i < (int)pattern.size()-1) {
          cout << ' ';
       }
    }
 }
 
-void printSequence(Array<RationalNumber>& pattern) {
+void printSequence(vector<RationalNumber>& pattern) {
    int i;
-   for (i=0; i<pattern.getSize(); i++) {
+   for (i=0; i<(int)pattern.size(); i++) {
       if (pattern[i] < 0) {
          cout << "*";
       } else {
          cout << pattern[i];
       }
-      if (i < pattern.getSize()-1) {
+      if (i < (int)pattern.size()-1) {
          cout << ' ';
       }
    }
@@ -406,9 +406,9 @@ void printSequence(Array<RationalNumber>& pattern) {
 // checkForWildcard -- returns true if any of the values are negative.
 //
 
-int checkForWildcard(Array<double>& sequence) {
+int checkForWildcard(vector<double>& sequence) {
    int i;
-   for (i=0; i<sequence.getSize(); i++) {
+   for (i=0; i<(int)sequence.size(); i++) {
       if (sequence[i] < 0.0) {
          return 1;
       }
@@ -423,17 +423,16 @@ int checkForWildcard(Array<double>& sequence) {
 // printMatchesWithData --
 //
 
-void printMatchesWithData(Array<int>& linematch, HumdrumFile& infile) {
+void printMatchesWithData(vector<int>& linematch, HumdrumFile& infile) {
    int i;
    int counter = 1;
 
 
-   Array<int> lookup;
-   lookup.setSize(infile.getNumLines());
-   lookup.allowGrowth(0);
-   lookup.setAll(-1);
+   vector<int> lookup;
+   lookup.resize(infile.getNumLines());
+	std::fill(lookup.begin(), lookup.end(), -1);
 
-   for (i=0; i<linematch.getSize(); i++) {
+   for (i=0; i<(int)linematch.size(); i++) {
       lookup[linematch[i]] = counter++;
    }
 
@@ -521,17 +520,17 @@ void printMatchesWithData(Array<int>& linematch, HumdrumFile& infile) {
 // printSearchResultsFinal --
 //
 
-void printSearchResultsFinal(Array<int>& linematch, HumdrumFile& infile,
-      Array<RationalNumber>& Bfeatures, Array<int>& Blines, 
-      Array<RationalNumber>& Dfeatures, Array<int>& Dlines) {
-   cout << "!!matches: " << linematch.getSize() << "\n";
+void printSearchResultsFinal(vector<int>& linematch, HumdrumFile& infile,
+      vector<RationalNumber>& Bfeatures, vector<int>& Blines, 
+      vector<RationalNumber>& Dfeatures, vector<int>& Dlines) {
+   cout << "!!matches: " << (int)linematch.size() << "\n";
 
    if (appendQ || prependQ) {
       printMatchesWithData(linematch, infile);
       return;
    }
 
-   Array<double> measures;
+   vector<double> measures;
    fillMeasureInfo(infile, measures);
 
 
@@ -549,7 +548,7 @@ void printSearchResultsFinal(Array<int>& linematch, HumdrumFile& infile,
    }
 
    cout << "\n";
-   for (i=0; i<linematch.getSize(); i++) {
+   for (i=0; i<(int)linematch.size(); i++) {
       cout << linematch[i]-1;
       cout << "\t" << measures[linematch[i]];
       if (zeroQ) {
@@ -585,12 +584,12 @@ void printSearchResultsFinal(Array<int>& linematch, HumdrumFile& infile,
 // printSequence --
 // 
 
-void printSequence(Array<double>& features, Array<int>& lines, 
-     Array<double>& search, int startline) {
+void printSequence(vector<double>& features, vector<int>& lines, 
+     vector<double>& search, int startline) {
 
    int index = -1;
    int i;
-   for (i=0; i<lines.getSize(); i++) {
+   for (i=0; i<(int)lines.size(); i++) {
       if (lines[i] == startline) {
          index = i;
          break;
@@ -602,8 +601,8 @@ void printSequence(Array<double>& features, Array<int>& lines,
       return;
    }
 
-   int stopindex = index + search.getSize() - 1;
-   for (i=index; (i<features.getSize()) && (i<=stopindex); i++) {
+   int stopindex = index + (int)search.size() - 1;
+   for (i=index; (i<(int)features.size()) && (i<=stopindex); i++) {
       cout << features[i];
       if (i < stopindex) {
          cout << " ";
@@ -613,12 +612,12 @@ void printSequence(Array<double>& features, Array<int>& lines,
 
 
 
-void printSequence(Array<RationalNumber>& features, Array<int>& lines, 
-     Array<double>& search, int startline) {
+void printSequence(vector<RationalNumber>& features, vector<int>& lines, 
+     vector<double>& search, int startline) {
 
    int index = -1;
    int i;
-   for (i=0; i<lines.getSize(); i++) {
+   for (i=0; i<(int)lines.size(); i++) {
       if (lines[i] == startline) {
          index = i;
          break;
@@ -630,8 +629,8 @@ void printSequence(Array<RationalNumber>& features, Array<int>& lines,
       return;
    }
 
-   int stopindex = index + search.getSize() - 1;
-   for (i=index; (i<features.getSize()) && (i<=stopindex); i++) {
+   int stopindex = index + (int)search.size() - 1;
+   for (i=index; (i<(int)features.size()) && (i<=stopindex); i++) {
       cout << features[i];
       if (i < stopindex) {
          cout << " ";
@@ -641,13 +640,12 @@ void printSequence(Array<RationalNumber>& features, Array<int>& lines,
 
 
 
-/*
-void printSequence(Array<double>& features, Array<int>& lines, 
-     Array<double>& search, int startline) {
+void printSequence(vector<RationalNumber>& features, vector<int>& lines, 
+     vector<RationalNumber>& search, int startline) {
 
    int index = -1;
    int i;
-   for (i=0; i<lines.getSize(); i++) {
+   for (i=0; i<(int)lines.size(); i++) {
       if (lines[i] == startline) {
          index = i;
          break;
@@ -659,68 +657,8 @@ void printSequence(Array<double>& features, Array<int>& lines,
       return;
    }
 
-   int stopindex = index + search.getSize() - 1;
-   for (i=index; (i<features.getSize()) && (i<=stopindex); i++) {
-      cout << features[i];
-      if (i < stopindex) {
-         cout << " ";
-      }
-   }
-}
-
-*/
-
-/*
- 
-void printSequence(Array<double>& features, Array<int>& lines, 
-     Array<double>& search, int startline) {
-
-   int index = -1;
-   int i;
-   for (i=0; i<lines.getSize(); i++) {
-      if (lines[i] == startline) {
-         index = i;
-         break;
-      }
-   }
-
-   if (index < 0) {
-      cout << ".";
-      return;
-   }
-
-   int stopindex = index + search.getSize() - 1;
-   for (i=index; (i<features.getSize()) && (i<=stopindex); i++) {
-      cout << features[i];
-      if (i < stopindex) {
-         cout << " ";
-      }
-   }
-}
-
-*/
-
-
-
-void printSequence(Array<RationalNumber>& features, Array<int>& lines, 
-     Array<RationalNumber>& search, int startline) {
-
-   int index = -1;
-   int i;
-   for (i=0; i<lines.getSize(); i++) {
-      if (lines[i] == startline) {
-         index = i;
-         break;
-      }
-   }
-
-   if (index < 0) {
-      cout << ".";
-      return;
-   }
-
-   int stopindex = index + search.getSize() - 1;
-   for (i=index; (i<features.getSize()) && (i<=stopindex); i++) {
+   int stopindex = index + (int)search.size() - 1;
+   for (i=index; (i<(int)features.size()) && (i<=stopindex); i++) {
       cout << features[i];
       if (i < stopindex) {
          cout << " ";
@@ -735,11 +673,9 @@ void printSequence(Array<RationalNumber>& features, Array<int>& lines,
 // fillMeasureInfo --
 //
 
-void fillMeasureInfo(HumdrumFile& infile, Array<double>& measures) {
+void fillMeasureInfo(HumdrumFile& infile, vector<double>& measures) {
    int i;
-   measures.setSize(infile.getNumLines());
-   measures.allowGrowth(0);
-   measures.setAll(0.0);
+   measures.resize(infile.getNumLines(), 0.0);
 
    double current = 0.0;
    for (i=0; i<infile.getNumLines(); i++) {
@@ -756,29 +692,29 @@ void fillMeasureInfo(HumdrumFile& infile, Array<double>& measures) {
 // mergeResults -- do an intersection of two lists of sorted integers
 //
 
-void mergeResults(Array<int>& output, Array<int>& input1, Array<int>& input2) {
+void mergeResults(vector<int>& output, vector<int>& input1, vector<int>& input2) {
    int i, j;
-   int maxsize = input1.getSize();
-   if (input2.getSize() < maxsize) {
-      maxsize = input2.getSize();
+   int maxsize = (int)input1.size();
+   if ((int)input2.size() < maxsize) {
+      maxsize = (int)input2.size();
    }
-   output.setSize(maxsize);
-   output.setSize(0);
+   output.clear();
+   output.reserve(maxsize);
    if (maxsize == 0) {
       return;
    }
    int similar;
    j=0;
-   for (i=0; i<input1.getSize(); i++) {
-      while ((j<input2.getSize()) && (input2[j] < input1[i])) {
+   for (i=0; i<(int)input1.size(); i++) {
+      while ((j<(int)input2.size()) && (input2[j] < input1[i])) {
          j++;
       }
-      if (j >= input2.getSize()) {
+      if (j >= (int)input2.size()) {
          break;
       }
       if (input2[j] == input1[i]) {
          similar = input2[j];
-         output.append(similar);
+         output.push_back(similar);
       }
    }
 }
@@ -790,14 +726,13 @@ void mergeResults(Array<int>& output, Array<int>& input1, Array<int>& input2) {
 // doBeatSearch -- search for specific beat pattern in data.
 //
 
-void doBeatSearch(Array<int>& results, HumdrumFile& infile, 
-      Array<double> search, Array<RationalNumber>& Bfeatures, 
-      Array<int>& Blines) {
+void doBeatSearch(vector<int>& results, HumdrumFile& infile, 
+      vector<double> search, vector<RationalNumber>& Bfeatures, 
+      vector<int>& Blines) {
    // extractBeatFeatures(infile, Blines, Bfeatures);
-   Array<double> doubleBfeatures;
-   doubleBfeatures.setSize(Bfeatures.getSize());
+   vector<double> doubleBfeatures(Bfeatures.size());
    int i;
-   for (i=0; i<doubleBfeatures.getSize(); i++) {
+   for (i=0; i<(int)doubleBfeatures.size(); i++) {
       doubleBfeatures[i] = Bfeatures[i].getFloat();
    }
    doComparison(results, Blines, search, doubleBfeatures, infile);
@@ -810,12 +745,12 @@ void doBeatSearch(Array<int>& results, HumdrumFile& infile,
 // extractBeatFeatures --
 //
 
-void extractBeatFeatures(HumdrumFile& infile, Array<int>& line,
-      Array<RationalNumber>& data) {
-   line.setSize(infile.getNumLines());
-   line.setSize(0);
-   data.setSize(infile.getNumLines());
-   data.setSize(0);
+void extractBeatFeatures(HumdrumFile& infile, vector<int>& line,
+      vector<RationalNumber>& data) {
+   line.clear();
+   line.reserve(infile.getNumLines());
+   data.clear();
+   data.reserve(infile.getNumLines());
 
    int lval;
    RationalNumber bval;
@@ -830,8 +765,8 @@ void extractBeatFeatures(HumdrumFile& infile, Array<int>& line,
          // ignore lines which do not have enough note onsets
          continue;
       }
-      line.append(lval);
-      data.append(bval);
+      line.push_back(lval);
+      data.push_back(bval);
    }
 }
 
@@ -842,12 +777,12 @@ void extractBeatFeatures(HumdrumFile& infile, Array<int>& line,
 // extractDurFeatures --
 //
 
-void extractDurFeatures(HumdrumFile& infile, Array<int>& line,
-      Array<RationalNumber>& data) {
-   line.setSize(infile.getNumLines());
-   line.setSize(0);
-   data.setSize(infile.getNumLines());
-   data.setSize(0);
+void extractDurFeatures(HumdrumFile& infile, vector<int>& line,
+      vector<RationalNumber>& data) {
+   line.clear();
+   line.resize(infile.getNumLines());
+   data.clear();
+   data.resize(infile.getNumLines());
 
    int lval;
    RationalNumber bval;
@@ -865,13 +800,13 @@ void extractDurFeatures(HumdrumFile& infile, Array<int>& line,
          // ignore lines which do not have enough note onsets,
 	 // adding duration of current line to last data line
 	 // which exceeds the onset threshold test.
-	 if (data.getSize() > 0) {
-	    data[data.getSize()-1] += bval;
+	 if ((int)data.size() > 0) {
+	    data[(int)data.size()-1] += bval;
 	 }
          continue;
       }
-      line.append(lval);
-      data.append(bval);
+      line.push_back(lval);
+      data.push_back(bval);
    }
 }
 
@@ -882,19 +817,19 @@ void extractDurFeatures(HumdrumFile& infile, Array<int>& line,
 // doComparison --
 //
 
-void doComparison(Array<int>& results, Array<int>& line, Array<double>& search,
-     Array<double>& data, HumdrumFile& infile) {
-   results.setSize(data.getSize() - search.getSize() + 1);
-   results.setSize(0);
+void doComparison(vector<int>& results, vector<int>& line, vector<double>& search,
+     vector<double>& data, HumdrumFile& infile) {
+   results.clear();
+   results.reserve((int)data.size() - (int)search.size() + 1);
 
    double startdur;
    double stopdur;
 
    int match;
    int i, j;
-   for (i=0; i<data.getSize() - search.getSize() + 1; i++) {
+   for (i=0; i<(int)data.size() - (int)search.size() + 1; i++) {
       match = 1;
-      for (j=0; j<search.getSize(); j++) {
+      for (j=0; j<(int)search.size(); j++) {
          if (search[j] < 0) {
             // for wildcard match (*)
             continue;
@@ -907,12 +842,12 @@ void doComparison(Array<int>& results, Array<int>& line, Array<double>& search,
       if (match) {
          if (Rvalue > 0) {
             startdur = infile[line[i]].getAbsBeat();
-            stopdur  = infile[line[i+search.getSize()-1]].getAbsBeat();
+            stopdur  = infile[line[i+(int)search.size()-1]].getAbsBeat();
             if (fabs(Rvalue - (stopdur-startdur)) < Tolerance) {
-               results.append(line[i]);
+               results.push_back(line[i]);
             }
          } else {
-            results.append(line[i]);
+            results.push_back(line[i]);
          }
       }
    }
@@ -925,18 +860,18 @@ void doComparison(Array<int>& results, Array<int>& line, Array<double>& search,
 // doDurSearch -- search for specific beat pattern in data.
 //
 
-void doDurSearch(Array<int>& results, HumdrumFile& infile, 
-      Array<double> search, Array<double>& Dfeatures, Array<int>& Dlines) {
+void doDurSearch(vector<int>& results, HumdrumFile& infile, 
+      vector<double> search, vector<double>& Dfeatures, vector<int>& Dlines) {
    // extractDurFeatures(infile, Dlines, Dfeatures);
    doComparison(results, Dlines, search, Dfeatures, infile);
 }
 
-void doDurSearch(Array<int>& results, HumdrumFile& infile, 
-      Array<double> search, Array<RationalNumber>& Dfeatures, 
-      Array<int>& Dlines) {
+void doDurSearch(vector<int>& results, HumdrumFile& infile, 
+      vector<double> search, vector<RationalNumber>& Dfeatures, 
+      vector<int>& Dlines) {
    int i;
-   Array<double> doubleDfeatures(Dfeatures.getSize());
-   for (i=0; i<doubleDfeatures.getSize(); i++) {
+   vector<double> doubleDfeatures((int)Dfeatures.size());
+   for (i=0; i<(int)doubleDfeatures.size(); i++) {
       doubleDfeatures[i] = Dfeatures[i].getFloat();
    }
 
@@ -970,20 +905,20 @@ RationalNumber getPickupDuration(HumdrumFile& file) {
 // printOutput --
 //
 
-void printOutput(HumdrumFile& file, Array<RationalNumber>& Bfeatures, 
-      Array<int>& Blines, Array<RationalNumber>& Dfeatures, Array<int>& Dlines,
-      Array<int>& tickanalysis) {
+void printOutput(HumdrumFile& file, vector<RationalNumber>& Bfeatures, 
+      vector<int>& Blines, vector<RationalNumber>& Dfeatures, vector<int>& Dlines,
+      vector<int>& tickanalysis) {
    int lastmeasureline = -1;
    int pickupstate = 0;
    int suppressreturn = 0;
    int i;
 
-   Array<unsigned long> abstick;
+   vector<unsigned long> abstick;
    if (tickQ) {
       unsigned long csum = 0;
-      abstick.setSize(tickanalysis.getSize());
-      abstick.setAll(0);
-      for (i=0; i<tickanalysis.getSize(); i++) {
+      abstick.resize((int)tickanalysis.size());
+		std::fill(abstick.begin(), abstick.end(), 0);
+      for (i=0; i<(int)tickanalysis.size(); i++) {
          abstick[i] = csum;
          csum += tickanalysis[i];
       }
@@ -991,17 +926,12 @@ void printOutput(HumdrumFile& file, Array<RationalNumber>& Bfeatures,
 
    RationalNumber minrhy(file.getMinTimeBase(), 4);
    RationalNumber rat;
-   Array<RationalNumber> Binfo;
-   Array<RationalNumber> Dinfo;
-   Binfo.setSize(file.getNumLines());
-   Binfo.allowGrowth(0);
-   Binfo.setAll(-1);
-   Dinfo.setSize(file.getNumLines());
-   Dinfo.allowGrowth(0);
-   Dinfo.setAll(-1);
+   vector<RationalNumber> Binfo(file.getNumLines(), -1);
+   vector<RationalNumber> Dinfo(file.getNumLines(), -1);
+
    int measurecount = 0;
 
-   for (i=0; i<Blines.getSize(); i++) {
+   for (i=0; i<(int)Blines.size(); i++) {
       Binfo[Blines[i]] = Bfeatures[i];
       if (Binfo[Blines[i]] == file[Blines[i]].getAbsBeatR()) { 
          Binfo[Blines[i]]++;
@@ -1011,7 +941,7 @@ void printOutput(HumdrumFile& file, Array<RationalNumber>& Bfeatures,
          Binfo[Blines[i]]--;
       }
    }
-   for (i=0; i<Dlines.getSize(); i++) {
+   for (i=0; i<(int)Dlines.size(); i++) {
       Dinfo[Dlines[i]] = Dfeatures[i];
    }
 
@@ -1315,8 +1245,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       Attack = 0;
    }
 
-   Bsearch.setSize(0);
-   Dsearch.setSize(0);
+   Bsearch.resize(0);
+   Dsearch.resize(0);
 
    if (opts.getBoolean("B")) {
       fillSearchString(Bsearch, opts.getString("B"));
@@ -1347,7 +1277,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 // fillSearchString --
 //
 
-void fillSearchString(Array<double>& searcher, const string& astring) {
+void fillSearchString(vector<double>& searcher, const string& astring) {
    int len = astring.size();
    char* tempstr;
    tempstr = new char[len+1];
@@ -1356,9 +1286,7 @@ void fillSearchString(Array<double>& searcher, const string& astring) {
    ptr = strtok(tempstr, " \t\n:;,");
    double value;
 
-   searcher.setSize(1000);
-   searcher.setGrowth(1000);
-   searcher.setSize(0);
+	searcher.reserve(1000);
    
    while(ptr != NULL) {
       if (strcmp(ptr, "*") == 0) {
@@ -1366,7 +1294,7 @@ void fillSearchString(Array<double>& searcher, const string& astring) {
       } else {
          value = atof(ptr);
       }
-      searcher.append(value);
+      searcher.push_back(value);
       ptr = strtok(NULL, " \t\n:;,");
    }
 
