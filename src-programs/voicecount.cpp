@@ -11,8 +11,12 @@
 //
 
 #include "humdrum.h"
-#include <stdlib.h>
 #include "PerlRegularExpression.h"
+
+#include <stdlib.h>
+
+#include <string>
+#include <vector>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -25,10 +29,10 @@ int       getVoiceCount        (HumdrumFile& infile, int line);
 int       getNoteCount         (HumdrumFile& infile, int line);
 void      printExclusiveInterpretation(void);
 int       doAnalysis           (HumdrumFile& infile, int line);
-int       isAttack             (const char* token);
-void      printMeasureData     (Array<int>& analysis, HumdrumFile& infile, 
+int       isAttack             (const string& token);
+void      printMeasureData     (vector<int>& analysis, HumdrumFile& infile, 
                                 int line);
-void      printSummary         (Array<double>& Summary);
+void      printSummary         (vector<double>& Summary);
 int       isValidFile          (HumdrumFile& infile);
 
 // global variables
@@ -52,7 +56,7 @@ int       nograceQ     = 0;    // used with -G option
 int       validQ       = 0;    // used with -v option
 int       uniqueQ      = 0;    // used with -u option
 int       summaryQ     = 0;    // used with --summary option
-Array<double> Summary;         // used with --summary option
+vector<double> Summary;         // used with --summary option
 int       SEGMENTS     = 0;    // used if there are more than one segment.
 
 ///////////////////////////////////////////////////////////////////////////
@@ -63,8 +67,8 @@ int main(int argc, char** argv) {
    HumdrumFile infile;
 
    if (summaryQ) {
-      Summary.setSize(1000);
-      Summary.setAll(0);
+      Summary.clear();
+      Summary.reserve(1000);
    }
 
    while (streamer.read(infile)) {
@@ -105,9 +109,9 @@ void processFile(HumdrumFile& infile, const string& filename) {
    }
 
    if (kernQ) {
-      Array<int> ktracks;
+      vector<int> ktracks;
       infile.getTracksByExInterp(ktracks, "**kern");
-      cout << ktracks.getSize() << endl;
+      cout << ktracks.size() << endl;
       return;
    }
 
@@ -115,9 +119,8 @@ void processFile(HumdrumFile& infile, const string& filename) {
       infile.analyzeRhythm("4");
    }
 
-   Array<int> analysis(infile.getNumLines());
-   analysis.setAll(0);
-   analysis.allowGrowth(0);
+   vector<int> analysis;
+   analysis.reserve(infile.getNumLines());
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isData()) {
          continue;
@@ -192,11 +195,10 @@ void processFile(HumdrumFile& infile, const string& filename) {
 //
 
 int isValidFile(HumdrumFile& infile) {
-   int actual;
    PerlRegularExpression pre;
-   Array<int> ktracks;
+   vector<int> ktracks;
    infile.getTracksByExInterp(ktracks, "**kern");
-   actual = ktracks.getSize();
+   int actual = (int)ktracks.size();
    int i;
    int target = -1;
    for (i=0; i<infile.getNumLines(); i++) {
@@ -227,7 +229,7 @@ int isValidFile(HumdrumFile& infile) {
 //     until the next measure which contains a measure number.
 //
 
-void printMeasureData(Array<int>& analysis, HumdrumFile& infile, int line) {
+void printMeasureData(vector<int>& analysis, HumdrumFile& infile, int line) {
    int i;
    PerlRegularExpression pre;
    RationalNumber startdur;
@@ -344,10 +346,9 @@ int getVoiceCount(HumdrumFile& infile, int line) {
    int count = 0;
    int track;
    int acount;
-   Array<int> tracks(infile.getMaxTracks()+1);
-   Array<Array<char> > tokens;
-   tracks.setAll(0);
-   tracks.allowGrowth(0);
+   vector<string> tokens;
+   vector<int> tracks;
+   tracks.reserve(infile.getMaxTracks()+1);
    for (j=0; j<infile[line].getFieldCount(); j++) {
       if (!infile[line].isExInterp(j, "**kern")) {
          continue;
@@ -369,8 +370,8 @@ int getVoiceCount(HumdrumFile& infile, int line) {
       if (attackQ) {
          infile[ii].getTokens(tokens, jj);
          acount = 0;
-         for (k=0; k<tokens.getSize(); k++) {
-            if (isAttack(tokens[k].getBase())) {
+         for (k=0; k<(int)tokens.size(); k++) {
+            if (isAttack(tokens[k])) {
                acount++;
             } 
          }
@@ -388,7 +389,7 @@ int getVoiceCount(HumdrumFile& infile, int line) {
 
    if (trackQ) {
       count = 0;
-      for (i=1; i<tracks.getSize(); i++) {
+      for (i=1; i<(int)tracks.size(); i++) {
          if (tracks[i]) {
             count++;
          }
@@ -405,9 +406,8 @@ int getVoiceCount(HumdrumFile& infile, int line) {
 //
 
 int getNoteCount(HumdrumFile& infile, int line) {
-   Array<int> states(1000);
-   states.setAll(0);
-   Array<Array<char> > tokens;
+   vector<int> states(1000, 0);
+   vector<string> tokens;
    int i, j, k;
    int ii, jj;
    int count = 0;
@@ -432,22 +432,22 @@ int getNoteCount(HumdrumFile& infile, int line) {
          continue;
       }
       infile[ii].getTokens(tokens, jj);
-      for (k=0; k<tokens.getSize(); k++) {
-         if (attackQ && !isAttack(tokens[k].getBase())) {
+      for (k=0; k<(int)tokens.size(); k++) {
+         if (attackQ && !isAttack(tokens[k])) {
             continue;
          }
          notenum = -1;
          if (twelveQ) {
-            notenum = Convert::kernToMidiNoteNumber(tokens[k].getBase());
+            notenum = Convert::kernToMidiNoteNumber(tokens[k]);
             if (pcQ) { notenum = notenum % 12; }
          } else if (sevenQ) {
-            notenum = Convert::kernToDiatonicPitch(tokens[k].getBase());
+            notenum = Convert::kernToDiatonicPitch(tokens[k]);
             if (pcQ) { notenum = notenum % 7; }
          } else if (noteQ && !uniqueQ) {
             count++;
          } else {
             // assume fortyQ:
-            notenum = Convert::kernToBase40(tokens[k].getBase());
+            notenum = Convert::kernToBase40(tokens[k]);
             if (pcQ) { notenum = notenum % 40; }
          }
          if (notenum < 0) {
@@ -459,7 +459,7 @@ int getNoteCount(HumdrumFile& infile, int line) {
 
    if (pcQ) {
       int pcount = 0;
-      for (i=0; i<states.getSize(); i++) {
+      for (i=0; i<(int)states.size(); i++) {
          if (states[i]) {
             pcount++;
          }
@@ -470,7 +470,7 @@ int getNoteCount(HumdrumFile& infile, int line) {
       return pcount;
    } else if (uniqueQ) {
       int unique = 0;
-      for (i=0; i<states.getSize(); i++) {
+      for (i=0; i<(int)states.size(); i++) {
          if (states[i]) {
             unique++;
          }
@@ -494,17 +494,17 @@ int getNoteCount(HumdrumFile& infile, int line) {
 // isAttack -- returns true if no r, _, or ] character in string.
 //
 
-int isAttack(const char* token) {
-   if (strchr(token, 'r') != NULL) {
+int isAttack(const string& token) {
+   if (token == ".") {
       return 0;
    }
-   if (strchr(token, '_') != NULL) {
+   if (token.find('r') != std::string::npos) {
       return 0;
    }
-   if (strchr(token, ']') != NULL) {
+   if (token.find('_') != std::string::npos) {
       return 0;
    }
-   if (strcmp(token, ".") == 0) {
+   if (token.find(']') != std::string::npos) {
       return 0;
    }
    return 1;
@@ -517,14 +517,13 @@ int isAttack(const char* token) {
 // printSummary -- Print the duration of each voice count and relative percent.
 //
 
-void printSummary(Array<double>& Summary) {
-   int i;
-   double sum = 0.0;
+void printSummary(vector<double>& Summary) {
+   double sum     = 0.0;
    double percent = 0.0;
-   double weight = 0.0;
-   int maxx = 0;
-   int minn = 1000;
-   for (i=0; i<Summary.getSize(); i++) {
+   double weight  = 0.0;
+   int maxx       = 0;
+   int minn       = 1000;
+   for (int i=0; i<(int)Summary.size(); i++) {
       if (Summary[i] != 0.0) {
          sum += Summary[i];
          if (i > maxx) { maxx = i; }   
@@ -554,7 +553,7 @@ void printSummary(Array<double>& Summary) {
       cout << "**v#";
    }
    cout << '\n';
-   for (i=minn; i<=maxx; i++) {
+   for (int i=minn; i<=maxx; i++) {
       if (Summary[i] == 0.0) {
          continue;
       }
