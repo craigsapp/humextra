@@ -29,7 +29,9 @@
 #include "ChordQuality.h"
 #include "SigCollection.h"
 #include "RationalNumber.h"
+
 #include <vector>
+#include <string>
 
 
 class Convert {
@@ -49,40 +51,40 @@ class Convert {
 
    // conversions dealing with **kern data
 
-      static int       kernToMidiNoteNumber      (const char* aKernString);
+      static int       kernToMidiNoteNumber      (const string& aKernString);
       static char*     durationToKernRhythm      (char* output, double input, 
                                                    int timebase = 1);
       static char*     durationRToKernRhythm     (char* output, 
                                                   RationalNumber input, 
                                                   int timebase = 1);
-      static double    kernToDuration            (const char* aKernString);
-      static RationalNumber kernToDurationR      (const char* aKernString);
-      static double    kernToDurationNoDots      (const char* aKernString);
-      static RationalNumber kernToDurationNoDotsR (const char* aKernString);
-      static double    kernTimeSignatureTop      (const char* aKernString);
+      static double    kernToDuration            (const string& aKernString);
+      static RationalNumber kernToDurationR      (const string& aKernString);
+      static double    kernToDurationNoDots      (const string& aKernString);
+      static RationalNumber kernToDurationNoDotsR (const string& aKernString);
+      static double    kernTimeSignatureTop      (const string& aKernString);
       static double    kernTimeSignatureBottomToDuration   
-                                                 (const char* aKernString);
-      static int       kernToDiatonicPitch       (const char* buffer);
-      static int       kernToDiatonicPitchClass  (const char* buffer);
-      static int       kernToDiatonicPitchClassNumeric(const char* buffer);
-      static int       kernToDiatonicAlteration  (const char* buffer);
-      static int       kernClefToBaseline        (const char* buffer);
-      static char*     musePitchToKernPitch      (char* kernOutput, const
-                                                    char* museInput);
+                                                 (const string& aKernString);
+      static int       kernToDiatonicPitch       (const string& buffer);
+      static int       kernToDiatonicPitchClass  (const string& buffer);
+      static int       kernToDiatonicPitchClassNumeric(const string& buffer);
+      static int       kernToDiatonicAlteration  (const string& buffer);
+      static int       kernClefToBaseline        (const string& buffer);
+      static char*     musePitchToKernPitch      (char* kernOutput,
+                                                  const string& museInput);
       static char*     museClefToKernClef        (char* kernOutput, 
                                                     int museInput);
-      static int       kernKeyToNumber           (const char* aKernString);
+      static int       kernKeyToNumber           (const string& aKernString);
       static const char* keyNumberToKern         (int number);
 
    // conversions dealing with **qual data
 
-      static ChordQuality chordQualityStringToValue (const char* aString);
+      static ChordQuality chordQualityStringToValue (const string& aString);
       static int       chordQualityToBaseNote    (const ChordQuality& aQuality);
       static void      chordQualityToNoteSet     (SigCollection<int>& noteSet, 
                                                   const ChordQuality& aQuality);
-      static int       chordQualityToInversion   (const char* aQuality);
-      static int       chordQualityToRoot        (const char* aQuality);
-      static int       chordQualityToType        (const char* aQuality);
+      static int       chordQualityToInversion   (const string& aQuality);
+      static int       chordQualityToRoot        (const string& aQuality);
+      static int       chordQualityToType        (const string& aQuality);
       static void      noteSetToChordQuality     (ChordQuality& cq, 
                                                   const SigCollection<int>& aSet);
       static void      noteSetToChordQuality     (ChordQuality& cq, 
@@ -97,16 +99,16 @@ class Convert {
       static int       base40ToAccidental         (int base40value);
       static int       base40IntervalToLineOfFifths(int base40interval);
       static int       base40IntervalToDiatonic   (int base40interval);
-      static int       kernToBase40               (const char* kernfield);
-      static int       kernToBase40Class          (const char* kernfield);
+      static int       kernToBase40               (const string& kernfield);
+      static int       kernToBase40Class          (const string& kernfield);
       static string    kernToScientificNotation   (const string& kernfield,
 											const string& flat = "b",
                                  const string& sharp = "#",
 		                           const string& doubleflat = "bb",
 		                           const string& doublesharp = "x");
-      static int       kernNoteToBase40           (const char* name);
+      static int       kernNoteToBase40           (const string& name);
       static SigCollection<int> keyToScaleDegrees (int aKey, int aMode);
-      static int       museToBase40               (const char* pitchString);
+      static int       museToBase40               (const string& pitchString);
       static int       base40ToScoreVPos          (int pitch, int clef);
       static char*     base40ToMuse               (int base40, char* buffer);
       static int       base40ToDiatonic           (int pitch);
@@ -119,7 +121,7 @@ class Convert {
       static char*     base40ToPerfViz            (char* output, 
                                                    int base40value);
       static char*     base40ToTrans              (char* buffer, int base40);
-      static int       transToBase40              (const char* buffer);
+      static int       transToBase40              (const string& buffer);
 
    // conversions dealing with MIDI base-12 system 
    
@@ -134,8 +136,8 @@ class Convert {
                                                    double a440 = 440.0);
 
    // conversions dealing with **koto data
-      static double    kotoToDuration             (const char* aKotoString);
-      static RationalNumber kotoToDurationR       (const char* aKotoString);
+      static double    kotoToDuration             (const string& aKotoString);
+      static RationalNumber kotoToDurationR       (const string& aKotoString);
 
    // convsions related to serial interval descriptions
       static const char* base12ToTnSetName        (Array<int>& base12);

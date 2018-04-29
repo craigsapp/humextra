@@ -19,14 +19,15 @@
 // Last Modified: Sun Dec 26 04:54:46 PST 2010 (added kernClefToBaseline)
 // Last Modified: Sat Jan 22 17:13:36 PST 2011 (added kernToDurationNoDots)
 // Last Modified: Thu Jan 26 18:10:29 PST 2012 (fixed kotoToDurationR)
+// Last Modified: Sun Apr 29 10:01:44 PDT 2018 (convert const char* to strings)
 // Filename:      ...sig/src/sigInfo/Convert.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/Convert.cpp
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   The Convert class is used to store functions
-//                in a centeral location which will convert one 
+//                in a centeral location which will convert one
 //                type of data into another.
-//                
+//
 
 #include "Convert.h"
 #include "HumdrumEnumerations.h"
@@ -70,7 +71,7 @@ EnumerationInterval   Convert::intervalNames;
 //    number; otherwise the notes should end up in the range from 0 to 127.
 //
 
-int Convert::kernToMidiNoteNumber(const char* aKernString) {
+int Convert::kernToMidiNoteNumber(const string& aKernString) {
    int base40 = Convert::kernToBase40(aKernString);
    if (base40 < 0 || base40 == E_unknown) {
       return -1;
@@ -121,11 +122,11 @@ int Convert::kernToMidiNoteNumber(const char* aKernString) {
       case 38: pitch = 12;     break;   // B#
       case 39: pitch = 13;     break;   // B##
 
-      default: 
+      default:
       cout << "Pitch Unknown: " << base40 % 40 << endl;
       pitch = -1000;
    }
-  
+
    return octave * 12 + pitch + 12;
 }
 
@@ -142,7 +143,7 @@ int Convert::kernToMidiNoteNumber(const char* aKernString) {
 //     doublesharp  = x
 //
 
-string Convert::kernToScientificNotation(const string& kernfield, 
+string Convert::kernToScientificNotation(const string& kernfield,
       const string& flat, const string& sharp, const string& doubleflat,
       const string& doublesharp) {
    int  ucount = 0;
@@ -184,7 +185,7 @@ string Convert::kernToScientificNotation(const string& kernfield,
       } else {
          for (i=0; i<fcount; i++) {
             output += flat;
-         } 
+         }
       }
    } else if (scount > 0) {
       if (scount == 1) {
@@ -194,7 +195,7 @@ string Convert::kernToScientificNotation(const string& kernfield,
       } else {
          for (i=0; i<scount; i++) {
             output += sharp;
-         } 
+         }
       }
    }
    if (lcount > 0) {
@@ -222,7 +223,7 @@ string Convert::kernToScientificNotation(const string& kernfield,
 //	input is quarter note duration == 1;
 //
 
-char* Convert::durationRToKernRhythm(char* output, RationalNumber input, 
+char* Convert::durationRToKernRhythm(char* output, RationalNumber input,
       int timebase) {
    output[0] = '\0';
 
@@ -326,7 +327,7 @@ char* Convert::durationToKernRhythm(char* output, double input, int timebase) {
    if (fabs(input - 18.0) < 0.0001) {
       strcat(output, "2%9");
       return output;
-   } 
+   }
 
    // handle special rounding cases primarily for SCORE which
    // only stores 4 digits for a duration
@@ -335,11 +336,11 @@ char* Convert::durationToKernRhythm(char* output, double input, int timebase) {
       strcat(output, "48");
       return output;
    }
-	    
+	
    if (diff < 0.002) {
       sprintf(buffer, "%d", (int)basic);
       strcat(output, buffer);
-   } else { 
+   } else {
       testinput = input / 3.0 * 2.0;
       basic = 4.0 / testinput;
       diff = basic - (int)basic;
@@ -367,7 +368,7 @@ char* Convert::durationToKernRhythm(char* output, double input, int timebase) {
                sprintf(output, "q%lf", input);
                // strcpy(output, "q");
                // cerr << "Error: Convert::durationToKernRhythm choked on the "
-               //      << "duration: " << input << endl; 
+               //      << "duration: " << input << endl;
                // exit(1);
             }
          }
@@ -384,7 +385,7 @@ char* Convert::durationToKernRhythm(char* output, double input, int timebase) {
 // Convert::kernToDurationNoDots --
 //
 
-double Convert::kernToDurationNoDots(const char* aKernString) {
+double Convert::kernToDurationNoDots(const string& aKernString) {
     RationalNumber value = Convert::kernToDurationNoDotsR(aKernString);
     return value.getFloat();
 }
@@ -396,15 +397,14 @@ double Convert::kernToDurationNoDots(const char* aKernString) {
 // Convert::kernToDurationNoDots --
 //
 
-RationalNumber Convert::kernToDurationNoDotsR (const char* aKernString) {
+RationalNumber Convert::kernToDurationNoDotsR (const string& aKernString) {
    int dotcount = 0;
-   int i = 0;
-   while ((aKernString[i] != '\0') && (aKernString[i] != ' ')) {
+   for (int i=0; i<(int)aKernString.size(); i++) {
       if (aKernString[i] == '.') {
          dotcount++;
       }
-      i++;
    }
+
    RationalNumber rn = Convert::kernToDurationR(aKernString);
    if (dotcount > 0) {
       rn = rn * (int)(pow(2.0, dotcount));
@@ -423,20 +423,20 @@ RationalNumber Convert::kernToDurationNoDotsR (const char* aKernString) {
 // and return a duration of zero.
 //
 
-double Convert::kernToDuration(const char* aKernString) {
+double Convert::kernToDuration(const string& aKernString) {
     RationalNumber value = Convert::kernToDurationR(aKernString);
     return value.getFloat();
 }
 
 
-RationalNumber Convert::kernToDurationR(const char* aKernString) {
+RationalNumber Convert::kernToDurationR(const string& aKernString) {
     RationalNumber zero(0,1);
 
     PerlRegularExpression pre;
 
    // check for grace notes
-   if ((strchr(aKernString, 'q') != NULL) ||
-       (strchr(aKernString, 'Q') != NULL)) {
+   if ((aKernString.find('q') != std::string::npos) ||
+         (aKernString.find('Q') != std::string::npos)) {
       return zero;
    }
 
@@ -447,15 +447,13 @@ RationalNumber Convert::kernToDurationR(const char* aKernString) {
    // single note, but chords may accidentally be sent to this
    // function instead).
    int dotcount = 0;
-   int index = 0;
-   while (aKernString[index] != '\0') {
-      if (aKernString[index] == '.') {
+   for (int i=0; i<(int)aKernString.size(); i++) {
+      if (aKernString[i] == '.') {
          dotcount++;
       }
-      if (aKernString[index] == ' ') {
+      if (aKernString[i] == ' ') {
          break;
       }
-      index++;
    }
 
    // parse special rhythms which can't be represented in
@@ -474,64 +472,63 @@ RationalNumber Convert::kernToDurationR(const char* aKernString) {
       return output;
    }
 
-   index = 0;
-   while (aKernString[index] != '\0' && !std::isdigit(aKernString[index])) {
+   int index = 0;
+   while ((index < (int)aKernString.size()) && !isdigit(aKernString[index])) {
       index++;
    }
-   if (aKernString[index] == '\0') {
+   if (index >= (int)aKernString.size()) {
       // no rhythm data found
       return zero;
    }
-   
+
    // should now be at start of kern rhythm
    int orhythm = 0;
-   while (aKernString[index] != '\0' && std::isdigit(aKernString[index])) {
+   while ((index < (int)aKernString.size()) && isdigit(aKernString[index])) {
       orhythm *= 10;
       orhythm += aKernString[index] - '0';
       index++;
    }
 
    RationalNumber oduration(0,1);
-   if (strchr(aKernString, '0') != NULL && 
-       strchr(aKernString, '1') == NULL && 
-       strchr(aKernString, '2') == NULL && 
-       strchr(aKernString, '3') == NULL && 
-       strchr(aKernString, '4') == NULL && 
-       strchr(aKernString, '5') == NULL && 
-       strchr(aKernString, '6') == NULL && 
-       strchr(aKernString, '7') == NULL && 
-       strchr(aKernString, '8') == NULL && 
-       strchr(aKernString, '9') == NULL    ) {
-      if (strstr(aKernString, "0000000000") != NULL) { // exotic rhythm
+   if ((aKernString.find('0') != std::string::npos) &&
+       (aKernString.find('1') == std::string::npos) &&
+       (aKernString.find('2') == std::string::npos) &&
+       (aKernString.find('3') == std::string::npos) &&
+       (aKernString.find('4') == std::string::npos) &&
+       (aKernString.find('5') == std::string::npos) &&
+       (aKernString.find('6') == std::string::npos) &&
+       (aKernString.find('7') == std::string::npos) &&
+       (aKernString.find('8') == std::string::npos) &&
+       (aKernString.find('9') == std::string::npos)    ) {
+      if (aKernString.find("0000000000") != std::string::npos) { // exotic rhythm
          oduration = 4096;
-      } else if (strstr(aKernString, "000000000") != NULL) { // exotic rhythm
+      } else if (aKernString.find("000000000") != std::string::npos) { // exotic rhythm
          oduration = 2048;
-      } else if (strstr(aKernString, "00000000") != NULL) { // exotic rhythm
+      } else if (aKernString.find("00000000") != std::string::npos) { // exotic rhythm
          oduration = 1024;
-      } else if (strstr(aKernString, "0000000") != NULL) { // exotic rhythm
+      } else if (aKernString.find("0000000") != std::string::npos) { // exotic rhythm
          oduration = 512;
-      } else if (strstr(aKernString, "000000") != NULL) { // exotic rhythm
+      } else if (aKernString.find("000000") != std::string::npos) { // exotic rhythm
          oduration = 256;
-      } else if (strstr(aKernString, "00000") != NULL) { // exotic rhythm
+      } else if (aKernString.find("00000") != std::string::npos) { // exotic rhythm
          oduration = 128;
-      } else if (strstr(aKernString, "0000") != NULL) { // exotic rhythm
+      } else if (aKernString.find("0000") != std::string::npos) { // exotic rhythm
          oduration = 64;
-      } else if (strstr(aKernString, "000") != NULL) { // 000 = maxima
+      } else if (aKernString.find("000") != std::string::npos) { // 000 = maxima
          oduration = 32;
-      } else if (strstr(aKernString, "00") != NULL) {  // 00 = long
+      } else if (aKernString.find("00") != std::string::npos) {  // 00 = long
          oduration = 16;
       } else { // 0 == breve
          oduration = 8;
       }
 
    } else {
-
       // now know everything to create a duration
       if (orhythm == 0) {
          oduration = 8;
       } else {
          oduration = 4;
-	 oduration /= orhythm;
+         oduration /= orhythm;
       }
    }
 
@@ -547,10 +544,10 @@ RationalNumber Convert::kernToDurationR(const char* aKernString) {
 
 //////////////////////////////
 //
-// Convert::kernToDiatonicPitch -- 
+// Convert::kernToDiatonicPitch --
 //
 
-int Convert::kernToDiatonicPitch(const char* buffer) {
+int Convert::kernToDiatonicPitch(const string& buffer) {
    return Convert::base40ToDiatonic(Convert::kernToBase40(buffer));
 }
 
@@ -561,10 +558,9 @@ int Convert::kernToDiatonicPitch(const char* buffer) {
 // Convert::kernToDiatonicAlteration --
 //
 
-int Convert::kernToDiatonicAlteration(const char* buffer) {
-   int i = 0;
+int Convert::kernToDiatonicAlteration(const string& buffer) {
    int output = 0;
-   while (buffer[i] != '\0') {
+   for (int i=0; i<(int)buffer.size(); i++) {
       if (buffer[i] == 'n') {
          output = 0;
       } else if (buffer[i] == '#') {
@@ -575,7 +571,6 @@ int Convert::kernToDiatonicAlteration(const char* buffer) {
          // only check the first note in the input **kern token
          break;
       }
-      i++;
    }
    return output;
 }
@@ -660,15 +655,14 @@ int Convert::base40IntervalToDiatonic(int base40interval) {
 
 //////////////////////////////
 //
-// Convert::kernToDiatonicPitchClass -- converts to lower case a-g, 
+// Convert::kernToDiatonicPitchClass -- converts to lower case a-g,
 //      plus r for rest.
 //
 
-int Convert::kernToDiatonicPitchClass(const char* buffer) {
-   int i = 0;
+int Convert::kernToDiatonicPitchClass(const string& buffer) {
    int character;
-   while (buffer[i] != '\0') {
-      character = std::tolower(buffer[i]);
+   for (int i=0; i<(int)buffer.size(); i++) {
+      character = tolower(buffer[i]);
       if (character == 'a') {
          return 'a';
       } else if (character == 'b') {
@@ -686,9 +680,7 @@ int Convert::kernToDiatonicPitchClass(const char* buffer) {
       } else if (character == 'r') {
          return 'r';
       }
-      i++;
    }
-
    return 'x';  // no pitch or rest found in data.
 }
 
@@ -700,9 +692,8 @@ int Convert::kernToDiatonicPitchClass(const char* buffer) {
 //      rest is something negative number.
 //
 
-int Convert::kernToDiatonicPitchClassNumeric(const char* buffer) {
+int Convert::kernToDiatonicPitchClassNumeric(const string& buffer) {
    int charval =  Convert::kernToDiatonicPitchClass(buffer);
-
    switch (charval) {
       case 'a': return  5;
       case 'b': return  6;
@@ -712,7 +703,6 @@ int Convert::kernToDiatonicPitchClassNumeric(const char* buffer) {
       case 'f': return  3;
       case 'g': return  4;
    }
-
    return -1;
 }
 
@@ -724,14 +714,14 @@ int Convert::kernToDiatonicPitchClassNumeric(const char* buffer) {
 //	in the bottom part of a time signature
 //
 
-double Convert::kernTimeSignatureBottomToDuration (const char* aKernString) {
-   const char* slash = strchr(aKernString, '/');
-   if (slash == NULL) {
+double Convert::kernTimeSignatureBottomToDuration (const string& aKernString) {
+   auto loc = aKernString.find('/');
+   if (loc == std::string::npos) {
       cerr << "Error: poorly formed time signature: " << aKernString << endl;
       exit(1);
-   } 
-
-   return Convert::kernToDuration(&slash[1]);
+   }
+   string afterslash = aKernString.substr(loc+1);
+   return Convert::kernToDuration(afterslash);
 }
 
 
@@ -743,15 +733,15 @@ double Convert::kernTimeSignatureBottomToDuration (const char* aKernString) {
 // fixed bug Wed May  5 23:56:19 PDT 2004
 //
 
-double Convert::kernTimeSignatureTop (const char* aKernString) {
-   if (strchr(aKernString, '+') != NULL) {
+double Convert::kernTimeSignatureTop (const string& aKernString) {
+   if (aKernString.find('+') != std::string::npos) {
       cerr << "Error: cannot handle time signature: " << aKernString
            << " yet." << endl;
       exit(1);
    } else {
-      int len = strlen(aKernString);
+      int len = (int)aKernString.size();
       if (len > 2) {
-         return (double)atoi(&aKernString[2]);  // used to be 1
+         return (double)atoi(aKernString.data()+2);  // used to be 1
       } else {
          return 0;
       }
@@ -790,24 +780,23 @@ const char* Convert::keyNumberToKern(int number) {
 
 //////////////////////////////
 //
-// kernKeyToNumber -- convert a kern key signature to an integer.
+// kernKeyToNumber -- convert a kern key signature into an integer.
 //      For example: *k[f#] == +1, *k[b-e-] == -2, *k[] == 0
 //      Input string is expected to be in the form *k[] with the
 //      accidentals inside the brackets with no spaces.
 //
 
-int Convert::kernKeyToNumber(const char* aKernString) {
+int Convert::kernKeyToNumber(const string& aKernString) {
    int count = 0;
-   int i;
-   int length = strlen(aKernString);
+   int length = (int)aKernString.size();
    int start = 0;
    int sign = 1;
 
-   if ((strlen(aKernString) == 0)  || (strstr(aKernString, "[]") != NULL)) {
+   if ((length == 0) || (aKernString.find("[]") != std::string::npos)) {
       return 0;
    }
 
-   for (i=0; i<length; i++) {
+   for (int i=0; i<length; i++) {
       if (start) {
          if (aKernString[i] == ']') {
             break;
@@ -831,7 +820,7 @@ int Convert::kernKeyToNumber(const char* aKernString) {
 // Convert::musePitchToKernPitch --
 //
 
-char* Convert::musePitchToKernPitch(char* kernOutput, const char* museInput) {
+char* Convert::musePitchToKernPitch(char* kernOutput, const string& museInput) {
    base40ToKern(kernOutput, museToBase40(museInput));
    return kernOutput;
 }
@@ -851,63 +840,63 @@ char* Convert::museClefToKernClef(char* kernOutput, int museInput) {
       case 3:   strcpy(kernOutput, "G3");       break;
       case 4:   strcpy(kernOutput, "G2");       break;
       case 5:   strcpy(kernOutput, "G1");       break;
-      
+
       case 10:  strcpy(kernOutput, "CX");       break;
       case 11:  strcpy(kernOutput, "C5");       break;
       case 12:  strcpy(kernOutput, "C4");       break;
       case 13:  strcpy(kernOutput, "C3");       break;
       case 14:  strcpy(kernOutput, "C2");       break;
       case 15:  strcpy(kernOutput, "C1");       break;
-      
+
       case 20:  strcpy(kernOutput, "FX");       break;
       case 21:  strcpy(kernOutput, "F5");       break;
       case 22:  strcpy(kernOutput, "F4");       break;
       case 23:  strcpy(kernOutput, "F3");       break;
       case 24:  strcpy(kernOutput, "F2");       break;
       case 25:  strcpy(kernOutput, "F1");       break;
-      
+
       case 30:  strcpy(kernOutput, "GvX");       break;
       case 31:  strcpy(kernOutput, "Gv5");       break;
       case 32:  strcpy(kernOutput, "Gv4");       break;
       case 33:  strcpy(kernOutput, "Gv3");       break;
       case 34:  strcpy(kernOutput, "Gv2");       break;
       case 35:  strcpy(kernOutput, "Gv1");       break;
-      
+
       case 40:  strcpy(kernOutput, "CvX");       break;
       case 41:  strcpy(kernOutput, "Cv5");       break;
       case 42:  strcpy(kernOutput, "Cv4");       break;
       case 43:  strcpy(kernOutput, "Cv3");       break;
       case 44:  strcpy(kernOutput, "Cv2");       break;
       case 45:  strcpy(kernOutput, "Cv1");       break;
-      
+
       case 50:  strcpy(kernOutput, "FvX");       break;
       case 51:  strcpy(kernOutput, "Fv5");       break;
       case 52:  strcpy(kernOutput, "Fv4");       break;
       case 53:  strcpy(kernOutput, "Fv3");       break;
       case 54:  strcpy(kernOutput, "Fv2");       break;
       case 55:  strcpy(kernOutput, "Fv1");       break;
-      
+
       case 60:  strcpy(kernOutput, "G^X");       break;
       case 61:  strcpy(kernOutput, "G^5");       break;
       case 62:  strcpy(kernOutput, "G^4");       break;
       case 63:  strcpy(kernOutput, "G^3");       break;
       case 64:  strcpy(kernOutput, "G^2");       break;
       case 65:  strcpy(kernOutput, "G^1");       break;
-      
+
       case 70:  strcpy(kernOutput, "C^X");       break;
       case 71:  strcpy(kernOutput, "C^5");       break;
       case 72:  strcpy(kernOutput, "C^4");       break;
       case 73:  strcpy(kernOutput, "C^3");       break;
       case 74:  strcpy(kernOutput, "C^2");       break;
       case 75:  strcpy(kernOutput, "C^1");       break;
-      
+
       case 80:  strcpy(kernOutput, "F^X");       break;
       case 81:  strcpy(kernOutput, "F^5");       break;
       case 82:  strcpy(kernOutput, "F^4");       break;
       case 83:  strcpy(kernOutput, "F^3");       break;
       case 84:  strcpy(kernOutput, "F^2");       break;
       case 85:  strcpy(kernOutput, "F^1");       break;
-      default:  strcpy(kernOutput, "X");         
+      default:  strcpy(kernOutput, "X");
    }
 
    return kernOutput;
@@ -925,12 +914,12 @@ char* Convert::museClefToKernClef(char* kernOutput, int museInput) {
 // Convert::chordQualityStringToValue --
 //
 
-ChordQuality Convert::chordQualityStringToValue(const char* aString) {
+ChordQuality Convert::chordQualityStringToValue(const string& aString) {
    ChordQuality output;
    char* temp;
    char* token;
-   temp = new char[strlen(aString)+1];
-   strcpy(temp, aString);
+   temp = new char[(int)aString.size()+1];
+   strcpy(temp, aString.c_str());
    token = strtok(temp, ":");
    for (int i=0; i<3; i++) {
       // determine what the current token is
@@ -972,14 +961,14 @@ int Convert::chordQualityToBaseNote(const ChordQuality& aQuality) {
 // Convert::chordQualityToNoteSet --
 //
 
-void Convert::chordQualityToNoteSet(SigCollection<int>& noteSet, 
+void Convert::chordQualityToNoteSet(SigCollection<int>& noteSet,
      const ChordQuality& aQuality) {
 
    SigCollection<int>& output = noteSet;
    output.setSize(0);
    output.allowGrowth();
    output[0] = 0;
-   
+
    switch (aQuality.getType()) {
       case E_chord_rest:     break;
       case E_chord_note:     break;
@@ -989,13 +978,13 @@ void Convert::chordQualityToNoteSet(SigCollection<int>& noteSet,
       case E_chord_secsev:
       case E_chord_dim:      output[1] = 11; output[2] = 22; break;
       case E_chord_min:      output[1] = 11; output[2] = 23; break;
-      case E_chord_neopol: 
+      case E_chord_neopol:
       case E_chord_secdom:
       case E_chord_maj:      output[1] = 12; output[2] = 23; break;
       case E_chord_aug:      output[1] = 12; output[2] = 24; break;
       case E_chord_minminx5: output[1] = 11; output[2] = 34; break;
       case E_chord_domsevx5: output[1] = 12; output[2] = 34; break;
-      
+
       case E_chord_secsevo:
       case E_chord_fullydim: output[1] = 11; output[2] = 22; output[3] = 33;
                              break;
@@ -1036,8 +1025,7 @@ void Convert::chordQualityToNoteSet(SigCollection<int>& noteSet,
 // Convert::chordQualityToInversion --
 //
 
-int Convert::chordQualityToInversion(const char* aQuality) {
-
+int Convert::chordQualityToInversion(const string& aQuality) {
    ChordQuality conversion = chordQualityStringToValue(aQuality);
    return conversion.getInversion();
 }
@@ -1049,8 +1037,7 @@ int Convert::chordQualityToInversion(const char* aQuality) {
 // Convert::chordQualityToRoot --
 //
 
-int Convert::chordQualityToRoot(const char* aQuality) {
-
+int Convert::chordQualityToRoot(const string& aQuality) {
    ChordQuality conversion = chordQualityStringToValue(aQuality);
    return conversion.getRoot();
 }
@@ -1062,8 +1049,7 @@ int Convert::chordQualityToRoot(const char* aQuality) {
 // Convert::chordQualityToType --
 //
 
-int Convert::chordQualityToType(const char* aQuality) {
-
+int Convert::chordQualityToType(const string& aQuality) {
    ChordQuality conversion = chordQualityStringToValue(aQuality);
    return conversion.getType();
 }
@@ -1084,7 +1070,7 @@ void Convert::noteSetToChordQuality(ChordQuality& cq, const vector<int>& aSet) {
 }
 
 
-void Convert::noteSetToChordQuality(ChordQuality& cq, 
+void Convert::noteSetToChordQuality(ChordQuality& cq,
       const SigCollection<int>& aSet) {
 
    ChordQuality& output = cq;
@@ -1275,7 +1261,7 @@ int Convert::base40ToAccidental(int base40value) {
 
 //////////////////////////////
 //
-// Convert::base40IntervalToLineOfFifths -- 0 => 0 (unison), 
+// Convert::base40IntervalToLineOfFifths -- 0 => 0 (unison),
 //    Perfect Fifth => 1, Major second => 2 (two fifths up), etc.
 //
 
@@ -1380,7 +1366,7 @@ int Convert::base40ToScoreVPos(int pitch, int clef) {
 int Convert::base40ToDiatonic(int pitch) {
    int chroma = pitch % 40;
    int octaveoffset = (pitch / 40) * 7;
-   if (pitch < 0) { 
+   if (pitch < 0) {
       return -1;   // rest;
    }
    switch (chroma) {
@@ -1426,130 +1412,94 @@ int Convert::base40ToDiatonic(int pitch) {
 //    of the bottom line on the staff.
 //
 
-int Convert::kernClefToBaseline(const char* buffer) {
-   const char* cptr = "";
-   if (strncmp(buffer, "*clef", 5) == 0) {
-      cptr = &(buffer[5]);
-   } else if (strncmp(buffer, "clef", 4) == 0) {
-      cptr = &(buffer[4]);
+int Convert::kernClefToBaseline(const string& buffer) {
+   string cptr;
+   if (buffer.compare(0, 5, "*clef") == 0) {
+      cptr = buffer.substr(5);
+   } else if (buffer.compare(0, 4, "clef") == 0) {
+      cptr = buffer.substr(4);
    } else {
       cerr << "Error in Convert::kernClefToBaseline: " << buffer << endl;
       exit(1);
    }
 
-   if (strcmp(cptr, "G2") == 0) {               // treble clef
+   if (cptr == "G2") {               // treble clef
       return Convert::kernToDiatonicPitch("e");
-   } else if (strcmp(cptr, "F4") == 0) {        // bass clef
+   } else if (cptr == "F4") {        // bass clef
       return Convert::kernToDiatonicPitch("GG");
-   } else if (strcmp(cptr, "C3") == 0) {        // alto clef
+   } else if (cptr == "C3") {        // alto clef
       return Convert::kernToDiatonicPitch("F");
-   } else if (strcmp(cptr, "C4") == 0) {        // tenor clef
-      return Convert::kernToDiatonicPitch("D"); 
-   } else if (strcmp(cptr, "Gv2") == 0) {       // vocal tenor clef
-      return Convert::kernToDiatonicPitch("E"); 
+   } else if (cptr == "C4") {        // tenor clef
+      return Convert::kernToDiatonicPitch("D");
+   } else if (cptr == "Gv2") {       // vocal tenor clef
+      return Convert::kernToDiatonicPitch("E");
 
    // rest of C clef possibilities:
-   } else if (strcmp(cptr, "C1") == 0) {        // soprano clef
-      return Convert::kernToDiatonicPitch("c"); 
-   } else if (strcmp(cptr, "C2") == 0) {        // mezzo-soprano clef
-      return Convert::kernToDiatonicPitch("A"); 
-   } else if (strcmp(cptr, "C5") == 0) {        // baritone clef
-      return Convert::kernToDiatonicPitch("BB"); 
+   } else if (cptr == "C1") {        // soprano clef
+      return Convert::kernToDiatonicPitch("c");
+   } else if (cptr == "C2") {        // mezzo-soprano clef
+      return Convert::kernToDiatonicPitch("A");
+   } else if (cptr == "C5") {        // baritone clef
+      return Convert::kernToDiatonicPitch("BB");
 
    // rest of G clef possibilities:
-   } else if (strcmp(cptr, "G1") == 0) {        // French-violin clef
-      return Convert::kernToDiatonicPitch("g"); 
-   } else if (strcmp(cptr, "G3") == 0) {      
-      return Convert::kernToDiatonicPitch("c"); 
-   } else if (strcmp(cptr, "G4") == 0) {      
-      return Convert::kernToDiatonicPitch("A"); 
-   } else if (strcmp(cptr, "G5") == 0) {      
-      return Convert::kernToDiatonicPitch("F"); 
+   } else if (cptr == "G1") {        // French-violin clef
+      return Convert::kernToDiatonicPitch("g");
+   } else if (cptr == "G3") { return Convert::kernToDiatonicPitch("c");
+   } else if (cptr == "G4") { return Convert::kernToDiatonicPitch("A");
+   } else if (cptr == "G5") { return Convert::kernToDiatonicPitch("F");
 
    // rest of F clef possibilities:
-   } else if (strcmp(cptr, "F1") == 0) {      
-      return Convert::kernToDiatonicPitch("F"); 
-   } else if (strcmp(cptr, "F2") == 0) {      
-      return Convert::kernToDiatonicPitch("D"); 
-   } else if (strcmp(cptr, "F3") == 0) {      
-      return Convert::kernToDiatonicPitch("BB"); 
-   } else if (strcmp(cptr, "F5") == 0) {      
-      return Convert::kernToDiatonicPitch("EE"); 
+   } else if (cptr == "F1") {  return Convert::kernToDiatonicPitch("F");
+   } else if (cptr == "F2") {  return Convert::kernToDiatonicPitch("D");
+   } else if (cptr == "F3") {  return Convert::kernToDiatonicPitch("BB");
+   } else if (cptr == "F5") {  return Convert::kernToDiatonicPitch("EE");
 
    // rest of G clef down an octave possibilities:
-   } else if (strcmp(cptr, "Gv1") == 0) {      
-      return Convert::kernToDiatonicPitch("G"); 
-   } else if (strcmp(cptr, "Gv3") == 0) {      
-      return Convert::kernToDiatonicPitch("C"); 
-   } else if (strcmp(cptr, "Gv4") == 0) {      
-      return Convert::kernToDiatonicPitch("AA"); 
-   } else if (strcmp(cptr, "Gv5") == 0) {      
-      return Convert::kernToDiatonicPitch("FF"); 
+   } else if (cptr == "Gv1") { return Convert::kernToDiatonicPitch("G");
+   } else if (cptr == "Gv3") { return Convert::kernToDiatonicPitch("C");
+   } else if (cptr == "Gv4") { return Convert::kernToDiatonicPitch("AA");
+   } else if (cptr == "Gv5") { return Convert::kernToDiatonicPitch("FF");
 
    // F clef down an octave possibilities:
-   } else if (strcmp(cptr, "Fv1") == 0) {      
-      return Convert::kernToDiatonicPitch("FF"); 
-   } else if (strcmp(cptr, "Fv2") == 0) {      
-      return Convert::kernToDiatonicPitch("DD"); 
-   } else if (strcmp(cptr, "Fv3") == 0) {      
-      return Convert::kernToDiatonicPitch("BBB"); 
-   } else if (strcmp(cptr, "Fv4") == 0) {      
-      return Convert::kernToDiatonicPitch("GGG"); 
-   } else if (strcmp(cptr, "Fv5") == 0) {      
-      return Convert::kernToDiatonicPitch("EEE"); 
+   } else if (cptr == "Fv1") { return Convert::kernToDiatonicPitch("FF");
+   } else if (cptr == "Fv2") { return Convert::kernToDiatonicPitch("DD");
+   } else if (cptr == "Fv3") { return Convert::kernToDiatonicPitch("BBB");
+   } else if (cptr == "Fv4") { return Convert::kernToDiatonicPitch("GGG");
+   } else if (cptr == "Fv5") { return Convert::kernToDiatonicPitch("EEE");
 
    // C clef down an octave possibilities:
-   } else if (strcmp(cptr, "Cv1") == 0) {     
-      return Convert::kernToDiatonicPitch("C"); 
-   } else if (strcmp(cptr, "Cv2") == 0) {    
-      return Convert::kernToDiatonicPitch("AA"); 
-   } else if (strcmp(cptr, "Cv3") == 0) {    
-      return Convert::kernToDiatonicPitch("FF"); 
-   } else if (strcmp(cptr, "Cv4") == 0) {    
-      return Convert::kernToDiatonicPitch("DD"); 
-   } else if (strcmp(cptr, "Cv5") == 0) {   
-      return Convert::kernToDiatonicPitch("BBB"); 
+   } else if (cptr == "Cv1") { return Convert::kernToDiatonicPitch("C");
+   } else if (cptr == "Cv2") { return Convert::kernToDiatonicPitch("AA");
+   } else if (cptr == "Cv3") { return Convert::kernToDiatonicPitch("FF");
+   } else if (cptr == "Cv4") { return Convert::kernToDiatonicPitch("DD");
+   } else if (cptr == "Cv5") { return Convert::kernToDiatonicPitch("BBB");
 
    // G clef up an octave possibilities:
-   } else if (strcmp(cptr, "G^1") == 0) {      
-      return Convert::kernToDiatonicPitch("gg"); 
-   } else if (strcmp(cptr, "G^2") == 0) {      
-      return Convert::kernToDiatonicPitch("ee"); 
-   } else if (strcmp(cptr, "G^3") == 0) {      
-      return Convert::kernToDiatonicPitch("cc"); 
-   } else if (strcmp(cptr, "G^4") == 0) {      
-      return Convert::kernToDiatonicPitch("a"); 
-   } else if (strcmp(cptr, "G^5") == 0) {      
-      return Convert::kernToDiatonicPitch("f"); 
+   } else if (cptr == "G^1") { return Convert::kernToDiatonicPitch("gg");
+   } else if (cptr == "G^2") { return Convert::kernToDiatonicPitch("ee");
+   } else if (cptr == "G^3") { return Convert::kernToDiatonicPitch("cc");
+   } else if (cptr == "G^4") { return Convert::kernToDiatonicPitch("a");
+   } else if (cptr == "G^5") { return Convert::kernToDiatonicPitch("f");
 
    // F clef up an octave possibilities:
-   } else if (strcmp(cptr, "F^1") == 0) {      
-      return Convert::kernToDiatonicPitch("f"); 
-   } else if (strcmp(cptr, "F^2") == 0) {      
-      return Convert::kernToDiatonicPitch("d"); 
-   } else if (strcmp(cptr, "F^3") == 0) {      
-      return Convert::kernToDiatonicPitch("B"); 
-   } else if (strcmp(cptr, "F^4") == 0) {      
-      return Convert::kernToDiatonicPitch("G"); 
-   } else if (strcmp(cptr, "F^5") == 0) {      
-      return Convert::kernToDiatonicPitch("E"); 
+   } else if (cptr == "F^1") { return Convert::kernToDiatonicPitch("f");
+   } else if (cptr == "F^2") { return Convert::kernToDiatonicPitch("d");
+   } else if (cptr == "F^3") { return Convert::kernToDiatonicPitch("B");
+   } else if (cptr == "F^4") { return Convert::kernToDiatonicPitch("G");
+   } else if (cptr == "F^5") { return Convert::kernToDiatonicPitch("E");
 
    // C clef up an octave possibilities:
-   } else if (strcmp(cptr, "C^1") == 0) {     
-      return Convert::kernToDiatonicPitch("cc"); 
-   } else if (strcmp(cptr, "C^2") == 0) {    
-      return Convert::kernToDiatonicPitch("a"); 
-   } else if (strcmp(cptr, "C^3") == 0) {    
-      return Convert::kernToDiatonicPitch("f"); 
-   } else if (strcmp(cptr, "C^4") == 0) {    
-      return Convert::kernToDiatonicPitch("d"); 
-   } else if (strcmp(cptr, "C^5") == 0) {   
-      return Convert::kernToDiatonicPitch("B"); 
+   } else if (cptr == "C^1") { return Convert::kernToDiatonicPitch("cc");
+   } else if (cptr == "C^2") { return Convert::kernToDiatonicPitch("a");
+   } else if (cptr == "C^3") { return Convert::kernToDiatonicPitch("f");
+   } else if (cptr == "C^4") { return Convert::kernToDiatonicPitch("d");
+   } else if (cptr == "C^5") { return Convert::kernToDiatonicPitch("B");
 
    // there are also two octave down (*clefGvv2) and two octaves up (*clefG^^2)
    } else {
       // but just use treble clef if don't know what the clef it by this point
-      return Convert::kernToDiatonicPitch("e"); 
+      return Convert::kernToDiatonicPitch("e");
    }
 }
 
@@ -1573,11 +1523,11 @@ char*  Convert::base40ToMuse(int base40, char* buffer) {
       case 4:  diatonic[0] = 'G'; break;
       case 5:  diatonic[0] = 'A'; break;
       case 6:  diatonic[0] = 'B'; break;
-      default: diatonic[0] = 'X'; 
+      default: diatonic[0] = 'X';
    }
 
    char octave[2] = {0};
-   octave[0]   = '0' + base40 / 40; 
+   octave[0]   = '0' + base40 / 40;
 
    char accidental[4] = {0};
    int acc = Convert::base40ToAccidental(base40);
@@ -1856,7 +1806,7 @@ char* Convert::base40ToIntervalAbbr2(char* output, int base40value) {
 //	string value (c.f. p221 of Humdrum Reference (1994)
 //
 
-char* Convert::base40ToKernTranspose(char* output, int transpose, 
+char* Convert::base40ToKernTranspose(char* output, int transpose,
       int keysignature) {
    int keyacc;
    int keydia;
@@ -1865,43 +1815,43 @@ char* Convert::base40ToKernTranspose(char* output, int transpose,
    int newdia;
 
    switch (keysignature) {
-      case  0:  keyacc = 0;   keydia = 0;  oldbase = 0;  break;  // C 
-      case  1:  keyacc = 0;   keydia = 4;  oldbase = 23; break;  // G 
-      case  2:  keyacc = 0;   keydia = 1;  oldbase = 6;  break;  // D 
-      case  3:  keyacc = 0;   keydia = 5;  oldbase = 29; break;  // A 
-      case  4:  keyacc = 0;   keydia = 2;  oldbase = 12; break;  // E 
-      case  5:  keyacc = 0;   keydia = 6;  oldbase = 35; break;  // B 
+      case  0:  keyacc = 0;   keydia = 0;  oldbase = 0;  break;  // C
+      case  1:  keyacc = 0;   keydia = 4;  oldbase = 23; break;  // G
+      case  2:  keyacc = 0;   keydia = 1;  oldbase = 6;  break;  // D
+      case  3:  keyacc = 0;   keydia = 5;  oldbase = 29; break;  // A
+      case  4:  keyacc = 0;   keydia = 2;  oldbase = 12; break;  // E
+      case  5:  keyacc = 0;   keydia = 6;  oldbase = 35; break;  // B
       case  6:  keyacc = +1;  keydia = 3;  oldbase = 18; break;  // F#
       case  7:  keyacc = +1;  keydia = 0;  oldbase = 1;  break;  // C#
-      case -1:  keyacc = 0;   keydia = 3;  oldbase = 17; break;  // F 
+      case -1:  keyacc = 0;   keydia = 3;  oldbase = 17; break;  // F
       case -2:  keyacc = -1;  keydia = 6;  oldbase = 34; break;  // Bb
       case -3:  keyacc = -1;  keydia = 2;  oldbase = 11; break;  // Eb
       case -4:  keyacc = -1;  keydia = 5;  oldbase = 28; break;  // Ab
       case -5:  keyacc = -1;  keydia = 1;  oldbase = 5;  break;  // Db
       case -6:  keyacc = -1;  keydia = 4;  oldbase = 22; break;  // Gb
       case -7:  keyacc = -1;  keydia = 0;  oldbase = -1; break;  // Cb
-      default:  keyacc = 0;   keydia = 0;  oldbase = 0;  break;  
+      default:  keyacc = 0;   keydia = 0;  oldbase = 0;  break;
    }
-  
+
    int newbase = (oldbase + transpose + 400) % 40;
 
    switch (newbase) {
-      case  0:  newacc = 0;   newdia = 0;  break;  // C 
-      case 23:  newacc = 0;   newdia = 4;  break;  // G 
-      case  6:  newacc = 0;   newdia = 1;  break;  // D 
-      case 29:  newacc = 0;   newdia = 5;  break;  // A 
-      case 12:  newacc = 0;   newdia = 2;  break;  // E 
-      case 35:  newacc = 0;   newdia = 6;  break;  // B 
+      case  0:  newacc = 0;   newdia = 0;  break;  // C
+      case 23:  newacc = 0;   newdia = 4;  break;  // G
+      case  6:  newacc = 0;   newdia = 1;  break;  // D
+      case 29:  newacc = 0;   newdia = 5;  break;  // A
+      case 12:  newacc = 0;   newdia = 2;  break;  // E
+      case 35:  newacc = 0;   newdia = 6;  break;  // B
       case 18:  newacc = +1;  newdia = 3;  break;  // F#
       case  1:  newacc = +1;  newdia = 0;  break;  // C#
-      case 17:  newacc = 0;   newdia = 3;  break;  // F 
+      case 17:  newacc = 0;   newdia = 3;  break;  // F
       case 34:  newacc = -1;  newdia = 6;  break;  // Bb
       case 11:  newacc = -1;  newdia = 2;  break;  // Eb
       case 28:  newacc = -1;  newdia = 5;  break;  // Ab
       case  5:  newacc = -1;  newdia = 1;  break;  // Db
       case 22:  newacc = -1;  newdia = 4;  break;  // Gb
       case -1:  newacc = -1;  newdia = 0;  break;  // Cb
-      default:  newacc = 0;   newdia = 0;  break;  
+      default:  newacc = 0;   newdia = 0;  break;
    }
 
    int chrom = newacc - keyacc;
@@ -1915,12 +1865,12 @@ char* Convert::base40ToKernTranspose(char* output, int transpose,
    } else {
 //      diaton += 7 * (abs(transpose) % 40);
    }
-    
+
    stringstream tempoutput;
    tempoutput << "d" << diaton << "c" << chrom << ends;
    strcpy(output, tempoutput.str().c_str());
-    
-   return output; 
+
+   return output;
 }
 
 
@@ -1934,7 +1884,7 @@ int Convert::base40ToMidiNoteNumber(int base40value) {
       return -100;
    }
 
-   // plus one needed for octave value since middle C is 60 
+   // plus one needed for octave value since middle C is 60
    // and 60 / 12 = 5 rather than 4.
    int octave = base40value / 40 + 1;
    int pc = -1;
@@ -2003,17 +1953,19 @@ int Convert::base40ToMidiNoteNumber(int base40value) {
 //      returns -1 if a null token.
 //
 
-int Convert::kernToBase40(const char* kernfield) {
+int Convert::kernToBase40(const string& kernfield) {
+   if (kernfield.empty()) {
+      return -1;
+   }
 
-   if (kernfield[0] == '.') {
+   if (kernfield == ".") {
       return -1;
    }
 
    int note = E_unknown;
-   int i = 0;
-   while (kernfield[i] != '\0') {
-      if (std::isalpha(kernfield[i])) {
-         switch (std::toupper(kernfield[i])) {
+   for (int i=0; i<(int)kernfield.size(); i++) {
+      if (isalpha(kernfield[i])) {
+         switch (toupper(kernfield[i])) {
             case 'A': case 'B': case 'C': case 'D':
             case 'E': case 'F': case 'G':
                note = kernNoteToBase40(&kernfield[i]);
@@ -2024,7 +1976,6 @@ int Convert::kernToBase40(const char* kernfield) {
                break;
          }
       }
-      i++;
    }
 
 finishup:
@@ -2040,8 +1991,7 @@ finishup:
 //      Pitch class of the note.  Returns -1 if a null token
 //
 
-int Convert::kernToBase40Class(const char* kernfield) {
-
+int Convert::kernToBase40Class(const string& kernfield) {
    int absolute = kernToBase40(kernfield);
    if (absolute >= 0) {
       return absolute % 40;
@@ -2058,38 +2008,40 @@ int Convert::kernToBase40Class(const char* kernfield) {
 //      a kern pitch.  Returns -1 on error or null token.
 //
 
-int Convert::kernNoteToBase40(const char* name) {
-
-   int output;
-
-   if (name[0] == '.') {
+int Convert::kernNoteToBase40(const string& name) {
+   int output = -1;
+   if (name == ".") {
       return -1;
    }
 
    switch (name[0]) {
-      case 'a': output = 4 * 40 + E_root_a;     break;
-      case 'b': output = 4 * 40 + E_root_b;     break;
-      case 'c': output = 4 * 40 + E_root_c;     break;
-      case 'd': output = 4 * 40 + E_root_d;     break;
-      case 'e': output = 4 * 40 + E_root_e;     break;
-      case 'f': output = 4 * 40 + E_root_f;     break;
-      case 'g': output = 4 * 40 + E_root_g;     break;
-      case 'A': output = 3 * 40 + E_root_a;     break;
-      case 'B': output = 3 * 40 + E_root_b;     break;
-      case 'C': output = 3 * 40 + E_root_c;     break;
-      case 'D': output = 3 * 40 + E_root_d;     break;
-      case 'E': output = 3 * 40 + E_root_e;     break;
-      case 'F': output = 3 * 40 + E_root_f;     break;
-      case 'G': output = 3 * 40 + E_root_g;     break;
-      case 'R': return E_root_rest;             break;
+      case 'a': output = 4 * 40 + E_root_a;  break;
+      case 'b': output = 4 * 40 + E_root_b;  break;
+      case 'c': output = 4 * 40 + E_root_c;  break;
+      case 'd': output = 4 * 40 + E_root_d;  break;
+      case 'e': output = 4 * 40 + E_root_e;  break;
+      case 'f': output = 4 * 40 + E_root_f;  break;
+      case 'g': output = 4 * 40 + E_root_g;  break;
+      case 'A': output = 3 * 40 + E_root_a;  break;
+      case 'B': output = 3 * 40 + E_root_b;  break;
+      case 'C': output = 3 * 40 + E_root_c;  break;
+      case 'D': output = 3 * 40 + E_root_d;  break;
+      case 'E': output = 3 * 40 + E_root_e;  break;
+      case 'F': output = 3 * 40 + E_root_f;  break;
+      case 'G': output = 3 * 40 + E_root_g;  break;
+      case 'R': return E_root_rest;          break;
       default:  return -1;
    }
 
    int octave=0;
-   while (name[octave] != '\0' && name[octave] == name[0]) {
-      octave++;
+   for (int i=0; i<(int)name.size(); i++) {
+      if (name[i] == name[0]) {
+         octave++;
+      } else {
+         break;
+      }
    }
-   if (std::islower(name[0])) {
+   if (islower(name[0])) {
       output += (octave - 1) * 40;
    } else {
       output -= (octave - 1) * 40;
@@ -2097,20 +2049,20 @@ int Convert::kernNoteToBase40(const char* name) {
 
    // check for first accidental sign
    int accidental = octave;
-   if (name[accidental] != '\0' && name[accidental] == '-') {
+   if ((accidental < (int)name.size()) && (name[accidental] == '-')) {
       output--;
-   } else if (name[accidental] != '\0' && name[accidental] == '#') {
+   } else if ((accidental < (int)name.size()) && (name[accidental] == '#')) {
       output++;
    }
 
    // chek for second accidental sign
-   if (name[accidental] == '\0') {
+   if (accidental >= (int)name.size()) {
       ; // nothing
    } else { // check for double sharp or double flat
       accidental++;
-      if (name[accidental] != '\0' && name[accidental] == '-') {
+      if ((accidental < (int)name.size()) && (name[accidental] == '-')) {
          output--;
-      } else if (name[accidental] != '\0' && name[accidental] == '#') {
+      } else if ((accidental < (int)name.size()) && (name[accidental] == '#')) {
          output++;
       }
    }
@@ -2135,12 +2087,12 @@ int Convert::kernNoteToBase40(const char* name) {
 //     *ITrd1c2  == Instrumental transposition marker prefixed
 //
 
-int Convert::transToBase40(const char* buffer) {
+int Convert::transToBase40(const string& buffer) {
    int dval = 0;
    int cval = 0;
-   if (sscanf(buffer, "d%dc%d", &dval, &cval) != 2) {
-      if (sscanf(buffer, "*Trd%dc%d", &dval, &cval) != 2) {
-         if (sscanf(buffer, "*ITrd%dc%d", &dval, &cval) != 2) {
+   if (sscanf(buffer.c_str(), "d%dc%d", &dval, &cval) != 2) {
+      if (sscanf(buffer.c_str(), "*Trd%dc%d", &dval, &cval) != 2) {
+         if (sscanf(buffer.c_str(), "*ITrd%dc%d", &dval, &cval) != 2) {
             // cerr << "Cannot find correct information" << endl;
             return 0;
          }
@@ -2151,10 +2103,10 @@ int Convert::transToBase40(const char* buffer) {
    // int csign = 1;
    if (dval < 0) {
       dsign = -1;
-   } 
+   }
    // if (cval < 0) {
    //    csign = -1;
-   // } 
+   // }
 
    int doctave = dsign * dval / 7;
    // int coctave = csign * cval / 12;
@@ -2233,11 +2185,11 @@ int Convert::transToBase40(const char* buffer) {
    else if ((dval==-7) && (cval==-11)) { base =	-39; }
    else { // some error occurred or accidentals out of range
       // cerr << "Problem occured in transToBase40()" << endl;
-      base = 0; 
-   }  
-	     
+      base = 0;
+   }
+	
    base += 40 * doctave * dsign;
-   
+
    return base;
 }
 
@@ -2266,7 +2218,7 @@ char* Convert::base40ToTrans(char* buffer, int base40) {
 
    int cval = 0;
    int dval = 0;
-   
+
    switch (chroma * sign) {
       case   0:	dval=0;  cval=0;	break; //	C -> C
       case   1:	dval=0;  cval=1;	break; //	C -> C#
@@ -2361,7 +2313,7 @@ char* Convert::base40ToTrans(char* buffer, int base40) {
 
 SigCollection<int> Convert::keyToScaleDegrees(int aKey, int aMode) {
    SigCollection<int> output;
-   
+
    switch (aMode) {
       case E_mode_major:
       case E_mode_ionian:
@@ -2412,17 +2364,17 @@ SigCollection<int> Convert::keyToScaleDegrees(int aKey, int aMode) {
 // Convert::museToBase40 --
 //
 
-int Convert::museToBase40(const char* pitchString) {
+int Convert::museToBase40(const string& pitchString) {
    char *temp;
-   int length = strlen(pitchString);
+   int length = (int)pitchString.size();
    temp = new char[length+1];
-   strcpy(temp, pitchString);
+   strcpy(temp, pitchString.c_str());
    int octave;
-   int i = length;
-   while (i >= 0 && !std::isdigit(temp[i])) {
+   int i = length - 1;
+   while (i >= 0 && !isdigit(temp[i])) {
       i--;
    }
-  
+
    if (i <= 0) {
       cerr << "Error: could not find octave in string: " << pitchString << endl;
       exit(1);
@@ -2442,7 +2394,7 @@ int Convert::museToBase40(const char* pitchString) {
 
 //////////////////////////////
 //
-// Convert::base7ToBase12 -- convert diatonic pitch class with optional 
+// Convert::base7ToBase12 -- convert diatonic pitch class with optional
 //    chromatic alteration into Base-12 (MIDI note number).
 //
 
@@ -2489,7 +2441,7 @@ int Convert::base7ToBase40(int aPitch, int alter) {
 int Convert::base12ToBase40(int aPitch) {
    int octave = aPitch / 12 - 1;
    int chroma = aPitch % 12;
- 
+
    int output = 0;
    switch (chroma) {
       case 0: output = E_muse_c   ;  break;   // 0  = C
@@ -2506,7 +2458,7 @@ int Convert::base12ToBase40(int aPitch) {
       case 11: output = E_muse_b  ;  break;   // 11 = B
       default: output = E_muse_c  ;  break;   // other = C
    }
-    
+
    output = output + 40 * octave;
    return output;
 }
@@ -2574,7 +2526,7 @@ char* Convert::base12ToKern(char* output, int aPitch) {
 
    int length = strlen(output);
    output[length + repeat] = '\0';
-   int i; 
+   int i;
    for (i=length-1; i>=0; i--) {
       output[i+repeat] = output[i];
    }
@@ -2651,8 +2603,8 @@ int Convert::freq2midi(double freq, double a440) {
 //   with 1.0 being a quarter note.
 //
 
-double Convert::kotoToDuration(const char* aKotoString) {
-   int length = strlen(aKotoString);
+double Convert::kotoToDuration(const string& aKotoString) {
+   int length = (int)aKotoString.size();
    int bars   = 0;
    int dashes = 0;
    int dots   = 0;
@@ -2678,7 +2630,7 @@ double Convert::kotoToDuration(const char* aKotoString) {
    for (i=0; i<bars; i++) {
       duration = duration / 2.0;
    }
-   
+
    double baseduration = duration;
    for (i=0; i<dots; i++) {
       duration += baseduration * pow(2.0, -(i+1));
@@ -2695,8 +2647,8 @@ double Convert::kotoToDuration(const char* aKotoString) {
 //   with 1.0 being a quarter note.
 //
 
-RationalNumber Convert::kotoToDurationR(const char* aKotoString) {
-   int length = strlen(aKotoString);
+RationalNumber Convert::kotoToDurationR(const string& aKotoString) {
+   int length = (int)aKotoString.size();
    int bars   = 0;
    int dashes = 0;
    int dots   = 0;
@@ -2723,7 +2675,7 @@ RationalNumber Convert::kotoToDurationR(const char* aKotoString) {
    for (i=0; i<bars; i++) {
       duration /= 2;
    }
-   
+
    RationalNumber baseduration = duration;
    for (i=0; i<dots; i++) {
       duration += baseduration / (int)(pow(2.0, (double)(i+1)));
@@ -2762,9 +2714,9 @@ int Convert::calculateInversion(int aType, int bassNote, int root) {
          return i;
       }
    }
-   
-   cerr << "Error: Note: " 
-        << Convert::kernPitchClass.getName(bassNote) << " is not in chord " 
+
+   cerr << "Error: Note: "
+        << Convert::kernPitchClass.getName(bassNote) << " is not in chord "
         << Convert::chordType.getName(aType) << " with root "
         << Convert::kernPitchClass.getName(root) << endl;
 
@@ -2846,7 +2798,7 @@ int Convert::checkChord(const SigCollection<int>& aSet) {
 
    return output;
 }
-   
+
 
 
 //////////////////////////////
@@ -2970,8 +2922,8 @@ void Convert::base12ToTnNormalForm(Array<int>& tnorm, Array<int>& base12) {
 
 //////////////////////////////
 //
-// Convert::base12ToTnSetNameAllSubsets -- given an input of base12 pitches, 
-// return the Tn set names for all pitch-class subsets for that unsorted 
+// Convert::base12ToTnSetNameAllSubsets -- given an input of base12 pitches,
+// return the Tn set names for all pitch-class subsets for that unsorted
 // collection (which may contain repeats).  The names are returned as
 // integers which encodes Forte numbers in this form:   nnnCCccLtt
 //    where nnn = the number of subsets containing that name (0 if no
@@ -2994,7 +2946,7 @@ void Convert::base12ToTnSetNameAllSubsets(Array<int>& list, Array<int>& notes) {
    // calculate the transposed normal form.  This makes the pitch-classes
    // unique and compacts them while preserving the original pitch-class
    // value (normal form would transpose the first pitch-class in the
-   // transposed normal form to 0.  
+   // transposed normal form to 0.
    Convert::base12ToTnNormalForm(tnorm, notes);
    int pcount = tnorm.getSize();
 
@@ -3067,7 +3019,7 @@ void Convert::addCombinations(Array<Array<int> >& combinations,
 
 //////////////////////////////
 //
-// Convert::base12ToTnSetName -- given an input of base12 pitches, return 
+// Convert::base12ToTnSetName -- given an input of base12 pitches, return
 // the Tn set name for that unsorted collection (which may contain repeats)
 //
 
@@ -3541,7 +3493,7 @@ void Convert::base12ToNormalForm(Array<int>& nform, Array<int>& base12) {
 // Convert::findBestNormalRotation -- used with base12ToNormalForm().
 //
 
-int Convert::findBestNormalRotation(Array<int>& input, int asize, 
+int Convert::findBestNormalRotation(Array<int>& input, int asize,
       Array<int>& choices) {
    Array<int> newchoices(choices.getSize());
    newchoices.setSize(0);
@@ -3571,7 +3523,7 @@ int Convert::findBestNormalRotation(Array<int>& input, int asize,
 
    if (asize <= 2) {
       // Case which occurs only when there is tie due to
-      // rotataional symmetry, so just choose the first one 
+      // rotataional symmetry, so just choose the first one
       return newchoices[0];
    }
 
