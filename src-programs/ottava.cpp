@@ -23,9 +23,10 @@
 
 #include "humdrum.h"
 
-#ifndef OLDCPP
-   using namespace std;
-#endif
+#include <vector>
+#include <string>
+
+using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -35,12 +36,12 @@
 // function declarations
 void      checkOptions       (Options& opts, int argc, char* argv[]);
 void      example            (void);
-void      usage              (const char* command);
+void      usage              (const string& command);
 void      processFile        (HumdrumFile& infile);
 void      checkLineForOttavas(HumdrumFile& infile, int index, 
-                              Array<int>& states);
+                              vector<int>& states);
 void      printDataLine      (HumdrumFile& infile, int line, 
-                              Array<int>& octavestate, int direction);
+                              vector<int>& octavestate, int direction);
 void      printNoteData      (HumdrumRecord& dataline, int index, 
                               int transpose);
 void      printTandemInterpretation(HumdrumFile& infile, int line, 
@@ -54,22 +55,22 @@ int       direction = 0;      // used with -v (+1) and -s (-1) arguments
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   HumdrumFile infile;
+	HumdrumFile infile;
 
-   // process the command-line options
-   checkOptions(options, argc, argv);
+	// process the command-line options
+	checkOptions(options, argc, argv);
 
-   const char* filename;
-   infile.clear();
-   // if no command-line arguments read data file from standard input
-   int numinputs = options.getArgCount();
-   if (numinputs < 1) {
-      infile.read(cin);
-   } else {
-      filename = options.getArg(1).data();
-      infile.read(filename);
-   }
-   processFile(infile);
+	string filename;
+	infile.clear();
+	// if no command-line arguments read data file from standard input
+	int numinputs = options.getArgCount();
+	if (numinputs < 1) {
+		infile.read(cin);
+	} else {
+		filename = options.getArg(1).data();
+		infile.read(filename);
+	}
+	processFile(infile);
 
 }
 
@@ -82,27 +83,22 @@ int main(int argc, char* argv[]) {
 //
 
 void processFile(HumdrumFile& infile) {
-   Array<int> octavestate;
-   int maxtracks = infile.getMaxTracks();
-   octavestate.setSize(maxtracks+1);
-   octavestate.allowGrowth(0);
-   octavestate.setAll(0);
+	int maxtracks = infile.getMaxTracks();
+	vector<int> octavestate(maxtracks+1, 0);
 
-   int i;
-   for (i=0; i<infile.getNumLines(); i++) {
-      if (infile[i].getType() == E_humrec_interpretation) {
-         checkLineForOttavas(infile, i, octavestate);
-      } 
-
-      if (infile[i].getType() == E_humrec_data) {
-         printDataLine(infile, i, octavestate, direction);
-      } else if (infile[i].getType() == E_humrec_interpretation) {
-         printTandemInterpretation(infile, i, direction);
-      } else {
-         cout << infile[i];
-      }
-      cout << "\n";
-   }
+	for (int i=0; i<infile.getNumLines(); i++) {
+		if (infile[i].getType() == E_humrec_interpretation) {
+			checkLineForOttavas(infile, i, octavestate);
+		} 
+		if (infile[i].getType() == E_humrec_data) {
+			printDataLine(infile, i, octavestate, direction);
+		} else if (infile[i].getType() == E_humrec_interpretation) {
+			printTandemInterpretation(infile, i, direction);
+		} else {
+			cout << infile[i];
+		}
+		cout << "\n";
+	}
 }
 
 
@@ -113,62 +109,62 @@ void processFile(HumdrumFile& infile) {
 //
 
 void printTandemInterpretation(HumdrumFile& infile, int line, int direction) {
-   int i;
-   for (i=0; i<infile[line].getFieldCount(); i++) {
-      if (strcmp(infile[line].getExInterp(i), "**kern") == 0) {
-         if (direction == TOSOUND) {
+	int i;
+	for (i=0; i<infile[line].getFieldCount(); i++) {
+		if (strcmp(infile[line].getExInterp(i), "**kern") == 0) {
+			if (direction == TOSOUND) {
 
-            if (strcmp(infile[line][i], "*8va/V") == 0) {
-               cout << "*8va";
-            } else if (strcmp(infile[line][i], "*X8va/V") == 0) {
-               cout << "*X8va";
-            } else if (strcmp(infile[line][i], "*8ba/V") == 0) {
-               cout << "*8ba";
-            } else if (strcmp(infile[line][i], "*X8ba/V") == 0) {
-               cout << "*X8ba";
-            } else if (strcmp(infile[line][i], "*15ma/V") == 0) {
-               cout << "*15ma";
-            } else if (strcmp(infile[line][i], "*X15ma/V") == 0) {
-               cout << "*X15ma";
-            } else if (strcmp(infile[line][i], "*15ba/V") == 0) {
-               cout << "*15ba";
-            } else if (strcmp(infile[line][i], "*X15ba/V") == 0) {
-               cout << "*X15ba";
-            } else {
-               cout << infile[line][i];
-            }
+				if (strcmp(infile[line][i], "*8va/V") == 0) {
+					cout << "*8va";
+				} else if (strcmp(infile[line][i], "*X8va/V") == 0) {
+					cout << "*X8va";
+				} else if (strcmp(infile[line][i], "*8ba/V") == 0) {
+					cout << "*8ba";
+				} else if (strcmp(infile[line][i], "*X8ba/V") == 0) {
+					cout << "*X8ba";
+				} else if (strcmp(infile[line][i], "*15ma/V") == 0) {
+					cout << "*15ma";
+				} else if (strcmp(infile[line][i], "*X15ma/V") == 0) {
+					cout << "*X15ma";
+				} else if (strcmp(infile[line][i], "*15ba/V") == 0) {
+					cout << "*15ba";
+				} else if (strcmp(infile[line][i], "*X15ba/V") == 0) {
+					cout << "*X15ba";
+				} else {
+					cout << infile[line][i];
+				}
 
-         } else if (direction == TOVISUAL) {
+			} else if (direction == TOVISUAL) {
 
-            if (strcmp(infile[line][i], "*8va") == 0) {
-               cout << "*8va/V";
-            } else if (strcmp(infile[line][i], "*X8va") == 0) {
-               cout << "*X8va/V";
-            } else if (strcmp(infile[line][i], "*8ba") == 0) {
-               cout << "*8ba/V";
-            } else if (strcmp(infile[line][i], "*X8ba") == 0) {
-               cout << "*X8ba/V";
-            } else if (strcmp(infile[line][i], "*15ma") == 0) {
-               cout << "*15ma/V";
-            } else if (strcmp(infile[line][i], "*X15ma") == 0) {
-               cout << "*X15ma/V";
-            } else if (strcmp(infile[line][i], "*15ba") == 0) {
-               cout << "*15ba/V";
-            } else if (strcmp(infile[line][i], "*X15ba") == 0) {
-               cout << "*X15ba/V";
-            } else {
-               cout << infile[line][i];
-            }
+				if (strcmp(infile[line][i], "*8va") == 0) {
+					cout << "*8va/V";
+				} else if (strcmp(infile[line][i], "*X8va") == 0) {
+					cout << "*X8va/V";
+				} else if (strcmp(infile[line][i], "*8ba") == 0) {
+					cout << "*8ba/V";
+				} else if (strcmp(infile[line][i], "*X8ba") == 0) {
+					cout << "*X8ba/V";
+				} else if (strcmp(infile[line][i], "*15ma") == 0) {
+					cout << "*15ma/V";
+				} else if (strcmp(infile[line][i], "*X15ma") == 0) {
+					cout << "*X15ma/V";
+				} else if (strcmp(infile[line][i], "*15ba") == 0) {
+					cout << "*15ba/V";
+				} else if (strcmp(infile[line][i], "*X15ba") == 0) {
+					cout << "*X15ba/V";
+				} else {
+					cout << infile[line][i];
+				}
 
-         }
-      } else {
-         cout << infile[line][i];
-      }
+			}
+		} else {
+			cout << infile[line][i];
+		}
 
-      if (i < infile[line].getFieldCount()-1) {
-         cout << "\t";
-      }
-   }
+		if (i < infile[line].getFieldCount()-1) {
+			cout << "\t";
+		}
+	}
 
 
 }
@@ -180,27 +176,27 @@ void printTandemInterpretation(HumdrumFile& infile, int line, int direction) {
 // printDataLine --
 //
 
-void printDataLine(HumdrumFile& infile, int line, Array<int>& octavestate,
-      int direction) {
-   int i;
-   int ptrack = 0;
-   int transpose = 0;
-   for (i=0; i<infile[line].getFieldCount(); i++) {
-      if (strcmp(infile[line][i], ".") == 0) {
-         cout << ".";
-      } else if (strcmp(infile[line].getExInterp(i), "**kern") == 0) {
-         ptrack = infile[line].getPrimaryTrack(i);
-         transpose = octavestate[ptrack] * direction;
-         printNoteData(infile[line], i, transpose);
-      } else {
-         cout << infile[line][i];
-      }
+void printDataLine(HumdrumFile& infile, int line, vector<int>& octavestate,
+		int direction) {
+	int i;
+	int ptrack = 0;
+	int transpose = 0;
+	for (i=0; i<infile[line].getFieldCount(); i++) {
+		if (strcmp(infile[line][i], ".") == 0) {
+			cout << ".";
+		} else if (strcmp(infile[line].getExInterp(i), "**kern") == 0) {
+			ptrack = infile[line].getPrimaryTrack(i);
+			transpose = octavestate[ptrack] * direction;
+			printNoteData(infile[line], i, transpose);
+		} else {
+			cout << infile[line][i];
+		}
 
-      if (i < infile[line].getFieldCount() - 1) {
-         cout << "\t";
-      }
+		if (i < infile[line].getFieldCount() - 1) {
+			cout << "\t";
+		}
 
-   }
+	}
 
 }
 
@@ -212,53 +208,53 @@ void printDataLine(HumdrumFile& infile, int line, Array<int>& octavestate,
 //
 
 void printNoteData(HumdrumRecord& dataline, int index, int transpose) {
-   if (transpose == 0) {
-      cout << dataline[index];
-      return;
-   }
+	if (transpose == 0) {
+		cout << dataline[index];
+		return;
+	}
  
-   int tokencount = dataline.getTokenCount(index);
-   int i;
-   int j;
-   int pitch = 0;
-   int printQ = 0;
-   int slen;
-   char buffer[256] = {0};
-   char newpitch[32] = {0};
-   for (i=0; i<tokencount; i++) {
-      dataline.getToken(buffer, index, i);
-      if (strchr(buffer, 'r') != NULL) {
-         cout << buffer;
-      } else {
-         pitch = Convert::kernToBase40(buffer);
-         pitch = pitch + transpose * 40;
-         slen = strlen(buffer);
-         printQ = 0;
-         for (j=0; j<slen; j++) {
-            if (toupper(buffer[j]) == 'A' || 
-                toupper(buffer[j]) == 'B' || 
-                toupper(buffer[j]) == 'C' || 
-                toupper(buffer[j]) == 'D' || 
-                toupper(buffer[j]) == 'E' || 
-                toupper(buffer[j]) == 'F' || 
-                toupper(buffer[j]) == 'G' || 
-                buffer[j] == '#' || 
-                buffer[j] == '-'  ) {
-                if (printQ == 0) {
-                   Convert::base40ToKern(newpitch, pitch);
-                   cout << newpitch;
-                   printQ = 1;
-                }
-             } else {
-                cout << buffer[j];
-             }
-         }
-      }
+	int tokencount = dataline.getTokenCount(index);
+	int i;
+	int j;
+	int pitch = 0;
+	int printQ = 0;
+	int slen;
+	char buffer[256] = {0};
+	char newpitch[32] = {0};
+	for (i=0; i<tokencount; i++) {
+		dataline.getToken(buffer, index, i);
+		if (strchr(buffer, 'r') != NULL) {
+			cout << buffer;
+		} else {
+			pitch = Convert::kernToBase40(buffer);
+			pitch = pitch + transpose * 40;
+			slen = strlen(buffer);
+			printQ = 0;
+			for (j=0; j<slen; j++) {
+				if (toupper(buffer[j]) == 'A' || 
+					toupper(buffer[j]) == 'B' || 
+					toupper(buffer[j]) == 'C' || 
+					toupper(buffer[j]) == 'D' || 
+					toupper(buffer[j]) == 'E' || 
+					toupper(buffer[j]) == 'F' || 
+					toupper(buffer[j]) == 'G' || 
+					buffer[j] == '#' || 
+					buffer[j] == '-'  ) {
+					if (printQ == 0) {
+						Convert::base40ToKern(newpitch, pitch);
+						cout << newpitch;
+						printQ = 1;
+					}
+				} else {
+					cout << buffer[j];
+				}
+			}
+		}
 
-      if (i < tokencount-1)  {
-         cout << ' ';
-      }
-   }
+		if (i < tokencount-1)  {
+			cout << ' ';
+		}
+	}
 }
 
 
@@ -272,59 +268,59 @@ void printNoteData(HumdrumRecord& dataline, int index, int transpose) {
 //  *15ba = down two octaves
 //
 
-void checkLineForOttavas(HumdrumFile& infile, int index, Array<int>& states) {
-   int j;
-   for (j=0; j<infile[index].getFieldCount(); j++) {
-      if (direction == TOSOUND) {
+void checkLineForOttavas(HumdrumFile& infile, int index, vector<int>& states) {
+	int j;
+	for (j=0; j<infile[index].getFieldCount(); j++) {
+		if (direction == TOSOUND) {
 
-         if (strcmp(infile[index][j], "*8va/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = +1;
-         } else if (strcmp(infile[index][j], "*X8va/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = 0;
-         } else if (strcmp(infile[index][j], "*8ba/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = -1;
-         } else if (strcmp(infile[index][j], "*X8ba/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = 0;
-         } else if (strcmp(infile[index][j], "*15ma/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = +2;
-         } else if (strcmp(infile[index][j], "*X15ma/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = 0;
-         } else if (strcmp(infile[index][j], "*15va/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = +2;
-         } else if (strcmp(infile[index][j], "*X15va/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = 0;
-         } else if (strcmp(infile[index][j], "*15ba/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = -2;
-         } else if (strcmp(infile[index][j], "*X15ba/V") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = 0;
-         }
+			if (strcmp(infile[index][j], "*8va/V") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = +1;
+			} else if (strcmp(infile[index][j], "*X8va/V") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = 0;
+			} else if (strcmp(infile[index][j], "*8ba/V") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = -1;
+			} else if (strcmp(infile[index][j], "*X8ba/V") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = 0;
+			} else if (strcmp(infile[index][j], "*15ma/V") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = +2;
+			} else if (strcmp(infile[index][j], "*X15ma/V") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = 0;
+			} else if (strcmp(infile[index][j], "*15va/V") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = +2;
+			} else if (strcmp(infile[index][j], "*X15va/V") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = 0;
+			} else if (strcmp(infile[index][j], "*15ba/V") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = -2;
+			} else if (strcmp(infile[index][j], "*X15ba/V") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = 0;
+			}
 
-      } else if (direction == TOVISUAL) {
+		} else if (direction == TOVISUAL) {
 
-         if (strcmp(infile[index][j], "*8va") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = +1;
-         } else if (strcmp(infile[index][j], "*X8va") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = 0;
-         } else if (strcmp(infile[index][j], "*8ba") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = -1;
-         } else if (strcmp(infile[index][j], "*X8ba") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = 0;
-         } else if (strcmp(infile[index][j], "*15ma") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = +2;
-         } else if (strcmp(infile[index][j], "*X15ma") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = 0;
-         } else if (strcmp(infile[index][j], "*15va") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = +2;
-         } else if (strcmp(infile[index][j], "*X15va") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = 0;
-         } else if (strcmp(infile[index][j], "*15ba") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = -2;
-         } else if (strcmp(infile[index][j], "*X15ba") == 0) {
-            states[infile[index].getPrimaryTrack(j)] = 0;
-         }
+			if (strcmp(infile[index][j], "*8va") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = +1;
+			} else if (strcmp(infile[index][j], "*X8va") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = 0;
+			} else if (strcmp(infile[index][j], "*8ba") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = -1;
+			} else if (strcmp(infile[index][j], "*X8ba") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = 0;
+			} else if (strcmp(infile[index][j], "*15ma") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = +2;
+			} else if (strcmp(infile[index][j], "*X15ma") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = 0;
+			} else if (strcmp(infile[index][j], "*15va") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = +2;
+			} else if (strcmp(infile[index][j], "*X15va") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = 0;
+			} else if (strcmp(infile[index][j], "*15ba") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = -2;
+			} else if (strcmp(infile[index][j], "*X15ba") == 0) {
+				states[infile[index].getPrimaryTrack(j)] = 0;
+			}
 
-      }
-   }
+		}
+	}
 
 
 }
@@ -338,44 +334,44 @@ void checkLineForOttavas(HumdrumFile& infile, int index, Array<int>& states) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("p|print|v|visual=b", "convert to printed visual score format");
-   opts.define("s|sound=b", "convert to sounding score format");
-   opts.define("debug=b");           // determine bad input line num
-   opts.define("author=b");          // author of program
-   opts.define("version=b");         // compilation info
-   opts.define("example=b");         // example usages
-   opts.define("h|help=b");          // short description
-   opts.process(argc, argv);
-   
-   // handle basic options:
-   if (opts.getBoolean("author")) {
-      cout << "Written by Craig Stuart Sapp, "
-           << "craig@ccrma.stanford.edu, Oct 2004" << endl;
-      exit(0);
-   } else if (opts.getBoolean("version")) {
-      cout << argv[0] << ", version: 25 Oct 2004" << endl;
-      cout << "compiled: " << __DATE__ << endl;
-      cout << MUSEINFO_VERSION << endl;
-      exit(0);
-   } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
-      exit(0);
-   } else if (opts.getBoolean("example")) {
-      example();
-      exit(0);
-   }
+	opts.define("p|print|v|visual=b", "convert to printed visual score format");
+	opts.define("s|sound=b", "convert to sounding score format");
+	opts.define("debug=b");           // determine bad input line num
+	opts.define("author=b");          // author of program
+	opts.define("version=b");         // compilation info
+	opts.define("example=b");         // example usages
+	opts.define("h|help=b");          // short description
+	opts.process(argc, argv);
+	
+	// handle basic options:
+	if (opts.getBoolean("author")) {
+		cout << "Written by Craig Stuart Sapp, "
+			  << "craig@ccrma.stanford.edu, Oct 2004" << endl;
+		exit(0);
+	} else if (opts.getBoolean("version")) {
+		cout << argv[0] << ", version: 25 Oct 2004" << endl;
+		cout << "compiled: " << __DATE__ << endl;
+		cout << MUSEINFO_VERSION << endl;
+		exit(0);
+	} else if (opts.getBoolean("help")) {
+		usage(opts.getCommand().data());
+		exit(0);
+	} else if (opts.getBoolean("example")) {
+		example();
+		exit(0);
+	}
 
-   if (opts.getBoolean("sound")) {
-      direction = +1;
-   } else if (opts.getBoolean("visual")) {
-      direction = -1;
-   }
+	if (opts.getBoolean("sound")) {
+		direction = +1;
+	} else if (opts.getBoolean("visual")) {
+		direction = -1;
+	}
 
-   if (direction == 0) {
-      cout << "Error: specify -v to convert to visual score or -s ";
-      cout << "for sounding score\n";
-      exit(1);
-   }
+	if (direction == 0) {
+		cout << "Error: specify -v to convert to visual score or -s ";
+		cout << "for sounding score\n";
+		exit(1);
+	}
 }
 
 
@@ -386,9 +382,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 //
 
 void example(void) {
-   cout <<
-   "                                                                         \n"
-   << endl;
+	cout <<
+	"                                                                         \n"
+	<< endl;
 }
 
 
@@ -398,12 +394,11 @@ void example(void) {
 // usage -- gives the usage statement for the program
 //
 
-void usage(const char* command) {
-   cout <<
-   "                                                                         \n"
-   << endl;
+void usage(const string& command) {
+	cout <<
+	"                                                                         \n"
+	<< endl;
 }
 
 
 
-// md5sum: 16591b572bf8f8fa678da8459edc1ee7 ottava.cpp [20151120]
