@@ -9,24 +9,26 @@
 // Description:   Splits multiple-segment Humdrum streams into separate files.
 //
 
-#include "humdrum.h"
-#include "PerlRegularExpression.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>   /* for stat function in fileExists */
 
 #include <iostream>
+
+#include "humdrum.h"
+#include "PerlRegularExpression.h"
+
 using namespace std;
 
 
 // function declarations
 void    checkOptions           (Options& opts, int argc, char* argv[]);
 void    example                (void);
-void    usage                  (const char* command);
+void    usage                  (const string& command);
 int     getHumdrumSegmentCount (HumdrumStream& streamer);
-void    extractSegment         (HumdrumFile& infile, HumdrumStream& streamer, 
-                                int extractNum);
+void    extractSegment         (HumdrumFile& infile, HumdrumStream& streamer,
+						              int extractNum);
 void    saveToDisk             (HumdrumFile& infile, int count);
 int     fileExists             (const string& filename);
 
@@ -50,31 +52,31 @@ int          Start         = 1;  // used with -n option
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   checkOptions(options, argc, argv);
+	checkOptions(options, argc, argv);
 
-   HumdrumStream streamer(options);
-   HumdrumFile infile;
+	HumdrumStream streamer(options);
+	HumdrumFile infile;
 
-   if (countQ) {
-      int count = getHumdrumSegmentCount(streamer);
-      cout << count << endl;
-      exit(0);
-   }
-   if (extractQ) {
-      extractSegment(infile, streamer, extractNum);
-      if (segmentLabelQ) {
-         infile.printSegmentLabel(cout);
-      }
-      cout << infile;
-      exit(0);
-   }
+	if (countQ) {
+		int count = getHumdrumSegmentCount(streamer);
+		cout << count << endl;
+		exit(0);
+	}
+	if (extractQ) {
+		extractSegment(infile, streamer, extractNum);
+		if (segmentLabelQ) {
+			infile.printSegmentLabel(cout);
+		}
+		cout << infile;
+		exit(0);
+	}
 
-   int filecounter = Start;
-   while (streamer.read(infile)) {
-      saveToDisk(infile, filecounter++);
-   }
-   
-   return 0;
+	int filecounter = Start;
+	while (streamer.read(infile)) {
+		saveToDisk(infile, filecounter++);
+	}
+
+	return 0;
 }
 
 
@@ -83,66 +85,66 @@ int main(int argc, char* argv[]) {
 
 //////////////////////////////
 //
-// saveToDisk -- 
+// saveToDisk --
 //
 
 void saveToDisk(HumdrumFile& infile, int count) {
-   string writename;
-   writename = infile.getFilename();
-   PerlRegularExpression pre;
-   pre.sar(writename, ".*/", "");   // remove old directory path (or URI)
+	string writename;
+	writename = infile.getFilename();
+	PerlRegularExpression pre;
+	pre.sar(writename, ".*/", "");   // remove old directory path (or URI)
 
-   if (writename.size() == 0) {
-      // There is no file, so create a synthetic one: count.humsplit
-      char filename[1024] = {0};
-      char format[32] = {0};
-      sprintf(format, "%s0%d.humsplit", "%", Width);
-      sprintf(filename, format, count);
-      writename = filename;
-   }
+	if (writename.size() == 0) {
+		// There is no file, so create a synthetic one: count.humsplit
+		char filename[1024] = {0};
+		char format[32] = {0};
+		sprintf(format, "%s0%d.humsplit", "%", Width);
+		sprintf(filename, format, count);
+		writename = filename;
+	}
 
-   if (extensionQ) {
-      // remove old filename extension and replace with new one
-      pre.sar(writename, "\\.[^.]*$", "");
-      pre.sar(writename, "$", Extension.c_str());
-   }
-   if (prefixQ) {
-      // prefix to give to filename (useful for auto-naming).
-      pre.sar(writename, "^", Prefix.c_str());
-   }
-   if (directoryQ) {
-      // place in new directory if requested
-      pre.sar(Directory, "/*$", "/");
-      pre.sar(writename, "^", Directory.c_str());
-   }
+	if (extensionQ) {
+		// remove old filename extension and replace with new one
+		pre.sar(writename, "\\.[^.]*$", "");
+		pre.sar(writename, "$", Extension);
+	}
+	if (prefixQ) {
+		// prefix to give to filename (useful for auto-naming).
+		pre.sar(writename, "^", Prefix);
+	}
+	if (directoryQ) {
+		// place in new directory if requested
+		pre.sar(Directory, "/*$", "/");
+		pre.sar(writename, "^", Directory);
+	}
 
-   if (!overwriteQ && fileExists(writename)) {
-      // print warning if trying to overwrite an existing file
-      cerr << "Warning: " << writename 
-           << " already exists.  Skipping..." << endl;
-      return;
-   }
+	if (!overwriteQ && fileExists(writename)) {
+		// print warning if trying to overwrite an existing file
+		cerr << "Warning: " << writename
+			  << " already exists.  Skipping..." << endl;
+		return;
+	}
 
-   ofstream output;
-   output.open(writename.c_str());
-   if (!output.is_open()) {
-      cerr << "Warning: " << writename 
-           << " could not be written.  Skipping..." << endl;
-   }
+	ofstream output;
+	output.open(writename.c_str());
+	if (!output.is_open()) {
+		cerr << "Warning: " << writename
+			  << " could not be written.  Skipping..." << endl;
+	}
 
-   if (segmentLabelQ) {
-      // preserve segment label
-      infile.printSegmentLabel(output);
-   }
-   int i;
-   int start = 0;
-   if (strncmp(infile[0][0], "!!!!SEGMENT", strlen("!!!!SEGMENT")) == 0) {
-      start = 1;
-   }
-   for (i=start; i<infile.getNumLines(); i++) {
-      output << infile[i] << '\n';
-   }
-   output.close();
+	if (segmentLabelQ) {
+		// preserve segment label
+		infile.printSegmentLabel(output);
+	}
+	int i;
+	int start = 0;
+	if (strncmp(infile[0][0], "!!!!SEGMENT", strlen("!!!!SEGMENT")) == 0) {
+		start = 1;
+	}
+	for (i=start; i<infile.getNumLines(); i++) {
+		output << infile[i] << '\n';
+	}
+	output.close();
 }
 
 
@@ -153,8 +155,8 @@ void saveToDisk(HumdrumFile& infile, int count) {
 //
 
 int fileExists(const string& filename) {
-   struct stat buf;
-   return stat(filename.c_str(), &buf) == -1 ? 0 : 1;
+	struct stat buf;
+	return stat(filename.c_str(), &buf) == -1 ? 0 : 1;
 }
 
 
@@ -164,16 +166,16 @@ int fileExists(const string& filename) {
 // extractSegment --
 //
 
-void extractSegment(HumdrumFile& infile, HumdrumStream& streamer, 
-      int extractNum) {
-   int count = 0;
-   while (streamer.read(infile)) {
-      count++;
-      if (count == extractNum) {
-         return;
-      }
-   }
-   infile.clear();
+void extractSegment(HumdrumFile& infile, HumdrumStream& streamer,
+		int extractNum) {
+	int count = 0;
+	while (streamer.read(infile)) {
+		count++;
+		if (count == extractNum) {
+			return;
+		}
+	}
+	infile.clear();
 }
 
 
@@ -184,12 +186,12 @@ void extractSegment(HumdrumFile& infile, HumdrumStream& streamer,
 //
 
 int getHumdrumSegmentCount(HumdrumStream& streamer) {
-   int count = 0;
-   HumdrumFile infile;
-   while (streamer.read(infile)) {
-      count++;
-   }
-   return count;
+	int count = 0;
+	HumdrumFile infile;
+	while (streamer.read(infile)) {
+		count++;
+	}
+	return count;
 }
 
 
@@ -200,54 +202,54 @@ int getHumdrumSegmentCount(HumdrumStream& streamer) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("c|count=b:",        "Count number of segments in input stream");
-   opts.define("x|extract=i:1",     "Extract the nth stream");
-   opts.define("s|segment=b",       "Display segment line in output (with -x)");
-   opts.define("O|overwrite=b",     "Overwrite any existing files");
-   opts.define("d|directory=s:.",   "Directory to save files to");
-   opts.define("e|extension=s:.krn","File extension replacement");
-   opts.define("p|prefix=s:",       "Filename prefix");
-   opts.define("w|width=i:5",       "Number width for automatic names");
-   opts.define("n|number=i:1",      "Starting number for automatic names");
+	opts.define("c|count=b:",        "Count number of segments in input stream");
+	opts.define("x|extract=i:1",     "Extract the nth stream");
+	opts.define("s|segment=b",       "Display segment line in output (with -x)");
+	opts.define("O|overwrite=b",     "Overwrite any existing files");
+	opts.define("d|directory=s:.",   "Directory to save files to");
+	opts.define("e|extension=s:.krn","File extension replacement");
+	opts.define("p|prefix=s:",       "Filename prefix");
+	opts.define("w|width=i:5",       "Number width for automatic names");
+	opts.define("n|number=i:1",      "Starting number for automatic names");
 
-   opts.define("debug=b");                      // determine bad input line num
-   opts.define("author=b");                     // author of program
-   opts.define("version=b");                    // compilation info
-   opts.define("example=b");                    // example usages
-   opts.define("h|help=b");                     // short description
-   opts.process(argc, argv);
-   
-   // handle basic options:
-   if (opts.getBoolean("author")) {
-      cout << "Written by Craig Stuart Sapp, "
-           << "craig@ccrma.stanford.edu, 13 Dec 2012" << endl;
-      exit(0);
-   } else if (opts.getBoolean("version")) {
-      cout << argv[0] << ", version: Dec 2012" << endl;
-      cout << "compiled: " << __DATE__ << endl;
-      cout << MUSEINFO_VERSION << endl;
-      exit(0);
-   } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().c_str());
-      exit(0);
-   } else if (opts.getBoolean("example")) {
-      example();
-      exit(0);
-   }
+	opts.define("debug=b");                      // determine bad input line num
+	opts.define("author=b");                     // author of program
+	opts.define("version=b");                    // compilation info
+	opts.define("example=b");                    // example usages
+	opts.define("h|help=b");                     // short description
+	opts.process(argc, argv);
 
-   countQ         = opts.getBoolean("count");
-   extractQ       = opts.getBoolean("extract");
-   extractNum     = opts.getInteger("extract");
-   segmentLabelQ  = opts.getBoolean("segment");
-   directoryQ     = opts.getBoolean("directory");
-   Directory      = opts.getString("directory").c_str();
-   overwriteQ     = opts.getBoolean("overwrite");
-   extensionQ     = opts.getBoolean("extension");
-   Extension      = opts.getString("extension").c_str();
-   prefixQ        = opts.getBoolean("prefix");
-   Prefix         = opts.getString("prefix").c_str();
-   Width          = opts.getInteger("width");
-   Start          = opts.getInteger("number");
+	// handle basic options:
+	if (opts.getBoolean("author")) {
+		cout << "Written by Craig Stuart Sapp, "
+			  << "craig@ccrma.stanford.edu, 13 Dec 2012" << endl;
+		exit(0);
+	} else if (opts.getBoolean("version")) {
+		cout << argv[0] << ", version: Dec 2012" << endl;
+		cout << "compiled: " << __DATE__ << endl;
+		cout << MUSEINFO_VERSION << endl;
+		exit(0);
+	} else if (opts.getBoolean("help")) {
+		usage(opts.getCommand());
+		exit(0);
+	} else if (opts.getBoolean("example")) {
+		example();
+		exit(0);
+	}
+
+	countQ         = opts.getBoolean("count");
+	extractQ       = opts.getBoolean("extract");
+	extractNum     = opts.getInteger("extract");
+	segmentLabelQ  = opts.getBoolean("segment");
+	directoryQ     = opts.getBoolean("directory");
+	Directory      = opts.getString("directory");
+	overwriteQ     = opts.getBoolean("overwrite");
+	extensionQ     = opts.getBoolean("extension");
+	Extension      = opts.getString("extension");
+	prefixQ        = opts.getBoolean("prefix");
+	Prefix         = opts.getString("prefix");
+	Width          = opts.getInteger("width");
+	Start          = opts.getInteger("number");
 }
 
 
@@ -258,9 +260,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 //
 
 void example(void) {
-   cout <<
-   "                                                                         \n"
-   << endl;
+	cout <<
+	"                                                                         \n"
+	<< endl;
 }
 
 
@@ -270,12 +272,11 @@ void example(void) {
 // usage -- gives the usage statement for the sonority program
 //
 
-void usage(const char* command) {
-   cout <<
-   "                                                                         \n"
-   << endl;
+void usage(const string& command) {
+	cout <<
+	"                                                                         \n"
+	<< endl;
 }
 
 
 
-// md5sum: 5e3ec56ed6825512d85d8d3cf290bc1b humsplit.cpp [20170605]

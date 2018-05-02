@@ -16,27 +16,31 @@
 //                a given line of music.
 // 
 
-#include "humdrum.h"
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
 
+#include <vector>
+
+#include "humdrum.h"
+
+
 // function declarations
 void   checkOptions             (Options& opts, int argc, char* argv[]);
 void   example                  (void);
-void   printAnalysis            (HumdrumFile& infile, Array<double>& timings,
-                                 Array<double>& tempo, int setcount);
-void   analyzeTiming            (HumdrumFile& infile, Array<double>& timings,
-                                 Array<double>& tempo);
+void   printAnalysis            (HumdrumFile& infile, vector<double>& timings,
+                                 vector<double>& tempo, int setcount);
+void   analyzeTiming            (HumdrumFile& infile, vector<double>& timings,
+                                 vector<double>& tempo);
 void   usage                    (const char* command);
-void   interpolateGeometric     (HumdrumFile& infile, Array<double>& tempo, 
+void   interpolateGeometric     (HumdrumFile& infile, vector<double>& tempo, 
                                  int startindex, int stopindex);
 int    getNextTempoIndex        (HumdrumFile& infile, int startindex);
 void   printtime                (const string& filename, double totaldur);
 void   doLinearInterpolation    (HumdrumFile& infile, int setcount);
-void   interpolateTimings       (Array<double>& timings, HumdrumFile& infile,
+void   interpolateTimings       (vector<double>& timings, HumdrumFile& infile,
                                  int startindex, int endindex);
-void   fixendingtimes           (Array<double>& timings, HumdrumFile& infile);
+void   fixendingtimes           (vector<double>& timings, HumdrumFile& infile);
 
 // global variables
 Options      options;            // database for command-line arguments
@@ -56,8 +60,8 @@ int          interpQ    = 0;     // used with -i option
 
 int main(int argc, char* argv[]) {
    HumdrumFileSet infiles;
-   Array<double>  timings;
-   Array<double>  tempo;
+   vector<double>  timings;
+   vector<double>  tempo;
 
    checkOptions(options, argc, argv);
    infiles.read(options);
@@ -71,10 +75,10 @@ int main(int argc, char* argv[]) {
       } else {
          analyzeTiming(infiles[i], timings, tempo);
          if (totalQ) {
-            totaldur += timings[timings.getSize()-1];
+            totaldur += timings[(int)timings.size()-1];
             if (infiles.getCount() > 1) {
                printtime(infiles[i].getFilename(), 
-                     timings[timings.getSize()-1]);
+                     timings[(int)timings.size()-1]);
             }
          } else {
             printAnalysis(infiles[i], timings, tempo, infiles.getCount());
@@ -109,20 +113,15 @@ void doLinearInterpolation(HumdrumFile& infile, int setcount) {
    infile.analyzeRhythm("4");
 
    // extract the timing data using -1 for undefined
-
-   Array<double> timings;
-   Array<double> absbeat;
-
-   timings.setSize(infile.getNumLines());
-   timings.setAll(INVALIDTIME);
+   vector<double> timings(infile.getNumLines(), INVALIDTIME);
+   vector<double> absbeat;
    double atime;
 
-   int i, j;
-   for (i=0; i<infile.getNumLines(); i++) {
+   for (int i=0; i<infile.getNumLines(); i++) {
       if (infile[i].getType() != E_humrec_data) {
          continue;
       }
-      for (j=0; j<infile[i].getFieldCount(); j++) {
+      for (int j=0; j<infile[i].getFieldCount(); j++) {
          if (strcmp("**time", infile[i].getExInterp(j)) == 0) {
             if (strcmp(infile[i][j], ".") == 0) {
                timings[i] = UNKNOWNTIME;
@@ -138,7 +137,7 @@ void doLinearInterpolation(HumdrumFile& infile, int setcount) {
    }
 
    int lasttimeindex = -1;
-   for (i=0; i<timings.getSize(); i++) {
+   for (int i=0; i<(int)timings.size(); i++) {
       if (timings[i] < 0) {
          continue;
       }
@@ -161,10 +160,10 @@ void doLinearInterpolation(HumdrumFile& infile, int setcount) {
       infile.printNonemptySegmentLabel(cout);
    }
    int tfound = 0;
-   for (i=0; i<infile.getNumLines(); i++) {
+   for (int i=0; i<infile.getNumLines(); i++) {
       if (infile[i].getType() == E_humrec_data) {
          tfound = 0;
-         for (j=0; j<infile[i].getFieldCount(); j++) {
+         for (int j=0; j<infile[i].getFieldCount(); j++) {
             if ((tfound == 0) && 
                 (strcmp(infile[i].getExInterp(j), "**time") == 0)) {
                tfound = 1;
@@ -195,11 +194,11 @@ void doLinearInterpolation(HumdrumFile& infile, int setcount) {
 // fixendingtimes --
 //
 
-void fixendingtimes(Array<double>& timings, HumdrumFile& infile) {
+void fixendingtimes(vector<double>& timings, HumdrumFile& infile) {
    int i;
    int lastdatai = -1;
    int lastlastdatai = -1;
-   for (i=timings.getSize()-1; i>=0; i--) {
+   for (i=(int)timings.size()-1; i>=0; i--) {
       if ((lastdatai == -1) && (timings[i] >= 0)) {
          lastdatai = i;
       } else if ((lastlastdatai == -1) && (timings[i] >= 0)) {
@@ -217,7 +216,7 @@ void fixendingtimes(Array<double>& timings, HumdrumFile& infile) {
    double beatdiff = 0.0;
 
 
-   for (i=lastdatai+1; i<timings.getSize(); i++) {
+   for (i=lastdatai+1; i<(int)timings.size(); i++) {
       if (timings[i] == UNKNOWNTIME) {
          beatdiff = infile[i].getAbsBeat() - infile[lastdatai].getAbsBeat();
          timings[i] = timings[lastdatai] + beatdiff * beatincrement;
@@ -234,7 +233,7 @@ void fixendingtimes(Array<double>& timings, HumdrumFile& infile) {
 // interpolateTimings -- do the actual interpolation work.
 //
 
-void interpolateTimings(Array<double>& timings, HumdrumFile& infile,
+void interpolateTimings(vector<double>& timings, HumdrumFile& infile,
       int startindex, int endindex) {
 
    int i;
@@ -332,37 +331,31 @@ void printtime(const string& filename, double totaldur) {
 //     line in the file.
 // 
 
-void analyzeTiming(HumdrumFile& infile, Array<double>& timings,
-      Array<double>& tempo) {
+void analyzeTiming(HumdrumFile& infile, vector<double>& timings,
+      vector<double>& tempo) {
    infile.analyzeRhythm("4");
 
-   timings.setSize(infile.getNumLines());
-   timings.setAll(0.0);
-   tempo.setSize(infile.getNumLines());
-   tempo.setAll(dtempo);
+   timings.resize(infile.getNumLines());
+	std::fill(timings.begin(), timings.end(), 0.0);
+   tempo.resize(infile.getNumLines());
+	std::fill(tempo.begin(), tempo.end(), dtempo);
    tempo[0] = dtempo;
    double currtempo = dtempo;
    double input = 0.0;
    int count;
-   Array<double> tempoindicators;
-   Array<int>    tempoindex;
+   vector<double> tempoindicators;
+   vector<int>    tempoindex;
 
-   tempoindicators.setSize(1000);
-   tempoindicators.setSize(0);
-   tempoindicators.setGrowth(1000);
-   tempoindex.setSize(1000);
-   tempoindex.setSize(0);
-   tempoindex.setGrowth(1000);
+   tempoindicators.reserve(1000);
+   tempoindex.reserve(1000);
 
    double ritard = -1.0;
    double accel  = -2.0;
 
-   int i;
-   int j;
-   for (i=1; i<infile.getNumLines(); i++) {
+   for (int i=1; i<infile.getNumLines(); i++) {
       // check for new tempo...
       if (infile[i].getType() == E_humrec_interpretation) {
-         for (j=0; j<infile[i].getFieldCount(); j++) {
+         for (int j=0; j<infile[i].getFieldCount(); j++) {
             if (strcmp(infile[i].getExInterp(j), "**kern") != 0) {
                continue;
             }
@@ -370,19 +363,19 @@ void analyzeTiming(HumdrumFile& infile, Array<double>& timings,
                count = sscanf(infile[i][j], "*MM%lf", &input);
                if (count == 1) {
                   currtempo = input;
-                  tempoindicators.append(currtempo);
-                  tempoindex.append(i);
+                  tempoindicators.push_back(currtempo);
+                  tempoindex.push_back(i);
                   if (i > 0) {
                      tempo[i-1] = currtempo;
                   }
                   tempo[i] = currtempo;
                }
             } else if (strcmp(infile[i][j], "*accel") == 0) {
-               tempoindicators.append(accel);
-               tempoindex.append(i);
+               tempoindicators.push_back(accel);
+               tempoindex.push_back(i);
             } else if (strcmp(infile[i][j], "*rit") == 0) {
-               tempoindicators.append(ritard);
-               tempoindex.append(i);
+               tempoindicators.push_back(ritard);
+               tempoindex.push_back(i);
             }
             break;
          }
@@ -401,7 +394,7 @@ void analyzeTiming(HumdrumFile& infile, Array<double>& timings,
    // go back and geometrically interpolate the tempo markings
    // when there are *accel and *rit markers in the data.
 
-   for (i=1; i<tempoindicators.getSize()-1; i++) {
+   for (int i=1; i<(int)tempoindicators.size()-1; i++) {
       if ((tempoindicators[i] < 0) && (tempoindicators[i+1] > 0)) {
          interpolateGeometric(infile, tempo, tempoindex[i], tempoindex[i+1]);
       }
@@ -426,7 +419,7 @@ void analyzeTiming(HumdrumFile& infile, Array<double>& timings,
    double startbeat;
    double stopbeat;
 
-   for (i=1; i<infile.getNumLines(); i++) {
+   for (int i=1; i<infile.getNumLines(); i++) {
       starttempo   = tempo[i];
       ntindex      = getNextTempoIndex(infile, i);
       stoptempo    = tempo[ntindex];
@@ -497,7 +490,7 @@ int getNextTempoIndex(HumdrumFile& infile, int startindex) {
 // interpolateGeometric --
 //
 
-void interpolateGeometric(HumdrumFile& infile, Array<double>& tempo, 
+void interpolateGeometric(HumdrumFile& infile, vector<double>& tempo, 
       int startindex, int stopindex) {
    double duration   = 0.0;
    double newtempo   = 0.0;
@@ -616,8 +609,8 @@ void example(void) {
 // printAnalysis -- 
 //
 
-void printAnalysis(HumdrumFile& infile, Array<double>& timings,
-      Array<double>& tempo, int setcount) {
+void printAnalysis(HumdrumFile& infile, vector<double>& timings,
+      vector<double>& tempo, int setcount) {
    int tempomark = 0;
    int i, j;
    int m;

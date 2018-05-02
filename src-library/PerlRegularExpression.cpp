@@ -159,25 +159,16 @@
 
 
 #include <string.h>
+
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
+
 #include "PerlRegularExpression.h"
 #include "Array.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <iostream.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+using namespace std;
 
 
 //////////////////////////////
@@ -637,6 +628,40 @@ int PerlRegularExpression::sar(Array<char>& inout, const char* searchstring,
 // PerlRegularExpression::tr -- translate characters
 //
 
+void PerlRegularExpression::tr(string& inout, const string& inputlist, 
+      const string& outputlist) {
+
+   char table[256];
+   for (int i=0; i<256; i++) {
+      table[i] = i;
+   }
+
+   vector<char> inchars;
+   vector<char> outchars;
+   inchars.reserve(256);  
+   outchars.reserve(256);  
+
+   expandList(inchars, inputlist);
+   expandList(outchars, outputlist);
+
+   // cout  << "INPUTLIST  " << inchars.getBase() << endl;
+   // cout  << "OUTPUTLIST " << outchars.getBase() << endl;
+   int maxx = (int)inchars.size();
+   if ((int)outchars.size() < maxx) {
+      maxx = (int)outchars.size();
+   }
+  
+   for (int i=0; i<maxx; i++) {
+      table[(unsigned char)inchars[i]] = outchars[i];
+   }
+
+   for (int i=0; i<(int)inout.size(); i++) {
+      inout[i] = table[(unsigned char)inout[i]];
+   }
+}
+
+
+
 void PerlRegularExpression::tr(Array<char>& inout, const char* inputlist, 
       const char* outputlist) {
    char table[256];
@@ -681,8 +706,57 @@ void PerlRegularExpression::tr(Array<char>& inout, const char* inputlist,
 //     individual characters.
 //
 
+
+void PerlRegularExpression::expandList(vector<char>& expandlist, 
+     const string& input) {
+
+   char ch;
+   int target;
+   int source;
+
+   int i = 0;
+   while (input[i] != '\0') {
+      switch (input[i]) {
+         case '-': 
+            if ((i == 0) || (input[i+1] == '\0')) {
+               // treat as a regular character
+               ch = '-';
+               expandlist.push_back(ch);
+            } else {
+               // treat as a character range marker
+               // literal markers are not allowed after dash
+               // in this implementation of tr
+               target = (unsigned char)input[i+1];
+               source = (unsigned char)input[i-1];
+               for (int j=source+1; j<=target; j++) {
+                  ch = (char)j;
+                  expandlist.push_back(ch);
+               }
+               i += 1;
+            }
+            break;
+         case '\\':                    // deal with \n, \t, \r in the future...
+            if (input[i+1] != '\0') {
+               ch = input[i+1];
+               expandlist.push_back(ch);
+               i++;
+            }
+            break;
+         default:
+	    ch = input[i];
+            expandlist.push_back(ch);
+      }
+      i++;
+   }
+
+   ch = '\0';
+   expandlist.push_back(ch);
+   expandlist.resize((int)expandlist.size()-1);
+}
+
+
 void PerlRegularExpression::expandList(Array<char>& expandlist, 
-     const char* input) {
+     const string& input) {
 
    char ch;
    int target;
@@ -783,7 +857,7 @@ int PerlRegularExpression::searchAndReplace(Array<char>& output,
       initializeSearch();
    }
 
-   SSTREAM tempdata;
+   stringstream tempdata;
    int counter = 0;
    int i;
    int len    = strlen(ptr);
@@ -824,9 +898,9 @@ int PerlRegularExpression::searchAndReplace(Array<char>& output,
       tempdata << ptr;   // store the piece of input after last replace.
    }
    tempdata << ends;
-   len = strlen(tempdata.CSTRING);
+   len = strlen(tempdata.str().c_str());
    output.setSize(len+1);
-   strcpy(output.getBase(), tempdata.CSTRING);
+   strcpy(output.getBase(), tempdata.str().c_str());
    return counter;
 }
 

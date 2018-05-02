@@ -9,37 +9,28 @@
 // Description:   Number, renumber or remove measure numbers from Humdrum files.
 //
 
-#include "humdrum.h"
 
 #include <string.h>
-#include <cctype>
 
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>     /* for windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <cctype>
+#include <vector>
+#include <string>
+
+#include "humdrum.h"
+
+using namespace std;
    
 
 // function declarations
-void      checkOptions       (Options& opts, int argc, char* argv[]);
-void      example            (void);
-void      usage              (const char* command);
-void      processFile        (HumdrumFile& file);
-void      removeBarNumbers   (HumdrumFile& infile);
-void      printWithoutBarNumbers(HumdrumRecord& humrecord);
-void      printWithBarNumbers(HumdrumRecord& humrecord, int measurenum);
-void      printSingleBarNumber(const char* string, int measurenum);
-int       getEndingBarline   (HumdrumFile& infile);
+void      checkOptions            (Options& opts, int argc, char* argv[]);
+void      example                 (void);
+void      usage                   (const string& command);
+void      processFile             (HumdrumFile& file);
+void      removeBarNumbers        (HumdrumFile& infile);
+void      printWithoutBarNumbers  (HumdrumRecord& humrecord);
+void      printWithBarNumbers     (HumdrumRecord& humrecord, int measurenum);
+void      printSingleBarNumber    (const string& astring, int measurenum);
+int       getEndingBarline        (HumdrumFile& infile);
 
 // global variables
 Options   options;            // database for command-line arguments
@@ -156,18 +147,15 @@ int getEndingBarline(HumdrumFile& infile) {
 void processFile(HumdrumFile& infile) {
    infile.analyzeRhythm("4");
 
-   Array<int>    measureline;   // line number in the file where measure occur
-   Array<double> measurebeats;  // duration of measure
-   Array<double> timesigbeats;  // duration according to timesignature
-   Array<int>    control;       // control = numbered measure
-   Array<int>    measurenums;   // output measure numbers
+   vector<int>    measureline;   // line number in the file where measure occur
+   vector<double> measurebeats;  // duration of measure
+   vector<double> timesigbeats;  // duration according to timesignature
+   vector<int>    control;       // control = numbered measure
+   vector<int>    measurenums;   // output measure numbers
 
-   measureline.setSize(infile.getNumLines());
-   measureline.setSize(0);
-   measurebeats.setSize(infile.getNumLines());
-   measurebeats.setSize(0);
-   timesigbeats.setSize(infile.getNumLines());
-   timesigbeats.setSize(0);
+   measureline.reserve(infile.getNumLines());
+   measurebeats.reserve(infile.getNumLines());
+   timesigbeats.reserve(infile.getNumLines());
 
    int i, j;
    double timesigdur = 0.0;
@@ -187,31 +175,31 @@ void processFile(HumdrumFile& infile) {
                timebot = Convert::kernTimeSignatureBottomToDuration(infile[i][j]);
                timesigdur = timetop * timebot;
                // fix last timesigbeats value
-               if (timesigbeats.getSize() > 0) {
-                  timesigbeats[timesigbeats.getSize()-1] = timesigdur;
-                  measurebeats[measurebeats.getSize()-1] = lastvalue * timebot;
+               if (timesigbeats.size() > 0) {
+                  timesigbeats[(int)timesigbeats.size()-1] = timesigdur;
+                  measurebeats[(int)measurebeats.size()-1] = lastvalue * timebot;
                }
             }
          }
       } else if (infile[i].getType() == E_humrec_data_measure) {
-         measureline.append(i);
+         measureline.push_back(i);
          lastvalue = infile[i].getBeat();
          // shouldn't use timebot (now analyzing rhythm by "4")
          // value = lastvalue * timebot;
          value = lastvalue;
-         measurebeats.append(value);
-         timesigbeats.append(timesigdur);
+         measurebeats.push_back(value);
+         timesigbeats.push_back(timesigdur);
       }
    }
 
    if (debugQ) {
       cout << "measure beats / timesig beats" << endl;
-      for (i=0; i<measurebeats.getSize(); i++) {
+      for (i=0; i<(int)measurebeats.size(); i++) {
          cout << measurebeats[i] << "\t" << timesigbeats[i] << endl;
       }
    }
 
-   if (measurebeats.getSize() == 0) {
+   if (measurebeats.size() == 0) {
       // no barlines, nothing to do...
       cout << infile;
       return;
@@ -232,14 +220,14 @@ void processFile(HumdrumFile& infile) {
    //     given.
    //
 
-   control.setSize(measureline.getSize());
-   measurenums.setSize(measureline.getSize());
-   control.setAll(-1);
-   measurenums.setAll(-1);
+   control.resize(measureline.size());
+   measurenums.resize(measureline.size());
+	std::fill(control.begin(), control.end(), -1);
+	std::fill(measurenums.begin(), measurenums.end(), -1);
 
    // If the time signature and the number of beats in a measure
    // agree, then the bar is worth numbering:
-   for (i=0; i<control.getSize(); i++) {
+   for (i=0; i<(int)control.size(); i++) {
       if (measurebeats[i] == timesigbeats[i]) {
          control[i] = 1;
       }
@@ -254,7 +242,7 @@ void processFile(HumdrumFile& infile) {
    }
 
    // Check for intermediate barlines which split one measure
-   for (i=0; i<control.getSize()-2; i++) {
+   for (i=0; i<(int)control.size()-2; i++) {
       if ((control[i] == 1) || (control[i+1] == 1)) {
          continue;
       }
@@ -272,22 +260,22 @@ void processFile(HumdrumFile& infile) {
 
    // if two (or more) non-controlling bars occur in a row, then
    // make them controlling:
-   //for (i=0; i<control.getSize()-1; i++) {
+   //for (i=0; i<control.size()-1; i++) {
    //   if ((control[i] < 1) && (control[i+1] < 1)) {
-   //      while ((i < control.getSize()) && (control[i] < 1)) {
+   //      while ((i < control.size()) && (control[i] < 1)) {
    //         control[i++] = 1;
    //      }
    //   }
    //}
 
-   for (i=0; i<control.getSize()-1; i++) {
+   for (i=0; i<(int)control.size()-1; i++) {
       if ((control[i] == 0) && (control[i+1] < 0)) {
          control[i+1] = 1;
       }
    }
 
    // if a measure contains no beats, then it is not a controlling barline
-   for (i=0; i<control.getSize(); i++) {
+   for (i=0; i<(int)control.size(); i++) {
       if (measurebeats[i] == 0) {
          control[i] = 0;
       }
@@ -314,7 +302,7 @@ void processFile(HumdrumFile& infile) {
    // if the last bar is incomplete, but the bar before it
    // is not incomplete, then allow barline on last measure,
    // excluding any ending barlines with no data after them.
-   for (i=control.getSize()-1; i>=0; i--) {
+   for (i=(int)control.size()-1; i>=0; i--) {
       if (control[i] == 0) {
          continue;
       }
@@ -325,14 +313,14 @@ void processFile(HumdrumFile& infile) {
    }
 
    if (allQ) {
-      control.setAll(1);
+		std::fill(control.begin(), control.end(), 1);
       offset = 0;
    }
 
    // if there is no time data, just label each barline
    // as a new measure. 
    if (infile[infile.getNumLines()-1].getAbsBeat() == 0.0) {
-      for (i=0; i<control.getSize(); i++) {
+      for (i=0; i<(int)control.size(); i++) {
          control[i] = 1;
       }
       // don't mark the last barline if there is no data
@@ -342,7 +330,7 @@ void processFile(HumdrumFile& infile) {
             break;
          }
          if (infile[i].isBarline()) {
-            control.last() = -1;
+            control.back() = -1;
             break;
          }
       }
@@ -350,7 +338,7 @@ void processFile(HumdrumFile& infile) {
 
    // assign the measure numbers;
    int mnum = startnum + offset;
-   for (i=0; i<measurenums.getSize(); i++) {
+   for (i=0; i<(int)measurenums.size(); i++) {
       if (control[i] == 1) {
          measurenums[i] = mnum++;
       }
@@ -358,7 +346,7 @@ void processFile(HumdrumFile& infile) {
 
    if (debugQ) {
       cout << "cont\tnum\tbeats" << endl;
-      for (i=0; i<control.getSize(); i++) {
+      for (i=0; i<(int)control.size(); i++) {
          cout << control[i] << "\t" << measurenums[i] << "\t"
               << measurebeats[i] << "\t" << timesigbeats[i] << endl;
       }
@@ -406,23 +394,21 @@ void printWithBarNumbers(HumdrumRecord& humrecord, int measurenum) {
 }
 
 
+
 //////////////////////////////
 //
 // printSingleBarNumber --
 //
 
-void printSingleBarNumber(const char* string, int measurenum) {
-   int length = strlen(string);
-   int i;
-   for (i=0; i<length; i++) {
-      if (string[i] == '=' && string[i+1] != '=') {
-         cout << string[i] << measurenum;
-      } else if (!std::isdigit(string[i])) {
-         cout << string[i];
+void printSingleBarNumber(const string& astring, int measurenum) {
+   for (int i=0; i<(int)astring.size(); i++) {
+      if ((astring[i] == '=') && (astring[i+1] != '=')) {
+         cout << astring[i] << measurenum;
+      } else if (!isdigit(astring[i])) {
+         cout << astring[i];
       }
    }
 }
-
 
 
 
@@ -489,7 +475,7 @@ void example(void) {
 // usage -- gives the usage statement for the meter program
 //
 
-void usage(const char* command) {
+void usage(const string& command) {
    cout <<
    "                                                                         \n"
    << endl;
@@ -497,4 +483,3 @@ void usage(const char* command) {
 
 
 
-// md5sum: 268d348bb121547d896fda2474cb644f barnum.cpp [20170605]

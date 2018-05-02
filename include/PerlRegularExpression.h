@@ -70,6 +70,10 @@ class PerlRegularExpression {
                                      const char* inputlist, 
                                      const char* outputlist);
 
+      void tr                       (string& inout, 
+                                     const string& inputlist, 
+                                     const string& outputlist);
+
       static int getTokens          (Array<SigString>& output, 
                                      const char* separator, 
                                      const char* input);
@@ -133,7 +137,9 @@ class PerlRegularExpression {
 
    private:
       void expandList               (Array<char>& expandlist, 
-                                     const char* input); 
+                                     const string& input); 
+      void expandList               (vector<char>& expandlist, 
+                                     const string& input); 
 
 };
 

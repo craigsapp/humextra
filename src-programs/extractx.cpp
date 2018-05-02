@@ -25,10 +25,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <iostream>
-#include <fstream>
-#include <vector>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
