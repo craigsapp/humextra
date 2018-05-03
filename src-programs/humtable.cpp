@@ -17,13 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <sstream>
-#else
-   #include <iostream.h>
-   #include <strstream.h>
-#endif
+#include <iostream>
+#include <sstream>
+
 
 // function declarations
 void     checkOptions         (Options& opts, int argc, char* argv[]);
@@ -34,22 +30,22 @@ void     printGlobalComment   (ostream& out, HumdrumFile& infile, int line);
 void     printReferenceRecord (ostream& out, HumdrumFile& infile, int line);
 void     printFields          (ostream& out, HumdrumFile& infile, int line);
 int      getSubTracks         (HumdrumFile& infile, int line, int track);
-void     addLabelHyperlinks   (Array<char>& strang);
-void     addLabelHyperlinkName(Array<char>& strang);
+void     addLabelHyperlinks   (string& strang);
+void     addLabelHyperlinkName(string& strang);
 ostream& printHtmlPageHeader  (ostream& out);
 ostream& printHtmlPageFooter  (ostream& out);
 ostream& printHtmlPageFooter  (ostream& out);
 ostream& printCss             (ostream& out);
 ostream& printClassInfo       (ostream& out, HumdrumFile& infile, int line);
-void     getMarks             (HumdrumFile& infile, Array<char>& chars, 
-                               Array<SigString>& colors);
+void     getMarks             (HumdrumFile& infile, string& chars, 
+                               vector<string>& colors);
 ostream& printMarkStyle       (ostream& out, HumdrumFile& infile, int line, 
-                               int track, Array<char>& chars, 
-                               Array<SigString>& colors);
-void     markupKernToken      (Array<char>& strang, HumdrumFile& infile, 
+                               int track, string& chars, 
+                               vector<string>& colors);
+void     markupKernToken      (string& strang, HumdrumFile& infile, 
                                int line, int field);
 void     printHtmlCharacter   (ostream& out, char ch);
-void     markNullToken        (Array<char>& strang);
+void     markNullToken        (string& strang);
 
 // global variables
 Options      options;            // database for command-line arguments
@@ -57,12 +53,12 @@ int          fullQ     = 1;      // used with --page option
 int          classQ    = 1;      // used with -C option
 int          cssQ      = 0;      // used with --css option
 int          textareaQ = 0;      // used with --textarea option
-int          markQ     = 1;	 // used with -M option
+int          markQ     = 1;	   // used with -M option
 int          kernQ     = 0;      // used with -k option
-const char*  prefix    = "hum";  // used with --prefix option
+string       prefix    = "hum";  // used with --prefix option
 
-Array<char>      Markchar;
-Array<SigString> Markcolor;
+string         Markchar;
+vector<string> Markcolor;
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -165,8 +161,8 @@ void createTable(ostream& out, HumdrumFile& infile) {
    if (markQ) {
       getMarks(infile, Markchar, Markcolor);
    } else {
-      Markchar.setSize(0);;
-      Markcolor.setSize(0);;
+      Markchar.resize(0);
+      Markcolor.resize(0);
    }
 
    out << "<div class=\"" << prefix << "Div\">\n";
@@ -219,14 +215,13 @@ void createTable(ostream& out, HumdrumFile& infile) {
 //     considering **kern markers for the moment.
 //
 
-void getMarks(HumdrumFile& infile, Array<char>& chars, 
-      Array<SigString>& colors) {
-   const char* defaultcolor = "#dd0000";
-   const char* color = defaultcolor;
+void getMarks(HumdrumFile& infile, string& chars, 
+      vector<string>& colors) {
+   string defaultcolor = "#dd0000";
+   string color = defaultcolor;
    PerlRegularExpression pre;
    char marker;
-   int i;
-   for (i=0; i<infile.getNumLines(); i++) {
+   for (int i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isReferenceRecord()) {
          continue;
       }
@@ -240,9 +235,8 @@ void getMarks(HumdrumFile& infile, Array<char>& chars,
          } else {
             color = defaultcolor;
          }
-         chars.append(marker);
-         colors.increase(1);
-         colors.last() = color;
+         chars.push_back(marker);
+			colors.push_back(color);
       }
    }
 }
@@ -313,7 +307,7 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
    int counter;
    int subtracks;
    PerlRegularExpression pre;
-   Array<char> strang;
+   string strang;
 
    for (track=1; track<=infile.getMaxTracks(); track++) {
       subtracks = getSubTracks(infile, line, track);
@@ -352,8 +346,7 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
                    (infile.getTrackExInterp(track) == "**kern")) {
                  markupKernToken(strang, infile, i, j);
                } else {
-                  strang.setSize(strlen(infile[i][j])+1);
-                  strcpy(strang.getBase(), infile[i][j]); 
+                  strang = infile[i][j]; 
                   pre.sar(strang, " ", "&nbsp;", "g");
                   // deal with HTML entities, just < and > for now:
                   pre.sar(strang, ">", "&gt;", "g");
@@ -394,8 +387,7 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
                    (infile.getTrackExInterp(track) == "**kern")) {
                  markupKernToken(strang, infile, i, j);
                } else {
-                  strang.setSize(strlen(infile[i][j])+1);
-                  strcpy(strang.getBase(), infile[i][j]); 
+                  strang = infile[i][j]; 
                   pre.sar(strang, " ", "&nbsp;", "g");
                   // deal with HTML entities, just < and > for now:
                   pre.sar(strang, ">", "&gt;", "g");
@@ -423,15 +415,13 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
 // markNullToken --
 //
 
-void markNullToken(Array<char>& strang) {
+void markNullToken(string& strang) {
    stringstream buffer;
    buffer << "<span class=\"" << prefix << "Null\">";
    buffer << ".";
    buffer << "</span>";
    buffer << ends;
-   int len = strlen(buffer.str().c_str());
-   strang.setSize(len+1);
-   strcpy(strang.getBase(), buffer.str().c_str());
+   strang = buffer.str();
 }
 
 
@@ -441,17 +431,14 @@ void markNullToken(Array<char>& strang) {
 // markupKernToken --
 //
 
-void markupKernToken(Array<char>& strang, HumdrumFile& infile, 
+void markupKernToken(string& strang, HumdrumFile& infile, 
       int line, int field) {
 
    stringstream buffer;
-   const char* token = infile[line][field];
-   int len = strlen(token);
-   Array<int> states(len);
-   states.setAll(0);
+   string token = infile[line][field];
+   vector<int> states(token.size(), 0);
    char ch;
-   int i;
-   for (i=0; i<len; i++) {
+   for (int i=0; i<(int)token.size(); i++) {
       if (std::isdigit(token[i])) {
          states[i] = 2;  // part of rhythm
          continue;
@@ -477,10 +464,10 @@ void markupKernToken(Array<char>& strang, HumdrumFile& infile,
 
    int lstate = 0;
    buffer << "<span class=\""  << prefix << "KernToken\">";
-   if (strcmp(token, ".") == 0) {
+   if (token == ".") {
       buffer << ".";
    } else {
-      for (i=0; i<len; i++) {
+      for (int i=0; i<(int)token.size(); i++) {
          if (states[i] == lstate) {
             // nothing new to markup.
             printHtmlCharacter(buffer, token[i]);
@@ -513,9 +500,7 @@ void markupKernToken(Array<char>& strang, HumdrumFile& infile,
    buffer << "</span>";
    buffer << ends;
 
-   int len2 = strlen(buffer.str().c_str());
-   strang.setSize(len2+1);
-   strcpy(strang.getBase(), buffer.str().c_str());
+   strang = buffer.str();
 }
 
 
@@ -545,7 +530,7 @@ void printHtmlCharacter(ostream& out, char ch) {
 //
 
 ostream& printMarkStyle(ostream& out, HumdrumFile& infile, int line, 
-      int track, Array<char>& chars, Array<SigString>& colors) {
+      int track, string& chars, vector<string>& colors) {
    if (!infile[line].isData()) {
       return out;
    }
@@ -566,7 +551,7 @@ ostream& printMarkStyle(ostream& out, HumdrumFile& infile, int line,
          jj = infile[line].getDotSpine(j);
       }
 
-      for (k=0; k<chars.getSize(); k++) {
+      for (k=0; k<(int)chars.size(); k++) {
          if (strchr(infile[ii][jj], chars[k]) == NULL) {
             continue;
          }
@@ -586,19 +571,17 @@ ostream& printMarkStyle(ostream& out, HumdrumFile& infile, int line,
 // addLabelHyperlinkName --
 //
 
-void addLabelHyperlinkName(Array<char>& strang) {
+void addLabelHyperlinkName(string& strang) {
    PerlRegularExpression pre;
    if (!pre.search(strang, "^\\*>([^\\[]+)$", "")) {
       return;
    }
 
-   char buffer[1024] = {0};
-   strcpy(buffer, "<a name=\"");
-   strcat(buffer, pre.getSubmatch(1));
-   strcat(buffer, "\"></a>");
-   strcat(buffer, strang.getBase());
-   strang.setSize(strlen(buffer)+1);
-   strcpy(strang.getBase(), buffer);
+   string buffer = "<a name=\"";
+   buffer += pre.getSubmatch(1);
+   buffer += "\"></a>";
+   buffer += strang;
+   strang = buffer;
 }
 
 
@@ -608,35 +591,35 @@ void addLabelHyperlinkName(Array<char>& strang) {
 // addLabelHyperlinks --
 //
 
-void addLabelHyperlinks(Array<char>& strang) {
+void addLabelHyperlinks(string& strang) {
    PerlRegularExpression pre;
    if (!pre.search(strang, "^\\*>(.*)\\[(.*)\\]", "")) {
       return;
    }
 
-   char buffer[10123] = {0};
-   strcpy(buffer, "*>");
-   strcat(buffer, pre.getSubmatch(1));
-   strcat(buffer, "[");
+	string buffer;
+	buffer.reserve(10123);
+	buffer = "*>";
+   buffer += pre.getSubmatch(1);
+   buffer += "[";
 
    PerlRegularExpression pre2;
-   Array<Array<char> > tokens;
+   vector<string> tokens;
    pre2.getTokens(tokens, ",", pre.getSubmatch(2));
    
    int i;
-   for (i=0; i<tokens.getSize(); i++) {
-      strcat(buffer, "<a href=\"#");
-      strcat(buffer, tokens[i].getBase());
-      strcat(buffer, "\">");
-      strcat(buffer, tokens[i].getBase());
-      strcat(buffer, "</a>");
-      if (i < tokens.getSize() - 1) {
-         strcat(buffer, ",");
+   for (i=0; i<(int)tokens.size(); i++) {
+      buffer += "<a href=\"#";
+      buffer += tokens[i];
+      buffer += "\">";
+      buffer += tokens[i];
+      buffer += "</a>";
+      if (i < (int)tokens.size() - 1) {
+         buffer += ",";
       }
    }
-   strcat(buffer, "]");
-   strang.setSize(strlen(buffer) + 1);
-   strcpy(strang.getBase(), buffer);
+   buffer += "]";
+   strang = buffer;
 }
 
 
@@ -660,7 +643,7 @@ void printReferenceRecord(ostream& out, HumdrumFile& infile, int line) {
       return;
    } 
 
-   Array<char> description;
+   string description;
    
    infile[line].getBibliographicMeaning(description, pre.getSubmatch(1));
    PerlRegularExpression pre2;
@@ -747,8 +730,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    kernQ     =  opts.getBoolean("kern");
    prefix    =  opts.getString("prefix").data();
 
-   Markchar.setSize(0);;
-   Markcolor.setSize(0);;
+   Markchar.resize(0);;
+   Markcolor.resize(0);;
 }
 
 
@@ -781,4 +764,3 @@ void usage(const char* command) {
 
 
 
-// md5sum: 1790292d3c46c0b1f40462824067fad0 humtable.cpp [20170605]

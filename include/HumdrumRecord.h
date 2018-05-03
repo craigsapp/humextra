@@ -89,6 +89,8 @@ class HumdrumRecord {
       static const char*getLanguageName    (const char* code);
       static const char*getBibliographicMeaning(Array<char>& output, 
                                             const char* code);
+      static string&    getBibliographicMeaning(string& output, 
+                                            const string& code);
       const char*       getLine            (void); 
       int               getLineNum         (void) const; 
       int               getPrimaryTrack    (int spineNumber);
@@ -103,6 +105,14 @@ class HumdrumRecord {
       int               getTokenCount      (int fieldIndex, 
                                               char separator = ' ');
       char*             getToken           (char* buffer, int fieldIndex, 
+                                              int tokenIndex, 
+                                              int buffersize = -1, 
+                                              char separator = ' ');
+      string&           getToken           (string& buffer, int fieldIndex, 
+                                              int tokenIndex, 
+                                              int buffersize = -1, 
+                                              char separator = ' ');
+      string            getToken           (int fieldIndex, 
                                               int tokenIndex, 
                                               int buffersize = -1, 
                                               char separator = ' ');
@@ -279,4 +289,3 @@ ostream& operator<<(ostream& out, HumdrumRecord& aRecord);
 
 
 
-// md5sum: a51a3ff3765fbd6308f3334a7ceb8b6e HumdrumRecord.h [20001204]

@@ -31,17 +31,14 @@
 #ifndef _HUMDRUMFILE_H_INCLUDED
 #define _HUMDRUMFILE_H_INCLUDED
 
+#include <iostream>
+#include <vector>
 
 #include "HumdrumFileBasic.h"
 #include "NoteList.h"
 #include "ChordQuality.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-   using namespace std;
-#else
-   #include <iostream.h>
-#endif
+using namespace std;
 
 
 //////////////////////////////
@@ -133,6 +130,8 @@ class HumdrumFile : public HumdrumFileBasic {
                                                int options = 0);
       int                    getNoteList      (Array<int>& notes, int line, 
                                                    int flag);
+      int                    getNoteList      (vector<int>& notes, int line, 
+                                                   int flag);
       void                   getNoteArray     (Array<double>& absbeat, 
                                                Array<int>& pitches, 
                                                Array<double>& durations, 
@@ -182,6 +181,7 @@ class HumdrumFile : public HumdrumFileBasic {
       //
       
       // serialisms
+
       void        getIntervalVector  (Array<int>& iv, int line, 
                                       int attackQ = 0);
       const char* getForteSetName    (int line);
@@ -193,6 +193,19 @@ class HumdrumFile : public HumdrumFileBasic {
                                       int attackQ = 0);
       const char* getTnSetName       (int line, int attackQ = 0);
       void        getTnSetNameAllSubsets(Array<int>& list, int line,
+                                      int attackQ = 0);
+
+      void        getIntervalVector  (vector<int>& iv, int line, 
+                                      int attackQ = 0);
+      string      getForteSetNameString (int line);
+      void        getNormalForm      (vector<int>& norm, int line, 
+                                      int attackQ = 0);
+      void        getTnNormalForm    (vector<int>& tnorm, int line,
+                                      int attackQ = 0);
+      void        getBase12PitchList (vector<int>& list, int line, 
+                                      int attackQ = 0);
+      string      getTnSetNameString (int line, int attackQ = 0);
+      void        getTnSetNameAllSubsets(vector<int>& list, int line,
                                       int attackQ = 0);
 
 
@@ -214,6 +227,7 @@ class HumdrumFile : public HumdrumFileBasic {
 
       // sonority harmonic analyses
       void analyzeSonorityQuality(Array<ChordQuality>& cq);
+      void analyzeSonorityQuality(vector<ChordQuality>& cq);
       void analyzeSonorityRoot(Array<int>& roots, 
             int flag = AFLAG_BASE40_PITCH);
 

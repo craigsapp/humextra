@@ -139,7 +139,8 @@ class Convert {
       static double    kotoToDuration             (const string& aKotoString);
       static RationalNumber kotoToDurationR       (const string& aKotoString);
 
-   // convsions related to serial interval descriptions
+   // conversions related to serial interval descriptions
+
       static const char* base12ToTnSetName        (Array<int>& base12);
       static void        base12ToTnSetNameAllSubsets(Array<int>& list, 
                                                    Array<int>& notes);
@@ -151,6 +152,18 @@ class Convert {
                                                       Array<int>& base40);
       static void      base12ToIntervalVector     (Array<int>& iv,  
                                                       Array<int>& base12);
+
+      static string    base12ToTnSetName          (vector<int>& base12);
+      static void      base12ToTnSetNameAllSubsets(vector<int>& list, 
+                                                   vector<int>& notes);
+      static void      base12ToTnNormalForm       (vector<int>& tnorm, 
+                                                   vector<int>& base12);
+      static void      base12ToNormalForm         (vector<int>& nform, 
+                                                   vector<int>& base12);
+      static void      base40ToIntervalVector     (vector<int>& iv,  
+                                                   vector<int>& base40);
+      static void      base12ToIntervalVector     (vector<int>& iv,  
+                                                   vector<int>& base12);
 
    protected:
       // findBestNormalRotation used with bse12ToNormalForm

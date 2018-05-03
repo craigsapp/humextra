@@ -1,5 +1,5 @@
 //
-// Copyright 1998-2000 by Craig Stuart Sapp, All Rights Reserved.
+// Copyright 1998-2018 by Craig Stuart Sapp, All Rights Reserved.
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon May 18 13:52:59 PDT 1998
 // Last Modified: Thu Jul  1 16:20:41 PDT 1999
@@ -30,29 +30,17 @@
 //                segments data into spines.
 //
 
+#include <stdio.h>
+#include <string.h>
+
+#include <cctype>
+
 #include "Convert.h"
 #include "HumdrumRecord.h"
 #include "PerlRegularExpression.h"
+#include <sstream>
 
-#include <stdio.h>
-#include <cctype>
-#include <string.h>
-
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>   /* for Windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-   
+using namespace std;
 
 
 //////////////////////////////
@@ -1041,6 +1029,24 @@ char* HumdrumRecord::getToken(Array<char>& buffer, int fieldIndex,
    return buffer.getBase();
 }
 
+string& HumdrumRecord::getToken(string& buffer, int fieldIndex, 
+      int tokenIndex, int buffersize, char separator) {
+	buffer.clear();
+	Array<char> buffer2;
+	getToken(buffer2, fieldIndex, tokenIndex, buffersize, separator);
+	for (int i=0; i<buffer2.getSize(); i++) {
+		buffer.push_back(buffer2[i]);
+	}
+   return buffer;
+}
+
+
+string HumdrumRecord::getToken(int fieldIndex, int tokenIndex, int buffersize,
+		char separator) {
+	string buffer;
+	getToken(buffer, fieldIndex, tokenIndex, buffersize, separator);
+   return buffer;
+}
 
 
 
@@ -2380,6 +2386,14 @@ void HumdrumRecord::setSpineWidth(int aSize) {
 //      Record code, return a brief summary of it.
 //
 
+string& HumdrumRecord::getBibliographicMeaning(string& output, 
+		const string& code) {
+	Array<char> temp;
+	output = getBibliographicMeaning(temp, code.c_str());
+	return output;
+}
+
+
 const char* HumdrumRecord::getBibliographicMeaning(Array<char>& output, 
       const char* code) {
    int atcount = 0;
@@ -2408,7 +2422,7 @@ const char* HumdrumRecord::getBibliographicMeaning(Array<char>& output,
   
    }
 
-   SSTREAM description;
+   stringstream description;
 
    if (strcmp(keybuf, "ACO") == 0) {
       description << "Analytic collection";
@@ -2794,9 +2808,9 @@ const char* HumdrumRecord::getBibliographicMeaning(Array<char>& output,
 
    description << ends;
 
-   len = strlen(description.CSTRING);
+   len = strlen(description.str().c_str());
    output.setSize(len+1);
-   strcpy(output.getBase(), description.CSTRING);
+   strcpy(output.getBase(), description.str().c_str());
 
    return output.getBase();
 }
@@ -4265,7 +4279,7 @@ const char* HumdrumRecord::getBibLangIso639_2(const char* string) {
 //
 
 void HumdrumRecord::makeRecordString(void) {
-   SSTREAM temp;
+   stringstream temp;
    char tab = '\t';
    for (int i=0; i<recordFields.getSize()-1; i++) {
       temp << recordFields[i] << tab;
@@ -4276,8 +4290,8 @@ void HumdrumRecord::makeRecordString(void) {
       delete [] recordString;
       recordString = NULL;
    }
-   recordString = new char[strlen(temp.CSTRING) + 1];
-   strcpy(recordString, temp.CSTRING);
+   recordString = new char[strlen(temp.str().c_str()) + 1];
+   strcpy(recordString, temp.str().c_str());
    modifiedQ = 0;
 }
 
@@ -4434,4 +4448,3 @@ ostream& operator<<(ostream& out, HumdrumRecord& aRecord) {
 
 
 
-// md5sum: b0731dc4d30ae0a5ea0fa793dc9a87da HumdrumRecord.cpp [20050403]

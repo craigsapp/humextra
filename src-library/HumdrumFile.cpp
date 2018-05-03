@@ -1694,6 +1694,17 @@ RationalNumber HumdrumFile::getAbsBeatR(int index) {
 //
 //
 
+int HumdrumFile::getNoteList(vector<int>& notes, int line, int flag) {
+	Array<int> temp;
+	getNoteList(temp, line, flag);
+	notes.resize(temp.getSize());
+	for (int i=0; i<(int)notes.size(); i++) {
+		notes[i] = temp[i];
+	}
+	return (int)notes.size();
+}
+
+
 int HumdrumFile::getNoteList(Array<int>& notes, int line, int flag) {
    // unpack flags:
    int restQ   = flag & (1 << 0);
@@ -4368,6 +4379,17 @@ void HumdrumFile::analyzeSonorityQuality(Array<ChordQuality>& cq) {
    cq.allowGrowth(0);
 }
 
+void HumdrumFile::analyzeSonorityQuality(vector<ChordQuality>& cq) {
+   vector<int> notes;
+   HumdrumFile& score = *this;
+   cq.resize(score.getNumLines());
+   for (int line=0; line<score.getNumLines(); line++) {
+      score.getNoteList(notes, line, NL_NOPC | NL_FILL | NL_NOSORT |
+         NL_NOUNIQ | NL_NORESTS);
+      Convert::noteSetToChordQuality(cq[line], notes);
+   }
+}
+
 
 
 //////////////////////////////
@@ -4473,6 +4495,13 @@ void HumdrumFile::getNormalForm(Array<int>& norm, int line, int attackQ) {
 }
 
 
+void HumdrumFile::getNormalForm(vector<int>& norm, int line, int attackQ) {
+   vector<int> base12;
+   this->getBase12PitchList(base12, line, attackQ);
+   Convert::base12ToNormalForm(norm, base12);
+}
+
+
 
 //////////////////////////////
 //
@@ -4486,6 +4515,17 @@ void HumdrumFile::getNormalForm(Array<int>& norm, int line, int attackQ) {
 //
 //    Default value: attackQ = 0
 //
+
+void HumdrumFile::getBase12PitchList(vector<int>& list, int line, int attackQ) {
+	Array<int> temp;
+	getBase12PitchList(temp, line, attackQ);
+	list.resize(temp.getSize());
+	for (int i=0; i<(int)list.size(); i++) {
+		list[i] = temp[i];
+	}
+}
+
+
 
 void HumdrumFile::getBase12PitchList(Array<int>& list, int line, int attackQ) {
    HumdrumRecord& arecord = (*this)[line];
@@ -4545,6 +4585,13 @@ void HumdrumFile::getIntervalVector(Array<int>& iv, int line, int attackQ) {
 }
 
 
+void HumdrumFile::getIntervalVector(vector<int>& iv, int line, int attackQ) {
+   vector<int> base12;
+   this->getBase12PitchList(base12, line, attackQ);
+   Convert::base12ToIntervalVector(iv, base12);
+}
+
+
 
 //////////////////////////////
 //
@@ -4556,6 +4603,13 @@ void HumdrumFile::getIntervalVector(Array<int>& iv, int line, int attackQ) {
 //
 // Default value attackQ = 0;
 //
+
+string HumdrumFile::getTnSetNameString(int line, int attackQ) {
+   vector<int> base12;
+   this->getBase12PitchList(base12, line, attackQ);
+	string output = Convert::base12ToTnSetName(base12);
+   return output;
+}
 
 const char* HumdrumFile::getTnSetName(int line, int attackQ) {
    Array<int> base12;
@@ -4569,6 +4623,14 @@ const char* HumdrumFile::getTnSetName(int line, int attackQ) {
 //
 // HumdrumFile::getTnSetNameAllSubsets --
 //
+
+void HumdrumFile::getTnSetNameAllSubsets(vector<int>& list, int line, 
+      int attackQ) {
+   vector<int> base12;
+   this->getBase12PitchList(base12, line, attackQ);
+   list.resize(0);
+   Convert::base12ToTnSetNameAllSubsets(list, base12);
+}
 
 void HumdrumFile::getTnSetNameAllSubsets(Array<int>& list, int line, 
       int attackQ) {
@@ -4585,6 +4647,12 @@ void HumdrumFile::getTnSetNameAllSubsets(Array<int>& list, int line,
 // HumdrumFile::getTnNormalForm -- 0-transposed normal form.
 //
 
+void HumdrumFile::getTnNormalForm(vector<int>& tnorm, int line, int attackQ) {
+   vector<int> base12;
+   this->getBase12PitchList(base12, line, attackQ);
+   Convert::base12ToTnNormalForm(tnorm, base12);
+}
+
 void HumdrumFile::getTnNormalForm(Array<int>& tnorm, int line, int attackQ) {
    Array<int> base12;
    this->getBase12PitchList(base12, line, attackQ);
@@ -4597,6 +4665,12 @@ void HumdrumFile::getTnNormalForm(Array<int>& tnorm, int line, int attackQ) {
 //
 // HumdrumFile::getForteSetName --
 //
+
+string HumdrumFile::getForteSetNameString(int line) {
+	string output = getForteSetName(line);
+	return output;
+}
+
 
 const char* HumdrumFile::getForteSetName(int line) {
    Array<int> iv;

@@ -20,15 +20,11 @@
 #ifndef _CHORDQUALITY_H_INCLUDED
 #define _CHORDQUALITY_H_INCLUDED
 
+#include <iostream>
+#include <vector>
+
 #include "SigCollection.h"
 #include "Array.h"
-
-#ifndef OLDCPP
-   #include <iostream>
-#else
-   #include <iostream.h>
-#endif
-
 
 class ChordQuality {
    public:
@@ -45,6 +41,7 @@ class ChordQuality {
       const char*        getInversionName (void) const;
       SigCollection<int> getNotesInChord  (void) const;
       void               getNotesInChord  (SigCollection<int>& notes) const;
+      void               getNotesInChord  (vector<int>& notes) const;
       ostream&           printPitchClasses(ostream& out);
       void               setPitchClasses  (Array<int>& newnotes);
       void               setPitchClasses  (SigCollection<int>& newnotes);

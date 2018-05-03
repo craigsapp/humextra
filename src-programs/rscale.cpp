@@ -11,45 +11,34 @@
 //
 //
 
+#include <ctype.h>
+#include <math.h>
+#include <string.h>
+
+#include <sstream>
+
 #include "PerlRegularExpression.h"
 #include "humdrum.h"
-#include <math.h>
 
-#include <string.h>
-#include <ctype.h>
+using namespace std;
 
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>     /* for windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-   
 
 // function declarations
 void      checkOptions       (Options& opts, int argc, char* argv[]);
 void      example            (void);
-void      usage              (const char* command);
+void      usage              (const string& command);
 void      printOutput        (HumdrumFile& infile, RationalNumber& rnum);
-void      printKernToken     (HumdrumFile& infile, int row, int col, 
+void      printKernToken     (HumdrumFile& infile, int row, int col,
                               RationalNumber& factor);
-void      printSingleKernSubtoken(const char* buff, RationalNumber& factor);
+void      printSingleKernSubtoken(const string& buff, RationalNumber& factor);
 void      printSpecialRational(RationalNumber& value);
-void      processTimeSignature(HumdrumFile& infile, int row, 
+void      processTimeSignature(HumdrumFile& infile, int row,
                               RationalNumber& factor);
-void      handleBibliographic(HumdrumFile& infile, int row, 
+void      handleBibliographic(HumdrumFile& infile, int row,
                               RationalNumber& num);
 void      getOriginalFactor  (HumdrumFile& infile, RationalNumber& factor);
 void      getAlternateFactor (HumdrumFile& infile, RationalNumber& factor);
-void      cleanUpBeams       (char* prebuffer, char* postbuffer, int level);
+void      cleanUpBeams       (string& prebuffer, string& postbuffer, int level);
 
 // global variables
 Options   options;             // database for command-line arguments
@@ -66,25 +55,25 @@ int       autoQ      = 0;      // used with -F option
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-   checkOptions(options, argc, argv);
-   HumdrumFileSet infiles;
-   infiles.read(options);
+	checkOptions(options, argc, argv);
+	HumdrumFileSet infiles;
+	infiles.read(options);
 
-   for (int i=0; i<infiles.getCount(); i++) {
-      infiles[i].analyzeRhythm("4");
-      if (originalQ) {
-         getOriginalFactor(infiles[i], factor);
-      } else if (alternateQ) {
-         getAlternateFactor(infiles[i], factor);
-      }
+	for (int i=0; i<infiles.getCount(); i++) {
+		infiles[i].analyzeRhythm("4");
+		if (originalQ) {
+			getOriginalFactor(infiles[i], factor);
+		} else if (alternateQ) {
+			getAlternateFactor(infiles[i], factor);
+		}
 
-      printOutput(infiles[i], factor);
-      if ((!originalQ) && (!FoundRef) && (factor != 1)) {
-         cout << "!!!rscale: " << factor << endl;
-      }
-   }
+		printOutput(infiles[i], factor);
+		if ((!originalQ) && (!FoundRef) && (factor != 1)) {
+			cout << "!!!rscale: " << factor << endl;
+		}
+	}
 
-   return 0;
+	return 0;
 }
 
 
@@ -93,53 +82,53 @@ int main(int argc, char* argv[]) {
 
 //////////////////////////////
 //
-// printOutput -- 
+// printOutput --
 //
 
 void printOutput(HumdrumFile& infile, RationalNumber& rnum) {
-   int i, j;
-   PerlRegularExpression pre;
+	int i, j;
+	PerlRegularExpression pre;
 
-   for (i=0; i<infile.getNumLines(); i++) {
-      if (autoQ) {
-         if (pre.search(infile[i][0], "^!+RSCALE:\\s*(\\d+)/(\\d+)")) {
-            rnum = atoi(pre.getSubmatch(1));
-            rnum /= atoi(pre.getSubmatch(2));
-            continue;
-         } else if (pre.search(infile[i][0], "^!+RSCALE:\\s*(\\d+)")) {
-            rnum = atoi(pre.getSubmatch(1));
-            continue;
-         }
-      }
-   
-      if (infile[i].isBibliographic()) {
-         handleBibliographic(infile, i, rnum);
-         continue;
-      }
-      if (!infile[i].isData()) {
-         if (meterQ && infile[i].isInterpretation()) {
-            processTimeSignature(infile, i, rnum); 
-         } else {
-            cout << infile[i] << "\n";
-         }
-         continue;
-      }
-      for (j=0; j<infile[i].getFieldCount(); j++) {
-         if (!(infile[i].isExInterp(j, "**kern") || 
-               infile[i].isExInterp(j, "**recip"))) {
-            cout << infile[i][j];
-            if (j < infile[i].getFieldCount() - 1) {
-               cout << "\t";
-            }
-            continue;
-         }
-         printKernToken(infile, i, j, rnum);
-         if (j < infile[i].getFieldCount() - 1) {
-            cout << "\t";
-         }
-      }
-      cout << "\n";
-   }
+	for (i=0; i<infile.getNumLines(); i++) {
+		if (autoQ) {
+			if (pre.search(infile[i][0], "^!+RSCALE:\\s*(\\d+)/(\\d+)")) {
+				rnum = atoi(pre.getSubmatch(1));
+				rnum /= atoi(pre.getSubmatch(2));
+				continue;
+			} else if (pre.search(infile[i][0], "^!+RSCALE:\\s*(\\d+)")) {
+				rnum = atoi(pre.getSubmatch(1));
+				continue;
+			}
+		}
+
+		if (infile[i].isBibliographic()) {
+			handleBibliographic(infile, i, rnum);
+			continue;
+		}
+		if (!infile[i].isData()) {
+			if (meterQ && infile[i].isInterpretation()) {
+				processTimeSignature(infile, i, rnum);
+			} else {
+				cout << infile[i] << "\n";
+			}
+			continue;
+		}
+		for (j=0; j<infile[i].getFieldCount(); j++) {
+			if (!(infile[i].isExInterp(j, "**kern") ||
+					infile[i].isExInterp(j, "**recip"))) {
+				cout << infile[i][j];
+				if (j < infile[i].getFieldCount() - 1) {
+					cout << "\t";
+				}
+				continue;
+			}
+			printKernToken(infile, i, j, rnum);
+			if (j < infile[i].getFieldCount() - 1) {
+				cout << "\t";
+			}
+		}
+		cout << "\n";
+	}
 }
 
 
@@ -152,32 +141,32 @@ void printOutput(HumdrumFile& infile, RationalNumber& rnum) {
 //
 
 void getOriginalFactor(HumdrumFile& infile, RationalNumber& factor) {
-   int i;
-   PerlRegularExpression pre;
-   RationalNumber newvalue;
-   int top;
-   int bot;
-   for (i=0; i<infile.getNumLines(); i++) {
-      if (!infile[i].isBibliographic()) {
-         continue;
-      }
-      if (!pre.search(infile[i][0], "^!!!rscale\\s*:\\s*(\\d+)(/?)(\\d*)", "")) {
-         continue;
-      }
+	int i;
+	PerlRegularExpression pre;
+	RationalNumber newvalue;
+	int top;
+	int bot;
+	for (i=0; i<infile.getNumLines(); i++) {
+		if (!infile[i].isBibliographic()) {
+			continue;
+		}
+		if (!pre.search(infile[i][0], "^!!!rscale\\s*:\\s*(\\d+)(/?)(\\d*)", "")) {
+			continue;
+		}
 
-      top = atoi(pre.getSubmatch(1));
-      bot = 1;
-      if (strlen(pre.getSubmatch(2)) != 0) {
-         if (strlen(pre.getSubmatch(3)) != 0) {
-            bot = atoi(pre.getSubmatch());
-         }
-      }
-      if (top == 0) { top = 1; }
-      if (bot == 0) { bot = 1; }
-      newvalue.setValue(bot, top);
-      factor = newvalue;
-      return;
-   }
+		top = atoi(pre.getSubmatch(1));
+		bot = 1;
+		if (strlen(pre.getSubmatch(2)) != 0) {
+			if (strlen(pre.getSubmatch(3)) != 0) {
+				bot = atoi(pre.getSubmatch());
+			}
+		}
+		if (top == 0) { top = 1; }
+		if (bot == 0) { bot = 1; }
+		newvalue.setValue(bot, top);
+		factor = newvalue;
+		return;
+	}
 
 }
 
@@ -190,36 +179,36 @@ void getOriginalFactor(HumdrumFile& infile, RationalNumber& factor) {
 //
 
 void getAlternateFactor(HumdrumFile& infile, RationalNumber& factor) {
-   PerlRegularExpression pre;
-   int i;
-   int top;
-   int bot;
-   RationalNumber value;
+	PerlRegularExpression pre;
+	int i;
+	int top;
+	int bot;
+	RationalNumber value;
 
-   RationalNumber orig(1,1);
-   getOriginalFactor(infile, orig);
+	RationalNumber orig(1,1);
+	getOriginalFactor(infile, orig);
 
-   for (i=0; i<infile.getNumLines(); i++) {
-      if (!infile[i].isBibliographic()) {
-         continue;
-      }
-      if (!pre.search(infile[i][0], "^!!!rscale-alt\\s*:\\s*(\\d+)(/?)(\\d*)", "")) {
-         continue;
-      }
+	for (i=0; i<infile.getNumLines(); i++) {
+		if (!infile[i].isBibliographic()) {
+			continue;
+		}
+		if (!pre.search(infile[i][0], "^!!!rscale-alt\\s*:\\s*(\\d+)(/?)(\\d*)", "")) {
+			continue;
+		}
 
-      top = atoi(pre.getSubmatch(1));
-      bot = 1;
-      if (strlen(pre.getSubmatch(2)) != 0) {
-         if (strlen(pre.getSubmatch(3)) != 0) {
-            bot = atoi(pre.getSubmatch());
-         }
-      }
-      if (top == 0) { top = 1; }
-      if (bot == 0) { bot = 1; }
-      value.setValue(top, bot);
-      factor = value * orig;
-      return;
-   }
+		top = atoi(pre.getSubmatch(1));
+		bot = 1;
+		if (strlen(pre.getSubmatch(2)) != 0) {
+			if (strlen(pre.getSubmatch(3)) != 0) {
+				bot = atoi(pre.getSubmatch());
+			}
+		}
+		if (top == 0) { top = 1; }
+		if (bot == 0) { bot = 1; }
+		value.setValue(top, bot);
+		factor = value * orig;
+		return;
+	}
 
 }
 
@@ -236,48 +225,48 @@ void getAlternateFactor(HumdrumFile& infile, RationalNumber& factor) {
 //
 
 void handleBibliographic(HumdrumFile& infile, int row, RationalNumber& num) {
-   char buffer[1024] = {0};
-   infile[row].getBibKey(buffer, 1000);
-   if (strcmp(buffer, "rscale") != 0) {
-      cout << infile[row] << endl;
-      return;
-   }
+	char buffer[1024] = {0};
+	infile[row].getBibKey(buffer, 1000);
+	if (strcmp(buffer, "rscale") != 0) {
+		cout << infile[row] << endl;
+		return;
+	}
 
-   RationalNumber onum;
-   PerlRegularExpression pre;
-   if (!pre.search(infile[row][0], "!!!rscale([^\\d]*)(\\d+)(/?)(\\d*)(.*)", "")) {
-      cout << infile[row] << endl;
-      return;
-   }
+	RationalNumber onum;
+	PerlRegularExpression pre;
+	if (!pre.search(infile[row][0], "!!!rscale([^\\d]*)(\\d+)(/?)(\\d*)(.*)", "")) {
+		cout << infile[row] << endl;
+		return;
+	}
 
-   int top = atoi(pre.getSubmatch(2));
-   int bot = 1;
-   if (strlen(pre.getSubmatch(3)) != 0) {
-      if (strlen(pre.getSubmatch(4)) != 0) {   
-         bot = atoi(pre.getSubmatch());
-      }
-   }
-   if (bot == 0) {
-      bot = 1;
-   }
-   onum.setValue(top, bot);
-   onum *= num;
-   FoundRef = 1;
-   if (onum == 1) {
-      // don't print !!!rscale: entry if scaling is 1.
-      return;
-   }
+	int top = atoi(pre.getSubmatch(2));
+	int bot = 1;
+	if (strlen(pre.getSubmatch(3)) != 0) {
+		if (strlen(pre.getSubmatch(4)) != 0) {
+			bot = atoi(pre.getSubmatch());
+		}
+	}
+	if (bot == 0) {
+		bot = 1;
+	}
+	onum.setValue(top, bot);
+	onum *= num;
+	FoundRef = 1;
+	if (onum == 1) {
+		// don't print !!!rscale: entry if scaling is 1.
+		return;
+	}
 
-   if (originalQ) {
-      // original rhythmic values are being generated, don't print ref rec.
-      return;
-   }
-   
-   cout << "!!!rscale";
-   cout << pre.getSubmatch(1);
-   cout << onum;
-   cout << pre.getSubmatch(5);
-   cout << "\n";
+	if (originalQ) {
+		// original rhythmic values are being generated, don't print ref rec.
+		return;
+	}
+
+	cout << "!!!rscale";
+	cout << pre.getSubmatch(1);
+	cout << onum;
+	cout << pre.getSubmatch(5);
+	cout << "\n";
 
 }
 
@@ -289,68 +278,68 @@ void handleBibliographic(HumdrumFile& infile, int row, RationalNumber& num) {
 //     bottom of the time signature by the scaling factor.
 //
 
-void processTimeSignature(HumdrumFile& infile, int row, 
-      RationalNumber& factor) {
-   int j;
-   RationalNumber beat;
-   int mtop;
-   int top;
-   int bot;
-   PerlRegularExpression pre;
-   for (j=0; j<infile[row].getFieldCount(); j++) {
-      if (pre.search(infile[row][j], "^\\*tb(\\d+)(%?)(\\d*)$", "")) {
-         // process a timebase interpretation
-         top = atoi(pre.getSubmatch(1));
-         bot = 1;
-         if (strlen(pre.getSubmatch(2)) != 0) {
-            if (strlen(pre.getSubmatch(3)) != 0) {
-               bot = atoi(pre.getSubmatch());
-               if (bot == 0) {
-                  bot = 1;
-               }
-            }
-         }
-         beat.setValue(top, bot);
-         beat /= factor;
-         cout << "*tb";
-         printSpecialRational(beat);
-         if (j < infile[row].getFieldCount() - 1) {
-            cout << "\t";
-         }
-         continue;
-      }
+void processTimeSignature(HumdrumFile& infile, int row,
+		RationalNumber& factor) {
+	int j;
+	RationalNumber beat;
+	int mtop;
+	int top;
+	int bot;
+	PerlRegularExpression pre;
+	for (j=0; j<infile[row].getFieldCount(); j++) {
+		if (pre.search(infile[row][j], "^\\*tb(\\d+)(%?)(\\d*)$", "")) {
+			// process a timebase interpretation
+			top = atoi(pre.getSubmatch(1));
+			bot = 1;
+			if (strlen(pre.getSubmatch(2)) != 0) {
+				if (strlen(pre.getSubmatch(3)) != 0) {
+					bot = atoi(pre.getSubmatch());
+					if (bot == 0) {
+						bot = 1;
+					}
+				}
+			}
+			beat.setValue(top, bot);
+			beat /= factor;
+			cout << "*tb";
+			printSpecialRational(beat);
+			if (j < infile[row].getFieldCount() - 1) {
+				cout << "\t";
+			}
+			continue;
+		}
 
-      if ((!meterQ) || (!pre.search(infile[row][j], "^\\*M(\\d+)/(\\d+)(%?)(\\d*)(.*)", ""))) {
-         cout << infile[row][j];
-         if (j < infile[row].getFieldCount() - 1) {
-            cout << "\t";
-         }
-         continue;
-      }
+		if ((!meterQ) || (!pre.search(infile[row][j], "^\\*M(\\d+)/(\\d+)(%?)(\\d*)(.*)", ""))) {
+			cout << infile[row][j];
+			if (j < infile[row].getFieldCount() - 1) {
+				cout << "\t";
+			}
+			continue;
+		}
 
-      mtop = atoi(pre.getSubmatch(1));
-      top = atoi(pre.getSubmatch(2));
-      bot = 1;
-      if (strlen(pre.getSubmatch(3)) != 0) {
-         if (strlen(pre.getSubmatch(4)) != 0) {
-            bot = atoi(pre.getSubmatch());
-            if (bot == 0) {
-               bot = 1;
-            }
-         }
-      }
-      beat.setValue(top, bot);
-      beat /= factor;
-      cout << "*M";
-      cout << mtop;
-      cout << "/";
-      printSpecialRational(beat);
-      cout << pre.getSubmatch(5);
-      if (j < infile[row].getFieldCount() - 1) {
-         cout << "\t";
-      }
-   }
-   cout << "\n";
+		mtop = atoi(pre.getSubmatch(1));
+		top = atoi(pre.getSubmatch(2));
+		bot = 1;
+		if (strlen(pre.getSubmatch(3)) != 0) {
+			if (strlen(pre.getSubmatch(4)) != 0) {
+				bot = atoi(pre.getSubmatch());
+				if (bot == 0) {
+					bot = 1;
+				}
+			}
+		}
+		beat.setValue(top, bot);
+		beat /= factor;
+		cout << "*M";
+		cout << mtop;
+		cout << "/";
+		printSpecialRational(beat);
+		cout << pre.getSubmatch(5);
+		if (j < infile[row].getFieldCount() - 1) {
+			cout << "\t";
+		}
+	}
+	cout << "\n";
 }
 
 
@@ -360,32 +349,32 @@ void processTimeSignature(HumdrumFile& infile, int row,
 // printKernToken --
 //
 
-void printKernToken(HumdrumFile& infile, int row, int col, 
-      RationalNumber& factor) {
-   int k;
-   static char buffer[1024] = {0};
+void printKernToken(HumdrumFile& infile, int row, int col,
+		RationalNumber& factor) {
+	int k;
+	static char buffer[1024] = {0};
 
-   if (strcmp(infile[row][col], ".") == 0) {
-      // print null tokens and return
-      cout << infile[row][col];
-      return;
-   }
-   if (strchr(infile[row][col], 'q') != NULL) {
-      // print notes/chords which have grace notes (chord rhythms 
-      // should not mix and always be equal).
-      cout << infile[row][col];
-      return;
-   }
+	if (strcmp(infile[row][col], ".") == 0) {
+		// print null tokens and return
+		cout << infile[row][col];
+		return;
+	}
+	if (strchr(infile[row][col], 'q') != NULL) {
+		// print notes/chords which have grace notes (chord rhythms
+		// should not mix and always be equal).
+		cout << infile[row][col];
+		return;
+	}
 
-   PerlRegularExpression pre;
-   int tcount = infile[row].getTokenCount(col);
-   for (k=0; k<tcount; k++) {
-      infile[row].getToken(buffer, col, k, 1000);
-      printSingleKernSubtoken(buffer, factor);
-      if (k < tcount - 1) {
-         cout << " ";
-      }
-   }
+	PerlRegularExpression pre;
+	int tcount = infile[row].getTokenCount(col);
+	for (k=0; k<tcount; k++) {
+		infile[row].getToken(buffer, col, k, 1000);
+		printSingleKernSubtoken(buffer, factor);
+		if (k < tcount - 1) {
+			cout << " ";
+		}
+	}
 }
 
 
@@ -395,65 +384,63 @@ void printKernToken(HumdrumFile& infile, int row, int col,
 // printSingleKernSubtoken --
 //
 
-void printSingleKernSubtoken(const char* buff, RationalNumber& factor) {
-   PerlRegularExpression pre;
-   RationalNumber value;
+void printSingleKernSubtoken(const string& buff, RationalNumber& factor) {
+	PerlRegularExpression pre;
+	RationalNumber value;
 
-   int level = 0;
-   if (factor == 2) {
-      level = 1;
-   } else if (factor == 4) {
-      level = 2;
-   }
-   if (!rebeamQ) {
-      level = 0;
-   }
-  
-   char prebuffer[1024] = {0};
-   char postbuffer[1024] = {0};
+	int level = 0;
+	if (factor == 2) {
+		level = 1;
+	} else if (factor == 4) {
+		level = 2;
+	}
+	if (!rebeamQ) {
+		level = 0;
+	}
 
-   if (pre.search(buff, "([^\\d]*)(\\d+)(%?)(\\d*)(.*)", "")) {
-      int top = atoi(pre.getSubmatch(2));
-      int bot;
-      if (strlen(pre.getSubmatch(4)) != 0) {
-         bot = atoi(pre.getSubmatch());
-         if (bot == 0) {
-            bot = 1;
-         }
-      } else {
-         bot = 1; 
-      }
-      if (top == 0) {
-         // handle cases where breve=0; long=00; maxima=000
-         int tcount = 0;
-         int i;
-         int len = strlen(buff);
-         for (i=0; i<len; i++) {
-            if (buff[i] == '0') {
-               tcount++;
-            }
-         }
-         top = 1;
-         bot = int(pow(2.0,tcount));
-      }
-      value.setValue(top, bot);
-      value /= factor;           // factor is duration so inverse
+	string prebuffer;
+	string postbuffer;
 
-      strcpy(prebuffer, pre.getSubmatch(1));
-      strcpy(postbuffer, pre.getSubmatch(5));
+	if (pre.search(buff, "([^\\d]*)(\\d+)(%?)(\\d*)(.*)", "")) {
+		int top = atoi(pre.getSubmatch(2));
+		int bot;
+		if (strlen(pre.getSubmatch(4)) != 0) {
+			bot = atoi(pre.getSubmatch());
+			if (bot == 0) {
+				bot = 1;
+			}
+		} else {
+			bot = 1;
+		}
+		if (top == 0) {
+			// handle cases where breve=0; long=00; maxima=000
+			int tcount = 0;
+			int i;
+			for (i=0; i<(int)buff.size(); i++) {
+				if (buff[i] == '0') {
+					tcount++;
+				}
+			}
+			top = 1;
+			bot = int(pow(2.0,tcount));
+		}
+		value.setValue(top, bot);
+		value /= factor;           // factor is duration so inverse
 
-      cleanUpBeams(prebuffer, postbuffer, level);
+		prebuffer  = pre.getSubmatch(1);
+		postbuffer = pre.getSubmatch(5);
 
-      cout << prebuffer;
+		cleanUpBeams(prebuffer, postbuffer, level);
+		cout << prebuffer;
 
-      printSpecialRational(value);
+		printSpecialRational(value);
 
-      // print stuff after numeric part of rhythm
-      cout << postbuffer;
+		// print stuff after numeric part of rhythm
+		cout << postbuffer;
 
-   } else {
-      cout << buff;
-   }
+	} else {
+		cout << buff;
+	}
 }
 
 
@@ -463,127 +450,114 @@ void printSingleKernSubtoken(const char* buff, RationalNumber& factor) {
 // cleanUpBeams -- remove k, K, L, J as needed from beam information.
 //
 
-void cleanUpBeams(char* prebuffer, char* postbuffer, int level) {
-   if (level < 1) {
-      return;
-   }
+void cleanUpBeams(string& prebuffer, string& postbuffer, int level) {
+	if (level < 1) {
+		return;
+	}
 
-   int kcount1 = 0;
-   int Kcount1 = 0;
-   int Lcount1 = 0;
-   int Jcount1 = 0;
+	int kcount1 = 0;
+	int Kcount1 = 0;
+	int Lcount1 = 0;
+	int Jcount1 = 0;
 
-   int kcount2 = 0;
-   int Kcount2 = 0;
-   int Lcount2 = 0;
-   int Jcount2 = 0;
+	int kcount2 = 0;
+	int Kcount2 = 0;
+	int Lcount2 = 0;
+	int Jcount2 = 0;
 
-   int len1 = strlen(prebuffer);
-   int len2 = strlen(postbuffer);
+	for (int i=0; i<(int)prebuffer.size(); i++) {
+		switch (prebuffer[i]) {
+			case 'k': kcount1++; break;
+			case 'K': Kcount1++; break;
+			case 'L': Lcount1++; break;
+			case 'J': Jcount1++; break;
+		}
+	}
 
-   int i;
+	for (int i=0; i<(int)postbuffer.size(); i++) {
+		switch (postbuffer[i]) {
+			case 'k': kcount2++; break;
+			case 'K': Kcount2++; break;
+			case 'L': Lcount2++; break;
+			case 'J': Jcount2++; break;
+		}
+	}
 
-   for (i=0; i<len1; i++) {
-      switch (prebuffer[i]) {
-         case 'k': kcount1++; break;
-         case 'K': Kcount1++; break;
-         case 'L': Lcount1++; break;
-         case 'J': Jcount1++; break;
-      }
-   }
+	string prestring = prebuffer;
+	string poststring = postbuffer;
+	PerlRegularExpression pre;
 
-   for (i=0; i<len2; i++) {
-      switch (postbuffer[i]) {
-         case 'k': kcount2++; break;
-         case 'K': Kcount2++; break;
-         case 'L': Lcount2++; break;
-         case 'J': Jcount2++; break;
-      }
-   }
+	if ((level == 1) && (Lcount1 > 0)) {
+		pre.sar(prestring, "L", "");
+		level--;
+	} else if ((level == 1) && (Jcount1 > 0)) {
+		pre.sar(prestring, "J", "");
+		level--;
+	} else if ((level == 1) && (Lcount2 > 0)) {
+		pre.sar(prestring, "L", "");
+		level--;
+	} else if ((level == 1) && (Jcount2 > 0)) {
+		pre.sar(prestring, "J", "");
+		level--;
+	} else if ((level == 2) && (Lcount1 > 1)) {
+		pre.sar(prestring, "L", "");
+		pre.sar(prestring, "L", "");
+		level -= 2;
+	} else if ((level == 2) && (Jcount1 > 1)) {
+		pre.sar(prestring, "J", "");
+		pre.sar(prestring, "J", "");
+		level -= 2;
+	} else if ((level == 2) && (Lcount2 > 1)) {
+		pre.sar(prestring, "L", "");
+		pre.sar(prestring, "L", "");
+		level -= 2;
+	} else if ((level == 2) && (Jcount2 > 1)) {
+		pre.sar(prestring, "J", "");
+		pre.sar(prestring, "J", "");
+		level -= 2;
+	}
 
-   Array<char> prestring;
-   Array<char> poststring;
-
-   prestring.setSize(len1+1);
-   strcpy(prestring.getBase(), prebuffer);
-
-   poststring.setSize(len1+1);
-   strcpy(poststring.getBase(), postbuffer);
-
-   PerlRegularExpression pre;
-
-   if ((level == 1) && (Lcount1 > 0)) {
-      pre.sar(prestring, "L", "");
-      level--;
-   } else if ((level == 1) && (Jcount1 > 0)) {
-      pre.sar(prestring, "J", "");
-      level--;
-   } else if ((level == 1) && (Lcount2 > 0)) {
-      pre.sar(prestring, "L", "");
-      level--;
-   } else if ((level == 1) && (Jcount2 > 0)) {
-      pre.sar(prestring, "J", "");
-      level--;
-   } else if ((level == 2) && (Lcount1 > 1)) {
-      pre.sar(prestring, "L", "");
-      pre.sar(prestring, "L", "");
-      level -= 2;
-   } else if ((level == 2) && (Jcount1 > 1)) {
-      pre.sar(prestring, "J", "");
-      pre.sar(prestring, "J", "");
-      level -= 2;
-   } else if ((level == 2) && (Lcount2 > 1)) {
-      pre.sar(prestring, "L", "");
-      pre.sar(prestring, "L", "");
-      level -= 2;
-   } else if ((level == 2) && (Jcount2 > 1)) {
-      pre.sar(prestring, "J", "");
-      pre.sar(prestring, "J", "");
-      level -= 2;
-   }
-
-   // deal with k and K later...
-
-   strcpy(prebuffer, prestring.getBase());
-   strcpy(postbuffer, poststring.getBase());
+	// deal with k and K later...
+	prebuffer =  prestring;
+	postbuffer = poststring;
 }
 
 
 
 //////////////////////////////
 //
-// printSpecialRational -- print rational number rhythm, but use 0 
+// printSpecialRational -- print rational number rhythm, but use 0
 //    for 1/2 (breve), 00 for 1/4 (long), or 000 for 1/8 (maxima).
 //
 
 void printSpecialRational(RationalNumber& value) {
-   static RationalNumber half(1,2);      // breve
-   static RationalNumber quarter(1,4);   // long
-   static RationalNumber eighth(1,8);    // maxima
+	static RationalNumber half(1,2);      // breve
+	static RationalNumber quarter(1,4);   // long
+	static RationalNumber eighth(1,8);    // maxima
 
-   if (longQ) {
-      // don't print 0 for breve, 00 for long or 000 for maxima.
-      cout << value.getNumerator();
-      if (value.getDenominator() != 1) {
-         cout << '%' << value.getDenominator();
-      }
+	if (longQ) {
+		// don't print 0 for breve, 00 for long or 000 for maxima.
+		cout << value.getNumerator();
+		if (value.getDenominator() != 1) {
+			cout << '%' << value.getDenominator();
+		}
 
-   } else {
+	} else {
 
-      if (value == half) {               // breve alternate
-         cout << "0";
-      } else if (value == quarter) {     // long alternate
-         cout << "00";
-      } else if (value == eighth) {      // maxima alternate
-         cout << "000";
-      } else {
-         cout << value.getNumerator();
-         if (value.getDenominator() != 1) {
-            cout << '%' << value.getDenominator();
-         }
-      }
+		if (value == half) {               // breve alternate
+			cout << "0";
+		} else if (value == quarter) {     // long alternate
+			cout << "00";
+		} else if (value == eighth) {      // maxima alternate
+			cout << "000";
+		} else {
+			cout << value.getNumerator();
+			if (value.getDenominator() != 1) {
+				cout << '%' << value.getDenominator();
+			}
+		}
 
-   }
+	}
 
 }
 
@@ -595,70 +569,70 @@ void printSpecialRational(RationalNumber& value) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("d|f|factor=s:1/1", "Factor to multiply durations by");
-   opts.define("F=b", "Read rscale factors from !!!RSCALE: lines");
-   opts.define("M|T|nometer=b", "Do not alter time signatures");
-   opts.define("o|original=b", "Revert to original rhythms");
-   opts.define("a|alternate=b", "Change to alternate rhythm set");
-   opts.define("r|long=b", "Do not use short form for breve,long,maxima");
-   opts.define("B|adjust-beams=b", "Adjust beaming for powers of 2 rscaling");
+	opts.define("d|f|factor=s:1/1", "Factor to multiply durations by");
+	opts.define("F=b", "Read rscale factors from !!!RSCALE: lines");
+	opts.define("M|T|nometer=b", "Do not alter time signatures");
+	opts.define("o|original=b", "Revert to original rhythms");
+	opts.define("a|alternate=b", "Change to alternate rhythm set");
+	opts.define("r|long=b", "Do not use short form for breve,long,maxima");
+	opts.define("B|adjust-beams=b", "Adjust beaming for powers of 2 rscaling");
 
-   opts.define("debug=b");              // determine bad input line num
-   opts.define("author=b");             // author of program
-   opts.define("version=b");            // compilation info
-   opts.define("example=b");            // example usages
-   opts.define("h|help=b");             // short description
-   opts.process(argc, argv);
-   
-   // handle basic options:
-   if (opts.getBoolean("author")) {
-      cout << "Written by Craig Stuart Sapp, "
-           << "craig@ccrma.stanford.edu, Jan 2011" << endl;
-      exit(0);
-   } else if (opts.getBoolean("version")) {
-      cout << argv[0] << ", version: 6 Jan 2011" << endl;
-      cout << "compiled: " << __DATE__ << endl;
-      cout << MUSEINFO_VERSION << endl;
-      exit(0);
-   } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
-      exit(0);
-   } else if (opts.getBoolean("example")) {
-      example();
-      exit(0);
-   }
+	opts.define("debug=b");              // determine bad input line num
+	opts.define("author=b");             // author of program
+	opts.define("version=b");            // compilation info
+	opts.define("example=b");            // example usages
+	opts.define("h|help=b");             // short description
+	opts.process(argc, argv);
 
-   PerlRegularExpression pre;
-   if (pre.search(opts.getString("factor").data(), "(\\d+)\\/?(\\d*)", "")) {
-      int top = 1;
-      int bot = 1;
-      top = atoi(pre.getSubmatch(1));
-      if (strlen(pre.getSubmatch(2)) != 0) {
-         bot = atoi(pre.getSubmatch());
-         if (bot == 0) {
-            bot = 1;
-         }
-      } else {
-         bot = 1;
-      }
-      factor.setValue(top, bot);
-   } else {
-      factor.setValue(1,1);
-      cerr << "Scaling factor set to " << factor << endl;
-   }
+	// handle basic options:
+	if (opts.getBoolean("author")) {
+		cout << "Written by Craig Stuart Sapp, "
+			  << "craig@ccrma.stanford.edu, Jan 2011" << endl;
+		exit(0);
+	} else if (opts.getBoolean("version")) {
+		cout << argv[0] << ", version: 6 Jan 2011" << endl;
+		cout << "compiled: " << __DATE__ << endl;
+		cout << MUSEINFO_VERSION << endl;
+		exit(0);
+	} else if (opts.getBoolean("help")) {
+		usage(opts.getCommand().data());
+		exit(0);
+	} else if (opts.getBoolean("example")) {
+		example();
+		exit(0);
+	}
 
-   debugQ = opts.getBoolean("debug");
+	PerlRegularExpression pre;
+	if (pre.search(opts.getString("factor").data(), "(\\d+)\\/?(\\d*)", "")) {
+		int top = 1;
+		int bot = 1;
+		top = atoi(pre.getSubmatch(1));
+		if (strlen(pre.getSubmatch(2)) != 0) {
+			bot = atoi(pre.getSubmatch());
+			if (bot == 0) {
+				bot = 1;
+			}
+		} else {
+			bot = 1;
+		}
+		factor.setValue(top, bot);
+	} else {
+		factor.setValue(1,1);
+		cerr << "Scaling factor set to " << factor << endl;
+	}
 
-   if (debugQ) {
-      cerr << "Scaling factor set to " << factor << endl;
-   }
+	debugQ = opts.getBoolean("debug");
 
-   autoQ       =  opts.getBoolean("F");
-   meterQ      = !opts.getBoolean("nometer");
-   originalQ   =  opts.getBoolean("original");
-   alternateQ  =  opts.getBoolean("alternate");
-   longQ       =  opts.getBoolean("long");
-   rebeamQ     =  opts.getBoolean("adjust-beams");
+	if (debugQ) {
+		cerr << "Scaling factor set to " << factor << endl;
+	}
+
+	autoQ       =  opts.getBoolean("F");
+	meterQ      = !opts.getBoolean("nometer");
+	originalQ   =  opts.getBoolean("original");
+	alternateQ  =  opts.getBoolean("alternate");
+	longQ       =  opts.getBoolean("long");
+	rebeamQ     =  opts.getBoolean("adjust-beams");
 }
 
 
@@ -669,9 +643,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 //
 
 void example(void) {
-   cout <<
-   "                                                                         \n"
-   << endl;
+	cout <<
+	"                                                                         \n"
+	<< endl;
 }
 
 
@@ -681,12 +655,11 @@ void example(void) {
 // usage -- gives the usage statement for the meter program
 //
 
-void usage(const char* command) {
-   cout <<
-   "                                                                         \n"
-   << endl;
+void usage(const string& command) {
+	cout <<
+	"                                                                         \n"
+	<< endl;
 }
 
 
 
-// md5sum: 5dc6728ea6f6263364ace506e9252ede rscale.cpp [20151120]

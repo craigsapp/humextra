@@ -11,49 +11,45 @@
 //                containing at least one **kern spine.
 //
 
-#include "humdrum.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-#else
-   #include <iostream.h>
-#endif
+#include <iostream>
+
+#include "humdrum.h"
 
 #define DEBUG 0
 
 int main(int argc, char** argv) {
-   if (argc > 2) {
-      cout << "Usage: " << argv[0] << " input-file" << endl;
-      exit(1);
-   }
+	if (argc > 2) {
+		cout << "Usage: " << argv[0] << " input-file" << endl;
+		exit(1);
+	}
 
-   HumdrumFile hfile;
-   if (argc == 2) {
-      hfile.read(argv[1]);
-   } else if (argc == 1) {
-      hfile.read(cin);
-   }
-   
-   hfile.analyzeRhythm("4", DEBUG);
+	HumdrumFile hfile;
+	if (argc == 2) {
+		hfile.read(argv[1]);
+	} else if (argc == 1) {
+		hfile.read(cin);
+	}
+	
+	hfile.analyzeRhythm("4", DEBUG);
 
-   int measure = 0;
+	int measure = 0;
 
-   cout << "absbeat\tdur\tbar\tbeat\t::\tdata\n";
-   cout << ":::::::::::::::::::::::::::::::::::::::::::::::::::::\n";
-   for (int i=0; i<hfile.getNumLines(); i++) {
-      if (hfile[i].isMeasure()) {
-         sscanf(hfile[i][0], "=%d", &measure);
-      }
-      cout << hfile.getAbsBeat(i) << '\t'
-           << hfile.getDuration(i) << '\t'
-           << measure << '\t'
-           << hfile.getBeat(i) << "\t::\t"
-           << hfile.getLine(i) << endl;
-   }
+	cout << "absbeat\tdur\tbar\tbeat\t::\tdata\n";
+	cout << ":::::::::::::::::::::::::::::::::::::::::::::::::::::\n";
+	for (int i=0; i<hfile.getNumLines(); i++) {
+		if (hfile[i].isMeasure()) {
+			sscanf(hfile[i][0], "=%d", &measure);
+		}
+		cout << hfile.getAbsBeat(i) << '\t'
+			  << hfile.getDuration(i) << '\t'
+			  << measure << '\t'
+			  << hfile.getBeat(i) << "\t::\t"
+			  << hfile.getLine(i) << endl;
+	}
 
-   return 0;
+	return 0;
 }
 
 
 
-// md5sum: 4b0eace00d6eeaf8595686d895ba0628 rcheck.cpp [20130504]

@@ -2842,6 +2842,21 @@ void Convert::rotatechord(SigCollection<int>& aChord) {
 //      interval vector.
 //
 
+void Convert::base40ToIntervalVector(vector<int>& iv, vector<int>& base40) {
+	Array<int> newbase40;
+	newbase40.setSize(base40.size());
+	for (int i=0; i<(int)base40.size(); i++) {
+		newbase40[i] = base40[i];
+	}
+	Array<int> newiv;
+	base40ToIntervalVector(newiv, newbase40);
+	iv.resize(newiv.getSize());
+	for (int i=0; i<(int)iv.size(); i++) {
+		iv[i] = newiv[i];
+	}
+}
+
+
 void Convert::base40ToIntervalVector(Array<int>& iv, Array<int>& base40) {
    iv.setSize(6);
    iv.setAll(0);
@@ -2864,6 +2879,21 @@ void Convert::base40ToIntervalVector(Array<int>& iv, Array<int>& base40) {
 // Convert::base12ToIntervalVector -- convert a list of MIDI note numbers
 //     into an interval vector.
 //
+
+void Convert::base12ToIntervalVector(vector<int>& iv, vector<int>& base12) {
+	Array<int> newbase12;
+	newbase12.setSize(base12.size());
+	for (int i=0; i<(int)base12.size(); i++) {
+		newbase12[i] = base12[i];
+	}
+	Array<int> newiv;
+	base12ToIntervalVector(newiv, newbase12);
+	iv.resize(newiv.getSize());
+	for (int i=0; i<(int)iv.size(); i++) {
+		iv[i] = newiv[i];
+	}
+}
+
 
 void Convert::base12ToIntervalVector(Array<int>& iv, Array<int>& base12) {
    iv.setSize(6);
@@ -2900,6 +2930,21 @@ void Convert::base12ToIntervalVector(Array<int>& iv, Array<int>& base12) {
 //
 // Convert::base12ToTnNormalForm --
 //
+
+void Convert::base12ToTnNormalForm(vector<int>& tnorm, vector<int>& base12) {
+	Array<int> newbase12;
+	newbase12.setSize((int)base12.size());
+	for (int i=0; i<(int)base12.size(); i++) {
+		newbase12[i] = base12[i];
+	}
+	Array<int> newtnorm;
+	base12ToTnNormalForm(newtnorm, newbase12);
+	tnorm.resize(newtnorm.getSize());
+	for (int i=0; i<(int)tnorm.size(); i++) {
+		tnorm[i] = newtnorm[i];
+	}
+}
+
 
 void Convert::base12ToTnNormalForm(Array<int>& tnorm, Array<int>& base12) {
    if (base12.getSize() == 0) {
@@ -2939,6 +2984,21 @@ void Convert::base12ToTnNormalForm(Array<int>& tnorm, Array<int>& base12) {
 //
 //    Note: transpostion is currently always set to 0, so need to add later.
 //
+
+void Convert::base12ToTnSetNameAllSubsets(vector<int>& list, vector<int>& notes) {
+	Array<int> newnotes;
+	newnotes.setSize(notes.size());
+	for (int i=0; i<(int)notes.size(); i++) {
+		newnotes[i] = notes[i];
+	}
+	Array<int> newlist;
+	base12ToTnSetNameAllSubsets(newlist, newnotes);
+	list.resize(newlist.getSize());
+	for (int i=0; i<(int)list.size(); i++) {
+		list[i] = newlist[i];
+	}
+}
+
 
 void Convert::base12ToTnSetNameAllSubsets(Array<int>& list, Array<int>& notes) {
    Array<int> tnorm;
@@ -3022,6 +3082,18 @@ void Convert::addCombinations(Array<Array<int> >& combinations,
 // Convert::base12ToTnSetName -- given an input of base12 pitches, return
 // the Tn set name for that unsorted collection (which may contain repeats)
 //
+
+
+string Convert::base12ToTnSetName(vector<int>& base12) {
+	Array<int> temp;
+	temp.setSize((int)base12.size());
+	for (int i=0; i<(int)base12.size(); i++) {
+		temp[i] = base12[i];
+	}
+	string output = base12ToTnSetName(temp);
+	return output;
+}
+
 
 const char* Convert::base12ToTnSetName(Array<int>& base12) {
    Array<int> tnorm;
@@ -3427,6 +3499,20 @@ const char* Convert::base12ToTnSetName(Array<int>& base12) {
 //     into a normal form.
 //
 
+void Convert::base12ToNormalForm(vector<int>& nform, vector<int>& base12) {
+	Array<int> newbase12;
+	Array<int> newnform;
+	for (int i=0; i<(int)base12.size(); i++) {
+		newbase12[i] = base12[i];
+	}
+	base12ToNormalForm(newnform, newbase12);
+	nform.resize(newnform.getSize());
+	for (int i=0; i<(int)nform.size(); i++) {
+		nform[i] = newnform[i];
+	}
+}
+
+
 void Convert::base12ToNormalForm(Array<int>& nform, Array<int>& base12) {
    int i;
    if (base12.getSize() == 0) {
@@ -3532,5 +3618,3 @@ int Convert::findBestNormalRotation(Array<int>& input, int asize,
 
 
 
-
-// md5sum: 8536ad8281c4b63bd8433449c6400194 Convert.cpp [20050403]

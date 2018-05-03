@@ -146,6 +146,16 @@ void ChordQuality::getNotesInChord(SigCollection<int>& notes) const {
 }
 
 
+void ChordQuality::getNotesInChord(vector<int>& notes) const {
+	SigCollection<int> temp;
+	getNotesInChord(temp);
+	notes.resize(temp.getSize());
+	for (int i=0; i<(int)notes.size(); i++) {
+		notes[i] = temp[i];
+	}
+}
+
+
 
 //////////////////////////////
 //
