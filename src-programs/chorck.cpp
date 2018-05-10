@@ -485,7 +485,9 @@ void marknote(HumdrumFile& infile, int line, int spine, const string& mark) {
 		}
 		data = infile[line][spine];
 	}
-	data += mark;
+	if (data.find(mark) == std::string::npos) {
+		data += mark;
+	}
 	if (line > 0) {
 		infile[line].changeField(spine, data.c_str());
 	}
