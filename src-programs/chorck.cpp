@@ -112,7 +112,7 @@ int          voicemin = 0;         // used with -s, -d, -t option
 int          fileQ    = 0;         // used with -f option
 int          idQ      = 0;         // used with --id option
 int          rawQ     = 0;         // used with --raw option
-int          markQ    = 0;         // used with -m option
+int          markQ    = 1;         // used with -m option
 string       Filename;             // used with -f option
 
 // Analysis variables
@@ -204,8 +204,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("a|base40-array=b",  "show intermediate calculation array");
 	opts.define("f|filename=b",      "display filename in warning");
 	opts.define("l|line=b",          "display line nums with -a");
-	opts.define("M|marker=s:Warning: ", "start of error message");
-	opts.define("m|mark=b",          "mark notes involved in rule violation");
+	opts.define("m|marker=s:Warning: ", "start of error message");
+	opts.define("M|no-marks=b",      "no marks on notes involved in rule violation");
 	opts.define("p|print-rules=s",   "print specified rule number");
 	opts.define("r|rule=s:",         "include certain error checking rules");
 	opts.define("s|no-single=b",     "exclude single note attacks");
@@ -280,13 +280,16 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 		exit(0);
 	}
 
-	marker = opts.getString("marker");
-	fileQ  = opts.getBoolean("filename");
-	idQ    = opts.getBoolean("id");
-	rawQ   = opts.getBoolean("raw");
-	markQ  = opts.getBoolean("mark");
+	marker =  opts.getString("marker");
+	fileQ  =  opts.getBoolean("filename");
+	idQ    =  opts.getBoolean("id");
+	rawQ   =  opts.getBoolean("raw");
+	markQ  = !opts.getBoolean("no-marks");
 	if (rawQ) {
 		idQ = 1;
+	}
+	if (options.getBoolean("warnings")) {
+		markQ = 0;
 	}
 }
 
@@ -475,8 +478,17 @@ void errormessage(int errornumber, const string& voice1, const string& voice2,
 
 void marknote(HumdrumFile& infile, int line, int spine, const string& mark) {
 	string data = infile[line][spine];
+	while ((line > 0) && (data == ".")) {
+		line--;
+		while ((line > 0) && !infile[line].isData()) {
+			line--;
+		}
+		data = infile[line][spine];
+	}
 	data += mark;
-	infile[line].changeField(spine, data.c_str());
+	if (line > 0) {
+		infile[line].changeField(spine, data.c_str());
+	}
 }
 
 
