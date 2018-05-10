@@ -4073,6 +4073,16 @@ int HumdrumFile::attemptMatch(Array<Array<int> >& allnotes, Array<int>& di,
 //     default value: tdefault = 60.0;
 //
 
+void HumdrumFile::analyzeTempoMarkings(vector<double>& tempo, double tdefault) {
+	Array<double> newtempo;
+	analyzeTempoMarkings(newtempo, tdefault);
+	tempo.resize(newtempo.getSize());
+	for (int i=0; i<(int)tempo.size(); i++) {
+		tempo[i] = newtempo[i];
+	}
+}
+
+
 void HumdrumFile::analyzeTempoMarkings(Array<double>& tempo, double tdefault) {
    HumdrumFile& score = *this;
    tempo.setSize(score.getNumLines());

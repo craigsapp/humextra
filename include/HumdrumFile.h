@@ -217,6 +217,7 @@ class HumdrumFile : public HumdrumFileBasic {
 
       // metrical analyses 
       void analyzeTempoMarkings(Array<double>& tempo, double tdefault = 60.0);
+      void analyzeTempoMarkings(vector<double>& tempo, double tdefault = 60.0);
       void analyzeMeter(Array<double>& top, Array<double>& bottom, 
          int flag = AFLAG_NOCOMPOUND_METER);
       void analyzeBeatDuration(Array<double>& beatdur, 

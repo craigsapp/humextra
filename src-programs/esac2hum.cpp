@@ -10,16 +10,18 @@
 // Description:   Converts an EsAC file into Humdrum.
 //
 
-#include "humdrum.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
 
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <math.h>
 
-#include <iostream>
-#include <fstream>
-#include <vector>
+#include "humdrum.h"
+
 using namespace std;
 
 typedef struct { char c[260]; } char260;
@@ -44,33 +46,33 @@ class NoteData {
 		int    slstart;   int    slend;    int lyricnum;
 		int    tiestart;  int    tiecont;  int tieend;
 		char   text[32];
-		
+
 };
 
 // function declarations:
 void      checkOptions          (Options& opts, int argc, char** argv);
 void      example               (void);
-void      usage                 (const char* command);
+void      usage                 (const string& command);
 void      convertEsacToHumdrum  (const char* filename);
-void      getSong               (vector<char260>& song, ifstream& infile, 
+void      getSong               (vector<char260>& song, ifstream& infile,
 							            int init);
 void      convertSong           (vector<char260>& song, ostream& out);
-void      getKeyInfo            (vector<char260>& song, char260& key, 
+void      getKeyInfo            (vector<char260>& song, char260& key,
 							            double& mindur, int& tonic, char260& meter,
 							            ostream& out);
 void      printNoteData         (NoteData& data, int textQ, ostream& out);
-void      getNoteList           (vector<char260>& song, 
+void      getNoteList           (vector<char260>& song,
 							            vector<NoteData>& songdata, double mindur,
 							            int tonic);
-void      getMeterInfo          (char260& meter, vector<int>& numerator, 
+void      getMeterInfo          (char260& meter, vector<int>& numerator,
 							            vector<int>& denominator);
 void      postProcessSongData   (vector<NoteData>& songdata,
 							            vector<int>& numerator,vector<int>& denominator);
-void      printKeyInfo          (vector<NoteData>& songdata, int tonic, 
+void      printKeyInfo          (vector<NoteData>& songdata, int tonic,
 							            int textQ, ostream& out);
 int       getAccidentalMax      (int a, int b, int c);
 void      printTitleInfo        (vector<char260>& song, ostream& out);
-void      getLineRange          (vector<char260>& song, const char* field, 
+void      getLineRange          (vector<char260>& song, const char* field,
 							            int& start, int& stop);
 void      printChar             (unsigned char c, ostream& out);
 void      printBibInfo          (vector<char260>& song, ostream& out);
@@ -78,7 +80,7 @@ void      printString           (const char* string, ostream& out);
 void      printSpecialChars     (ostream& out);
 void      placeLyrics           (vector<char260>& song,
 							            vector<NoteData>& songdata);
-void      placeLyricPhrase      (vector<NoteData>& songdata, 
+void      placeLyricPhrase      (vector<NoteData>& songdata,
 							            vector<char260>& lyrics, int line);
 void      getLyrics             (vector<char260>& lyrics, const char* buffer);
 void      cleanupLyrics         (vector<char260>& lyrics);
@@ -104,7 +106,7 @@ int inputline = 0;
 
 #define ND_NOTE 0  /* notes or rests + text and phrase markings */
 #define ND_BAR  1  /* explicit barlines */
-		
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -130,11 +132,7 @@ int main(int argc, char** argv) {
 //
 
 void convertEsacToHumdrum(const char* filename) {
-	#ifndef OLDCPP
-		ifstream infile(filename);
-	#else
-		ifstream infile(filename, ios::nocreate);
-	#endif
+	ifstream infile(filename);
 	if (verboseQ) {
 		cout << "processing file " << filename << " ..." << endl;
 	}
@@ -174,12 +172,8 @@ void convertEsacToHumdrum(const char* filename) {
 			strcat(outfilename, numberstring);
 			strcat(outfilename, fileextension);
 			filecounter++;
-			
-			#ifndef OLDCPP
-				outfile.open(outfilename);
-			#else
-				outfile.open(outfilename, ios::noreplace);
-			#endif
+
+			outfile.open(outfilename);
 
 			if (!outfile.is_open()) {
 				cout << "Error: cannot write to file: " << outfilename << endl;
@@ -236,7 +230,7 @@ void getSong(vector<char260>& song, ifstream& infile, int init) {
 			cout << "INLINE: " << holdbuffer.c << endl;
 		}
 	}
- 
+
 }
 
 
@@ -324,7 +318,7 @@ void convertSong(vector<char260>& song, ostream& out) {
 	printKeyInfo(songdata, tonic, textQ, out);
 	for (i=0; i<(int)songdata.size(); i++) {
 		printNoteData(songdata[i], textQ, out);
-	} 
+	}
 	out << "*-";
 	if (textQ) {
 		out << "\t*-";
@@ -353,11 +347,11 @@ void convertSong(vector<char260>& song, ostream& out) {
 
 	printBibInfo(song, out);
 	printSpecialChars(out);
-	
+
 	for (i=0; i<(int)songdata.size(); i++) {
 		if (songdata[i].lyricerr) {
 			out << "!!!RWG: Lyric placement mismatch "
-				  << "in phrase (too many syllables) " << songdata[i].phnum << " [" 
+				  << "in phrase (too many syllables) " << songdata[i].phnum << " ["
 				  << key.c << "]\n";
 			break;
 		}
@@ -394,7 +388,7 @@ void placeLyrics(vector<char260>& song, vector<NoteData>& songdata) {
 	char buffer[256] = {0};
 	for (line=0; line<=stop-start; line++) {
 		if (strlen(song[line+start].c) <= 4) {
-			cout << "Error: lyric line is too short!: " 
+			cout << "Error: lyric line is too short!: "
 				  << song[line+start].c << endl;
 			exit(1);
 		}
@@ -410,7 +404,7 @@ void placeLyrics(vector<char260>& song, vector<NoteData>& songdata) {
 		}
 		if (strcmp(buffer, "") == 0) {
 			continue;
-		} 
+		}
 		getLyrics(lyrics, buffer);
 		cleanupLyrics(lyrics);
 		placeLyricPhrase(songdata, lyrics, line);
@@ -439,19 +433,19 @@ void cleanupLyrics(vector<char260>& lyrics) {
 		}
 
 		if (i > 0) {
-			if (strcmp(lyrics[i].c, ".") != 0 && 
-				 strcmp(lyrics[i].c, "")  != 0 && 
-				 strcmp(lyrics[i].c, "%") != 0 && 
-				 strcmp(lyrics[i].c, "^") != 0 && 
-				 strcmp(lyrics[i].c, "|") != 0 && 
+			if (strcmp(lyrics[i].c, ".") != 0 &&
+				 strcmp(lyrics[i].c, "")  != 0 &&
+				 strcmp(lyrics[i].c, "%") != 0 &&
+				 strcmp(lyrics[i].c, "^") != 0 &&
+				 strcmp(lyrics[i].c, "|") != 0 &&
 				 strcmp(lyrics[i].c, " ") != 0    ) {
 				lastsyl = -1;
 				for (m=i-1; m>=0; m--) {
-					if (strcmp(lyrics[m].c, ".") != 0 && 
-						 strcmp(lyrics[m].c, "")  != 0 && 
-						 strcmp(lyrics[m].c, "%") != 0 && 
-						 strcmp(lyrics[i].c, "^") != 0 && 
-						 strcmp(lyrics[m].c, "|") != 0 && 
+					if (strcmp(lyrics[m].c, ".") != 0 &&
+						 strcmp(lyrics[m].c, "")  != 0 &&
+						 strcmp(lyrics[m].c, "%") != 0 &&
+						 strcmp(lyrics[i].c, "^") != 0 &&
+						 strcmp(lyrics[m].c, "|") != 0 &&
 						 strcmp(lyrics[m].c, " ") != 0    ) {
 						lastsyl = m;
 						break;
@@ -547,7 +541,7 @@ void placeLyricPhrase(vector<NoteData>& songdata, vector<char260>& lyrics, int l
 	if (lyrics.size() == 0) {
 		return;
 	}
-	
+
 	// find the phrase to which the lyrics belongs
 	for (i=0; i<(int)songdata.size(); i++) {
 		if (songdata[i].phnum == line) {
@@ -594,7 +588,7 @@ void printSpecialChars(ostream& out) {
 	for (i=0; i<(int)chartable.size(); i++) {
 		if (chartable[i]) {
 		switch (i) {
-			case 129:   out << "!!!RNB" << ": symbol: &uuml;  = u umlaut (UTF-8: " 
+			case 129:   out << "!!!RNB" << ": symbol: &uuml;  = u umlaut (UTF-8: "
 							     << (char)0xc3 << (char)0xb3 << ")\n";    break;
 			case 130:   out << "!!!RNB" << ": symbol: &eacute;= e acute  (UTF-8: "
 							     << (char)0xc3 << (char)0xa9 << ")\n";    break;
@@ -669,9 +663,9 @@ void printSpecialChars(ostream& out) {
 							     << (char)0xc3 << (char)0xb3 << ")\n";    break;
 			case 252:   out << "!!!RNB" << ": symbol: &uuml;  = u umlaut (UTF-8: "
 							     << (char)0xc3 << (char)0xbc << ")\n";    break;
-//         default:    
+//         default:
 		}
-		} 
+		}
 		chartable[i] = 0;
 	}
 }
@@ -698,7 +692,7 @@ void printTitleInfo(vector<char260>& song, ostream& out) {
 	if (buffer[length-1] == ']') {
 		buffer[length-1] = '\0';
 	}
-	
+
 	int i;
 	out << "!!!OTL: ";
 	length = strlen(buffer);
@@ -762,7 +756,7 @@ void printChar(unsigned char c, ostream& out) {
 			case 243:   out << "&oacute;";  break;  // 1250 encoding
 			case 252:   out << "&uuml;";    break;
 			default:    out << c;
-		} 
+		}
 	}
 }
 
@@ -784,7 +778,7 @@ void printKeyInfo(vector<NoteData>& songdata, int tonic, int textQ,
 			pitches[songdata[i].pitch % 40]++;
 			pitchsum += Convert::base40ToMidiNoteNumber(songdata[i].pitch);
 			pitchcount++;
-		} 
+		}
 	}
 
 	// generate a clef, choosing either treble or bass clef depending
@@ -852,10 +846,10 @@ keysigend:
 	out << "*k[" << kbuf << "]";
 	if (textQ) {
 		out << "\t*k[" << kbuf << "]";
-	} 
+	}
 	out << "\n";
 
- 
+
 	// look at the third scale degree above the tonic pitch
 	int minor = pitches[(tonic + 40 + 11) % 40];
 	int major = pitches[(tonic + 40 + 12) % 40];
@@ -901,7 +895,7 @@ int getAccidentalMax(int a, int b, int c) {
 // postProcessSongData -- clean up data and do some interpreting.
 //
 
-void postProcessSongData(vector<NoteData>& songdata, vector<int>& numerator, 
+void postProcessSongData(vector<NoteData>& songdata, vector<int>& numerator,
 		vector<int>& denominator) {
 	int i, j;
 	// move phrase start markers off of rests and onto the
@@ -913,7 +907,7 @@ void postProcessSongData(vector<NoteData>& songdata, vector<int>& numerator,
 		}
 	}
 
-	// move phrase ending markers off of rests and onto the 
+	// move phrase ending markers off of rests and onto the
 	// previous note that it finds
 	for (i=(int)songdata.size()-1; i>0; i--) {
 		if (songdata[i].pitch < 0 && songdata[i].phend) {
@@ -1098,7 +1092,7 @@ void postProcessSongData(vector<NoteData>& songdata, vector<int>& numerator,
 // getMeterInfo --
 //
 
-void getMeterInfo(char260& meter, vector<int>& numerator, 
+void getMeterInfo(char260& meter, vector<int>& numerator,
 		vector<int>& denominator) {
 	char buffer[256] = {0};
 	strcpy(buffer, meter.c);
@@ -1123,7 +1117,7 @@ void getMeterInfo(char260& meter, vector<int>& numerator,
 				denominator.push_back(denom);
 			} else {
 				num = atoi(ptr);
-				denom = 4;     
+				denom = 4;
 				numerator.push_back(num);
 				denominator.push_back(denom);
 			}
@@ -1141,7 +1135,7 @@ void getMeterInfo(char260& meter, vector<int>& numerator,
 //     field.  Returns -1 if the data field was not found.
 //
 
-void getLineRange(vector<char260>& song, const char* field, int& start, 
+void getLineRange(vector<char260>& song, const char* field, int& start,
 		int& stop) {
 	char searchstring[32] = {0};
 	strcpy(searchstring, field);
@@ -1178,9 +1172,9 @@ void getNoteList(vector<char260>& song, vector<NoteData>& songdata, double mindu
 	int melstart = -1;
 	int melstop  = -1;
 	int i, j;
-	int octave      = 0; 
-	int degree      = 0; 
-	int accidental  = 0; 
+	int octave      = 0;
+	int degree      = 0;
+	int accidental  = 0;
 	double duration = mindur;
 	int bar    = 0;
 	// int tuplet = 0;
@@ -1234,9 +1228,9 @@ void getNoteList(vector<char260>& song, vector<NoteData>& songdata, double mindu
 				case '#': accidental++; state = STATE_ACC;  break;
 
 				// Note information:
-				case '0': case '1': case '2': case '3': case '4': 
-				case '5': case '6': case '7': 
-					degree =  major[song[i].c[j] - '0'];  
+				case '0': case '1': case '2': case '3': case '4':
+				case '5': case '6': case '7':
+					degree =  major[song[i].c[j] - '0'];
 					state = STATE_NOTE;
 					break;
 				case 'O':
@@ -1245,7 +1239,7 @@ void getNoteList(vector<char260>& song, vector<NoteData>& songdata, double mindu
 					break;
 
 				// Barline information:
-				case ' ': 
+				case ' ':
 					state = STATE_BAR;
 					if (song[i].c[j+1] == ' ') {
 						bar = 1;
@@ -1260,7 +1254,7 @@ void getNoteList(vector<char260>& song, vector<NoteData>& songdata, double mindu
 				case '/':                     break;
 				case ']':                     break;
 //            case '>':                     break;   // unknown marker
-//            case '<':                     break;   // 
+//            case '<':                     break;   //
 				case '^': tie = 1; state = STATE_NOTE; break;
 				default : cout << "Error: unknown character " << song[i].c[j]
 							      << " on the line: " << song[i].c << endl;
@@ -1277,8 +1271,8 @@ void getNoteList(vector<char260>& song, vector<NoteData>& songdata, double mindu
 				case '{': nextstate = STATE_SLSTART; break;
 				case '}': nextstate = STATE_SLEND; break;
 				case '^': nextstate = STATE_NOTE; break;
-				case ' ': 
-					 if (song[i].c[j+1] == ' ') nextstate = STATE_BAR; 
+				case ' ':
+					 if (song[i].c[j+1] == ' ') nextstate = STATE_BAR;
 					 else if (song[i].c[j+1] == '/') nextstate = -2;
 					 break;
 				case '\0':
@@ -1286,8 +1280,8 @@ void getNoteList(vector<char260>& song, vector<NoteData>& songdata, double mindu
 				default: nextstate = -1;
 			}
 
-			if (nextstate < state || 
-					((nextstate == STATE_NOTE) && (state == nextstate))) { 
+			if (nextstate < state ||
+					((nextstate == STATE_NOTE) && (state == nextstate))) {
 				 tempnote.clear();
 				 if (degree < 0) { // rest
 					 tempnote.pitch = -999;
@@ -1414,11 +1408,11 @@ void printNoteData(NoteData& data, int textQ, ostream& out) {
 	}
 
 	out << "\n";
-	
+
 	// print barline information
 	if (data.bar == 1) {
 
-		out << "="; 
+		out << "=";
 		if (data.barnum > 0) {
 			out << data.barnum;
 		}
@@ -1432,7 +1426,7 @@ void printNoteData(NoteData& data, int textQ, ostream& out) {
 		}
 		if (textQ) {
 			out << "\t";
-			out << "="; 
+			out << "=";
 			if (data.barnum > 0) {
 				out << data.barnum;
 			}
@@ -1446,13 +1440,13 @@ void printNoteData(NoteData& data, int textQ, ostream& out) {
 			}
 		}
 
-		out << "\n"; 
+		out << "\n";
 	} else if (data.bar == 2) {
-		out << "=="; 
+		out << "==";
 		if (textQ) {
 			out << "\t==";
 		}
-		out << "\n"; 
+		out << "\n";
 	}
 }
 
@@ -1487,7 +1481,7 @@ void getKeyInfo(vector<char260>& song, char260& key, double& mindur,
 			if (song[i].c[10] != ' ') {
 				out << "!! Warning key field is not complete" << endl;
 			}
-			
+
 			mindur = (song[i].c[11] - '0') * 10 + (song[i].c[12] - '0');
 			mindur = 4.0 / mindur;
 
@@ -1513,7 +1507,7 @@ void getKeyInfo(vector<char260>& song, char260& key, double& mindur,
 			if (strcmp(tonicstr.c, "H") == 0) {
 				strcpy(tonicstr.c, "B");
 			}
-			
+
 			tonic = Convert::kernToBase40(tonicstr.c);
 			if (tonic <= 0) {
 				cout << "Error: invalid tonic on line: " << song[i].c << endl;
@@ -1540,24 +1534,24 @@ void getKeyInfo(vector<char260>& song, char260& key, double& mindur,
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-	opts.define("debug=b",      "print debug information"); 
-	opts.define("v|verbose=b",  "verbose output"); 
+	opts.define("debug=b",      "print debug information");
+	opts.define("v|verbose=b",  "verbose output");
 	opts.define("h|header=s:",  "Header filename for placement in output");
 	opts.define("t|trailer=s:", "Trailer filename for placement in output");
 	opts.define("s|split=s:file", "Split song info into separate files");
 	opts.define("x|extension=s:.krn", "Split filename extension");
 	opts.define("f|first=i:1",    "Number of first split filename");
 
-	opts.define("author=b",  "author of program"); 
+	opts.define("author=b",  "author of program");
 	opts.define("version=b", "compilation info");
-	opts.define("example=b", "example usages");   
+	opts.define("example=b", "example usages");
 	opts.define("help=b",  "short description");
 	opts.process(argc, argv);
-	
+
 	// handle basic options:
 	if (opts.getBoolean("author")) {
 		cout << "Written by Craig Stuart Sapp, "
@@ -1575,7 +1569,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 		example();
 		exit(0);
 	}
-	
+
 	debugQ      = opts.getBoolean("debug");
 	verboseQ    = opts.getBoolean("verbose");
 
@@ -1647,7 +1641,7 @@ void example(void) {
 // usage --
 //
 
-void usage(const char* command) {
+void usage(const string& command) {
 
 }
 
@@ -1685,7 +1679,7 @@ void printBibInfo(vector<char260>& song, ostream& out) {
 
 			// don't print CUT field if only one line.  !!!OTL: will contain CUT[]
 			// if (strcmp(buffer, "CUT") == 0 && start == stop) continue;
-	  
+
 			buffer[0] = tolower(buffer[0]);
 			buffer[1] = tolower(buffer[1]);
 			buffer[2] = tolower(buffer[2]);
@@ -1709,7 +1703,7 @@ void printBibInfo(vector<char260>& song, ostream& out) {
 						printString(templine, out);
 						out << "\n";
 					}
-	
+
 				} else if (j==start) {
 					out << "!!!" << buffer << count++ << ": ";
 					printString(&(song[j].c[4]), out);
@@ -1749,10 +1743,9 @@ void printString(const char* string, ostream& out) {
 	int i;
 	int length = strlen(string);
 	for (i=0; i<length; i++) {
-		printChar(string[i], out); 
+		printChar(string[i], out);
 	}
 }
 
 
 
-// md5sum: 2034e9123839f48e5a69108a45dace66 esac2hum.cpp [20160320]
