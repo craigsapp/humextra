@@ -42,16 +42,16 @@
 // Reference:     http://crystal.apana.org.au/ghansper/midi_introduction/midi_file_format.html
 //
 
+#include <math.h>
+
+#include <cctype>
+#include <iostream>
+#include <sstream>
+
 #include "MidiFile.h"
 #include "Options.h"
 #include "Convert.h"
 #include "HumdrumFile.h"
-#include <math.h>
-#include <cctype>
-#include <iostream>
-#include <sstream>
-#define SSTREAM stringstream
-#define CSTRING str().c_str()
 
 using namespace std;
 
@@ -101,20 +101,20 @@ double  timesigtop = 4.0;    // used to print barlines
 double  timesigbottom = 4.0; // used to print barlines
 
 // function declarations:
-void      convertToHumdrum  (MidiFile& midifile);
-void      getMidiData       (Array<Array<MidiInfo> >& mididata,
-                             MidiFile& midifile);
-void      storenote         (MidiInfo& info, Array<Array<MidiInfo> >& mididata,
+void      convertToHumdrum  (smf::MidiFile& midifile);
+void      getMidiData       (vector<vector<MidiInfo> >& mididata,
+                             smf::MidiFile& midifile);
+void      storenote         (MidiInfo& info, vector<vector<MidiInfo> >& mididata,
                              int i, int currtick);
-void      printKernData     (Array<Array<MidiInfo> >& mididata,
-                             MidiFile& midifile, Array<MetaInfo>& metadata);
-void      identifyChords    (Array<Array<MidiInfo> >& mididata);
-void      correctdurations  (Array<Array<MidiInfo> >& mididata, int tpq);
+void      printKernData     (vector<vector<MidiInfo> >& mididata,
+                             smf::MidiFile& midifile, vector<MetaInfo>& metadata);
+void      identifyChords    (vector<vector<MidiInfo> >& mididata);
+void      correctdurations  (vector<vector<MidiInfo> >& mididata, int tpq);
 int       MidiInfoCompare   (const void* a, const void* b);
 void      printRestCorrection (ostream& out, int restcorr, int tqp);
-void      processMetaMessage(MidiFile& midifile, int track, int event,
-                             Array<MetaInfo>& metadata);
-void      printMetaData     (ostream& out, Array<MetaInfo>& metadata,
+void      processMetaMessage(smf::MidiFile& midifile, int track, int event,
+                             vector<MetaInfo>& metadata);
+void      printMetaData     (ostream& out, vector<MetaInfo>& metadata,
                              int metaindex);
 void      splitDataWithMeasure(ostream& out, HumdrumFile& hfile, int index,
                              int& measurenum, double firstdur);
@@ -127,7 +127,7 @@ void      usage             (const char* command);
 
 int main(int argc, char* argv[]) {
    checkOptions(options, argc, argv);
-   MidiFile midifile(options.getArg(1));
+   smf::MidiFile midifile(options.getArg(1));
    convertToHumdrum(midifile);
 
    return 0;
@@ -141,12 +141,12 @@ int main(int argc, char* argv[]) {
 // convertToHumdrum -- convert a MIDI file into Humdrum format.
 //
 
-void convertToHumdrum(MidiFile& midifile) {
+void convertToHumdrum(smf::MidiFile& midifile) {
    int ticksperquarter = midifile.getTicksPerQuarterNote();
    cout << "!! Converted from MIDI with mid2hum" << endl;
    cout << "!! Ticks Per Quarter Note = " << ticksperquarter << endl;
    cout << "!! Track count: " << midifile.getNumTracks() << endl;
-   Array<Array<MidiInfo> > mididata;
+   vector<vector<MidiInfo> > mididata;
    getMidiData(mididata, midifile);
 }
 
@@ -157,7 +157,7 @@ void convertToHumdrum(MidiFile& midifile) {
 // storenote -- store a MIDI note into the data array for later processing.
 //
 
-void storenote(MidiInfo& info, Array<Array<MidiInfo> >& mididata,
+void storenote(MidiInfo& info, vector<vector<MidiInfo> >& mididata,
       int i, int currtick) {
    if (info.state == 0) {
       // don't store a note already in the off state.
@@ -166,7 +166,7 @@ void storenote(MidiInfo& info, Array<Array<MidiInfo> >& mididata,
    }
 
    info.tickdur = currtick - info.starttick;
-   mididata[i].append(info);
+   mididata[i].push_back(info);
    info.clear();
 }
 
@@ -177,32 +177,26 @@ void storenote(MidiInfo& info, Array<Array<MidiInfo> >& mididata,
 // getMidiData --
 //
 
-void getMidiData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile) {
-   mididata.setSize(midifile.getNumTracks());
-   int i;
-   int j;
-   for  (i=0; i<mididata.getSize(); i++) {
-      mididata[i].setSize(10000);
-      mididata[i].setGrowth(10000);
-      mididata[i].setSize(0);
+void getMidiData(vector<vector<MidiInfo> >& mididata, smf::MidiFile& midifile) {
+   mididata.resize(midifile.getNumTracks());
+   for  (int i=0; i<(int)mididata.size(); i++) {
+      mididata[i].reserve(10000);
+      mididata[i].resize(0);
    }
 
-   Array<MetaInfo> metadata;
-   metadata.setSize(1000);
-   metadata.setGrowth(1000);
-   metadata.setSize(0);
+   vector<MetaInfo> metadata;
+   metadata.reserve(1000);
+   metadata.resize(0);
 
-   Array<Array<MidiInfo> > notestates;
-   notestates.setSize(midifile.getNumTracks());
-   for (i=0; i<notestates.getSize(); i++) {
-      notestates[i].setSize(128);
-      notestates[i].allowGrowth(0);
+   vector<vector<MidiInfo> > notestates(midifile.getNumTracks());
+   for (int i=0; i<(int)notestates.size(); i++) {
+      notestates[i].resize(128);
    }
 
    // extract a list of notes in the MIDI file along with their durations
    int k;
-   for (i=0; i<midifile.getNumTracks(); i++) {
-      for (j=0; j<midifile.getNumEvents(i); j++) {
+   for (int i=0; i<midifile.getNumTracks(); i++) {
+      for (int j=0; j<midifile.getNumEvents(i); j++) {
          if (((midifile.getEvent(i, j)[0] & 0xf0) == 0x90) &&
              (midifile.getEvent(i, j)[2] > 0) ) {
             // a note-on message. Store the state
@@ -232,9 +226,9 @@ void getMidiData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile) {
 
 /*
    // test print the note information
-   for (i=0; i<mididata.getSize(); i++) {
+   for (i=0; i<(int)mididata.size(); i++) {
       cout << "Track " << i << endl;
-      for (j=0; j<mididata[i].getSize(); j++) {
+      for (j=0; j<(int)mididata[i].size(); j++) {
          cout << "\tNote: pitch = "
               << (int)midifile.getEvent(i, mididata[i][j].index)[1]
               << "\tduration = "
@@ -244,8 +238,8 @@ void getMidiData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile) {
    }
 */
 
-   for (i=0; i<mididata.getSize(); i++) {
-      qsort(mididata[i].getBase(), mididata[i].getSize(), sizeof(MidiInfo),
+   for (int i=0; i<(int)mididata.size(); i++) {
+      qsort(mididata[i].data(), mididata[i].size(), sizeof(MidiInfo),
             MidiInfoCompare);
    }
    identifyChords(mididata);
@@ -261,8 +255,8 @@ void getMidiData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile) {
 // processMetaMessage --
 //
 
-void processMetaMessage(MidiFile& midifile, int track, int event,
-      Array<MetaInfo>& metadata) {
+void processMetaMessage(smf::MidiFile& midifile, int track, int event,
+      vector<MetaInfo>& metadata) {
    MetaInfo tempmeta;
    tempmeta.type = midifile.getEvent(track, event)[1];
    tempmeta.starttick = midifile.getEvent(track, event).tick;
@@ -282,14 +276,14 @@ void processMetaMessage(MidiFile& midifile, int track, int event,
       case 0x05:   // lyric
          break;
       case 0x06:   // marker
-         tempmeta.tsize = (uchar)midifile.getEvent(track, event)[2];
+         tempmeta.tsize = (unsigned char)midifile.getEvent(track, event)[2];
          for (d=0; d<tempmeta.tsize; d++) {
             tempmeta.text[d] = midifile.getEvent(track, event)[3+d];
          }
          tempmeta.text[tempmeta.tsize] = '\0';
          break;
       case 0x07:   // cue point
-         tempmeta.tsize = (uchar)midifile.getEvent(track, event)[2];
+         tempmeta.tsize = (unsigned char)midifile.getEvent(track, event)[2];
          for (d=0; d<tempmeta.tsize; d++) {
             tempmeta.text[d] = midifile.getEvent(track, event)[3+d];
          }
@@ -320,7 +314,7 @@ void processMetaMessage(MidiFile& midifile, int track, int event,
          tempmeta.mode   = midifile.getEvent(track, event)[4];
    }
 
-   metadata.append(tempmeta);
+   metadata.push_back(tempmeta);
    // cout << "!!meta:" << hex << tempmeta.type << dec << endl;
 }
 
@@ -333,18 +327,18 @@ void processMetaMessage(MidiFile& midifile, int track, int event,
 //    rhythm values might make sense.
 //
 
-void correctdurations  (Array<Array<MidiInfo> >& mididata, int tpq) {
+void correctdurations  (vector<vector<MidiInfo> >& mididata, int tpq) {
    int i, j;
    double duration = 0.0;
    double fraction = 0.0;
    int    count = 0;
    int    durationcorrection = 0;
 
-   for (i=0; i<mididata.getSize(); i++) {
-      if (mididata[i].getSize() == 0) {
+   for (i=0; i<(int)mididata.size(); i++) {
+      if (mididata[i].size() == 0) {
          continue;
       }
-      for (j=0; j<mididata[i].getSize(); j++) {
+      for (j=0; j<(int)mididata[i].size(); j++) {
          duration = (double)mididata[i][j].tickdur/tpq;
          fraction = duration/quantlevel;
          count = (int)fraction;
@@ -359,7 +353,7 @@ void correctdurations  (Array<Array<MidiInfo> >& mididata, int tpq) {
 //         cout << "\tFraction value: "  << fraction << endl;
 //         cout << "\tCorrection value: "  << durationcorrection << endl;
 //         cout << "\tDuration value: "  << mididata[i][j].tickdur << endl;
-//         if (j<mididata[i].getSize()-1) {
+//         if (j<(int)mididata[i].size()-1) {
 //            cout << "\tDifference value: "
 //                 << mididata[i][j+1].starttick - mididata[i][j].starttick
 //                 << endl;
@@ -383,10 +377,10 @@ void correctdurations  (Array<Array<MidiInfo> >& mididata, int tpq) {
 // identifyChords --
 //
 
-void identifyChords(Array<Array<MidiInfo> >& mididata) {
+void identifyChords(vector<vector<MidiInfo> >& mididata) {
    int i, j;
-   for (i=0; i<mididata.getSize(); i++) {
-      for (j=1; j<mididata[i].getSize(); j++) {
+   for (i=0; i<(int)mididata.size(); i++) {
+      for (j=1; j<(int)mididata[i].size(); j++) {
          if ((mididata[i][j].starttick == mididata[i][j-1].starttick) &&
              (mididata[i][j].tickdur == mididata[i][j-1].tickdur) ) {
             mididata[i][j].chord = 1;
@@ -436,51 +430,41 @@ int MidiInfoCompare(const void* a, const void* b) {
 // printKernData --
 //
 
-void printKernData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile,
-      Array<MetaInfo>& metadata) {
-   int i;
-   int j;
-
-   Array<int> kerntrack;
-   kerntrack.setSize(mididata.getSize());
-   for (i=0; i<mididata.getSize(); i++) {
-      if (mididata[i].getSize() == 0) {
+void printKernData(vector<vector<MidiInfo> >& mididata, smf::MidiFile& midifile,
+      vector<MetaInfo>& metadata) {
+   vector<int> kerntrack(mididata.size());
+   for (int i=0; i<(int)mididata.size(); i++) {
+      if (mididata[i].size() == 0) {
          kerntrack[i] = 0;
       } else {
          kerntrack[i] = 1;
       }
    }
 
-   Array<int> restcorrection;
-   restcorrection.setSize(mididata.getSize());
-   restcorrection.setGrowth(0);
-   restcorrection.setAll(0);
+   vector<int> restcorrection(mididata.size(), 0);
    int maxticks = 0;
    int testticks = 0;
-   for (i=0; i<mididata.getSize(); i++) {
-      if (mididata[i].getSize() > 0) {
-         testticks = mididata[i][mididata[i].getSize()-1].starttick +
-             mididata[i][mididata[i].getSize()-1].tickdur;
+   for (int i=0; i<(int)mididata.size(); i++) {
+      if (mididata[i].size() > 0) {
+         testticks = mididata[i][(int)mididata[i].size()-1].starttick +
+             mididata[i][(int)mididata[i].size()-1].tickdur;
          if (testticks > maxticks) {
             maxticks = testticks;
          }
       }
    }
-   for (i=0; i<mididata.getSize(); i++) {
+   for (int i=0; i<(int)mididata.size(); i++) {
       if (kerntrack[i] == 0) {
          continue;
       }
-      testticks = mididata[i][mididata[i].getSize()-1].starttick +
-          mididata[i][mididata[i].getSize()-1].tickdur;
+      testticks = mididata[i][(int)mididata[i].size()-1].starttick +
+          mididata[i][(int)mididata[i].size()-1].tickdur;
       restcorrection[i] = maxticks - testticks;
    }
 
-   Array<int> startrestcorrection;
-   startrestcorrection.setSize(mididata.getSize());
-   startrestcorrection.setGrowth(0);
-   startrestcorrection.setAll(0);
+   vector<int> startrestcorrection(mididata.size(), 0);
    int minstartticks = 999999;
-   for (i=0; i<mididata.getSize(); i++) {
+   for (int i=0; i<(int)mididata.size(); i++) {
       if (kerntrack[i] == 0) {
          continue;
       }
@@ -488,7 +472,7 @@ void printKernData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile,
          minstartticks = mididata[i][0].starttick;
       }
    }
-   for (i=0; i<mididata.getSize(); i++) {
+   for (int i=0; i<(int)mididata.size(); i++) {
       if (kerntrack[i] == 0) {
          continue;
       }
@@ -499,7 +483,7 @@ void printKernData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile,
    HumdrumFile extra;
    HumdrumFile tempfile;
    int baseQ = 0;
-   SSTREAM *buffstream;
+   stringstream *buffstream;
    HumdrumFile* hpointer[2];
    hpointer[0] = &base;
    hpointer[1] = &extra;
@@ -511,15 +495,15 @@ void printKernData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile,
    int starttime = 0;
    int metaindex = 0;
 
-   int ii;
-   for (ii=0; ii<mididata.getSize(); ii++) {
+   for (int ii=0; ii<(int)mididata.size(); ii++) {
+		int i;
       // go in reverse order with the tracks because the ordering is
       // usually from highest to lowest which should be reversed
       // in the Humdrum file according to the specification
       if (reverseQ) {
          i = ii;
       } else {
-         i = mididata.getSize() - 1 - ii;
+         i = (int)mididata.size() - 1 - ii;
       }
 
       if (kerntrack[i] == 0) {
@@ -528,11 +512,11 @@ void printKernData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile,
       if ((extracttrack > -1) && (i != (extracttrack-1))) {
          continue;
       }
-      buffstream = new SSTREAM;
+      buffstream = new stringstream;
       (*buffstream) << "**kern\n";
       metaindex = 0;
-      for (j=0; j<mididata[i].getSize(); j++) {
-         while ((metaindex < metadata.getSize()) &&
+      for (int j=0; j<(int)mididata[i].size(); j++) {
+         while ((metaindex < (int)metadata.size()) &&
              (metadata[metaindex].starttick <= mididata[i][j].starttick)) {
             printMetaData(*buffstream, metadata, metaindex);
             metaindex++;
@@ -559,7 +543,7 @@ void printKernData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile,
          starttime = mididata[i][j].starttick;
 
          chordnote = 0;
-         while ((j < mididata[i].getSize()) &&
+         while ((j < (int)mididata[i].size()) &&
                   (starttime == mididata[i][j].starttick)) {
             if (chordnote) {
                (*buffstream) << ' ';
@@ -577,7 +561,7 @@ void printKernData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile,
       (*buffstream) << "*-\n";
       (*buffstream) << ends;
       if (serialQ) {
-         // cout << (*buffstream).CSTRING;
+         // cout << (*buffstream).str().c_str();
          base.clear();
          base.read(*buffstream);
          printHumdrumFileWithBarlines(cout, base);
@@ -585,7 +569,7 @@ void printKernData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile,
          tempfile.clear();
          tempfile.read(*buffstream);
          delete buffstream;
-         buffstream = new SSTREAM;
+         buffstream = new stringstream;
          printHumdrumFileWithBarlines(*buffstream, tempfile);
          (*buffstream) << ends;
          if (baseQ == 0) {
@@ -614,7 +598,7 @@ void printKernData(Array<Array<MidiInfo> >& mididata, MidiFile& midifile,
 // printMetaData --
 //
 
-void printMetaData(ostream& out, Array<MetaInfo>& metadata, int metaindex) {
+void printMetaData(ostream& out, vector<MetaInfo>& metadata, int metaindex) {
    int ii;
    int count = 0;
    switch (metadata[metaindex].type) {
@@ -921,4 +905,3 @@ Here are the options available with the mid2hum program:
 
 
 
-// md5sum: 92142b08e5cd6278970c8f4cbb9506c9 mid2hum.cpp [20160320]
