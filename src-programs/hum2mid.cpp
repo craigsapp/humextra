@@ -184,10 +184,10 @@ void      example           (void);
 int       makeVLV           (uchar *buffer, int number);
 void      reviseInstrumentMidiNumbers(const char* string);
 int       setMidiPlusVolume (const char* kernnote);
-void      storeMetaText     (MidiFile& mfile, int track, const string& string,
+void      storeMetaText     (smf::MidiFile& mfile, int track, const string& string,
                                int tick, int metaType = 1);
-void      storeMidiData     (HumdrumFile& infile, MidiFile& outfile);
-void      storeInstrument   (int ontick, MidiFile& mfile, HumdrumFile& infile,
+void      storeMidiData     (HumdrumFile& infile, smf::MidiFile& outfile);
+void      storeInstrument   (int ontick, smf::MidiFile& mfile, HumdrumFile& infile,
                              int line, int row, int pcQ);
 void      usage             (const char* command);
 void      storeFreeNote     (vector<vector<int> >& array,int ptrack,int midinote);
@@ -217,20 +217,20 @@ int       getMillisecondTime (HumdrumFile& infile, int line);
 int       getFileDurationInMilliseconds(HumdrumFile& infile);
 int       getMillisecondDuration(HumdrumFile& infile, int row, int col,
                              int subcol);
-void      addTempoTrack      (HumdrumFile& infile, MidiFile& outfile);
+void      addTempoTrack      (HumdrumFile& infile, smf::MidiFile& outfile);
 void      getBendByPcData    (double* bendbypc, const string& filename);
-void      insertBendData     (MidiFile& outfile, double* bendbypc);
+void      insertBendData     (smf::MidiFile& outfile, double* bendbypc);
 void      getKernTracks      (vector<int>& tracks, HumdrumFile& infile);
 void      getTitle           (string& title, HumdrumFile& infile);
-void      addMonoTemperamentAdjustment(MidiFile& outfile, int track,
+void      addMonoTemperamentAdjustment(smf::MidiFile& outfile, int track,
                               int channel, int ticktime, int midinote,
                               double* bendbypc);
 void      defineOptions      (Options& opts, int argc, char* argv[]);
 void      processOptions     (Options& opts, int argc, char* argv[]);
 void      checkEmbeddedOptions(HumdrumFile& infile, int argc, char* argv[]);
-void      checkForTimeSignature(MidiFile& outfile, HumdrumFile& infile,
+void      checkForTimeSignature(smf::MidiFile& outfile, HumdrumFile& infile,
                                 int line);
-void      checkForKeySignature(MidiFile& outfile, HumdrumFile& infile,
+void      checkForKeySignature(smf::MidiFile& outfile, HumdrumFile& infile,
                                 int line);
 string    getInstrumentName   (HumdrumFile& infile, int ptrack);
 
@@ -241,15 +241,15 @@ void     printPerfVizKey       (int key);
 void     printPerfVizTimeSig   (int tstop, int tsbottom);
 void     printPerfVizTempo     (double approxtempo);
 void     printRational          (ostream& out, double value);
-void     storePan              (int ontime, MidiFile& outfile,
+void     storePan              (int ontime, smf::MidiFile& outfile,
                                 HumdrumFile& infile, int row, int column);
-void     adjustEventTimes      (MidiFile& outfile, int starttick);
-void     checkForBend          (MidiFile& outfile, int notetick, int channel,
+void     adjustEventTimes      (smf::MidiFile& outfile, int starttick);
+void     checkForBend          (smf::MidiFile& outfile, int notetick, int channel,
                                 HumdrumFile& infile, int row, int col,
                                 double scalefactor);
 void     storeTimbres          (vector<string>& name, vector<int>& value,
                                 vector<int>& volumes, const string& string);
-void     autoPan               (MidiFile& outfile, HumdrumFile& infile);
+void     autoPan               (smf::MidiFile& outfile, HumdrumFile& infile);
 
 vector<int> tracknamed;      // for storing boolean if track is named
 vector<int> trackchannel;    // channel of each track
@@ -272,7 +272,7 @@ int main(int argc, char* argv[]) {
    stringstream *perfviz = NULL;
 
    HumdrumFile infile;
-   MidiFile    outfile;
+   smf::MidiFile    outfile;
 
    // process the command-line options
    checkOptions(options, argc, argv);
@@ -488,7 +488,7 @@ void checkEmbeddedOptions(HumdrumFile& infile, int argc, char* argv[]) {
 //      as a drum channel on General MIDI synthesizers.
 //
 
-void insertBendData(MidiFile& outfile, double* bendbypc) {
+void insertBendData(smf::MidiFile& outfile, double* bendbypc) {
    int i, j;
    int channel;
    // int track = 0;
@@ -540,7 +540,7 @@ void insertBendData(MidiFile& outfile, double* bendbypc) {
 //    an note is tured on in a
 //
 
-void addMonoTemperamentAdjustment(MidiFile& outfile, int track, int channel,
+void addMonoTemperamentAdjustment(smf::MidiFile& outfile, int track, int channel,
    int ticktime, int midinote, double* bendbypc) {
    double bendvalue = bendbypc[midinote % 12];
    outfile.addPitchBend(track, ticktime, channel, bendvalue);
@@ -554,9 +554,9 @@ void addMonoTemperamentAdjustment(MidiFile& outfile, int track, int channel,
 //    also subtract that value from all events in the MIDI file;
 //
 
-void adjustEventTimes(MidiFile& outfile, int starttick) {
+void adjustEventTimes(smf::MidiFile& outfile, int starttick) {
    int i, j;
-   MidiEvent* eventptr;
+   smf::MidiEvent* eventptr;
    int atick;
    int minval = 1000000000;
    for (i=0; i<outfile.getTrackCount(); i++) {
@@ -599,7 +599,7 @@ void adjustEventTimes(MidiFile& outfile, int starttick) {
 // addTempoTrack --
 //
 
-void addTempoTrack(HumdrumFile& infile, MidiFile& outfile) {
+void addTempoTrack(HumdrumFile& infile, smf::MidiFile& outfile) {
    int i, j;
    double tempo;
    double absbeat;
@@ -1261,7 +1261,7 @@ void example(void) {
 // storeMetaText --
 //
 
-void storeMetaText(MidiFile& mfile, int track, const string& text, int tick,
+void storeMetaText(smf::MidiFile& mfile, int track, const string& text, int tick,
       int metaType) {
    int i;
    int length = text.size();
@@ -1405,7 +1405,7 @@ void getIdynDynamics(HumdrumFile& infile, vector<string>& dynamics,
 // storeMidiData --
 //
 
-void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
+void storeMidiData(HumdrumFile& infile, smf::MidiFile& outfile) {
    double duration = 0.0;
    int midinote = 0;
    int base40note = 0;
@@ -2004,7 +2004,7 @@ void storeMidiData(HumdrumFile& infile, MidiFile& outfile) {
 //     for a key signature and key.
 //
 
-void checkForKeySignature(MidiFile& outfile, HumdrumFile& infile, int line) {
+void checkForKeySignature(smf::MidiFile& outfile, HumdrumFile& infile, int line) {
    int i;
    // int foundkeysig = -1;
    // int foundkey = -1;
@@ -2088,7 +2088,7 @@ void checkForKeySignature(MidiFile& outfile, HumdrumFile& infile, int line) {
 //     which can be used to convert to a time signature.
 //
 
-void checkForTimeSignature(MidiFile& outfile, HumdrumFile& infile, int line) {
+void checkForTimeSignature(smf::MidiFile& outfile, HumdrumFile& infile, int line) {
    int i;
    int foundsig = -1;
    int foundprimary = -1;
@@ -2271,7 +2271,7 @@ void getTitle(string& title, HumdrumFile& infile) {
 // checkForBend --
 //
 
-void checkForBend(MidiFile& outfile, int notetick, int channel,
+void checkForBend(smf::MidiFile& outfile, int notetick, int channel,
       HumdrumFile& infile, int row, int col, double scalefactor) {
    double bendvalue = 0;
 
@@ -2491,7 +2491,7 @@ int setMidiPlusVolume(const char* kernnote) {
 // storePan --
 //
 
-void storePan(int ontime, MidiFile& outfile, HumdrumFile& infile,
+void storePan(int ontime, smf::MidiFile& outfile, HumdrumFile& infile,
    int row, int column) {
    double value = 0.5;
    int mvalue = 64;
@@ -2529,7 +2529,7 @@ void storePan(int ontime, MidiFile& outfile, HumdrumFile& infile,
 // autoPan -- presuming multi-track MIDI file.
 //
 
-void autoPan(MidiFile& outfile, HumdrumFile& infile) {
+void autoPan(smf::MidiFile& outfile, HumdrumFile& infile) {
 
    vector<int> kerntracks;
    getKernTracks(kerntracks, infile);
@@ -2570,7 +2570,7 @@ void autoPan(MidiFile& outfile, HumdrumFile& infile) {
 // storeInstrument --
 //
 
-void storeInstrument(int ontick, MidiFile& mfile, HumdrumFile& infile,
+void storeInstrument(int ontick, smf::MidiFile& mfile, HumdrumFile& infile,
       int line, int col, int pcQ) {
 
    PerlRegularExpression pre;
