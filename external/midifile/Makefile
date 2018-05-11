@@ -18,7 +18,9 @@
 ##     make
 ## to compile both the library and the programs at the same time.
 ##
-
+## NB: To build on Windows with Visual Studio, use visual-studio/midifile.sln
+##     instead of this Makefile.
+##
 
 
 ##############################
@@ -30,7 +32,7 @@
 .PHONY : all info library examples programs bin options clean lib
 
 
-all: info library programs lib
+all: info library lib
 
 
 info:
@@ -58,28 +60,6 @@ clean:
 	$(MAKE) -f Makefile.library clean
 	-rm -rf bin
 	-rm -rf lib
-
-
-bin:      programs
-examples: programs
-programs:
-	$(MAKE) -f Makefile.programs
-
-
-options:
-# The Options class is borrowed from optionlib:
-#     https://github.com/craigsapp/optionlib
-# This code downloads the most recent version of the Option class, and the
-# Option class should not be modified within this library.  The Option
-# class is only needed by some of the example programs.  It is not 
-# necessary if you only want to use the compiled MidiFile library.
-ifneq ($(shell which wget),)
-	wget https://raw.githubusercontent.com/craigsapp/optionlib/master/src/Options.cpp -O src/Options.cpp
-	wget https://raw.githubusercontent.com/craigsapp/optionlib/master/include/Options.h -O include/Options.h
-else ifneq ($(shell which curl),)
-	curl https://raw.githubusercontent.com/craigsapp/optionlib/master/src/Options.cpp -o src/Options.cpp
-	curl https://raw.githubusercontent.com/craigsapp/optionlib/master/include/Options.h -O include/Options.h
-endif
 
 
 
