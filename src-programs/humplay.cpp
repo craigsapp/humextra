@@ -15,17 +15,18 @@
 // Description:   Play **kern entries in a Humdrum file through MIDI.
 //
 
+#include <sstream>
+#include <vector>
+#include <string>
+
+#include <string.h>
+
 #include "synthImprov.h"
 #include "HumdrumFile.h"
 #include "HumdrumStream.h"
 #include "Convert.h"
-#include <string.h>
 
-// include string stream class which can have various names:
 using namespace std;
-#include <sstream>
-#define SSTREAM stringstream
-#define CSTRING str().c_str()
 
 /*----------------- beginning of improvization algorithms ---------------*/
 
@@ -60,8 +61,8 @@ int noteonlyQ     = 0;    // hide/show stems and beaming in **kern spines
 int colormode     = 'b';  // w = white background; b = black background
 int tabsize       = 12;   // used with 't' and 'T' real-time commands
 int transpose     = 0;    // used with 'l' and 'L' real-time commands
-Array<int> trackmute;     // used to mute/unmute tracks
-Array<int> markers;       // storage for markers created with space bar
+vector<int> trackmute;     // used to mute/unmute tracks
+vector<int> markers;       // storage for markers created with space bar
 int markerindex   =  0;   // place to store first marker
 
 int mine          = 30;   // used with the -m option
@@ -89,7 +90,7 @@ int      getKernNoteOnlyLen      (char* buffer, const char* ptr);
 void     printMarkLocation       (HumdrumFile& infile, int line, int mindex);
 void     printMarkerInfo         (ostream& out, int mindex, int line,
                                   HumdrumFile& infile, int style);
-void     printAllMarkers         (ostream& out, Array<int>& markers,
+void     printAllMarkers         (ostream& out, vector<int>& markers,
                                   HumdrumFile& infile);
 int      hasLayout               (HumdrumRecord& record);
 
@@ -104,22 +105,22 @@ int      hasLayout               (HumdrumRecord& record);
 //
 
 void description(void) {
-   printboxtop();
-   psl(" HUMPLAY -- by Craig Stuart Sapp, 4 May 2000");
-   psl("   , = slow down          . = speed up           p = pause/play            ");
-   psl("   _ = lower volume       + = raise volume       s = silence current notes ");
-   psl("   < = slow down more     > = speed up more      space = toggle text output");
-   psl("   b = black bground      w = white bground      c = no coloring           ");
-   psl("   e  = print spine info         k = toggle kern-only display              ");
-   psl("  #l = transpose up # steps     #L = transpose down # steps                ");
-   psl("   m = mute all spines          #m = mute spine #                          ");
-   psl("   t = increase tab size         T = decrease tab size                     ");
-   psl("   n = toggle notes only        #o = set tempo to #                        ");
-   psl("  #r = return to marker #        R = list markers                          ");
-   psl("   ^ = go to start of file      space = insert marker                      ");
-   psl("   x = clear screen              $ = go to end of file                     ");
-   psl("  #( = go back # measures       #) = go forward # measures                 ");
-   printboxbottom();
+	printboxtop();
+	psl(" HUMPLAY -- by Craig Stuart Sapp, 4 May 2000");
+	psl("   , = slow down          . = speed up           p = pause/play            ");
+	psl("   _ = lower volume       + = raise volume       s = silence current notes ");
+	psl("   < = slow down more     > = speed up more      space = toggle text output");
+	psl("   b = black bground      w = white bground      c = no coloring           ");
+	psl("   e  = print spine info         k = toggle kern-only display              ");
+	psl("  #l = transpose up # steps     #L = transpose down # steps                ");
+	psl("   m = mute all spines          #m = mute spine #                          ");
+	psl("   t = increase tab size         T = decrease tab size                     ");
+	psl("   n = toggle notes only        #o = set tempo to #                        ");
+	psl("  #r = return to marker #        R = list markers                          ");
+	psl("   ^ = go to start of file      space = insert marker                      ");
+	psl("   x = clear screen              $ = go to end of file                     ");
+	psl("  #( = go back # measures       #) = go forward # measures                 ");
+	printboxbottom();
 }
 
 
@@ -130,29 +131,27 @@ void description(void) {
 //
 
 void initialization(void) {
-   checkOptions();
-   timer.setPeriod(500);
-   timer.reset();
-   eventIdler.setPeriod(0);
-   eventBuffer.setPollPeriod(10);
-   eventBuffer.setPort(synth.getOutputPort());
-   if (colorQ) {
-      colormessage(cout, COLOR_INIT, colormode, colorQ);
-      colormessage(cout, COLOR_CLEAR_SCREEN, colormode, colorQ);
-      //if (!options.getBoolean("Q")) {
-      //   print_commands();
-      //}
-      //sleep(1);
-   }
-   trackmute.setSize(1000); // maximum track in humdrum file assumed to be 1000
-                            // space 1000-10 is used for a special purpose.
-   trackmute.allowGrowth(0);
-   trackmute.setAll(0);
+	checkOptions();
+	timer.setPeriod(500);
+	timer.reset();
+	eventIdler.setPeriod(0);
+	eventBuffer.setPollPeriod(10);
+	eventBuffer.setPort(synth.getOutputPort());
+	if (colorQ) {
+		colormessage(cout, COLOR_INIT, colormode, colorQ);
+		colormessage(cout, COLOR_CLEAR_SCREEN, colormode, colorQ);
+		//if (!options.getBoolean("Q")) {
+		//   print_commands();
+		//}
+		//sleep(1);
+	}
+	trackmute.resize(1000); // maximum track in humdrum file assumed to be 1000
+							       // space 1000-10 is used for a special purpose.
+	std::fill(trackmute.begin(), trackmute.end(), 0);
 
-   markers.setSize(1001);
-   markers.setAll(0);
-   markers.allowGrowth(0);
-   markerindex = 0;
+	markers.resize(1001);
+	std::fill(markers.begin(), markers.end(), 0);
+	markerindex = 0;
 }
 
 
@@ -163,10 +162,10 @@ void initialization(void) {
 //
 
 void finishup(void) {
-   eventBuffer.off();
-   printAllMarkers(cout, markers, data);
-   markers.setAll(0);
-   colormessage(cout, COLOR_RESET, colormode, colorQ);
+	eventBuffer.off();
+	printAllMarkers(cout, markers, data);
+	std::fill(markers.begin(), markers.end(), 0);
+	colormessage(cout, COLOR_RESET, colormode, colorQ);
 }
 
 
@@ -180,18 +179,18 @@ void finishup(void) {
 //
 
 void mainloopalgorithms(void) {
-   eventBuffer.checkPoll();
-   if (pauseQ) {
-      return;
-   }
-   if (timer.expired()) {
-      playdata(data, linenum, timer);
-      if (linenum >= data.getNumLines()) {
-         printAllMarkers(cout, markers, data);
-         markers.setAll(0);
-         inputNewFile();
-      }
-   }
+	eventBuffer.checkPoll();
+	if (pauseQ) {
+		return;
+	}
+	if (timer.expired()) {
+		playdata(data, linenum, timer);
+		if (linenum >= data.getNumLines()) {
+			printAllMarkers(cout, markers, data);
+			std::fill(markers.begin(), markers.end(), 0);
+			inputNewFile();
+		}
+	}
 }
 
 /*-------------------- triggered algorithms -----------------------------*/
@@ -205,264 +204,265 @@ void mainloopalgorithms(void) {
 //
 
 void keyboardchar(int key) {
-   static int lastkeytime = 0;
-   static int number      = 0;
+	static int lastkeytime = 0;
+	static int number      = 0;
 
-   if (t_time - lastkeytime > 5000) {
-      // reset the number value if more than 5 seconds has elapsed
-      // since the last key press.
-      number = 0;
-   }
-   lastkeytime = t_time;
+	if (t_time - lastkeytime > 5000) {
+		// reset the number value if more than 5 seconds has elapsed
+		// since the last key press.
+		number = 0;
+	}
+	lastkeytime = t_time;
 
-   if (isdigit(key)) {
-      number = number * 10 + (key - '0');
-      return;
-   }
-   switch (key) {
-   // case 'a': break;
-      case 'b':               // set color mode to black
-         colorQ = 1;          // turn on colorization automatically
-         colormode = 'b';
-         colormessage(cout, COLOR_INIT, colormode, colorQ);
-         cout << "!! CHANGING TO BLACK BACKGROUND" << endl;
-         break;
-      case 'c':               // toggle colorization
-         colorQ = !colorQ;
-         if (colorQ) {
-            colormessage(cout, COLOR_INIT, colormode, colorQ);
-            cout << "!! COLORIZATION TURNED ON" << endl;
-         } else {
-            colormessage(cout, COLOR_RESET, colormode, !colorQ);
-            cout << "!! COLORIZATION TURNED OFF" << endl;
-         }
-         break;
-   // case 'd': break;
-      case 'e':               // print exclusive interpretation info for spines
-         printExclusiveInterpLine(linenum, data);
-         break;
-   // case 'f': break;
-   // case 'g': break;
+	if (isdigit(key)) {
+		number = number * 10 + (key - '0');
+		return;
+	}
+	switch (key) {
+	// case 'a': break;
+		case 'b':               // set color mode to black
+			colorQ = 1;          // turn on colorization automatically
+			colormode = 'b';
+			colormessage(cout, COLOR_INIT, colormode, colorQ);
+			cout << "!! CHANGING TO BLACK BACKGROUND" << endl;
+			break;
+		case 'c':               // toggle colorization
+			colorQ = !colorQ;
+			if (colorQ) {
+				colormessage(cout, COLOR_INIT, colormode, colorQ);
+				cout << "!! COLORIZATION TURNED ON" << endl;
+			} else {
+				colormessage(cout, COLOR_RESET, colormode, !colorQ);
+				cout << "!! COLORIZATION TURNED OFF" << endl;
+			}
+			break;
+	// case 'd': break;
+		case 'e':               // print exclusive interpretation info for spines
+			printExclusiveInterpLine(linenum, data);
+			break;
+	// case 'f': break;
+	// case 'g': break;
 
-      case 'h':               // hide/unhide non-kern spine (remove later)
-      case 'k':               // hide/unhide non-kern spine
-         hideQ = !hideQ;
-         if (hideQ) {
-            cout << "!! Hiding non-kern spines" << endl;
-         } else {
-            cout << "!! Showing all spines" << endl;
-         }
-         break;
-   // case 'i': break;
-   // case 'j': break;
-   // case 'k': break;
-      case 'l':               // transpose up specified number of semitones
-         if (number < 100) {
-            transpose = number;
-            cout << "!! Transposing " << transpose << " steps up" << endl;
-         }
-         break;
-      case 'L':               // transpose down specified number of semitones
-         if (number < 100) {
-            transpose = -number;
-            cout << "!! Transposing " << -transpose << " steps down" << endl;
-         }
-         break;
-      case 'm':               // mute or unmute all tracks
-         if (number == 0) {
-            trackmute.setAll(!trackmute[trackmute.getSize()-1]);
-            if (trackmute[0]) {
-               cout << "!! All spines are muted" << endl;
-            } else {
-               cout << "!! All spines are unmuted" << endl;
-            }
-         } else {
-            int tracknum = getKernTrack(number, data);
-            trackmute[tracknum] = !trackmute[tracknum];
-            if (trackmute[tracknum]) {
-               cout << "!! **kern spine " << number << " is muted" << endl;
-            } else {
-               cout << "!! **kern spine " << number << " is unmuted" << endl;
-            }
-         }
-         break;
-         break;
-      case 'n':     // toggle display of note only (supression
-                    // of beam and stem display
-                    // Also, don't display ![!]LO: lines.
-         noteonlyQ = !noteonlyQ;
-         if (noteonlyQ) {
-            cout << "!! Notes only: supressing beams and stems in **kern data"
-                 << endl;
-         } else {
-            cout << "!! Displaying **kern data unmodified" << endl;
-         }
-         break;
-      case 'o':               // set the tempo to a particular value
-         if (number > 20 && number < 601) {
-            cout << "!! TEMPO SET TO " << number << endl;
-            tempo = number;
-            tempoScale = 1.0;
-         } else if (number == 0) {
-            cout << "!! Current tempo: " << tempo * tempoScale << endl;
-         }
-         break;
-      case 'p':               // toggle music pausing
-         eventBuffer.off();
-         timer.reset();
-         pauseQ = !pauseQ;
-         if (pauseQ) {
-            cout << "!! Paused" << endl;
-         }
-         break;
-      case 'q':               // toggle display of file while playing
-         echoTextQ = !echoTextQ;
-         if (echoTextQ) {
-            cout << "!! FILE DISPLAY TURNED ON" << endl;
-         } else {
-            cout << "!! FILE DISPLAY TURNED OFF" << endl;
-         }
-         break;
-      case 'r':               // return to a marker
-         if (number == 0) {
-            linenum = markers[0];
-            cout << "!! Going to line " << linenum << endl;
-            eventBuffer.off();
-            timer.reset();
-         } else if (number < markers.getSize()) {
-            linenum = markers[number];
-            cout << "!! Going to line " << linenum << endl;
-            eventBuffer.off();
-            timer.reset();
-         }
-         break;
-      case 'R':               // Print a list of all markers
-         printAllMarkers(cout, markers, data);
-         break;
-      case 's':    // silence notes
-         eventBuffer.off();
-         break;
-      case 't':    // increase tab size
-         tabsize++;
-         // cout << "!! tabsize = " << tabsize << endl;
-         break;
-      case 'T':    // decrease tab size
-         tabsize--;
-         if (tabsize < 3) {
-            tabsize = 3;
-         }
-         // cout << "!! tabsize = " << tabsize << endl;
-         break;
-   // case 'u': break;
-   // case 'v': break;
-      case 'w':               // set color mode to white
-         colorQ = 1;          // turn on colorization automatically
-         colormode = 'w';
-         colormessage(cout, COLOR_INIT, colormode, colorQ);
-         cout << "!! CHANGING TO WHITE BACKGROUND" << endl;
-         break;
-      case 'x':               // clear the screen
-         colormessage(cout, COLOR_CLEAR_SCREEN, colormode, 1);
-         printInputLine(data, linenum-1);
-         break;
-   // case 'y': break;
-   // case 'z': break;
+		case 'h':               // hide/unhide non-kern spine (remove later)
+		case 'k':               // hide/unhide non-kern spine
+			hideQ = !hideQ;
+			if (hideQ) {
+				cout << "!! Hiding non-kern spines" << endl;
+			} else {
+				cout << "!! Showing all spines" << endl;
+			}
+			break;
+	// case 'i': break;
+	// case 'j': break;
+	// case 'k': break;
+		case 'l':               // transpose up specified number of semitones
+			if (number < 100) {
+				transpose = number;
+				cout << "!! Transposing " << transpose << " steps up" << endl;
+			}
+			break;
+		case 'L':               // transpose down specified number of semitones
+			if (number < 100) {
+				transpose = -number;
+				cout << "!! Transposing " << -transpose << " steps down" << endl;
+			}
+			break;
+		case 'm':               // mute or unmute all tracks
+			if (number == 0) {
+				std::fill(trackmute.begin(), trackmute.end(), 
+						!trackmute[(int)trackmute.size()-1]);
+				if (trackmute[0]) {
+					cout << "!! All spines are muted" << endl;
+				} else {
+					cout << "!! All spines are unmuted" << endl;
+				}
+			} else {
+				int tracknum = getKernTrack(number, data);
+				trackmute[tracknum] = !trackmute[tracknum];
+				if (trackmute[tracknum]) {
+					cout << "!! **kern spine " << number << " is muted" << endl;
+				} else {
+					cout << "!! **kern spine " << number << " is unmuted" << endl;
+				}
+			}
+			break;
+			break;
+		case 'n':     // toggle display of note only (supression
+						  // of beam and stem display
+						  // Also, don't display ![!]LO: lines.
+			noteonlyQ = !noteonlyQ;
+			if (noteonlyQ) {
+				cout << "!! Notes only: supressing beams and stems in **kern data"
+					  << endl;
+			} else {
+				cout << "!! Displaying **kern data unmodified" << endl;
+			}
+			break;
+		case 'o':               // set the tempo to a particular value
+			if (number > 20 && number < 601) {
+				cout << "!! TEMPO SET TO " << number << endl;
+				tempo = number;
+				tempoScale = 1.0;
+			} else if (number == 0) {
+				cout << "!! Current tempo: " << tempo * tempoScale << endl;
+			}
+			break;
+		case 'p':               // toggle music pausing
+			eventBuffer.off();
+			timer.reset();
+			pauseQ = !pauseQ;
+			if (pauseQ) {
+				cout << "!! Paused" << endl;
+			}
+			break;
+		case 'q':               // toggle display of file while playing
+			echoTextQ = !echoTextQ;
+			if (echoTextQ) {
+				cout << "!! FILE DISPLAY TURNED ON" << endl;
+			} else {
+				cout << "!! FILE DISPLAY TURNED OFF" << endl;
+			}
+			break;
+		case 'r':               // return to a marker
+			if (number == 0) {
+				linenum = markers[0];
+				cout << "!! Going to line " << linenum << endl;
+				eventBuffer.off();
+				timer.reset();
+			} else if (number < (int)markers.size()) {
+				linenum = markers[number];
+				cout << "!! Going to line " << linenum << endl;
+				eventBuffer.off();
+				timer.reset();
+			}
+			break;
+		case 'R':               // Print a list of all markers
+			printAllMarkers(cout, markers, data);
+			break;
+		case 's':    // silence notes
+			eventBuffer.off();
+			break;
+		case 't':    // increase tab size
+			tabsize++;
+			// cout << "!! tabsize = " << tabsize << endl;
+			break;
+		case 'T':    // decrease tab size
+			tabsize--;
+			if (tabsize < 3) {
+				tabsize = 3;
+			}
+			// cout << "!! tabsize = " << tabsize << endl;
+			break;
+	// case 'u': break;
+	// case 'v': break;
+		case 'w':               // set color mode to white
+			colorQ = 1;          // turn on colorization automatically
+			colormode = 'w';
+			colormessage(cout, COLOR_INIT, colormode, colorQ);
+			cout << "!! CHANGING TO WHITE BACKGROUND" << endl;
+			break;
+		case 'x':               // clear the screen
+			colormessage(cout, COLOR_CLEAR_SCREEN, colormode, 1);
+			printInputLine(data, linenum-1);
+			break;
+	// case 'y': break;
+	// case 'z': break;
 
-      case ' ':               // mark the measure/beat/line of the music
-         if ((number != 0) && (number < markers.getSize())) {
-            markerindex = number;
-         } else {
-            markerindex++;
-            if (markerindex > markers.getSize()-1) {
-               markerindex = 1;
-            }
-         }
-         printMarkLocation(data, linenum == 0 ? 0 : linenum-1, markerindex);
-         break;
-      case ',':    // slow down tempo
-         tempoScale *= 0.97;
-         cout << "!! TEMPO SET TO " << (int)(tempo * tempoScale) << endl;
-         break;
-      case '<':
-         tempoScale *= 0.93;
-         cout << "!! TEMPO SET TO " << (int)(tempo * tempoScale) << endl;
-         break;
-      case '.':    // speed up tempo
-         tempoScale *= 1.03;
-         cout << "!! TEMPO SET TO " << (int)(tempo * tempoScale) << endl;
-         break;
-      case '>':
-         tempoScale *= 1.07;
-         cout << "!! TEMPO SET TO " << (int)(tempo * tempoScale) << endl;
-         break;
-      case '=':
-         {
-            int newline = 0;
-            if (number == 0) {
-               newline = 0;
-            } else {
-               newline = getMeasureLine(data, number);
-            }
-            if (newline >= 0) {
-               cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-                    << " =" << number
-                    << endl;
-               linenum = newline;
-               eventBuffer.off();
-               timer.reset();
-            }
-         }
-         break;
-      case '(':
-         {
-            int newline = goBackMeasures(data, linenum, number);
-            cout << "!! back " << number << " measure"
+		case ' ':               // mark the measure/beat/line of the music
+			if ((number != 0) && (number < (int)markers.size())) {
+				markerindex = number;
+			} else {
+				markerindex++;
+				if (markerindex > (int)markers.size()-1) {
+					markerindex = 1;
+				}
+			}
+			printMarkLocation(data, linenum == 0 ? 0 : linenum-1, markerindex);
+			break;
+		case ',':    // slow down tempo
+			tempoScale *= 0.97;
+			cout << "!! TEMPO SET TO " << (int)(tempo * tempoScale) << endl;
+			break;
+		case '<':
+			tempoScale *= 0.93;
+			cout << "!! TEMPO SET TO " << (int)(tempo * tempoScale) << endl;
+			break;
+		case '.':    // speed up tempo
+			tempoScale *= 1.03;
+			cout << "!! TEMPO SET TO " << (int)(tempo * tempoScale) << endl;
+			break;
+		case '>':
+			tempoScale *= 1.07;
+			cout << "!! TEMPO SET TO " << (int)(tempo * tempoScale) << endl;
+			break;
+		case '=':
+			{
+				int newline = 0;
+				if (number == 0) {
+					newline = 0;
+				} else {
+					newline = getMeasureLine(data, number);
+				}
+				if (newline >= 0) {
+					cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+						  << " =" << number
+						  << endl;
+					linenum = newline;
+					eventBuffer.off();
+					timer.reset();
+				}
+			}
+			break;
+		case '(':
+			{
+				int newline = goBackMeasures(data, linenum, number);
+				cout << "!! back " << number << " measure"
 		 << (number==1? "":"s") << endl;
-            linenum = newline;
-            eventBuffer.off();
-            timer.reset();
-         }
-         break;
-      case ')':
-         {
-            int newline = goForwardMeasures(data, linenum, number);
-            cout << "!! forward " << number << " measure"
-                 << (number==1? "":"s") << endl;
-            linenum = newline;
-            eventBuffer.off();
-            timer.reset();
-         }
-         break;
-      case '+':    // louder
-         velocity++;
-         if (velocity > 127) {
-            velocity = 127;
-         }
-         cout << "!! velocity = " << velocity << endl;
-         break;
+				linenum = newline;
+				eventBuffer.off();
+				timer.reset();
+			}
+			break;
+		case ')':
+			{
+				int newline = goForwardMeasures(data, linenum, number);
+				cout << "!! forward " << number << " measure"
+					  << (number==1? "":"s") << endl;
+				linenum = newline;
+				eventBuffer.off();
+				timer.reset();
+			}
+			break;
+		case '+':    // louder
+			velocity++;
+			if (velocity > 127) {
+				velocity = 127;
+			}
+			cout << "!! velocity = " << velocity << endl;
+			break;
 
-      case '_':    // sofer
-         velocity--;
-         if (velocity < 1) {
-            velocity = 1;
-         }
-         cout << "!! velocity = " << velocity << endl;
-         break;
+		case '_':    // sofer
+			velocity--;
+			if (velocity < 1) {
+				velocity = 1;
+			}
+			cout << "!! velocity = " << velocity << endl;
+			break;
 
-      case '^':    // go to the start of the file
-         linenum = 0;
-         cout << "!! Going to start of file" << endl;
-         break;
+		case '^':    // go to the start of the file
+			linenum = 0;
+			cout << "!! Going to start of file" << endl;
+			break;
 
-      case '$':    // go to the end of the file
-         linenum = data.getNumLines() - 1;
-         cout << "!! Going to end of file" << endl;
-         break;
-   }
+		case '$':    // go to the end of the file
+			linenum = data.getNumLines() - 1;
+			cout << "!! Going to end of file" << endl;
+			break;
+	}
 
-   if (!isdigit(key)) {
-      number = 0;
-   }
+	if (!isdigit(key)) {
+		number = 0;
+	}
 }
 
 
@@ -475,30 +475,28 @@ void keyboardchar(int key) {
 // printAllMarkers --
 //
 
-void printAllMarkers(ostream& out, Array<int>& markers, HumdrumFile& infile) {
-   int i;
+void printAllMarkers(ostream& out, vector<int>& markers, HumdrumFile& infile) {
+	int mcount = 0;
+	for (int i=1; i<(int)markers.size(); i++) {
+		if (markers[i] > 0) {
+			mcount++;
+			break;
+		}
+	}
+	if (mcount == 0) {
+		return;
+	}
 
-   int mcount = 0;
-   for (i=1; i<markers.getSize(); i++) {
-      if (markers[i] > 0) {
-         mcount++;
-         break;
-      }
-   }
-   if (mcount == 0) {
-      return;
-   }
-
-   colormessage(cout, COLOR_MARKS, colormode, colorQ);
-   out << "**mark\t**line\t**abeat\t**bar\t**beat\n";
-   for (i=1; i<markers.getSize(); i++) {
-      if (markers[i] > 0) {
-         printMarkerInfo(out, i, markers[i], infile, 0);
-         out << "\n";
-      }
-   }
-   out << "*-\t*-\t*-\t*-\t*-" << endl;
-   colormessage(cout, COLOR_INIT, colormode, colorQ);
+	colormessage(cout, COLOR_MARKS, colormode, colorQ);
+	out << "**mark\t**line\t**abeat\t**bar\t**beat\n";
+	for (int i=1; i<(int)markers.size(); i++) {
+		if (markers[i] > 0) {
+			printMarkerInfo(out, i, markers[i], infile, 0);
+			out << "\n";
+		}
+	}
+	out << "*-\t*-\t*-\t*-\t*-" << endl;
+	colormessage(cout, COLOR_INIT, colormode, colorQ);
 }
 
 
@@ -511,40 +509,40 @@ void printAllMarkers(ostream& out, Array<int>& markers, HumdrumFile& infile) {
 //
 
 void printMarkerInfo(ostream& out, int mindex, int line, HumdrumFile& infile,
-      int style) {
-   double absbeat = infile.getAbsBeat(line);
-   double measure = -10;
-   double beat = infile[line].getBeat();
+		int style) {
+	double absbeat = infile.getAbsBeat(line);
+	double measure = -10;
+	double beat = infile[line].getBeat();
 
-   int i;
-   int counter = 0;
-   for (i=line; i>=0; i--) {
-      if (data[i].isMeasure()) {
-         counter++;
-         if (sscanf(data[i][0], "=%lf", &measure)) {
-            break;
-         }
-         if (counter >= 2) {
-            // don't search more than two measures backwards
-            break;
-         }
-      }
-   }
+	int i;
+	int counter = 0;
+	for (i=line; i>=0; i--) {
+		if (data[i].isMeasure()) {
+			counter++;
+			if (sscanf(data[i][0], "=%lf", &measure)) {
+				break;
+			}
+			if (counter >= 2) {
+				// don't search more than two measures backwards
+				break;
+			}
+		}
+	}
 
-   if (style == 0) {
-      out << mindex << "\t" << line+1 << "\t" << absbeat;
-      out << "\t" << measure << "\t" << beat;
-   } else {
-      out << "Mark:"         << mindex
-           << "\tLine:"       << line+1
-           << "\tAbsbeat:"    << absbeat;
-      if (measure > -10) {
-         out << "\tMeasure:" << measure;
-      }
-      if (beat >= 0) {
-         out << "\tBeat:"    << beat;
-      }
-   }
+	if (style == 0) {
+		out << mindex << "\t" << line+1 << "\t" << absbeat;
+		out << "\t" << measure << "\t" << beat;
+	} else {
+		out << "Mark:"         << mindex
+			  << "\tLine:"       << line+1
+			  << "\tAbsbeat:"    << absbeat;
+		if (measure > -10) {
+			out << "\tMeasure:" << measure;
+		}
+		if (beat >= 0) {
+			out << "\tBeat:"    << beat;
+		}
+	}
 
 }
 
@@ -556,18 +554,18 @@ void printMarkerInfo(ostream& out, int mindex, int line, HumdrumFile& infile,
 //
 
 void printMarkLocation(HumdrumFile& infile, int line, int mindex) {
-   if (line < 0 || line > infile.getNumLines()-1) {
-      return;
-   }
-   colormessage(cout, COLOR_COMMENT, colormode, colorQ);
-   cout << "!! ";
-   colormessage(cout, COLOR_MARKS, colormode, colorQ);
-   printMarkerInfo(cout, mindex, line, infile, 1);
-   colormessage(cout, COLOR_INIT, colormode, colorQ);
-   cout << endl;
+	if (line < 0 || line > infile.getNumLines()-1) {
+		return;
+	}
+	colormessage(cout, COLOR_COMMENT, colormode, colorQ);
+	cout << "!! ";
+	colormessage(cout, COLOR_MARKS, colormode, colorQ);
+	printMarkerInfo(cout, mindex, line, infile, 1);
+	colormessage(cout, COLOR_INIT, colormode, colorQ);
+	cout << endl;
 
-   markers[mindex] = line;
-   markers[0]      = line;
+	markers[mindex] = line;
+	markers[0]      = line;
 }
 
 
@@ -578,37 +576,37 @@ void printMarkLocation(HumdrumFile& infile, int line, int mindex) {
 //
 
 void printExclusiveInterpLine(int linenum, HumdrumFile& infile) {
-   int dataline = -1;
-   int i;
-   for (i=0; i<data.getNumLines(); i++) {
-      if (infile[i].hasSpines()) {
-         dataline = i;
-         break;
-      }
-   }
-   if (dataline < 0) {
-      return;
-   }
+	int dataline = -1;
+	int i;
+	for (i=0; i<data.getNumLines(); i++) {
+		if (infile[i].hasSpines()) {
+			dataline = i;
+			break;
+		}
+	}
+	if (dataline < 0) {
+		return;
+	}
 
-   SSTREAM tempstream;
-   for (i=0; i<infile[dataline].getFieldCount(); i++) {
-      tempstream << infile[dataline].getExInterp(i);
-      if (i < infile[dataline].getFieldCount()-1) {
-         tempstream << "\t";
-      }
-   }
-   tempstream << "\n";
-   for (i=0; i<infile[dataline].getFieldCount(); i++) {
-      tempstream << "*-";
-      if (i < infile[dataline].getFieldCount()-1) {
-         tempstream << "\t";
-      }
-   }
-   tempstream << ends;
+	stringstream tempstream;
+	for (i=0; i<infile[dataline].getFieldCount(); i++) {
+		tempstream << infile[dataline].getExInterp(i);
+		if (i < infile[dataline].getFieldCount()-1) {
+			tempstream << "\t";
+		}
+	}
+	tempstream << "\n";
+	for (i=0; i<infile[dataline].getFieldCount(); i++) {
+		tempstream << "*-";
+		if (i < infile[dataline].getFieldCount()-1) {
+			tempstream << "\t";
+		}
+	}
+	tempstream << ends;
 
-   HumdrumFile dummyfile;
-   dummyfile.read(tempstream);
-   printInputLine(dummyfile, 0);
+	HumdrumFile dummyfile;
+	dummyfile.read(tempstream);
+	printInputLine(dummyfile, 0);
 }
 
 
@@ -619,22 +617,22 @@ void printExclusiveInterpLine(int linenum, HumdrumFile& infile) {
 //
 
 int goBackMeasures(HumdrumFile& data, int startline, int target) {
-   if (target < 0) {
-      target = 1;
-   }
-   target++; // need to go back past the current measure barline as well.
-   int i;
-   int counter = 0;
-   for (i=startline; i>=0; i--) {
-      if (data[i].isMeasure()) {
-         counter++;
-         if (counter > target) {
-            break;
-         }
-      }
-   }
+	if (target < 0) {
+		target = 1;
+	}
+	target++; // need to go back past the current measure barline as well.
+	int i;
+	int counter = 0;
+	for (i=startline; i>=0; i--) {
+		if (data[i].isMeasure()) {
+			counter++;
+			if (counter > target) {
+				break;
+			}
+		}
+	}
 
-   return i;
+	return i;
 }
 
 
@@ -645,24 +643,24 @@ int goBackMeasures(HumdrumFile& data, int startline, int target) {
 //
 
 int goForwardMeasures(HumdrumFile& data, int startline, int target) {
-   if (target < 0) {
-      target = 1;
-   }
-   if (startline > data.getNumLines()-1) {
-      return data.getNumLines()-1;
-   }
-   int i;
-   int counter = 0;
-   for (i=startline; i<data.getNumLines(); i++) {
-      if (data[i].isMeasure()) {
-         counter++;
-         if (counter > target) {
-            break;
-         }
-      }
-   }
+	if (target < 0) {
+		target = 1;
+	}
+	if (startline > data.getNumLines()-1) {
+		return data.getNumLines()-1;
+	}
+	int i;
+	int counter = 0;
+	for (i=startline; i<data.getNumLines(); i++) {
+		if (data[i].isMeasure()) {
+			counter++;
+			if (counter > target) {
+				break;
+			}
+		}
+	}
 
-   return i;
+	return i;
 }
 
 
@@ -674,19 +672,19 @@ int goForwardMeasures(HumdrumFile& data, int startline, int target) {
 //
 
 int getMeasureLine(HumdrumFile& data, int number) {
-   int i;
-   int testnum = -1;
-   for (i=0; i<data.getNumLines(); i++) {
-      if (data[i].isMeasure()) {
-         if (sscanf(data[i][0], "=%d", &testnum) == 1) {
-            if (number == testnum) {
-               return i;
-            }
-         }
-      }
-   }
+	int i;
+	int testnum = -1;
+	for (i=0; i<data.getNumLines(); i++) {
+		if (data[i].isMeasure()) {
+			if (sscanf(data[i][0], "=%d", &testnum) == 1) {
+				if (number == testnum) {
+					return i;
+				}
+			}
+		}
+	}
 
-   return -1;
+	return -1;
 }
 
 
@@ -697,21 +695,21 @@ int getMeasureLine(HumdrumFile& data, int number) {
 //
 
 int getKernTrack(int number, HumdrumFile& infile) {
-   int counter = 0;
-   int i;
+	int counter = 0;
+	int i;
 
-   for (i=1; i<=infile.getMaxTracks(); i++) {
-      if (infile.getTrackExInterp(i) == "**kern") {
-         counter++;
-      }
-      if (counter == number) {
-         return i;
-      }
-   }
+	for (i=1; i<=infile.getMaxTracks(); i++) {
+		if (infile.getTrackExInterp(i) == "**kern") {
+			counter++;
+		}
+		if (counter == number) {
+			return i;
+		}
+	}
 
-   // Give some high-numbered spine which is not likely
-   // to be used (but is valid based on the size of trackmute).
-   return trackmute.getSize()-10;
+	// Give some high-numbered spine which is not likely
+	// to be used (but is valid based on the size of trackmute).
+	return (int)trackmute.size()-10;
 }
 
 
@@ -723,44 +721,44 @@ int getKernTrack(int number, HumdrumFile& infile) {
 //
 
 void checkOptions(void) {
-   options.define("t|tempo=d:120.0", "Base tempo");
-   options.define("e|tempo-scale=d:1.0", "Tempo scaling factor");
-   options.define("c|color|colour=s:b", "colorize the display");
-   options.define("p|pause=d:1.0", "pause time in seconds between files");
-   options.define("q|quiet=b", "Turn off data echoing while playing");
-   options.define("v|velocity=i:64", "Default MIDI key velocity");
-   options.define("m|min=i:30",      "minimum millisecond duration of notes");
-   options.define("s|shorten=i:30",  "shortening millisecond value for note durations");
-   options.process();
+	options.define("t|tempo=d:120.0", "Base tempo");
+	options.define("e|tempo-scale=d:1.0", "Tempo scaling factor");
+	options.define("c|color|colour=s:b", "colorize the display");
+	options.define("p|pause=d:1.0", "pause time in seconds between files");
+	options.define("q|quiet=b", "Turn off data echoing while playing");
+	options.define("v|velocity=i:64", "Default MIDI key velocity");
+	options.define("m|min=i:30",      "minimum millisecond duration of notes");
+	options.define("s|shorten=i:30",  "shortening millisecond value for note durations");
+	options.process();
 
-   velocity = options.getInteger("velocity");
-   tempoScale = options.getDouble("tempo-scale");
-   tempo = options.getDouble("tempo");
-   if (options.getBoolean("quiet")) {
-      echoTextQ = 0;
-   }
+	velocity = options.getInteger("velocity");
+	tempoScale = options.getDouble("tempo-scale");
+	tempo = options.getDouble("tempo");
+	if (options.getBoolean("quiet")) {
+		echoTextQ = 0;
+	}
 
-   //if (options.getArgCount() < 1) {
-   //   data.read(cin);
-   //} else {
-   //   inputNewFile();
-   //}
-   vector<string> list;
-   options.getArgList(list);
-   streamer.setFileList(list);
+	//if (options.getArgCount() < 1) {
+	//   data.read(cin);
+	//} else {
+	//   inputNewFile();
+	//}
+	vector<string> list;
+	options.getArgList(list);
+	streamer.setFileList(list);
 
-   mine = options.getInteger("min");
-   if (mine < 0) {
-      mine = 0;
-   }
-   shortenQ = !options.getBoolean("shorten");
-   shortenamount = options.getInteger("shorten");
+	mine = options.getInteger("min");
+	if (mine < 0) {
+		mine = 0;
+	}
+	shortenQ = !options.getBoolean("shorten");
+	shortenamount = options.getInteger("shorten");
 
-   colorQ = !options.getBoolean("color");
-   colormode = options.getString("color").c_str()[0];
-   if ((colormode != 'b') && (colormode != 'w')) {
-      colormode = 'w';
-   }
+	colorQ = !options.getBoolean("color");
+	colormode = options.getString("color").c_str()[0];
+	if ((colormode != 'b') && (colormode != 'w')) {
+		colormode = 'w';
+	}
 }
 
 
@@ -771,19 +769,19 @@ void checkOptions(void) {
 //
 
 void inputNewFile(void) {
-   data.clear();
-   linenum = 0;
-   if (!streamer.read(data)) {
-      finishup();
-      exit(0);
-   }
+	data.clear();
+	linenum = 0;
+	if (!streamer.read(data)) {
+		finishup();
+		exit(0);
+	}
 
-   data.analyzeRhythm("4");
+	data.analyzeRhythm("4");
 
-   if (fileNumber > 1) {
-      millisleep((float)(1000 * options.getDouble("pause")));
-   }
-   fileNumber++;
+	if (fileNumber > 1) {
+		millisleep((float)(1000 * options.getDouble("pause")));
+	}
+	fileNumber++;
 }
 
 
@@ -796,37 +794,37 @@ void inputNewFile(void) {
 //
 
 void playdata(HumdrumFile& data, int& linenum, SigTimer& timer) {
-   double duration = 0;     // duration of the current line;
+	double duration = 0;     // duration of the current line;
 
-   if (data.getNumLines() == 0) {
-      // ignore empty files.
-      return;
-   }
+	if (data.getNumLines() == 0) {
+		// ignore empty files.
+		return;
+	}
 
-   int type = data[linenum].getType();
+	int type = data[linenum].getType();
 
-   while (linenum < data.getNumLines() && duration == 0.0) {
-      duration = data[linenum].getDuration();
+	while (linenum < data.getNumLines() && duration == 0.0) {
+		duration = data[linenum].getDuration();
 
-      if (type == E_humrec_data) {
-         processNotes(data[linenum]);
-      } else if (type == E_humrec_interpretation) {
-         if (strncmp(data[linenum][0], "*MM", 3) == 0) {
-            tempo = atoi(&data[linenum][0][3]);
-         }
-      }
-      if (echoTextQ) {
-         printInputLine(data, linenum);
-      }
-      if (duration > 0.0) {
-         timer.setPeriod(60000 / tempo / tempoScale * duration);
-         timer.reset();
-      }
-      linenum++;
-      if (linenum < data.getNumLines()) {
-         type = data[linenum].getType();
-      }
-   }
+		if (type == E_humrec_data) {
+			processNotes(data[linenum]);
+		} else if (type == E_humrec_interpretation) {
+			if (strncmp(data[linenum][0], "*MM", 3) == 0) {
+				tempo = atoi(&data[linenum][0][3]);
+			}
+		}
+		if (echoTextQ) {
+			printInputLine(data, linenum);
+		}
+		if (duration > 0.0) {
+			timer.setPeriod(60000 / tempo / tempoScale * duration);
+			timer.reset();
+		}
+		linenum++;
+		if (linenum < data.getNumLines()) {
+			type = data[linenum].getType();
+		}
+	}
 }
 
 
@@ -838,35 +836,35 @@ void playdata(HumdrumFile& data, int& linenum, SigTimer& timer) {
 //
 
 void printInputLine(HumdrumFile& infile, int line) {
-   if ((line < 0) || (line >= infile.getNumLines())) {
-      return;
-   }
-   HumdrumRecord& record = infile[line];
-   if (record.isMeasure()) {
-      colormessage(cout, COLOR_BARLINE, colormode, colorQ);
-      tabPrintLine(cout, record, tabsize, COLOR_BARLINE);
-      colormessage(cout, COLOR_INIT, colormode, colorQ);
-      cout << endl;
-   } else if (record.isTandem()) {
-      colormessage(cout, COLOR_TANDEM, colormode, colorQ);
-      tabPrintLine(cout, record, tabsize, COLOR_TANDEM);
-      colormessage(cout, COLOR_INIT, colormode, colorQ);
-      cout << endl;
-   } else if (record.isInterpretation()) {
-      colormessage(cout, COLOR_INTERPRETATION, colormode, colorQ);
-      tabPrintLine(cout, record, tabsize, COLOR_INTERPRETATION);
-      colormessage(cout, COLOR_INIT, colormode, colorQ);
-      cout << endl;
-   } else {
-      int printline = 1;
-      if (noteonlyQ) {
-         printline = !hasLayout(record);
-      }
-      if (printline) {
-         tabPrintLine(cout, record, tabsize);
-         cout << endl;
-      }
-   }
+	if ((line < 0) || (line >= infile.getNumLines())) {
+		return;
+	}
+	HumdrumRecord& record = infile[line];
+	if (record.isMeasure()) {
+		colormessage(cout, COLOR_BARLINE, colormode, colorQ);
+		tabPrintLine(cout, record, tabsize, COLOR_BARLINE);
+		colormessage(cout, COLOR_INIT, colormode, colorQ);
+		cout << endl;
+	} else if (record.isTandem()) {
+		colormessage(cout, COLOR_TANDEM, colormode, colorQ);
+		tabPrintLine(cout, record, tabsize, COLOR_TANDEM);
+		colormessage(cout, COLOR_INIT, colormode, colorQ);
+		cout << endl;
+	} else if (record.isInterpretation()) {
+		colormessage(cout, COLOR_INTERPRETATION, colormode, colorQ);
+		tabPrintLine(cout, record, tabsize, COLOR_INTERPRETATION);
+		colormessage(cout, COLOR_INIT, colormode, colorQ);
+		cout << endl;
+	} else {
+		int printline = 1;
+		if (noteonlyQ) {
+			printline = !hasLayout(record);
+		}
+		if (printline) {
+			tabPrintLine(cout, record, tabsize);
+			cout << endl;
+		}
+	}
 }
 
 
@@ -878,15 +876,15 @@ void printInputLine(HumdrumFile& infile, int line) {
 //
 
 int hasLayout(HumdrumRecord& record) {
-   int i;
-   for (i=0; i<record.getFieldCount(); i++) {
-      if ((i == 0) && (strncmp(record[i], "!!LO:", 5) == 0)) {
-         return 1;
-      } else if (strncmp(record[i], "!LO:", 4) == 0) {
-         return 1;
-      }
-   }
-   return 0;
+	int i;
+	for (i=0; i<record.getFieldCount(); i++) {
+		if ((i == 0) && (strncmp(record[i], "!!LO:", 5) == 0)) {
+			return 1;
+		} else if (strncmp(record[i], "!LO:", 4) == 0) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 
@@ -897,105 +895,105 @@ int hasLayout(HumdrumRecord& record) {
 // default value sMessage = COLOR_INVALID
 //
 
-ostream& tabPrintLine(ostream& out, HumdrumRecord& record, int tabsize, 
-      int sMessage) {
-   int i, j;
-   int len;
-   int track;
-   int suppressColor = record.isMeasure() || record.isInterpretation();
+ostream& tabPrintLine(ostream& out, HumdrumRecord& record, int tabsize,
+		int sMessage) {
+	int i, j;
+	int len;
+	int track;
+	int suppressColor = record.isMeasure() || record.isInterpretation();
 
-   // count the **kern spines (used with hideQ varaible):
-   int kerncount = 0;
-   int lastkern = -1;
-   for (i=0; i<record.getFieldCount(); i++) {
-      if (strcmp(record.getExInterp(i), "**kern") == 0) {
-         kerncount++;
-         lastkern = i;
-      }
-   }
+	// count the **kern spines (used with hideQ varaible):
+	int kerncount = 0;
+	int lastkern = -1;
+	for (i=0; i<record.getFieldCount(); i++) {
+		if (strcmp(record.getExInterp(i), "**kern") == 0) {
+			kerncount++;
+			lastkern = i;
+		}
+	}
 
-   const char *ptr = NULL;
-   char buffer[1024] = {0};
-   for (i=0; i<record.getFieldCount()-1; i++) {
-      if (hideQ && (strcmp(record.getExInterp(i), "**kern") != 0)) {
-         continue;
-      }
-      if (hideQ && (lastkern == i)) {
-         // print the last kern spine outside of the loop below
-         break;
-      }
-      track = record.getPrimaryTrack(i);
-      ptr = record[i];
-      if (noteonlyQ && strcmp(record.getExInterp(i), "**kern") == 0) {
-         len = getKernNoteOnlyLen(buffer, ptr);
-         ptr = buffer;
-      } else {
-         len = strlen(ptr);
-      }
+	const char *ptr = NULL;
+	char buffer[1024] = {0};
+	for (i=0; i<record.getFieldCount()-1; i++) {
+		if (hideQ && (strcmp(record.getExInterp(i), "**kern") != 0)) {
+			continue;
+		}
+		if (hideQ && (lastkern == i)) {
+			// print the last kern spine outside of the loop below
+			break;
+		}
+		track = record.getPrimaryTrack(i);
+		ptr = record[i];
+		if (noteonlyQ && strcmp(record.getExInterp(i), "**kern") == 0) {
+			len = getKernNoteOnlyLen(buffer, ptr);
+			ptr = buffer;
+		} else {
+			len = strlen(ptr);
+		}
 
-      if (len < tabsize) {
-         if (!suppressColor && trackmute[track]) {
-            colormessage(cout, COLOR_MUTE, colormode, colorQ);
-            out << ptr;
-            colormessage(cout, COLOR_INIT, colormode, colorQ);
-         } else {
-            out << ptr;
-         }
-         for (j=len; j<tabsize; j++) {
-            out << ' ';
-         }
-      } else {
-         if (!suppressColor && trackmute[track]) {
-            colormessage(cout, COLOR_MUTE, colormode, colorQ);
-         }
-         for (j=0; j<tabsize - 1; j++) {
-            out << ptr[j];
-         }
-         if (!trackmute[track]) {
-            colormessage(cout, COLOR_OVERFILL, colormode, colorQ);
-         }
-         out << '|';
-         if (suppressColor) {
-               colormessage(cout, sMessage, colormode, colorQ);
-         } else {
-            if (!trackmute[track]) {
-               colormessage(cout, COLOR_INIT, colormode, colorQ);
-            }
+		if (len < tabsize) {
+			if (!suppressColor && trackmute[track]) {
+				colormessage(cout, COLOR_MUTE, colormode, colorQ);
+				out << ptr;
+				colormessage(cout, COLOR_INIT, colormode, colorQ);
+			} else {
+				out << ptr;
+			}
+			for (j=len; j<tabsize; j++) {
+				out << ' ';
+			}
+		} else {
+			if (!suppressColor && trackmute[track]) {
+				colormessage(cout, COLOR_MUTE, colormode, colorQ);
+			}
+			for (j=0; j<tabsize - 1; j++) {
+				out << ptr[j];
+			}
+			if (!trackmute[track]) {
+				colormessage(cout, COLOR_OVERFILL, colormode, colorQ);
+			}
+			out << '|';
+			if (suppressColor) {
+					colormessage(cout, sMessage, colormode, colorQ);
+			} else {
+				if (!trackmute[track]) {
+					colormessage(cout, COLOR_INIT, colormode, colorQ);
+				}
 
-            if (!suppressColor && trackmute[track]) {
-               colormessage(cout, COLOR_INIT, colormode, colorQ);
-            }
-         }
-      }
-   }
+				if (!suppressColor && trackmute[track]) {
+					colormessage(cout, COLOR_INIT, colormode, colorQ);
+				}
+			}
+		}
+	}
 
-   int lastindex = 0;
-   if (hideQ && (lastkern >= 0)) {
-      track = record.getPrimaryTrack(lastkern);
-      lastindex = lastkern;
-   } else {
-      lastindex = record.getFieldCount()-1;
-      track = record.getPrimaryTrack(lastindex);
-   }
+	int lastindex = 0;
+	if (hideQ && (lastkern >= 0)) {
+		track = record.getPrimaryTrack(lastkern);
+		lastindex = lastkern;
+	} else {
+		lastindex = record.getFieldCount()-1;
+		track = record.getPrimaryTrack(lastindex);
+	}
 
-   ptr = record[lastindex];
-   if (noteonlyQ && strcmp(record.getExInterp(lastindex), "**kern") == 0) {
-      len = getKernNoteOnlyLen(buffer, ptr);
-      ptr = buffer;
-   } else {
-      len = strlen(ptr);
-   }
+	ptr = record[lastindex];
+	if (noteonlyQ && strcmp(record.getExInterp(lastindex), "**kern") == 0) {
+		len = getKernNoteOnlyLen(buffer, ptr);
+		ptr = buffer;
+	} else {
+		len = strlen(ptr);
+	}
 
-   if ((track > 0) && !suppressColor && trackmute[track]) {
-      colormessage(cout, COLOR_MUTE, colormode, colorQ);
-   }
-   out << ptr;
-   if ((track > 0) && !suppressColor && trackmute[track]) {
-      colormessage(cout, COLOR_INIT, colormode, colorQ);
-   }
-   out << flush;
+	if ((track > 0) && !suppressColor && trackmute[track]) {
+		colormessage(cout, COLOR_MUTE, colormode, colorQ);
+	}
+	out << ptr;
+	if ((track > 0) && !suppressColor && trackmute[track]) {
+		colormessage(cout, COLOR_INIT, colormode, colorQ);
+	}
+	out << flush;
 
-   return out;
+	return out;
 }
 
 
@@ -1007,23 +1005,23 @@ ostream& tabPrintLine(ostream& out, HumdrumRecord& record, int tabsize,
 //
 
 int getKernNoteOnlyLen(char* buffer, const char* ptr) {
-   buffer[0] = '\0';
-   int counter = 0;
-   int len = strlen(ptr);
-   int i;
-   for (i=0; i<len; i++) {
-      switch (ptr[i]) {
-         case 'k': case 'K': case 'L': case 'J':   // beaming characters
-         case '/': case '\\':                      // stem direction characters
-            break;
-         default:
-            buffer[counter++] = ptr[i];
-            buffer[counter] = '\0';
-      }
-   }
+	buffer[0] = '\0';
+	int counter = 0;
+	int len = strlen(ptr);
+	int i;
+	for (i=0; i<len; i++) {
+		switch (ptr[i]) {
+			case 'k': case 'K': case 'L': case 'J':   // beaming characters
+			case '/': case '\\':                      // stem direction characters
+				break;
+			default:
+				buffer[counter++] = ptr[i];
+				buffer[counter] = '\0';
+		}
+	}
 
-   buffer[counter] = '\0';
-   return counter;
+	buffer[counter] = '\0';
+	return counter;
 }
 
 
@@ -1036,83 +1034,83 @@ int getKernNoteOnlyLen(char* buffer, const char* ptr) {
 //
 
 void processNotes(HumdrumRecord& record) {
-   NoteEvent note;
-   int pitch = 0;
-   double duration = 0.0;
-   int staccatoQ = 0;
-   int accentQ = 0;
-   int sforzandoQ = 0;
-   int i, j;
-   int notecount = 0;
-   char buffer[128] = {0};
-   for (i=0; i<record.getFieldCount(); i++) {
-      if ((record.getPrimaryTrack(i) < trackmute.getSize())
-            && trackmute[record.getPrimaryTrack(i)]) {
-         continue;
-      }
-      if (record.getExInterpNum(i) == E_KERN_EXINT) {
-         notecount = record.getTokenCount(i);
-         if (strcmp(record[i], ".") == 0) {
-            continue;
-         }
-         for (j=0; j<notecount; j++) {
-            record.getToken(buffer, i, j);
-            if (strchr(buffer, '[')) {
-               // total tied note durations
-               duration = data.getTiedDuration(linenum, i, j);
-            } else {
-               duration = Convert::kernToDuration(buffer);
-            }
-            pitch = Convert::kernToMidiNoteNumber(buffer);
-            // skip rests
-            if (pitch < 0) {
-               continue;
-            }
-            pitch += transpose;
-            // don't play note which is transposed too extremely
-            if (pitch < 0)   { continue; }
-            if (pitch > 127) { continue; }
+	NoteEvent note;
+	int pitch = 0;
+	double duration = 0.0;
+	int staccatoQ = 0;
+	int accentQ = 0;
+	int sforzandoQ = 0;
+	int i, j;
+	int notecount = 0;
+	char buffer[128] = {0};
+	for (i=0; i<record.getFieldCount(); i++) {
+		if ((record.getPrimaryTrack(i) < (int)trackmute.size())
+				&& trackmute[record.getPrimaryTrack(i)]) {
+			continue;
+		}
+		if (record.getExInterpNum(i) == E_KERN_EXINT) {
+			notecount = record.getTokenCount(i);
+			if (strcmp(record[i], ".") == 0) {
+				continue;
+			}
+			for (j=0; j<notecount; j++) {
+				record.getToken(buffer, i, j);
+				if (strchr(buffer, '[')) {
+					// total tied note durations
+					duration = data.getTiedDuration(linenum, i, j);
+				} else {
+					duration = Convert::kernToDuration(buffer);
+				}
+				pitch = Convert::kernToMidiNoteNumber(buffer);
+				// skip rests
+				if (pitch < 0) {
+					continue;
+				}
+				pitch += transpose;
+				// don't play note which is transposed too extremely
+				if (pitch < 0)   { continue; }
+				if (pitch > 127) { continue; }
 
-            // skip tied notes
-            if (strchr(buffer, '_') || strchr(buffer, ']')) {
-               continue;
-            }
+				// skip tied notes
+				if (strchr(buffer, '_') || strchr(buffer, ']')) {
+					continue;
+				}
 
-            accentQ    = strchr(buffer, '^')  == NULL? 0 : 1;
-            sforzandoQ = strchr(buffer, 'z')  == NULL? 0 : 1;
-            staccatoQ  = strchr(buffer, '\'') == NULL? 0 : 1;
-            note.setChannel(0);
-            note.setKey(pitch);
-            note.setOnTime(t_time);
-            duration = duration * 60000 / tempo / tempoScale;
-            if (shortenQ) {
-               duration -= shortenamount;
-               if (duration < mine) {
-                  duration = mine;
-               }
-            }
-            note.setDur((int)duration);
-            if (staccatoQ) {
-               note.setDur((int)(0.5 * note.getDur()));
-            }
-            note.setKey(pitch);
-            if (accentQ) {
-               velocity *= 1.3;
-            }
-            if (sforzandoQ) {
-               velocity *= 1.5;
-            }
-            if (velocity > 127) {
-               velocity = 127;
-            }
-            note.setVelocity(velocity);
+				accentQ    = strchr(buffer, '^')  == NULL? 0 : 1;
+				sforzandoQ = strchr(buffer, 'z')  == NULL? 0 : 1;
+				staccatoQ  = strchr(buffer, '\'') == NULL? 0 : 1;
+				note.setChannel(0);
+				note.setKey(pitch);
+				note.setOnTime(t_time);
+				duration = duration * 60000 / tempo / tempoScale;
+				if (shortenQ) {
+					duration -= shortenamount;
+					if (duration < mine) {
+						duration = mine;
+					}
+				}
+				note.setDur((int)duration);
+				if (staccatoQ) {
+					note.setDur((int)(0.5 * note.getDur()));
+				}
+				note.setKey(pitch);
+				if (accentQ) {
+					velocity *= 1.3;
+				}
+				if (sforzandoQ) {
+					velocity *= 1.5;
+				}
+				if (velocity > 127) {
+					velocity = 127;
+				}
+				note.setVelocity(velocity);
 
-            note.activate();
-            note.action(eventBuffer);
-            eventBuffer.insert(note);
-         }
-      }
-   }
+				note.activate();
+				note.action(eventBuffer);
+				eventBuffer.insert(note);
+			}
+		}
+	}
 }
 
 
@@ -1123,80 +1121,79 @@ void processNotes(HumdrumRecord& record) {
 //
 
 ostream& colormessage(ostream& out, int messagetype, int mode, int status) {
-   if (messagetype == COLOR_INVALID) {
-      return out;
-   }
+	if (messagetype == COLOR_INVALID) {
+		return out;
+	}
 
-   #define ANSI_RESET          "\033[0m"   /* go back to the original colors */
-   #define ANSI_UNDERLINE_ON   "\033[4m"
-   #define ANSI_UNDERLINE_OFF  "\033[24m"
-   #define ANSI_CLEAR_SCREEN   "\033[2J\033[H" /* and move to the top */
+	#define ANSI_RESET          "\033[0m"   /* go back to the original colors */
+	#define ANSI_UNDERLINE_ON   "\033[4m"
+	#define ANSI_UNDERLINE_OFF  "\033[24m"
+	#define ANSI_CLEAR_SCREEN   "\033[2J\033[H" /* and move to the top */
 
-   #define ANSI_BLACK          "\033[37;40m"  /* black background; white text */
-   #define ANSI_WHITE          "\033[30;107m" /* white background; black text */
+	#define ANSI_BLACK          "\033[37;40m"  /* black background; white text */
+	#define ANSI_WHITE          "\033[30;107m" /* white background; black text */
 
-   #define ANSI_BLACK_TX       "\033[30m"
-   #define ANSI_RED_TX         "\033[31m"
-   #define ANSI_GREEN_TX       "\033[32m"
-   #define ANSI_YELLOW_TX      "\033[33m"
-   #define ANSI_BLUE_TX        "\033[34m"
-   #define ANSI_MAGENTA_TX     "\033[35m"
-   #define ANSI_CYAN_TX        "\033[36m"
-   #define ANSI_WHITE_TX       "\033[37m"
+	#define ANSI_BLACK_TX       "\033[30m"
+	#define ANSI_RED_TX         "\033[31m"
+	#define ANSI_GREEN_TX       "\033[32m"
+	#define ANSI_YELLOW_TX      "\033[33m"
+	#define ANSI_BLUE_TX        "\033[34m"
+	#define ANSI_MAGENTA_TX     "\033[35m"
+	#define ANSI_CYAN_TX        "\033[36m"
+	#define ANSI_WHITE_TX       "\033[37m"
 
-   #define ANSI_HI_BLACK_TX    "\033[90m"
-   #define ANSI_HI_RED_TX      "\033[91m"
-   #define ANSI_HI_GREEN_TX    "\033[92m"
-   #define ANSI_HI_YELLOW_TX   "\033[93m"
-   #define ANSI_HI_BLUE_TX     "\033[94m"
-   #define ANSI_HI_MAGENTA_TX  "\033[95m"
-   #define ANSI_HI_CYAN_TX     "\033[96m"
-   #define ANSI_HI_WHITE_TX    "\033[97m"
+	#define ANSI_HI_BLACK_TX    "\033[90m"
+	#define ANSI_HI_RED_TX      "\033[91m"
+	#define ANSI_HI_GREEN_TX    "\033[92m"
+	#define ANSI_HI_YELLOW_TX   "\033[93m"
+	#define ANSI_HI_BLUE_TX     "\033[94m"
+	#define ANSI_HI_MAGENTA_TX  "\033[95m"
+	#define ANSI_HI_CYAN_TX     "\033[96m"
+	#define ANSI_HI_WHITE_TX    "\033[97m"
 
-   #define ANSI_GRAY_BG        "\033[47m"
+	#define ANSI_GRAY_BG        "\033[47m"
 
-   if (status == 0) {
-      return out;   // don't do any coloring
-   }
+	if (status == 0) {
+		return out;   // don't do any coloring
+	}
 
-   if (mode == 'b') {
+	if (mode == 'b') {
 
-      switch (messagetype) {
-         case COLOR_RESET:         out << ANSI_RESET;         break;
-         case COLOR_INIT:          out << ANSI_BLACK;         break;
-         case COLOR_BARLINE:       out << ANSI_YELLOW_TX;     break;
-         case COLOR_CLEAR_SCREEN:  out << ANSI_CLEAR_SCREEN;  break;
-         case COLOR_MUTE:          out << ANSI_BLUE_TX;       break;
-         case COLOR_OVERFILL:      out << ANSI_HI_BLUE_TX;    break;
-         case COLOR_INTERPRETATION:out << ANSI_HI_RED_TX;     break;
-         case COLOR_TANDEM:        out << ANSI_MAGENTA_TX;    break;
-         case COLOR_MARKS:         out << ANSI_CYAN_TX;       break;
-         case COLOR_COMMENT:       out << ANSI_GREEN_TX;      break;
-         default: return colormessage(out, COLOR_INIT, mode, status);
-      }
+		switch (messagetype) {
+			case COLOR_RESET:         out << ANSI_RESET;         break;
+			case COLOR_INIT:          out << ANSI_BLACK;         break;
+			case COLOR_BARLINE:       out << ANSI_YELLOW_TX;     break;
+			case COLOR_CLEAR_SCREEN:  out << ANSI_CLEAR_SCREEN;  break;
+			case COLOR_MUTE:          out << ANSI_BLUE_TX;       break;
+			case COLOR_OVERFILL:      out << ANSI_HI_BLUE_TX;    break;
+			case COLOR_INTERPRETATION:out << ANSI_HI_RED_TX;     break;
+			case COLOR_TANDEM:        out << ANSI_MAGENTA_TX;    break;
+			case COLOR_MARKS:         out << ANSI_CYAN_TX;       break;
+			case COLOR_COMMENT:       out << ANSI_GREEN_TX;      break;
+			default: return colormessage(out, COLOR_INIT, mode, status);
+		}
 
-   } else if (mode == 'w') {
+	} else if (mode == 'w') {
 
-      switch (messagetype) {
-         case COLOR_RESET:         out << ANSI_RESET;         break;
-         case COLOR_INIT:          out << ANSI_WHITE;         break;
-         case COLOR_BARLINE:       out << ANSI_GRAY_BG;       break;
-         case COLOR_CLEAR_SCREEN:  out << ANSI_CLEAR_SCREEN;  break;
-         case COLOR_MUTE:          out << ANSI_YELLOW_TX;     break;
-         case COLOR_OVERFILL:      out << ANSI_HI_CYAN_TX;    break;
-         case COLOR_INTERPRETATION:out << ANSI_HI_RED_TX;     break;
-         case COLOR_TANDEM:        out << ANSI_MAGENTA_TX;    break;
-         case COLOR_MARKS:         out << ANSI_CYAN_TX;       break;
-         case COLOR_COMMENT:       out << ANSI_GREEN_TX;      break;
-         default: return colormessage(out, COLOR_INIT, mode, status);
-      }
+		switch (messagetype) {
+			case COLOR_RESET:         out << ANSI_RESET;         break;
+			case COLOR_INIT:          out << ANSI_WHITE;         break;
+			case COLOR_BARLINE:       out << ANSI_GRAY_BG;       break;
+			case COLOR_CLEAR_SCREEN:  out << ANSI_CLEAR_SCREEN;  break;
+			case COLOR_MUTE:          out << ANSI_YELLOW_TX;     break;
+			case COLOR_OVERFILL:      out << ANSI_HI_CYAN_TX;    break;
+			case COLOR_INTERPRETATION:out << ANSI_HI_RED_TX;     break;
+			case COLOR_TANDEM:        out << ANSI_MAGENTA_TX;    break;
+			case COLOR_MARKS:         out << ANSI_CYAN_TX;       break;
+			case COLOR_COMMENT:       out << ANSI_GREEN_TX;      break;
+			default: return colormessage(out, COLOR_INIT, mode, status);
+		}
 
-   }
+	}
 
-   out << flush;
-   return out;
+	out << flush;
+	return out;
 }
 
 
-// md5sum: 8fcc7cb5a04397f6e8ae7aad5d256b10 humplay.cpp [20170605]
 
