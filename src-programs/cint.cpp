@@ -764,7 +764,14 @@ int printCombinationModulePrepare(ostream& out, const string& filename,
 		if (searchQ) {
 			// Check to see if the extracted module matches to the
 			// search query.
-			match = SearchString.search(tempstream.str().c_str());
+			string tstring = tempstring.str();
+			string newstring;
+			for (int i=0; i<(int)tstring.size(); i++) {
+				if (tstring[i] != '\0') {
+					newstring += tstring[i];
+				}
+			}
+			match = SearchString.search(newstring);
 			if (match) {
 				count++;
 				if (locationQ) {
@@ -781,7 +788,12 @@ int printCombinationModulePrepare(ostream& out, const string& filename,
 							<< endl;
 				}
 				if (raw2Q || rawQ) {
-					out << tempstream.str();
+					string tempstring = tempstream.str();
+					for (int i=0; i<(int)tempstring.size(); i++) {
+						if (tempstring[i] != '\0') {
+							out << tempstring[i];
+						}
+					}
 					// newline already added somewhere previously.
 					// cout << "\n";
 				} else {
@@ -799,9 +811,21 @@ int printCombinationModulePrepare(ostream& out, const string& filename,
 		} else {
 			if (retroQ) {
 				int column = getTriangleIndex((int)notes.size(), part1, part2);
-				retrospective[column][status] = tempstream.str();
+				string tempstring = tempstream.str();
+				string newstring;
+				for (int i=0; i<(int)tempstring.size(); i++) {
+					if (tempstring[i] != '\0') {
+						newstring += tempstring[i];
+					}
+				}
+				retrospective[column][status] = newstring;
 			} else {
-				out << tempstream.str();
+				string tempstring = tempstream.str();
+				for (int i=0; i<(int)tempstring.size(); i++) {
+					if (tempstring[i] != '\0') {
+						out << tempstring[i];
+					}
+				}
 			}
 		}
 	} else {
@@ -1834,7 +1858,12 @@ int printLatticeItemRows(vector<vector<NoteNode> >& notes, int n,
 			cout << ".";
 		} else {
 			tempstream << ends;
-			cout << tempstream.str();
+			string tstring = tempstream.str();
+			for (int i=0; i<(int)tstring.size(); i++) {
+				if (tstring[i] != '\0') {
+					cout << tstring[i];
+				}
+			}
 		}
 	}
 
@@ -2882,3 +2911,4 @@ void usage(const string& command) {
 
 
 // md5sum: 641f46b96c3502610c3b3a866dd645a1 cint.cpp [20170605]
+
