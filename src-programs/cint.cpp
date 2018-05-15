@@ -764,7 +764,7 @@ int printCombinationModulePrepare(ostream& out, const string& filename,
 		if (searchQ) {
 			// Check to see if the extracted module matches to the
 			// search query.
-			string tstring = tempstring.str();
+			string tstring = tempstream.str();
 			string newstring;
 			for (int i=0; i<(int)tstring.size(); i++) {
 				if (tstring[i] != '\0') {
