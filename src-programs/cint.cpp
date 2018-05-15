@@ -2766,13 +2766,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	koptionQ = opts.getBoolean("koption");
 
 	if (opts.getBoolean("comma")) {
-		Spacer.resize(2);
-		Spacer[0] = ',';
-		Spacer[1] = '\0';
+		Spacer = ',';
 	} else {
-		Spacer.resize(2);
-		Spacer[0] = ' ';
-		Spacer[1] = '\0';
+		Spacer = ' ';
 	}
 
 	// dispay as base-7 by default
