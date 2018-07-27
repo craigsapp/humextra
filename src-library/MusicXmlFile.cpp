@@ -231,7 +231,13 @@ ostream& MusicXmlFile::printGraceNoteRhythm(ostream& out, _MusicXmlItem& item) {
                   } else if (strcmp(buffer, "16th") == 0) {
                      out << "16";
                      return out;
+                  } else if (strcmp(buffer, "sixteenth") == 0) {
+                     out << "16";
+                     return out;
                   } else if (strcmp(buffer, "8th") == 0) {
+                     out << "8";
+                     return out;
+                  } else if (strcmp(buffer, "eighth") == 0) {
                      out << "8";
                      return out;
                   } else if (strcmp(buffer, "quarter") == 0) {
@@ -261,12 +267,14 @@ ostream& MusicXmlFile::printGraceNoteRhythm(ostream& out, _MusicXmlItem& item) {
 //////////////////////////////
 //
 // printGraceMarker -- print "q" if the grace note requires a slash.
-//     print "q" if the grace note does not require a slash.
+//     print "qq" if the grace note does not require a slash.
 //
 
 ostream& MusicXmlFile::printGraceMarker(ostream& out, _MusicXmlItem& item) {
    CXMLObject*   entry   = item.obj;
    CXMLElement*  element = NULL;
+
+   out << "q";
 
    entry = entry->Zoom();
    while (entry != NULL) {
@@ -274,18 +282,18 @@ ostream& MusicXmlFile::printGraceMarker(ostream& out, _MusicXmlItem& item) {
          element = (CXMLElement*)entry;
          for (int i=0; i<element->GetAttributes().GetLength(); i++) {
             if (element->GetAttributes().GetName(i) == "slash") {
-               if (element->GetAttributes().GetValue(i) == "yes") {
+               if (element->GetAttributes().GetValue(i) != "yes") {
                   out << "q";
-                  return out;
                }
+               return out;
                break;
             }
          }
       }
       entry = entry->GetNext();
    }
+	out << "q";
 
-   out << "q";
    return out;
 }
 
