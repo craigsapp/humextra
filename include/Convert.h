@@ -57,6 +57,9 @@ class Convert {
       static char*     durationRToKernRhythm     (char* output, 
                                                   RationalNumber input, 
                                                   int timebase = 1);
+      static string    durationToKernRhythm      (double input, int timebase = 1);
+      static string    durationRToKernRhythm     (RationalNumber input, 
+                                                  int timebase = 1);
       static double    kernToDuration            (const string& aKernString);
       static RationalNumber kernToDurationR      (const string& aKernString);
       static double    kernToDurationNoDots      (const string& aKernString);

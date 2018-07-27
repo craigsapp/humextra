@@ -26,6 +26,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
 
 // function declarations:
 void      checkOptions          (Options& opts, int argc, char** argv);
@@ -51,7 +52,7 @@ double    convertNoteEntryToXML (HumdrumFile& infile, int line, int col,
                                  const char* buffer, int chord, int vlevel,
                                  int voice);
 void      checkMeasure          (void);
-void      printDurationType     (const char* durstring);
+void      printDurationType     (const string& durstring);
 void      printDots             (const char* durstring);
 void      adjustKey             (int keyinfo);
 void      checkAccidentals      (int diatonic, int alter, int chord);
@@ -68,8 +69,8 @@ void      displayLyrics         (HumdrumFile& infile, int line, int col,
 void      displayHTMLText       (const char* buffer);
 void      processBeams          (HumdrumFile& infile, int line, int col,
                                  const char* buffer, int vlevel);
-void      setLineTicks          (Array<int>& LineTick, HumdrumFile& infile, int divisions);
-void      getBarlines           (Array<int>& barlines, HumdrumFile& infile);
+void      setLineTicks          (vector<int>& LineTick, HumdrumFile& infile, int divisions);
+void      getBarlines           (vector<int>& barlines, HumdrumFile& infile);
 void      convertMeasureToMusicXML(HumdrumFile& infile, int track,
                                  int startbar, int endbar);
 int       getMaxVoice           (HumdrumFile& infile, int track,
@@ -80,10 +81,10 @@ void      printMode             (int lev, HumdrumFile& infile, int line,
                                  int col, int voice);
 int       adjustKeyInfo         (HumdrumFile& infile, int line, int col,
                                  int voice);
-void      setColorCharacters    (HumdrumFile& infile, Array<char>& colorchar,
-                                 Array<string>& colorout);
-string    checkColor            (const char* note, Array<char>& colorchar,
-                                 Array<string>& colorout);
+void      setColorCharacters    (HumdrumFile& infile, string& colorchar,
+                                 vector<string>& colorout);
+string    checkColor            (const char* note, string& colorchar,
+                                 vector<string>& colorout);
 void      convertBnumForNote    (ostream& out, HumdrumFile& infile, int line, 
                                  int col);
 void      convertBassoContinuoFigureGroup(ostream& out, HumdrumFile& infile,
@@ -115,17 +116,17 @@ int v1chord[7] = {0};          // for explicit accidentals ABCDEFG
 int v1prechordstates[7] = {0}; // for explicit accidentals ABCDEFG
 
 int AbsTick = 0;                // for <backup> <forward> commands
-Array<int> LineTick;            // for <backup> and <forward> commands
+vector<int> LineTick;            // for <backup> and <forward> commands
 int beamlevel[128] = {0};       // for beaming information
 int musicstart = 0;             // for suppressing bars before music starts
 // int attributes = 0;             // for suppressing multiple attributes entries
 
-Array<int> Barlines;
+vector<int> Barlines;
 
 int  ClefOctaveTranspose = 0;   // used to fix bug in MusicXML vocal tenor clef notes
 
-Array<char> Colorchar;          // charcter in **kern data which causes color
-Array<string> Colorcode;        // color code that the marker indicates
+string Colorchar;          // charcter in **kern data which causes color
+vector<string> Colorcode;        // color code that the marker indicates
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -172,9 +173,9 @@ int main(int argc, char** argv) {
 // getBarlines --
 //
 
-void getBarlines(Array<int>& barlines, HumdrumFile& infile) {
-   barlines.setSize(infile.getNumLines());
-   barlines.setSize(0);
+void getBarlines(vector<int>& barlines, HumdrumFile& infile) {
+   barlines.clear();
+   barlines.reserve(infile.getNumLines());
    int i;
    int datafoundQ = 0;
    // int exinterpline = 0;
@@ -184,7 +185,7 @@ void getBarlines(Array<int>& barlines, HumdrumFile& infile) {
       }
       if (strncmp(infile[i][0], "**", 2) == 0) {
          // exinterpline = i;
-         barlines.append(i);
+         barlines.push_back(i);
       }
       if (!infile[i].isMeasure()) {
          continue;
@@ -192,10 +193,10 @@ void getBarlines(Array<int>& barlines, HumdrumFile& infile) {
       if (!datafoundQ) {
          continue;
       }
-      barlines.append(i);
+      barlines.push_back(i);
    }
    i = infile.getNumLines() - 1;
-   barlines.append(i);
+   barlines.push_back(i);
 }
 
 
@@ -205,9 +206,8 @@ void getBarlines(Array<int>& barlines, HumdrumFile& infile) {
 // setLineTicks --
 //
 
-void setLineTicks(Array<int>& LineTick, HumdrumFile& infile, int divisions) {
-   LineTick.setSize(infile.getNumLines());
-   LineTick.allowGrowth(0);
+void setLineTicks(vector<int>& LineTick, HumdrumFile& infile, int divisions) {
+   LineTick.resize(infile.getNumLines());
    RationalNumber rat;
    int i;
    for (i=0; i<infile.getNumLines(); i++) {
@@ -306,7 +306,7 @@ void convertToMusicXML(HumdrumFile& infile) {
    // pline(lev, "<score-partwise version="2.0">\n");
    pline(lev, "<score-partwise version=\"2.0\">\n");
 
-   Array<int> kerntracks;
+   vector<int> kerntracks;
    infile.getTracksByExInterp(kerntracks, "**kern");
 
    int count = makePartList(infile);
@@ -318,12 +318,12 @@ void convertToMusicXML(HumdrumFile& infile) {
    if (!reverseQ) {
       // print parts in reverse order because Humdrum scores are printed lowest
       // part first going towards highest, but MusicXML is from highest to lowest.
-      for (i=kerntracks.getSize()-1; i>=0 ;i--) {
+      for (i=(int)kerntracks.size()-1; i>=0 ;i--) {
          makePart(infile, start, kerntracks[i], ++gcount);
       }
    } else {
       // print reverse because Humdrum score is probably reversed
-      for (i=0; i<kerntracks.getSize(); i++) {
+      for (i=0; i<(int)kerntracks.size(); i++) {
          makePart(infile, start, kerntracks[i], ++gcount);
       }
    }
@@ -332,7 +332,7 @@ void convertToMusicXML(HumdrumFile& infile) {
 
    pline(lev, "</score-partwise>\n");
    printGlobalComments(infile, -1);
-   if (count != kerntracks.getSize()) {
+   if (count != (int)kerntracks.size()) {
       cerr << "Error in generating parts: number of parts has changed: " << count << endl;
    }
 }
@@ -424,9 +424,7 @@ void printBibliography(HumdrumFile& infile, int line) {
    if (i == 0) return;
 
    // Handle stupid XML parsers which find "--" within a comment and choke:
-   Array<char> newvalue;
-   newvalue.setSize(strlen(&(buffer[i]))+1);
-   strcpy(newvalue.getBase(), &(buffer[i]));
+   string newvalue = &buffer[i];
    PerlRegularExpression pre;
    pre.sar(newvalue, "--", "&#45;&#45;", "g");
 
@@ -467,7 +465,7 @@ void makePart(HumdrumFile& infile, int start, int track, int count) {
 
    int i;
 
-   for (i=0; i<Barlines.getSize()-1; i++) {
+   for (i=0; i<(int)Barlines.size()-1; i++) {
       convertMeasureToMusicXML(infile, track, Barlines[i], Barlines[i+1]);
    }
 
@@ -1561,7 +1559,9 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
       pline(lev, "<grace");
       if (slash) {
          cout << " slash=\"yes\"";
-      }
+      } else {
+         cout << " slash=\"no\"";
+		}
       cout << "/>\n";
    }
 
@@ -1649,13 +1649,9 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
    pline(lev, "<type>");
 
    PerlRegularExpression pre;
-   Array<char> newbuffer;
-   newbuffer.setSize(strlen(buffer)+1);
-   strcpy(newbuffer.getBase(), buffer);
+   string newbuffer = buffer;
 
-   Array<char> nodots;
-   nodots.setSize(strlen(newbuffer.getBase()) + 1);
-   strcpy(nodots.getBase(), newbuffer.getBase());
+   string nodots = newbuffer;
    PerlRegularExpression removedots;
    removedots.sar(nodots, "\\.", "", "g");
 
@@ -1663,13 +1659,12 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
    if (grace) {
       // if a grace note and no rhythm, set the visual duration to 8th
       if (!pre.search(newbuffer, "\\d")) {
-         newbuffer.setSize(2);
-         strcpy(newbuffer.getBase(), "8");
+         newbuffer = "8";
       }
    }
 
    // have to ignore augmentation dots on rhythm?
-   RationalNumber rat = Convert::kernToDurationR(nodots.getBase());
+   RationalNumber rat = Convert::kernToDurationR(nodots);
    double newduration = rat.getFloat();
    RationalNumber ratout = 1;
 
@@ -1679,12 +1674,12 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
    if (newduration > 0.0) {
       double base2val =  log10(newduration)/log10(2);
       tempval = pow(2.0, floor(base2val + 0.99));
-      Convert::durationToKernRhythm(newbuffer.getBase(), tempval);
+      newbuffer = Convert::durationToKernRhythm(tempval);
    }
 
-   ratout = Convert::kernToDurationR(newbuffer.getBase());
-   printDurationType(newbuffer.getBase());
-   // printDurationType(nodots.getBase());
+   ratout = Convert::kernToDurationR(newbuffer);
+   printDurationType(newbuffer);
+   // printDurationType(nodots);
 
    cout << "</type>\n";
 
@@ -2024,12 +2019,12 @@ void displayUnknownTextType(HumdrumFile& infile, int line, int col,
 
 void displayHTMLText(const char* buffer) {
    PerlRegularExpression pre;
-   Array<char> tbuf;
+   string tbuf;
    tbuf = buffer;
    pre.sar(tbuf, "&", "&amp;", "g");
    pre.sar(tbuf, "--", "&#45;&#45;", "g");
 
-   int length = strlen(tbuf.getBase());
+   int length = (int)tbuf.size();
    for (int i=0; i<length; i++) {
       switch ((unsigned char)tbuf[i]) {
          case 0xe4: cout << "&auml;"; break; // 'ä'
@@ -2158,26 +2153,34 @@ void printDots(const char* durstring) {
 // printDurationType --
 //
 
-void printDurationType(const char* durstring) {
+void printDurationType(const string& durstring) {
    char buffer[32] = {0};
-   int length = strlen(durstring);
-   strcpy(buffer, durstring);
+   int length = (int)durstring.size();
+   strcpy(buffer, durstring.c_str());
    int counter = 0;
+	string buffer2;
+	int founddot = 0;
    for (int i=0; i<length; i++) {
       if (buffer[i] == '0') {
          counter++;
       } else if (std::isdigit(buffer[i])) {
          counter = -100;
+			if (!founddot) {
+				buffer2 += buffer[i];
+			}
       }
+		if (buffer[i] == '%') {
+         buffer[i] = '\0';
+		}
       if (buffer[i] == '.') {
          buffer[i] = '\0';
       }
    }
 
-   int number = atoi(buffer);
+   int number = atoi(buffer2.c_str());
    if (counter == 2) {
       cout << "long";
-   } else if (number == 0) {
+   } else if (counter == 1) {
       cout << "breve";
    } else if (number <= 1) {
       cout << "whole";
@@ -2347,11 +2350,11 @@ void usage(const char* command) {
 //
 //
 
-void setColorCharacters(HumdrumFile& infile, Array<char>& colorchar,
-      Array<string>& colorout) {
+void setColorCharacters(HumdrumFile& infile, string& colorchar,
+      vector<string>& colorout) {
    PerlRegularExpression pre;
-   colorchar.setSize(0);
-   colorout.setSize(0);
+   colorchar.resize(0);
+   colorout.resize(0);
    char value;
    string color;
    int i;
@@ -2366,22 +2369,22 @@ void setColorCharacters(HumdrumFile& infile, Array<char>& colorchar,
             "^!!!RDF\\*\\*kern:\\s*([^\\s])\\s*=\\s*mark", "i")
          ) {
          value = pre.getSubmatch(1)[0];
-         colorchar.append(value);
+         colorchar.push_back(value);
          if (pre.search(infile[i].getLine(),
                "color\\s*=\\s*\"?(#[a-f0-9]{6})\"?", "i")) {
             color = pre.getSubmatch(1);
-            colorout.append(color);
+            colorout.push_back(color);
          } else {
             color = "#ff0000";
-            colorout.append(color);
+            colorout.push_back(color);
          }
       }
    }
 
    if (debugQ) {
-      if (colorchar.getSize() > 0) {
+      if (colorchar.size() > 0) {
          cout << "COLOR MARKERS:\n";
-         for (i=0; i<colorchar.getSize(); i++) {
+         for (i=0; i<(int)colorchar.size(); i++) {
             cout << "\t\"" << colorchar[i] << "\" ==> ";
             cout << "\t\"" << colorout[i] << "\"";
             cout << "\n";
@@ -2397,9 +2400,9 @@ void setColorCharacters(HumdrumFile& infile, Array<char>& colorchar,
 // checkColor --
 //
 
-string checkColor(const char* note, Array<char>& colorchar,
-      Array<string>& colorout) {
-   for (int i=0; i<colorchar.getSize(); i++) {
+string checkColor(const char* note, string& colorchar,
+      vector<string>& colorout) {
+   for (int i=0; i<(int)colorchar.size(); i++) {
       if (strchr(note, colorchar[i]) != NULL) {
          return colorout[i];
       }

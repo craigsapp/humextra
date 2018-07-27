@@ -284,6 +284,24 @@ char* Convert::durationRToKernRhythm(char* output, RationalNumber input,
 //	default value: timebase = 1;
 //
 
+string Convert::durationToKernRhythm(double input, int timebase) {
+	char *buffer = new char[128];
+	Convert::durationToKernRhythm(buffer, input, timebase);
+	string output = buffer;
+	delete [] buffer;
+	return output;
+}
+
+
+string Convert::durationRToKernRhythm(RationalNumber input, int timebase) {
+	char* buffer = new char[128];
+	Convert::durationRToKernRhythm(buffer, input, timebase);
+	string output = buffer;
+	delete [] buffer;
+	return output;
+}
+
+
 char* Convert::durationToKernRhythm(char* output, double input, int timebase) {
 
    output[0] = '\0';
