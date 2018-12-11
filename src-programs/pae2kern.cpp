@@ -1497,9 +1497,6 @@ void printMeasure(ostream& out, MeasureObject *measure) {
 			if (measure->notes[i].tie == 1) {
 				out << "[";
 			}
-			else if (measure->notes[i].tie > 1) {
-				out << "_";
-			}
 			out << Convert::durationToKernRhythm(buffer, 
 					measure->notes[i].duration);
 			for (j=0; j<measure->notes[i].dot; j++) {
@@ -1520,12 +1517,12 @@ void printMeasure(ostream& out, MeasureObject *measure) {
 			if (measure->notes[i].tie == -1) {
 				out << "]";
 			}
+			else if (measure->notes[i].tie > 1) {
+				out << "_";
+			}
 		} else {
 			if (measure->notes[i].tie == 1) {
 				out << "[";
-			}
-			else if (measure->notes[i].tie > 1) {
-				out << "_";
 			}
 			if (!measure->notes[i].acciaccatura) {
 				out << Convert::durationToKernRhythm(buffer, 
@@ -1548,6 +1545,9 @@ void printMeasure(ostream& out, MeasureObject *measure) {
 			
 			if (measure->notes[i].tie == -1) {
 				out << "]";
+			}
+			else if (measure->notes[i].tie > 1) {
+				out << "_";
 			}
 			
 			if (measure->notes[i].beam == 1) {
