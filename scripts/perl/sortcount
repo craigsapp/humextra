@@ -2,33 +2,72 @@
 #
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Sat Apr  6 23:09:41 PDT 2013
-# Last Modified: Thu Jun  9 12:54:04 PDT 2016
+# Last Modified: Mon Jan 28 21:06:14 PST 2019
 # Filename:      sortcount
 # Syntax:        perl 5
 #
-# Description:   shorthand for the pipeline:
+# Description:   Shorthand for the pipeline:
 #                   sort | uniq -c | sort -nr
+#                With multiple output formats.  Type:
+#                   sortcount --options
+#                to view a list of the options.
 #
 
 use strict;
 use Getopt::Long;
 Getopt::Long::Configure("bundling");
 
-my $alphabeticQ = 0;  # sort output lines alphabetically
-my $percentQ    = 0;  # show counts as percentages
-my $fractionQ   = 0;  # show counts as fractions
-my $totalQ      = 0;  # show total count of input lines
-my $smallQ      = 0;  # sort by smallest numbers first
-my $humdrumQ    = 0;  # output data in Humdrum file format
+my $alphabeticQ = 0;  # Sort output lines alphabetically.
+my $percentQ    = 0;  # Show counts as percentages.
+my $fractionQ   = 0;  # Show counts as fractions.
+my $totalQ      = 0;  # Show total count of input lines.
+my $smallQ      = 0;  # Sort by smallest numbers first.
+my $humdrumQ    = 0;  # Output data in Humdrum file format (or HTML if -v used)..
+my $htmlQ       = 0;  # Embed Vega-Lite data in HTML.
+my $vegaQ       = 0;  # Output data in Vega-Lite format.
+my $jsonQ       = 0;  # Output data in JSON file format for Vega-Lite.
+my $legendQ     = 0;  # Vega-Lite plot will display a legend.
+my $title       = "Plot title goes here";   # Title for Vega-Lite plot title.
+my $xlabel      = "x-axis label";           # Title for Vega-Lite plot x-axis.
+my $ylabel      = "";   # Title for Vega-Lite plot x-axis (empty means use default).
+my $width       = 600;  # Width of Vega-Lite plot (pixels).
+my $height      = "";   # Height of Vega-Lite plot (pixels).
+my $horizontalQ = 0;    # Display bars horizontally.
+my $sorttype    = "";   # Special category sorting (interval = sort by music interval).
+my $optionsQ    = 0;    # Print option list and then quit.
+my $min         = "";   # Minimum value to output.
+my $max         = "";   # Maximum value to output.
+my $exclude     = "";   # Regular expression for filtering out certain categories 
+                        # (after including in total).
 
 GetOptions (
-   'a|alphabetic' => \$alphabeticQ,
-   'p|percent'    => \$percentQ,
-   'f|fraction'   => \$fractionQ,
-   't|total'      => \$totalQ,
-   's|small'      => \$smallQ,
-   'h|humdrum'    => \$humdrumQ,
+   'a|alphabetic'     => \$alphabeticQ,
+   'p|percent'        => \$percentQ,
+   'f|fraction'       => \$fractionQ,
+   't|total'          => \$totalQ,
+   's|small'          => \$smallQ,
+   'h|humdrum'        => \$humdrumQ,
+   'H|no-html'        => \$htmlQ,
+   'v|vega-lite'      => \$vegaQ,
+   'j|json'           => \$jsonQ,
+   'l|legend'         => \$legendQ,
+   'T|title=s'        => \$title,
+   'x|x-axis-label=s' => \$xlabel,
+   'y|y-axis-label=s' => \$ylabel,
+   'w|width=s'        => \$width,
+   'X|exclude=s'      => \$exclude,
+   'height=s'         => \$height,
+   'horizontal'       => \$horizontalQ,
+   'min=s'            => \$min,
+   'max=s'            => \$max,
+   'sort=s'           => \$sorttype,
+   'options'          => \$optionsQ
 );
+
+printOptionsAndExit() if $optionsQ;
+
+my $plainQ = !($humdrumQ || $vegaQ || $jsonQ);
+$htmlQ = !$htmlQ;
 
 my @contents = <>;
 
@@ -42,7 +81,6 @@ my $sum = @contents;
 @keys = keys %unique;
 @keys = sort @keys if $alphabeticQ;
 
-
 if    ($humdrumQ && $percentQ)  { print "**pcent\t**data\n";  } 
 elsif ($humdrumQ && $fractionQ) { print "**frac\t**data\n";   } 
 elsif ($humdrumQ)               { print "**count\t**data\n";  }
@@ -51,6 +89,9 @@ foreach $key (@keys) {
    if    ($percentQ)  { $value = int(10000.0*$unique{$key}/$sum + 0.5)/100.0; } 
    elsif ($fractionQ) { $value = int(1000.0*$unique{$key}/$sum + 0.5)/1000.0; }
    else               { $value = $unique{$key}; }
+	next if ($min ne "") && ($value < $min);
+	next if ($max ne "") && ($value > $max);
+	next if ($exclude ne "") && ($key =~ /$exclude/);
    $output[@output] =  "$value\t$key";
 }
 
@@ -60,12 +101,329 @@ if ($smallQ && !$alphabeticQ) {
    @output = sort { $b <=> $a } @output;
 }
 
-print join("", @output);
-
-print "*-\t*-\n" if $humdrumQ;
-if ($totalQ) {
-   print "!!" if $humdrumQ;
-   print "TOTAL:\t$sum\n";
+if ($plainQ || $humdrumQ) {
+	print join("", @output);
+	print "*-\t*-\n" if $humdrumQ;
+	if ($totalQ) {
+   	print "!!" if $humdrumQ;
+   	print "TOTAL:\t$sum\n";
+	}
+} elsif ($vegaQ) {
+	printHtmlHeader() if $htmlQ;
+	printVegaScript();
+	printHtmlFooter() if $htmlQ;
+} else {
+	printJson();
 }
+
+
+
+##############################
+##
+## printJson -- Print output data in JSON format
+##
+
+sub printJson {
+	my $numberlabel = "count";
+	$numberlabel = "percent" if $percentQ;
+	$numberlabel = "fraction" if $fractionQ;
+	print "[\n";
+	for (my $i=0; $i<@output; $i++) {
+		my $line = $output[$i];
+		chomp $line;
+		if ($line =~ /^\s*([^\s]+)\s+(.*)\s*$/) {
+			my $count = $1;
+			my $category = $2;
+			print "{\"category\": '$category', \"$numberlabel\": $count}";
+			print "," if $i < $#output;
+			print "\n";
+		}
+	}
+	print "]\n";
+}
+
+
+
+##############################
+##
+## printVegaScript --
+##
+
+sub printVegaScript {
+
+	my $heighttext = "";
+	if ($height !~ /^\s*$/) {
+		$heighttext = "\n\t\"height\": $height,";
+	}
+
+print <<"EOT";
+{
+	"\$schema": 'https://vega.github.io/schema/vega-lite/v3.json',
+	"width": $width,$heighttext
+	"title": '$title',
+	"data": {
+	"values": 
+EOT
+
+	printJson();
+
+	my $numberlabel = "count";
+	$numberlabel = "percent" if $percentQ;
+	$numberlabel = "fraction" if $fractionQ;
+
+	my $maxwidth = 0;
+	foreach my $line (@output) {
+		chomp $line;
+		if ($line =~ /^\s*([^\s]+)\s+(.*)\s*$/) {
+			my $label = $2;
+			my $length = length $label;
+			if ($length > $maxwidth) {
+				$maxwidth = $length;
+			}
+		}
+	}
+	my $angle = 0;
+	$angle = -45 if $maxwidth > 4;
+	$angle = -90 if @output >= 20;
+
+	$ylabel = $numberlabel if $ylabel eq "";
+
+	my $sort = "";
+	$sort = sortByInterval() if $sorttype =~ /int/i;
+	my $sorttext = "";
+	if ($sort !~ /^\s*$/) {
+		$sorttext = ",\n\t\t\t\"sort\": $sort\n";
+	}
+	if (!$sorttext) {
+		if ($alphabeticQ) {
+			$sorttext = ",\n\t\t\t\"sort\": 'category'\n";
+		} else {
+			$sorttext = ",\n\t\t\t\"sort\": '$numberlabel'\n";
+		}
+	}
+
+	my $legendtext = "";
+	if (!$legendQ) {
+		$legendtext = ",\n\t\t\t\"legend\": null";
+	}
+
+	my $axis1 = "x";
+	my $axis2 = "y";
+	if ($horizontalQ) {
+		$axis1 = "y";
+		$axis2 = "x";
+	}
+	
+print <<"EOT";
+	},
+	"mark": 'bar',
+	"encoding": {
+		"$axis1": {
+			"field": 'category', 
+			"title": '$xlabel',
+			"type": 'ordinal',
+			"axis": {"labelAngle": $angle }$sorttext
+		},
+		"$axis2": {
+			"field": '$numberlabel',
+			"title": '$ylabel',
+			"type": 'quantitative'
+		},
+		"tooltip": {
+			"field": '$numberlabel',
+			"type": 'quantitative'
+		},
+		"color": {
+			"field": 'category',
+			"type": 'nominal'$legendtext
+		}
+	}
+}
+EOT
+
+}
+
+
+
+##############################
+##
+## printHtmlHeader --
+##
+
+sub printHtmlHeader {
+print <<"EOT";
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sortcount output</title>
+<script src="https://cdn.jsdelivr.net/npm/vega\@4.4.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite\@3.0.0-rc12"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed\@3.29.1"></script>
+</head>
+<body>
+<div id="plotarea"></div>
+<script type="text/javascript">
+var mydata =
+EOT
+}
+
+
+
+##############################
+##
+## printHtmlFooter --
+##
+
+sub printHtmlFooter {
+print <<"EOT";
+;
+
+vegaEmbed('#plotarea', mydata);
+</script>
+</body>
+</html>
+EOT
+}
+
+
+
+##############################
+##
+## sortByInterval --
+##
+
+sub sortByInterval {
+	my @keys;
+	foreach my $line (@output) {
+		chomp $line;
+		if ($line =~ /^\s*([^\s]+)\s+(.*)\s*/) {
+			my $label = $2;
+			$keys[@keys] = $label;
+		}
+
+		@keys = sort {
+			$a =~ /([-+]*)([APMmd])(\d+)/;
+			my $asign = $1;
+			my $aqual = $2;
+			my $anum  = $3;
+			$b =~ /([-+]*)([APMmd])(\d+)/;
+			my $bsign = $1;
+			my $bqual = $2;
+			my $bnum  = $3;
+
+			if    ($asign eq "-") { $asign = -1; } 
+			elsif ($asign eq "+") { $asign = +1; } 
+			else                  { $asign = 0; }
+
+			if    ($bsign eq "-") { $bsign = -1; } 
+			elsif ($bsign eq "+") { $bsign = +1; } 
+			else                  { $bsign = 0; }
+
+			if ($asign < $bsign) {
+				return -1;
+			} elsif ($asign > $bsign) {
+				return +1;
+			}
+
+			if ($asign >= 0) {
+				if ($anum < $bnum) {
+					return -1;
+				} elsif ($anum > $bnum) {
+					return +1;
+				}
+			} else {
+				if ($anum > $bnum) {
+					return -1;
+				} elsif ($anum < $bnum) {
+					return +1;
+				}
+			}
+
+			if ($aqual eq "P") {
+				$aqual = 0;
+			} elsif ($aqual eq "m") {
+				$aqual = 1;
+			} elsif ($aqual eq "M") {
+				$aqual = 2;
+			} elsif ($aqual =~ "A") {
+				$aqual = length $aqual + 2;
+			} elsif ($aqual =~ "d") {
+				$aqual = -(length $aqual);
+			}
+			
+			if ($bqual eq "P") {
+				$bqual = 0;
+			} elsif ($bqual eq "m") {
+				$bqual = 1;
+			} elsif ($bqual eq "M") {
+				$bqual = 2;
+			} elsif ($bqual =~ "A") {
+				$bqual = length $bqual + 2;
+			} elsif ($aqual =~ "d") {
+				$bqual = -(length $bqual);
+			}
+			if ($asign >= 0) {
+				return $aqual <=> $bqual;
+			} else {
+				return $bqual <=> $aqual;
+			}
+		} @keys;
+	
+	}
+	my $output = "[";
+	for (my $i=0; $i<@keys; $i++) {
+		$output .= "\"$keys[$i]\"";
+		if ($i <$#keys) {
+			$output .= ",";
+		}
+	}
+	$output .= "]";
+	
+	return $output;
+}
+
+
+
+##############################
+##
+## printOptionsAndExit --
+##
+
+sub printOptionsAndExit {
+print <<"EOT";
+
+Usage: cat input | $0 [-f|-p] [-sa] [-h|-v[-H]|-j > output
+
+Options:
+   -f   Display counts as normalized fractions in the range from 0.0 to 1.0.
+   -p   Display counts as percentges.
+   -a   Sort alphabetically (numeric by default).
+   -s   Sort smallest numbers first.
+   -t   List total number of entries (Humdrum and plain outputs only).
+   -h   Wrap output data in Humdrum syntax.
+   -v   Output Vega-Lite plot script.
+   -H   Do not embed Vega-Lite plot script in HTML code.
+   -j   Output data in JSON format (for use with external Vega-Lite script).
+   --max #    Do not print categories about given count/percent/fraction.
+   --min #    Do not print categories below given count/percent/fraction.
+   -X string  Regular expression for filtering out categories (after including in counts).
+   --options  Print this list of options.
+
+Vega-Lite plotting options:
+   -w pixels        Width of the plot in pixels.
+   --height pixels  Height of the plot in pixels.
+   -l               Display plot legend.
+   -T title         The title of the plot.
+   -x title         The title of the x-axis.
+   -y title         The title of the y-axis.
+   --sort type      Sort x-axis categories by given type:
+                      interval == sort by melodic interval.
+   --horizontal     Orient catgeory bars horizontally.
+
+EOT
+exit(1);
+
+}
+
 
 
