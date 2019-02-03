@@ -472,6 +472,8 @@ sub convertMusicToHumdrum {
 					$tempout .= $token;
 				} elsif ($token =~ /^\*\*/) {
 					$tempout .= "**recip";
+				} elsif ($token =~ /^\*-/) {
+					$tempout .= "*-";
 				} elsif ($token =~ /^\*/) {
 					$tempout .= "*";
 				} else {
