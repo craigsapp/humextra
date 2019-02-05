@@ -2,7 +2,7 @@
 #
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Sat Feb  2 16:10:47 PST 2019
-# Last Modified: Sat Feb  2 18:50:26 PST 2019
+# Last Modified: Mon Feb  4 22:42:39 PST 2019
 # Filename:      gptab2str
 # Syntax:        perl 5
 # vim:           ts=3
@@ -20,6 +20,7 @@ use strict;
 
 my @files = @ARGV;
 my @CONTENTS;
+my $LINES = -1;
 
 foreach my $file (@files) {
 	convertFile($file);
@@ -286,14 +287,14 @@ sub getLegend {
 
 sub getMusic {
 	my @contents = @_;
-	my @strings = ("", "", "", "", "", "");
+	my @strings;
 	my $i = 0;
 	my @systemStrings;
 	my $lastchar = "";
 	while ($i < @contents) {
 		($i, $lastchar, @systemStrings) = getSystem($i, $lastchar, @contents);
 
-		for (my $j=0; $j<@strings; $j++) {
+		for (my $j=0; $j<@systemStrings; $j++) {
 			$strings[$j] .= $systemStrings[$j];
 		}
 	}
@@ -305,35 +306,84 @@ sub getMusic {
 
 ##############################
 ##
-## getSystem -- Find the next line (measure of music).  Assuming always 6 strings
-##   (no ukulele or similar).  $lastchar is the last character on the previous line.
-##   If it is not "|", that means that the measure is continuing from the previous system.
-##   In that case, do not remove the first two characters on the new system line that follows.
+## getLineCount --
+##
+
+sub getLineCount {
+	my ($startindex, @contents) = @_;
+	my $output = 0;
+	my $start = -1;
+	for (my $i=$startindex; $i<@contents; $i++) {
+		my $line = $contents[$i];
+		if ($line =~ /---/) {
+			$start = $i;
+			last;
+		}
+	}
+	if ($start < 0) {
+		return -1;
+	}
+	my $counter = 0;
+	my $i = $start;
+	for ($i=$start; $i<@contents; $i++) {
+		my $line = $contents[$i];
+		if (($line =~ /---/) or ($line =~ /\|--/) or ($line =~ /--\|/)) {
+			$counter++;
+		} else {
+			last;
+		}
+	}
+	return $counter;
+}
+
+
+
+##############################
+##
+## getSystem -- Find the next line (measure of music).  $lastchar is the
+##     last character on the previous line.  If it is not "|", that means that
+##     the measure is continuing from the previous system.  In that case, do
+##     not remove the first two characters on the new system line that follows.
 ##
 
 sub getSystem {
 	my ($startindex, $lastchar, @contents) = @_;
 	my $newstart = -1;
 
-	my @output = ("", "", "", "", "", "");
+	my $linecount = $LINES;
+	if ($linecount <= 0) {
+		$linecount = getLineCount($startindex, @contents);
+		$LINES = $linecount;
+	}
+	die "Cannot find any strings in file." if $linecount <= 0;
 
-	# search for the next line that start a set of 6 strings.
+	my @output;
+	for (my $i=0; $i<$linecount; $i++) {
+		$output[$i] = "";
+	}
+
+	# search for the next line that start a set of strings.
 	for (my $i = $startindex; $i<@contents; $i++) {
-		if ($contents[$i] =~ /---/
-				&& $contents[$i+1] =~ /---/
-				&& $contents[$i+2] =~ /---/
-				&& $contents[$i+3] =~ /---/
-				&& $contents[$i+4] =~ /---/
-				&& $contents[$i+5] =~ /---/) {
+		my $found = 0;
+		for (my $j=0; $j<$linecount; $j++) {
+			my $line = $contents[$i+$j];
+			if (($line =~ /---/) or ($line =~ /\|--/) or ($line =~ /--\|/)) {
+				$found++;
+			} else {
+				$found = 0;
+			}
+		}
+		if ($found == $linecount) {
 			$newstart = $i;
 			last;
 		}
 	}
+
 	if ($newstart < 0) {
 		return ($#contents+1, @output);
 	}
 	# the line above the staff can have fade ins above it, so need to check here.
-	for (my $i=0; $i<6; $i++) {
+	for (my $i=0; $i<$linecount; $i++) {
 		my $line = @contents[$i+$newstart];
 		chomp $line;
 		$line =~ s/\|--/|/g;  # remove two dashes after barline
@@ -345,12 +395,12 @@ sub getSystem {
 	}
 
 	my $len = length($output[0]);
-	for (my $j=1; $j<@output; $j++) {
+	for (my $j=1; $j<$linecount; $j++) {
 		next if $len == length($output[$j]);
 		my $ii = $newstart + 1;
 		print "Error: unequal-equal length of string on staff near line $ii\n";
 		print "Staff with problem:\n";
-		for (my $k=0; $k<@output; $k++) {
+		for (my $k=0; $k<$linecount; $k++) {
 			print"\t$output[$k]\n";
 		}
 		die;
@@ -358,7 +408,7 @@ sub getSystem {
 
 	$lastchar = substr($output[0], -1);
 
-	return ($newstart + 6, $lastchar, @output);
+	return ($newstart + $linecount, $lastchar, @output);
 }
 
 
@@ -393,7 +443,14 @@ sub convertMusicToHumdrum {
 	my @string4;
 	my @string5;
 	my @string6;
-	my @strings = (\@string1, \@string2, \@string3, \@string4, \@string5, \@string6);
+	my @strings;
+	if ($LINES == 4) {
+		@strings = (\@string1, \@string2, \@string3, \@string4);
+	} elsif ($LINES == 6) {
+		@strings = (\@string1, \@string2, \@string3, \@string4, \@string5, \@string6);
+	} else {
+		die "Unhandled number of strings in part: $LINES\n";
+	}
 	for (my $i=0; $i<@strings; $i++) {
 		push(@{$strings[$i]}, "**str");
 	}
@@ -412,15 +469,61 @@ sub convertMusicToHumdrum {
 			$init = 1;
 		} elsif (!$init && $char =~ /[A-G]/) {
 			# initial string tuning line
-			for (my $j=0; $j<@strings; $j++) {
-				$ch = substr($input[$j], $i, 1);
-				$ch = "E3" if $j == 0 && $ch eq "E";
-				$ch = "B2" if $j == 1 && $ch eq "B";
-				$ch = "G2" if $j == 2 && $ch eq "G";
-				$ch = "D2" if $j == 3 && $ch eq "D";
-				$ch = "A1" if $j == 4 && $ch eq "A";
-				$ch = "E1" if $j == 5 && $ch eq "E";
-				push(@{$strings[$j]}, "*AT:$ch");
+			# Guitar tunings:
+			#    6 string:        EADGBE = E1 A1 D2 G2 B2 E3
+			# Bass guitar tunings:
+			#    4 string:        EADG   = E1 A1 D2 G2
+			#    4 string tenor:  ADGC   = A1 D2 G2 C3
+			#    5 string:        BEADG  = B0 E1 A1 D2 G2
+			#    5 string tenor:  EADGC  = E1 A1 D2 G2 C3
+			#    6 string:        BEADGC = B0 E1 A1 D2 G2 C3
+			my $ccount = 0;
+			if ($LINES == 6) {
+				# hard-coded to standard guitar string tuning
+				for (my $j=0; $j<@strings; $j++) {
+					$ch = substr($input[$j], $i, 1);
+					$ccount++ if $ch eq "C";
+					# Guitar tunings:
+					$ch = "E3" if $j == 0 && $ch eq "E";
+					$ch = "B2" if $j == 1 && $ch eq "B";
+					$ch = "G2" if $j == 2 && $ch eq "G";
+					$ch = "D2" if $j == 3 && $ch eq "D";
+					$ch = "A1" if $j == 4 && $ch eq "A";
+					$ch = "E1" if $j == 5 && $ch eq "E";
+					# 6-string bass guitar tunings:
+					$ch = "C3" if $j == 0 && $ch eq "C";
+					$ch = "G2" if $j == 1 && $ch eq "G";
+					$ch = "D2" if $j == 2 && $ch eq "D";
+					$ch = "A1" if $j == 3 && $ch eq "A";
+					$ch = "E1" if $j == 4 && $ch eq "E";
+					$ch = "B0" if $j == 5 && $ch eq "B";
+					push(@{$strings[$j]}, "*AT:$ch");
+				}
+			} elsif ($LINES == 4) {
+				for (my $j=0; $j<@strings; $j++) {
+					$ch = substr($input[$j], $i, 1);
+					$ccount++ if $ch eq "C";
+					# 4-string bass guitar:
+					$ch = "G2" if $j == 0 && $ch eq "G";
+					$ch = "D2" if $j == 1 && $ch eq "D";
+					$ch = "A1" if $j == 2 && $ch eq "A";
+					$ch = "E1" if $j == 3 && $ch eq "E";
+					# 4-string tenor bass guitar:
+					$ch = "C3" if $j == 0 && $ch eq "C";
+					$ch = "G2" if $j == 1 && $ch eq "G";
+					$ch = "D2" if $j == 2 && $ch eq "D";
+					$ch = "A1" if $j == 3 && $ch eq "A";
+					push(@{$strings[$j]}, "*AT:$ch");
+				}
+			}
+			if ($ccount == $LINES) {
+				# drum track
+				for (my $j=0; $j<@strings; $j++) {
+					${$strings[$j]}[@{$strings[$j]}-1] = "*AT:0";
+				}
+				for (my $j=0; $j<@strings; $j++) {
+					push(@{$strings[$j]}, "*CH:10");
+				}
 			}
 			$init = 1;
 		} else {
