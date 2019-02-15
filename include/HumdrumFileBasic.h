@@ -153,9 +153,9 @@ class HumdrumFileBasic {
       void                   analyzeDots      (void);
       int                    getMaxTracks     (void);
       string                 getTrackExInterp (int track);
+      string         fileName;      // storage for input file's name
 
    protected:
-      string         fileName;      // storage for input file's name
       int            segmentLevel;  // storage for input file's segment level
       SigCollection  <HumdrumRecord*>  records;
       int            maxtracks;           // max exclusive interpretation count
