@@ -18,6 +18,8 @@
 // Last Modified: Sat Oct  6 07:45:11 PDT 2012 added --cb and --db options
 // Last Modified: Sun Oct 21 13:26:51 PDT 2012 added --key for keysig modality
 // Last Modified: Fri Dec 14 00:39:32 PST 2012 made compiler OS X happy
+// Last Modified: Mon Feb 04 13:15:00 EST 2018 treatment of broken rhythms [SS]
+// Last Modified: Mon Feb 07 08:30:00 EST 2018 --Cmeter option added [SS]
 // Filename:      ...sig/examples/all/hum2abc.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2abc.cpp
 // Syntax:        C++; museinfo
@@ -326,6 +328,10 @@ void      printKernTokenAsAbc  (ostream& out, HumdrumFile& infile, int row,
                                 int col, Array<int>& accident, double notedur, 
                                 int brokenq, double brokendur, int top, 
                                 int bot, int& slursuppress, int groupflag);
+void      noBrokenRhythms      (Array<int>& broken, Array<double>& brokendurs, 
+                                Array<Coordinate>& nogracelist, 
+                                Array<double>& nogracedurs, 
+                                HumdrumFile& infile);
 void      getBrokenRhythms     (Array<int>& broken, Array<double>& brokendurs, 
                                 Array<Coordinate>& nogracelist, 
                                 Array<double>& nogracedurs, 
@@ -380,7 +386,9 @@ void      identifyTuplets      (Array<TupletInfo>& tupletstuff,
                                 Array<Coordinate>& nogracelist, 
 	                        HumdrumFile& infile, Array<int>& broken, 
                                 Array<double>& brokendurs,
-                                Array<BeamInfo>& beaminfo);
+                                Array<BeamInfo>& beaminfo,
+				Array<double> & savenogracedurs);
+int       remove_2_powers      (int n); 
 int       getTupletInfo        (TupletInfo& tupletsutff, 
                                 Coordinate& nogracelist, HumdrumFile& infile);
 int       getNonDuplePrimes    (Array<int>& factors);
@@ -489,6 +497,8 @@ int    slurQ             = 1;      // used with --no-slur option
 int    databarnumQ       = 0;      // used with --data-barnum option
 int    commentbarnumQ    = 0;      // used with --comment-barnum option
 int    keyQ              = 0;      // used with --key option
+int    brhythmQ          = 0;      // do not allow broken rhythms
+int    CmeterQ           = 0;      // convert M:C to 4/2 and M:C| to 2/1
 
 // mark data
 int    markQ       = 1;           // used with --no-mark option
@@ -548,7 +558,8 @@ int main(int argc, char** argv) {
          // process the command-line options
          // checkOptions(options, argc, argv, i, infiles[i]);
          checkMarks(infiles[i]);
-         convertHumdrumToAbc(cout, infiles[i], i, options.getArg(i).c_str());
+         //convertHumdrumToAbc(cout, infiles[i], i+1, options.getArg(i).c_str());
+         convertHumdrumToAbc(cout, infiles[i], i+1, options.getArg(1).c_str());
          if (i < infiles.getCount()-1) {
             cout << "\n\n\n";
          }
@@ -812,6 +823,8 @@ void convertHumdrumToAbc(ostream& out, HumdrumFile& infile, int xval,
    out << smarks.str().c_str();
    out << sbody.str().c_str();
    out << flush;
+   // reset Header[T] for the next file [SS] 2018-12-25
+   storeHeaderRecord(Header, 'T', "");
 }
 
 
@@ -1169,7 +1182,8 @@ void printMeasureLine(ostream& out, HumdrumFile& infile, int line,
 
    if (strchr(token, '-') != NULL) {
       // print an invisible barline
-      out << "[|] ";
+      //out << "[|] ";
+      out << ":"; // make invisible line dotted
       return;
    }
    
@@ -1289,6 +1303,8 @@ void printLayer(int layer, ostream& out, const VoiceMap& voiceinfo,
    getNoGraceList(nogracelist, address, layer, infile);
    Array<double> nogracedurs;
    getNoGraceDurs(nogracedurs, notedurs, address, layer);
+   Array<double> savenogracedurs; // [SS]
+   getNoGraceDurs(savenogracedurs, notedurs, address, layer); // [SS]
 
    Array<BeamInfo> beaminfo;
    getBeamInfo(beaminfo, nogracelist, infile);
@@ -1300,7 +1316,7 @@ void printLayer(int layer, ostream& out, const VoiceMap& voiceinfo,
 
    Array<TupletInfo> tupletstuff;
    identifyTuplets(tupletstuff, nogracedurs, nogracelist, infile, broken, 
-		         brokendurs, beaminfo);
+		         brokendurs, beaminfo,savenogracedurs);
 
    int beamstate = 0;
    int oldbeamstate = 0;
@@ -1654,6 +1670,13 @@ void printTupletInfo(ostream& out, TupletInfo& tinfo) {
    out << "(" << tinfo.top << ":" << tinfo.bot << ":" << tinfo.count;
 }
 
+int remove_2_powers (int n) {
+   while (n % 2 == 0) {
+	   n = n/2;
+           }
+   return n;
+}
+
 
 
 //////////////////////////////
@@ -1667,7 +1690,7 @@ void printTupletInfo(ostream& out, TupletInfo& tinfo) {
 void identifyTuplets(Array<TupletInfo>& tupletstuff, 
       Array<double>& nogracedurs, Array<Coordinate>& nogracelist, 
       HumdrumFile& infile, Array<int>& broken, Array<double>& brokendurs,
-      Array<BeamInfo>& beaminfo) {
+      Array<BeamInfo>& beaminfo, Array <double> & savenogracedurs) {
 
    tupletstuff.setSize(nogracelist.getSize());
    tupletstuff.allowGrowth(0);
@@ -1680,6 +1703,8 @@ void identifyTuplets(Array<TupletInfo>& tupletstuff,
    int dupleprimes;
    double newdur;
    int i;
+   char buffer[32] = {0};
+   int rhythm1,rhythm2,nr;
 
    if (debugQ) {
       cout << "%\n% TUPLET INFO INPUT\n";
@@ -1697,39 +1722,40 @@ void identifyTuplets(Array<TupletInfo>& tupletstuff,
       cout << "%\n";
    }
 
-   int scale;
+   //int scale;
 
    for (i=0; i<nogracelist.getSize(); i++) {
       dupleprimes = getTupletInfo(tupletstuff[i], nogracelist[i], infile);
+      if (brhythmQ == 1) {
+         newdur = nogracedurs[i];
+      } else {
+         newdur = savenogracedurs[i];
+	 broken[i] = 0;
+      }
+
       if (tupletstuff[i].top > 2) {
-         newdur = 4.0 / (dupleprimes * tupletstuff[i].bot);
-         scale = 0;
-	 if (brokendurs[i] > 0) {
-            if (broken[i] < 0) {
-               // the current note is the first note in a broken
-               // rhythm and it is the smaller 
-               scale = -broken[i];
-            } else if (i > 0) {
-               // the previous note was part of the broken rhythm
-               // and was longer than the current note.
-               if (broken[i-1] > 0) {
-                  scale = broken[i-1];
-               }
-            }
-         }
-         if (scale > 0) {
-            newdur = newdur * (1 << scale);
+	 infile[nogracelist[i].row].getToken(buffer, nogracelist[i].col, 0, 32);
+         nr = sscanf(&buffer[0], "%d%%%d", &rhythm1,&rhythm2); 
+         rhythm1 = remove_2_powers (rhythm1);
+	 newdur = rhythm1*savenogracedurs[i]/(rhythm1-1); // for n:n-1 tuplets 
+	 broken[i] = 0; // do not use broken rhythm inside tuple
+         if (debugQ) {
+	    cout << "nr = " << nr << "\t";
+	    cout << "rhythm = " << rhythm1 << "\t";
+            cout << "dupleprimes = " << dupleprimes << "\t";
+	    cout << "tupletstuff[i].bot = " << tupletstuff[i].bot << "\t";
+	    cout << "newdur = " << newdur << "\n";
+	    }
          }
          nogracedurs[i] = newdur;
       }
-   }
 
    identifyTupletShortCuts(tupletstuff, beaminfo, nogracedurs, nogracelist,
          infile);
 
    if (debugQ) {
       cout << "%\n% TUPLET INFO OUTPUT\n";
-      cout << "%tuptop\ttupbot\tcount\tshort\tbeam\tbrok\tbrkdur\tnewdur\ttoken\n";
+      cout << "%tuptop\ttupbot\tcount\tshort\tbeam\tbrok\tbrkdur\tsavenogracedur\tnewdur\ttoken\n";
       for (i=0; i<tupletstuff.getSize(); i++) {
          cout << "%" 
               << tupletstuff[i].top      << "\t"
@@ -1739,6 +1765,7 @@ void identifyTuplets(Array<TupletInfo>& tupletstuff,
               << beaminfo[i].right << ":" << beaminfo[i].left << "\t"
 	      << broken[i]               << "\t"
 	      << int(brokendurs[i]*10000.0+0.5)/10000.0 << "\t"
+              << savenogracedurs[i]          << "\t"
               << nogracedurs[i]          << "\t"
               << infile[nogracelist[i].row][nogracelist[i].col] 
               << "\n";
@@ -2357,7 +2384,10 @@ void printAbcMeter(ostream& out, const char* string) {
    }
 
    if (strcmp(string, "*met(C)") == 0) {
-      out << "C";
+      if (CmeterQ) 
+         out << "4/2";
+      else
+         out << "C";
       return;
    }
    
@@ -2367,7 +2397,10 @@ void printAbcMeter(ostream& out, const char* string) {
    }
 
    if (strcmp(string, "*met(C|)") == 0) {
-      out << "C|";
+      if (CmeterQ)
+          out << "2/1";
+      else
+          out << "C|";
       return;
    }
    
@@ -3180,6 +3213,19 @@ int countDots(char* buffer) {
 }
 
 
+//////////////////////////////
+//
+// noBrokenRhythm -- not used any more
+//
+
+void noBrokenRhythms(Array<int>& broken, Array<double>& brokendurs, 
+      Array<Coordinate>& nogracelist, Array<double>& nogracedurs, 
+      HumdrumFile& infile) {
+   broken.setSize(nogracelist.getSize());
+   brokendurs.setSize(nogracelist.getSize());
+   broken.setAll(0);
+   brokendurs.setAll(0);
+}
 
 //////////////////////////////
 //
@@ -3844,22 +3890,21 @@ void printHeader(ostream& out, HumdrumFile& infile, Array<char*>& header,
    int firstmeasure = getFirstMeasureNumber(infile);
 
    // display the title next (if given)
-   if (strcmp(header[TT], "") != 0) {
+   if (strcmp(header[TT], "") != 0 && filenametitleQ == 0) {
       out << "T:";
       if (filenumQ) {
          printNumberFromString(out, filename, filenumstring.c_str());
       }
-      if (filenametitleQ) {
-         out << " ";
-         printFilenameBase(out, filename);
-      } 
       out << " " << header[TT] << "\n";
-   } else if (filenametitleQ) {
+   } else {
       out << "T:";
       out << " ";
       printFilenameBase(out, filename);
       out << "\n";
    }
+   out << "N: Derived from ";
+   //printFilenameBase(out, filename);
+   out << infile.fileName << "\n"; 
 
    // display the composer next if given
    if (strcmp(header[CC], "") != 0) {
@@ -4783,6 +4828,7 @@ void parseBibliographic(Array<char*>& header, HumdrumFile& infile) {
    contents.setSize(0);
    int length;
    char omdstring[1024] = {0};
+   string titlename;
 
    Array<Array<char> > markers;
    Array<Array<char> > contentses;
@@ -4792,6 +4838,16 @@ void parseBibliographic(Array<char*>& header, HumdrumFile& infile) {
    for (i=0; i<markers.getSize(); i++) {
       marker = markers[i];
       contents = contentses[i];
+      if (strncmp(marker.getBase(), "OPR", 3) == 0 ||
+          strncmp(marker.getBase(), "OTL", 3) == 0 ) 
+          {
+	      if (titlename.size() > 2) 
+	          titlename = titlename + " / " + contents.getBase();
+               else 
+	          titlename = titlename + contents.getBase();
+	  }
+                  
+ 
       length = strlen(contents.getBase());
       if (length == 0) {
          continue;
@@ -4846,8 +4902,15 @@ void parseBibliographic(Array<char*>& header, HumdrumFile& infile) {
                }
 
                if (strcmp(infile[i][j], "*met(C)") == 0) {
-                  storeHeaderRecord(header, 'M', "C");
-                  top = bot = 4;
+                  if (CmeterQ) {
+                      storeHeaderRecord(header, 'M', "4/2");
+                      top = 4;
+		      bot = 2;
+	              }
+                  else {
+                      storeHeaderRecord(header, 'M', "C");
+                      top = bot = 4;
+		      }
                   break;  // don't get redundant info on same line
                }
                if (strcmp(infile[i][j], "*met(c)") == 0) {
@@ -4856,8 +4919,15 @@ void parseBibliographic(Array<char*>& header, HumdrumFile& infile) {
                   break;  // don't get redundant info on same line
                }
                if (strcmp(infile[i][j], "*met(C|)") == 0) {
-                  storeHeaderRecord(header, 'M', "C|");
-                  top = bot = 2;
+                  if (CmeterQ) {
+                      storeHeaderRecord(header, 'M', "2/1");
+                      top = 2;
+		      bot = 1;
+		      }
+		  else {
+                      storeHeaderRecord(header, 'M', "C|");
+                      top = bot = 2;
+		      }
                   break;  // don't get redundant info on same line
                }
                if (strcmp(infile[i][j], "*met(c|)") == 0) {
@@ -4895,7 +4965,8 @@ void parseBibliographic(Array<char*>& header, HumdrumFile& infile) {
          }
       }
    }
-        
+
+   if (!options.getBoolean("T")) storeHeaderRecord(header, 'T', titlename.c_str());
 }
 
 
@@ -5771,6 +5842,8 @@ void storeOptionSet(Options& opts) {
    opts.define("db|data-barnum=b",   "display all bar numbers in data");
    opts.define("cb|comment-barnum=b",   "display all bar numbers as comments");
    opts.define("k|key=b",   "use key designation as key signature");
+   opts.define("brhythm=b", "allow broken rhythms to be used");
+   opts.define("Cmeter=b","convert M:C to M:4/2 and M:C| to M:2/1");
 
    // abcm2ps parameter settings
    opts.define("box=b",           "Put boxes around measure numbers");
@@ -5944,6 +6017,8 @@ void checkOptions(Options& opts, int argc, char* argv[], int fcount,
    databarnumQ =  opts.getBoolean("data-barnum");
    commentbarnumQ = opts.getBoolean("comment-barnum");
    keyQ        = opts.getBoolean("key");
+   brhythmQ    = opts.getBoolean("brhythm");
+   CmeterQ     = opts.getBoolean("Cmeter");
 
    if (strchr(opts.getString("barnums").c_str(), 'b') != NULL) {
       // the presence of a b after the measure number option
