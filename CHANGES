@@ -1,0 +1,181 @@
+The recommended method of converting a collection of kern files to
+an abc file is to run
+hum2abc ../jrp/Jos/kern/Jo*.krn -Q 180 --filetitle --Cmeter > josquin.abc
+where --Cmeter is a new option described below.
+The first parameter specifies the path to all the kern files (eg.
+../jrp/Jos/kern/Jo*.krn).
+
+The humexta/Makefile.program was modified to include the symbol table
+in the executables to allow debugging the programs using gdb.
+-g was added to the PREFLAGS, optimization flag -O3 was changed to -O0
+and we no longer strip off the symbol tables around lines 350 + in
+the Makefile. In humextra/Makefile.library I removed the optimization
+flag -O3 from the PREFLAGS.
+
+hum2abc.cpp has at least several problems.
+
+1) When processing a list of kern files, all the abc tunes have the same
+title consisting of the first kern file processed. To fix this issue,
+at the end of the function convertHumdrumToAbc(),the Header('T') string
+is reset to the empty string "". Otherwise, the code which was designed
+to block more than one title appearing in the same abc tune also blocked
+titles in other files from being replaced. 
+
+2) The first two abc tunes have the same reference number X:1.
+This was caused by a zero value being sent to the X: command
+for the first file processed.  To fix this problem, the xval value
+for convertHumdrumToAbc was changed to i+1 instead of i
+(in the second loop).
+
+3) The option --filetitle prepends the string 'hum2abc' to the title
+instead of the filename of the kern file that was processed. To fix this,
+I changed the 4th argument to convertHumdrumToAbc from 
+ options.getArg(i).c_str()
+to
+ options.getArg(1).c_str());
+(changed i to 1 in getArg().c_str()).
+
+Unfortunately this did not work correctly when I ran
+hum2abc --filetitle sioux/sioux00*
+The file name is always sioux001 for each of the 9 tunes.
+
+The only way to fix this was to get the filename from
+infile.fileName. Unfortunately fileName was declared as a protected
+member in include/HumdrumFileBasic.h line 158
+It was necessary to edit HumdrumFileBasic.h so that fileName
+is a public member.
+
+
+4) The --filetitle option preprends the filename in the T: line.
+Since web sites index the tune by the title, this would cause
+some confusion. It was preferable to put the filename in a
+separate line under a N: command like
+N: Derived from sioux004
+
+
+Hum2abc makes numerous rhythm errors when it attempts to convert
+tuples in **kern notation into ABC notation.  Since this can cause
+one of the voices to lose synchronization with the other voices,
+this is a serious bug. This is evident in both the abc2midi and
+abcm2ps output. In addition, hum2abc insists in using broken rhythm
+notation even when it is not appropriate. When the broken rhythm
+notation occurs inside a tuplet, (eg. (3F>ED ), this will cause
+an error in both abc2midi and abcm2ps.
+
+Broken rhythm notation replaces F3/2E/2 with F>E and is 
+appropriate for only Celtic music, in particular music with specific
+rhythms such as Hornpipes. In this notation abc2midi may change
+the ratio of the note durations from 3:1 to 2:1 in order to
+give the music a swing. Furthermore it is extremely rare to find
+the notation F>>E or F>>>E in any abc music archives. For this
+reason, I have modified hum2abc to not use broken rhythm notation
+except when the it is run with the option --brhythm.
+
+Below are examples of the conversion errors made by hum2abc.
+
+
+!!!voices: 1
+**kern
+*staff1
+*clefG2
+*k[f#]
+*M4/4
+=1-
+6f#
+3e
+3%2d
+=
+*-
+
+Produces
+L:1/4
+(3FE2D2 | 
+The correct result should be
+(3FE2D4 | 
+
+
+
+!!!voices: 1
+**kern
+*staff1
+*clefG2
+*k[f#]
+*M8/4
+=1-
+3%2.a
+3b
+3%2.a
+3b
+=
+*-
+
+Produces
+L:1/4
+(3:2:4A2>B4A2B2 | 
+The correct result should be
+(3:2:4A6B2A6B2 | 
+ 
+
+Implementation: a new function int remove_2_powers(int n) was introduced.
+Given n (eg 12) it divides n by all factors of 2 (returns 3).
+A new flag, brhythmQ initialized to 0 was introduced which can be set
+by the runtime parameter --brhythm which allows broken rhythm notation
+to be used.
+In order to patch hum2abc, a new array
+Array<double> savenogracedurs;
+was added. Like the array nogracedurs, it is set by the function
+getNoGraceDurs(...) however, it is not touched by the function
+getBrokenRhythms().
+The array savenogracedurs, was added to the end of function
+identifyTuplets().
+In identifyTuplets(), the code based on the scale and broken array variables
+(which I could not understand) was replaced with
+
+  for (i=0; i<nogracelist.getSize(); i++) {
+      dupleprimes = getTupletInfo(tupletstuff[i], nogracelist[i], infile);
+      if (brhythmQ == 1) {
+         newdur = nogracedurs[i];
+      } else {
+         newdur = savenogracedurs[i];
+	 broken[i] = 0;
+      }
+
+      if (tupletstuff[i].top > 2) {
+	 infile[nogracelist[i].row].getToken(buffer, nogracelist[i].col, 0, 32);
+         nr = sscanf(&buffer[0], "%d%%%d", &rhythm1,&rhythm2); 
+         rhythm1 = remove_2_powers (rhythm1);
+	 newdur = rhythm1*savenogracedurs[i]/(rhythm1-1); // for n:n-1 tuplets 
+	 broken[i] = 0; // do not use broken rhythm inside tuple
+       }
+         nogracedurs[i] = newdur;
+      }
+
+The changes can only handle tuplets of the form (n:n-1:m ...
+I cannot figure out how to handle more complex tuplets like (n:k:m
+where k is any number between n-1 and 2.
+
+I tested the code on the jrp/Ano/kern/ dataset which contained some
+complex tuplets, and the modified code seemed to work.
+
+Many of the kern files, in particular those in the Josquin Research
+Project are notated in the meter of C and C|. Unfortunately the abc
+standard interprets this as 4/4 and 2/2. However, the measures are 8 beats
+long implying a time signature of 4/2 and 2/1. Though abcm2ps does
+not complain, abc2midi does report numerous warnings. In order to address
+this issue, I have added another option --Cmeter. When this option is
+present, hum2abc prints all M:C commands as M:4/2 and M:C| as M:2/1.
+
+
+5) Invisible bar lines in the kern notation are translated into dotted bar
+lines in the abc notation. This is a temporary measure to facilitate
+debugging the code.
+
+6) The title of the music contained in the kern OTL header may not be
+meaningful without the name of the parent work in the OPR header (if
+present). The T: field concatenates the information in both headers
+if present. (Though hum2abc offers the -TT option which is supposed
+to do the same thing, it does not appear to be working.) Code was
+added to the function parseBibliographic in order to perform this
+operation.
+ 
+
