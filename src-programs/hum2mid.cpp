@@ -2198,8 +2198,10 @@ void checkForTimeSignature(smf::MidiFile& outfile, HumdrumFile& infile, int line
 		// MenCircle with coloration should go here.
 	} else if (ispow2) {
 		if (bottom == 0) {
-			// bottom represent a breve (double-whole note).
-			bottom = -1;
+			// Bottom represent a breve (double-whole note).
+			// Convert it to a semi-breve since MIDI cannot handle it.
+			bottom = 1;
+			top *= 2;
 		} else {
 			cticks = cticks * 4.0 / bottom;
 		}
