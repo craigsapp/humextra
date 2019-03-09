@@ -11,9 +11,9 @@
 #                created from input Humdrum data.
 #
 # Basic options:
-#  -H         Do not wrap Humdrum plugin code in HTML content.
-#  --options  Print this list of options.
-#  --id       ID for notation example.
+#  -H          Do not wrap Humdrum plugin code in HTML content.
+#  --options   Print this list of options.
+#  --id string ID for notation example.
 #
 # Humdrum plugin pass-through options:
 #  -f string   Filter string for post-processing Humdrum data inside Verovio.
@@ -180,7 +180,7 @@ print <<"EOT";
 <!DOCTYPE html>
 <html>
 <head>
-<title>Webnote output</title>
+<title>Webscore output</title>
 <script src="https://verovio-script.humdrum.org/scripts/verovio-toolkit.js"></script>
 <script src="https://plugin.humdrum.org/scripts/humdrum-notation-plugin.js"></script>
 <script>var vrvToolkit = new verovio.toolkit()</script>
@@ -217,9 +217,9 @@ print <<"EOT";
 Usage: cat input | $0 [-H] file(s) > output.html
 
 Options:
-   -H         Do not wrap Humdrum plugin code in HTML content.
-   --options  Print this list of options.
-   --id       ID for notation example.
+   -H          Do not wrap Humdrum plugin code in HTML content.
+   --options   Print this list of options.
+   --id string ID for notation example.
 
 Humdrum plugin options:
    -f string   Filter string for post-processing Humdrum data inside Verovio.
