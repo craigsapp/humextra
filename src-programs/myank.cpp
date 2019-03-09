@@ -1761,7 +1761,10 @@ void expandMeasureOutList(Array<MeasureInfo>& measureout,
    Array<int> inmap(maxmeasure+1);
    inmap.setAll(-1);
    for (i=0; i<measurein.getSize(); i++) {
-      inmap[measurein[i].num] = i;
+		int number = measurein[i].num;
+		if (number >=0) {
+      	inmap[number] = i;
+		}
    }
 
    fillGlobalDefaults(infile, measurein, inmap);
@@ -1835,26 +1838,33 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
       if ((currmeasure == -1) && (thingy == 0) && infile[i].isData()) {
          currmeasure = 0;
       }
+		if (currmeasure < 0) {
+			currmeasure = 0;
+		}
       if (infile[i].isMeasure()) {
          if (!pre.search(infile[i][0], "(\\d+)", "")) {
             continue;
          }
          thingy = 1;
+			int mnum = inmap[currmeasure];
+			if (mnum < 0) {
+				mnum = 0;
+			}
 
          // store state of global music values at end of measure
          if (currmeasure >= 0) {
-            measurein[inmap[currmeasure]].eclef    = currclef;
-            measurein[inmap[currmeasure]].ekeysig  = currkeysig;
-            measurein[inmap[currmeasure]].ekey     = currkey;
-            measurein[inmap[currmeasure]].etimesig = currtimesig;
-            measurein[inmap[currmeasure]].emet     = currmet;
-            measurein[inmap[currmeasure]].etempo   = currtempo;
+            measurein[mnum].eclef    = currclef;
+            measurein[mnum].ekeysig  = currkeysig;
+            measurein[mnum].ekey     = currkey;
+            measurein[mnum].etimesig = currtimesig;
+            measurein[mnum].emet     = currmet;
+            measurein[mnum].etempo   = currtempo;
          }
 
          lastmeasure = currmeasure;
          currmeasure = atoi(pre.getSubmatch(1));
 
-         if (currmeasure < inmap.getSize()) {
+         if ((currmeasure >= 0) && (currmeasure < inmap.getSize())) {
             // [20120818] Had to compensate for last measure being single
             // and un-numbered.
             if (inmap[currmeasure] < 0) {
@@ -2427,4 +2437,3 @@ void usage(const char* command) {
 
 
 
-// md5sum: fe95792ec639523ba97a652686210fae myank.cpp [20170605]
