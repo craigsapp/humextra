@@ -42,10 +42,14 @@ centerpoint:
 
 
 pcre:
+ifeq ($(shell which autoreconf),)
 	# The following command helps to avoid having autoreconf or
 	# aclocal or other stupid non-installed configuration tools
 	# from being triggered to run.
 	(cd $(PCRE);  touch *)
+else
+	(cd $(PCRE);  autoreconf -f -i)
+endif
 	(cd $(PCRE); ./configure)
 	(cd $(PCRE); $(MAKE))
 	-mkdir ../lib
