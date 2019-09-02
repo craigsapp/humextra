@@ -878,6 +878,10 @@ double checkForTempo(HumdrumRecord& record) {
 		}
 		if (pre.search(record[0], "^\\*M4/2$")) {
 			return 132.0;
+		} else if (pre.search(record[0], "^\\*M4/4$")) {
+			return 72.0;
+		} else if (pre.search(record[0], "^\\*M3/2$")) {
+			return 108.0;
 		} else if (pre.search(record[0], "^\\*M2/1$")) {
 			return 176.0;
 		}
