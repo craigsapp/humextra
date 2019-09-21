@@ -1,0 +1,863 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Sat Feb  2 16:10:47 PST 2019
+# Last Modified: Mon Feb 11 13:26:30 EST 2019
+# Filename:      gptab2str
+# Syntax:        perl 5
+# vim:           ts=3
+#
+# Description:   Guitar Pro ASCII tab to **str converter.  Use Humlib tool
+#                str2mid to convert to MIDI.  Currently assumes 6 string
+#                guitar, and a 4/4 meter, which is not always true.
+#
+#                Should also mostly work with Ultimate Guitar ASCII Tabs, which
+#                have a more rigorous structure:
+#                   https://www.ultimate-guitar.com/contribution/help/rubric
+#
+
+use strict;
+use Getopt::Long;
+
+# $COLUMNSPACE is the text which separates each column of parameters.
+my $longQ = 0;
+Getopt::Long::Configure("bundling");
+GetOptions (
+   'l|long' => \$longQ
+);
+
+my @files = @ARGV;
+my @CONTENTS;
+my $LINES = -1;
+
+foreach my $file (@files) {
+	convertFile($file);
+}
+
+exit(0);
+
+
+##############################
+##
+## convertFile -- Convert a file from ASCII TAB format into **str data.
+##   The first spine will be a **recip spine with the interpreted rhythm
+##   of the music.  Currently the music is assumed to be in 4/4.
+##
+
+sub convertFile {
+	my ($filename) = @_;
+	open (FILE, $filename) or die "Cannot read file $filename";
+	my @contents = <FILE>;
+	@CONTENTS = @contents;
+	close FILE;
+	my @music = getMusic(@contents);
+	my $header = getHeader(@contents);
+	my $legend = getLegend(@contents);
+
+	@music = cleanMusic(@music);
+
+	printMusic($header, $legend, @music);
+}
+
+
+
+##############################
+##
+## cleanMusic --
+##
+
+sub cleanMusic {
+	my @music = @_;
+	for (my $i=0; $i<$#music; $i++) {
+		$music[$i] =~ s/--\|--/ZZ|ZZ/g;
+		$music[$i] =~ s/\|\|\|/Z|Z/g;
+		$music[$i] =~ s/-Z\|/ZZ|/g;
+		$music[$i] =~ s/\|Z-/|ZZ/g;
+	}
+	my $len = length($music[0]);
+
+	for (my $j=0; $j<$len; $j++) {
+		my $haso = 0;
+		for (my $i=0; $i<$#music; $i++) {
+			my $char = substr($music[$i], $j, 1);
+			if ($char eq "o") {
+				$haso = 1;
+				last;
+			}
+		}
+		next if !$haso;
+		for (my $i=0; $i<@music; $i++) {
+			my $char = substr($music[$i], $j, 1);
+			if ($char eq "-") {
+				substr($music[$i], $j, 1, "o");
+			} elsif ($char eq " ") {
+				substr($music[$i], $j, 1, "o");
+			} elsif ($char eq "Z") {
+				substr($music[$i], $j, 1, "o");
+			}
+		}
+	}
+
+	for (my $i=0; $i<$#music; $i++) {
+		$music[$i] =~ s/\|\|Z/|ZZ/g;
+		$music[$i] =~ s/\|\|o/|Zo/g;
+		$music[$i] =~ s/Z\|\|/ZZ|/g;
+		$music[$i] =~ s/o\|\|/Zo|/g;
+		$music[$i] =~ s/\|--/\|ZZ/g;
+		$music[$i] =~ s/--\|/\ZZ|/g;
+	}
+	# place a Z in each matching position of the expression line
+
+	for (my $j=0; $j<$len; $j++) {
+		my $char = substr($music[0], $j, 1);
+		next if $char ne "Z";
+		substr($music[$#music], $j, 1, "Z");
+	}
+
+	# add barlines to expression line
+	for (my $j=0; $j<$len; $j++) {
+		my $char = substr($music[0], $j, 1);
+		next if $char ne "|";
+		substr($music[$#music], $j, 1, "|");
+	}
+
+	# remove Z's
+	for (my $i=0; $i<@music; $i++) {
+		$music[$i] =~ s/Z//g;
+	}
+
+	return @music;
+}
+
+
+
+##############################
+##
+## getHeader -- Return reference records that are extracted from the header
+##     information in the file.  There can be two formats for the header:
+##
+##   Tempo = 96
+##   [ARTIST]
+## or
+##    Title: [TITLE]
+##    SubTitle: [SUBTITLE]
+##    Artist: [PERFORMER]
+##    Album: [ALBUM]
+##    Words: [LYRICIST]
+##    Music: [COMPSER]
+##    Copyright: [COPYRIGHT]
+##    Instructions: [INSTRUCTIONS]
+##    Tabber: [ARRANGER]
+##    Tempo = 74
+##    [INSTRUMENT NAME]
+##
+## Fixes:
+##    Instructions: Tab by ... 
+##
+
+sub getHeader {
+	my @contents = @_;
+	my @header;
+	foreach my $line (@contents) {
+		last if $line =~ /^\s*$/;
+		chomp $line;
+		push(@header, $line);
+	}
+	if (@header < 2) {
+		return "";
+	} elsif (@header == 2) {
+		return shortHeader(@header);
+	} else {
+		return longHeader(@header);
+	}
+}
+
+
+
+##############################
+##
+## longHeader -- More than two lines in this format:
+##
+##    Title: [TITLE]
+##    SubTitle: [SUBTITLE]
+##    Artist: [PERFORMER]
+##    Album: [ALBUM]
+##    Words: [LYRICIST]
+##    Music: [COMPSER]
+##    Copyright: [COPYRIGHT]
+##    Instructions: [INSTRUCTIONS]
+##    Tabber: [ARRANGER]
+##    Tempo = 74
+##    [INSTRUMENT NAME]
+##
+## Fixes:
+##    Instructions: Tab by ... 
+##
+
+sub longHeader {
+	my @header = @_;
+	my $output = "";
+	for (my $i=0; $i<@header; $i++) {
+		my $line = $header[$i];
+		if ($line =~ /^\s*Tempo\s*=\s*/) {
+			my $newline = $header[$i+1];
+			if ($newline !~ /^\s*$/) {
+				$output .= "!!!instrument: $newline\n";
+			}
+		}
+		if ($line =~ /^\s*([^:]+)\s*:\s*(.*)\s*$/) {
+			my $key = $1;
+			my $value = $2;
+			if ($key eq "Title") {
+				$output .= "!!!OTL: $value\n";
+			} elsif ($key eq "SubTitle") {
+				$output .= "!!!subtitle: $value\n";
+			} elsif ($key eq "Album") {
+				$output .= "!!!OPR: $value\n";
+			} elsif ($key eq "Copyright") {
+				$output .= "!!!YOO: $value\n";
+
+			} elsif ($key eq "Instructions") {
+				if ($value =~ /^\s*Tab by\s+(.*)\s*$/) {
+					$output .= "!!!LAR: $1\n";
+				} elsif ($value !~ /tempo/i) {
+					$output .= "!!!instructions: $value\n";
+				}
+
+			} elsif ($key eq "Tabber") {
+				$value =~ s/\band\b/,/g;
+				if ($value =~ /,/) {
+					my @perfs = split(/\s*,\s*/, $value);
+					for (my $i=0; $i<@perfs; $i++) {
+						next if $perfs[$i] =~ /^\s*$/;
+						$output .= "!!!LAR: $perfs[$i]\n";
+					}
+				} else {
+					$output .= "!!!LAR: $value\n";
+				}
+
+			} elsif ($key eq "Words") {
+				$value =~ s/\band\b/,/g;
+				if ($value =~ /,/) {
+					my @perfs = split(/\s*,\s*/, $value);
+					for (my $i=0; $i<@perfs; $i++) {
+						next if $perfs[$i] =~ /^\s*$/;
+						$output .= "!!!LYR: $perfs[$i]\n";
+					}
+				} else {
+					$output .= "!!!LYR: $value\n";
+				}
+
+			} elsif ($key eq "Music") {
+				$value =~ s/\band\b/,/g;
+				if ($value =~ /,/) {
+					my @perfs = split(/\s*,\s*/, $value);
+					for (my $i=0; $i<@perfs; $i++) {
+						next if $perfs[$i] =~ /^\s*$/;
+						$output .= "!!!COM: $perfs[$i]\n";
+					}
+				} else {
+					$output .= "!!!COM: $value\n";
+				}
+
+			} elsif ($key eq "Artist") {
+				$value =~ s/\band\b/,/g;
+				if ($value =~ /,/) {
+					my @perfs = split(/\s*,\s*/, $value);
+					for (my $i=0; $i<@perfs; $i++) {
+						next if $perfs[$i] =~ /^\s*$/;
+						$output .= "!!!MPN: $perfs[$i]\n";
+					}
+				} else {
+					$output .= "!!!MPN: $value\n";
+				}
+			} else {
+				$output .= "!!!$key: $value\n";
+			}
+
+		}
+	}
+
+	return $output;
+}
+
+
+
+##############################
+##
+## shortHeader -- Two lines, first one is tempo second one
+##     is artist (composer or performer).
+##
+## Format:
+##   Tempo = 96
+##   [ARTIST]
+##
+
+sub shortHeader {
+	my @header = @_;
+	my $output = "";
+	if ($header[0] !~ /^\s*Tempo\s*=\s*/) {
+		return "";
+	}
+	if ($header[1] !~ /^\s*$/) {
+		$header[1] =~ s/\band\b/,/g;
+		if ($header[1] =~ /,/) {
+			my @perfs = split(/\s*,\s*/, $header[1]);
+			for (my $i=0; $i<@perfs; $i++) {
+				next if $perfs[$i] =~ /^\s*$/;
+				$output .= "!!!MPN: $perfs[$i]\n";
+			}
+		} else {
+			$output .= "!!!MPN: $header[1]\n";
+		}
+	}
+	return $output;
+}
+
+
+
+##############################
+##
+## getLegend -- Return the legend information in the file which explains
+##     the ornamentation symbols.
+##
+## Format:
+##
+## Legend
+## L - tied note
+## x - dead note
+## h - hammer on/pull off
+## b - bend
+## s - slide
+## ~ - vibrato
+## t - trill
+## M - palm mute
+## . - staccato
+## [then a blank line ends the legend]
+## [or a line containing | might also work]
+##
+
+sub getLegend {
+	my @contents = @_;
+	my $startline = -1;
+	for (my $i=0; $i<@contents; $i++) {
+		if ($contents[$i] =~ /^\s*Legend\s*$/) {
+			$startline = $i+1;
+			last;
+		}
+	}
+	return "" if $startline < 0;
+	my $i = $startline;
+	my $output = "";
+	my $char;
+	my $definition;
+	for (my $i = $startline; $i<@contents; $i++) {
+		my $line = $contents[$i];
+		chomp $line;
+		last if $line =~ /^\s*$/;
+		if ($line =~ /^\s*([^\s]+)\s*-\s*(.*)\s*$/) {
+			$char = $1;
+			$definition = $2;
+			$output .= "!!!RDF**str: $char = $definition\n";
+		}
+	}
+	return $output;
+}
+
+
+
+##############################
+##
+## getMusic -- Return a continuous stream of each string.
+##
+
+sub getMusic {
+	my @contents = @_;
+	my @strings;
+	my $i = 0;
+	my @systemStrings;
+	my $lastchar = "";
+	while ($i < @contents) {
+		($i, $lastchar, @systemStrings) = getSystem($i, $lastchar, @contents);
+
+		for (my $j=0; $j<@systemStrings; $j++) {
+			$strings[$j] .= $systemStrings[$j];
+		}
+	}
+
+	return @strings;
+}
+
+
+
+##############################
+##
+## getLineCount -- Return the number of strings (exclusive of the articulation line above the staff).
+##
+
+sub getLineCount {
+	my ($startindex, @contents) = @_;
+	my $output = 0;
+	my $start = -1;
+	for (my $i=$startindex; $i<@contents; $i++) {
+		my $line = $contents[$i];
+		if ($line =~ /---/) {
+			$start = $i;
+			last;
+		}
+	}
+	if ($start < 0) {
+		return -1;
+	}
+	my $counter = 0;
+	my $i = $start;
+	for ($i=$start; $i<@contents; $i++) {
+		my $line = $contents[$i];
+		if (($line =~ /---/) or ($line =~ /\|--/) or ($line =~ /--\|/)) {
+			$counter++;
+		} else {
+			last;
+		}
+	}
+	return $counter;
+}
+
+
+
+##############################
+##
+## getSystem -- Find the next line (measure of music).  $lastchar is the
+##     last character on the previous line.  If it is not "|", that means that
+##     the measure is continuing from the previous system.  In that case, do
+##     not remove the first two characters on the new system line that follows.
+##
+
+sub getSystem {
+	my ($startindex, $lastchar, @contents) = @_;
+	my $newstart = -1;
+
+	my $linecount = $LINES;
+	if ($linecount <= 0) {
+		$linecount = getLineCount($startindex, @contents);
+		$LINES = $linecount;
+	}
+	die "Cannot find any strings in file." if $linecount <= 0;
+
+	my @output;
+	for (my $i=0; $i<$linecount + 1; $i++) {
+		$output[$i] = "";
+	}
+
+	# search for the next line that start a set of strings.
+	for (my $i = $startindex; $i<@contents; $i++) {
+		my $found = 0;
+		for (my $j=0; $j<$linecount; $j++) {
+			my $line = $contents[$i+$j];
+			if (($line =~ /---/) or ($line =~ /\|--/) or ($line =~ /--\|/)) {
+				$found++;
+			} else {
+				$found = 0;
+			}
+		}
+		if ($found == $linecount) {
+			$newstart = $i;
+			last;
+		}
+	}
+
+	if ($newstart < 0) {
+		return ($#contents+1, @output);
+	}
+	# the line above the staff can have fade ins above it, so need to check here.
+	for (my $i=0; $i<$linecount; $i++) {
+		my $line = @contents[$i+$newstart];
+		chomp $line;
+		#$line =~ s/\|--/|/g;  # remove two dashes after barline
+		#$line =~ s/--\|/|/g;  # remove two dashes before barline
+		#$line =~ s/\s+//g;    # remove any spaces
+		# Remove two lines at start of line only if the last system ends with a barline:
+		#$line =~ s/^--//g if $lastchar eq "|";
+		$output[$i] = $line;
+	}
+
+	# store the line above the staff which may have notational elements.
+	my $aboveindex = $newstart - 1;
+	my $aboveline = $contents[$aboveindex];
+	chomp $aboveline;
+	my $olen = length($aboveline);
+	my $len = length($output[0]);
+	my $addition = $len - $olen;
+	for (my $k=0; $k<$addition; $k++) {
+		$aboveline .= " ";
+	}
+	$output[$linecount] = $aboveline;
+
+	for (my $j=1; $j<$linecount; $j++) {
+		next if $len == length($output[$j]);
+		my $ii = $newstart + 1;
+		print "Error: unequal-equal length of string on staff near line $ii\n";
+		print "Staff with problem:\n";
+		for (my $k=0; $k<$linecount; $k++) {
+			print"\t$output[$k]\n";
+		}
+		die;
+	}
+
+	$lastchar = substr($output[0], -1);
+
+	return ($newstart + $linecount, $lastchar, @output);
+}
+
+
+
+##############################
+##
+## printMusic -- Print the reference records and prepare the main
+##    contents of the music from prepared input strings and print as well.
+##
+
+sub printMusic {
+	my ($header, $legend, @music) = @_;
+	print $header;
+
+	my $data = "";
+	if ($longQ) {
+		$data = "$music[$#music]\n";
+		for (my $i=0; $i<$#music; $i++) {
+			$data .= "$music[$i]\n";
+		}
+	} else {
+		$data = convertMusicToHumdrum(@music);
+	}
+	print $data;
+
+	print $legend;
+}
+
+
+
+##############################
+##
+## convertMusicToHumdrum -- Convert long input string for each insturment string
+##    into a Humdrum spine.  A **recip spine for rhythm is added as the first spine.
+##
+
+sub convertMusicToHumdrum {
+	my (@input) = @_;
+
+	my @string1;
+	my @string2;
+	my @string3;
+	my @string4;
+	my @string5;
+	my @string6;
+	my @abovestring;
+	my @strings;
+	if ($LINES == 4) {
+		@strings = (\@string1, \@string2, \@string3, \@string4, \@abovestring);
+	} elsif ($LINES == 6) {
+		@strings = (\@string1, \@string2, \@string3, \@string4, \@string5, \@string6, \@abovestring);
+	} else {
+		die "Unhandled number of strings in part: $LINES\n";
+	}
+	for (my $i=0; $i<$LINES; $i++) {
+		push(@{$strings[$i]}, "**str");
+	}
+	push(@{$strings[$LINES]}, "**extra");
+	my $max = length($input[0]);
+	my $char;
+	my $nextchar;
+	my $ch;
+	my $extra = 0;
+	my $init = 0;
+	my $lastletter = "A";
+	my $letter = "A";
+	for (my $i=0; $i<$max; $i++) {
+		$char = substr($input[0], $i, 1);
+		if ($char eq "o") {
+			next;
+		} elsif ($char eq "|") {
+			my $barline = "|";
+			my $bchar = substr($input[0], $i-1, 1);
+			my $achar = substr($input[0], $i+1, 1);
+			if (($bchar eq "o") && ($achar eq "o")) {
+				$barline = "=:|!|:";
+				$letter++;
+			} elsif ($bchar eq "o") {
+				$barline = "=:|!";
+				$letter++;
+			} elsif ($achar eq "o") {
+				$barline = "=!|:";
+				$letter++;
+			} else {
+				$barline = "=";
+			}
+			# barline (1 character wide)
+			for (my $j=0; $j<$LINES; $j++) {
+				$ch = substr($input[$j], $i, 1);
+				push(@{$strings[$j]}, $barline);
+			}
+			push(@{$strings[$LINES]}, "");
+			
+			if ($lastletter ne $letter) {
+				my $label = "*>$letter";
+				for (my $j=0; $j<$LINES; $j++) {
+					$ch = substr($input[$j], $i, 1);
+					push(@{$strings[$j]}, $label);
+				}
+				push(@{$strings[$LINES]}, "");
+				$lastletter = $letter;
+			}
+			$init = 1;
+		} elsif (!$init && $char =~ /[A-G]/) {
+			# initial string tuning line
+			# Guitar tunings:
+			#    6 string:        EADGBE = E1 A1 D2 G2 B2 E3
+			# Bass guitar tunings:
+			#    4 string:        EADG   = E1 A1 D2 G2
+			#    4 string tenor:  ADGC   = A1 D2 G2 C3
+			#    5 string:        BEADG  = B0 E1 A1 D2 G2
+			#    5 string tenor:  EADGC  = E1 A1 D2 G2 C3
+			#    6 string:        BEADGC = B0 E1 A1 D2 G2 C3
+			my $ccount = 0;
+			if ($LINES == 6) {
+				# hard-coded to standard guitar string tuning
+				for (my $j=0; $j<$LINES; $j++) {
+					$ch = substr($input[$j], $i, 1);
+					$nextchar = substr($input[$j], $i+1, 1);
+					$ccount++ if $ch eq "C";
+					# Guitar tunings:
+					$ch = "E3" if $j == 0 && $ch eq "E";
+					$ch = "B2" if $j == 1 && $ch eq "B";
+					$ch = "G2" if $j == 2 && $ch eq "G";
+					$ch = "D2" if $j == 3 && $ch eq "D";
+					$ch = "A1" if $j == 4 && $ch eq "A";
+					$ch = "E1" if $j == 5 && $ch eq "E";
+					# 6-string bass guitar tunings:
+					$ch = "C3" if $j == 0 && $ch eq "C";
+					$ch = "G2" if $j == 1 && $ch eq "G";
+					$ch = "D2" if $j == 2 && $ch eq "D";
+					$ch = "A1" if $j == 3 && $ch eq "A";
+					$ch = "E1" if $j == 4 && $ch eq "E";
+					$ch = "B0" if $j == 5 && $ch eq "B";
+
+					if ($nextchar eq "#") {
+						# Insert sharp into string
+						my $temp = substr($ch, 0, 1);
+						$temp .= "#";
+						$temp .= substr($ch, 1, 1);
+						$ch = $temp;
+						$extra = 1;
+					} elsif ($nextchar eq " ") {
+						$extra = 1;
+					}
+					push(@{$strings[$j]}, "*AT:$ch");
+				}
+			} elsif ($LINES == 4) {
+				for (my $j=0; $j<$LINES; $j++) {
+					$ch = substr($input[$j], $i, 1);
+					$nextchar = substr($input[$j], $i+1, 1);
+					$ccount++ if $ch eq "C";
+					# 4-string bass guitar:
+					$ch = "G2" if $j == 0 && $ch eq "G";
+					$ch = "D2" if $j == 1 && $ch eq "D";
+					$ch = "A1" if $j == 2 && $ch eq "A";
+					$ch = "E1" if $j == 3 && $ch eq "E";
+					# 4-string tenor bass guitar:
+					$ch = "C3" if $j == 0 && $ch eq "C";
+					$ch = "G2" if $j == 1 && $ch eq "G";
+					$ch = "D2" if $j == 2 && $ch eq "D";
+					$ch = "A1" if $j == 3 && $ch eq "A";
+
+					if ($nextchar eq "#") {
+						# insert sharp into string
+						my $temp = substr($ch, 0, 1);
+						$temp .= "#";
+						$temp .= substr($ch, 1, 1);
+						$ch = $temp;
+						$extra = 1;
+					} elsif ($nextchar eq " ") {
+						$extra = 1;
+					}
+
+					push(@{$strings[$j]}, "*AT:$ch");
+				}
+			}
+			if ($ccount == $LINES) {
+				# drum track
+				for (my $j=0; $j<$LINES; $j++) {
+					${$strings[$j]}[@{$strings[$j]}-1] = "*AT:0";
+				}
+				for (my $j=0; $j<$LINES; $j++) {
+					push(@{$strings[$j]}, "*CH:10");
+				}
+			}
+			$init = 1;
+		} else {
+			# note (3 characters wide);
+			for (my $j=0; $j<$LINES; $j++) {
+				$ch = substr($input[$j], $i, 3);
+				if ($ch =~ /\|/) {
+					print "Some strange error: found barline when not expecting it.:near index $i in $ch\n";
+				}
+				if ($ch eq "---") {
+					$ch = ".";
+				} else {
+					$ch =~ s/-.*//;
+				}
+				push(@{$strings[$j]}, $ch);
+			}
+			my $symbol = substr($input[$LINES], $i, 3);
+			$symbol =~ s/\s+//g;
+			if ($symbol !~ /^\s*$/) {
+				for (my $j=0; $j<$LINES; $j++) {
+					my $size = @{$strings[$j]};
+					next if ${$strings[$j]}[$size-1] !~ /\d/;
+					${$strings[$j]}[$size-1] .= $symbol;
+				}
+			}
+			$i += 2;
+		}
+		$i += $extra;
+		$extra = 0;
+	}
+	for (my $i=0; $i<$LINES; $i++) {
+		push(@{$strings[$i]}, "*-");
+	}
+
+	my $len = @{$strings[0]};
+	if ($letter ne "A") {
+		for (my $i=0; $i<$len; $i++) {
+			if (${$strings[0]}[$i] !~ /^=/) {
+				next;
+			}
+			for (my $j=0; $j<$LINES; $j++) {
+				splice @{$strings[$j]}, $i, 0, "*>A";
+			}
+			last;
+		}
+	}
+
+
+	# fix barlines
+	for (my $i=$len-1; $i>=0; $i--) {
+		if (${$strings[0]}[$i] !~ /^=/) {
+			next;
+		}
+		for (my $j=0; $j<$LINES; $j++) {
+			${$strings[$j]}[$i] = "==";
+		}
+		last;
+	}
+
+
+	$len = @{$strings[0]};
+	my $barnum = 1;
+	my $output = "";
+	my $tempout = "";
+	my $barQ = 0;
+	my $recip = ".";
+
+	for (my $i=0; $i<$len; $i++) {
+		$tempout = "";
+		$barQ = 0;
+		for (my $j=0; $j<$LINES; $j++) {
+			my $jj = $LINES - $j - 1;
+			my $token = ${$strings[$jj]}[$i];
+			my $nexttoken = ${$strings[$jj]}[$i+1];
+			my $lasttoken = ${$strings[$jj]}[$i-1];
+			next if $token =~ /^=/ && $nexttoken =~ /^=/;
+			if ($token =~ /^=(.*)/) {
+				if ($token !~ /^==/) {
+					$token = "=$barnum$1";
+				}
+				$barQ = 1;
+				$recip = getRecipForNextMeasure($i+1, @strings);
+			}
+			if ($j == 0) {
+				if ($token =~ /^=/) {
+					$tempout .= $token;
+				} elsif ($token =~ /^\*\*/) {
+					$tempout .= "**recip";
+				} elsif ($token =~ /^\*-/) {
+					$tempout .= "*-";
+				} elsif ($token =~ /^\*/) {
+					if (${$strings[0]}[$i] =~ /^\*>/) {
+						$tempout .= ${$strings[0]}[$i];
+					} else {
+						$tempout .= "*";
+					}
+				} else {
+					$tempout .= $recip;
+				}
+			}
+			$tempout .= "\t";
+			$tempout .= $token;
+		}
+		$barnum++ if $barQ;
+		if ($tempout !~ /^\s*$/) {
+			$output .= "$tempout\n";
+			if ($tempout =~ /^\*\*/) {
+				# print assumed meter
+				$output .= "*M4/4";
+				for (my $j=0; $j<$LINES; $j++) {
+					$output .= "\t*M4/4";
+				}
+				$output .= "\n";
+				my $tempo = getTempo(@CONTENTS);
+				if ($tempo !~ /^\s*$/) {
+					$output .= "$tempo";
+					for (my $j=0; $j<$LINES; $j++) {
+						$output .= "\t$tempo";
+					}
+					$output .= "\n";
+				}
+			}
+		}
+	}
+
+	return $output;
+}
+
+
+
+##############################
+##
+## getTempo -- Return the tempo as a **kern interpretation (if available).
+##
+## Format:
+##    Tempo = 96
+##
+
+sub getTempo {
+	my @contents = @_;
+	foreach my $line (@contents) {
+		if ($line =~ /^\s*Tempo\s*=\s*(\d+)/) {
+			return "*MM$1";
+		}
+	}
+	return "";
+}
+
+
+
+##############################
+##
+## getRecipForNextMeasure -- Calculate the duration of each time unit
+##    in the following measure.  Currently assumes always 4/4 meter.
+##
+
+sub getRecipForNextMeasure {
+	my ($startindex, @strings) = @_;
+	my $counter = 0;
+	my $len = @{$strings[0]};
+	for (my $i=$startindex; $i<$len; $i++) {
+		my $token = ${$strings[0]}[$i];
+		last if $token =~ /^=/;
+		next if $token =~ /^\*/;
+		$counter++;
+	}
+	return $counter;
+}
+
+

@@ -137,6 +137,7 @@ int       outlineQ     = 1;     // used with --no-outline
 int       numberQ      = 0;     // used with -n option
 int       trimQ        = 0;     // used with --trim option
 int       averageQ     = 0;     // used with --average option
+int       maxQ         = 0;     // used with --max option
 int       secondQ      = 0;     // used with --second option
 int       keyQ         = 0;     // used with -k option
 
@@ -1619,7 +1620,28 @@ void identifyKeyDouble(vector<HISTTYPE>& histogram) {
 		return;
 	}
 
-	if (!averageQ) {
+   if (maxQ) {
+      int maxi = 0;
+		for (i=0; i<12; i++) {
+			keysum[i]    = h[i];
+			keysum[i+12] = h[i];
+         if (h[i] > h[maxi]) {
+            maxi = i;
+         }
+		}
+      if (h[maxi] == h[(maxi+12-7)%12]) {
+         maxi = (maxi + 12 - 7) % 12;
+      } else if (h[maxi] == h[(maxi+12-3)%12]) {
+         maxi = (maxi + 12 - 3) % 12;
+      } else if (h[maxi] == h[(maxi+12-4)%12]) {
+         maxi = (maxi + 12 - 4) % 12;
+      }
+      if (keysum[(maxi + 4)%12] < keysum[(maxi+3)%12]) {
+         keysum[maxi+12] += 1.0;
+      } else {
+         keysum[maxi] += 1.0;
+      }
+   } else if (!averageQ) {
 		for (i=0; i<12; i++) {
 			keysum[i]    = pearsonCorrelation(12, majorweights.data(), h+i);
 			keysum[i+12] = pearsonCorrelation(12, minorweights.data(), h+i);
@@ -2255,6 +2277,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("n|number=b",       "print barnumber markers");
 	opts.define("no-outline=b",     "do not outline keys in legend");
 	opts.define("m|mapping=s:newton", "predefined color mapping");
+   opts.define("max=b",            "display maximum pitch rather than key");
 	opts.define("C|printcolors=b",  "print key to color mapping");
 	opts.define("D|no-drum=b",      "Don't analyze the General MIDI drum track");
 	opts.define("x|exclude=s",      "exclude MIDI channel notes");
@@ -2301,6 +2324,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	blankQ    =  opts.getBoolean("blank");
 	fillQ     =  opts.getBoolean("fill");
 	averageQ  = !opts.getBoolean("average");
+   maxQ      =  opts.getBoolean("max");
 	secondQ   =  opts.getBoolean("second");
 	keyQ      =  opts.getBoolean("key");
 

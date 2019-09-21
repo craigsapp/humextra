@@ -234,6 +234,7 @@ void scrambleNotes(vector<NoteUnit>& notes) {
 //
 
 void getNotes(vector<NoteUnit>& notes, HumdrumFile& infile) {
+	notes.resize(0);
 	notes.reserve(100000);
 	NoteUnit tempnote;
 	int tokencount;
@@ -253,8 +254,9 @@ void getNotes(vector<NoteUnit>& notes, HumdrumFile& infile) {
 			track = infile[i].getPrimaryTrack(j);
 			for (k=0; k<tokencount; k++) {
 				infile[i].getToken(buffer, j, k);
-				if (buffer == ".") {
+				if (strcmp(buffer.c_str(), ".") == 0) {
 					continue;
+				} else {
 				}
 				if (buffer.find('_') != std::string::npos) {
 					continue;

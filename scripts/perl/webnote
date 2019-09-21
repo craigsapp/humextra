@@ -1,0 +1,143 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Fri Mar  8 14:45:27 EST 2019
+# Last Modified: Fri Mar  8 14:45:29 EST 2019
+# Filename:      webnote
+# Syntax:        perl 5
+# vim:           ts=3
+#
+# Description:   Generates a webpage with musical data
+#                created from input Humdrum data.
+#
+
+use strict;
+use Getopt::Long;
+Getopt::Long::Configure("bundling");
+
+my $htmlQ       = 0;  # Embed Humdrum plugin data in HTML.
+my $optionsQ    = 0;  # Used to print options and then exit.
+my $scale       = 0;  # Used with Humdrum notation plugin "scale" option
+my $filter      = ""; # used with Humdrum notation "filter" option
+
+GetOptions (
+	'H|no-html'    => \$htmlQ,
+	'options'      => \$optionsQ,
+	's|scale:s'    => \$scale,
+	'f|filter:s'   => \$filter
+);
+
+printOptionsAndExit() if $optionsQ;
+
+$htmlQ = !$htmlQ;
+
+my @CONTENTS = <>;
+
+printHtmlHeader() if $htmlQ;
+printHumdrumPlugin();
+printHtmlFooter() if $htmlQ;
+
+exit(0);
+
+
+
+##############################
+##
+## printHumdrumPlugin --
+##
+
+sub printHumdrumPlugin {
+
+	print <<"EOT";
+<script>
+displayHumdrum({
+	source:   "example",
+EOT
+
+	if ($scale) {
+		print "\tscale:    $scale,\n";
+	}
+	if ($filter) {
+		print "\tfilter:    \"$filter\",\n";
+	}
+
+	print <<"EOT";
+	renderer: vrvToolkit
+});
+</script>
+
+<script type="text/x-humdrum" id="example">
+EOT
+
+foreach my $line (@CONTENTS) {
+	print $line;
+}
+
+	print <<"EOT";
+</script>
+EOT
+
+}
+
+
+##############################
+##
+## printHtmlHeader --
+##
+
+sub printHtmlHeader {
+print <<"EOT";
+<!DOCTYPE html>
+<html>
+<head>
+<title>Webnote output</title>
+<script src="https://verovio-script.humdrum.org/scripts/verovio-toolkit.js"></script>
+<script src="https://plugin.humdrum.org/scripts/humdrum-notation-plugin.js"></script>
+<script>var vrvToolkit = new verovio.toolkit()</script>
+</head>
+<body>
+
+EOT
+}
+
+
+
+##############################
+##
+## printHtmlFooter --
+##
+
+sub printHtmlFooter {
+print <<"EOT";
+
+</body>
+</html>
+EOT
+}
+
+
+##############################
+##
+## printOptionsAndExit --
+##
+
+sub printOptionsAndExit {
+print <<"EOT";
+
+Usage: cat input | $0 [-H] file(s) > output.html
+
+Options:
+   -H   Do not wrap Humdrum plugin code in HTML content.
+   --options  Print this list of options.
+
+Humdrum plugin options:
+   -s #        Scaling factor for notation (1-100). Default 40.
+   -f string   Filter string for post-processing Humdrum data inside Verovio.
+
+EOT
+exit(1);
+
+}
+
+
+

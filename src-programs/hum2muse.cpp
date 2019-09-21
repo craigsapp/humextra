@@ -555,7 +555,7 @@ int    sfzQ            = 1;   // used with --no-dynamics option
 int    textQ           = 1;   // used with --no-text option
 string TextSpines      = "";  // used with --text option
 int    metQ            = 1;   // used with --no-met option
-int    verselimit      = 5;   // used with --vl option
+int    verselimit      = 6;   // used with --vl option
 int    mensuralQ       = 0;   // used with --mensural option
 int    abbreviationQ   = 0;   // used with --abbreviation option
 int    sysabbrQ        = 0;   // used with -a option
@@ -1449,7 +1449,6 @@ void setupTextAssignments(HumdrumFile& infile, int& textQ,
       }
 
    } else {
-
       int lastkern = 0;
       for (i=0; i<infile.getNumLines(); i++) {
          if (!infile[i].isInterpretation()) {

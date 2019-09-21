@@ -1,0 +1,236 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Fri Mar  8 14:45:27 EST 2019
+# Last Modified: Sat Mar  9 08:40:45 EST 2019
+# Filename:      webscore
+# Syntax:        perl 5
+# vim:           ts=3
+#
+# Description:   Generates a webpage with musical notation.
+#                created from input Humdrum data.
+#
+# Basic options:
+#  -H          Do not wrap Humdrum plugin code in HTML content.
+#  --options   Print this list of options.
+#  --id string ID for notation example.
+#
+# Humdrum plugin pass-through options:
+#  -f string   Filter string for post-processing Humdrum data inside Verovio.
+#  -i          Display inicipit (first system only) of music.
+#  -s #        Scaling factor for notation (1-100). Default 40.
+#  --header    Display title information (if any) at top of example.
+#
+
+use strict;
+use Getopt::Long;
+Getopt::Long::Configure("bundling");
+
+# webnote options:
+my $htmlQ       = 0;  # Embed Humdrum plugin data in HTML.
+my $optionsQ    = 0;  # Used to print options and then exit.
+my $id          = "example"; # Used for setting the element ID for notation.
+
+# Humdrum notation plugin options:
+my $filter      = ""; # Used with Humdrum notation "filter" option.
+my $incipitQ    = 0;  # Used to print options and then exit.
+my $scale       = 0;  # Used with Humdrum notation plugin "scale" option.
+my $headerQ     = 0;  # used with Humdrum notation plugin "header" option.
+
+GetOptions (
+	'id'                => \$id,
+	'i|incipit'         => \$incipitQ,
+	'H|no-html'         => \$htmlQ,
+	'options'           => \$optionsQ,
+	's|scale:s'         => \$scale,
+	'header'            => \$headerQ,
+	'f|filter:s'        => \$filter
+);
+
+$id =~ s/\s+//g;
+$id = "example" if $id =~ /^\s*$/;
+$id = "n_$id" if $id =~ /^\d$/;
+
+printOptionsAndExit() if $optionsQ;
+
+$htmlQ = !$htmlQ;
+
+my @contents = <>;
+if ((@contents == 1) && ($contents[0] =~ /^\*/ || $contents[0] =~ /^!/)) {
+	# assume embedded newlines in one-line string
+	my $value = $contents[0];
+	$value =~ s/\s+$//;
+	@contents = split(/\\n/, $value);
+	for (my $i=0; $i<@contents; $i++) {
+		$contents[$i] .= "\n";
+	}
+}
+
+my @examples = extractHumdrum(@contents);
+
+printHtmlHeader() if $htmlQ;
+for (my $i=0; $i<@examples; $i++) {
+	my $newid = $id;
+	$newid = "${newid}_$i" if @examples > 1;
+	printHumdrumPlugin($newid, $examples[$i]);
+}
+printHtmlFooter() if $htmlQ;
+
+exit(0);
+
+
+
+##############################
+##
+## extractHumdrum -- Split input data stream into separte files.
+##
+
+sub extractHumdrum {
+	my @lines = @_;
+	my @output;
+	my $current = "";
+	my @starts;
+	for (my $i=0; $i<@lines; $i++) {
+		if ($lines[$i] =~ /^\*\*/) {
+			$starts[@starts] = $i;
+		}
+	}
+	if (@starts == 0) {
+		return @output;
+	}
+	$starts[0] = 0;
+	for (my $i=1; $i<@starts; $i++) {
+		for (my $j=$starts[$i]; $j>0; $j--) {
+			if ($lines[$j] =~ /^\*-/) {
+				$starts[$i] = $j+1;
+				last;
+			}
+			if ($lines[$j] =~ /^!!!!\s*SEGMENT\s*:/) {
+				$starts[$i] = $j;
+				last;
+			}
+		}
+	}
+	for (my $i=0; $i<@starts; $i++) {
+		my $starti = $starts[$i];
+		my $endi;
+		if ($i < $#starts) {
+			$endi = $starts[$i+1];
+		} else {
+			$endi = @lines+1;
+		}
+		my $out = "";
+		for (my $j=$starti; $j<$endi; $j++) {
+			$out .= $lines[$j];
+		}
+		$output[@output] = $out;
+	}
+	return @output;
+}
+
+
+
+##############################
+##
+## printHumdrumPlugin --
+##
+
+sub printHumdrumPlugin {
+	my ($label, $humdrum) = @_;
+
+	print <<"EOT";
+<script>
+displayHumdrum({
+	source:   "$label",
+EOT
+
+	if ($scale) {
+		print "\tscale:	$scale,\n";
+	}
+	if ($filter) {
+		print "\tfilter:	\"$filter\",\n";
+	}
+	if ($incipitQ) {
+		print "\tincipit:	true,\n";
+	}
+	if ($headerQ) {
+		print "\theader:	true,\n";
+	}
+
+	print <<"EOT";
+	renderer: vrvToolkit
+});
+</script>
+
+<script type="text/x-humdrum" id="$label">
+$humdrum
+</script>
+EOT
+
+}
+
+
+##############################
+##
+## printHtmlHeader --
+##
+
+sub printHtmlHeader {
+print <<"EOT";
+<!DOCTYPE html>
+<html>
+<head>
+<title>Webscore output</title>
+<script src="https://verovio-script.humdrum.org/scripts/verovio-toolkit.js"></script>
+<script src="https://plugin.humdrum.org/scripts/humdrum-notation-plugin.js"></script>
+<script>var vrvToolkit = new verovio.toolkit()</script>
+</head>
+<body>
+
+EOT
+}
+
+
+
+##############################
+##
+## printHtmlFooter --
+##
+
+sub printHtmlFooter {
+print <<"EOT";
+
+</body>
+</html>
+EOT
+}
+
+
+##############################
+##
+## printOptionsAndExit --
+##
+
+sub printOptionsAndExit {
+print <<"EOT";
+
+Usage: cat input | $0 [-H] file(s) > output.html
+
+Options:
+   -H          Do not wrap Humdrum plugin code in HTML content.
+   --options   Print this list of options.
+   --id string ID for notation example.
+
+Humdrum plugin options:
+   -f string   Filter string for post-processing Humdrum data inside Verovio.
+   -i          Display inicipit (first system only) of music.
+   -s #        Scaling factor for notation (1-100). Default 40.
+   --header    Display header information (title/composer) at start of notation.
+
+EOT
+exit(1);
+
+}
+
+
+

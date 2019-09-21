@@ -233,6 +233,7 @@ void      checkForTimeSignature(smf::MidiFile& outfile, HumdrumFile& infile,
 void      checkForKeySignature(smf::MidiFile& outfile, HumdrumFile& infile,
                                int line);
 string    getInstrumentName   (HumdrumFile& infile, int ptrack);
+vector<int> getGraceNoteState(HumdrumFile& infile);
 
 // PerfViz related functions:
 void      writePerfVizMatchFile(const string& filename, stringstream& contents);
@@ -877,6 +878,10 @@ double checkForTempo(HumdrumRecord& record) {
 		}
 		if (pre.search(record[0], "^\\*M4/2$")) {
 			return 132.0;
+		} else if (pre.search(record[0], "^\\*M4/4$")) {
+			return 72.0;
+		} else if (pre.search(record[0], "^\\*M3/2$")) {
+			return 108.0;
 		} else if (pre.search(record[0], "^\\*M2/1$")) {
 			return 176.0;
 		}
@@ -1490,6 +1495,8 @@ void storeMidiData(HumdrumFile& infile, smf::MidiFile& outfile) {
 		}
 	}
 
+   vector<int> gracenote = getGraceNoteState(infile);
+
 	PerlRegularExpression pre;
 
 	for (i=0; i<infile.getNumLines(); i++) {
@@ -1560,6 +1567,7 @@ void storeMidiData(HumdrumFile& infile, smf::MidiFile& outfile) {
 				tempo = -1;
 			}
 
+         // convert notes to MIDI
 			for (j=infile[i].getFieldCount()-1; j>=0; j--) {
 				if (timeQ || perfvizQ) {
 					ontick = getMillisecondTime(infile, i);
@@ -1718,6 +1726,7 @@ void storeMidiData(HumdrumFile& infile, smf::MidiFile& outfile) {
 					continue;
 				} else {
 					// process **kern note events
+					// ggg
 
 					track      = Rtracks[infile[i].getPrimaryTrack(j)];
 					tokencount = infile[i].getTokenCount(j);
@@ -1848,6 +1857,18 @@ void storeMidiData(HumdrumFile& infile, smf::MidiFile& outfile) {
 							offtick = int(duration *
 									outfile.getTicksPerQuarterNote()) + ontick;
 						}
+
+                  // gracenote time adjustment
+                  double tickadj = tempo * tpq  / 600.0;
+                  ontick -= int(gracenote[i] * tickadj + 0.5);
+                  offtick -= int(gracenote[i] * tickadj + 0.5);
+                  if (ontick + Offset < 0) {
+                     ontick = 0;
+                  }
+                  if (offtick + Offset < 0) {
+                     offtick = 0;
+                  }
+
 						if (shortenQ) {
 							offtick -= shortenamount;
 							if (offtick - ontick < mine) {
@@ -1996,6 +2017,26 @@ void storeMidiData(HumdrumFile& infile, smf::MidiFile& outfile) {
 	}
 }
 
+
+//////////////////////////////
+//
+// getGraceNoteState --
+//
+
+vector<int> getGraceNoteState(HumdrumFile& infile) {
+   vector<int> states(infile.getNumLines(), 0);
+   for (int i=0; i<infile.getNumLines(); i++) {
+      if (infile[i].getDuration() == 0.0) {
+         states[i] = 1;
+      }
+   }
+   for (int i=(int)states.size() - 2; i>=0; i--) {
+      if (states[i]) {
+         states[i] += states[i+1];
+      }
+   }
+   return states;
+}
 
 
 //////////////////////////////
@@ -2198,8 +2239,10 @@ void checkForTimeSignature(smf::MidiFile& outfile, HumdrumFile& infile, int line
 		// MenCircle with coloration should go here.
 	} else if (ispow2) {
 		if (bottom == 0) {
-			// bottom represent a breve (double-whole note).
-			bottom = -1;
+			// Bottom represent a breve (double-whole note).
+			// Convert it to a semi-breve since MIDI cannot handle it.
+			bottom = 1;
+			top *= 2;
 		} else {
 			cticks = cticks * 4.0 / bottom;
 		}
