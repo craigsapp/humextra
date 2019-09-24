@@ -28,10 +28,10 @@ Brief descriptions
 | motion        | Count occurrences of similar, contrary and oblique motion in counterpoint modules. |
 | partjoin      | Merge multiple parts into a single score (preserving grace notes). |
 | sdmarkov      | Generate scale-degree markov transition tables from **kern data. |
-| sortcount     | Shortcut for "sort \| uniq -c \| sort -nr".  Also can output vega-lite bar charts of input data. |
 | webnote       | Generates a webpage with musical data created from input Humdrum data. |
 | webscore      | Generates a webpage with musical data created from input Humdrum data. |
 
 
 
+| sortcount     | Shortcut for "sort \| uniq -c \| sort -nr".  Also can output vega-lite bar charts of input data. |
 
