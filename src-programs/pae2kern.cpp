@@ -1383,9 +1383,11 @@ int getNote(const char* incipit, NoteObject *note, MeasureObject *measure,
 		note->duration /= note->tuplet;
 		//cout << durations[0] << ":" << note->tuplet << endl;
 	}
-	note->pitch = getPitch(incipit[i], note->octave, note->accident, 
-			measure->a_key);
-	
+	// get new pitch if we are not tied to previous note
+	if (note->tie == 0) {
+		note->pitch = getPitch(incipit[i], note->octave, note->accident, 
+				measure->a_key);
+	}
 	// beaming
 	// detect if it is a fermata or a tuplet
 	if (note->beam > 0) {
@@ -1412,7 +1414,10 @@ int getNote(const char* incipit, NoteObject *note, MeasureObject *measure,
 	regfree(&re);
 	//cout << "regexp " << has_tie << endl;
 	if (has_tie == 0) {
-		note->tie = 1; // 1 for the first note, 2 for the second one
+		note->tie++; // 1 for the first note, 2 for the second one
+	}
+	else if (note->tie > 0) {
+		note->tie = -1; // close tie
 	}
 	
 	measure->notes.push_back(*note);
@@ -1425,9 +1430,7 @@ int getNote(const char* incipit, NoteObject *note, MeasureObject *measure,
 		note->beam = 0;
 	}
 	// tie
-	if (note->tie == 1) {
-		note->tie++;
-	} else if (note->tie == 2) {
+	if (note->tie == -1) {
 		note->tie = 0;
 	}
 	// grace notes
@@ -1511,10 +1514,11 @@ void printMeasure(ostream& out, MeasureObject *measure) {
 				out << "J";
 			}
 
-			if (measure->notes[i].tie == 2) {
+			if (measure->notes[i].tie == -1) {
 				out << "]";
-			//} else if (measure->notes[i].tie == 3) {
-			//   out << "_";
+			}
+			else if (measure->notes[i].tie > 1) {
+				out << "_";
 			}
 		} else {
 			if (measure->notes[i].tie == 1) {
@@ -1539,10 +1543,11 @@ void printMeasure(ostream& out, MeasureObject *measure) {
 				out << ";";
 			} 
 			
-			if (measure->notes[i].tie == 2) {
+			if (measure->notes[i].tie == -1) {
 				out << "]";
-			//} else if (measure->notes[i].tie == 3) {
-			//   out << "_";
+			}
+			else if (measure->notes[i].tie > 1) {
+				out << "_";
 			}
 			
 			if (measure->notes[i].beam == 1) {

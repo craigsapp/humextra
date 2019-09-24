@@ -225,7 +225,7 @@ void printStringWithTie(ostream& out, const char* string, int correction) {
 	if (strchr(string, '}') != NULL) {  // these are really phrase markers
 		hasslurstop = 1;
 	}
-	int hasoldtie = 0;
+	/*int hasoldtie = 0;
 	if (strchr(string, '[') != NULL) {
 		hasoldtie = 1;
 	}
@@ -234,70 +234,49 @@ void printStringWithTie(ostream& out, const char* string, int correction) {
 	}
 	if (strchr(string, ']') != NULL) {
 		hasoldtie = 3;
-	}
+	}*/
 
 	int i;
 	int len = strlen(string);
 	switch (correction) {
 		case TIESTART:
 			if (!hasslurstart) {
-				out << "[" << string;
+				out << "[";
+				printStringWithoutTie(out, string);
 				return;
 			}
 			for (i=0; i<len; i++) {
 				if (string[i] == '{') {
 					out << "{[";
-				} else {
+				} else if ((string[i] != '_') && (string[i] != ']')) {
 					out << string[i];
 				}
 			}
 			break;
 		case TIECONT:
 			if (!hasslurstop) {
-				if (hasoldtie == TIESTOP) {
-					for (i=0; i<len; i++) {
-						if (string[i] == ']') {
-							out << "_";
-						} else {
-							out << string[i];
-						}
-					}
-				} else if (hasoldtie == TIESTART) {
-					for (i=0; i<len; i++) {
-						if (string[i] == '[') {
-							// do nothing
-						} else if (string[i] == '}') {
-							// this case will not be reached
-							out << "_}";
-						} else {
-							out << string[i];
-						}
-					}
-					if (!hasslurstop) {
-						out << "_";
-					}
-				} else {
-					out << string << "_";
-				}
+				printStringWithoutTie(out, string);
+				out << "_";
 				return;
 			}
 			for (i=0; i<len; i++) {
 				if (string[i] == '}') {
 					out << "_}"; // strange condition...
-				} else {
+				} else if ((string[i] != '[') && (string[i] != ']')) {
 					out << string[i];
 				}
 			}
 			break;
 		case TIESTOP:
 			if (!hasslurstop) {
-				out << string << "]";
+				printStringWithoutTie(out, string);
+				out << "]";
 				return;
 			}
 			for (i=0; i<len; i++) {
 				if (string[i] == '}') {
 					out << "]}";
-				} else {
+				} else if ((string[i] != '[') && (string[i] != '_')) {
 					out << string[i];
 				}
 			}
@@ -350,27 +329,63 @@ int getTieCorrections(vector<int>& tiecorrections, vector<int>& pitches,
 					tiestates[i+1] = TIESTOP;
 				} else if (pitches[i] != pitches[i+1]) {
 					tiecorrections[i] = -TIESTART;
+					tiestates[i] = TIENONE;
 					output += 1;
 				}
 			}
 		} else if (tiestates[i] == TIECONT) {
 			if (i==(int)pitches.size()-1) {
-				tiecorrections[i] = -tiestates[i];
+				tiecorrections[i] = TIESTOP;
+				output += 1;
+			} else if (i == 0) {
+				tiecorrections[i] = TIESTART; //-tiestates[i];
+				tiestates[i] = TIESTART;
 				output += 1;
 			} else {
-				if ((pitches[i] == pitches[i+1]) && (tiestates[i+1] == TIENONE)) {
-					tiecorrections[i+1] = TIESTOP;
-					output += 1;
-					tiestates[i+1] = TIESTOP;
-				} else if (pitches[i] != pitches[i+1]) {
-					tiecorrections[i] = -TIESTART;
-					output += 1;
+				if (pitches[i] != pitches[i-1]) {
+					if  (pitches[i] == pitches[i+1]) {
+						tiecorrections[i] = TIESTART;
+						tiestates[i] = TIESTART;
+						output += 1;
+						if (tiestates[i+1] == TIENONE) {
+							tiecorrections[i+1] = TIESTOP;
+							tiestates[i+1] = TIESTOP;
+							output += 1;
+						}
+					} else {
+						tiecorrections[i] = -TIECONT;
+						tiestates[i] = TIENONE;
+						output += 1;
+					}
+				} else {
+					if ((tiestates[i-1] == TIECONT) or (tiestates[i-1] == TIESTART)) {
+						if (pitches[i] != pitches[i+1]) {
+							tiecorrections[i] = TIESTOP;
+							output += 1;
+							tiestates[i] = TIESTOP;
+						} else if (tiestates[i+1] == TIENONE) {
+							tiecorrections[i+1] = TIESTOP;
+							output += 1;
+							tiestates[i+1] = TIESTOP;
+						}
+					} else {
+						if (pitches[i] == pitches[i+1]) {
+							tiecorrections[i] = TIESTART;
+							output += 1;
+							tiestates[i+1] = TIESTOP;
+						}
+						else {
+							tiecorrections[i] = TIENONE;
+							output += 1;
+							tiestates[i] = TIENONE;
+						}
+					}
 				}
 			}
-
 		} else if (tiestates[i] == TIESTOP) {
 			if (i==0) {
-				tiecorrections[i] = tiestates[i];
+				tiecorrections[i] = -TIESTOP;
+				tiestates[i] = TIENONE;
 				output += 1;
 			} else {
 				if ((pitches[i] == pitches[i-1]) && (tiestates[i-1] == TIENONE)) {
@@ -380,6 +395,7 @@ int getTieCorrections(vector<int>& tiecorrections, vector<int>& pitches,
 				} else if (pitches[i] !=pitches[i-1]) {
 					tiecorrections[i] = -TIESTOP;
 					output += 1;
+					tiestates[i] = TIENONE;
 				} else if ((pitches[i] == pitches[i-1]) &&
 						(tiestates[i-1] == TIESTOP)) {
 					tiecorrections[i-1] = TIECONT;
