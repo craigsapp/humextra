@@ -18,7 +18,7 @@ Brief descriptions
 
 
 | Tool name     | Description |
-| ============= | ============= |
+| ------------- | ------------- |
 | finalis       | Identify the final note/chord root in an input file. |
 | finalis-tonic | Add key designation according to the finalis note of input file. |
 | gptab2str     | Convert Guitar Pro ASCII tab to **str representation. |
