@@ -120,6 +120,10 @@ void ScoreRecordSimple::printAscii(ostream& out, int roundQ, int verboseQ) {
    shrink();
 
    union { float num; unsigned char ch[4]; } u;
+   u.ch[0] = '\0';
+   u.ch[1] = '\0';
+   u.ch[2] = '\0';
+   u.ch[3] = '\0';
    static char buffer[128] = {0};
 
    double num;

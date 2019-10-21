@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
 	// output file variables
 	int i = 0; // number of converted incipits used for 
 	           // filenames when not supplied
-	char outfilename[1024] = {0};
+	char outfilename[11000] = {0};
 	ofstream outfile;
 
 	while (!infile.eof()) {

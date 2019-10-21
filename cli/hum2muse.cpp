@@ -5682,7 +5682,7 @@ void addPositionParameters(MuseData& tempdata, int column,
    int& XQ = states[0]; int& xQ = states[1];
    int& YQ = states[2]; int& yQ = states[3];
 
-   char buffer[128] = {0};
+   char buffer[512] = {0};
    char nbuff[32] = {0};
 
    if (!(xQ || XQ || yQ || YQ)) {
@@ -5711,8 +5711,10 @@ void addPositionParameters(MuseData& tempdata, int column,
       return;
    }
 
-   char buffer2[128] = {0};
-   sprintf(buffer2, " C%d:%s", column, buffer);
+   char buffer2[2048] = {0};
+   if (column < 500) {
+      sprintf(buffer2, " C%d:%s", column, buffer);
+   }
 
    // if there is already a print suggestion line, then the new
    // print suggestion must occur on the same line (appended to end).

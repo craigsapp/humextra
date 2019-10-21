@@ -1752,7 +1752,7 @@ void MusicXmlFile::parseNote(CXMLObject* entry, int partnum, long& ticktime) {
    CXMLCharacterData* cdata = NULL;
    current = current->Zoom();
    CXMLObject* durcurr;
-   char buffer[1024] = {0};
+   char buffer[2048] = {0};
    int duration = 0;
    int voice = 0;
    int pitch = 0;
@@ -2047,7 +2047,7 @@ int MusicXmlFile::getClefStaffNumber(CXMLObject* object) {
 
    XMLString value;
    int i;
-   char buffer[1024] = {0};
+   char buffer[2048] = {0};
    for (i=0; i<element->GetAttributes().GetLength(); i++) {
       if (element->GetAttributes().GetName(i) == "number") {
          value = element->GetAttributes().GetValue(i);
@@ -4579,7 +4579,7 @@ int MusicXmlFile::getMeasureNumber(CXMLObject* object) {
 
    int i;
    XMLString string;
-   char buffer[1024] = {0};
+   char buffer[2048] = {0};
    for (i=0; i<element->GetAttributes().GetLength(); i++) {
       if (element->GetAttributes().GetName(i) == "number") {
          string = element->GetAttributes().GetValue(i);
