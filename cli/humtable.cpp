@@ -715,7 +715,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -728,7 +728,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    textareaQ =  opts.getBoolean("textarea");
    markQ     = !opts.getBoolean("no-marks");
    kernQ     =  opts.getBoolean("kern");
-   prefix    =  opts.getString("prefix").data();
+   prefix    =  opts.getString("prefix").c_str();
 
    Markchar.resize(0);;
    Markcolor.resize(0);;

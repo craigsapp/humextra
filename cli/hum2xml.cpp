@@ -2412,5 +2412,3 @@ string checkColor(const char* note, string& colorchar,
 
 
 
-// md5sum: fab28588e4d72e74ea25927709988315 hum2xml.cpp [20151120]
-//

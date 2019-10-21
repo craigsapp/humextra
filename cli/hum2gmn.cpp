@@ -864,7 +864,3 @@ void resetGlobals(void) {
 
 
 
-
-
-
-// md5sum: 8ac58be5093e5841df84b395d7a09b8e hum2gmn.cpp [20170605]

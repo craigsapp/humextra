@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
    Array<int> datalines;
 
    if ((options.getArgCount() < 1) || (options.getArgCount() > 2)) {
-      usage(options.getCommand().data());
+      usage(options.getCommand().c_str());
       exit(1);
    }
 
@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
    
    if (options.getArgCount() == 2) {
       infile.read(options.getArg(sourcearg));
-      readTemplateContents(templatedata, options.getArg(templatearg).data());
+      readTemplateContents(templatedata, options.getArg(templatearg).c_str());
 
    } else {
       // read second file from standard input
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
 	 readTemplateContents(templatedata, cin);
       } else {
          infile.read(cin);
-	 readTemplateContents(templatedata, options.getArg(1).data());
+	 readTemplateContents(templatedata, options.getArg(1).c_str());
       }
    }
 
@@ -400,7 +400,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -412,7 +412,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    scalingQ  = !options.getBoolean("n");
    interp    =  NULL;
    if (options.getBoolean("i")) {
-      interp =  options.getString("i").data();
+      interp =  options.getString("i").c_str();
    }
    debugQ    =  options.getBoolean("debug");
    rawQ      =  options.getBoolean("raw");
@@ -425,7 +425,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    threshold =  options.getDouble("threshold");
 
    if (options.getBoolean("weight-file")) {
-      readEditWeights(options.getString("weight-file").data());
+      readEditWeights(options.getString("weight-file").c_str());
    }
 
    if (options.getBoolean("R1")) { weight_R1 = options.getDouble("R1"); }
@@ -1051,4 +1051,4 @@ double dlvcharstar(char** set1, int len1, char** set2, int len2) {
 }
 
 
-// md5sum: 84841e2d00679b77fc833fb9c6b336c9 simil.cpp [20170605]
+

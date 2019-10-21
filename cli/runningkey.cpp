@@ -365,7 +365,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -396,7 +396,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       majorKey = majorKeyKostkaPayne;
       minorKey = minorKeyKostkaPayne;
    } else if (opts.getBoolean("weights")) {
-      readWeights(opts.getString("weights").data());
+      readWeights(opts.getString("weights").c_str());
       majorKey = majorKeyUser;
       minorKey = minorKeyUser;
    } else {
@@ -745,4 +745,4 @@ void equalizeData2(double* data, int asize, double summation) {
 }
 
 
-// md5sum: 011e1bf8f127b475d83b5f1ff00d4bbd runningkey.cpp [20151120]
+

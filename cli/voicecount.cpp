@@ -614,7 +614,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -699,4 +699,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: f6c350da4aa5e9be6f4874b37b9e82f3 voicecount.cpp [20170605]
+

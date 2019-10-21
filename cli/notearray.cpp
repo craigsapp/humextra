@@ -1409,7 +1409,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1421,7 +1421,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       // beatbase  = "1";  // beat is the whole note.
       doubleQ   = 1;
    } else {
-      beatbase  = opts.getString("beat").data();
+      beatbase  = opts.getString("beat").c_str();
       doubleQ   = opts.getBoolean("double");
    }
 
@@ -1451,7 +1451,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    }
 
    mathQ     =  opts.getBoolean("mathematica");
-   mathvar   =  opts.getString("mathematica").data();
+   mathvar   =  opts.getString("mathematica").c_str();
    commentStart = "(* ";
    commentStop  = " *)";
 
@@ -1548,4 +1548,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 350e204fef0a457ddcc473da30ff66c2 notearray.cpp [20170605]
+

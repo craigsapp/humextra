@@ -85,7 +85,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -105,9 +105,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 void setupBuffers(Options& opts) {
    double duration = 0.0;
    int style = 0;
-   int length = strlen(opts.getString("rhythm").data());
+   int length = strlen(opts.getString("rhythm").c_str());
    char buffer[length + 1];
-   strcpy(buffer, opts.getString("rhythm").data());
+   strcpy(buffer, opts.getString("rhythm").c_str());
 
    durations.reset();
    styles.reset();
@@ -327,4 +327,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 9d77e55782b2b233dbac47651e1ef920 sample.cpp [20170605]
+

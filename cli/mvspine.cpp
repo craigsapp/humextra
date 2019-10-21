@@ -158,7 +158,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -171,7 +171,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    if (determineQ) {
       normalQ = 1;
    }
-   primaryspine = options.getString("primary").data();
+   primaryspine = options.getString("primary").c_str();
 
 }
 
@@ -357,4 +357,3 @@ void usage(const char* command) { }
 
 
 
-// md5sum: 24272570a59c6e3ea0af102c34df1971 mvspine.cpp [20170605]

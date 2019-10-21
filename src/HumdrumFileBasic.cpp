@@ -816,7 +816,7 @@ HumdrumFileBasic& HumdrumFileBasic::operator=(const HumdrumFileBasic& aFile) {
 //
 
 void HumdrumFileBasic::read(const string& filename) {
-   read(filename.data());
+   read(filename.c_str());
 }
 
 
@@ -870,6 +870,8 @@ void HumdrumFileBasic::read(const char* filename) {
       read(embeddedData);
       return;
    }
+
+	setFilename(filename);
 
    char templine[4096];
    while (!infile.eof()) {

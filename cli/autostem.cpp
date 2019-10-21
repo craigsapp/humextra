@@ -1445,4 +1445,3 @@ void countBeamStuff(const string& token, int& start, int& stop, int& flagr,
 
 
 
-// md5sum: 3cfd89f63fef46b01f595dbd30cf0239 autostem.cpp [20170605]

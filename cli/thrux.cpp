@@ -303,7 +303,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 		cout << MUSEINFO_VERSION << endl;
 		exit(0);
 	} else if (opts.getBoolean("help")) {
-		usage(opts.getCommand().data());
+		usage(opts.getCommand().c_str());
 		exit(0);
 	} else if (opts.getBoolean("example")) {
 		example();
@@ -356,7 +356,7 @@ void processData(HumdrumFile& infile) {
 	int footer = -1;
 	char labelsearch[1024] = {0};
 	strcpy(labelsearch, "*>");
-	strcat(labelsearch, variation.data());
+	strcat(labelsearch, variation.c_str());
 	strcat(labelsearch, "[");
 	int length = strlen(labelsearch);
 
@@ -554,7 +554,7 @@ void getLabelSequence(vector<string>& labelsequence,
 		const string& astring) {
 	int slength = (int)astring.size();
 	char* sdata = new char[slength+1];
-	strcpy(sdata, astring.data());
+	strcpy(sdata, astring.c_str());
 	const char* ignorecharacters = ", [] ";
 	int index;
 

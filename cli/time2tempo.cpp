@@ -194,7 +194,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -339,4 +339,4 @@ void usage(const char* command) {
 }
 
 
-// md5sum: 738ebe2eb510e5e9573520312bfff5d6 time2tempo.cpp [20151120]
+

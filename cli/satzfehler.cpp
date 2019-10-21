@@ -171,7 +171,7 @@ int identifySatzfehler(HumdrumFile& infile, Array<Array<NoteNode> >& notes,
 void markToken(HumdrumFile& infile, int line, int spine, string& signifier) {
    char buffer[1024] = {0};
    strcpy(buffer, infile[line][spine]);
-   strcat(buffer, Signifier.data());
+   strcat(buffer, Signifier.c_str());
    infile[line].setToken(spine, buffer);
 }
 
@@ -254,7 +254,7 @@ void extractSatzfehler(HumdrumFile& infile, int line, int spine,
 				}
 				if (track == track2) {
 					if ((i == minline)
-							&& (strstr(infile[i][j], Signifier.data()) == NULL)) {
+							&& (strstr(infile[i][j], Signifier.c_str()) == NULL)) {
 						cout << "rX";
 					} else {
 						cout << infile[i][j];
@@ -380,7 +380,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -426,4 +426,3 @@ void usage(const char* command) {
 
 
 
-// md5sum: c95f7e855da6f942b2aab39aaf94b1ce satzfehler.cpp [20151120]

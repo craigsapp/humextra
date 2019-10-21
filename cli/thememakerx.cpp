@@ -76,10 +76,10 @@ int main(int argc, char** argv) {
          hfile.read(cin);
          createIncipit(hfile, "", sourcebase, limit);
       } else {
-         if (is_directory(options.getArg(i+1).data())) {
-            strcpy(sourcebase, options.getArg(i+1).data());
+         if (is_directory(options.getArg(i+1).c_str())) {
+            strcpy(sourcebase, options.getArg(i+1).c_str());
          }
-         processArgument(options.getArg(i+1).data());
+         processArgument(options.getArg(i+1).c_str());
       }
    }
 
@@ -503,7 +503,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -514,7 +514,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    limitQ      = opts.getBoolean("limit");
    limit       = opts.getInteger("limit");
    minval      = opts.getInteger("min");
-   target      = opts.getString("target").data();
+   target      = opts.getString("target").c_str();
 
    if (!is_directory(target)) {
       cout << "Error: target directory does not exist: " << target << endl;
@@ -548,4 +548,3 @@ void usage(const char* command) {
 
 
 
-// md5sum: ad9a3973b510c8d54c1c04aa0afb2df1 thememakerx.cpp [20151120]

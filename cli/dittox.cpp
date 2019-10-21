@@ -343,4 +343,3 @@ void usage(const string& command) {
 
 
 
-// md5sum: abe3c775e11412a7ee7715e893fadbd9 dittox.cpp [20130504]

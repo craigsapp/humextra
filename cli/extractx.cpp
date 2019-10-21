@@ -2022,4 +2022,3 @@ void usage(const char* command) {
 
 
 
-// md5sum: acaccf863962f9365daff2627868e53a extractx.cpp [20170605]

@@ -49,7 +49,7 @@ void      printHumdrumPart  (HumdrumFile& hfile, const char* filebase,
 int main(int argc, char* argv[]) {
    checkOptions(options, argc, argv);
 
-   MusicXmlFile xmlfile(options.getArg(1).data());
+   MusicXmlFile xmlfile(options.getArg(1).c_str());
 
    if (printQ) {
       xmlfile.print();
@@ -259,7 +259,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << "compiled: " << __DATE__ << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -282,7 +282,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    printQ    =  opts.getBoolean("print");
    textQ     = !opts.getBoolean("no-text");
    splitQ    =  opts.getBoolean("parts");
-   SplitBase =  opts.getString("parts").data();
+   SplitBase =  opts.getString("parts").c_str();
    if (opts.getBoolean("no-notation")) {
       stemQ     = 0;
       beamQ     = 0;
@@ -314,4 +314,3 @@ void usage(const char* command) {
 
 
 
-// md5sum: 7e47dc5e59626fa480d5e0e53f2b2155 xml2hum.cpp [20151120]

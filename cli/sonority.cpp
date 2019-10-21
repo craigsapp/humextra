@@ -572,7 +572,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 		cout << MUSEINFO_VERSION << endl;
 		exit(0);
 	} else if (opts.getBoolean("help")) {
-		usage(opts.getCommand().data());
+		usage(opts.getCommand().c_str());
 		exit(0);
 	} else if (opts.getBoolean("example")) {
 		example();
@@ -586,25 +586,25 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	} else if (opts.getBoolean("inversion")) {
 		ChordQuality::setDisplay("i");
 	} else {
-		ChordQuality::setDisplay(opts.getString("format").data());
+		ChordQuality::setDisplay(opts.getString("format").c_str());
 	}
 
-	Convert::chordType.setNullName(opts.getString("unknown").data());
-	Convert::chordInversion.setNullName(opts.getString("unknown").data());
-	Convert::kernPitchClass.setNullName(opts.getString("unknown").data());
+	Convert::chordType.setNullName(opts.getString("unknown").c_str());
+	Convert::chordInversion.setNullName(opts.getString("unknown").c_str());
+	Convert::kernPitchClass.setNullName(opts.getString("unknown").c_str());
 
-	strncpy(unknown, opts.getString("unknown").data(), 64);
+	strncpy(unknown, opts.getString("unknown").c_str(), 64);
 	strcat(unknown, ":");
-	strncat(unknown, opts.getString("unknown").data(), 64);
+	strncat(unknown, opts.getString("unknown").c_str(), 64);
 	strcat(unknown, ":");
-	strncat(unknown, opts.getString("unknown").data(), 64);
+	strncat(unknown, opts.getString("unknown").c_str(), 64);
 
 	explicitQ =  opts.getBoolean("unknown-pcs");
 	imageQ    =  opts.getBoolean("image");
 	if (imageQ) {
 		imagex = 800;
 		imagey = 20;
-		sscanf(opts.getString("image").data(), "%dx%d", &imagex, &imagey);
+		sscanf(opts.getString("image").c_str(), "%dx%d", &imagex, &imagey);
 	}
 
 	filenameQ =  opts.getBoolean("filename");
@@ -629,7 +629,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	barlinesQ =  opts.getBoolean("barlines");
 	legendQ   =  opts.getBoolean("legend");
 	if (opts.getBoolean("separator")) {
-		notesep   =  opts.getString("separator").data();
+		notesep   =  opts.getString("separator").c_str();
 	}
 	if (opts.getBoolean("octave")) {
 		octaveVal =  opts.getInteger("octave");
@@ -801,7 +801,7 @@ void processRecords(HumdrumFile& infile) {
 								) {
 							char tempbuffer[128] = {0};
 							strcpy(tempbuffer, aString);
-							strcpy(aString, options.getString("unknown").data());
+							strcpy(aString, options.getString("unknown").c_str());
 							strcat(aString, tempbuffer);
 						}
 						if (suppressQ && transitionalSonority(quality, infile, i)) {

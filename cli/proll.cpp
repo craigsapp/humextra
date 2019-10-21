@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
 
    int numinputs = options.getArgCount();
    if (numinputs > 0) {
-      const char* filenameIn  = options.getArg(1).data();
+      const char* filenameIn  = options.getArg(1).c_str();
       infile.read(filenameIn);
    } else {
       infile.read(cin);
@@ -1307,7 +1307,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -1320,12 +1320,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    maxheight      =  opts.getInteger("height");
    measureQ       = !opts.getBoolean("no-measure");
    keyboardQ      = !opts.getBoolean("no-keyboard");
-   keyboardcolor  =  opts.getString("keyboard").data();
-   style          =  opts.getString("style").data()[0];
+   keyboardcolor  =  opts.getString("keyboard").c_str();
+   style          =  opts.getString("style").c_str()[0];
    jsonQ          =  opts.getBoolean("json");
-   optionfilename =  opts.getString("filename").data();
+   optionfilename =  opts.getString("filename").c_str();
    P6Q            =  opts.getBoolean("p6");
-   bgcolor        =  opts.getString("background").data();
+   bgcolor        =  opts.getString("background").c_str();
    if (opts.getBoolean("p6")) {
       P3Q = 0;
    } else {
@@ -1542,4 +1542,4 @@ double checkForTempo(HumdrumRecord& record) {
 }
 
 
-// md5sum: 5a65c2389a4836085c158305b8026093 proll.cpp [20170605]
+

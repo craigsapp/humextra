@@ -1158,5 +1158,3 @@ void usage(const char* command) {
 
 
 
-
-// md5sum: 070c757774ff28184747d76e94712cab humpdf.cpp [20170605]

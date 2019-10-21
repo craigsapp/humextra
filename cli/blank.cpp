@@ -652,7 +652,3 @@ void removeDollarsFromString(Array<char>& buffer, int maxtrack) {
 
 
 
-
-
-// md5sum: ec5bfed5a848eeff7508e533e478fd5c blank.cpp [20131109]
-

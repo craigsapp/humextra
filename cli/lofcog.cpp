@@ -82,10 +82,10 @@ int main(int argc, char* argv[]) {
       if (options.getArgCount() < 1) {
          infile.read(cin);
       } else {
-         infile.read(options.getArg(i).data());
-         CurrentFile = options.getArg(i).data();
-         if (strrchr(options.getArg(i).data(), '/') != NULL) {
-            CurrentFile = strrchr(options.getArg(i).data(), '/') + 1;
+         infile.read(options.getArg(i).c_str());
+         CurrentFile = options.getArg(i).c_str();
+         if (strrchr(options.getArg(i).c_str(), '/') != NULL) {
+            CurrentFile = strrchr(options.getArg(i).c_str(), '/') + 1;
          }
       }
      
@@ -632,7 +632,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -797,4 +797,3 @@ double getAverage(HumdrumFile& infile, vector<vector<double> >& data,
 
 
 
-// md5sum: eb5a1888c40059aec1ab5168d18865bd lofcog.cpp [20160320]

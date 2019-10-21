@@ -6010,4 +6010,3 @@ void usage(const char* command) {
 
 
 
-// md5sum: ed4503ca347bcafb5950c561c3ab3533 hum2abc.cpp [20140731]

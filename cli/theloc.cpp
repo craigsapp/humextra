@@ -1044,4 +1044,3 @@ void usage(const string& command) {
 
 
 
-// md5sum: 7b18e2c430085328dca17fcb5d9de87a theloc.cpp [20170605]

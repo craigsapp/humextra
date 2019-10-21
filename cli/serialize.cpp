@@ -669,7 +669,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -701,8 +701,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       }
    }
 
-   if (strlen(opts.getString("separator").data()) >= 1) {
-      Separator = opts.getString("separator").data()[0];
+   if (strlen(opts.getString("separator").c_str()) >= 1) {
+      Separator = opts.getString("separator").c_str()[0];
    }
    if (opts.getBoolean("marker")) {
       markerQ = 1;
@@ -742,4 +742,3 @@ void usage(const char* command) {
 
 
 
-// md5sum: aa181fa300063a8a20cc38bf53a7ad66 serialize.cpp [20170605]

@@ -262,7 +262,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -317,4 +317,3 @@ void usage(const char* command) {
 
 
 
-// md5sum: 3995f27476cfc825f480c6922fccbb92 ridx.cpp [20151120]

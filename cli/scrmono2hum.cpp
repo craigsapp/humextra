@@ -174,10 +174,10 @@ int main(int argc, char** argv) {
    const char* globalfilename = "";
    const char* localfilename  = "";
    if (options.getBoolean("global-ref")) {
-      globalfilename = options.getString("global-ref").data();
+      globalfilename = options.getString("global-ref").c_str();
    }
    if (options.getBoolean("local-ref")) {
-      localfilename = options.getString("local-ref").data();
+      localfilename = options.getString("local-ref").c_str();
    }
    Array<char1024> header;    // header bibliographic records
    Array<char1024> trailer;   // trailer bibliographic records
@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
    int i;
    for (i=1; i<=options.getArgCount(); i++) {
       score.clear();
-      score.readFile(options.getArg(i).data(), verboseQ); 
+      score.readFile(options.getArg(i).c_str(), verboseQ); 
       getThings(score, things);
       assignMeasure(score, things);
       applySlurs(score, things);
@@ -1617,4 +1617,3 @@ void printNoRep(Array<Thru>& thruinfo, ostream& out) {
 
 
 
-// md5sum: 87b3c887de481d6ee290d361ab7cbd29 scrmono2hum.cpp [20151120]

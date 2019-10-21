@@ -299,7 +299,7 @@ int main(int argc, char** argv) {
 				createIndex(infiles[j], infiles[j].getFilename());
 			}
 		} else {
-			processArgument(options.getArg(i+1).data());
+			processArgument(options.getArg(i+1).c_str());
 		}
 	}
 
@@ -2082,7 +2082,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 		cout << MUSEINFO_VERSION << endl;
 		exit(0);
 	} else if (opts.getBoolean("help")) {
-		usage(opts.getCommand().data());
+		usage(opts.getCommand().c_str());
 		exit(0);
 	} else if (opts.getBoolean("example")) {
 		example();
@@ -2112,7 +2112,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	rhythmQ     = opts.getBoolean("rhythm");
 	fileQ       = opts.getBoolean("file");
 	if (fileQ) {
-		Filename = opts.getString("file").data();
+		Filename = opts.getString("file").c_str();
 	}
 	pitchQ  = 1;
 	rhythmQ = 1;
@@ -2127,7 +2127,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	limit       = opts.getInteger("limit");
 	istnQ       = opts.getBoolean("istn");
 	bibQ        = opts.getBoolean("bib");
-	istnfile    = opts.getString("istn").data();
+	istnfile    = opts.getString("istn").c_str();
 	dirprefixQ  = opts.getBoolean("dir-prefix");
 	verboseQ    = opts.getBoolean("verbose");
 
@@ -2141,7 +2141,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	}
 
 	if (opts.getBoolean("bibfilter")) {
-		bibfilter = opts.getString("bibfilter").data();
+		bibfilter = opts.getString("bibfilter").c_str();
 	}
 
 	if (istnQ) {
@@ -2164,7 +2164,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	if (opts.getBoolean("features")) {
 		pitchQ = 0;    // no need to turn off, but just in case
 		rhythmQ = 0;   // no need to turn off, but just in case
-		extractFeatureSet(opts.getString("features").data());
+		extractFeatureSet(opts.getString("features").c_str());
 	} else if (opts.getBoolean("duration")) {
 		pitchQ = 0;    // no need to turn off, but just in case
 		rhythmQ = 0;   // no need to turn off, but just in case

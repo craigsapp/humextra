@@ -255,7 +255,7 @@ fillWeightsWithBellmanBudge(majorweights, minorweights);
 	const char* filename = "";
 	int   filetype       = UNKNOWNFILE;
 	if (options.getArgCount() > 0) {
-		filename = options.getArg(1).data();
+		filename = options.getArg(1).c_str();
 	}
 	int fnlength = strlen(filename);
 	if (fnlength != 0) {
@@ -2312,7 +2312,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 		cout << MUSEINFO_VERSION << endl;
 		exit(0);
 	} else if (opts.getBoolean("help")) {
-		usage(opts.getCommand().data());
+		usage(opts.getCommand().c_str());
 		exit(0);
 	} else if (opts.getBoolean("example")) {
 		example();
@@ -2342,7 +2342,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
 	rrotate = 0;
 	if (opts.getInteger("rotate")) {
-		const char* strang = opts.getString("rotate").data();
+		const char* strang = opts.getString("rotate").c_str();
 		if (hasdigit(strang)) {
 			rrotate = atol(strang);
 		} else {
@@ -2361,14 +2361,14 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 		blankQ = 1;
 	}
 
-	setFilterOptions(channelfilter, opts.getString("exclude").data());
+	setFilterOptions(channelfilter, opts.getString("exclude").c_str());
 	if (opts.getBoolean("no-drum")) {
 		// turn off MIDI channel 10
 		channelfilter[9] = 0;
 	}
 
 	if (opts.getBoolean("colorfile")) {
-		processColorFile(opts.getString("colorfile").data(), colorfile);
+		processColorFile(opts.getString("colorfile").c_str(), colorfile);
 	}
 	if (opts.getBoolean("printcolors")) {
 		printColorMap(colorindex);
@@ -2389,7 +2389,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	}
 
 	if (opts.getBoolean("weights")) {
-		processWeights(opts.getString("weights").data(), majorweights, minorweights);
+		processWeights(opts.getString("weights").c_str(), majorweights, minorweights);
 	}
 
 	if (opts.getBoolean("printweights")) {
@@ -2401,7 +2401,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	corlevel = opts.getInteger("cor");
 
 	if (opts.getBoolean("mapping")) {
-		changeColorMapping(colorindex, opts.getString("mapping").data());
+		changeColorMapping(colorindex, opts.getString("mapping").c_str());
 	}
 }
 

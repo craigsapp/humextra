@@ -595,7 +595,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 		cout << MUSEINFO_VERSION << endl;
 		exit(0);
 	} else if (opts.getBoolean("help")) {
-		usage(opts.getCommand().data());
+		usage(opts.getCommand().c_str());
 		exit(0);
 	} else if (opts.getBoolean("example")) {
 		example();
@@ -603,7 +603,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	}
 
 	PerlRegularExpression pre;
-	if (pre.search(opts.getString("factor").data(), "(\\d+)\\/?(\\d*)", "")) {
+	if (pre.search(opts.getString("factor").c_str(), "(\\d+)\\/?(\\d*)", "")) {
 		int top = 1;
 		int bot = 1;
 		top = atoi(pre.getSubmatch(1));

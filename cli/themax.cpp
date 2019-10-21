@@ -514,7 +514,7 @@ int main(int argc, char** argv) {
       totalcount += searchForMatches(cin, ss, pre, totalcount);
    } else {
       for (i=1; i<=options.getArgCount(); i++) {
-         totalcount += searchForMatches(options.getArgument(i).data(), ss, pre, 
+         totalcount += searchForMatches(options.getArgument(i).c_str(), ss, pre, 
                totalcount);
          if (limitQ && (totalcount >= limitval)) {
             break;
@@ -2183,7 +2183,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       cout << MUSEINFO_VERSION << endl;
       exit(0);
    } else if (opts.getBoolean("help")) {
-      usage(opts.getCommand().data());
+      usage(opts.getCommand().c_str());
       exit(0);
    } else if (opts.getBoolean("example")) {
       example();
@@ -2213,8 +2213,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    unlinkQ                =  opts.getBoolean("unlink");
    notQ                   =  opts.getBoolean("not");
    overlapQ               =  opts.getBoolean("overlap");
-   tonicstring.setSize(strlen(opts.getString("tonic").data()) + 1);
-   strcpy(tonicstring.getBase(), opts.getString("tonic").data());
+   tonicstring.setSize(strlen(opts.getString("tonic").c_str()) + 1);
+   strcpy(tonicstring.getBase(), opts.getString("tonic").c_str());
    pre.sar(tonicstring, "-sharp", "#", "g");
    pre.sar(tonicstring, "-flat", "-", "g");
    pre.tr(tonicstring, "abcdefg", "ABCDEFG");
@@ -2224,17 +2224,17 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    printendQ              = opts.getBoolean("location");
    overlapQ               = opts.getBoolean("overlap");
    kernQ                  = opts.getBoolean("kern");
-   kernstring             = opts.getString("kern").data();
+   kernstring             = opts.getString("kern").c_str();
    limitQ                 = opts.getBoolean("limit");
    limitval               = opts.getInteger("limit");
 
    keyfilterQ             = majorQ || minorQ || tonicQ;
    meterQ                 =  opts.getBoolean("meter");
-   meterstring            =  opts.getString("meter").data();
+   meterstring            =  opts.getString("meter").c_str();
 
    if (opts.getBoolean("file")) {
-      filetag.setSize(strlen(opts.getString("file").data()) + 1);
-      strcpy(filetag.getBase(), opts.getString("file").data());
+      filetag.setSize(strlen(opts.getString("file").c_str()) + 1);
+      strcpy(filetag.getBase(), opts.getString("file").c_str());
    } else {
       filetag.setSize(1);
       filetag[0] = '\0';
@@ -2252,25 +2252,25 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       PpitchclassQ = 1;
    }
 
-   P12toneinterval.setSize(strlen(opts.getString("pitch-12tone-interval").data())+1);
-   strcpy(P12toneinterval.getBase(), opts.getString("pitch-12tone-interval").data());
-   Pgrosscontour.setSize(strlen(opts.getString("pitch-gross-contour").data())+1);
-   strcpy(Pgrosscontour.getBase(), opts.getString("pitch-gross-contour").data());
-   Prefinedcontour.setSize(strlen(opts.getString("pitch-refined-contour").data())+1);
-   strcpy(Prefinedcontour.getBase(), opts.getString("pitch-refined-contour").data());
-   Pscaledegree.setSize(strlen(opts.getString("pitch-scale-degree").data())+1);
-   strcpy(Pscaledegree.getBase(), opts.getString("pitch-scale-degree").data());
-   Pmusicalinterval.setSize(strlen(opts.getString("pitch-musical-interval").data())+1);
-   strcpy(Pmusicalinterval.getBase(), opts.getString("pitch-musical-interval").data());
-   P12tonepitchclass.setSize(strlen(opts.getString("pitch-12tonepc").data())+1);
-   strcpy(P12tonepitchclass.getBase(), opts.getString("pitch-12tonepc").data());
+   P12toneinterval.setSize(strlen(opts.getString("pitch-12tone-interval").c_str())+1);
+   strcpy(P12toneinterval.getBase(), opts.getString("pitch-12tone-interval").c_str());
+   Pgrosscontour.setSize(strlen(opts.getString("pitch-gross-contour").c_str())+1);
+   strcpy(Pgrosscontour.getBase(), opts.getString("pitch-gross-contour").c_str());
+   Prefinedcontour.setSize(strlen(opts.getString("pitch-refined-contour").c_str())+1);
+   strcpy(Prefinedcontour.getBase(), opts.getString("pitch-refined-contour").c_str());
+   Pscaledegree.setSize(strlen(opts.getString("pitch-scale-degree").c_str())+1);
+   strcpy(Pscaledegree.getBase(), opts.getString("pitch-scale-degree").c_str());
+   Pmusicalinterval.setSize(strlen(opts.getString("pitch-musical-interval").c_str())+1);
+   strcpy(Pmusicalinterval.getBase(), opts.getString("pitch-musical-interval").c_str());
+   P12tonepitchclass.setSize(strlen(opts.getString("pitch-12tonepc").c_str())+1);
+   strcpy(P12tonepitchclass.getBase(), opts.getString("pitch-12tonepc").c_str());
 
    if (diatonicQ) {
-      Ppitchclass.setSize(strlen(opts.getString("diatonic-pitch-class").data())+1);
-      strcpy(Ppitchclass.getBase(), opts.getString("diatonic-pitch-class").data());
+      Ppitchclass.setSize(strlen(opts.getString("diatonic-pitch-class").c_str())+1);
+      strcpy(Ppitchclass.getBase(), opts.getString("diatonic-pitch-class").c_str());
    } else {
-      Ppitchclass.setSize(strlen(opts.getString("pitch-class").data())+1);
-      strcpy(Ppitchclass.getBase(), opts.getString("pitch-class").data());
+      Ppitchclass.setSize(strlen(opts.getString("pitch-class").c_str())+1);
+      strcpy(Ppitchclass.getBase(), opts.getString("pitch-class").c_str());
    }
 
    RgrosscontourQ         = opts.getBoolean("duration-gross-contour");
@@ -2282,28 +2282,28 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    RmetricrefinedcontourQ = opts.getBoolean("metric-refined-contour");
    RmetricgrosscontourQ   = opts.getBoolean("metric-gross-contour");
 
-   Rgrosscontour.setSize(strlen(opts.getString("duration-gross-contour").data())+1);
-   strcpy(Rgrosscontour.getBase(), opts.getString("duration-gross-contour").data());
+   Rgrosscontour.setSize(strlen(opts.getString("duration-gross-contour").c_str())+1);
+   strcpy(Rgrosscontour.getBase(), opts.getString("duration-gross-contour").c_str());
    Rrefinedcontour.setSize(
-      strlen(opts.getString("duration-refined-contour").data())+1);
+      strlen(opts.getString("duration-refined-contour").c_str())+1);
    strcpy(Rrefinedcontour.getBase(), 
-      opts.getString("duration-refined-contour").data());
-   Rduration.setSize(strlen(opts.getString("duration").data())+1);
-   strcpy(Rduration.getBase(), opts.getString("duration").data());
-   Rbeatlevel.setSize(strlen(opts.getString("beat-level").data())+1);
-   strcpy(Rbeatlevel.getBase(), opts.getString("beat-level").data());
-   Rmetriclevel.setSize(strlen(opts.getString("metric-level").data())+1);
-   strcpy(Rmetriclevel.getBase(), opts.getString("metric-level").data());
-   Rmetricposition.setSize(strlen(opts.getString("metric-position").data())+1);
-   strcpy(Rmetricposition.getBase(), opts.getString("metric-position").data());
+      opts.getString("duration-refined-contour").c_str());
+   Rduration.setSize(strlen(opts.getString("duration").c_str())+1);
+   strcpy(Rduration.getBase(), opts.getString("duration").c_str());
+   Rbeatlevel.setSize(strlen(opts.getString("beat-level").c_str())+1);
+   strcpy(Rbeatlevel.getBase(), opts.getString("beat-level").c_str());
+   Rmetriclevel.setSize(strlen(opts.getString("metric-level").c_str())+1);
+   strcpy(Rmetriclevel.getBase(), opts.getString("metric-level").c_str());
+   Rmetricposition.setSize(strlen(opts.getString("metric-position").c_str())+1);
+   strcpy(Rmetricposition.getBase(), opts.getString("metric-position").c_str());
    Rmetricrefinedcontour.setSize(
-      strlen(opts.getString("metric-refined-contour").data())+1);
+      strlen(opts.getString("metric-refined-contour").c_str())+1);
    strcpy(Rmetricrefinedcontour.getBase(), 
-      opts.getString("metric-refined-contour").data());
+      opts.getString("metric-refined-contour").c_str());
    Rmetricgrosscontour.setSize(
-      strlen(opts.getString("metric-gross-contour").data())+1);
+      strlen(opts.getString("metric-gross-contour").c_str())+1);
    strcpy(Rmetricgrosscontour.getBase(), 
-      opts.getString("metric-gross-contour").data());
+      opts.getString("metric-gross-contour").c_str());
 
    if (kernQ) {
       processKernString(kernstring);
@@ -2349,7 +2349,7 @@ void adjustForInterleavedQuery(Options& opts) {
 
    Array<Array<char> > tokens;
    PerlRegularExpression pre;
-   pre.getTokens(tokens, "\\s+", opts.getString("query").data());
+   pre.getTokens(tokens, "\\s+", opts.getString("query").c_str());
 
    if (tokens.getSize() == 0) {
       return;
@@ -3420,4 +3420,4 @@ void processKernString(const char* astring) {
 }
 
 
-// md5sum: 222f1914e4f03ab5801e0e219a9c41f4 themax.cpp [20160512]
+

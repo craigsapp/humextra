@@ -2910,5 +2910,4 @@ void usage(const string& command) {
 }
 
 
-// md5sum: 641f46b96c3502610c3b3a866dd645a1 cint.cpp [20170605]
 
