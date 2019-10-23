@@ -355,14 +355,14 @@ $(TARGDIR)/humplay:   POSTFLAGS += $(IMPROV_POSTFLAGS) $(ALSA_POSTFLAGS)
 	@mkdir -p $(TARGDIR)
 	@echo [CC] $@
 	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
-		&& strip $(TARGDIR)/$@$(EXTEN)
+		#&& strip $(TARGDIR)/$@$(EXTEN)
 
 
 $(TARGDIR)/% : $(notdir %.cpp)
 	@mkdir -p $(TARGDIR)
 	@echo [CC] $@
 	@$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
-		&& strip $@$(EXTEN)
+		#&& strip $@$(EXTEN)
 
 
 #                                                                         #
