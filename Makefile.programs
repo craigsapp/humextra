@@ -135,7 +135,7 @@ endif
 # Beginning of user-modifiable configuration variables                    #
 #                                                                         #
 
-SRCDIR    = src-programs
+SRCDIR    = cli
 INCDIR    = include
 OBJDIR    = obj
 LIBDIR    = lib
@@ -284,7 +284,7 @@ SCRIPTS_PERL=$(wildcard scripts/perl/*)
 SCRIPTS=$(SCRIPTS_PERL)
 
 # Targets which don't actually refer to files
-.PHONY : bin scripts src-programs src-library include obj bin-win obj-win
+.PHONY : bin scripts cli src-library include obj bin-win obj-win
 
 
 ###########################################################################

@@ -84,7 +84,7 @@ endif
 #                                                                         #
 
 OBJDIR    = obj
-SRCDIR    = src-library
+SRCDIR    = src
 INCDIR    = include
 LIBDIR    = lib
 LIBFILE   = libhumextra.a

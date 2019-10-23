@@ -89,6 +89,9 @@ tests-fail: regression-fails-only
 regression-fails-only:
 	(cd example; $(MAKE) regression-fails)
 
+push:
+	git push
+
 #                                                                         #
 #                                                                         #
 ###########################################################################
