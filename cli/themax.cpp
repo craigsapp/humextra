@@ -1079,7 +1079,7 @@ void getMusicalIntervalLocationEnd(vector<int>& positions, string& line,
 	// Check only locations specified by startlocs.
 	// The positions in startlocs are presumed to be sorted.
 	const char* str = line.c_str();
-	while ((i < line.size()) && (line[i] != '\t') && (tindex < tsize)) {
+	while ((i < (int)line.size()) && (line[i] != '\t') && (tindex < tsize)) {
 		// search for the ith start position, and then extract the end position
 
 		pos = pokey.search(str+i);
@@ -1164,7 +1164,7 @@ void getSimpleLocationINTEnd(vector<int>& positions, string& line,
 
 	// Check only locations specified by startlocs.
 	// The positions in startlocs are presumed to be sorted.
-	while ((i < line.size()) && (line[i] != '\t') && (tindex < tsize)) {
+	while ((i < (int)line.size()) && (line[i] != '\t') && (tindex < tsize)) {
 		// search for the ith start position, and then extract the end position
 		pos = pokey.search(str+i);
 		if (pos == 0) {
