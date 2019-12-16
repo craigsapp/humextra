@@ -70,7 +70,7 @@ class LayoutParameters {
 		LayoutParameters           (void) { clear(); }
 		void         clear         (void);
 		void         parseLayout   (HumdrumFile& infile, Array<Coord>& layout);
-		int          getParameter  (int codeindex, const char* searchkey);
+		int          getParameter  (int codeindex, const string& searchkey);
 		void         addEntry      (LayoutParameters& param, int index);
 		int          getSize       (void) {return code.getSize(); }
 		int          getCodeSize   (int index) {return key[index].getSize(); }
@@ -87,7 +87,7 @@ class LayoutParameters {
 		ostream&     print         (ostream& out, int index=-1);
 
 	protected:
-		void prepareCode(const char* xcode, const string& params);
+		void prepareCode(const string& xcode, const string& params);
 
 	private:
 		Array<string>         code;
@@ -105,7 +105,7 @@ ostream& LayoutParameters::print(ostream& out, int index) {
 		out << "@LO:" << getCode(index) << ":";
 		for (int j=0; j<key[index].getSize(); j++) {
 			out << key[index][j];
-			if (strlen(value[index][j].c_str()) > 0) {
+			if (!value[index][j].empty()) {
 				out << "=" << value[index][j];
 			}
 			if (j < getCodeSize(index)-1) {
@@ -224,10 +224,12 @@ void LayoutParameters::addEntry(LayoutParameters& param, int index) {
 }
 
 
-int LayoutParameters::getParameter(int codeindex, const char* searchkey) {
+int LayoutParameters::getParameter(int codeindex, const string& searchkey) {
 	int output = -1;
+
+
 	for (int j=0; j<key[codeindex].getSize(); j++) {
-		if (strcmp(key[codeindex][j].c_str(), searchkey) == 0) {
+		if (key[codeindex][j] == searchkey) {
 			output = j;
 			break;
 		}
@@ -235,7 +237,7 @@ int LayoutParameters::getParameter(int codeindex, const char* searchkey) {
 	return output;
 }
 
-void LayoutParameters::prepareCode(const char* xcode, const string& params) {
+void LayoutParameters::prepareCode(const string& xcode, const string& params) {
 	code.increase(1);
 	code.last() = xcode;
 
@@ -252,8 +254,8 @@ void LayoutParameters::prepareCode(const char* xcode, const string& params) {
 
 	for (int i=0; i<(int)tokens.size(); i++) {
 		if (pre2.search(tokens[i], "^([^=]+)=?(.*)", "")) {
-			key.last()[i] = pre2.getSubmatch();
-			value.last()[i] = pre2.getSubmatch();
+			key.last()[i] = pre2.getSubmatch(1);
+			value.last()[i] = pre2.getSubmatch(2);
 		} else {
 			key.last()[i].clear();
 			value.last()[i].clear();
@@ -5304,7 +5306,7 @@ void addHairpinStarts(MuseData& tempdata, HumdrumFile& infile,
 		// the next one start, so stop it before the new one starts.
 		if (strcmp(pre2.getSubmatch(1), "[") == 0) {
 			addCrescendoStop(tempdata, lpd);
-		} else if (strcmp(pre2.getSubmatch(), "]") == 0) {
+		} else if (strcmp(pre2.getSubmatch(1), "]") == 0) {
 			addDecrescendoStop(tempdata, lpd);
 		}
 	}
@@ -6898,7 +6900,7 @@ void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line,
 		measurenum = atoi(pre.getSubmatch(1));
 		if (measurenum >= 0) {
 		  strcat(buffer, " ");
-		  strcat(buffer, pre.getSubmatch());
+		  strcat(buffer, pre.getSubmatch(1));
 		}
 	}
 
@@ -7158,6 +7160,7 @@ void handleMeasureLayoutParam(MuseData& tempdata, HumdrumFile& infile,
 	if (!(linebreakQ || pagebreakQ)) {
 		return;
 	}
+
 
 	PerlRegularExpression pre;
 	int index2 = lp.getParameter(index, "g");
@@ -8233,15 +8236,15 @@ int verifyPart(MuseData& part) {
 		int value;
 		int value2;
 		if (len == 1) {
-			if (sscanf(pre2.getSubmatch(), "%1x", &value)) {
+			if (sscanf(pre2.getSubmatch(1), "%1x", &value)) {
 				LNEWLINE[0] = (char)value;
 			}
 		} else if (len == 2) {
-			if (sscanf(pre2.getSubmatch(), "%2x", &value)) {
+			if (sscanf(pre2.getSubmatch(1), "%2x", &value)) {
 				LNEWLINE = (char)value;
 			}
 		} else if (len == 4) {
-			if (sscanf(pre2.getSubmatch(), "%2x%2x", &value, &value2)) {
+			if (sscanf(pre2.getSubmatch(1), "%2x%2x", &value, &value2)) {
 				LNEWLINE = "";
 				LNEWLINE += (char)value;
 				LNEWLINE += (char)value2;
@@ -8648,15 +8651,15 @@ void getNewLine(string& newline, MuseData& part) {
 	int value;
 	int value2;
 	if (len == 1) {
-		if (sscanf(pre.getSubmatch(), "%1x", &value)) {
+		if (sscanf(pre.getSubmatch(1), "%1x", &value)) {
 			newline = (char)value;
 		}
 	} else if (len == 2) {
-		if (sscanf(pre.getSubmatch(), "%2x", &value)) {
+		if (sscanf(pre.getSubmatch(1), "%2x", &value)) {
 			newline = (char)value;
 		}
 	} else if (len == 4) {
-		if (sscanf(pre.getSubmatch(), "%2x%2x", &value, &value2)) {
+		if (sscanf(pre.getSubmatch(1), "%2x%2x", &value, &value2)) {
 			newline = (char)value;
 			newline += (char)value2;
 		}
