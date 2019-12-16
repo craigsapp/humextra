@@ -1031,7 +1031,7 @@ int PerlRegularExpression::search(const char* input) {
 // output tokens, like is done in PERL.
 //
 
-int PerlRegularExpression::getTokens(Array<Array<char> >& output, 
+int PerlRegularExpression::getTokens(Array<Array<char>>& output, 
       const char* separator, const char* input) {
 
    output.setSize(0);
@@ -1100,7 +1100,7 @@ int PerlRegularExpression::getTokens(Array<Array<char> >& output,
 
 int PerlRegularExpression::getTokens(Array<SigString>& output, 
       const char* separator, const char* input) {
-   Array<Array<char> > pretokens;
+   Array<Array<char>> pretokens;
    getTokens(pretokens, separator, input);
    int i;
    output.setSize(pretokens.getSize());
@@ -1114,7 +1114,7 @@ int PerlRegularExpression::getTokens(Array<SigString>& output,
 
 int PerlRegularExpression::getTokens(vector<string>& output, 
       const string& separator, const string& input) {
-   Array<Array<char> > pretokens;
+   Array<Array<char>> pretokens;
    getTokens(pretokens, separator.c_str(), input.c_str());
    int i;
    output.resize(pretokens.getSize());
@@ -1125,7 +1125,13 @@ int PerlRegularExpression::getTokens(vector<string>& output,
 }
 
 
-int PerlRegularExpression::getTokensWithEmpties(Array<Array<char> >& output, 
+
+//////////////////////////////
+//
+// PerlRegularExpression::getTokensWithEmpties --
+//
+
+int PerlRegularExpression::getTokensWithEmpties(Array<Array<char>>& output, 
       const char* separator, const char* input) {
 
    output.setSize(0);
@@ -1189,6 +1195,60 @@ int PerlRegularExpression::getTokensWithEmpties(Array<Array<char> >& output,
    }
 
    return output.getSize();
+}
+
+
+
+int PerlRegularExpression::getTokensWithEmpties(vector<string>& output, 
+      const string& separator, const string& input) {
+
+   output.clear();
+   output.reserve(100);
+
+   PerlRegularExpression pre;
+   int flag;
+   pre.setAnchor();
+   const char* ptr = input.c_str();
+
+   // skip over any initial separator 
+   flag = pre.search(ptr, separator);
+   if (flag) {
+      ptr = ptr + pre.getSubmatchEnd(0);
+   }
+
+   string spat = "(.*?)(";
+   spat += separator;
+   spat += ")";
+
+   int oindex;
+   int stepsize;
+   int strsize;
+   char* cptr;
+   // remember: anchor is still active
+   while (pre.search(ptr, spat.c_str())) {
+      oindex = (int)output.size();
+      output.resize(oindex+1);
+      strsize = pre.getSubmatchEnd(1) - pre.getSubmatchStart(1);
+      output[oindex].resize(strsize);
+      for (int i=0; i<strsize; i++) {
+         output[oindex][i] = ptr[i];
+      }
+      stepsize = pre.getSubmatchEnd(2);
+      if (stepsize > 0) {
+         ptr += stepsize;
+      }
+      if (stepsize <= 0) {
+         break;
+      }
+   }
+
+   if (ptr[0] != '\0') {
+      oindex = (int)output.size();
+      output.resize(oindex+1);
+      output[oindex] = ptr;
+   }
+
+   return (int)output.size();
 }
 
 

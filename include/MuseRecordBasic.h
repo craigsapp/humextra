@@ -43,6 +43,8 @@ class MuseRecordBasic {
                                             int endcol);
       void              setColumns         (Array<char>& data, int startcol, 
                                             int endcol);
+      void              setColumns         (string& data, int startcol, 
+                                            int endcol);
       int               getLength          (void) const;
       const char*       getLine            (void); 
       int               getLineIndex       (void) { return lineindex; }

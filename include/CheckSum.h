@@ -48,6 +48,7 @@ class CheckSum {
 
       // equivalent to the md5sum output by "md5sum" command:
       static void          getMD5Sum (Array<char>& md5sum, Array<char>& data);
+      static void          getMD5Sum (string& md5sum, string& data);
       static void          getMD5Sum (ostream& out, SSTREAM& data);
 
    protected:

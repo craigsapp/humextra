@@ -251,7 +251,33 @@ void MuseRecordBasic::setColumns(Array<char>& data, int startcol, int endcol) {
          break;
       }
    }
+}
 
+
+void MuseRecordBasic::setColumns(string& data, int startcol, int endcol) {
+   if (startcol > endcol) {
+      int temp = startcol;
+      startcol = endcol;
+      endcol = temp;
+   }
+
+   int dsize = (int)data.size();
+   if (data[dsize-1] == '\0') {
+      // don't insert any null-termination of the string.
+      dsize--;
+   }
+
+   getColumn(endcol) = ' '; // allocate space if not already done
+   int i;
+   int ii;
+   for (i=startcol; i<=endcol; i++) {
+      ii = i - startcol;
+      if (ii < dsize) {
+         getColumn(i) = data[ii];
+      } else {
+         break;
+      }
+   }
 }
 
 

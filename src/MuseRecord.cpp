@@ -1891,6 +1891,10 @@ void MuseRecord::setBeamInfo(Array<char>& strang) {
    setColumns(strang, 26, 31);
 }
 
+void MuseRecord::setBeamInfo(string& strang) {
+   setColumns(strang, 26, 31);
+}
+
 
 
 //////////////////////////////

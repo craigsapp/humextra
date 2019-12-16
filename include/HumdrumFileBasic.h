@@ -135,8 +135,14 @@ class HumdrumFileBasic {
       void                   makeVts          (Array<char>& vtsstring);
       static void            makeVts          (Array<char>& vtsstring,
                                                HumdrumFileBasic& infile);
+      void                   makeVts          (string& vtsstring);
+      static void            makeVts          (string& vtsstring,
+                                               HumdrumFileBasic& infile);
       void                   makeVtsData      (Array<char>& vtsstring);
       static void            makeVtsData      (Array<char>& vtsstring,
+                                               HumdrumFileBasic& infile);
+      void                   makeVtsData      (string& vtsstring);
+      static void            makeVtsData      (string& vtsstring,
                                                HumdrumFileBasic& infile);
       HumdrumFileBasic&      operator=        (const HumdrumFileBasic& aFile);
       void                   read             (const char* filename);

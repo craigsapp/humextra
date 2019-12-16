@@ -37,14 +37,9 @@
 #include <stdio.h>
 #include <cctype>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-   using namespace std;
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-#endif
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 char HumdrumFileBasic::empty[1] = {0};
 
@@ -865,7 +860,7 @@ void HumdrumFileBasic::read(const char* filename) {
    }
 
    if (infile.peek() == '%') {
-      SSTREAM embeddedData;
+      stringstream embeddedData;
       extractEmbeddedDataFromPdf(embeddedData, infile);
       read(embeddedData);
       return;
@@ -893,7 +888,7 @@ void HumdrumFileBasic::read(istream& inStream) {
    int linecount = 0;
 
    if (inStream.peek() == '%') {
-      SSTREAM embeddedData;
+      stringstream embeddedData;
       extractEmbeddedDataFromPdf(embeddedData, inStream);
       read(embeddedData);
       return;
@@ -1760,7 +1755,7 @@ char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
          strcpy(location.getBase(), "/");
       }
    
-      SSTREAM httprequest;
+      stringstream httprequest;
       httprequest << "http://" << "kern.ccarh.org";
       if (strchr(filename.getBase(), '.') != NULL) {
          httprequest << "/cgi-bin/ksdata?file=";
@@ -1782,7 +1777,7 @@ char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
       httprequest << "&format=kern";
       httprequest << ends;
      
-      strcpy(buffer, httprequest.CSTRING);
+      strcpy(buffer, httprequest.str().c_str());
       return buffer;
    }
    
@@ -1795,13 +1790,13 @@ char* HumdrumFileBasic::getUriToUrlMapping(char* buffer, int buffsize,
          ptr += strlen("jrp:");
       }
    
-      SSTREAM httprequest;
+      stringstream httprequest;
       httprequest << "http://" << "jrp.ccarh.org";
       httprequest << "/cgi-bin/jrp?a=humdrum&f=";
       httprequest << ptr;
       httprequest << ends;
 
-      strcpy(buffer, httprequest.CSTRING);
+      strcpy(buffer, httprequest.str().c_str());
       return buffer;
    }
 
@@ -1859,7 +1854,7 @@ void HumdrumFileBasic::readFromHumdrumURI(const char* humdrumaddress) {
       strcpy(location.getBase(), "/");
    }
 
-   SSTREAM httprequest;
+   stringstream httprequest;
    httprequest << "http://" << "kern.ccarh.org";
    httprequest << "/cgi-bin/ksdata?file=";
    if (filename.getSize() > 0) {
@@ -1872,7 +1867,7 @@ void HumdrumFileBasic::readFromHumdrumURI(const char* humdrumaddress) {
    httprequest << "&format=kern";
    httprequest << ends;
 
-   readFromHttpURI(httprequest.CSTRING);
+   readFromHttpURI(httprequest.str().c_str());
 }
 
 
@@ -1897,13 +1892,13 @@ void HumdrumFileBasic::readFromJrpURI(const char* jrpaddress) {
       ptr += strlen("jrp:");
    }
 
-   SSTREAM httprequest;
+   stringstream httprequest;
    httprequest << "http://" << "jrp.ccarh.org";
    httprequest << "/cgi-bin/jrp?a=humdrum&f=";
    httprequest << ptr;
    httprequest << ends;
 
-   readFromHttpURI(httprequest.CSTRING);
+   readFromHttpURI(httprequest.str().c_str());
 }
 
 
@@ -1949,7 +1944,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
 
    char newline[3] = {0x0d, 0x0a, 0};
 
-   SSTREAM request;
+   stringstream request;
    request << "GET "   << location.getBase() << " HTTP/1.1" << newline;
    request << "Host: " << hostname.getBase() << newline;
    request << "User-Agent: HumdrumFile Downloader 1.0 (" 
@@ -1960,18 +1955,18 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
 
    // cout << "HOSTNAME: " << hostname.getBase() << endl;
    // cout << "LOCATION: " << location.getBase() << endl;
-   // cout << request.CSTRING << endl;
+   // cout << request.str().c_str() << endl;
    // cout << "-------------------------------------------------" << endl;
 
    int socket_id = open_network_socket(hostname.getBase(), 80);
-   if (::write(socket_id, request.CSTRING, strlen(request.CSTRING)) == -1) {
+   if (::write(socket_id, request.str().c_str(), strlen(request.str().c_str())) == -1) {
       exit(-1);
    }
    #define URI_BUFFER_SIZE (10000)
    char buffer[URI_BUFFER_SIZE];
    int message_len;
-   SSTREAM inputdata;
-   SSTREAM header;
+   stringstream inputdata;
+   stringstream header;
    int foundcontent = 0;
    int i;
    int newlinecounter = 0;
@@ -2002,7 +1997,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
    int chunked = 0;
 
    header << ends;
-   // cout << header.CSTRING << endl;
+   // cout << header.str().c_str() << endl;
    // cout << "-------------------------------------------------" << endl;
    while (header.getline(buffer, URI_BUFFER_SIZE)) {
       int len = strlen(buffer);
@@ -2079,7 +2074,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
    inputdata << ends;
 
    // cout << "CONTENT:=======================================" << endl;
-   // cout << inputdata.CSTRING;
+   // cout << inputdata.str().c_str();
    // cout << "===============================================" << endl;
 
    HumdrumFileBasic::read(inputdata);
@@ -2114,7 +2109,7 @@ void HumdrumFileBasic::readFromHttpURI(const char* webaddress) {
 // 
 // The message is finally closed by a last CRLF combination.
 
-int HumdrumFileBasic::getChunk(int socket_id, SSTREAM& inputdata, 
+int HumdrumFileBasic::getChunk(int socket_id, stringstream& inputdata, 
       char* buffer, int bufsize) {
    int chunksize = 0;
    int message_len;
@@ -2161,7 +2156,7 @@ int HumdrumFileBasic::getChunk(int socket_id, SSTREAM& inputdata,
 //
 
 int HumdrumFileBasic::getFixedDataSize(int socket_id, int datalength, 
-      SSTREAM& inputdata, char* buffer, int bufsize) {
+      stringstream& inputdata, char* buffer, int bufsize) {
    int readcount = 0;
    int readsize;
    int message_len;
@@ -2267,11 +2262,15 @@ void HumdrumFileBasic::makeVts(Array<char>& vtsstring) {
    HumdrumFileBasic::makeVts(vtsstring, (*this));
 }
 
+void HumdrumFileBasic::makeVts(string& vtsstring) {
+   HumdrumFileBasic::makeVts(vtsstring, (*this));
+}
+
 
 void HumdrumFileBasic::makeVts(Array<char>& vtsstring, 
       HumdrumFileBasic& infile) {
    int i;
-   SSTREAM tstream;
+   stringstream tstream;
    for (i=0; i<infile.getNumLines(); i++) {
       if (strncmp(infile[i][0], "!!!VTS", 6) == 0) {
          continue;
@@ -2279,12 +2278,28 @@ void HumdrumFileBasic::makeVts(Array<char>& vtsstring,
       tstream << infile[i] << (char)0x0a;
    }
    tstream << ends;
-   int len = strlen(tstream.CSTRING);
-   unsigned long checksum = CheckSum::crc32(tstream.CSTRING, len);
+   int len = strlen(tstream.str().c_str());
+   unsigned long checksum = CheckSum::crc32(tstream.str().c_str(), len);
    char buffer[128] = {0};
    sprintf(buffer, "!!!VTS: %lu", checksum);
    vtsstring.setSize(strlen(buffer) + 1);
    strcpy(vtsstring.getBase(), buffer);
+}
+
+void HumdrumFileBasic::makeVts(string& vtsstring, 
+      HumdrumFileBasic& infile) {
+   stringstream tstream;
+   for (int i=0; i<infile.getNumLines(); i++) {
+      if (strncmp(infile[i][0], "!!!VTS", 6) == 0) {
+         continue;
+      }
+      tstream << infile[i] << (char)0x0a;
+   }
+	string tempstr = tstream.str();
+   unsigned long checksum = CheckSum::crc32(tempstr.c_str(), tempstr.size());
+   char buffer[128] = {0};
+   sprintf(buffer, "!!!VTS: %lu", checksum);
+   vtsstring = buffer;
 }
 
 
@@ -2299,10 +2314,14 @@ void HumdrumFileBasic::makeVtsData(Array<char>& vtsstring) {
    HumdrumFileBasic::makeVtsData(vtsstring, (*this));
 }
 
+void HumdrumFileBasic::makeVtsData(string& vtsstring) {
+   HumdrumFileBasic::makeVtsData(vtsstring, (*this));
+}
+
 void HumdrumFileBasic::makeVtsData(Array<char>& vtsstring, 
       HumdrumFileBasic& infile) {
    int i;
-   SSTREAM tstream;
+   stringstream tstream;
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isData()) {
          continue;
@@ -2310,13 +2329,29 @@ void HumdrumFileBasic::makeVtsData(Array<char>& vtsstring,
       tstream << infile[i] << (char)0x0a;
    }
    tstream << ends;
-   int len = strlen(tstream.CSTRING);
-   unsigned long checksum = CheckSum::crc32(tstream.CSTRING, len);
+   int len = strlen(tstream.str().c_str());
+   unsigned long checksum = CheckSum::crc32(tstream.str().c_str(), len);
    char buffer[128] = {0};
    sprintf(buffer, "!!!VTS-data: %lu", checksum);
    vtsstring.setSize(strlen(buffer) + 1);
    strcpy(vtsstring.getBase(), buffer);
 }
 
+void HumdrumFileBasic::makeVtsData(string& vtsstring, 
+      HumdrumFileBasic& infile) {
+   stringstream tstream;
+   for (int i=0; i<infile.getNumLines(); i++) {
+      if (!infile[i].isData()) {
+         continue;
+      }
+      tstream << infile[i] << (char)0x0a;
+   }
+	string tempstring = tstream.str();
+   unsigned long checksum = CheckSum::crc32(tempstring.c_str(), tempstring.size());
+   char buffer[128] = {0};
+   sprintf(buffer, "!!!VTS-data: %lu", checksum);
+   vtsstring = buffer;
+}
 
-// md5sum: ade20f80d810702755a5e2aac8395c32 HumdrumFileBasic.cpp [20050403]
+
+

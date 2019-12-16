@@ -15,11 +15,10 @@
 
 #include "MuseRecordBasic.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-#else
-   #include <iostream.h>
-#endif
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 class MuseRecord : public MuseRecordBasic {
    public:
@@ -186,6 +185,7 @@ class MuseRecord : public MuseRecordBasic {
       int              beam256Q                     (void);
       char*            getKernBeamStyle             (char* output);
       void             setBeamInfo                  (Array<char>& strang);
+      void             setBeamInfo                  (string& strang);
 
       // columns 32 -- 43: additional notation
       char*            getAdditionalNotationsField  (char* output);
