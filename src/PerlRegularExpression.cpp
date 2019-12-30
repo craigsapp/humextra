@@ -1223,7 +1223,6 @@ int PerlRegularExpression::getTokensWithEmpties(vector<string>& output,
    int oindex;
    int stepsize;
    int strsize;
-   char* cptr;
    // remember: anchor is still active
    while (pre.search(ptr, spat.c_str())) {
       oindex = (int)output.size();
