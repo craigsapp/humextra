@@ -437,29 +437,23 @@ void expandSpines(vector<int>& field, vector<int>& subfield, vector<int>& model,
 void reverseSpines(vector<int>& field, vector<int>& subfield, vector<int>& model,
 		HumdrumFile& infile, const string& exinterp) {
 
-	vector<int> target;
-	target.resize(infile.getMaxTracks()+1);
-	fill(target.begin(), target.end(), 0);
-
-	int t;
-
-	for (t=1; t<=infile.getMaxTracks(); t++) {
+	vector<int> target(infile.getMaxTracks()+1, 0);
+	for (int t=1; t<=infile.getMaxTracks(); t++) {
 		if (infile.getTrackExInterp(t) == exinterp) {
-			target[t] = 1;
+			target.at(t) = 1;
 		}
 	}
 
 	field.reserve(infile.getMaxTracks()*2);
 	field.resize(0);
 
-	int i, j;
 	int lasti = target.size();
-	for (i=(int)target.size()-1; i>0; i--) {
-		if (target[i]) {
+	for (int i=(int)target.size()-1; i>0; i--) {
+		if (target.at(i)) {
 			lasti = i;
 			field.push_back(i);
-			for (j=i+1; j<(int)target.size(); j++) {
-				if (!target[j]) {
+			for (int j=i+1; j<(int)target.size(); j++) {
+				if (!target.at(j)) {
 					field.push_back(j);
 				} else {
 					break;
@@ -474,17 +468,17 @@ void reverseSpines(vector<int>& field, vector<int>& subfield, vector<int>& model
 	if (lasti != 1) {
 		extras = lasti - 1;
 		field.resize(field.size()+extras);
-		for (i=0; i<(int)field.size()-extras; i++) {
+		for (int i=0; i<(int)field.size()-extras; i++) {
 			field[(int)field.size()-1-i] = field[(int)field.size()-1-extras-i];
 		}
-		for (i=0; i<extras; i++) {
+		for (int i=0; i<extras; i++) {
 			field[i] = i+1;
 		}
 	}
 
 	if (debugQ) {
 		cout << "!!reverse: ";
-		for (i=0; i<(int)field.size(); i++) {
+		for (int i=0; i<(int)field.size(); i++) {
 			cout << field[i] << " ";
 		}
 		cout << endl;
