@@ -2,7 +2,7 @@
 #
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Mon Mar 21 17:06:33 PDT 2016
-# Last Modified: Mon Mar 21 19:12:56 PDT 2016
+# Last Modified: Tue Jan  3 02:23:00 PST 2017 word1'word2 splits
 # Filename:      lyrics
 # Syntax:        perl 5
 #
@@ -22,50 +22,146 @@
 use strict;
 use Getopt::Long;
 
-my $htmlQ  = 0;   # display as html
-my $bodyQ  = 0;   # embed HTML code in full page
-my $verseQ = 0;   # display verse numbers
-my $titleQ = 0;   # display the title
+my $extractx  = "/project/museinfo/bin/extractx";
+my $serialize = "/project/museinfo/bin/serialize";
+my $humcat    = "/project/museinfo/bin/humcat";
+
+my $boringWords = <<"EOT";
+il 'l lo l' la gli gl' le un un’ uno una de di d' del dello della dell'
+del' dei de' degli delle a &agrave; a' al allo alla all' ai agli agl' alle da
+da' dal dallo dalla dall' dai dagl' dalle in 'n nel nello nella nell'
+nei ne' negli negl' nelle con co' su su' s&ugrave; sul sullo sulla sull' sui
+sugli sugl' sulle per tra trà fra frà e et o ò che ch&egrave; ch&eacute; ch' ne
+n&egrave; n&eacute; n' perch&eacute; perch' poich&eacute; poich' senza senz' se s' quando quand'
+come com' anche anch
+EOT
+
+$boringWords =~ s/\s*$//s;
+$boringWords =~ s/^\s*//s;
+
+my @boringList = split(/\s+/s, $boringWords);
+my %boringHash;
+foreach my $boring (@boringList) {
+   $boringHash{$boring} = 0;
+   # $boringHash{$boring} = 1;
+}
+
+my $Columns = 6;  # column count for wordlist html display
+my $htmlQ   = 0;  # display as html
+my $bodyQ   = 0;  # embed HTML code in full page
+my $verseQ  = 0;  # display verse numbers
+my $wordsQ  = 0;  # display as sorted list of words
+
+my %WORDS;
 
 Getopt::Long::Configure("bundling");
 GetOptions (
    'h|html'  => \$htmlQ,
    'b|body'  => \$bodyQ,
-   'v|verse' => \$verseQ
+   'v|verse' => \$verseQ,
+   'w|words' => \$wordsQ
 );
-
-if (@ARGV == 0) {
-   print "Options:\n";
-   print "\t-h\tEmbed output in HTML file\n";
-   print "\t-b\tEmbed output in HTML <body> element\n";
-   print "\t-v\tShow verse numbers\n";
-   print "\t-t\tShow title\n";
-   print "\n";
-   exit(1);
-}
 
 my @files = @ARGV;
 
 printHeader() if $bodyQ;
 printStyle() if $htmlQ;
+printScript() if $htmlQ;
 
 foreach my $file (@files) {
    if (@files > 1) {
       if ($htmlQ) {
          print "\n<h2> $file <hr noshade> </h2>\n";
       } else {    
-         print "\n========= Lyrics for $file\n\n";
+         if (!$wordsQ) {
+            print "\n========= Lyrics for $file\n\n";
+         }
       }
    }
    printFileLyrics($file);
 }
 
 printFooter() if $bodyQ;
-
+printWords() if $wordsQ;
 
 exit(0);
 
 ###########################################################################
+
+
+##############################
+##
+## printWords --
+##
+
+sub printWords {
+   my @list = sort keys %WORDS;
+   my $i;
+   my %dmap;
+   my $item;
+   for ($i=0; $i<@list; $i++) {
+      $item = $list[$i];
+      if ($item =~ s/&(.)([^;]*);/\1/g) {
+         $item = $item . "_";
+      }
+      $item =~ s/'//g;
+      $dmap{$item} = $list[$i];
+   }
+   @list = sort keys %dmap;
+
+   if (!$htmlQ) {
+      foreach my $item (@list) {
+         print "$WORDS{$item}\t$item\n";
+      }
+      return;
+   }
+
+   my $total = keys %WORDS;
+
+   my @eachcol;
+   my $minval = int($total / $Columns);
+   for ($i=0; $i<$Columns; $i++) {
+      $eachcol[$i] = $minval;
+   }
+   my $remainder = $total % $Columns;
+   for ($i=0; $i<$remainder; $i++) {
+      $eachcol[$i]++;
+   }
+   my @starts;
+   my $sum = 0;
+   for ($i=0; $i<@eachcol; $i++) {
+      $starts[$i] = $sum;
+      $sum += $eachcol[$i];
+   }
+
+   my @words = @list;
+   my @counts;
+   for ($i=0; $i<@words; $i++) {
+      $counts[$i] = $WORDS{$dmap{$words[$i]}};
+   }
+
+   print "<table class='freq-table'>\n";
+   print "<tr>\n";
+   for ($i=0; $i<$Columns; $i++) {
+      print "<td>";
+
+      print "<table class='wordlist'>";
+      print "<tr><td><b>Count</b></td><td><b>Word</b></td></tr>\n";
+      #foreach my $item (@list) {
+      for (my $j=$starts[$i]; $j < $starts[$i] + $eachcol[$i]; $j++) {
+         my $item = $dmap{$words[$j]};
+         my $c = $counts[$j];
+         print "<tr><td>$c\t</td><td><span class='word'>$item</span></td></tr>\n";
+      }
+      print "</table>";
+
+      print "</td>";
+   }
+   print "</tr>\n";
+   print "</table>\n";
+
+}
+
 
 
 ##############################
@@ -78,32 +174,34 @@ sub printFileLyrics {
    my $line;
    my $counter = 0;
    my $tcounter = 0;
-   my @contents = `humcat $file | extractx -r | serialize`;
+   my @contents = `$humcat $file | $extractx -r | $serialize`;
    for (my $i=0; $i<@contents; $i++) {
       $line = $contents[$i];
       chomp $line;
       if (!$counter && !$tcounter) {
          if ($line =~ /^\!\!\!OTL[^\s]*:\s*(.*)\s*$/) {
             my $title = $1;
-            if ($titleQ) {
-               if ($htmlQ) {
-                  print "<h2>$title</h2>\n";
+            if ($htmlQ) {
+               if ($wordsQ) {
+                   print "<h2 id='wf'>Word frequencies</h2>\n";
                } else {
-                  print "TITLE: $title\n\n";
+                   print "<h2 id='title'>$title</h2>\n";
                }
+            } else {
+               print "TITLE: $title\n\n";
             }
             $tcounter++;
          }
       }
       if ($line eq "**kern") {
-         if (!$counter) {
+         if (!$wordsQ && !$counter) {
             print "\n<table class=\"lyrics\">\n" if $htmlQ;
             $counter++;
          }
          processPart($i, @contents);
       }
    }
-   print "\n</table>\n" if $htmlQ;
+   print "\n</table>\n" if $htmlQ && !$wordsQ;
 }
 
 
@@ -120,17 +218,19 @@ sub processPart {
    chomp $contents[$i];
    while (($i < @contents) && ($contents[$i] !~ /\*\*kern/)) {
       if ($contents[$i] =~ /^\*I"(.*)/) {
-         if ($htmlQ) {
+         if ($htmlQ && !$wordsQ) {
             print "\n<tr><td class=\"partname\" colspan=\"2\">$1</td></tr>\n";
          } else {
-            print "\n== $1 ==";
+            if (!$wordsQ) {
+               print "\n== $1 ==";
+            }
          }
          $i++;
          chomp $contents[$i];
          next;
       }
       if ($contents[$i] eq "**text") {
-         if ($htmlQ) {
+         if ($htmlQ && !$wordsQ) {
             print "\n\n<tr><td class=\"verse\">verse&nbsp;$vcount</td><td>\n\t";
          } elsif ($verseQ) {
             print "\n" if $vcount == 1;
@@ -154,7 +254,9 @@ sub processPart {
       return if $contents[$i] =~ /\*\*kern/;
    }
    
-   print "\n";
+   if (!$wordsQ) {
+      print "\n";
+   }
 }
 
 
@@ -203,6 +305,8 @@ sub processVerse {
       } else {
          $hasdash = 0;
       }
+      $line =~ s/^\s*&\s+/&nbsp;&hellip;&nbsp;/;
+      $line =~ s/\&\s*$/&nbsp;&hellip;&nbsp;/;
 
       $line =~ s/^-//;
       $output .= $line;
@@ -224,13 +328,288 @@ sub processVerse {
 
 sub printVerse {
    my ($verse) = @_;
+   if ($wordsQ) {
+      $verse =~ s/</ /g;
+      $verse =~ s/>/ /g;
+      $verse =~ s/"/ /g;
+      $verse =~ s/, ?/ /g;
+      $verse =~ s/! ?/ /g;
+      $verse =~ s/\. ?/ /g;
+      $verse =~ s/&nbsp;/ /g;
+      $verse =~ s/&hellip;/ /g;
+      $verse =~ s/: ?/ /g;
+      $verse =~ s/\? ?/ /g;
+      my @list = split(/\s+/, $verse);
+      foreach my $item (@list) {
+         if ($item =~ /[A-Z]/i) {
+            $item = lcfirst $item;
+            if ($item =~ /(.+')(.+)/) {
+               my $first = $1;
+               my $sec = $2;
+               $sec =~ s/;$// if $sec !~ /&/;
+               $first =~ s/^"//;
+               $WORDS{$first}++ unless $boringHash{$first};
+               $WORDS{$sec}++ unless $boringHash{$sec};
+            } else {
+               $item =~ s/;$// if $item !~ /&/;
+               $item =~ s/^"//;
+               $WORDS{$item}++ unless $boringHash{$item};
+            }
+         }
+      }
+      return;
+   }
    $verse =~ s/</&lt;/g;
    $verse =~ s/>/&gt;/g;
-   print $verse;
+   if (!$htmlQ) {
+      print $verse;
+   } else {
+      printVerseByWord($verse);
+   }
    print "\n";
 }
 
 
+
+##############################
+##
+## printVerseByWord --
+##
+
+sub printVerseByWord {
+   my ($verse) = @_;
+   my @spaced = split(/\s+/, $verse);
+   my $output = "";
+   foreach my $item (@spaced) {
+      $output .= printSingleWordSpan($item);
+      $output .= " ";
+   }
+
+   print $output;
+}
+
+
+
+##############################
+##
+## printSingleWordSpan --
+##
+
+sub printSingleWordSpan {
+   my ($word) = @_;
+   $word =~ s/&lt;/</g;
+   $word =~ s/&gt;/>/g;
+   my $prefix = "";
+   my $postfix = "";
+   if ($word =~ /&/) {
+      $word =~ /([<"]*)([^.,>!:?]*)([.,>!:?]*)/;
+      $prefix = $1;
+      $word = $2;
+      $postfix = $3;
+   } else {
+      $word =~ /([<"]*)([^.,>!:;?]*)([.,>!:;?]*)/;
+      $prefix = $1;
+      $word = $2;
+      $postfix = $3;
+   }
+   $prefix =~ s/</&lt;/g;
+   $postfix =~ s/>/&gt;/g;
+   if ($word =~ /(.+')(.+)/) {
+      return "$prefix<span class='word'>$1</span><span class='word'>$2</span>$postfix";
+   } else {
+      return "$prefix<span class='word'>$word</span>$postfix";
+   }
+}
+
+
+##############################
+##
+## printScript --
+##
+
+sub printScript {
+   print <<"EOT";
+<script>
+
+var SORT = "alphabetic";
+var SORTALPHABETIC = [];
+var SORTNUMERIC = [];
+var LASTWORD = "";
+var WORDLIST = {};
+var ZCOUNT = 0;
+
+document.addEventListener("DOMContentLoaded", function() {
+   if (ZCOUNT > 0) {
+      return;
+   }
+   ZCOUNT++;
+   prepareWordlist();
+   var wf = document.querySelector("#wf");
+   if (wf) {
+      wf.addEventListener("click", function(event) { toggleSort(event); });
+   }
+});
+
+document.addEventListener("mouseover", function(event) {
+   if (!event.target.nodeName.match(/^SPAN\$/i)) {
+      return;
+   }
+   event.preventDefault();
+   var text = event.target.innerHTML.toLowerCase();
+   if (text === LASTWORD) {
+      return;
+   }
+   unhighlightWord(LASTWORD);
+   highlightWord(text);
+   LASTWORD = text;
+});
+
+
+function unhighlightWord(word) {
+   var list = WORDLIST[word]
+   if (!list) {
+      return;
+   }
+   for (var i=0; i<list.length; i++) {
+      list[i].style.color = "";
+   }
+}
+
+function highlightWord(word) {
+   var list = WORDLIST[word]
+   if (!list) {
+      return;
+   }
+   for (var i=0; i<list.length; i++) {
+      list[i].style.color = "red";
+   }
+}
+
+
+function prepareWordlist() {
+   var words = document.querySelectorAll("span.word");
+   for (var i=0; i<words.length; i++) {
+      word = words[i].innerHTML.toLowerCase();
+      if (WORDLIST[word]) {
+         WORDLIST[word].push(words[i]);
+      } else {
+         WORDLIST[word] = [];
+         WORDLIST[word].push(words[i]);
+      }
+   }
+}
+
+
+function toggleSort(event) {
+   event.preventDefault();
+   if (SORT === "alphabetic") {
+      sortNumeric();
+      SORT = "numeric";
+   } else {
+      sortAlphabetic();
+      SORT = "alphabetic";
+   }
+   prepareWordlist();
+   unhighlightWord(LASTWORD);
+   LASTWORD = "";
+}
+
+
+function sortNumeric() {
+   var entries = document.querySelectorAll("table.wordlist tr");
+   var alphaentries;
+   if (SORTALPHABETIC.length > 0) {
+      alphaentries = SORTALPHABETIC; 
+   } else {
+      for (var i=0; i<entries.length; i++) {
+         SORTALPHABETIC.push(entries[i].innerHTML);
+      }
+   }
+
+   var numentries;
+   if (SORTNUMERIC.length > 0) {
+      numentries = SORTNUMERIC;
+   } else {
+      numentries = SORTALPHABETIC.concat()
+                         .sort(function(a, b) {
+         var matches;
+
+         if (a.match("Count")) {
+            return 1;
+         }
+         if (b.match("Count")) {
+            return -1;
+         }
+
+         var regexp1 = /<td>([0-9]+)/
+         var anum;
+         if (matches = a.match(regexp1)) {
+            anum = matches[1];
+         }
+
+         var regexp2 = /<span[^>]*>([^<]+)<.span>/;
+         var atext;
+         if (matches = a.match(regexp2)) {
+            atext = matches[1];
+         }
+
+         if (!anum) { return -1; }
+         if (!atext) { return -1; }
+
+         var bnum;
+         if (matches = b.match(regexp1)) {
+            bnum = matches[1];
+         }
+
+         var btext;
+         if (matches = b.match(regexp2)) {
+            btext = matches[1];
+         }
+
+         if (!bnum) { return 1; }
+         if (!btext) { return 1; }
+
+
+         if (anum === bnum) {
+            return atext.localeCompare(btext);
+         } else {
+            return parseInt(bnum) - parseInt(anum);
+         }
+      }) ;
+      // console.log("NUMERIC SORT", numentries);
+   }
+
+   var counter = 0;
+   for (i=0; i<entries.length; i++) {
+      if (entries[i].innerHTML.match("Count")) {
+         continue;
+      }
+      entries[i].innerHTML = numentries[counter++];
+   }
+}
+
+
+function sortAlphabetic() {
+   var entries = document.querySelectorAll("table.wordlist tr");
+
+   var counter = 0;
+   for (i=0; i<entries.length; i++) {
+      if (entries[i].innerHTML.match("Count")) {
+         continue;
+      }
+      if (SORTALPHABETIC[counter].match("Count")) {
+         counter++;
+      }
+      entries[i].innerHTML = SORTALPHABETIC[counter++];
+   }
+}
+
+</script>
+
+EOT
+
+
+}
 
 ##############################
 ##
@@ -244,8 +623,19 @@ sub printStyle {
 
 <style>
 
-table.lyrics {
-   max-width: 1000px;
+
+.word, #wf {
+   cursor: pointer;
+}
+
+table,
+table tr,
+table tr td
+{ vertical-align: top; }
+
+
+table {
+   max-width: 800px;
 }
 
 .lyrics td {
@@ -266,6 +656,21 @@ td.verse {
 
 body {
    margin: 50px;
+}
+
+table.wordlist {
+   border-collapse: collapse;
+}
+
+table.wordlist td:first-child {
+   width: 50px;
+   text-align: right;
+   padding-right: 20px;
+}
+
+table.wordlist td {
+   padding: 0px;
+   margin: 0px;
 }
 
 </style>
