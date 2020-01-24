@@ -587,7 +587,7 @@ Array<RationalNumber> MeasureDur;  // used to decide centered whole rest
 Array<Array<Array<Coord>>> LayoutInfo;
 Array<Array<Coord>> GlobalLayoutInfo;
 int LastTPQPrinted;                // used for tpqs that change
-const char* muse2psoptionstring = "";  // used with --mo option
+string muse2psoptionstring;  // used with --mo option
 string NEWLINE;               // used to control the newline style
 
 Array<Array<int>> TextAssignment;  // used to keep track of lyics by staff
@@ -1925,7 +1925,7 @@ void printMuse2PsOptions(HumdrumFile& infile) {
 	}
 
 	string ostring;
-	if (strlen(muse2psoptionstring) > 0) {
+	if (muse2psoptionstring.size() > 0) {
 		ostring = muse2psoptionstring;
 	}
 	if (kflag > 0) {
@@ -1944,7 +1944,6 @@ void printMuse2PsOptions(HumdrumFile& infile) {
 	if (mensuralQ) {
 		pre.sar(ostring, "$", "W1", "");  // thin barlines
 	}
-
 
 	if (!ostring.empty()) {
 		if (!pre.search(ostring, "^=", "")) {
@@ -2899,7 +2898,6 @@ int appendTimeSignature(char* buffer, HumdrumFile& infile, int line,
 		stringstream temps;
 		temps << "T:";
 		temps << timetop << "/" << timebot;
-		temps << ends;
 		strcat(buffer, temps.str().c_str());
 	} else {
 		// no time signature found in interpretation region.
@@ -3018,7 +3016,6 @@ void insertHeaderRecords(HumdrumFile& infile, MuseData& tempdata,
 	// Record 12: 		<name1>: part <x> of <number in group>
 	stringstream partnum;
 	partnum << "score: part " << (total - counter)+1 << " of " << total;
-	partnum << ends;
 	arecord.clear();
 	arecord.insertString(1, partnum.str().c_str());
 	tempdata.append(arecord);
@@ -8336,7 +8333,6 @@ void removeOldTimeStamps(MuseData& part) {
 		tstream << part[i] << "\n";
 	}
 
-	tstream << ends;
 	part.clear();
 	part.read(tstream);
 
@@ -8809,7 +8805,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
 		Copyright = opts.getString("copyright").c_str();
 	}
 	sfzQ = dynamicsQ;
-	muse2psoptionstring = opts.getString("muse2ps-options").c_str();
+	muse2psoptionstring = opts.getString("muse2ps-options");
 	LyricSpines  = opts.getString("lyrics-spines").c_str();
 
 	if (opts.getBoolean("unix")) {
