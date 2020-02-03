@@ -17,13 +17,8 @@
 #include <string.h>
 #include <stdio.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <fstream>
-#else
-   #include <iostream.h>
-   #include <fstream.h>
-#endif
+#include <iostream>
+#include <fstream>
 
 
 // function declarations:
