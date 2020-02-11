@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Oct 23 19:44:36 PDT 2000
-// Last Modified: Mon Oct 23 19:44:38 PDT 2000
+// Last Modified: Tue Feb 11 07:26:13 PST 2020 Added --total option
 // Filename:      ...sig/examples/all/scordur.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/scordur.cpp
 // Syntax:        C++; museinfo
@@ -23,7 +23,7 @@ using namespace std;
 
 // function declarations
 void      checkOptions       (Options& opts, int argc, char* argv[]);
-void      displayResults     (HumdrumFile& hfile, int count, 
+double    displayResults     (HumdrumFile& hfile, int count, 
 					               const string& filename);
 void      example            (void);
 void      usage              (const string& command);
@@ -44,7 +44,8 @@ int main(int argc, char** argv) {
 	numinputs = options.getArgCount();
  
 	string filename;
-
+	double total = 0.0;
+	int counter = 0;
 	for (int i=0; i<numinputs || i==0; i++) {
 		hfile.clear();
 
@@ -58,7 +59,11 @@ int main(int argc, char** argv) {
 		}
 	  
 		hfile.analyzeRhythm();
-		displayResults(hfile, numinputs, filename);
+		total += displayResults(hfile, numinputs, filename);
+		counter++;
+	}
+	if (counter && options.getBoolean("total")) {
+		cout << "Total:\t" << total << endl;
 	}
 
 	return 0;
@@ -73,6 +78,7 @@ int main(int argc, char** argv) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
+	opts.define("t|total=b", "display total duration of all inputs");
 	opts.define("author=b");               // author of program
 	opts.define("version=b");              // compilation info
 	opts.define("example=b");              // example usages
@@ -85,7 +91,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 			  << "craig@ccrma.stanford.edu, October 2000" << endl;
 		exit(0);
 	} else if (opts.getBoolean("version")) {
-		cout << argv[0] << ", version: 23 October 2000" << endl;
+		cout << argv[0] << ", version: 11 February 2020" << endl;
 		cout << "compiled: " << __DATE__ << endl;
 		cout << MUSEINFO_VERSION << endl;
 		exit(0);
@@ -102,20 +108,20 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
 //////////////////////////////
 //
-// displayResults -- display the total rhythmic duration(s) 
+// displayResults -- display the total rhythmic duration
 //     of the file.
 //
 
-void displayResults(HumdrumFile& hfile, int count, const string& filename) {
-	for (int i=0; i<hfile.getNumLines(); i++) {
-		if ((hfile[i].getType() == E_humrec_interpretation) &&
-			 (strcmp(hfile[i][0], "*-") == 0)) {
-			if (count > 1) {
-				cout << filename << ":\t";
-			}
-			cout << hfile.getAbsBeat(i) << "\n";
-		}
+double displayResults(HumdrumFile& hfile, int count, const string& filename) {
+	double output = 0.0;
+	int maxline = hfile.getNumLines() - 1;
+	if (maxline < 0) {
+		return output;
 	}
+	output = hfile[maxline].getAbsBeat();
+	cout << filename << ":\t";
+	cout << output << "\n";
+	return output;
 }
 
 
