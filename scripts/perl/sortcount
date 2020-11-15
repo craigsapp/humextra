@@ -2,7 +2,7 @@
 #
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Sat Apr  6 23:09:41 PDT 2013
-# Last Modified: Mon Jan 28 21:06:14 PST 2019
+# Last Modified: Sun Nov 15 15:56:55 PST 2020
 # Filename:      sortcount
 # Syntax:        perl 5
 #
@@ -190,6 +190,7 @@ EOT
 
 	my $sort = "";
 	$sort = sortByInterval() if $sorttype =~ /int/i;
+	$sort = sortByNumber() if $sorttype =~ /num/i;
 	my $sorttext = "";
 	if ($sort !~ /^\s*$/) {
 		$sorttext = ",\n\t\t\t\"sort\": $sort\n";
@@ -213,7 +214,7 @@ EOT
 		$axis1 = "y";
 		$axis2 = "x";
 	}
-	
+
 print <<"EOT";
 	},
 	"mark": 'bar',
@@ -289,6 +290,37 @@ EOT
 
 ##############################
 ##
+## sortByNumber --
+##
+
+sub sortByNumber {
+	my @keys;
+	foreach my $line (@output) {
+		chomp $line;
+		if ($line =~ /^\s*([^\s]+)\s+(.*)\s*/) {
+			my $label = $2;
+			$keys[@keys] = $label;
+		}
+
+		@keys = sort {
+			return int($a) <=> int($b);
+		} @keys;
+
+	}
+	my $output = "[";
+	for (my $i=0; $i<@keys; $i++) {
+		$output .= "\"$keys[$i]\"";
+		if ($i <$#keys) {
+			$output .= ",";
+		}
+	}
+	$output .= "]";
+
+	return $output;
+}
+
+##############################
+##
 ## sortByInterval --
 ##
 
@@ -350,7 +382,7 @@ sub sortByInterval {
 			} elsif ($aqual =~ "d") {
 				$aqual = -(length $aqual);
 			}
-			
+
 			if ($bqual eq "P") {
 				$bqual = 0;
 			} elsif ($bqual eq "m") {
@@ -368,7 +400,7 @@ sub sortByInterval {
 				return $bqual <=> $aqual;
 			}
 		} @keys;
-	
+
 	}
 	my $output = "[";
 	for (my $i=0; $i<@keys; $i++) {
@@ -378,7 +410,7 @@ sub sortByInterval {
 		}
 	}
 	$output .= "]";
-	
+
 	return $output;
 }
 
