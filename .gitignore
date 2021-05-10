@@ -52,4 +52,5 @@ external/pcre-8.35/pcrecpparg.h
 external/pcre-8.35/pcregrep
 external/pcre-8.35/pcretest
 external/pcre-8.35/stamp-h1
-
+external/pcre-8.35/autom4te.cache
+external/pcre-8.35/config.h.in~
