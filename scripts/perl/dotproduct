@@ -1,0 +1,258 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Mon Jan 25 17:52:10 PST 2021
+# Last Modified: Mon Jan 25 18:28:12 PST 2021
+# Filename:      dotproduct
+# Syntax:        perl 5
+#
+# Description:   Calculate dot-product between two sets of labeled histograms.
+#
+# Options:
+#    -m     merge two separate histogram files into a shared list of categories.
+#
+
+use strict;
+use List::Util qw/sum/;
+use List::Util qw/max/;
+use Getopt::Long;
+Getopt::Long::Configure("bundling");
+
+my $bothQ    = 0;   # normalize across both histograms
+my $dotQ     = 0;   # include dot-product analysis in merged histogram list
+my $helpQ    = 0;   # Show help and exit
+my $mergeQ   = 0;   # Output merged histogram list
+my $normmax  = 0;   # normalize by maximum value in histogram(s)
+my $normsum  = 0;   # normalize by sum of histogram(s)
+
+GetOptions (
+	'b|both'           => \$bothQ,
+	'd|dot|dot-product'=> \$dotQ,
+	'h|help|options'   => \$helpQ,
+	'm|merge'          => \$mergeQ,
+	'n|normmax:s'      => \$normmax,
+	'N|normsum:s'      => \$normsum
+);
+
+if (@ARGV < 2) {
+	print STDERR "Error: maximum of two input files allow.\n";
+	printHelpAndExit();
+}
+
+printHelpAndExit() if $helpQ;
+
+if (@ARGV != 2) {
+	print STDERR "Cannot handle this confguration yet\n.";
+	exit(1);
+}
+
+my @contents1;
+my @contents2;
+
+if (@ARGV == 2) {
+	@contents1 = getContents($ARGV[0]);
+	@contents2 = getContents($ARGV[1]);
+} else {
+	die;
+}
+
+if ($mergeQ) {
+	my $output = mergeContents();
+	print $output;
+} else {
+	# my $output = dotProduct();
+	my $merge = mergeContents();
+	my $output = calculateDotProduct($merge);
+	print "$output\n";
+}
+
+
+exit(0);
+
+
+###########################################################################
+
+
+
+##############################
+##
+## calculateDotProduct --
+##
+
+sub calculateDotProduct {
+	my ($filecontents) = @_;
+	my @contents = split("\n", $filecontents);
+	chomp @contents;
+	my $sum = 0;
+	foreach my $line (@contents) {
+		next if $line eq "";
+		next if $line =~ /^[!*]/;
+		my @data = split(/\t+/, $line);
+		if (@data < 3) {
+			die "Need as least three columns of data\n";
+		}
+		my $product = $data[0] * $data[1];
+		$sum += $product;
+	}
+	return $sum;
+}
+
+
+
+##############################
+##
+## getContents -- Get file contents and strip newlines
+##
+
+sub getContents {
+	my ($filename) = @_;
+	open(FILE, $filename) or die "Cannot read $filename.\n";
+	my @output = <FILE>;
+	close FILE;
+	chomp @output;
+	return @output;
+}
+
+
+
+##############################
+##
+## mergeContents -- Merge the two separate histograms into a single file.
+##
+
+sub mergeContents {
+	my %values1;
+	my %values2;
+	%values1 = getValues(@contents1);
+	%values2 = getValues(@contents2);
+	my @keys1 = keys %values1;
+	my @keys2 = keys %values2;
+	my %labels;
+	my %labels2;
+	foreach my $key (@keys1) {
+		my $test = $labels{$key};
+		if ($test ne "") {
+			print "Warning: duplicate label in file 1: $test\n";
+		}
+		$labels{$key} = 1;
+	}
+	foreach my $key (@keys2) {
+		my $test = $labels2{$key};
+		if ($test ne "") {
+			print "Warning: duplicate label in file 1: $test\n";
+		}
+		$labels{$key} = 1;
+		$labels2{$key} = 1;
+	}
+
+	my $scale1 = 0;
+	my $scale2 = 0;
+	if ($normmax) {
+		my $max1 = max map {abs $_} values %values1;
+		my $max2 = max map {abs $_} values %values2;
+print "MAX2 = $max2, MAX1 = $max1\n";
+		if ($bothQ) {
+			$max1 = $max2 if $max1 < $max2;
+			$max2 = $max1 if $max1 > $max2;
+		}
+		$scale1 = $normmax / $max1;
+		$scale2 = $normmax / $max2;
+	} elsif ($normsum) {
+		my $sum1 = sum values %values1;
+		my $sum2 = sum values %values2;
+		if ($bothQ) {
+			$sum1 = $sum2 if $sum1 < $sum2;
+			$sum2 = $sum1 if $sum1 > $sum2;
+		}
+		$scale1 = $normsum / abs($sum1);
+		$scale2 = $normsum / abs($sum2);
+	}
+
+	my @keys = sort keys %labels;
+	my $output = "";
+	my $dotproduct = 0;
+	$output .= "**num\t**num\t**label\n";
+	if (($scale1 > 0) || ($scale2 > 0)) {
+		$output .= "*s:$scale1\t*s:$scale2\t*\n";
+	} else {
+		$scale1 = 1;
+		$scale2 = 1;
+	}
+	foreach my $key (@keys) {
+		my $v1 = $values1{$key} * $scale1;
+		my $v2 = $values2{$key} * $scale2;
+		$dotproduct += $v1 * $v2;
+		$v1 = 0 if $v1 =~ /^$/;
+		$v2 = 0 if $v2 =~ /^$/;
+		$output .= "$v1\t$v2\t$key\n";
+	}
+	$output .= "*-\t*-\t*-\n";
+	if ($dotQ) {
+		$output .= "!!dot-produt: $dotproduct\n";
+	}
+}
+
+
+
+##############################
+##
+## getValues --
+##
+
+sub getValues {
+	my @contents = @_;
+	my %output;
+	my $negativeQ = 0;
+	foreach my $line (@contents) {
+		next if $line eq "";
+		next if $line =~ /^[!*]/;
+		my @data = split(/\t+/, $line);
+		if (@data < 2) {
+			my $count = @data;
+			die "Need at least two spines of data, but found $count fields in data line: $line\n";
+		}
+		$data[0] =~ s/^\s+//;
+		$data[0] =~ s/\s+$//;
+ 		next if $data[0] eq ".";
+		if (($data[0] !~ /^[+-]\d+\.?\d*$/) && ($data[0] !~ /^[+-]?\d*\.?\d+/)) {
+			die "Error: invalid number $data[0] for label $data[1]\n";
+		}
+		my $number = $data[0];
+		my $label = $data[1];
+		if ($number =~ /^-/) {
+			print STDERR "Warning: negative values are not good input: $number for label $label\n";
+		}
+		if ($output{$label} ne "") {
+			die "Duplicate label $label found in input.\n";
+		}
+		$output{$label} = $number;
+	}
+	return %output;
+}
+
+
+
+##############################
+##
+## printHelpAndExit --
+##
+
+sub printHelpAndExit {
+print STDERR <<"EOT";
+
+Usage: dotproduct file1.hmd file2.hmd
+
+Options:
+   -h   : Print this help message.
+   -m   : Merge two category histograms.
+	-n # : Normalize histograms by scaling max value to #.
+	-N # : Normalize histograms by scaling by sum of histogram scaled to #.
+	-b   : Normalize both histograms by the same scaling factor.
+
+EOT
+exit(1);
+
+}
+
+
+

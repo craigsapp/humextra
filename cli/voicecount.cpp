@@ -1,12 +1,12 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Oct  9 18:44:49 PDT 2013
-// Last Modified: Thu Oct 24 12:26:05 PDT 2013 Finished initial set of options
+// Last Modified: Mon May 10 11:36:15 PDT 2021 added -w option
 // Filename:      ...museinfo/examples/all/voicecount.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/voicecount.cpp
 // Syntax:        C++; museinfo
 //
-// Description:   Count the active number of voices/parts sounding at any 
+// Description:   Count the active number of voices/parts sounding at any
 //                given moment in the score.
 //
 
@@ -30,10 +30,12 @@ int       getNoteCount         (HumdrumFile& infile, int line);
 void      printExclusiveInterpretation(void);
 int       doAnalysis           (HumdrumFile& infile, int line);
 int       isAttack             (const string& token);
-void      printMeasureData     (vector<int>& analysis, HumdrumFile& infile, 
+void      printMeasureData     (vector<int>& analysis, HumdrumFile& infile,
                                 int line);
 void      printSummary         (vector<double>& Summary);
 int       isValidFile          (HumdrumFile& infile);
+void      waterFill            (vector<int>& analysis, HumdrumFile& infile, double water);
+void      checkForFill         (vector<int>& analysis, int start, vector<int>& index, HumdrumFile& infile, double duration);
 
 // global variables
 Options   options;             // database for command-line arguments
@@ -56,7 +58,8 @@ int       nograceQ     = 0;    // used with -G option
 int       validQ       = 0;    // used with -v option
 int       uniqueQ      = 0;    // used with -u option
 int       summaryQ     = 0;    // used with --summary option
-vector<double> Summary;         // used with --summary option
+double    water        = 0.0;  // used with --water-fill
+vector<double> Summary;        // used with --summary option
 int       SEGMENTS     = 0;    // used if there are more than one segment.
 
 ///////////////////////////////////////////////////////////////////////////
@@ -84,7 +87,7 @@ int main(int argc, char** argv) {
    if (summaryQ) {
       printSummary(Summary);
    }
-  
+
    return 0;
 }
 
@@ -119,14 +122,18 @@ void processFile(HumdrumFile& infile, const string& filename) {
       infile.analyzeRhythm("4");
    }
 
-   vector<int> analysis;
-   analysis.reserve(infile.getNumLines());
+   vector<int> analysis(infile.getNumLines(), 0);
+
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isData()) {
          continue;
       }
       analysis[i] = doAnalysis(infile, i);
    }
+
+	if (water > 0.0) {
+		waterFill(analysis, infile, water);
+	}
 
    if (summaryQ) {
       return;
@@ -168,7 +175,7 @@ void processFile(HumdrumFile& infile, const string& filename) {
       } else if (infile[i].isBarline()) {
          if (pre.search(infile[i][0], "\\d")) {
             firstdata = 1;
-         } 
+         }
          if (appendQ)  { cout << '\t'; }
          cout << infile[i][0];
          if (prependQ) { cout << '\t'; }
@@ -249,7 +256,7 @@ void printMeasureData(vector<int>& analysis, HumdrumFile& infile, int line) {
             break;
          }
       }
-      if (!infile[i].isData()) { 
+      if (!infile[i].isData()) {
          continue;
       }
       if (nograceQ && (infile[i].getDuration() == 0)) {
@@ -280,7 +287,7 @@ int doAnalysis(HumdrumFile& infile, int line) {
       return -1;
    }
    if (uniqueQ || noteQ || twelveQ || fortyQ || sevenQ) {
-      value = getNoteCount(infile, line); 
+      value = getNoteCount(infile, line);
    } else {
       value = getVoiceCount(infile, line);
    }
@@ -305,28 +312,28 @@ void printExclusiveInterpretation(void) {
          cout << "**up#";
       }
    } else if (twelveQ) {
-      if (pcQ) { 
-         cout << "**12pc#"; 
+      if (pcQ) {
+         cout << "**12pc#";
       } else if (allQ) {
-         cout << "**12p#"; 
+         cout << "**12p#";
       } else {
-         cout << "**12up#"; 
+         cout << "**12up#";
       }
    } else if (fortyQ) {
-      if (pcQ) { 
-         cout << "**40pc#"; 
+      if (pcQ) {
+         cout << "**40pc#";
       } else if (allQ) {
-         cout << "**40p#"; 
+         cout << "**40p#";
       } else {
-         cout << "**40up#"; 
+         cout << "**40up#";
       }
    } else if (sevenQ) {
-      if (pcQ) { 
-         cout << "**7pc#"; 
+      if (pcQ) {
+         cout << "**7pc#";
       } else if (allQ) {
-         cout << "**7p#"; 
+         cout << "**7p#";
       } else {
-         cout << "**7up#"; 
+         cout << "**7up#";
       }
    } else {
       cout << "**v#";
@@ -373,7 +380,7 @@ int getVoiceCount(HumdrumFile& infile, int line) {
          for (k=0; k<(int)tokens.size(); k++) {
             if (isAttack(tokens[k])) {
                acount++;
-            } 
+            }
          }
          if (acount == 0) {
             continue;
@@ -394,7 +401,7 @@ int getVoiceCount(HumdrumFile& infile, int line) {
             count++;
          }
       }
-   } 
+   }
    return count;
 }
 
@@ -482,7 +489,7 @@ int getNoteCount(HumdrumFile& infile, int line) {
    } else if (allQ || noteQ) {
       return count;
    }
-   
+
    // shouldn't get here...
    return -1;
 }
@@ -526,8 +533,8 @@ void printSummary(vector<double>& Summary) {
    for (int i=0; i<(int)Summary.size(); i++) {
       if (Summary[i] != 0.0) {
          sum += Summary[i];
-         if (i > maxx) { maxx = i; }   
-         if (i < minn) { minn = i; }   
+         if (i > maxx) { maxx = i; }
+         if (i < minn) { minn = i; }
          weight += (i+1) * Summary[i];
       }
    }
@@ -578,23 +585,24 @@ void printSummary(vector<double>& Summary) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("a|append=b",         "append analysis data to input"); 
+   opts.define("a|append=b",         "append analysis data to input");
    opts.define("u|uniq|unique=b",    "count unique number of notes");
-   opts.define("p|prepend=b",        "prepend analysis data to input"); 
-   opts.define("y|summary=b",        "list voice counts by durations"); 
-   opts.define("c|pc|pitch-class=b", "pitch classes only; ignore octaves"); 
-   opts.define("12|twelve-tone=b",   "count of twelvetone pitch classes"); 
-   opts.define("40|base-40=b",       "count of base-40 pitches "); 
-   opts.define("G|no-grace-notes=b", "do not process lines with grace notes"); 
-   opts.define("m|measure|b|bar=b",  "sum results for measure"); 
-   opts.define("M|measure-duration=b", "list duration of measure"); 
-   opts.define("7|diatonic=b",       "count of diatonic pitches "); 
-   opts.define("x|attack=b",         "only count note attacks"); 
-   opts.define("n|notes|note=b",     "only count note attacks"); 
-   opts.define("segment|segments=b","display segment marker for single input"); 
-   opts.define("k|kern=b",           "count number of **kern spines "); 
-   opts.define("v|valid=b",          "only consider complete part segments"); 
-   opts.define("s|spines|spine|tracks|track=b", "only count note attacks"); 
+   opts.define("p|prepend=b",        "prepend analysis data to input");
+   opts.define("y|summary=b",        "list voice counts by durations");
+   opts.define("c|pc|pitch-class=b", "pitch classes only; ignore octaves");
+   opts.define("12|twelve-tone=b",   "count of twelvetone pitch classes");
+   opts.define("40|base-40=b",       "count of base-40 pitches ");
+   opts.define("G|no-grace-notes=b", "do not process lines with grace notes");
+   opts.define("m|measure|b|bar=b",  "sum results for measure");
+   opts.define("M|measure-duration=b", "list duration of measure");
+   opts.define("7|diatonic=b",       "count of diatonic pitches ");
+   opts.define("x|attack=b",         "only count note attacks");
+   opts.define("n|notes|note=b",     "only count note attacks");
+   opts.define("segment|segments=b","display segment marker for single input");
+   opts.define("k|kern=b",           "count number of **kern spines ");
+   opts.define("v|valid=b",          "only consider complete part segments");
+   opts.define("w|water-fill=d:1.0", "only consider complete part segments");
+   opts.define("s|spines|spine|tracks|track=b", "only count note attacks");
 
    opts.define("debug=b");              // determine bad input line num
    opts.define("author=b");             // author of program
@@ -602,7 +610,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");            // example usages
    opts.define("help=b");               // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -639,6 +647,9 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    validQ     =  opts.getBoolean("valid");
    summaryQ   =  opts.getBoolean("summary");
    SEGMENTS   =  opts.getBoolean("segment");
+	if (opts.getBoolean("water-fill")) {
+		water = opts.getDouble("water-fill");
+	}
 
    if (noteQ) {
       allQ = 1;
@@ -698,5 +709,66 @@ void usage(const char* command) {
    << endl;
 }
 
+
+
+//////////////////////////////
+//
+// waterFill --
+//
+
+void waterFill(vector<int>& analysis, HumdrumFile& infile, double water) {
+	infile.analyzeRhythm();
+	vector<int> index;
+	index.reserve(analysis.size());
+	for (int i=0; i<infile.getNumLines(); i++) {
+		if (infile[i].isData()) {
+			index.push_back(i);
+		}
+	}
+
+
+	for (int i=0; i<(int)index.size() - 1; i++) {
+		if (analysis.at(index.at(i)) > analysis.at(index.at(i+1))) {
+			checkForFill(analysis, i, index, infile, water);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// checkForFill --
+//
+
+void checkForFill(vector<int>& analysis, int starti, vector<int>& index, HumdrumFile& infile, double water) {
+	if (starti >= (int)index.size() - 1) {
+		return;
+	}
+	double starttime = infile[index.at(starti+1)].getAbsBeat();
+	int target = analysis.at(index.at(starti));
+	int fill = -1;
+	for (int i=starti+1; i<(int)analysis.size(); i++) {
+			double endtime = infile[index[i]].getAbsBeat();
+			double duration = (endtime - starttime) / 4.0; // converting to whole note units
+			int vcount = analysis.at(index.at(i));
+			if (vcount >= target) {
+				fill = i;
+				break;
+			}
+			if (duration >= water) {
+				break;
+			}
+	}
+	if (fill < 0) {
+		return;
+	}
+
+	for (int i=starti+1; i<=fill; i++) {
+		if (analysis.at(index.at(i)) < target) {
+			analysis.at(index.at(i)) = -target;
+		}
+	}
+}
 
 
