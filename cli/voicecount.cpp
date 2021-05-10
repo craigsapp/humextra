@@ -156,7 +156,11 @@ void processFile(HumdrumFile& infile, const string& filename) {
             if (nograceQ && (infile[i].getDuration() == 0)) {
                cout << ".";
             } else {
-               cout << analysis[i];
+               if (analysis[i] < 0) {
+                  cout << -analysis[i] << "f";
+               } else {
+                  cout << analysis[i];
+               }
             }
          }
          if (prependQ) { cout << '\t'; }
@@ -262,7 +266,7 @@ void printMeasureData(vector<int>& analysis, HumdrumFile& infile, int line) {
       if (nograceQ && (infile[i].getDuration() == 0)) {
          continue;
       }
-      sum += analysis[i];
+      sum += abs(analysis[i]);
    }
    if (mdurQ) {
       RationalNumber duration;
