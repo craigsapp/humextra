@@ -544,14 +544,20 @@ int searchForMatches(istream& inputfile, string& ss,
 		if (!state) {
 			continue;
 		}
-		if (noteoffsettest.search(line)) {
-			offset = atoi(noteoffsettest.getSubmatch(1));
-		} else {
-			offset = 1;
-		}
+
 		if (state && (!unlinkQ) && (!anchoredQ) && (featureCount > 1)) {
+		   if (noteoffsettest.search(line)) {
+			   offset = atoi(noteoffsettest.getSubmatch(1));
+		   } else {
+			   offset = 1;
+		   }
 			state = checkLink(line, offset);
 		} else if (state && (countQ || locationQ || location2Q)) {
+		   if (noteoffsettest.search(line)) {
+			   offset = atoi(noteoffsettest.getSubmatch(1));
+		   } else {
+			   offset = 1;
+		   }
 			counter += checkLink(line, offset);
 			mcount++;
 			continue;
