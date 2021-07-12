@@ -224,7 +224,7 @@ endif
 # first need to compile the improv library which can be downloaded
 # from http://improv.sapp.org (Makefile.library tries to do this).
 
-ifneq ($(wildcard external/improv),)
+ifneq ($(wildcard external/improv/lib/libimprov.a),)
    IMPROV_PREFLAGS     = -Iexternal/improv/include 
    IMPROV_POSTFLAGS    = -Lexternal/improv/lib -limprov 
 
@@ -352,17 +352,28 @@ $(TARGDIR)/humplay:   POSTFLAGS += $(IMPROV_POSTFLAGS) $(ALSA_POSTFLAGS)
 
 
 % : $(notdir %.cpp)
-	@mkdir -p $(TARGDIR)
-	@echo [CC] $@
-	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
-		#&& strip $(TARGDIR)/$@$(EXTEN)
+	@if [[ "$@" == "humplay" ]]; then \
+		if [[ -e "external/improv/lib/libimprov.a" ]]; then \
+			mkdir -p $(TARGDIR); \
+			echo [CC] $@; \
+			$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
+				&& strip $(TARGDIR)/$@$(EXTEN); \
+		else \
+			echo "Skipping compilation of $@"; \
+		fi \
+	else \
+		mkdir -p $(TARGDIR); \
+		echo [CC] $@; \
+		$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
+			&& strip $(TARGDIR)/$@$(EXTEN); \
+	fi
 
 
 $(TARGDIR)/% : $(notdir %.cpp)
 	@mkdir -p $(TARGDIR)
 	@echo [CC] $@
 	@$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
-		#&& strip $@$(EXTEN)
+		&& strip $@$(EXTEN)
 
 
 #                                                                         #
