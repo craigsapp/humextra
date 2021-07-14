@@ -3519,6 +3519,7 @@ const char* Convert::base12ToTnSetName(Array<int>& base12) {
 
 void Convert::base12ToNormalForm(vector<int>& nform, vector<int>& base12) {
 	Array<int> newbase12;
+	newbase12.setSize((int)base12.size());
 	Array<int> newnform;
 	for (int i=0; i<(int)base12.size(); i++) {
 		newbase12[i] = base12[i];

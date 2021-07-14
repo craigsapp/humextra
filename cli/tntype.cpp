@@ -231,7 +231,7 @@ void processRecords(HumdrumFile& infile) {
 	for (int i=0; i<infile.getNumLines(); i++) {
 		if (options.getBoolean("debug")) {
 			cout << "processing line " << (i+1) << " of input ..." << endl;
-	cout << "LINE IS: " << infile[i] << endl;
+			cout << "LINE IS: " << infile[i] << endl;
 		}
 		switch (infile[i].getType()) {
 			case E_humrec_none:
