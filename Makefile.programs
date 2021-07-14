@@ -293,16 +293,20 @@ SCRIPTS=$(SCRIPTS_PERL)
 
 examples: all
 
-all: bin scripts $(addprefix $(TARGDIR)/,$(PROGS))
+# The clear target is needed to force recompiling all cli programs (otherwise
+# they are not recompiled with depedency updates correctly).
+clear:
+	@echo "Clearing previously compiled programs:"
+	-rm -f $(addprefix $(TARGDIR)/,$(PROGS))
+
+all: clear bin scripts $(addprefix $(TARGDIR)/,$(PROGS))
 	@echo Finished compiling all programs.
 
 info:
 	@echo "Programs to compile: $(PROGS)" | fmt
 
 bin:
-ifeq ($(wildcard $(TARGDIR)),)
 	-mkdir -p $(TARGDIR)
-endif
 
 # link all scripts into the bin directory
 scripts:
@@ -352,39 +356,38 @@ $(TARGDIR)/humplay:   POSTFLAGS += $(IMPROV_POSTFLAGS) $(ALSA_POSTFLAGS)
 
 
 % : $(notdir %.cpp)
-
-	@if [[ "$@" == "humplay" ]]; then \
-		if [[ -e "external/improv/lib/libimprov.a" ]]; then \
-			mkdir -p $(TARGDIR); \
-			echo [CC] $@; \
+	@if [[ "$@" == "humplay" ]]; then                                        \
+		if [[ -e "external/improv/lib/libimprov.a" ]]; then              \
+			mkdir -p $(TARGDIR);                                     \
+			echo [CC] $@;                                            \
 			$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
-				&& strip $(TARGDIR)/$@$(EXTEN); \
-		else \
-			echo "Skipping compilation of $@"; \
-		fi \
-	else \
-		mkdir -p $(TARGDIR); \
-		echo [CC] $@; \
-		$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
-			&& strip $(TARGDIR)/$@$(EXTEN); \
+				&& strip $(TARGDIR)/$@$(EXTEN);                  \
+		else                                                             \
+			echo "Skipping compilation of $@";                       \
+		fi                                                               \
+	else                                                                     \
+		mkdir -p $(TARGDIR);                                             \
+		echo [CC] $@;                                                    \
+		$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS)         \
+			&& strip $(TARGDIR)/$@$(EXTEN);                          \
 	fi
 
 
 $(TARGDIR)/% : $(notdir %.cpp)
-	@if [[ "$@" == "$(TARGDIR)/humplay" ]]; then \
-		if [[ -e "external/improv/lib/libimprov.a" ]]; then \
-			mkdir -p $(TARGDIR); \
-			echo [CC] $@; \
-			$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
-				&& strip $(TARGDIR)/$@$(EXTEN); \
-		else \
-			echo "Skipping compilation of $@"; \
-		fi \
-	else \
-		mkdir -p $(TARGDIR); \
-		echo [CC] $@; \
-		$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
-			&& strip $@$(EXTEN); \
+	@if [[ "$@" == "$(TARGDIR)/humplay" ]]; then                  \
+		if [[ -e "external/improv/lib/libimprov.a" ]]; then   \
+			mkdir -p $(TARGDIR);                          \
+			echo [CC] $@;                                 \
+			$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
+				&& strip $@$(EXTEN);                  \
+		else                                                  \
+			echo "Skipping compilation of $@";            \
+		fi                                                    \
+	else                                                          \
+		mkdir -p $(TARGDIR);                                  \
+		echo [CC] $@;                                         \
+		$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS)         \
+			&& strip $@$(EXTEN);                          \
 	fi
 
 #                                                                         #

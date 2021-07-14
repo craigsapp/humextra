@@ -74,10 +74,16 @@ programs:
 	$(MAKE) -f Makefile.programs
 
 %: 
-	-mkdir -p bin
-	@echo compiling file $@
-	$(MAKE) -f Makefile.programs $@
-	
+	@if [ "$@" = "examples" ]; then          \
+		echo "";                         \
+	elif [ "$@" = "all" ]; then              \
+		echo "";                         \
+	else                                     \
+		mkdir -p bin;                    \
+		echo compiling file $@;          \
+		$(MAKE) -f Makefile.programs $@; \
+	fi
+
 
 test: regression
 tests: regression
