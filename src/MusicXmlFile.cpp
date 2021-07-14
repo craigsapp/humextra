@@ -944,15 +944,20 @@ void MusicXmlFile::fixPartPickups(int staffno) {
 
    int measureticks = 0;
    int timeticks = 0;
-   measureticks = getMeasureTickDuration(partdata[staffno][firstmeasure].obj);
-   timeticks = getTimeSignatureTicks(partdata[staffno][meter].obj, tickinfo);
 
-   if (timeticks == measureticks) {
-      // the measure contains the expected number of beats; do nothing
-      return;
-   } else if (timeticks < measureticks) {
-      // something weird is happening in the measure; do nothing
-      return;
+   measureticks = getMeasureTickDuration(partdata[staffno][firstmeasure].obj);
+   if (meter >= 0) {
+      timeticks = getTimeSignatureTicks(partdata[staffno][meter].obj, tickinfo);
+   }
+
+   if (timeticks > 0) {
+      if (timeticks == measureticks) {
+         // the measure contains the expected number of beats; do nothing
+         return;
+      } else if (timeticks < measureticks) {
+         // something weird is happening in the measure; do nothing
+         return;
+      }
    }
 
    // the measure does not have the full amount of beats, so
@@ -1374,7 +1379,6 @@ void MusicXmlFile::parseMeasure(CXMLObject* entry, int partnum,
 
 void MusicXmlFile::parseDirection(CXMLObject* object, int partnum,
       long& ticktime) {
-cerr << "GOT HERE " << endl;
 return;
    if (object == NULL) {
       return;
