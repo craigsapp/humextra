@@ -352,6 +352,7 @@ $(TARGDIR)/humplay:   POSTFLAGS += $(IMPROV_POSTFLAGS) $(ALSA_POSTFLAGS)
 
 
 % : $(notdir %.cpp)
+
 	@if [[ "$@" == "humplay" ]]; then \
 		if [[ -e "external/improv/lib/libimprov.a" ]]; then \
 			mkdir -p $(TARGDIR); \
@@ -370,11 +371,21 @@ $(TARGDIR)/humplay:   POSTFLAGS += $(IMPROV_POSTFLAGS) $(ALSA_POSTFLAGS)
 
 
 $(TARGDIR)/% : $(notdir %.cpp)
-	@mkdir -p $(TARGDIR)
-	@echo [CC] $@
-	@$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
-		&& strip $@$(EXTEN)
-
+	@if [[ "$@" == "$(TARGDIR)/humplay" ]]; then \
+		if [[ -e "external/improv/lib/libimprov.a" ]]; then \
+			mkdir -p $(TARGDIR); \
+			echo [CC] $@; \
+			$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
+				&& strip $(TARGDIR)/$@$(EXTEN); \
+		else \
+			echo "Skipping compilation of $@"; \
+		fi \
+	else \
+		mkdir -p $(TARGDIR); \
+		echo [CC] $@; \
+		$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
+			&& strip $@$(EXTEN); \
+	fi
 
 #                                                                         #
 #                                                                         #
