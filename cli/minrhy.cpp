@@ -70,7 +70,9 @@ int main(int argc, char** argv) {
          if (pathQ) {
             cout << infiles[i].getFilename() << ":\t";
          } else {
-            const char* filename = infiles[i].getFilename().c_str();
+				char filename[5000] = {0};
+				strncpy(filename, infiles[i].getFilename().c_str(), 4096);
+            // const char* filename = infiles[i].getFilename().c_str();
             const char* ptr = NULL;
             ptr = strrchr(filename, '/');
             if (ptr != NULL) {

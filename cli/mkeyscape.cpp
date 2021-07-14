@@ -2342,7 +2342,8 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
 	rrotate = 0;
 	if (opts.getInteger("rotate")) {
-		const char* strang = opts.getString("rotate").c_str();
+		char strang[128] = {0};
+		strncpy(strang, opts.getString("rotate").c_str(), 100);
 		if (hasdigit(strang)) {
 			rrotate = atol(strang);
 		} else {
