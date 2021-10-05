@@ -22,9 +22,17 @@
 use strict;
 use Getopt::Long;
 
-my $extractx  = "extractx";
-my $serialize = "serialize";
-my $humcat    = "humcat";
+my $extractx  = `which extractx`;
+chomp $extractx;
+die "Error: extractx tool not found: Install Humdrum Extras?\n" if $extractx =~ /^\s*$/;
+
+my $serialize = `which serialize`;
+chomp $serialize;
+die "Error: serialize tool not found: Install Humdrum Extras?\n" if $serialize =~ /^\s*$/;
+
+my $humcat    = `which humcat`;
+chomp $humcat;
+die "Error: humcat tool not found: Install Humdrum Extras?\n" if $humcat =~ /^\s*$/;
 
 my $boringWords = <<"EOT";
 il 'l lo l' la gli gl' le un un’ uno una de di d' del dello della dell'
