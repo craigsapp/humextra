@@ -22,9 +22,9 @@
 use strict;
 use Getopt::Long;
 
-my $extractx  = "/project/museinfo/bin/extractx";
-my $serialize = "/project/museinfo/bin/serialize";
-my $humcat    = "/project/museinfo/bin/humcat";
+my $extractx  = "extractx";
+my $serialize = "serialize";
+my $humcat    = "humcat";
 
 my $boringWords = <<"EOT";
 il 'l lo l' la gli gl' le un un’ uno una de di d' del dello della dell'
