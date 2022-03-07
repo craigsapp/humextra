@@ -267,7 +267,7 @@ void growHistograms(vector<vector<double> >& midibins, int voices,
 		}
 	}
 
-	int oldsize = midibins.size();
+	int oldsize = (int)midibins.size();
 
 	if (!hasnames) {
 		if (voices <= oldsize-1) {
@@ -355,7 +355,7 @@ void printReferenceRecords(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// printScorEncodedText -- print SCORE text string
+// printScoreEncodedText -- print SCORE text string
 //    See SCORE 3.1 manual additions (page 19) for more.
 //
 
@@ -611,9 +611,10 @@ void printScoreFile(vector<vector<double> >& midibins, HumdrumFile& infile,
 		}
 	}
 
+// ggg had to change i+1 indexes for some reason.
 	for (i=hpos.size()-1; i>=0; i--) {
-		printScoreVoice(inames[i+1], hpos[i], midibins[i+1],
-				kernspines[i], 17.6);
+		// printScoreVoice(inames.at(i+1), hpos[i], midibins[i+1], kernspines[i], 17.6);
+		printScoreVoice(inames.at(i), hpos[i], midibins[i], kernspines[i], 17.6);
 	}
 
 	if (xmlQ) {
@@ -932,7 +933,6 @@ void printScoreVoice(string& voicestring, double hpos, vector<double>& midibins,
 		}
 	}
 
-
 	int topquartile;
 	if (quartileQ) {
 		// print top quartile
@@ -995,7 +995,6 @@ void printScoreVoice(string& voicestring, double hpos, vector<double>& midibins,
 			cout << "\" p7=\"4\" p10=\"" << offset << "\"/>\n";
 		}
 	}
-	
 	
 	// print bottom quartile
 	if (quartileQ) {
@@ -1849,7 +1848,7 @@ void generateAnalysis(HumdrumFile& infile, vector<vector<double> >& midibins,
 					midibins[vindex+1][keynum] += duration;
 				} else {
 					midibins[0][keynum] += 1.0;
-					if (vindex+1 >= midibins.size()) {
+					if (vindex+1 >= (int)midibins.size()) {
 						midibins.resize(midibins.size()+1);
 						midibins.back().resize(40*11);
 						fill(midibins.back().begin(), midibins.back().end(), 0.0);
