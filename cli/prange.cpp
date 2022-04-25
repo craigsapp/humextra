@@ -1570,7 +1570,7 @@ int getTessitura(vector<double>& midibins) {
 		minn = Convert::base7ToBase12(minn);
 	}
 
-	return maxx - minn;
+	return maxx - minn + 1;
 }
 
 
