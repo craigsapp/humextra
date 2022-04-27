@@ -409,6 +409,7 @@ int main(int argc, char* argv[]) {
 				break;
 			}
 			if (pup > 0) {
+				pup -= 1;  // (need to 0-index the beat number)
 				pup *= tpq;
 				starttick = int(pup.getFloat() + 0.5);
 				adjustEventTimes(outfile, starttick);
