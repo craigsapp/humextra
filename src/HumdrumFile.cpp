@@ -3301,29 +3301,37 @@ void HumdrumFile::fixIncompleteBarMeterR(
       return;
    }
 
-   // Only handle pickup measures for quarter note beats for now.
-   // Pickups in other time bases are being messed up by the line
-   //      file[i].setBeat(timedur[0]-pickupdur+file[i].getBeatR()+1);      
-   // Probably because of a mixture of "4" and non "4" timebase in
-   // calculation.  
+	int barindex = 0;
    if (strcmp(base, "4") == 0) {
       pickupdur = 0;
       if (file[barlocs[0]].getAbsBeatR() > 0) {
          if (file[barlocs[0]].getAbsBeatR() < timedur[0]) {
             pickupdur = file[barlocs[0]].getAbsBeatR();
          }
-      }
+      } else {
+			if (barlocs.getSize() >= 2) {
+				RationalNumber bardur = file[barlocs[1]].getAbsBeatR();
+				if (timedur[0] > bardur) {
+					pickupdur = bardur;
+					barindex = 1;
+				}
+			}
+		}
    }
    if (pickupdur > 0) {
       // int dataQ = 0;
-      for (i=0; i<barlocs[0]; i++) {
+      for (i=0; i<barlocs[barindex]; i++) {
          // if (file[i].isData()) {
          //    dataQ = 1;
          // }
          //if (!dataQ) {
          //   continue;
          //}
-         file[i].setBeat(timedur[0]-pickupdur+file[i].getBeatR()+1);      
+			RationalNumber value = timedur[0] - pickupdur + file[i].getBeatR();
+			if (barindex == 0) {
+				value += 1;
+			}
+         file[i].setBeat(value);
       }
    }
 
