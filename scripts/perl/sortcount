@@ -39,8 +39,10 @@ my $min         = "";   # Minimum value to output.
 my $max         = "";   # Maximum value to output.
 my $exclude     = "";   # Regular expression for filtering out certain categories 
                         # (after including in total).
+my $myAngle     = "";
 
 GetOptions (
+   'angle=s'          => \$myAngle,
    'a|alphabetic'     => \$alphabeticQ,
    'p|percent'        => \$percentQ,
    'f|fraction'       => \$fractionQ,
@@ -185,6 +187,9 @@ EOT
 	my $angle = 0;
 	$angle = -45 if $maxwidth > 4;
 	$angle = -90 if @output >= 20;
+	if ($myAngle !~ /^\s*$/) {
+		$angle = $myAngle;
+	}
 
 	$ylabel = $numberlabel if $ylabel eq "";
 
