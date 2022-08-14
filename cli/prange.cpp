@@ -126,8 +126,6 @@ int main(int argc, char* argv[]) {
 	vector<string> tempnames;
 	midibins.resize(1);
 	clearHistograms(midibins);
-	inames.resize(1);
-	inames[0] = "all";
 	vector<int> kernSpines;
 
 	// can only handle one input if SCORE display is being given.
@@ -148,10 +146,12 @@ int main(int argc, char* argv[]) {
 //
 
 	while (streamer.read(infile)) {
-		  infile.getTracksByExInterp(kernSpines, "**kern");
-		  getInstrumentNames(tempnames, kernSpines, infile);
-		  growHistograms(midibins, kernSpines.size(), inames, tempnames);
-		  generateAnalysis(infile, midibins, kernSpines, inames, tempnames);
+		inames.resize(infile.getMaxTracks()+1);
+		inames.at(0) = "all";
+		infile.getTracksByExInterp(kernSpines, "**kern");
+		getInstrumentNames(tempnames, kernSpines, infile);
+		growHistograms(midibins, kernSpines.size(), inames, tempnames);
+		generateAnalysis(infile, midibins, kernSpines, inames, tempnames);
 	}
 
 //   for (i=0; i<infiles.getCount(); i++) {
@@ -198,8 +198,10 @@ void getInstrumentNames(vector<string>& inames, vector<int>& kernSpines,
 	int i, j, k;
 	int track;
 	string name;
-	inames.resize(kernSpines.size());
+	// inames.resize(kernSpines.size());
+	inames.resize(infile.getMaxTracks() + 1);
 	fill(inames.begin(), inames.end(), "");
+	inames.at(0) = "all";
 	for (i=0; i<infile.getNumLines(); i++) {
 		if (!infile[i].isInterpretation()) {
 			continue;
@@ -611,10 +613,8 @@ void printScoreFile(vector<vector<double> >& midibins, HumdrumFile& infile,
 		}
 	}
 
-// ggg had to change i+1 indexes for some reason.
 	for (i=hpos.size()-1; i>=0; i--) {
-		// printScoreVoice(inames.at(i+1), hpos[i], midibins[i+1], kernspines[i], 17.6);
-		printScoreVoice(inames.at(i), hpos[i], midibins[i], kernspines[i], 17.6);
+		printScoreVoice(inames.at(i), hpos.at(i), midibins.at(i), kernspines.at(i), 17.6);
 	}
 
 	if (xmlQ) {
