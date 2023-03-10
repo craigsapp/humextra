@@ -278,21 +278,21 @@ class MusicXmlFile {
       void      getKernNoteProperties     (_NoteState& ns, 
                                            CSL::XML::CXMLObject* object, 
                                            int tickdur);
-      char*     getKernKey                (char* buffer, 
+      char*     getKernKey                (char* buffer, int outputMaxSize,
                                            CSL::XML::CXMLObject* object);
-      char*     printKernClef             (char* buffer, 
+      char*     printKernClef             (char* buffer, int outputMaxSize,
                                            CSL::XML::CXMLObject* object);
-      char*     getKernTimeSig            (char* buffer, 
+      char*     getKernTimeSig            (char* buffer, int outputMaxSize,
                                            CSL::XML::CXMLObject* object);
-      char*     getKernTimeMet            (char* buffer, 
+      char*     getKernTimeMet            (char* buffer, int outputMaxSize,
                                            CSL::XML::CXMLObject* object);
-      char*     getKernMetronome          (char* buffer, 
+      char*     getKernMetronome          (char* buffer, int outputMaxSize,
                                            CSL::XML::CXMLObject* object);
       int       printMeasureStyle         (char* buffer, int partnum, 
                                            int index);
       int       getNextVoiceTime          (int staffno, int index, int voice);
-      int       getInterpRestDuration     (char* interpbuffer, int interptick,
-                                           int divisions);
+      int       getInterpRestDuration     (char* interpbuffer, int outputMaxSize,
+		                                     int interptick, int divisions);
 
       // printing functions
       ostream&  printTraverse             (ostream& out, 

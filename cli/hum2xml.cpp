@@ -1501,7 +1501,7 @@ double convertNoteEntryToXML(HumdrumFile& infile, int line, int col,
    // pitch = pitch - 40 * ClefOctaveTranspose;
    char buff2[64] = {0};
    if (pitch > 0) {
-      Convert::base40ToKern(buff2, pitch);
+      Convert::base40ToKern(buff2, 64, pitch);
    } else {
       strcpy(buff2, "r");
    }

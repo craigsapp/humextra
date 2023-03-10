@@ -25,9 +25,9 @@ void      usage             (const char* command);
 void      generateAnalysis  (HumdrumFile& infile, Array<double>& durs);
 void      doRhythmAnalysis  (HumdrumFile& infile, Array<double>& durs);
 int       makeRootInterval  (const char* harmdata, int keyroot, int keymode);
-void      getChordPitches   (Array<int>& pitches, const char* token, int root, 
+void      getChordPitches   (Array<int>& pitches, const char* token, int root,
                              int keyroot, int keymode);
-void      printChordInfo    (const char* token,  int rootinterval, 
+void      printChordInfo    (const char* token,  int rootinterval,
                              int keyroot, int keymode, double duration);
 int       getInversion      (const char* token);
 int       getScaleDegree    (const char* harm);
@@ -44,8 +44,8 @@ int       appendQ      = 0;  // used with -a option
 int       octave       = 2;  // used with -o option
 int       boctave      = 3;  // used with -O option
 int       rhythmQ      = 1;  // used with --RR option
-int       rootQ        = 1;  // used with -r option 
-int       bassQ        = 0;  // used with -b option 
+int       rootQ        = 1;  // used with -r option
+int       bassQ        = 0;  // used with -b option
 int       recip        = -1; // used with -R option
 int       recipField   = -1; // used with -R option
 string    instrument   = ""; // used with -I option
@@ -94,7 +94,7 @@ void doRhythmAnalysis(HumdrumFile& infile, Array<double>& durs) {
          for (j=infile[i].getFieldCount()-1; j>=0; j--) {
             if (strcmp(infile[i].getExInterp(j), "**harm") == 0) {
                if (strcmp(infile[i][j], ".") != 0) {
-                  lastbeat = beat; 
+                  lastbeat = beat;
                   beat = infile[i].getAbsBeat();
                   duration = beat - lastbeat;
                   durs.append(duration);
@@ -102,7 +102,7 @@ void doRhythmAnalysis(HumdrumFile& infile, Array<double>& durs) {
             }
          }
       }
-   } 
+   }
 
    for (i=0; i<durs.getSize()-1; i++)  {
       durs[i] = durs[i+1];
@@ -142,19 +142,19 @@ void generateAnalysis(HumdrumFile& infile, Array<double>& durs) {
                   cout << "\t";
                }
                if (strcmp(infile[i][j], ".") != 0) {
-                  rootinterval = makeRootInterval(infile[i][j], keyroot, 
+                  rootinterval = makeRootInterval(infile[i][j], keyroot,
                         keymode);
 
                   if (rootQ) {
                      if (durs.getSize() > 0) {
-                        Convert::durationToKernRhythm(buffer, durs[rindex++]);
+                        Convert::durationToKernRhythm(buffer, 128, durs[rindex++]);
                         if (rhythmQ && buffer[0] != '-') {
                            cout << buffer;
                         }
                      }
                      if (rootinterval >= 0) {
-                        cout << Convert::base40ToKern(buffer, 
-                              (keyroot + rootinterval) % 40 + octave * 40); 
+                        cout << Convert::base40ToKern(buffer, 128,
+                              (keyroot + rootinterval) % 40 + octave * 40);
                      } else {
                         cout << "r";
                      }
@@ -170,15 +170,15 @@ void generateAnalysis(HumdrumFile& infile, Array<double>& durs) {
 //cerr << "Pitch IS " << pitches[inversion] << " FOR " << infile[i][j] << endl;
 
                      if (durs.getSize() > 0) {
-                        Convert::durationToKernRhythm(buffer, durs[rindex++]);
+                        Convert::durationToKernRhythm(buffer, 128, durs[rindex++]);
                         if (rhythmQ && buffer[0] != '-') {
                            cout << buffer;
                         }
                      }
                      if (rootinterval >= 0) {
-                        //cout << Convert::base40ToKern(buffer, 
-                        //      (keyroot + rootinterval) % 40 + boctave * 40); 
-                        cout << Convert::base40ToKern(buffer, bass);
+                        //cout << Convert::base40ToKern(buffer,
+                        //      (keyroot + rootinterval) % 40 + boctave * 40);
+                        cout << Convert::base40ToKern(buffer, 128, bass);
                      } else {
                         cout << "r";
                      }
@@ -188,14 +188,14 @@ void generateAnalysis(HumdrumFile& infile, Array<double>& durs) {
                   } else {
                      // print entire chord
                      if ((recipField <= 0) && (durs.getSize() > 0)) {
-                        printChordInfo(infile[i][j], rootinterval, keyroot, 
+                        printChordInfo(infile[i][j], rootinterval, keyroot,
                            keymode, durs[rindex++]);
-                     } else if (recipField > 0) { 
+                     } else if (recipField > 0) {
                         rdur = getRecipDuration(infile, i, recipField);
-                        printChordInfo(infile[i][j], rootinterval, keyroot, 
+                        printChordInfo(infile[i][j], rootinterval, keyroot,
                            keymode, rdur);
                      } else {
-                        printChordInfo(infile[i][j], rootinterval, keyroot, 
+                        printChordInfo(infile[i][j], rootinterval, keyroot,
                            keymode, -1);
                      }
                   }
@@ -250,7 +250,7 @@ void generateAnalysis(HumdrumFile& infile, Array<double>& durs) {
             status = checkForKeyDesignation(infile, i);
             if (status == 0) {
                status = checkForTimeSignature(infile, i);
-            } 
+            }
             if (status == 0) {
                cout << "*";
             }
@@ -307,7 +307,7 @@ int checkForKeyDesignation(HumdrumFile& infile, int line) {
 //////////////////////////////
 //
 // checkForTimeSignature -- look for a time signature on the current
-//   line in the input **recip data if it exists, and echo it in 
+//   line in the input **recip data if it exists, and echo it in
 //   the output spine.
 //
 
@@ -338,7 +338,7 @@ int checkForTimeSignature(HumdrumFile& infile, int line) {
 
 //////////////////////////////
 //
-// getRecipDuration -- 
+// getRecipDuration --
 //
 
 double getRecipDuration(HumdrumFile& infile, int line, int primarySpine) {
@@ -392,7 +392,7 @@ int getRecipField(int line, HumdrumFile& infile, int recip) {
    if (counter > 0) {
       output = 1;
    }
- 
+
    return output;
 }
 
@@ -403,13 +403,13 @@ int getRecipField(int line, HumdrumFile& infile, int recip) {
 // printChordInfo --
 //
 
-void printChordInfo(const char* token,  int root, 
+void printChordInfo(const char* token,  int root,
       int keyroot, int keymode, double duration) {
    int i;
    char dbuffer[1024] = {0};
    char pbuffer[1024] = {0};
    if (duration > 0) {
-      Convert::durationToKernRhythm(dbuffer, duration);
+      Convert::durationToKernRhythm(dbuffer, 1024, duration);
    }
    if (!rhythmQ) {
       dbuffer[0] = '\0';
@@ -424,7 +424,7 @@ void printChordInfo(const char* token,  int root,
       getChordPitches(pitches, token, root, keyroot, keymode);
       for (i=0; i<pitches.getSize(); i++) {
          cout << dbuffer;
-         cout << Convert::base40ToKern(pbuffer, pitches[i]);
+         cout << Convert::base40ToKern(pbuffer, 1024, pitches[i]);
          //cout << "(" << pitches[i] << ")";
          if (strchr(token, ';') != NULL) {
             cout << ';';
@@ -452,7 +452,7 @@ void printChordInfo(const char* token,  int root,
 // getChordPitches --
 //
 
-void getChordPitches(Array<int>& pitches, const char* token, int root, 
+void getChordPitches(Array<int>& pitches, const char* token, int root,
    int keyroot, int keymode) {
 
    int oct = octave + 2;
@@ -539,14 +539,14 @@ void getChordPitches(Array<int>& pitches, const char* token, int root,
       strcpy(lastpart, strchr(token, '/')+1);
       offset = makeRootInterval(lastpart, keyroot, keymode);
       keymode = adjustKeyMode(keymode, keyroot, lastpart);
-   } 
+   }
 
    int rootscaledegree = getScaleDegree(firstpart);
    int seventhdegree = (rootscaledegree + 6) % 7;
 
    // int pitch = (root + keyroot) % 40 + oct * 40;
    // int base = pitch;
-   
+
    pitches.append(pitch);
    if (strstr(firstpart, "D7") != NULL) {
       pitches[3] = base + 33;
@@ -557,12 +557,12 @@ void getChordPitches(Array<int>& pitches, const char* token, int root,
       pitches[3] = (keyroot + degrees[seventhdegree]) % 40 + oct * 40;
       if (pitches[3] - base < 25) {
          pitches[3] += 40;
-      } 
+      }
    } else {
       // minor key (harmonic minor used)
       int degrees[7] = {0, 6, 11, 17, 23, 28, 35};
       pitches[3] = (keyroot + degrees[seventhdegree]) % 40 + oct * 40;
-   } 
+   }
 
    // fix the octave placement of the seventh (to be above the fifth)
    pitches[3] = pitches[3] + offset;
@@ -594,7 +594,7 @@ int adjustKeyMode(int keymode, int keyroot, const char* lastpart) {
    const char* ptr = lastpart;
    if (strchr(string, '/') != NULL) {
       ptr = strchr(string, '/') + 1;
-   } 
+   }
    if (strchr(ptr, 'v') != NULL) {
       keymode = 1;
    } else if (strchr(ptr, 'i') != NULL) {
@@ -614,24 +614,24 @@ int adjustKeyMode(int keymode, int keyroot, const char* lastpart) {
 
 //////////////////////////////
 //
-// getScaleDegree -- 
+// getScaleDegree --
 //
 
 int getScaleDegree(const char* harm) {
-   if (strstr(harm, "VII") != NULL) { return 6; } 
-   if (strstr(harm, "vii") != NULL) { return 6; } 
-   if (strstr(harm, "VI")  != NULL) { return 5; } 
-   if (strstr(harm, "vi")  != NULL) { return 5; } 
-   if (strstr(harm, "IV")  != NULL) { return 3; } 
-   if (strstr(harm, "iv")  != NULL) { return 3; } 
-   if (strstr(harm, "V")   != NULL) { return 4; } 
-   if (strstr(harm, "v")   != NULL) { return 4; } 
-   if (strstr(harm, "III") != NULL) { return 2; } 
-   if (strstr(harm, "iii") != NULL) { return 2; } 
-   if (strstr(harm, "II")  != NULL) { return 1; } 
-   if (strstr(harm, "ii")  != NULL) { return 1; } 
-   if (strstr(harm, "I")   != NULL) { return 0; } 
-   if (strstr(harm, "i")   != NULL) { return 0; } 
+   if (strstr(harm, "VII") != NULL) { return 6; }
+   if (strstr(harm, "vii") != NULL) { return 6; }
+   if (strstr(harm, "VI")  != NULL) { return 5; }
+   if (strstr(harm, "vi")  != NULL) { return 5; }
+   if (strstr(harm, "IV")  != NULL) { return 3; }
+   if (strstr(harm, "iv")  != NULL) { return 3; }
+   if (strstr(harm, "V")   != NULL) { return 4; }
+   if (strstr(harm, "v")   != NULL) { return 4; }
+   if (strstr(harm, "III") != NULL) { return 2; }
+   if (strstr(harm, "iii") != NULL) { return 2; }
+   if (strstr(harm, "II")  != NULL) { return 1; }
+   if (strstr(harm, "ii")  != NULL) { return 1; }
+   if (strstr(harm, "I")   != NULL) { return 0; }
+   if (strstr(harm, "i")   != NULL) { return 0; }
    if (strstr(harm, "Fr")  != NULL) { return 5; }
    if (strstr(harm, "Gn")  != NULL) { return 5; }
    if (strstr(harm, "Lt")  != NULL) { return 5; }
@@ -675,11 +675,11 @@ int makeRootInterval(const char* harmdata, int keyroot, int keymode) {
       }
    }
    int offset = 0;
-   
+
    if (slashcount >= 1) {
       const char* ptr = strchr(harmdata, '/') + 1;
       offset = makeRootInterval(ptr, keyroot, keymode);
-   } 
+   }
 
    if (keymode) {
       // minor mode (harmonic minor)
@@ -762,13 +762,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("r|root=b",           "extract only root information");
    opts.define("I|instrument=s",     "instrument to play music on");
 
-   opts.define("debug=b",          "trace input parsing");   
-   opts.define("author=b",         "author of the program");   
-   opts.define("version=b",        "compilation information"); 
-   opts.define("example=b",        "example usage"); 
-   opts.define("help=b",           "short description"); 
+   opts.define("debug=b",          "trace input parsing");
+   opts.define("author=b",         "author of the program");
+   opts.define("version=b",        "compilation information");
+   opts.define("example=b",        "example usage");
+   opts.define("help=b",           "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

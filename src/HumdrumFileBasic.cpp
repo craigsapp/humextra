@@ -1111,7 +1111,7 @@ void HumdrumFileBasic::privateSpineAnalysis(void) {
                string tstring = getRecord(n)[i];
                trackexinterp.push_back(tstring);
                spineid++;
-               sprintf(buffer, "%d", spineid);
+               snprintf(buffer, 1024, "%d", spineid);
                bp = buffer;
                spineinfo.push_back(bp);
                int value;
@@ -2281,7 +2281,7 @@ void HumdrumFileBasic::makeVts(Array<char>& vtsstring,
    int len = strlen(tstream.str().c_str());
    unsigned long checksum = CheckSum::crc32(tstream.str().c_str(), len);
    char buffer[128] = {0};
-   sprintf(buffer, "!!!VTS: %lu", checksum);
+   snprintf(buffer, 128, "!!!VTS: %lu", checksum);
    vtsstring.setSize(strlen(buffer) + 1);
    strcpy(vtsstring.getBase(), buffer);
 }
@@ -2298,7 +2298,7 @@ void HumdrumFileBasic::makeVts(string& vtsstring,
 	string tempstr = tstream.str();
    unsigned long checksum = CheckSum::crc32(tempstr.c_str(), tempstr.size());
    char buffer[128] = {0};
-   sprintf(buffer, "!!!VTS: %lu", checksum);
+   snprintf(buffer, 128, "!!!VTS: %lu", checksum);
    vtsstring = buffer;
 }
 
@@ -2332,7 +2332,7 @@ void HumdrumFileBasic::makeVtsData(Array<char>& vtsstring,
    int len = strlen(tstream.str().c_str());
    unsigned long checksum = CheckSum::crc32(tstream.str().c_str(), len);
    char buffer[128] = {0};
-   sprintf(buffer, "!!!VTS-data: %lu", checksum);
+   snprintf(buffer, 128, "!!!VTS-data: %lu", checksum);
    vtsstring.setSize(strlen(buffer) + 1);
    strcpy(vtsstring.getBase(), buffer);
 }
@@ -2349,7 +2349,7 @@ void HumdrumFileBasic::makeVtsData(string& vtsstring,
 	string tempstring = tstream.str();
    unsigned long checksum = CheckSum::crc32(tempstring.c_str(), tempstring.size());
    char buffer[128] = {0};
-   sprintf(buffer, "!!!VTS-data: %lu", checksum);
+   snprintf(buffer, 128, "!!!VTS-data: %lu", checksum);
    vtsstring = buffer;
 }
 

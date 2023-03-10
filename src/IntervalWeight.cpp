@@ -598,7 +598,7 @@ ostream& IntervalWeight::newprint(ostream& out) {
    int i;
    char buffer[64] = {0};
    for (i=0; i<40; i++) {
-      Convert::base40ToKern(buffer, i + 4*40);
+      Convert::base40ToKern(buffer, 64, i + 4*40);
       if (buffer[0] == '\0') {
          continue;
       }
@@ -621,7 +621,7 @@ ostream& operator<<(ostream& out, IntervalWeight& weights) {
    int i;
    char buffer[64] = {0};
    for (i=0; i<40; i++) {
-      Convert::base40ToKern(buffer, i + 4*40);
+      Convert::base40ToKern(buffer, 64, i + 4*40);
       if (buffer[0] == '\0') {
          continue;
       }

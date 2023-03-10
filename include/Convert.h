@@ -52,9 +52,9 @@ class Convert {
    // conversions dealing with **kern data
 
       static int       kernToMidiNoteNumber      (const string& aKernString);
-      static char*     durationToKernRhythm      (char* output, double input, 
+      static char*     durationToKernRhythm      (char* output, int outputMaxSize, double input, 
                                                    int timebase = 1);
-      static char*     durationRToKernRhythm     (char* output, 
+      static char*     durationRToKernRhythm     (char* output, int outputMaxSize,
                                                   RationalNumber input, 
                                                   int timebase = 1);
       static string    durationToKernRhythm      (double input, int timebase = 1);
@@ -73,8 +73,9 @@ class Convert {
       static int       kernToDiatonicAlteration  (const string& buffer);
       static int       kernClefToBaseline        (const string& buffer);
       static char*     musePitchToKernPitch      (char* kernOutput,
+		                                            int outputMaxSize,
                                                   const string& museInput);
-      static char*     museClefToKernClef        (char* kernOutput, 
+      static char*     museClefToKernClef        (char* kernOutput, int outputMaxSize,
                                                     int museInput);
       static int       kernKeyToNumber           (const string& aKernString);
       static const char* keyNumberToKern         (int number);
@@ -95,8 +96,8 @@ class Convert {
 
    // conversions dealing with base 40 system of notation
 
-      static char*     base40ToKern               (char* output, int aPitch);
-      static char*     base40ToKernTranspose      (char* output, int transpose,
+      static char*     base40ToKern               (char* output, int outputMaxSize, int aPitch);
+      static char*     base40ToKernTranspose      (char* output, int outputMaxSize, int transpose,
                                                      int keysignature);
       static int       base40ToMidiNoteNumber     (int base40value);
       static int       base40ToAccidental         (int base40value);
@@ -113,23 +114,23 @@ class Convert {
       static SigCollection<int> keyToScaleDegrees (int aKey, int aMode);
       static int       museToBase40               (const string& pitchString);
       static int       base40ToScoreVPos          (int pitch, int clef);
-      static char*     base40ToMuse               (int base40, char* buffer);
+      static char*     base40ToMuse               (int base40, char* buffer, int outputMaxSize);
       static int       base40ToDiatonic           (int pitch);
-      static char*     base40ToIntervalAbbr       (char* output, 
+      static char*     base40ToIntervalAbbr       (char* output, int outputMaxSize,
                                                    int base40value);
-      static char*     base40ToIntervalAbbrWrap   (char* output, 
+      static char*     base40ToIntervalAbbrWrap   (char* output, int outputMaxSize,
                                                    int base40value);
-      static char*     base40ToIntervalAbbr2      (char* output, 
+      static char*     base40ToIntervalAbbr2      (char* output, int outputMaxSize,
                                                    int base40value);
-      static char*     base40ToPerfViz            (char* output, 
+      static char*     base40ToPerfViz            (char* output, int outputMaxSize,
                                                    int base40value);
-      static char*     base40ToTrans              (char* buffer, int base40);
+      static char*     base40ToTrans              (char* buffer, int outputMaxSize, int base40);
       static int       transToBase40              (const string& buffer);
 
    // conversions dealing with MIDI base-12 system 
    
-      static char*     base12ToKern               (char* output, int aPitch);
-      static char*     base12ToPitch              (char* output, int aPitch);
+      static char*     base12ToKern               (char* output, int outputMaxSize, int aPitch);
+      static char*     base12ToPitch              (char* output, int outputMaxSize, int aPitch);
       static int       base12ToBase40             (int aPitch);
       static int       base7ToBase12              (int aPitch, int alter = 0);
       static int       base7ToBase40              (int aPitch, int alter = 0);

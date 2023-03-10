@@ -868,7 +868,7 @@ void MuseRecord::setTicks(int value) {
       cerr << "@ Error: ticks out of range in MuseRecord::setTicks" << endl;
    }
    char buffer[8] = {0};
-   sprintf(buffer, "%d", value);
+   snprintf(buffer, 8, "%d", value);
    int len = strlen(buffer);
    insertString(5+3-len+1, buffer);
 }
@@ -2525,7 +2525,7 @@ char* MuseRecord::getKernNoteStyle(char* output, int beams, int stems) {
    // add the pitch to the output string
    char kernpitch[16];
    char musepitch[16];
-   Convert::musePitchToKernPitch(kernpitch, getPitch(musepitch));
+   Convert::musePitchToKernPitch(kernpitch, 16, getPitch(musepitch));
    strcat(output, kernpitch);
 
    // if there is a notated natural sign, then add it now:
@@ -2637,7 +2637,7 @@ char* MuseRecord::getKernRestStyle(char* output, int quarter) {
       strcat(output, getStringProlongation(temp));
    } else {   // stage 1 data:
       dnotetype = (float)getTickDurationField() / quarter;
-      Convert::durationToKernRhythm(rhythmstring, dnotetype);
+      Convert::durationToKernRhythm(rhythmstring, 16, dnotetype);
       strcat(output, rhythmstring);
    }
 

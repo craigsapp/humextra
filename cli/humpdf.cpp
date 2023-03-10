@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
 
    // update the object count (/Size) in the trailer:
    char replacement[128] = {0};
-   sprintf(replacement, "/Size %d", nextobject);
+   snprintf(replacement, 128, "/Size %d", nextobject);
    PerlRegularExpression pre;
    pre.sar(trailerstring, "\\/Size\\s+\\d+", replacement);
 
@@ -421,7 +421,7 @@ int updateRootObject(ostream& out, int rootobjnum, int initialoffset,
  
    Array<char> entry;
    entry.setSize(1024);
-   sprintf(entry.getBase(), " /Names %d %d R ", ndobjectnumber, ndversion);
+   snprintf(entry.getBase(), 1024, " /Names %d %d R ", ndobjectnumber, ndversion);
    entry.setSize(strlen(entry.getBase())+1);
    addDictionaryEntry(rootstring, entry);
 
@@ -547,7 +547,7 @@ int updateNamesObject(ostream& out, Array<int>& objectindex,
       // Add an /EmbeddedFiles entry to the Name Dictionary
       int assignednum = nextobject++;
       int version = 0;
-      sprintf(entry.getBase(), " /EmbeddedFiles %d %d R ", assignednum, 
+      snprintf(entry.getBase(), 1000, " /EmbeddedFiles %d %d R ", assignednum, 
          version);
       entry.setSize(strlen(entry.getBase())+1);
       addDictionaryEntry(ndstring, entry);
@@ -790,7 +790,7 @@ void addTrailerPrev(Array<char>& trailerstring, int newprevoffset) {
          const char* ptr = pre.getSubmatch(1);
          plen = strlen(ptr);
          i+= plen-1;
-         sprintf(buffer, "/Prev %d", newprevoffset);
+         snprintf(buffer, 128, "/Prev %d", newprevoffset);
          j = 0;
          while (buffer[j] != '\0') {
             newtrailer.append(buffer[j++]);
@@ -816,7 +816,7 @@ void addTrailerPrev(Array<char>& trailerstring, int newprevoffset) {
          if (level != 2) {
             continue;
          }
-         sprintf(buffer, " /Prev %d\n", newprevoffset);
+         snprintf(buffer, 128, " /Prev %d\n", newprevoffset);
          plen = strlen(buffer);
          int oldlen = newtrailer.getSize();
          newtrailer.setSize(oldlen+plen);

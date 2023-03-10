@@ -147,7 +147,7 @@ void addRests(HumdrumFile& infile, Array<int>& trackstates) {
       } else {
          continue;
       }
-      Convert::durationRToKernRhythm(buffer, rn);
+      Convert::durationRToKernRhythm(buffer, 1024, rn);
       strcat(buffer, "r");
       if (invisibleQ) {
          strcat(buffer, "yy");
@@ -295,7 +295,7 @@ ostream& printBlanks(ostream& out, HumdrumFile& infile, int line,
             } else if (measureline == 0) {
                rn = infile.getPickupDurationR();
             }
-            Convert::durationRToKernRhythm(buffer, rn);
+            Convert::durationRToKernRhythm(buffer, 1024, rn);
             cout << buffer << "r";
             if (invisibleQ) {
                cout << "yy";
@@ -626,25 +626,25 @@ void removeDollarsFromString(Array<char>& buffer, int maxtrack) {
    int value2;
 
    if (pre.search(buffer.getBase(), "\\$$")) {
-      sprintf(buf2, "%d", maxtrack);
+      snprintf(buf2, 128, "%d", maxtrack);
       pre.sar(buffer, "\\$$", buf2);
    }
 
    if (pre.search(buffer.getBase(), "\\$(?![\\d-])")) {
       // don't know how this case could happen, however...
-      sprintf(buf2, "%d", maxtrack);
+      snprintf(buf2, 128, "%d", maxtrack);
       pre.sar(buffer, "\\$(?![\\d-])", buf2, "g");
    }
 
    if (pre.search(buffer.getBase(), "\\$0")) {
       // replace $0 with maxtrack (used for reverse orderings)
-      sprintf(buf2, "%d", maxtrack);
+      snprintf(buf2, 128, "%d", maxtrack);
       pre.sar(buffer, "\\$0", buf2, "g");
    }
 
    while (pre.search(buffer.getBase(), "\\$(-?\\d+)")) {
       value2 = maxtrack - (int)fabs(strtol(pre.getSubmatch(1), NULL, 10));
-      sprintf(buf2, "%d", value2);
+      snprintf(buf2, 128, "%d", value2);
       pre.sar(buffer, "\\$-?\\d+", buf2);
    }
 

@@ -4411,7 +4411,7 @@ void HumdrumRecord::setSize(int asize) {
    for (i=0; i<recordFields.getSize(); i++) {
       recordFields[i] = new char[2];
       strcpy(recordFields[i], ".");
-      sprintf(buffer, "%d", i+1);
+      snprintf(buffer, 32, "%d", i+1);
       spineids[i] = buffer;
    }
   

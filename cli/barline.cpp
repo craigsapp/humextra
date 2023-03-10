@@ -230,7 +230,7 @@ int setNewDuration(HumdrumFile& infile, int line, int col,
 	string token;
 	token = infile[line][col];
 	char buffer[1024] = {0};
-	Convert::durationRToKernRhythm(buffer, newdur);
+	Convert::durationRToKernRhythm(buffer, 1024, newdur);
 	pre.sar(token, "[\\d%.]+", buffer, "g");
 	infile[line].setToken(col, token.c_str());
 	if (strchr(infile[line][col], 'r') != NULL) {

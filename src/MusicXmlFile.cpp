@@ -359,7 +359,7 @@ ostream& MusicXmlFile::info(ostream& out) {
          } else if (((CXMLElement*)(partdata[i][j].obj))->GetName() == "note") {
             cout << " (";
             if (partdata[i][j].pitch > 0) {
-               cout << Convert::base40ToKern(buffer, partdata[i][j].pitch);
+               cout << Convert::base40ToKern(buffer, 1024, partdata[i][j].pitch);
             } else {
                cout << "r";
             }
@@ -978,7 +978,7 @@ int MusicXmlFile::getTimeSignatureTicks(CXMLObject* obj, int tickinfo) {
    int numerator = 0;
    double denominator = 0.0;
    char timebuffer[1024] = {0};
-   getKernTimeSig(timebuffer, obj);
+   getKernTimeSig(timebuffer, 1024, obj);
    numerator = (int)Convert::kernTimeSignatureTop(timebuffer);
    denominator = Convert::kernTimeSignatureBottomToDuration(timebuffer);
    return (int)(numerator * denominator * tickinfo);
@@ -2415,7 +2415,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
             if (measureno >= 0) {
                strcpy(buffer, "=");
                if (measureno > 0) {
-                  sprintf(buffer2, "%d", measureno);
+                  snprintf(buffer2, 1024, "%d", measureno);
                   strcat(buffer, buffer2);
                }
                if (!noteinit) {
@@ -2444,7 +2444,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
             }
             break;
          case MXI_clef:
-            (*tempstream) << printKernClef(buffer, partdata[staffno][i].obj);
+            (*tempstream) << printKernClef(buffer, 1024, partdata[staffno][i].obj);
             if (partvoiceticktime1 > partdata[staffno][i].ticktime) {
                // this if statement is needed if there are two voices
                // (or more) and the first part is being interrupted
@@ -2457,7 +2457,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
                // voice will be lost most likely in the merging of the
                // two voices.
                (*tempstream) << "\t";
-               (*tempstream) << printKernClef(buffer, partdata[staffno][i].obj);
+               (*tempstream) << printKernClef(buffer, 1024, partdata[staffno][i].obj);
             }
             if (humdrumDynamics && partdynamics[staffno]) {
                (*tempstream) << "\t" << buffer;
@@ -2465,7 +2465,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
             (*tempstream) << "\n"; humline++;
             break;
          case MXI_key:
-            getKernKey(buffer, partdata[staffno][i].obj);
+            getKernKey(buffer, 1024, partdata[staffno][i].obj);
             if (buffer[0] != '\0') {
                (*tempstream) << buffer;
                if (humdrumDynamics && partdynamics[staffno]) {
@@ -2475,7 +2475,7 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
             }
             break;
          case MXI_timemet:
-            getKernTimeMet(buffer, partdata[staffno][i].obj);
+            getKernTimeMet(buffer, 1024, partdata[staffno][i].obj);
             if (buffer[0] != '\0') {
                (*tempstream) << buffer;
                if (humdrumDynamics && partdynamics[staffno]) {
@@ -2485,14 +2485,14 @@ void MusicXmlFile::humdrumPart(HumdrumFile& hfile, int staffno, int debugQ) {
             }
             break;
          case MXI_time:
-            (*tempstream) << getKernTimeSig(buffer, partdata[staffno][i].obj);
+            (*tempstream) << getKernTimeSig(buffer, 1024, partdata[staffno][i].obj);
             if (humdrumDynamics && partdynamics[staffno]) {
                (*tempstream) << "\t" << buffer;
             }
             (*tempstream) << "\n"; humline++;
             break;
          case MXI_tempo:
-            getKernMetronome(buffer, partdata[staffno][i].obj);
+            getKernMetronome(buffer, 1024, partdata[staffno][i].obj);
             if (buffer[0] != '\0') {
                (*tempstream) << buffer;
                if (humdrumDynamics && partdynamics[staffno]) {
@@ -3363,7 +3363,7 @@ void MusicXmlFile::processSpineChanges(SSTREAM& newstream, SSTREAM& oldstream,
 // MusicXmlFile::getKernKey --
 //
 
-char* MusicXmlFile::getKernKey(char* buffer, CXMLObject* object) {
+char* MusicXmlFile::getKernKey(char* buffer, int outputMaxSize, CXMLObject* object) {
    int fifths= 0;
    CXMLElement* element;
    object = object->Zoom();
@@ -3455,7 +3455,7 @@ int MusicXmlFile::printPageBreak(ostream& out, CXMLObject* object) {
 // MusicXmlFile::printKernClef --
 //
 
-char* MusicXmlFile::printKernClef(char* buffer, CXMLObject* object) {
+char* MusicXmlFile::printKernClef(char* buffer, int outputMaxSize, CXMLObject* object) {
    strcpy(buffer, "*");
 
    if (object == NULL) {
@@ -3527,7 +3527,7 @@ char* MusicXmlFile::printKernClef(char* buffer, CXMLObject* object) {
    }
 
    char buf[32] = {0};
-   sprintf(buf, "%d", line);
+   snprintf(buf, 32, "%d", line);
 
    strcat(buffer, buf);
 
@@ -3751,7 +3751,7 @@ int MusicXmlFile::printMeasureStyle(char* buffer, int staffno, int index) {
 // MusicXmlFile::getKernMetronome --
 //
 
-char* MusicXmlFile::getKernMetronome(char* buffer, CXMLObject* object) {
+char* MusicXmlFile::getKernMetronome(char* buffer, int outputMaxSize, CXMLObject* object) {
    buffer[0] = '\0';
    if (object == NULL) {
       return buffer;
@@ -3776,7 +3776,7 @@ char* MusicXmlFile::getKernMetronome(char* buffer, CXMLObject* object) {
       }
    }
 
-   sprintf(buffer, "*MM%d", tempo);
+   snprintf(buffer, outputMaxSize, "*MM%d", tempo);
 
    return buffer;
 }
@@ -3788,7 +3788,7 @@ char* MusicXmlFile::getKernMetronome(char* buffer, CXMLObject* object) {
 // MusicXmlFile::getKernTimeMet -- get the display format of the time signature.
 //
 
-char* MusicXmlFile::getKernTimeMet(char* buffer, CXMLObject* object) {
+char* MusicXmlFile::getKernTimeMet(char* buffer, int outputMaxSize, CXMLObject* object) {
    buffer[0]= '\0';
    if (object == NULL) {
       return buffer;
@@ -3825,7 +3825,7 @@ char* MusicXmlFile::getKernTimeMet(char* buffer, CXMLObject* object) {
 // MusicXmlFile::getKernTimeSig --
 //
 
-char* MusicXmlFile::getKernTimeSig(char* buffer, CXMLObject* object) {
+char* MusicXmlFile::getKernTimeSig(char* buffer, int outputMaxSize, CXMLObject* object) {
    int top = 5;
    int bottom = 5;
    if (object == NULL) {
@@ -3887,7 +3887,7 @@ char* MusicXmlFile::getKernTimeSig(char* buffer, CXMLObject* object) {
       object = object->GetNext();
    }
 
-   sprintf(buffer, "*M%d/%d", top, bottom);
+   snprintf(buffer, outputMaxSize, "*M%d/%d", top, bottom);
    return buffer;
 }
 
@@ -3944,10 +3944,10 @@ int MusicXmlFile::getNextVoiceTime(int staffno, int index, int voice) {
 // Note: the algorithm will probably need to be made more sophisicated.
 //
 
-int MusicXmlFile::getInterpRestDuration(char* interpbuffer, int interptick,
+int MusicXmlFile::getInterpRestDuration(char* interpbuffer, int outputMaxSize, int interptick,
       int divisions) {
     // try to create a rhythm out of the entire duration:
-    Convert::durationToKernRhythm(interpbuffer,
+    Convert::durationToKernRhythm(interpbuffer, outputMaxSize,
           (double)interptick/divisions);
 
     // tests now need to be done in order to verify that the interpreted
@@ -4288,7 +4288,7 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
                 partvoiceticktime1) {
                interptick = getNextVoiceTime(staffno, index, 1) -
                             partdata[staffno][index].ticktime;
-               interpextenttick = getInterpRestDuration(interpbuffer,
+               interpextenttick = getInterpRestDuration(interpbuffer, 128,
                                    interptick,
                                    partdata[staffno][index].divisions);
                partvoiceticktime1 = partdata[staffno][index].ticktime +
@@ -4338,7 +4338,7 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
    char buffer[1024] = {0};
    if (duration > 0) {
       // print duration only if not a gracenote.
-      out << Convert::durationToKernRhythm(buffer, duration);
+      out << Convert::durationToKernRhythm(buffer, 1024, duration);
    } else {
        // print duration even if a grace note (used for visual display)
        printGraceNoteRhythm(out, partdata[staffno][index]);
@@ -4349,7 +4349,7 @@ int MusicXmlFile::printKernNote(ostream& out, int staffno, int index,
    if (partdata[staffno][index].pitch <= 0) {
       out << "r";
    } else {
-      out << Convert::base40ToKern(buffer, partdata[staffno][index].pitch);
+      out << Convert::base40ToKern(buffer, 1024, partdata[staffno][index].pitch);
    }
 
    // print any explicit natural signs

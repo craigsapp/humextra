@@ -133,7 +133,7 @@ void ScoreRecordSimple::printAscii(ostream& out, int roundQ, int verboseQ) {
    int bufflen;
    for (i=0; i<getFixedSize(); i++) {
       if (isTextItem() && (i==2) && (fabs(getValue(i)) < 0.001)) {
-         sprintf(buffer, "%f", 0.001);
+         snprintf(buffer, 128, "%f", 0.001);
          // there is a bug in WinScore with text at position 0.0000...
       } else {
          num = getValue(i);
@@ -150,7 +150,7 @@ void ScoreRecordSimple::printAscii(ostream& out, int roundQ, int verboseQ) {
             }
          }
 	        
-         sprintf(buffer, "%f", num);
+         snprintf(buffer, 128, "%f", num);
 
          u.num = (float)atof(buffer);
          if (u.num != num) {
@@ -270,7 +270,7 @@ void ScoreRecordSimple::printAscii(ostream& out, int roundQ, int verboseQ) {
    if (isNoteItem() && verboseQ && getPitch() != 0) {
       char buffer[32];
       out << "\n; pitch=" << getPitch() << " ("
-          << Convert::base40ToKern(buffer, getPitch()) << ")";
+          << Convert::base40ToKern(buffer, 32, getPitch()) << ")";
    }
 
 

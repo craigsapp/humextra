@@ -3448,7 +3448,7 @@ ostream& operator<<(ostream& out, PerfVizNote& note) {
 	double absbeaton  = note.absbeat;
 	double absbeatoff = note.absbeat + note.scoredur;
 	char pitchname[1024] = {0};
-	Convert::base40ToPerfViz(pitchname, note.pitch);
+	Convert::base40ToPerfViz(pitchname, 1024, note.pitch);
 	double soffset    = note.beatfrac;
 	double dur        = note.beatdur;
 

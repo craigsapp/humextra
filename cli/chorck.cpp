@@ -424,35 +424,35 @@ void errormessage(int errornumber, const string& voice1, const string& voice2,
 	anError.line = linenumber;
 	switch (errornumber) {
 		case 1:
-			sprintf(anError.message, "1. Parallel 5th between %s and %s",
+			snprintf(anError.message, 128, "1. Parallel 5th between %s and %s",
 				  voice1.c_str(), voice2.c_str());
 			break;
 		case 2:
-			sprintf(anError.message, "2. Parallel octave between %s and %s",
+			snprintf(anError.message, 128, "2. Parallel octave between %s and %s",
 				  voice1.c_str(), voice2.c_str());
 			break;
 		case 3:
-			sprintf(anError.message, "3. Contrary parallel 5th between %s and %s",
+			snprintf(anError.message, 128, "3. Contrary parallel 5th between %s and %s",
 				  voice1.c_str(), voice2.c_str());
 			break;
 		case 4:
-			sprintf(anError.message, "4. Unequal 5th between %s and %s",
+			snprintf(anError.message, 128, "4. Unequal 5th between %s and %s",
 				  voice1.c_str(), voice2.c_str());
 			break;
 		case 5:
-			sprintf(anError.message, "5. Hidden 5th between %s and %s",
+			snprintf(anError.message, 128, "5. Hidden 5th between %s and %s",
 				  voice1.c_str(), voice2.c_str());
 			break;
 		case 6:
-			sprintf(anError.message, "6. Hidden octave between %s and %s",
+			snprintf(anError.message, 128, "6. Hidden octave between %s and %s",
 				  voice1.c_str(), voice2.c_str());
 			break;
 		case 7:
-			sprintf(anError.message, "7. Voice crossing between %s and %s",
+			snprintf(anError.message, 128, "7. Voice crossing between %s and %s",
 				  voice1.c_str(), voice2.c_str());
 			break;
 		case 8:
-			sprintf(anError.message, "8. Open spacing between %s and %s",
+			snprintf(anError.message, 128, "8. Open spacing between %s and %s",
 				  voice1.c_str(), voice2.c_str());
 			break;
 		default:

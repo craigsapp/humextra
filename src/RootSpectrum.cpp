@@ -523,7 +523,7 @@ ostream& RootSpectrum::printHumdrum(ostream& out, int type,
          default:
             findex = (i-2+40)%40;
       }
-      Convert::base40ToKern(buffer, (findex+2)%40+4*40);
+      Convert::base40ToKern(buffer, 64, (findex+2)%40+4*40);
       if (buffer[0] == '\0') {
          continue;
       }
@@ -646,7 +646,7 @@ ostream& RootSpectrum::printXfig(ostream& out, const char* title, int type) {
                nextindex = -1;
             }
       }
-      Convert::base40ToKern(buffer, ((findex+2)%40) + 4*40);
+      Convert::base40ToKern(buffer, 64, ((findex+2)%40) + 4*40);
       if (buffer[0] == '\0') {
          continue;
       }
@@ -728,7 +728,6 @@ int RootSpectrum::calculate(IntervalWeight& distances, HumdrumFile& infile,
    Array<Array<int> > lastpitches;   // pitches which approach note
    Array<Array<int> > nextpitches;   // pitches which leave note
 
-
    char buffer[64] = {0};
    if (!melodyQ) {
       infile.getNoteArray(absbeat, pitches, durations, levels, startline,
@@ -742,7 +741,7 @@ int RootSpectrum::calculate(IntervalWeight& distances, HumdrumFile& infile,
            << "!! **level   = metric level of the note on linear scale\n";
          cout << "**kern\t**dur\t**level\t**absbeat\n";
          for (i=0; i<pitches.getSize(); i++) {
-            cout << Convert::base40ToKern(buffer, pitches[i]) << "\t";
+            cout << Convert::base40ToKern(buffer, 64, pitches[i]) << "\t";
             cout << durations[i] << "\t";
             cout << levels[i]    << "\t";
             cout << absbeat[i]   << "\n";
@@ -761,13 +760,13 @@ int RootSpectrum::calculate(IntervalWeight& distances, HumdrumFile& infile,
            << "!! **level   = metric level of the note on linear scale\n";
          cout << "**kern\t**last\t**next\t**dur\t**level\t**absbeat\n";
          for (i=0; i<pitches.getSize(); i++) {
-            cout << Convert::base40ToKern(buffer, pitches[i]) << "\t";
+            cout << Convert::base40ToKern(buffer, 64, pitches[i]) << "\t";
    
             if (lastpitches[i].getSize() == 0) {
                cout << "." << "\t";
             } else {
                for (j=0; j<lastpitches[i].getSize(); j++) {
-                  cout << Convert::base40ToKern(buffer, lastpitches[i][j]); 
+                  cout << Convert::base40ToKern(buffer, 64, lastpitches[i][j]); 
                   if (j<lastpitches[i].getSize() - 1) {
                      cout << " ";
                   }
@@ -779,7 +778,7 @@ int RootSpectrum::calculate(IntervalWeight& distances, HumdrumFile& infile,
                cout << "." << "\t";
             } else {
                for (j=0; j<nextpitches[i].getSize(); j++) {
-                  cout << Convert::base40ToKern(buffer, nextpitches[i][j]); 
+                  cout << Convert::base40ToKern(buffer, 64, nextpitches[i][j]); 
                   if (j<nextpitches[i].getSize() - 1) {
                      cout << " ";
                   }

@@ -15,24 +15,10 @@
 #include <cctype>
 #include <math.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <iomanip>
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #include <iostream.h>
-   #include <iomanip.h>
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+using namespace std;
    
 
 #define MAX_ENVELOPE_POINT_DIMENSION (100)
@@ -637,7 +623,7 @@ void EnvelopeString::makeEnvelope(void) {
 //
 
 void EnvelopeString::makeCLMenv(void) {
-   SSTREAM newString;
+   stringstream newString;
    int i, j;
    
    newString << "(";
@@ -659,15 +645,12 @@ void EnvelopeString::makeCLMenv(void) {
    newString << ")";
 
    newString << ends;
-   const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = strlen(newString.str().c_str());
    if (envelope != NULL) {
       delete [] envelope;
    }
    envelope = new char[length + 1];
-   strcpy(envelope, temp);
-
-   // Question: should temp be deleted?
+   strcpy(envelope, newString.str().c_str());
 
    modified = 0;
 }
@@ -680,7 +663,7 @@ void EnvelopeString::makeCLMenv(void) {
 //
 
 void EnvelopeString::makeLISPenv(void) {
-   SSTREAM newString;
+   stringstream newString;
    int i, j;
    
    newString << "(";
@@ -701,15 +684,12 @@ void EnvelopeString::makeLISPenv(void) {
    newString << ")";
 
    newString << ends;
-   const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = strlen(newString.str().c_str());
    if (envelope != NULL) {
       delete [] envelope;
    }
    envelope = new char[length + 1];
-   strcpy(envelope, temp);
-
-   // Question: should temp be deleted?
+   strcpy(envelope, newString.str().c_str());
 
    modified = 0;
 }
@@ -722,7 +702,7 @@ void EnvelopeString::makeLISPenv(void) {
 //
 
 void EnvelopeString::makeMKenv(void) {
-   SSTREAM newString;
+   stringstream newString;
    int i, j;
    
    newString << "[";
@@ -746,15 +726,12 @@ void EnvelopeString::makeMKenv(void) {
 
 
    newString << ends;
-   const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = strlen(newString.str().c_str());
    if (envelope != NULL) {
       delete [] envelope;
    }
    envelope = new char[length + 1];
-   strcpy(envelope, temp);
-
-   // Question: should temp be deleted?
+   strcpy(envelope, newString.str().c_str());
 
    modified = 0;
 }
@@ -767,7 +744,7 @@ void EnvelopeString::makeMKenv(void) {
 //
 
 void EnvelopeString::makeMMAenv(void) {
-   SSTREAM newString;
+   stringstream newString;
    int i, j;
    
    newString << "{";
@@ -792,15 +769,12 @@ void EnvelopeString::makeMMAenv(void) {
    newString << "}";
 
    newString << ends;
-   const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = strlen(newString.str().c_str());
    if (envelope != NULL) {
       delete [] envelope;
    }
    envelope = new char[length + 1];
-   strcpy(envelope, temp);
-
-   // Question: should temp be deleted?
+   strcpy(envelope, newString.str().c_str());
 
    modified = 0;
 }
@@ -813,7 +787,7 @@ void EnvelopeString::makeMMAenv(void) {
 //
 
 void EnvelopeString::makePLAINenv(void) {
-   SSTREAM newString;
+   stringstream newString;
    int i, j;
    
    for (i=0; i<getNumPoints(); i++) {
@@ -833,15 +807,12 @@ void EnvelopeString::makePLAINenv(void) {
    }
 
    newString << ends;
-   const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = strlen(newString.str().c_str());
    if (envelope != NULL) {
       delete [] envelope;
    }
    envelope = new char[length + 1];
-   strcpy(envelope, temp);
-
-   // Question: should temp be deleted?
+   strcpy(envelope, newString.str().c_str());
 
    modified = 0;
 }
@@ -854,7 +825,7 @@ void EnvelopeString::makePLAINenv(void) {
 //
 
 void EnvelopeString::makeSIGenv(void) {
-   SSTREAM newString;
+   stringstream newString;
    int i, j;
    
    if (std::toupper(defaultInterpolation) != 'L') {
@@ -893,15 +864,12 @@ void EnvelopeString::makeSIGenv(void) {
    newString << ")";
 
    newString << ends;
-   const char* temp = newString.CSTRING;
-   int length = strlen(temp);
+   int length = strlen(newString.str().c_str());
    if (envelope != NULL) {
       delete [] envelope;
    }
    envelope = new char[length + 1];
-   strcpy(envelope, temp);
-
-   // Question: should temp be deleted?
+   strcpy(envelope, newString.str().c_str());
 
    modified = 0;
 }

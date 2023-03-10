@@ -280,7 +280,7 @@ void printKernTokenLineDuration(HumdrumFile& infile, int line, int field) {
 		return;
 	}
 	noteendabsbeat = notestartabsbeat + notedur;
-	Convert::durationToKernRhythm(newdur, linedur.getFloat());
+	Convert::durationToKernRhythm(newdur, 1024, linedur.getFloat());
 	notebuffer = infile[ii][jj];
 	pre.sar(notebuffer, "[\\d%.]+", newdur, "g");
 

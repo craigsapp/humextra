@@ -436,7 +436,7 @@ void PerformDataRecord::setMeasure(int aTime, const char* measureData,
 
 void PerformDataRecord::setMeasure(int aTime, int aMeasure) {
    char measureString[128] = {0};
-   sprintf(measureString, "BAR%3d", aMeasure);
+   snprintf(measureString, 128, "BAR%3d", aMeasure);
    setMeasure(aTime, measureString);
 }
 
@@ -470,7 +470,7 @@ void PerformDataRecord::setTempo(int aTime, const char* tempoData,
 
 void PerformDataRecord::setTempo(int aTime, int aTempo) {
    char tempoString[128] = {0};
-   sprintf(tempoString, "TEMPO%3d", aTempo);
+   snprintf(tempoString, 128, "TEMPO%3d", aTempo);
    setTempo(aTime, tempoString);
 }
 

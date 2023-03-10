@@ -212,7 +212,7 @@ void ScoreRecord::printAscii(ostream& out, int roundQ, int verboseQ,
    int bufflen;
    for (i=0; i<getFixedSize(); i++) {
       if (isTextItem() && (i==2) && (fabs(getValue(i)) < 0.001)) {
-         sprintf(buffer, "%f", 0.001);
+         snprintf(buffer, 128, "%f", 0.001);
          // there is a bug in WinScore with text at position 0.0000...
       } else {
          num = getValue(i);
@@ -234,7 +234,7 @@ void ScoreRecord::printAscii(ostream& out, int roundQ, int verboseQ,
             //}
          }
 
-         sprintf(buffer, "%f", num);
+         snprintf(buffer, 128, "%f", num);
 
          u.num = (float)atof(buffer);
          if (u.num != num) {
@@ -412,7 +412,7 @@ void ScoreRecord::printAsciiExtraParameters(ostream& out, int roundQ, int verbos
       }
       out << indent << "@" << getKeyName(i) << ":\t" << getKeyValue(i);
       if (strcmp(getKeyName(i), "base40") == 0) {
-         out << "\t(" << Convert::base40ToMuse(getKeyValue(i), buffer) << ")";
+         out << "\t(" << Convert::base40ToMuse(getKeyValue(i), buffer, 32) << ")";
       }
       out << endl;
    }

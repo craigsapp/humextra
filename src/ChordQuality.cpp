@@ -232,7 +232,7 @@ ostream& ChordQuality::printPitchClasses(ostream& out) {
    out << '[';
    int i;
    for (i=0; i<chordNotes.getSize(); i++) {
-      out << Convert::base40ToKern(buffer, chordNotes[i] + 40*3);
+      out << Convert::base40ToKern(buffer, 128, chordNotes[i] + 40*3);
    }
    out << ']';
    return out;

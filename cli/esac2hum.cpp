@@ -159,7 +159,7 @@ void convertEsacToHumdrum(const char* filename) {
 		init = 1;
 		if (splitQ) {
 			strcpy(outfilename, namebase);
-			sprintf(numberstring, "%d", filecounter);
+			snprintf(numberstring, 16, "%d", filecounter);
 			if (filecounter < 1000) {
 				strcat(outfilename, "0");
 			}
@@ -325,7 +325,7 @@ void convertSong(vector<char260>& song, ostream& out) {
 	}
 	out << "\n";
 
-	out << "!!!minrhy: " << Convert::durationToKernRhythm(buffer, mindur)<<"\n";
+	out << "!!!minrhy: " << Convert::durationToKernRhythm(buffer, 32, mindur)<<"\n";
 	out << "!!!meter";
 	if (numerator.size() > 1) {
 		out << "s";
@@ -857,16 +857,16 @@ keysigend:
 	char buffer[32] = {0};
 	if (minor > major) {
 		// minor key (or related mode)
-		out  << "*" << Convert::base40ToKern(buffer, 40 * 4 + tonic) << ":";
+		out  << "*" << Convert::base40ToKern(buffer, 32, 40 * 4 + tonic) << ":";
 		if (textQ) {
-			out  << "\t*" << Convert::base40ToKern(buffer, 40 * 4 + tonic) << ":";
+			out  << "\t*" << Convert::base40ToKern(buffer, 32, 40 * 4 + tonic) << ":";
 		}
 		out << "\n";
 	} else {
 		// major key (or related mode)
-		out  << "*" << Convert::base40ToKern(buffer, 40 * 3 + tonic) << ":";
+		out  << "*" << Convert::base40ToKern(buffer, 32, 40 * 3 + tonic) << ":";
 		if (textQ) {
-			out  << "\t*" << Convert::base40ToKern(buffer, 40 * 3 + tonic) << ":";
+			out  << "\t*" << Convert::base40ToKern(buffer, 32, 40 * 3 + tonic) << ":";
 		}
 		out << "\n";
 	}
@@ -1357,11 +1357,11 @@ void printNoteData(NoteData& data, int textQ, ostream& out) {
 	if (data.tiestart == 1) {
 		out << "[";
 	}
-	out << Convert::durationToKernRhythm(buffer, data.duration);
+	out << Convert::durationToKernRhythm(buffer, 32, data.duration);
 	if (data.pitch < 0) {
 		out << "r";
 	} else {
-		out << Convert::base40ToKern(buffer, data.pitch);
+		out << Convert::base40ToKern(buffer, 32, data.pitch);
 	}
 	if (data.tiecont == 1) {
 		out << "_";

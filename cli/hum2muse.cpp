@@ -943,7 +943,7 @@ void analyzeForwardTieConditions(Array<Array<Array<char>>>& tiestate,
 				for (k=0; k<tiestate[i][j].getSize(); k++) {
 					if (tiestate[i][j][k] != 0) {
 						cout << j << ":"
-							  << Convert::base40ToKern(buffer, k)
+							  << Convert::base40ToKern(buffer, 128, k)
 							  << "=" << (int)tiestate[i][j][k]
 							  << " ";
 					}
@@ -1326,7 +1326,7 @@ void printWithMd5sum(MuseData& datafile) {
 		char newlinestring[1024] = {0};
 		char buffer[32] = {0};
 		for (int i=0; i<(int)NEWLINE.size(); i++) {
-			sprintf(buffer, "%02x", (int)NEWLINE[i]);
+			snprintf(buffer, 32, "%02x", (int)NEWLINE[i]);
 			strcat(newlinestring, buffer);
 		}
 
@@ -1931,13 +1931,13 @@ void printMuse2PsOptions(HumdrumFile& infile) {
 	if (kflag > 0) {
 		char buffer[32] = {0};
 		if (kflag < 0xff) {
-			sprintf(buffer, "k^0x%02x^", kflag);
+			snprintf(buffer, 32, "k^0x%02x^", kflag);
 		} else if (kflag < 0xffff) {
-			sprintf(buffer, "k^0x%04x^", kflag);
+			snprintf(buffer, 32, "k^0x%04x^", kflag);
 		} else if (kflag < 0xffffff) {
-			sprintf(buffer, "k^0x%06x^", kflag);
+			snprintf(buffer, 32, "k^0x%06x^", kflag);
 		} else {
-			sprintf(buffer, "k^0x%08x^", kflag);
+			snprintf(buffer, 32, "k^0x%08x^", kflag);
 		}
 		pre.sar(ostring, "$", buffer, "");
 	}
@@ -2514,7 +2514,7 @@ void insertDollarRecord(HumdrumFile& infile, int line, MuseData& musedata,
 	}
 	// ticks
 	if (tpq > 0) {
-		sprintf(tempbuf, "Q:%d   ", tpq);
+		snprintf(tempbuf, 16, "Q:%d   ", tpq);
 		strcat(buffer, tempbuf);
 	}
 
@@ -2958,7 +2958,7 @@ int appendKeySignature(char* buffer, HumdrumFile& infile, int line, int track) {
 
 	int keynumber = Convert::kernKeyToNumber(infile[row][col]);
 	char keybuf[16] = {0};
-	sprintf(keybuf, "K:%d", keynumber);
+	snprintf(keybuf, 16, "K:%d", keynumber);
 	strcat(buffer, keybuf);
 	return 1;
 }
@@ -3192,17 +3192,17 @@ void addDateAndEncoder(HumdrumFile& infile, MuseData& tempdata) {
 	char datebuf[1024] = {0};
 	char daybuf[16] = {0};
 	if (day < 10) {
-		sprintf(daybuf, "0%d", day);
+		snprintf(daybuf, 16, "0%d", day);
 	} else {
-		sprintf(daybuf, "%d", day);
+		snprintf(daybuf, 16, "%d", day);
 	}
 	char monthbuf[16] = {0};
 	if (month < 10) {
-		sprintf(monthbuf, "0%d", month);
+		snprintf(monthbuf, 16, "0%d", month);
 	} else {
-		sprintf(monthbuf, "%d", month);
+		snprintf(monthbuf, 16, "%d", month);
 	}
-	sprintf(datebuf, "%s/%s/%d ", monthbuf, daybuf, year);
+	snprintf(datebuf, 1024, "%s/%s/%d ", monthbuf, daybuf, year);
 
 	if (encline >= 0) {
 		if (pre.search(infile[encline][0], "^!!!ENC:\\s*(.*)\\s*$", "")) {
@@ -3633,7 +3633,7 @@ void processVoice(MuseData& tempdata, HumdrumFile& infile, int startline,
 			if (tpqtest > 0) {
 				MuseRecord dchange;
 				char buffer[128] = {0};
-				sprintf(buffer, "$ Q:%d", tpqtest);
+				snprintf(buffer, 128, "$ Q:%d", tpqtest);
 				dchange.insertString(1, buffer);
 				tempdata.append(dchange);
 				tpqtest = -1;
@@ -3932,7 +3932,7 @@ int addNoteToEntry(MuseData& tempdata, HumdrumFile& infile, int row, int col,
 	if (RscaleState[i][j] != 1) {
 		RationalNumber visrn;
 		visrn = rn * RscaleState[i][j];
-		Convert::durationRToKernRhythm(visbuffer, visrn);
+		Convert::durationRToKernRhythm(visbuffer, 128, visrn);
 		visual_display = visbuffer;
 	}
 
@@ -5471,7 +5471,7 @@ void addDecrescendoStart(MuseData& tempdata, LayoutParameters& lp) {
 
 	arecord.getColumn(1) = '*';
 	arecord.getColumn(column) = 'E';
-	sprintf(buffer, "%d", spread);
+	snprintf(buffer, 32, "%d", spread);
 	arecord.insertStringRight(23, buffer);
 	tempdata.append(arecord);
 
@@ -5530,19 +5530,19 @@ void addPositionParameters(MuseData& tempdata, int column,
 	}
 
 	if (xQ) {
-		sprintf(nbuff, "%d", x);
+		snprintf(nbuff, 32, "%d", x);
 		strcat(buffer, "x");
 		strcat(buffer, nbuff);
 	} else if (XQ) {
-		sprintf(nbuff, "%d", X);
+		snprintf(nbuff, 32, "%d", X);
 		strcat(buffer, "x");     // X does not seem to work, to remap to x
 		strcat(buffer, nbuff);
 	}
 
 	if (yQ) {
-		sprintf(nbuff, "%d", y); strcat(buffer, "y"); strcat(buffer, nbuff);
+		snprintf(nbuff, 32, "%d", y); strcat(buffer, "y"); strcat(buffer, nbuff);
 	} else if (YQ) {
-		sprintf(nbuff, "%d", Y); strcat(buffer, "Y"); strcat(buffer, nbuff);
+		snprintf(nbuff, 32, "%d", Y); strcat(buffer, "Y"); strcat(buffer, nbuff);
 	}
 
 	if (strlen(buffer) == 0) {
@@ -5552,7 +5552,7 @@ void addPositionParameters(MuseData& tempdata, int column,
 
 	char buffer2[2048] = {0};
 	if (column < 500) {
-		sprintf(buffer2, " C%d:%s", column, buffer);
+		snprintf(buffer2, 2048, " C%d:%s", column, buffer);
 	}
 
 	// if there is already a print suggestion line, then the new
@@ -5584,7 +5584,7 @@ void addCrescendoStart(MuseData& tempdata, LayoutParameters& lp) {
 
 	arecord.getColumn(1) = '*';
 	arecord.getColumn(column) = 'E';
-	sprintf(buffer, "%d", spread);
+	snprintf(buffer, 32, "%d", spread);
 	arecord.insertStringRight(23, buffer);
 	tempdata.append(arecord);
 
@@ -5607,7 +5607,7 @@ void addDecrescendoStop(MuseData& tempdata, LayoutParameters& lp) {
 
 	arecord.getColumn(1) = '*';
 	arecord.getColumn(column) = 'F';
-	sprintf(buffer, "%d", spread);
+	snprintf(buffer, 32, "%d", spread);
 	arecord.insertStringRight(23, buffer);
 	tempdata.append(arecord);
 
@@ -5632,7 +5632,7 @@ void addCrescendoStop(MuseData& tempdata, LayoutParameters& lp) {
 
 	arecord.getColumn(1) = '*';
 	arecord.getColumn(column) = 'F';
-	sprintf(buffer, "%d", spread);
+	snprintf(buffer, 32, "%d", spread);
 	arecord.insertStringRight(23, buffer);
 	tempdata.append(arecord);
 
@@ -6114,10 +6114,10 @@ void convertKernLODYtoMusePS(char* buffer, Array<string>& keys,
 	int& XQ = states[0]; int& xQ = states[1];
 	int& YQ = states[2]; int& yQ = states[3];
 
-	if (xQ) { sprintf(buffer2, "x%d", x); strcat(buffer, buffer2); }
-	if (yQ) { sprintf(buffer2, "y%d", y); strcat(buffer, buffer2); }
-	if (XQ) { sprintf(buffer2, "X%d", X); strcat(buffer, buffer2); }
-	if (YQ) { sprintf(buffer2, "Y%d", Y); strcat(buffer, buffer2); }
+	if (xQ) { snprintf(buffer2, 128, "x%d", x); strcat(buffer, buffer2); }
+	if (yQ) { snprintf(buffer2, 128, "y%d", y); strcat(buffer, buffer2); }
+	if (XQ) { snprintf(buffer2, 128, "X%d", X); strcat(buffer, buffer2); }
+	if (YQ) { snprintf(buffer2, 128, "Y%d", Y); strcat(buffer, buffer2); }
 }
 
 
@@ -6146,10 +6146,10 @@ void convertKernLONtoMusePS(char* buffer, Array<string>& keys,
 	int& XQ = states[0]; int& xQ = states[1];
 	int& YQ = states[2]; int& yQ = states[3];
 
-	if (xQ) { sprintf(buffer2, "x%d", x); strcat(buffer, buffer2); }
-	if (yQ) { sprintf(buffer2, "y%d", y); strcat(buffer, buffer2); }
-	if (XQ) { sprintf(buffer2, "X%d", X); strcat(buffer, buffer2); }
-	if (YQ) { sprintf(buffer2, "Y%d", Y); strcat(buffer, buffer2); }
+	if (xQ) { snprintf(buffer2, 128, "x%d", x); strcat(buffer, buffer2); }
+	if (yQ) { snprintf(buffer2, 128, "y%d", y); strcat(buffer, buffer2); }
+	if (XQ) { snprintf(buffer2, 128, "X%d", X); strcat(buffer, buffer2); }
+	if (YQ) { snprintf(buffer2, 128, "Y%d", Y); strcat(buffer, buffer2); }
 
 	// check for LO:N:vis=dot layout directive:
 
@@ -6177,16 +6177,16 @@ void convertKernLONtoMusePS(char* buffer, Array<string>& keys,
 		for (int i=0; i<keys.getSize(); i++) {
 			if (keys[i] == "smy") {
 				value = atoi(values[i].c_str());
-				sprintf(buffer2, " C23:y%d", value); strcat(buffer, buffer2);
+				snprintf(buffer2, 128, " C23:y%d", value); strcat(buffer, buffer2);
 			} else if (keys[i] == "smY") {
 				value = atoi(values[i].c_str());
-				sprintf(buffer2, " C23:Y%d", value); strcat(buffer, buffer2);
+				snprintf(buffer2, 128, " C23:Y%d", value); strcat(buffer, buffer2);
 			} else if (keys[i] == "bmy") {
 				value = atoi(values[i].c_str());
-				sprintf(buffer2, " C26:y%d", value); strcat(buffer, buffer2);
+				snprintf(buffer2, 128, " C26:y%d", value); strcat(buffer, buffer2);
 			} else if (keys[i] == "bmY") {
 				value = atoi(values[i].c_str());
-				sprintf(buffer2, " C26:y%d", value); strcat(buffer, buffer2);
+				snprintf(buffer2, 128, " C26:y%d", value); strcat(buffer, buffer2);
 			}
 		}
 	}
@@ -6211,9 +6211,9 @@ void insertStaccatoSuggestion(MuseData& data, MuseRecord& prec,
 	}
 	char buffer[32] = {0};
 	if (direction < 0) {
-		sprintf(buffer, " C%d:b", staccatoColumn);
+		snprintf(buffer, 32, " C%d:b", staccatoColumn);
 	} else {
-		sprintf(buffer, " C%d:a", staccatoColumn);
+		snprintf(buffer, 32, " C%d:a", staccatoColumn);
 	}
 	prec.appendString(buffer);
 }
@@ -6234,7 +6234,7 @@ void insertSlurUpPrintSug(MuseData& data, MuseRecord& prec) {
 		return;
 	}
 	char buffer[32] = {0};
-	sprintf(buffer, " C%d:o", slurcolumn);
+	snprintf(buffer, 32, " C%d:o", slurcolumn);
 	prec.appendString(buffer);
 }
 
@@ -6254,7 +6254,7 @@ void insertSlurDownPrintSug(MuseData& data, MuseRecord& prec) {
 		return;
 	}
 	char buffer[32] = {0};
-	sprintf(buffer, " C%d:u", slurcolumn);
+	snprintf(buffer, 32, " C%d:u", slurcolumn);
 	prec.appendString(buffer);
 }
 
@@ -6649,7 +6649,7 @@ void insertArpeggio(MuseData& tempdata, HumdrumFile& infile, int row, int col) {
 	// column 1: "g" for grace note:
 	arecord.getColumn(1) = 'g';
 	// columns 2-5: pitch (used to space arpeggio, not a real note)
-	arecord.insertString(2, Convert::base40ToMuse(gracepitch, buffer));
+	arecord.insertString(2, Convert::base40ToMuse(gracepitch, buffer, 32));
 	// columns 6-7 blank
 	// columns 8: "X" which means grace-note is a dummy for arpeggios
 	arecord.getColumn(8) = 'X';
@@ -6658,11 +6658,11 @@ void insertArpeggio(MuseData& tempdata, HumdrumFile& infile, int row, int col) {
 	// columns 16 blank
 	// columns 17-21 vertical parameters of arpeggio:
 	// column 17-18 are
-	sprintf(buffer, "%d", postop);
+	snprintf(buffer, 32, "%d", postop);
 	arecord.insertString(17, buffer);
 	// column 19 grand staff marker (not set by this algorithm)
 	// column 20-21: ending level of arpeggio.
-	sprintf(buffer, "%d", posbot);
+	snprintf(buffer, 32, "%d", posbot);
 	arecord.insertString(20, buffer);
 	// column 22-23 blank
 	// column 24 = staff number (space is 1).
@@ -6983,19 +6983,19 @@ void addMeasureEntry(MuseData& tempdata, HumdrumFile& infile, int line,
 				if (glp.hasKeyName(ii, "start")) {
 					// print a start-ending marker
 					ending = glp.getKeyValueInt(ii, "start");
-					sprintf(mbuffer, "start-end%d", ending);
+					snprintf(mbuffer, 1024, "start-end%d", ending);
 					arecord.addMeasureFlag(mbuffer);
 				}
 				if (glp.hasKeyName(ii, "stop")) {
 					// print a stop-ending marker
 					ending = glp.getKeyValueInt(ii, "stop");
-					sprintf(mbuffer, "stop-end%d", ending);
+					snprintf(mbuffer, 1024, "stop-end%d", ending);
 					arecord.addMeasureFlag(mbuffer);
 				}
 				if (glp.hasKeyName(ii, "disc")) {
 					// print a discontinue-ending marker
 					ending = glp.getKeyValueInt(ii, "disc");
-					sprintf(mbuffer, "disc-end%d", ending);
+					snprintf(mbuffer, 1024, "disc-end%d", ending);
 					arecord.addMeasureFlag(mbuffer);
 				}
 			}
@@ -7080,7 +7080,7 @@ int printUnterminatedTies(MuseData& tempdata, HumdrumFile& infile,
 		if (TieConditionsForward[line][track][i]) {
 			arecord.getColumn(1) = '*';
 			arecord.getColumn(17) = 'X';
-			Convert::base40ToMuse(i, buffer);
+			Convert::base40ToMuse(i, buffer, 1024);
 			arecord.insertString(25, buffer);
 			tempdata.append(arecord);
 			arecord.clear();
@@ -7249,17 +7249,17 @@ void addRepeatLines(MuseData& tempdata, HumdrumFile& infile,
 
 	if (start >= 0) {
 		startnum = atoi(lp.getValue(index,start).c_str());
-		sprintf(buffer, "start-end%d", startnum);
+		snprintf(buffer, 1024, "start-end%d", startnum);
 		tempdata.last().addMeasureFlag(buffer);
 	}
 	if (stop >= 0) {
 		stopnum = atoi(lp.getValue(index,stop).c_str());
-		sprintf(buffer, "stop-end%d", stopnum);
+		snprintf(buffer, 1024, "stop-end%d", stopnum);
 		tempdata.last().addMeasureFlag(buffer);
 	}
 	if (open >= 0) {
 		opennum = atoi(lp.getValue(index,open).c_str());
-		sprintf(buffer, "disc-end%d", opennum);
+		snprintf(buffer, 1024, "disc-end%d", opennum);
 		tempdata.last().addMeasureFlag(buffer);
 	}
 
@@ -8525,7 +8525,7 @@ void updatePart(MuseData& part) {
 	char newlinestring[128] = {0};
 	char buffer[16] = {0};
 	for (int i=0; i<(int)newline.size()-1; i++) {
-		sprintf(buffer, "%02x", (int)newline[i]);
+		snprintf(buffer, 16, "%02x", (int)newline[i]);
 		strcat(newlinestring, buffer);
 	}
 	pre.sar(tdata, "AAYYYBB", newlinestring, "");
@@ -9136,7 +9136,7 @@ void addTextVerticalSpace(string& ostring, HumdrumFile& infile) {
 	char buff2[1024] = {0};
 	strcpy(buff2, "v");
 	for (int i=0; i<values.getSize(); i++) {
-		sprintf(buff1, "%d", values[i]);
+		snprintf(buff1, 1024, "%d", values[i]);
 		if (i > 0) {
 			strcat(buff2, ",");
 		}

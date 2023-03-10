@@ -3786,7 +3786,7 @@ RationalNumber HumdrumFile::determineDurationR(HumdrumRecord& aRecord,
 				if (lastdurations[count] != 0) {
 					// have a legitimate rhythm, store it in the rhythms array.
 					RationalNumber sss = lastdurations[count];
-					Convert::durationRToKernRhythm(rbuff, sss);
+					Convert::durationRToKernRhythm(rbuff, 32, sss);
 					int rbase  = atoi(rbuff);
 					int length = strlen(rbuff);
 					int z;

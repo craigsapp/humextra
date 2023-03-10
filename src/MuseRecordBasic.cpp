@@ -524,7 +524,7 @@ void MuseRecordBasic::appendString(const char* astring) {
 
 void MuseRecordBasic::appendInteger(int value) {
    char buffer[32] = {0};
-   sprintf(buffer, "%d", value);
+   snprintf(buffer, 32, "%d", value);
    insertString(getLength()+1, buffer);
 }
 

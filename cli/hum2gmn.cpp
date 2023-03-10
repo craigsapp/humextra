@@ -222,7 +222,7 @@ void convertPartToGMN(HumdrumFile& hfile, int part, int startline) {
    static char buffer[1024] = {0};
    print("[ ");     // beginning of part marker
 
-   sprintf(buffer, "\\staff<%d> ", staffno++);
+   snprintf(buffer, 1024, "\\staff<%d> ", staffno++);
    print(buffer);
    if (Gpartinit == 0) {
       printTitleComposer(hfile);
@@ -459,7 +459,7 @@ void convertMeasureToGMN(HumdrumFile& hfile, int part, int line) {
          print("\\bar");
       }
       if (measureQ) {
-         sprintf(buffer, "<%d> ", measurenum);
+         snprintf(buffer, 1024, "<%d> ", measurenum);
          print(buffer);
       } else {
          print(" ");
@@ -507,9 +507,9 @@ int convertInterpretationToGMN(HumdrumFile& hfile, int part, int line) {
       }
       clef = std::tolower(clef);
       if (ctype != 99) {
-         sprintf(buffer, "\\clef<\"%c%d\">", clef, ctype);
+         snprintf(buffer, 1024, "\\clef<\"%c%d\">", clef, ctype);
       } else {
-         sprintf(buffer, "\\clef<\"%c\">", clef);
+         snprintf(buffer, 1024, "\\clef<\"%c\">", clef);
       }
       print(buffer);
       print(" ");
@@ -548,7 +548,7 @@ int convertInterpretationToGMN(HumdrumFile& hfile, int part, int line) {
          case E_muse_ff:  keyinfo = -7;  break;
       }
 
-      sprintf(buffer, "\\key<%d>", keyinfo);
+      snprintf(buffer, 1024, "\\key<%d>", keyinfo);
       print(buffer);
       print(" ");
 
@@ -566,7 +566,7 @@ int convertInterpretationToGMN(HumdrumFile& hfile, int part, int line) {
          if (Gnoteinit == 0) {
             print("\n\t"); 
          }
-         sprintf(buffer, "\\meter<\"%d/%d\">", top, bottom);
+         snprintf(buffer, 1024, "\\meter<\"%d/%d\">", top, bottom);
          print(buffer);
          print(" ");
       }
@@ -693,14 +693,14 @@ void convertNoteToGMN(const char* note, int graceQ) {
    } else {   // process a real note
       base40 = Convert::kernToBase40(note);
       octave = (base40 / 40) - 3;           // Middle C = C1 in Guido
-      Convert::base40ToKern(buffer, base40);
+      Convert::base40ToKern(buffer, 1024, base40);
       name = std::tolower(buffer[0]);
    }
 
    if (restQ) {
       print("_");
    } else {
-      sprintf(buffer, "%c", name);
+      snprintf(buffer, 1024, "%c", name);
       print(buffer);
       if (accidental > 0) {
          for (i=0; i<accidental; i++) {
@@ -712,16 +712,15 @@ void convertNoteToGMN(const char* note, int graceQ) {
          }
       }
       if (octave != Goctave) {
-         sprintf(buffer, "%d", octave);
+         snprintf(buffer, 1024, "%d", octave);
          print(buffer);
          Goctave = octave;
       }
    }
 
-
    // process duration
    double duration = Convert::kernToDuration(note);
-   Convert::durationToKernRhythm(buffer, duration);
+   Convert::durationToKernRhythm(buffer, 1024, duration);
    if (duration == Gduration) {
       // don't print duration, since it is alreay active.
    } else {
@@ -731,6 +730,7 @@ void convertNoteToGMN(const char* note, int graceQ) {
    }
    
 }
+
 
 
 //////////////////////////////

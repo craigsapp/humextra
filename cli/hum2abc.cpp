@@ -4840,7 +4840,7 @@ void parseBibliographic(Array<char*>& header, HumdrumFile& infile) {
             if (infile[i].getExInterpNum(j) == E_KERN_EXINT) {
 
                if (sscanf(infile[i][j], "*M%d/%d", &top, &bot) == 2) {
-                  sprintf(meterbuffer, "%d/%d", top, bot);
+                  snprintf(meterbuffer, 1024, "%d/%d", top, bot);
                   storeHeaderRecord(header, 'M', meterbuffer);
                   break;  // don't get redundant info on same line
                }
@@ -5198,7 +5198,7 @@ void calculateQRecord(Array<char>& QRecord, double tempo,
 
 
 
-   sprintf(tempostring, "%d/%d=%d", temportop, temporbot, tempoint);
+   snprintf(tempostring, 1024, "%d/%d=%d", temportop, temporbot, tempoint);
 
    if ((!notempoQ) && (tempoint > 0)) {
       length = strlen(tempostring);
@@ -5652,7 +5652,7 @@ void calculateBestRhythmUnit(HumdrumFile& infile, int& Ltop, int& Lbot) {
                duration = Convert::kernToDuration(infile[i][j]);
             }
          }
-         Convert::durationToKernRhythm(buffer, duration);
+         Convert::durationToKernRhythm(buffer, 128, duration);
          if (sscanf(buffer, "%d", &rhythm) == 1) {
             if (rhythm >= 16) {
                rhythm = 16;

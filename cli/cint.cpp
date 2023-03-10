@@ -2055,7 +2055,7 @@ int printInterval(ostream& out, NoteNode& note1, NoteNode& note2,
 
 	if (chromaticQ) {
 		char buffer[1024] = {0};
-		out << Convert::base40ToIntervalAbbr(buffer, interval);
+		out << Convert::base40ToIntervalAbbr(buffer, 1024, interval);
 	} else {
 		int negative = 1;
 		if (interval < 0) {
@@ -2324,7 +2324,7 @@ void printPitchGrid(vector<vector<NoteNode> >& notes, HumdrumFile& infile) {
 						// sonority.
 						cout << "[";
 					}
-					cout << Convert::base40ToKern(buffer, abspitch);
+					cout << Convert::base40ToKern(buffer, 1024, abspitch);
 					// print tie continue/termination as necessary.
 					if (pitch < 0) {
 						if ((i < (int)notes[j].size() - 1) &&
@@ -2667,7 +2667,7 @@ void getNames(vector<string>& names, vector<int>& reverselookup,
 
 	for (i=0; i<(int)names.size(); i++) {
 		value = (int)reverselookup.size() - i;
-		sprintf(buffer, "%d", value);
+		snprintf(buffer, 1024, "%d", value);
 		names[i] = buffer;
 	}
 

@@ -200,11 +200,11 @@ string Convert::kernToScientificNotation(const string& kernfield,
    }
    if (lcount > 0) {
       value = 3 + lcount;
-      sprintf(buffer, "%d", value);
+      snprintf(buffer, 32, "%d", value);
       output += buffer;
    } else if (ucount > 0) {
       value = 4 - ucount;
-      sprintf(buffer, "%d", value);
+      snprintf(buffer, 32, "%d", value);
       output += buffer;
    } else {
       output = "R";
@@ -223,8 +223,8 @@ string Convert::kernToScientificNotation(const string& kernfield,
 //	input is quarter note duration == 1;
 //
 
-char* Convert::durationRToKernRhythm(char* output, RationalNumber input,
-      int timebase) {
+char* Convert::durationRToKernRhythm(char* output, int outputMaxSize,
+	RationalNumber input, int timebase) {
    output[0] = '\0';
 
    // dividing by 4 to convert from whole note units to quarter note units.
@@ -240,28 +240,28 @@ char* Convert::durationRToKernRhythm(char* output, RationalNumber input,
 
    // handle rhythms which are not dotted
    if (newdur.getNumerator() == 1) {
-      sprintf(output, "%d", newdur.getDenominator());
+      snprintf(output, outputMaxSize, "%d", newdur.getDenominator());
       return output;
    }
 
    // check for single dot rhythms
    RationalNumber dotless1dur = (newdur*2)/3;
    if (dotless1dur.getNumerator() == 1) {
-      sprintf(output, "%d.", dotless1dur.getDenominator());
+      snprintf(output, outputMaxSize, "%d.", dotless1dur.getDenominator());
       return output;
    }
 
    // check for double dot rhythms
    RationalNumber dotless2dur = (newdur*4)/7;
    if (dotless2dur.getNumerator() == 1) {
-      sprintf(output, "%d..", dotless2dur.getDenominator());
+      snprintf(output, outputMaxSize, "%d..", dotless2dur.getDenominator());
       return output;
    }
 
    // check for triple dot rhythms
    RationalNumber dotless3dur = (newdur*8)/15;
    if (dotless3dur.getNumerator() == 1) {
-      sprintf(output, "%d..", dotless3dur.getDenominator());
+      snprintf(output, outputMaxSize, "%d..", dotless3dur.getDenominator());
       return output;
    }
 
@@ -271,7 +271,7 @@ char* Convert::durationRToKernRhythm(char* output, RationalNumber input,
    }
 
    // unknown rhythm, so output a rational duration
-   sprintf(output, "%d%%%d", newdur.getDenominator(), newdur.getNumerator());
+   snprintf(output, outputMaxSize, "%d%%%d", newdur.getDenominator(), newdur.getNumerator());
    return output;
 }
 
@@ -286,7 +286,7 @@ char* Convert::durationRToKernRhythm(char* output, RationalNumber input,
 
 string Convert::durationToKernRhythm(double input, int timebase) {
 	char *buffer = new char[128];
-	Convert::durationToKernRhythm(buffer, input, timebase);
+	Convert::durationToKernRhythm(buffer, 128, input, timebase);
 	string output = buffer;
 	delete [] buffer;
 	return output;
@@ -295,14 +295,14 @@ string Convert::durationToKernRhythm(double input, int timebase) {
 
 string Convert::durationRToKernRhythm(RationalNumber input, int timebase) {
 	char* buffer = new char[128];
-	Convert::durationRToKernRhythm(buffer, input, timebase);
+	Convert::durationRToKernRhythm(buffer, 128, input, timebase);
 	string output = buffer;
 	delete [] buffer;
 	return output;
 }
 
 
-char* Convert::durationToKernRhythm(char* output, double input, int timebase) {
+char* Convert::durationToKernRhythm(char* output, int outputMaxSize, double input, int timebase) {
 
    output[0] = '\0';
    char buffer[32] = {0};
@@ -356,14 +356,14 @@ char* Convert::durationToKernRhythm(char* output, double input, int timebase) {
    }
 	
    if (diff < 0.002) {
-      sprintf(buffer, "%d", (int)basic);
+      snprintf(buffer, 32, "%d", (int)basic);
       strcat(output, buffer);
    } else {
       testinput = input / 3.0 * 2.0;
       basic = 4.0 / testinput;
       diff = basic - (int)basic;
       if (diff < 0.002) {
-         sprintf(buffer, "%d", (int)basic);
+         snprintf(buffer, 32, "%d", (int)basic);
          strcat(output, buffer);
          strcat(output, ".");
       } else {
@@ -371,7 +371,7 @@ char* Convert::durationToKernRhythm(char* output, double input, int timebase) {
          basic = 4.0 / testinput;
          diff = basic - (int)basic;
          if (diff < 0.002) {
-            sprintf(buffer, "%d", (int)basic);
+            snprintf(buffer, 32, "%d", (int)basic);
             strcat(output, buffer);
             strcat(output, "..");
          } else {
@@ -379,11 +379,11 @@ char* Convert::durationToKernRhythm(char* output, double input, int timebase) {
             basic = 2.0 / testinput;
             diff = basic - (int)basic;
             if (diff < 0.002) {
-               sprintf(buffer, "%d", (int)basic);
+               snprintf(buffer, 32, "%d", (int)basic);
                strcat(output, buffer);
                strcat(output, "...");
             } else {
-               sprintf(output, "q%lf", input);
+               snprintf(output, outputMaxSize, "q%lf", input);
                // strcpy(output, "q");
                // cerr << "Error: Convert::durationToKernRhythm choked on the "
                //      << "duration: " << input << endl;
@@ -838,8 +838,8 @@ int Convert::kernKeyToNumber(const string& aKernString) {
 // Convert::musePitchToKernPitch --
 //
 
-char* Convert::musePitchToKernPitch(char* kernOutput, const string& museInput) {
-   base40ToKern(kernOutput, museToBase40(museInput));
+char* Convert::musePitchToKernPitch(char* kernOutput, int outputMaxSize, const string& museInput) {
+   base40ToKern(kernOutput, outputMaxSize, museToBase40(museInput));
    return kernOutput;
 }
 
@@ -850,7 +850,7 @@ char* Convert::musePitchToKernPitch(char* kernOutput, const string& museInput) {
 // Convert::museClefToKernClef --
 //
 
-char* Convert::museClefToKernClef(char* kernOutput, int museInput) {
+char* Convert::museClefToKernClef(char* kernOutput, int outputMaxSize, int museInput) {
    switch (museInput) {
       case 0:   strcpy(kernOutput, "GX");       break;
       case 1:   strcpy(kernOutput, "G5");       break;
@@ -1171,11 +1171,10 @@ void Convert::noteSetToChordQuality(ChordQuality& cq,
 // base40ToPerfViz --
 //
 
-char* Convert::base40ToPerfViz(char* output, int base40value) {
+char* Convert::base40ToPerfViz(char* output, int outputMaxSize, int base40value) {
    int accidental = Convert::base40ToAccidental(base40value);
    int diatonic   = Convert::base40ToDiatonic(base40value);
    int octave     = base40value / 40;
-
 
    output[0] = '\0';
 
@@ -1529,7 +1528,7 @@ int Convert::kernClefToBaseline(const string& buffer) {
 // to a diatonic pitch name in the MuseData style.
 //
 
-char*  Convert::base40ToMuse(int base40, char* buffer) {
+char*  Convert::base40ToMuse(int base40, char* buffer, int outputMaxSize) {
    buffer[0] = '\0';
 
    char diatonic[2] = {0};
@@ -1570,7 +1569,7 @@ char*  Convert::base40ToMuse(int base40, char* buffer) {
 // Convert::base40ToKern --
 //
 
-char* Convert::base40ToKern(char* output, int aPitch) {
+char* Convert::base40ToKern(char* output, int outputMaxSize, int aPitch) {
    int octave     = aPitch / 40;
    int accidental = Convert::base40ToAccidental(aPitch);
    int diatonic   = Convert::base40ToDiatonic(aPitch) % 7;
@@ -1628,7 +1627,7 @@ char* Convert::base40ToKern(char* output, int aPitch) {
 // Convert::base40ToIntervalAbbr --
 //
 
-char* Convert::base40ToIntervalAbbr(char* output, int base40interval) {
+char* Convert::base40ToIntervalAbbr(char* output, int outputMaxSize, int base40interval) {
    if (base40interval < -1000) {
       strcpy(output, "r");
       return output;
@@ -1687,7 +1686,7 @@ char* Convert::base40ToIntervalAbbr(char* output, int base40interval) {
    // Add base-7 number
    char buffer2[32] = {0};
    int diatonic = Convert::base40IntervalToDiatonic(base40interval)+1;
-   sprintf(buffer2, "%d", diatonic);
+   snprintf(buffer2, 32, "%d", diatonic);
    strcat(output, buffer2);
 
    return output;
@@ -1700,7 +1699,7 @@ char* Convert::base40ToIntervalAbbr(char* output, int base40interval) {
 // Convert::base40ToIntervalAbbrWrap --
 //
 
-char* Convert::base40ToIntervalAbbrWrap(char* output, int base40value) {
+char* Convert::base40ToIntervalAbbrWrap(char* output, int outputMaxSize, int base40value) {
    base40value += 400;
    if (base40value < 0) {
       strcpy(output, "r");
@@ -1762,7 +1761,7 @@ char* Convert::base40ToIntervalAbbrWrap(char* output, int base40value) {
 //   d = diminished, D = doubly diminished, a = augmented, A = doubly augmented
 //
 
-char* Convert::base40ToIntervalAbbr2(char* output, int base40value) {
+char* Convert::base40ToIntervalAbbr2(char* output, int outputMaxSize, int base40value) {
    base40value += 400;
    if (base40value < 0) {
       strcpy(output, "r");
@@ -1824,7 +1823,7 @@ char* Convert::base40ToIntervalAbbr2(char* output, int base40value) {
 //	string value (c.f. p221 of Humdrum Reference (1994)
 //
 
-char* Convert::base40ToKernTranspose(char* output, int transpose,
+char* Convert::base40ToKernTranspose(char* output, int outputMaxSize, int transpose,
       int keysignature) {
    int keyacc;
    int keydia;
@@ -2220,7 +2219,7 @@ int Convert::transToBase40(const string& buffer) {
 //
 
 
-char* Convert::base40ToTrans(char* buffer, int base40) {
+char* Convert::base40ToTrans(char* buffer, int outputMaxSize, int base40) {
    int sign = 1;
    int chroma;
    int octave;
@@ -2316,7 +2315,7 @@ char* Convert::base40ToTrans(char* buffer, int base40) {
       cval = cval + sign * octave * 12;
    }
 
-   sprintf(buffer, "d%dc%d", dval, cval);
+   snprintf(buffer, outputMaxSize, "d%dc%d", dval, cval);
 
    return buffer;
 }
@@ -2491,7 +2490,7 @@ int Convert::base12ToBase40(int aPitch) {
 //     a D-flat, but in B-major it is probably a C-sharp.
 //
 
-char* Convert::base12ToKern(char* output, int aPitch) {
+char* Convert::base12ToKern(char* output, int outputMaxSize, int aPitch) {
    int octave = aPitch / 12 - 1;  // possible bug fix or bug creation
    if (octave > 12 || octave < -1) {
       cerr << "Error: unreasonable octave value: " << octave << endl;
@@ -2566,7 +2565,7 @@ char* Convert::base12ToKern(char* output, int aPitch) {
 //     a D-flat, but in B-major it is probably a C-sharp.
 //
 
-char* Convert::base12ToPitch(char* output, int aPitch) {
+char* Convert::base12ToPitch(char* output, int outputMaxSize, int aPitch) {
    int octave = aPitch / 12 - 1;  // possible bug fix or bug creation
    if (octave > 12 || octave < -1) {
       cerr << "Error: unreasonable octave value: " << octave << endl;
@@ -2590,7 +2589,7 @@ char* Convert::base12ToPitch(char* output, int aPitch) {
       case 11: strcpy(output, "B");  break;
    }
    char buffer[12] = {0};
-   sprintf(buffer, "%d", octave);
+   snprintf(buffer, 12, "%d", octave);
    strcat(output, buffer);
 
    return output;
