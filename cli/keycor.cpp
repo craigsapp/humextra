@@ -816,8 +816,8 @@ void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist,
          cout << "The best key is: ";
       }
       best40 = identifyBranchCut(bestkey, b40hist);
-      // cout << Convert::base12ToKern(buffer, bestkey+12*4)
-      cout << Convert::base40ToKern(buffer, best40+40*3)
+      // cout << Convert::base12ToKern(buffer, 64, bestkey+12*4)
+      cout << Convert::base40ToKern(buffer, 64, best40+40*3)
            << " Major";
       if (errorQ) {
          printErrorMarker(infile, best40, "major");
@@ -831,7 +831,7 @@ void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist,
       }
       best40 = identifyBranchCut(bestkey, b40hist);
       // cout << Convert::base12ToKern(buffer, bestkey+12*3)
-      cout << Convert::base40ToKern(buffer, best40+40*3)
+      cout << Convert::base40ToKern(buffer, 64, best40+40*3)
            << " Minor";
       if (errorQ) {
          printErrorMarker(infile, best40, "minor");
@@ -901,7 +901,7 @@ void printErrorMarker(HumdrumFile& infile, int best40, const char* mode) {
 
    // the answer was not correct, so print the correct answer
    char buffer[1024] = {0};
-   Convert::base40ToKern(buffer, (testbase40 % 40) + 3 * 40);
+   Convert::base40ToKern(buffer, 1024, (testbase40 % 40) + 3 * 40);
    cout << " X:" << buffer << " " << testmode;
 }
 

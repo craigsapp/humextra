@@ -1272,7 +1272,7 @@ void removeDollarsFromString(string& buffer, int maxblock) {
 	}
 
 	if (pre.search(buffer, "\\$$")) {
-		sprintf(buf2, "%d", maxblock);
+		snprintf(buf2, 128, "%d", maxblock);
 		pre.sar(buffer, "\\$$", buf2);
 	}
 
@@ -1282,19 +1282,19 @@ void removeDollarsFromString(string& buffer, int maxblock) {
 
 	if (pre.search(buffer, "\\$(?![\\d-])")) {
 		// don't know how this case could happen, however...
-		sprintf(buf2, "%d", maxblock);
+		snprintf(buf2, 128, "%d", maxblock);
 		pre.sar(buffer, "\\$(?![\\d-])", buf2, "g");
 	}
 
 	if (pre.search(buffer, "\\$0")) {
 		// replace $0 with maxblock (used for reverse orderings)
-		sprintf(buf2, "%d", maxblock);
+		snprintf(buf2, 128, "%d", maxblock);
 		pre.sar(buffer, "\\$0", buf2, "g");
 	}
 
 	while (pre.search(buffer, "\\$(-?\\d+)")) {
 		value2 = maxblock - (int)fabs(strtol(pre.getSubmatch(1), NULL, 10));
-		sprintf(buf2, "%d", value2);
+		snprintf(buf2, 128, "%d", value2);
 		pre.sar(buffer, "\\$-?\\d+", buf2);
 	}
 

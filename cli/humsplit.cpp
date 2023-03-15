@@ -98,8 +98,8 @@ void saveToDisk(HumdrumFile& infile, int count) {
 		// There is no file, so create a synthetic one: count.humsplit
 		char filename[1024] = {0};
 		char format[32] = {0};
-		sprintf(format, "%s0%d.humsplit", "%", Width);
-		sprintf(filename, format, count);
+		snprintf(format, 32, "%s0%d.humsplit", "%", Width);
+		snprintf(filename, 1024, format, count);
 		writename = filename;
 	}
 

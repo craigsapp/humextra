@@ -303,11 +303,11 @@ void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist) {
 
    if (bestkey < 12) {
       cout << "The best key is: " 
-           << Convert::base12ToKern(buffer, bestkey+12*4)
+           << Convert::base12ToKern(buffer, 64, bestkey+12*4)
            << " Major" << "\n";
    } else {
       cout << "The best key is: " 
-           << Convert::base12ToKern(buffer, bestkey+12*3)
+           << Convert::base12ToKern(buffer, 64, bestkey+12*3)
            << " Minor" << "\n";
    }
    int i;

@@ -1068,12 +1068,12 @@ void printScoreVoice(string& voicestring, double hpos, vector<double>& midibins,
 
 void printDiatonicPitchName(int base12) {
 	char buffer[16] = {0};
-	Convert::base12ToKern(buffer, base12);
+	Convert::base12ToKern(buffer, 16, base12);
 	buffer[1] = '\0';
 	buffer[0] = toupper(buffer[0]);
 	cout << buffer;
 	int octave = base12 / 12 - 1;
-	sprintf(buffer, "%d", octave);
+	snprintf(buffer, 16, "%d", octave);
 	cout << buffer;
 }
 
@@ -1109,15 +1109,15 @@ const char* getTitle(char* hbuffer, double value, int pitch) {
 		base12 = Convert::base7ToBase12(pitch);
 	}
 
-	Convert::base12ToKern(pitchstring, base12);
+	Convert::base12ToKern(pitchstring, 128, base12);
 	pitchstring[1] = '\0';
 	pitchstring[0] = toupper(pitchstring[0]);
 	int octave = base12 / 12 - 1;
 	char obuf[16] = {0};
-	sprintf(obuf, "%d", octave);
+	snprintf(obuf, 16, "%d", octave);
 
 	if (durationQ) {
-		sprintf(tempbuf, "%lf", value/8.0);
+		snprintf(tempbuf, 128, "%lf", value/8.0);
 		if (value/8.0 == 1.0) {
 			strcat(tempbuf, " long on ");
 		} else {
@@ -1125,7 +1125,7 @@ const char* getTitle(char* hbuffer, double value, int pitch) {
 		}
 		strcat(tempbuf, pitchstring);
 	} else {
-		sprintf(tempbuf, "%d ", (int)value);
+		snprintf(tempbuf, 128, "%d ", (int)value);
 		strcat(tempbuf, pitchstring);
 		strcat(tempbuf, obuf);
 		if (value != 1.0) {
@@ -1432,9 +1432,9 @@ void printAnalysis(vector<double>& midibins) {
 		}
 		cout << base12 << "\t";
 		if (pitchQ) {
-			cout << Convert::base12ToPitch(buffer, base12);
+			cout << Convert::base12ToPitch(buffer, 1024, base12);
 		} else {
-			cout << Convert::base12ToKern(buffer, base12);
+			cout << Convert::base12ToKern(buffer, 1024, base12);
 		}
 		cout << "\t";
 		cout << midibins[i] / normval;
@@ -1468,7 +1468,7 @@ void printAnalysis(vector<double>& midibins) {
 	}
 	cout << "!!mean:\t" << mean;
 	cout << " (";
-	cout << Convert::base12ToKern(buffer, int(mean+0.5));
+	cout << Convert::base12ToKern(buffer, 1024, int(mean+0.5));
 	cout << ")" << "\n";
 
 	int median = getMedian(midibins);
@@ -1477,7 +1477,7 @@ void printAnalysis(vector<double>& midibins) {
 	}
 	cout << "!!median:\t" << median;
 	cout << " (";
-	cout << Convert::base12ToKern(buffer, median);
+	cout << Convert::base12ToKern(buffer, 1024, median);
 	cout << ")" << "\n";
 
 }

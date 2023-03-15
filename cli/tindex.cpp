@@ -991,7 +991,7 @@ void printDuration(vector<double>& durations) {
 		} else if (durations[i] == 12.0) {
 			strcpy(buffer, "B.");
 		} else {
-			Convert::durationToKernRhythm(buffer, durations[i]);
+			Convert::durationToKernRhythm(buffer, 128, durations[i]);
 		}
 
 		if (durations[i] > 0 && (buffer[0] == 'q')) {
@@ -1000,7 +1000,7 @@ void printDuration(vector<double>& durations) {
 				temps << "4";
 			}
 			if (durations[i] - count > 0) {
-				Convert::durationToKernRhythm(buffer, durations[i]-count);
+				Convert::durationToKernRhythm(buffer, 128, durations[i]-count);
 			}
          len = strlen(buffer);
          for (k=0; k<len; k++) {
@@ -1398,7 +1398,7 @@ void printKey(int mode, int tonic) {
 		cout << 'Z';   // major
 	}
 
-	cout << Convert::base40ToKern(buffer, tonic + 3*40);
+	cout << Convert::base40ToKern(buffer, 128, tonic + 3*40);
 	cout << '=';
 }
 
@@ -1600,7 +1600,7 @@ void printPitch(vector<int>& pitches) {
 			cout << "R ";
 			continue;
 		}
-		Convert::base40ToKern(buffer, (pitches[i] % 40) + 3 * 40);
+		Convert::base40ToKern(buffer, 128, (pitches[i] % 40) + 3 * 40);
 		j = 0;
 		while (buffer[j] != '\0') {
 			if (buffer[j] == '-') {

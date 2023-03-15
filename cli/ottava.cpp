@@ -241,7 +241,7 @@ void printNoteData(HumdrumRecord& dataline, int index, int transpose) {
 					buffer[j] == '#' || 
 					buffer[j] == '-'  ) {
 					if (printQ == 0) {
-						Convert::base40ToKern(newpitch, pitch);
+						Convert::base40ToKern(newpitch, 32, pitch);
 						cout << newpitch;
 						printQ = 1;
 					}

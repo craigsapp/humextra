@@ -206,7 +206,7 @@ void printHumdrumPart(HumdrumFile& hfile, const char* filebase, int index,
    if ((index+1 < 1000) && (max >= 1000)) {
       strcat(buffer, "0");
    }
-   sprintf(num, "%d", index+1);
+   snprintf(num, 32, "%d", index+1);
    strcat(buffer, num);
    char* filename = buffer;
    ofstream outputfile;

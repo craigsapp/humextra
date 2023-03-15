@@ -62,9 +62,9 @@ void processFile(HumdrumFile& infile) {
    vector<string> partname(partcount);
    vector<string> partabbr(partcount);
    for (i=0; i<partcount; i++) {
-      sprintf(buffer, "part %d", partcount - i);
+      snprintf(buffer, 1024, "part %d", partcount - i);
       partname[i] = buffer;
-      sprintf(buffer, "P%d", partcount - i);
+      snprintf(buffer, 1024, "P%d", partcount - i);
       partabbr[i] = buffer;
    }
 

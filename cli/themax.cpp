@@ -3132,7 +3132,7 @@ void processKernString(const string& astring) {
 	  // << "\t" << durations[i] << endl;
 	  if (pitchesq) {
 		  if (pitches[i] > 0) {
-			  Convert::base40ToKern(buffer, pitches[i]%40 + 3*40);
+			  Convert::base40ToKern(buffer, 1024, pitches[i]%40 + 3*40);
 			  pitchseq << buffer;
 		  } else {
 			  pitchseq << ".";
@@ -3143,7 +3143,7 @@ void processKernString(const string& astring) {
 	  }
 	  if (dursq) {
 		  if (durations[i] > 0) {
-			  Convert::durationToKernRhythm(buffer, durations[i]);
+			  Convert::durationToKernRhythm(buffer, 1024, durations[i]);
 			  if (pre.search(buffer, "-")) {
 				  durseq << "x";
 			  } else {

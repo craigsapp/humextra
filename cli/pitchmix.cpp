@@ -130,7 +130,7 @@ void replaceNote(HumdrumFile& infile, int line, int spine, int token,
 	char prebuffer[128] = {0};
 	char postbuffer[128] = {0};
 	char pbuffer[128] = {0};
-	Convert::base40ToKern(pbuffer, newpitch);
+	Convert::base40ToKern(pbuffer, 128, newpitch);
 	if (oldpitch == -1) {
 		oldpitch = Convert::kernToBase40(infile[line][spine]);
 	}

@@ -78,7 +78,7 @@ void processFile(HumdrumFile& infile) {
                }
             } else if (strchr(infile[i][j], '[') != NULL) {
                rn = infile.getTiedDurationR(i, j, 0);
-               Convert::durationRToKernRhythm(newrhy, rn);
+               Convert::durationRToKernRhythm(newrhy, 128, rn);
                string newtoken = infile[i][j];
                pre.sar(newtoken, "[\\d%]+", newrhy, "g");
                if (!markQ) {

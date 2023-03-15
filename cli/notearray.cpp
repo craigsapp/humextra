@@ -928,7 +928,7 @@ void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks,
             if (values[j] == 0) {
                cout << "r";
             } else {
-               cout << Convert::base40ToKern(buffer, abs(values[j]));
+               cout << Convert::base40ToKern(buffer, 1024, abs(values[j]));
             }
 
             if (kerntieQ && noteContinueMarker(notes, i, j / width)) {

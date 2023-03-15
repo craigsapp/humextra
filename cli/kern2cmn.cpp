@@ -333,7 +333,7 @@ void getNoteArray(Array<int>& notes, HumdrumFile& infile, int line, int spine){
 
 void printCMNDuration(double duration) {
    char buffer[128] = {0};
-   Convert::durationToKernRhythm(buffer, duration);
+   Convert::durationToKernRhythm(buffer, 128, duration);
    if (strcmp(buffer, "8") == 0) {
       cout << "e";
    } else if (strcmp(buffer, "8.") == 0) {

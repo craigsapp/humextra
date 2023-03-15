@@ -160,7 +160,7 @@ void printXfig(HumdrumFile& infile, vector<double>& fifthmean) {
       } else if (infile[i].getType() == E_humrec_data_measure) {
          count = sscanf(infile[i][0], "=%d", &mnum);
          if (count == 1) {
-            sprintf(buffer, "%d", mnum);
+            snprintf(buffer, 1024, "%d", mnum);
             plot.addVLine(infile[i].getAbsBeat(), "");
             if ((mnum > 0) && (mnum % 10 == 0)) {
                plot.addText(buffer, infile[i].getAbsBeat(), 
@@ -322,11 +322,10 @@ double getFifthMean(HumdrumFile& infile, int line, double beats,
                if (infile[line].getTokenCount(i) > 1) {
                   cout << " token=" << j+1;
                }
-               cout << " (" << Convert::base40ToKern(buffer, 
-                       lo5ToBase40(tlinenum)+4*40) 
+               cout << " (" << Convert::base40ToKern(buffer, 1024, lo5ToBase40(tlinenum)+4*40) 
                     << " is changed to ";
 
-               cout << Convert::base40ToKern(buffer, lo5ToBase40(linenum)+4*40)
+               cout << Convert::base40ToKern(buffer, 1024, lo5ToBase40(linenum)+4*40)
                     << ")";
                cout << " [" << tlinenum << " to " << linenum << "]";
                cout << endl;
@@ -577,7 +576,7 @@ void printAnalysis(HumdrumFile& infile, vector<double>& fifthmean) {
                if (lo5ToBase40(fifthmean[i]) < -100) {
                   cout << ".";
                } else {
-                  cout << Convert::base40ToKern(buffer, 
+                  cout << Convert::base40ToKern(buffer, 1024,
                            lo5ToBase40(fifthmean[i]) + 4 * 40);
                }
             } else {

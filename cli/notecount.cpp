@@ -396,7 +396,7 @@ void printPitchClassInfo(Array<WorkInfo>& counts) {
       }
    } else {
       for (i=0; i<40; i++) {
-         labels[i] = Convert::base40ToKern(buffer, i+40*3);
+         labels[i] = Convert::base40ToKern(buffer, 1024, i+40*3);
       }
    }
 

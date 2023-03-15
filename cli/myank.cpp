@@ -1617,8 +1617,8 @@ void getSectionString(string& sstring, HumdrumFile& infile, int sec) {
    }
    char buffer1[32] = {0};
    char buffer2[32] = {0};
-   sprintf(buffer1, "%d", first);
-   sprintf(buffer2, "%d", second);
+   snprintf(buffer1, 32, "%d", first);
+   snprintf(buffer2, 32, "%d", second);
    sstring = buffer1;
    sstring += "-";
    sstring += buffer2;
@@ -2327,7 +2327,7 @@ void removeDollarsFromString(Array<char>& buffer, int maxx) {
          outval = 0;
       }
       
-      sprintf(tbuf, "%d", outval);
+      snprintf(tbuf, 1024, "%d", outval);
       strcpy(obuf, "\\");
       strcat(obuf, pre.getSubmatch());
       pre.sar(buffer, obuf, tbuf, "");

@@ -308,7 +308,7 @@ void printPartNames(HumdrumFile& infile) {
 	names.resize(ktracks.size());
 	char buffer[1024] = {0};
 	for (i=0; i<(int)names.size(); i++) {
-		sprintf(buffer, "part %ld", (long)names.size() - i);
+		snprintf(buffer, 1024, "part %ld", (long)names.size() - i);
 		names[i] = buffer;
 	}
 	vector<int> rkern;
@@ -819,7 +819,7 @@ void printPitch(ostream& out, int b40, const string& kern) {
 	int accid = Convert::base40ToAccidental(b40);
 	char buffer[32] = {0};
 
-	Convert::base40ToKern(buffer, b40 % 40 + 120);
+	Convert::base40ToKern(buffer, 32, b40 % 40 + 120);
 	
 	if ((accid == 0) && (kern.find('n') == std::string::npos)) {
 		accid = -100000;

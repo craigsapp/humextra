@@ -123,7 +123,7 @@ void printFinalis(HumdrumFile& infile) {
 			if (base40Q) {
 				cout << root-2;
 			} else {
-				cout << Convert::base40ToKern(buffer, root + 3 * 40);
+				cout << Convert::base40ToKern(buffer, 128, root + 3 * 40);
 			}
 			break;
 		}
@@ -930,11 +930,11 @@ void fillStringWithNotes(char* string, ChordQuality& quality,
 	char buffer[32] = {0};
 	for (i=0; i<(int)notes.size(); i++) {
 		//if (octaveVal >= 0) {
-		//   Convert::base40ToKern(buffer, (notes[i]%40) + octaveVal * 40);
+		//   Convert::base40ToKern(buffer, 32, (notes[i]%40) + octaveVal * 40);
 		//} else {
-		//   Convert::base40ToKern(buffer, notes[i] + ((octave[i]+4) * 40));
+		//   Convert::base40ToKern(buffer, 32, notes[i] + ((octave[i]+4) * 40));
 		//}
-		Convert::base40ToKern(buffer, notes[i]%40 + (octave[i] * 40));
+		Convert::base40ToKern(buffer, 32, notes[i]%40 + (octave[i] * 40));
 		if (parenQ && (sounding[i] == 0)) {
 			strcat(string, "(");
 		}

@@ -534,7 +534,7 @@ void printKernData(vector<vector<MidiInfo> >& mididata, smf::MidiFile& midifile,
 						(*buffstream) << "1r" << endl;
 						difference -= tpq * 4;
 					}
-					(*buffstream) << Convert::durationToKernRhythm(buffer,
+					(*buffstream) << Convert::durationToKernRhythm(buffer, 1024,
 						(double)difference/tpq);
 					(*buffstream) << "r" << endl;
 				}
@@ -549,9 +549,9 @@ void printKernData(vector<vector<MidiInfo> >& mididata, smf::MidiFile& midifile,
 				if (chordnote) {
 					(*buffstream) << ' ';
 				}
-				(*buffstream) << Convert::durationToKernRhythm(buffer,
+				(*buffstream) << Convert::durationToKernRhythm(buffer, 1024,
 						(double)mididata[i][j].tickdur/tpq);
-				(*buffstream) << Convert::base12ToKern(buffer, mididata[i][j].key);
+				(*buffstream) << Convert::base12ToKern(buffer, 1024, mididata[i][j].key);
 				chordnote = 1;
 				j++;
 			}
@@ -676,7 +676,7 @@ void printRestCorrection (ostream& out, int restcorr, int tqp) {
 		return;
 	}
 
-	out << Convert::durationToKernRhythm(buffer, totaldur);
+	out << Convert::durationToKernRhythm(buffer, 1024, totaldur);
 	out << "r\n";
 }
 
@@ -822,10 +822,10 @@ void splitDataWithMeasure(ostream& out, HumdrumFile& hfile, int index,
 		base40 = Convert::kernToBase40(tokenbuffer);
 		if (base40 >= 0) {  // not a rest
 			out << '[';
-			out << Convert::durationToKernRhythm(buffer, firstdur);
-			out << Convert::base40ToKern(buffer, base40);
+			out << Convert::durationToKernRhythm(buffer, 1024, firstdur);
+			out << Convert::base40ToKern(buffer, 1024, base40);
 		} else {
-			out << Convert::durationToKernRhythm(buffer, firstdur);
+			out << Convert::durationToKernRhythm(buffer, 1024, firstdur);
 			out << "r";
 		}
 		if (i<tokencount-1) {
@@ -849,9 +849,9 @@ void splitDataWithMeasure(ostream& out, HumdrumFile& hfile, int index,
 	for (i=0; i<tokencount; i++) {
 		hfile[index].getToken(tokenbuffer, 0, i);
 		base40 = Convert::kernToBase40(tokenbuffer);
-		out << Convert::durationToKernRhythm(buffer, seconddur);
+		out << Convert::durationToKernRhythm(buffer, 1024, seconddur);
 		if (base40 >= 0) {  // not a rest
-			out << Convert::base40ToKern(buffer, base40);
+			out << Convert::base40ToKern(buffer, 1024, base40);
 			out << ']';
 		} else {
 			out << "r";

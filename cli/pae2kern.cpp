@@ -216,9 +216,9 @@ int main(int argc, char** argv) {
 		
 			if (!stdoutQ) {
 				if (strlen(data_value.c_str())==0) {
-					sprintf(outfilename, "%s%015d", outdir, i);
+					snprintf(outfilename, 11000, "%s%015d", outdir, i);
 				} else {
-					sprintf(outfilename, "%s%s", outdir, data_value.c_str());
+					snprintf(outfilename, 11000, "%s%s", outdir, data_value.c_str());
 				}
 				// add extention
 				strcat(outfilename, ".");  
@@ -1210,7 +1210,7 @@ int getWholeRest(const char *incipit, int *wholerest, int index) {
 		sscanf(&(incipit[i+1]), "%d", wholerest);
 		char buf[10];
 		memset(buf, 0, 10);
-		sprintf(buf, "%d", *wholerest);
+		snprintf(buf, 10, "%d", *wholerest);
 		i += strlen(buf);
 	}
 	return i - index;
@@ -1478,11 +1478,11 @@ void printMeasure(ostream& out, MeasureObject *measure) {
 	int i,j;
 	
 	if (measure->wholerest > 0) {
-		out << Convert::durationToKernRhythm(buffer, measure->measure_duration);
+		out << Convert::durationToKernRhythm(buffer, 1024, measure->measure_duration);
 		out << "rr\n";
 		for (i=1; i<measure->wholerest; i++) {
 			out << "=\n";
-			out << Convert::durationToKernRhythm(buffer, 
+			out << Convert::durationToKernRhythm(buffer, 1024,
 					measure->measure_duration);
 			out << "rr\n";
 		}
@@ -1497,7 +1497,7 @@ void printMeasure(ostream& out, MeasureObject *measure) {
 			if (measure->notes[i].tie == 1) {
 				out << "[";
 			}
-			out << Convert::durationToKernRhythm(buffer, 
+			out << Convert::durationToKernRhythm(buffer, 1024,
 					measure->notes[i].duration);
 			for (j=0; j<measure->notes[i].dot; j++) {
 				out << ".";
@@ -1525,13 +1525,13 @@ void printMeasure(ostream& out, MeasureObject *measure) {
 				out << "[";
 			}
 			if (!measure->notes[i].acciaccatura) {
-				out << Convert::durationToKernRhythm(buffer, 
+				out << Convert::durationToKernRhythm(buffer, 1024,
 						measure->notes[i].duration);
 				for (j=0; j<measure->notes[i].dot; j++) {
 					out << ".";
 				}
 			}
-			out << Convert::base40ToKern(buffer, measure->notes[i].pitch);
+			out << Convert::base40ToKern(buffer, 1024, measure->notes[i].pitch);
 			
 			if (measure->notes[i].acciaccatura) {
 				out << "q";

@@ -233,7 +233,7 @@ void createDataLine(char* buffer, HumdrumFile& infile, int line,
    char tbuffer[100] = {0};
    int tokencount;
 
-   Convert::durationToKernRhythm(dstring, duration);
+   Convert::durationToKernRhythm(dstring, 100, duration);
    int pitch;
 
 
@@ -249,7 +249,7 @@ void createDataLine(char* buffer, HumdrumFile& infile, int line,
 
                pitch = Convert::kernToBase40(tbuffer);
                if (pitch >= 0) {
-                  Convert::base40ToKern(pbuffer, pitch);
+                  Convert::base40ToKern(pbuffer, 100, pitch);
                   strcat(buffer, dstring);
                } else {
                   strcpy(pbuffer, "r");
@@ -272,7 +272,7 @@ void createDataLine(char* buffer, HumdrumFile& infile, int line,
                infile[line].getToken(tbuffer, i, k);
                pitch = Convert::kernToBase40(tbuffer);
                if (pitch >= 0) {
-                  Convert::base40ToKern(pbuffer, pitch);
+                  Convert::base40ToKern(pbuffer, 100, pitch);
                   strcat(buffer, dstring);
                } else {
                   strcpy(pbuffer, "r");

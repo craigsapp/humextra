@@ -129,7 +129,7 @@ void printPitches(Array<int>& pc40) {
 
    for (i=0; i<pc40.getSize(); i++) {
       if (pc40[i] > 0) {
-         cout << Convert::base40ToKern(buffer, i + 120);
+         cout << Convert::base40ToKern(buffer, 128, i + 120);
          count++;
          if (count < upc) {
             cout << " ";

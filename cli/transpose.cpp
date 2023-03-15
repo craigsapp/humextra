@@ -324,7 +324,7 @@ void convertToWrittenPitches(HumdrumFile& infile, int line, Array<int>& tvals) {
       if (pre.search(infile[line][j], "^\\*ITrd[+-]?\\d+c[+-]?\\d+$", "")) {
          base = Convert::transToBase40(infile[line][j]);
 	 strcpy(buffer1, "*Tr");
-	 strcat(buffer1, Convert::base40ToTrans(buffer2, base));
+	 strcat(buffer1, Convert::base40ToTrans(buffer2, 128, base));
          cout << buffer1;
          ptrack = infile[line].getPrimaryTrack(j);
          tvals[ptrack] = base;
@@ -355,7 +355,7 @@ void convertToConcertPitches(HumdrumFile& infile, int line, Array<int>& tvals) {
       if (pre.search(infile[line][j], "^\\*Trd[+-]?\\d+c[+-]?\\d+$", "")) {
          base = Convert::transToBase40(infile[line][j]);
 	 strcpy(buffer1, "*ITr");
-	 strcat(buffer1, Convert::base40ToTrans(buffer2, base));
+	 strcat(buffer1, Convert::base40ToTrans(buffer2, 128, base));
          cout << buffer1;
          ptrack = infile[line].getPrimaryTrack(j);
          tvals[ptrack] = -base;
@@ -554,10 +554,10 @@ void printTransposeInformation(HumdrumFile& infile, Array<int>& spineprocess,
       } else {
          if (instrumentQ) {
             cout << "*ITr";
-            cout << Convert::base40ToTrans(buffer, -finalvalues[ptrack]);
+            cout << Convert::base40ToTrans(buffer, 1024, -finalvalues[ptrack]);
          } else {
             cout << "*Tr";
-            cout << Convert::base40ToTrans(buffer, finalvalues[ptrack]);
+            cout << Convert::base40ToTrans(buffer, 1024, finalvalues[ptrack]);
          }
       }
       if (j < infile[line].getFieldCount()-1) {
@@ -803,7 +803,7 @@ void printNewKeyInterpretation(HumdrumRecord& aRecord, int index,
    base40 = base40 + (3 + mode) * 40;
    char buffer[128] = {0};
 
-   cout << "*" << Convert::base40ToKern(buffer, base40) << ":";
+   cout << "*" << Convert::base40ToKern(buffer, 128, base40) << ":";
 
    PerlRegularExpression pre;
    if (pre.search(aRecord[index], ":(.+)$", "")) {
@@ -904,7 +904,7 @@ void printNewKernString(const char* string, int transval) {
    if (ptr1 != NULL) {
       cout << ptr1;
    }
-   cout << Convert::base40ToKern(buffer2, base40 + transval);
+   cout << Convert::base40ToKern(buffer2, 1024, base40 + transval);
    if (ptr2 != NULL) {
       cout << ptr2;
    }
@@ -979,7 +979,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       case 2:
          {
             char buffer[128] = {0};
-            sprintf(buffer, "d%dc%d", opts.getInt("d"), opts.getInt("c"));
+            snprintf(buffer, 128, "d%dc%d", opts.getInt("d"), opts.getInt("c"));
             transval = Convert::transToBase40(buffer);
          }
          break;
@@ -1787,25 +1787,25 @@ void removeDollarsFromString(Array<char>& buffer, int maxtrack) {
    int value2;
 
    if (pre.search(buffer.getBase(), "\\$$")) {
-      sprintf(buf2, "%d", maxtrack);
+      snprintf(buf2, 128, "%d", maxtrack);
       pre.sar(buffer, "\\$$", buf2);
    }
 
    if (pre.search(buffer.getBase(), "\\$(?![\\d-])")) {
       // don't know how this case could happen, however...
-      sprintf(buf2, "%d", maxtrack);
+      snprintf(buf2, 128, "%d", maxtrack);
       pre.sar(buffer, "\\$(?![\\d-])", buf2, "g");
    }
 
    if (pre.search(buffer.getBase(), "\\$0")) {
       // replace $0 with maxtrack (used for reverse orderings)
-      sprintf(buf2, "%d", maxtrack);
+      snprintf(buf2, 128, "%d", maxtrack);
       pre.sar(buffer, "\\$0", buf2, "g");
    }
 
    while (pre.search(buffer.getBase(), "\\$(-?\\d+)")) {
       value2 = maxtrack - (int)fabs(strtol(pre.getSubmatch(1), NULL, 10));
-      sprintf(buf2, "%d", value2);
+      snprintf(buf2, 128, "%d", value2);
       pre.sar(buffer, "\\$-?\\d+", buf2);
    }
 

@@ -673,7 +673,7 @@ void fillStringWithNotes(char* astring, ChordQuality& quality,
 		//} else {
 		//   Convert::base40ToKern(buffer, notes[i] + ((octave[i]+4) * 40));
 		//}
-		Convert::base40ToKern(buffer, notes[i]%40 + (octave[i] * 40));
+		Convert::base40ToKern(buffer, 32, notes[i]%40 + (octave[i] * 40));
 		if (parenQ && (sounding[i] == 0)) {
 			strcat(astring, "(");
 		}

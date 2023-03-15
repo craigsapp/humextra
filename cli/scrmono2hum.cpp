@@ -863,9 +863,9 @@ void printKern(ostream& out, ScorePageSimple& score, Array<Thing>& things,
          if (things[i].tiestart) {
             out << "[";
          }
-         out << Convert::durationToKernRhythm(dbuffer, things[i].dur);
+         out << Convert::durationToKernRhythm(dbuffer, 128, things[i].dur);
          if (things[i].type == P1_Note) {
-            out << Convert::base40ToKern(pbuffer, 
+            out << Convert::base40ToKern(pbuffer, 128,
                   score.getStaff(things[i].loc, things[i].index).getPitch());
          } else {
             out << "r";
