@@ -3789,20 +3789,19 @@ void identifyWholeRestsInMeasures(Array<MeasureInfo>& measures,
 
 int checkForWholeRestInMeasure(int startline, int endline, int primary,
       HumdrumFile& infile) {
-   int i, j;
    int notecount = 0;
-   int restcount = 0;
-   for (i=startline; i<=endline; i++) {
+   // int restcount = 0;
+   for (int i=startline; i<=endline; i++) {
       if (infile[i].getType() != E_humrec_data) {
          continue;
       }
-      for (j=0; j<infile[i].getFieldCount(); j++) {
+      for (int j=0; j<infile[i].getFieldCount(); j++) {
          if (infile[i].getPrimaryTrack(j) == primary) {
             if (strcmp(infile[i][j], ".") == 0) {
                continue;
             }
             if (strchr(infile[i][j], 'r') != NULL) {
-               restcount++;
+               // restcount++;
             } else {
                notecount++;
             }

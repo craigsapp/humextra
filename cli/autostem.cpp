@@ -304,7 +304,7 @@ void setStemDirection(HumdrumFile& infile, int row, int col, int direction) {
 
 	for (k=0; k<tokencount; k++) {
 		infile[i].getToken(buffer, j, k, 30);
-		if ((strchr(buffer, '/') == NULL) & (strchr(buffer, '\\') == NULL)) {
+		if ((strchr(buffer, '/') == NULL) && (strchr(buffer, '\\') == NULL)) {
 				if (direction > 0) {
 				addStem(buffer2, buffer, "/");
 				} else if (direction < 0) {

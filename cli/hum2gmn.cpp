@@ -154,7 +154,7 @@ void convertToGMN(HumdrumFile& hfile) {
 
    // find the start of the data and count how many parts there are
    int i, j;
-   int parts = 0;
+   // int parts = 0;
    Array<int> partspines;
    partspines.setSize(100);
    partspines.setSize(0);
@@ -165,7 +165,7 @@ void convertToGMN(HumdrumFile& hfile) {
          startline = i;
          for (j=0; j<hfile[i].getFieldCount(); j++) {
             if (strcmp(hfile[i].getExInterp(j), "**kern") == 0) {
-               parts++;
+               // parts++;
                partspines.append(j);
             }
          }

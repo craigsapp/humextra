@@ -48,5 +48,9 @@ external/pcre2-10.42/src/config.h.in~
 external/pcre2-10.42/src/pcre2.h
 external/pcre2-10.42/src/pcre2_chartables.c
 external/pcre2-10.42/src/stamp-h1
-
-
+external/pcre-8.35/autom4te.cache/output.3
+external/pcre-8.35/autom4te.cache/output.4
+external/pcre-8.35/autom4te.cache/output.5
+external/pcre-8.35/autom4te.cache/traces.3
+external/pcre-8.35/autom4te.cache/traces.4
+external/pcre-8.35/autom4te.cache/traces.5

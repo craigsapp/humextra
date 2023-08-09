@@ -903,11 +903,11 @@ ostream& tabPrintLine(ostream& out, HumdrumRecord& record, int tabsize,
 	int suppressColor = record.isMeasure() || record.isInterpretation();
 
 	// count the **kern spines (used with hideQ varaible):
-	int kerncount = 0;
+	// int kerncount = 0;
 	int lastkern = -1;
 	for (i=0; i<record.getFieldCount(); i++) {
 		if (strcmp(record.getExInterp(i), "**kern") == 0) {
-			kerncount++;
+			// kerncount++;
 			lastkern = i;
 		}
 	}

@@ -1878,7 +1878,7 @@ void processBeams(HumdrumFile& infile, int line, int col, const char* buffer,
 
    // int totalcount = beamlevel[vlevel] + openbeam - closebeam +
    //       backhook + forehook;
-   int rcount = 0;
+   // int rcount = 0;
 
    if (openbeam != 0) {
       // add any new beams which are starting
@@ -1887,14 +1887,14 @@ void processBeams(HumdrumFile& infile, int line, int col, const char* buffer,
       for (i=0; i<beamlevel[vlevel]; i++) {
          pline(lev, "<beam number=\"");
          cout << i+1 << "\">continue</beam>\n";
-         rcount++;
+         //rcount++;
       }
 
       // add new beams
       for (i=0; i<openbeam; i++) {
          pline(lev, "<beam number=\"");
          cout << beamlevel[vlevel] + i + 1 << "\">begin</beam>\n";
-         rcount++;
+         //rcount++;
       }
       beamlevel[vlevel] += openbeam;
 
@@ -1902,7 +1902,7 @@ void processBeams(HumdrumFile& infile, int line, int col, const char* buffer,
       for (i=0; i<forehook; i++) {
          pline(lev, "<beam number=\"");
          cout << beamlevel[vlevel] + i + 1 << "\">forward hook</beam>\n";
-         rcount++;
+         //rcount++;
       }
 
    }
@@ -1914,7 +1914,7 @@ void processBeams(HumdrumFile& infile, int line, int col, const char* buffer,
       for (i=0; i<beamlevel[vlevel] - closebeam - backhook; i++) {
          pline(lev, "<beam number=\"");
          cout << i+1 << "\">continue</beam>\n";
-         rcount++;
+         //rcount++;
       }
 
       // close old beams
@@ -1923,7 +1923,7 @@ void processBeams(HumdrumFile& infile, int line, int col, const char* buffer,
          if ((beamlevel[vlevel] - closebeam + i + 1) > 0) {
             pline(lev, "<beam number=\"");
             cout << beamlevel[vlevel] - closebeam + i + 1 << "\">end</beam>\n";
-            rcount++;
+            //rcount++;
          }
       }
       beamlevel[vlevel] -= closebeam;
@@ -1933,7 +1933,7 @@ void processBeams(HumdrumFile& infile, int line, int col, const char* buffer,
          pline(lev, "<beam number=\"");
          cout << beamlevel[vlevel] + closebeam + i + 1
               << "\">backward hook</beam>\n";
-         rcount++;
+         //rcount++;
       }
 
    }
