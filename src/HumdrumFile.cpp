@@ -2634,7 +2634,7 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
 	}
 
 	HumdrumRecord currRecord;
-	int measurecount = 0;
+	// int measurecount = 0;
 	int ii, jj;
 	int nonblank = 0;
 	int foundstart = 0;
@@ -2737,7 +2737,7 @@ void HumdrumFile::privateRhythmAnalysis(const char* base, int debug) {
 					infile[i+1].setBeatR(summation + 1);
 					// infile[i].setBeatR(0,1);
 				}
-	    measurecount++;
+				// measurecount++;
 				break;
 
 			case E_humrec_data:

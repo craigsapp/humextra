@@ -2623,7 +2623,7 @@ int Convert::freq2midi(double freq, double a440) {
 double Convert::kotoToDuration(const string& aKotoString) {
    int length = (int)aKotoString.size();
    int bars   = 0;
-   int dashes = 0;
+   // int dashes = 0;
    int dots   = 0;
    int i;
 
@@ -2635,7 +2635,7 @@ double Convert::kotoToDuration(const string& aKotoString) {
          dots++;
       }
       if (aKotoString[i] == '-') {
-         dashes++;
+         // dashes++;
       }
       if (aKotoString[i] == ' ') {
          break;   // only look at first note in a chord or arpeggio
@@ -2667,7 +2667,7 @@ double Convert::kotoToDuration(const string& aKotoString) {
 RationalNumber Convert::kotoToDurationR(const string& aKotoString) {
    int length = (int)aKotoString.size();
    int bars   = 0;
-   int dashes = 0;
+   // int dashes = 0;
    int dots   = 0;
    int i;
 
@@ -2679,7 +2679,7 @@ RationalNumber Convert::kotoToDurationR(const string& aKotoString) {
          dots++;
       }
       if (aKotoString[i] == '-') {
-         dashes++;
+         // dashes++;
       }
       if (aKotoString[i] == ' ') {
          break;   // only look at first note in a chord or arpeggio

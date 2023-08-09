@@ -2973,7 +2973,7 @@ int MuseRecord::getAttributeInt(char attribute) {
 
    int output = E_unknown;
    int ending = 0;
-   int index = 0;
+   // int index = 0;
    int tempcol;
    int column;
    for (column=4; column <= getLength(); column++) {
@@ -2990,7 +2990,7 @@ int MuseRecord::getAttributeInt(char attribute) {
                ending = 1;
             } 
             tempcol++;
-            index++;
+            // index++;
          }
       }
       if (ending) {
@@ -3025,7 +3025,7 @@ int MuseRecord::getAttributeString(char* output, const char* attribute) {
 
    int returnValue = 0;
    int ending = 0;
-   int index = 0;
+   // int index = 0;
    int tempcol;
    int column;
    for (column=4; column <= getLength(); column++) {
@@ -3042,7 +3042,7 @@ int MuseRecord::getAttributeString(char* output, const char* attribute) {
                ending = 1;
             } 
             tempcol++;
-            index++;
+            // index++;
          }
       }
       if (ending) {

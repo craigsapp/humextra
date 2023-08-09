@@ -178,7 +178,7 @@ void printSubTracks(HumdrumFile& infile, int track, int start, int submax) {
 void printSubSpine(HumdrumFile& infile, int track, int start, int subspine) {
    int i, j;
    int taber;
-   int counter = 0;
+   // int counter = 0;
 
    if (interp.size() > 1) {
       if (!interpmatch(infile, track, start, interp)) {
@@ -217,7 +217,7 @@ void printSubSpine(HumdrumFile& infile, int track, int start, int subspine) {
                      cout << "\t";
                   }
                   cout << infile[i][j];
-                  counter++;
+                  // counter++;
                   if (subspineQ) {
                      cout << "\n";
                   } else {
@@ -297,10 +297,10 @@ void printSubSpine(HumdrumFile& infile, int track, int start, int subspine) {
                   }
                   if (chordQ) {
                      printChordSeparator(infile, i, j, Separator, nth);
-                     counter++;
+                     // counter++;
                   } else {
                      cout << infile[i][j];
-                     counter++;
+                     // counter++;
                   }
                   if (subspineQ) {
                      cout << "\n";

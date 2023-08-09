@@ -671,20 +671,20 @@ void getRomanAnalysisTimes(vector<int>& romantimes, HumdrumFile& romananalysis) 
 
    int k;
    int count = 0;
-   int countother = 0;
+   // int countother = 0;
    int endingtime = 0;
    double increment = 0.0;
    for (i=0; i<(int)romantimes.size(); i++) {
       if (romantimes[i] >= 0) {
          count = 0;
-         countother = 0;
+         // countother = 0;
          endingtime = -1;
          j = i+1;
          while (j < (int)romantimes.size()) {
             if (romantimes[j] < -10) {
                count++;
             } else if (romantimes[j] < 0) {
-               countother++;
+               // countother++;
             } else {
                endingtime = romantimes[j];
                break;

@@ -455,20 +455,20 @@ void cleanUpBeams(string& prebuffer, string& postbuffer, int level) {
 		return;
 	}
 
-	int kcount1 = 0;
-	int Kcount1 = 0;
+	// int kcount1 = 0;
+	// int Kcount1 = 0;
 	int Lcount1 = 0;
 	int Jcount1 = 0;
 
-	int kcount2 = 0;
-	int Kcount2 = 0;
+	// int kcount2 = 0;
+	// int Kcount2 = 0;
 	int Lcount2 = 0;
 	int Jcount2 = 0;
 
 	for (int i=0; i<(int)prebuffer.size(); i++) {
 		switch (prebuffer[i]) {
-			case 'k': kcount1++; break;
-			case 'K': Kcount1++; break;
+			// case 'k': kcount1++; break;
+			// case 'K': Kcount1++; break;
 			case 'L': Lcount1++; break;
 			case 'J': Jcount1++; break;
 		}
@@ -476,8 +476,8 @@ void cleanUpBeams(string& prebuffer, string& postbuffer, int level) {
 
 	for (int i=0; i<(int)postbuffer.size(); i++) {
 		switch (postbuffer[i]) {
-			case 'k': kcount2++; break;
-			case 'K': Kcount2++; break;
+			// case 'k': kcount2++; break;
+			// case 'K': Kcount2++; break;
 			case 'L': Lcount2++; break;
 			case 'J': Jcount2++; break;
 		}
