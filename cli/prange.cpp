@@ -1463,21 +1463,29 @@ void printAnalysis(vector<double>& midibins) {
 	cout << "!!tessitura:\t" << getTessitura(midibins) << " semitones\n";
 
 	double mean = getMean(midibins);
-	if (diatonicQ) {
+	if (diatonicQ && (mean > 0)) {
 		mean = Convert::base7ToBase12(mean);
 	}
-	cout << "!!mean:\t" << mean;
+	cout << "!!mean:\t\t" << mean;
 	cout << " (";
-	cout << Convert::base12ToKern(buffer, 1024, int(mean+0.5));
+	if (mean < 0) {
+		cout << "unpitched";
+	} else {
+		cout << Convert::base12ToKern(buffer, 1024, int(mean+0.5));
+	}
 	cout << ")" << "\n";
 
 	int median = getMedian(midibins);
-	if (diatonicQ) {
+	if (diatonicQ && (median > 0)) {
 		median = Convert::base7ToBase12(median);
 	}
 	cout << "!!median:\t" << median;
 	cout << " (";
-	cout << Convert::base12ToKern(buffer, 1024, median);
+	if (median < 0) {
+		cout << "unpitched";
+	} else {
+		cout << Convert::base12ToKern(buffer, 1024, median);
+	}
 	cout << ")" << "\n";
 
 }
