@@ -1680,7 +1680,8 @@ void printLattice(vector<vector<NoteNode> >& notes, HumdrumFile& infile,
 			if (!(rawQ || raw2Q)) {
 				cout << "\t**cint\n";
 			}
-			continue;
+		} else if (strcmp(infile[i][0], "*-") == 0) {
+			cout << "\t*-\n";
 		} else if (infile[i].isData()) {
 			if (!(rawQ || raw2Q)) {
 				cout << "\t";
@@ -1693,22 +1694,18 @@ void printLattice(vector<vector<NoteNode> >& notes, HumdrumFile& infile,
 			if (!(rawQ || raw2Q)) {
 				cout << "\n";
 			}
-			continue;
 		} else if (infile[i].isBarline()) {
 			if (!(rawQ || raw2Q)) {
 				cout << "\t" << infile[i][0] << "\n";
 			}
-			continue;
 		} else if (infile[i].isInterpretation()) {
 			if (!(rawQ || raw2Q)) {
 				cout << "\t*\n";
 			}
-			continue;
-		}	else if (infile[i].isLocalComment()) {
+		} else if (infile[i].isLocalComment()) {
 			if (!(rawQ || raw2Q)) {
 				cout << "\t!\n";
 			}
-			continue;
 		} else {
 			// global comment, reference record, or empty line
 			cout << "\n";
