@@ -1,9 +1,11 @@
 //
-// Programmer:    Laurent Pugin <puginl@ccrma.stanford.edu>
+// Programmer:  Laurent Pugin <puginl@ccrma.stanford.edu>
+//				David Rizo <drizo@dlsi.ua.es>
 // Creation Date: Lun 13 oct 2008 11:51:41 PDT
 // Last Modified: Mer  5 nov 2008 15:40:54 PST
 // Last Modified: Tue Dec  2 19:19:27 PST 2008 Added -q and -Q options.
 // Last Modified: Wed Mar 25 23:16:07 PDT 2015 Use STL vector class.
+// Last Modified: Lun Nov 13 23:10:07 JST 2023 Chords
 // Filename:      ...sig/examples/all/pae2kern.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/pae2kern.cpp
 // Syntax:        C++; museinfo
@@ -32,10 +34,15 @@
 //                clef (and changes %)
 //                grace notes (g)
 //                acciaccatura notes (q and qq..r types)
+//                chords: we've changed note objects for references and created 
+//                a pure base class PitchedObject. The previous programming style 
+//                has been respected.
 //
 // Fixed:         
-//
-
+//                met(C) changed for met(c)		
+//                Appogiatura Q changed for qq
+//                Acciaccatura exported with a default 8th duration				
+//                Trill exported now as 'T' instead of 't'
 #include "humdrum.h"
 
 #include <string.h>
@@ -50,31 +57,168 @@
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////////
-
-class NoteObject {
+/**
+ * Used as an abstract (pure) base class for NoteObject and ChordObject
+*/
+class PitchedObject {
 	public:
-		       NoteObject(void) { clear(); };
+		PitchedObject() {}
+		virtual ~PitchedObject() {}
+		virtual PitchedObject* clone() = 0;
+		virtual void print(ostream &out, char buffer[]) = 0;
+
+};
+
+class NoteObject: public PitchedObject {
+	public:
+		NoteObject(void) { clear(); };
+		NoteObject(const NoteObject &from) {
+			dot = from.dot;
+			beam = from.beam;
+			appoggiatura = from.appoggiatura;
+			appoggiatura_multiple = from.appoggiatura_multiple;
+			acciaccatura = from.acciaccatura;
+			fermata = from.fermata;
+			trill = from.trill;
+			duration = from.duration;
+			tuplet = from.tuplet;
+			pitch = from.pitch;
+			octave = from.octave;
+			accident = from.accident;
+			tie = from.tie;
+		}
+		virtual ~NoteObject() {}
+		virtual PitchedObject* clone() {
+			return new NoteObject(*this);
+		}
 		void   clear(void) {
-					 pitch = octave = accident = dot = tie = beam = appoggiatura = 0;
-					 acciaccatura = appoggiatura_multiple = fermata = trill = false;
-					 duration = 0.0;
-					 tuplet = 1.0;
-		      };
-		int    pitch;
-		int    octave;
-		int    accident;
+				octave = dot = beam = appoggiatura = 0;
+				acciaccatura = appoggiatura_multiple = fermata = trill = false;
+				duration = 0.0;
+				tuplet = 1.0;
+				pitch = octave = accident = 0;
+		};
+
+		virtual void print(ostream &out, char buffer[]) {
+			if (pitch < 0) {
+				if (tie == 1) {
+					out << "[";
+				}
+				out << Convert::durationToKernRhythm(buffer, 1024,
+						duration);
+				for (int j=0; j<dot; j++) {
+					out << ".";
+				}
+				out << "r";
+				
+				if (fermata) {
+					out << ";";
+				} 
+
+				if (beam == 1) {
+					out << "L";
+				} else if (beam == -1) {
+					out << "J";
+				}
+
+				if (tie == -1) {
+					out << "]";
+				}
+				else if (tie > 1) {
+					out << "_";
+				}
+			} else {
+				if (tie == 1) {
+					out << "[";
+				}
+				if (!acciaccatura) {
+					out << Convert::durationToKernRhythm(buffer, 1024,
+							duration);
+					for (int j=0; j<dot; j++) {
+						out << ".";
+					}
+				} else {
+					// print 8 by default
+					out << "8";
+				}
+
+				char *base40 = Convert::base40ToKern(buffer, 1024, pitch);
+				out << base40;
+				
+				if (acciaccatura) {
+					//out << "q"; // https://github.com/humdrum-tools/vhv-documentation/issues/9#issuecomment-617752051
+					out << "q";
+				} else if (appoggiatura > 0) {
+					//out << "Q";
+					out << "qq"; // https://github.com/humdrum-tools/vhv-documentation/issues/9#issuecomment-617752051
+				}
+				
+				if (fermata) {
+					out << ";";
+				} 
+				
+				if (tie == -1) {
+					out << "]";
+				}
+				else if (tie > 1) {
+					out << "_";
+				}
+				
+				if (beam == 1) {
+					out << "L";
+				} else if (beam == -1) {
+					out << "J";
+				}
+				
+				if (trill == true) {
+					//out << "t";
+					out << "T";
+				}
+			}			
+		}			  
 		double duration;
 		int    dot;
 		double tuplet;
-		int    tie;
 		int    beam;
 		bool   acciaccatura;
 		int    appoggiatura;
 		bool   appoggiatura_multiple;
 		bool   fermata;
-		bool   trill;
+		bool   trill;		
+		int    pitch;
+		int    octave;
+		int    accident;
+		int    tie;
 };
 
+class ChordObject: public PitchedObject {
+	public:
+		virtual ~ChordObject() {}
+		virtual PitchedObject* clone() {
+			ChordObject *result = new ChordObject();
+			for (int i=0; i<notes.size(); i++) {
+				result->notes.push_back(new NoteObject(*notes[i]));
+			}
+			return result;
+		}
+		void addNote(NoteObject* note) 
+		{
+			notes.push_back(note);
+		}
+		vector<NoteObject*> getNotes() {
+			return notes;
+		}
+		virtual void print(ostream &out, char buffer[]) {		
+			for(int i = 0; i < notes.size(); i++) {
+				if (i>0) {
+					out << " ";
+				}
+				notes[i]->print(out, buffer);
+			}
+		}
+	private:
+		vector<NoteObject*> notes;
+};
 
 class MeasureObject {
 	public:
@@ -102,9 +246,24 @@ class MeasureObject {
 					 measure_duration = 0.0;
 					 abbreviation_offset = -1;
 				 };
+		// it returns NULL if there is no last note or it is not a chord
+		ChordObject* getLastChord() {
+			ChordObject *lastChord = NULL;
+			if (!notes.empty()) {
+				lastChord = dynamic_cast<ChordObject*>(notes.back());
+			}
+			return lastChord;
+		}
+		void copy(vector<PitchedObject*> from) {
+			notes.clear();
+			for (int i=0; i<from.size(); i++) {
+				notes.push_back(from[i]->clone());
+			}
+		}
 		string    clef;
 		double measure_duration;
-		vector<NoteObject> notes;
+		//changed for containing chords vector<NoteObject> notes;
+		vector<PitchedObject*> notes;
 		vector<int> a_key;
 		string s_key;
 		vector<double> a_timeinfo;   
@@ -151,8 +310,8 @@ int       getGraceNote        (const char* incipit, NoteObject *note,
 int       getWholeRest        (const char* incipit, int *wholerest, int index);
 int       getAbbreviation     (const char* incipit, MeasureObject *measure, 
                                int index = 0); 
-int       getNote             (const char* incipit, NoteObject *note, 
-                               MeasureObject *measure, int index = 0);
+int       getNote             (const char* incipit, NoteObject *note, MeasureObject *measure, 
+								bool in_chord, int index = 0);
 
 int       getPitch            (char c_note, int octave, int accidental, 
                                vector<int>& a_key);
@@ -224,16 +383,16 @@ int main(int argc, char** argv) {
 				strcat(outfilename, ".");  
 				strcat(outfilename, extension);        
 				if (debugQ) {
-					cout << "Processing file: " << outfilename << endl;
+					std::cout << "Processing file: " << outfilename << endl;
 				}
 				outfile.open(outfilename);
 				if (!outfile.is_open()) {
-					cout << "Error: cannot write to file: " << outfilename << endl;
+					std::cout << "Error: cannot write to file: " << outfilename << endl;
 				}
 				convertPlainAndEasyToKern(infile, outfile);
 				outfile.close();
 			} else {
-				convertPlainAndEasyToKern(infile, cout);
+				convertPlainAndEasyToKern(infile, std::cout);
 			}
 
 			//std::cout << "\tKEY:   " << key.c_str()   << endl;
@@ -266,7 +425,8 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
 
 	string s_key;
 	MeasureObject current_measure;
-	NoteObject current_note;
+	NoteObject *current_note = new NoteObject();
+	bool in_chord = false;
 	vector<int> current_key; // Not measure one, which will be affected by 
 	                         // temporary alterations.
 	//current_key.resize(7);
@@ -346,7 +506,7 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
 		
 		// octaves
 		if ((incipit[i] == '\'') || (incipit[i] == ',')) {
-			i += getOctave(incipit, &current_note.octave, i);
+			i += getOctave(incipit, &(current_note->octave), i);
 		}
 		
 		// rhythmic values
@@ -356,17 +516,17 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
 
 		//accidentals (1 = n; 2 = x; 3 = xx; 4 = b; 5 = bb)    
 		else if (incipit[i] == 'n' || incipit[i] == 'x' || incipit[i] == 'b') {
-			i += getAccidental(incipit, &current_note.accident, i);
+			i += getAccidental(incipit, &(current_note->accident), i);
 		}
 		
 		// beaming starts
 		else if (incipit[i] == '{') {
-			current_note.beam = 1;
+			current_note->beam = 1;
 		}
 			
 		// beaming ends
 		else if (incipit[i] == '}') {
-			current_note.beam = 0; // should not have to be done, but just in case
+			current_note->beam = 0; // should not have to be done, but just in case
 		}
 		
 		// slurs are read when adding the note
@@ -377,12 +537,12 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
 		else if (incipit[i] == '(') {
 			i += getTupletFermata(incipit, getDurationWithDot(
 					current_measure.durations[0], current_measure.dots[0]), 
-					&current_note, i);
+					current_note, i);
 		}
 		
 		// end of tuplets
 		else if ((incipit[i] == ';') || (incipit[i] == ')')) {
-			i += getTupletFermataEnd(incipit, &current_note, i);
+			i += getTupletFermataEnd(incipit, current_note, i);
 		}
 
 		// trills are read when adding the note
@@ -391,18 +551,20 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
 
 		//grace notes
 		else if ((incipit[i] == 'g') || (incipit[i] == 'q')) {
-			i += getGraceNote(incipit, &current_note, i);
+			i += getGraceNote(incipit, current_note, i);
 		}
 		
 		
 		// end of appogiatura
 		else if (incipit[i] == 'r') {
-			current_note.appoggiatura = 0; // just in case
+			current_note->appoggiatura = 0; // just in case
 		}
 		
 		//note and rest
 		else if (((incipit[i]-'A'>=0) && (incipit[i]-'A'<7))||(incipit[i]=='-')) {
-			i += getNote(incipit, &current_note, &current_measure, i);
+			current_note = new NoteObject(*current_note);
+			i += getNote(incipit, current_note, &current_measure, in_chord, i);			
+			in_chord = false; // it it's another chord, it must use ^ before again
 		}
 		
   		// whole rest
@@ -418,7 +580,8 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
 		// measure repetition
 		else if ((incipit[i] == 'i') && staff.size()) {
 			MeasureObject last_measure = staff[staff.size()-1];
-			current_measure.notes = last_measure.notes;
+			//chords current_measure.notes = last_measure.notes;
+			current_measure.copy(last_measure.notes);
 			current_measure.a_timeinfo = last_measure.a_timeinfo;
 			current_measure.measure_duration = 
 					getMeasureDur(last_measure.a_timeinfo);
@@ -456,6 +619,13 @@ void convertPlainAndEasyToKern(istream &infile, ostream &out) {
 			current_key = current_measure.a_key;
 		} 
 		
+		// chord
+		else if ((incipit[i] == '^') && (i+1 < length)) {			
+			if (in_chord) {
+				throw "Two consecutive chord codes ^";
+			}
+			in_chord = true;
+		}
 		i++;
 	}
 	
@@ -1137,11 +1307,11 @@ int getTimeInfo(const char* incipit, vector<double>& timeinfo, string *output, i
 	} else if (strcmp(timesig_str, "c") == 0) {
 		// C
 		timeinfo[0] = 4.0; timeinfo[1] = 4.0/4.0;
-		sout << "*M4/4\n*met(C)"; 
+		sout << "*M4/4\n*met(c)"; 
 	} else if (strcmp(timesig_str, "c/") == 0) {
 		// C|
 		timeinfo[0] = 2.0; timeinfo[1] = 4.0/2.0;
-		sout << "*M2/2\n*met(C|)";
+		sout << "*M2/2\n*met(c|)";
 	} else if (strcmp(timesig_str, "c3") == 0) {
 		// C3
 		timeinfo[0] = 3.0; timeinfo[1] = 4.0/1.0;
@@ -1279,7 +1449,8 @@ int getAbbreviation(const char* incipit, MeasureObject *measure, int index) {
 		while ((i+1 < length) && (incipit[i+1]=='f')) {
 			i++;
 			for (j=measure->abbreviation_offset; j<abbreviation_stop; j++) {
-				measure->notes.push_back(measure->notes[j]);
+				//chords measure->notes.push_back(measure->notes[j]);
+				measure->notes.push_back(measure->notes[j]->clone());
 			}
 		}
 		measure->abbreviation_offset = -1;   
@@ -1370,9 +1541,7 @@ int getKeyInfo(const char *incipit, vector<int>& key, string *output,
 // getNote --
 //
 
-int getNote(const char* incipit, NoteObject *note, MeasureObject *measure, 
-		int index) {
-
+int getNote(const char* incipit, NoteObject *note, MeasureObject *measure, bool in_chord, int index) {
 	regex_t re;
 	
 	int i = index;
@@ -1383,6 +1552,11 @@ int getNote(const char* incipit, NoteObject *note, MeasureObject *measure,
 		note->duration /= note->tuplet;
 		//cout << durations[0] << ":" << note->tuplet << endl;
 	}
+
+   if (note->octave == 0) {
+      note->octave = 4; // it seems that when the octave is not specified as ' or , it wrongly remained 0
+   }
+
 	// get new pitch if we are not tied to previous note
 	if (note->tie == 0) {
 		note->pitch = getPitch(incipit[i], note->octave, note->accident, 
@@ -1419,9 +1593,27 @@ int getNote(const char* incipit, NoteObject *note, MeasureObject *measure,
 	else if (note->tie > 0) {
 		note->tie = -1; // close tie
 	}
-	
-	measure->notes.push_back(*note);
-	
+
+	if (in_chord) {
+		ChordObject *lastChord = measure->getLastChord();
+		if (lastChord == NULL) {				
+			// replace the last note by the chord and insert that note into the chord
+			lastChord = new ChordObject();
+			if (!measure->notes.empty()) {
+				NoteObject *lastNote = dynamic_cast<NoteObject*>(measure->notes.back());
+				if (lastNote == NULL) {
+					throw "Last element in the measure should be a note";
+				}			
+				measure->notes.pop_back();
+				lastChord->addNote(lastNote); 
+			}
+			measure->notes.push_back(lastChord);		
+		} 
+		lastChord->addNote(new NoteObject(*note)); // we add a copy
+	} else {
+			measure->notes.push_back(new NoteObject(*note)); // we add a copy
+	}
+		
 	// reset values
 	// beam
 	if (note->beam > 0) {
@@ -1475,7 +1667,7 @@ void printMeasure(ostream& out, MeasureObject *measure) {
 	}
 	
 	char buffer[1024] = {0};
-	int i,j;
+	int i;
 	
 	if (measure->wholerest > 0) {
 		out << Convert::durationToKernRhythm(buffer, 1024, measure->measure_duration);
@@ -1492,76 +1684,14 @@ void printMeasure(ostream& out, MeasureObject *measure) {
 		//}
 	}
 
+	// print the notes and chords
 	for (i=0; i<(int)measure->notes.size(); i++) {
-		if (measure->notes[i].pitch < 0) {
-			if (measure->notes[i].tie == 1) {
-				out << "[";
-			}
-			out << Convert::durationToKernRhythm(buffer, 1024,
-					measure->notes[i].duration);
-			for (j=0; j<measure->notes[i].dot; j++) {
-				out << ".";
-			}
-			out << "r";
-			
-			if (measure->notes[i].fermata) {
-				out << ";";
-			} 
-
-			if (measure->notes[i].beam == 1) {
-				out << "L";
-			} else if (measure->notes[i].beam == -1) {
-				out << "J";
-			}
-
-			if (measure->notes[i].tie == -1) {
-				out << "]";
-			}
-			else if (measure->notes[i].tie > 1) {
-				out << "_";
-			}
-		} else {
-			if (measure->notes[i].tie == 1) {
-				out << "[";
-			}
-			if (!measure->notes[i].acciaccatura) {
-				out << Convert::durationToKernRhythm(buffer, 1024,
-						measure->notes[i].duration);
-				for (j=0; j<measure->notes[i].dot; j++) {
-					out << ".";
-				}
-			}
-			out << Convert::base40ToKern(buffer, 1024, measure->notes[i].pitch);
-			
-			if (measure->notes[i].acciaccatura) {
-				out << "q";
-			} else if (measure->notes[i].appoggiatura > 0) {
-				out << "Q";
-			}
-			
-			if (measure->notes[i].fermata) {
-				out << ";";
-			} 
-			
-			if (measure->notes[i].tie == -1) {
-				out << "]";
-			}
-			else if (measure->notes[i].tie > 1) {
-				out << "_";
-			}
-			
-			if (measure->notes[i].beam == 1) {
-				out << "L";
-			} else if (measure->notes[i].beam == -1) {
-				out << "J";
-			}
-			
-			if (measure->notes[i].trill == true) {
-				out << "t";
-			}
-		}
+		measure->notes[i]->print(out, buffer);
+		// after it, the notes are useless, we delete them
+		delete measure->notes[i];
 		out << "\n";
 	}
+	measure->notes.clear();
 	if (measure->barline.length()) {
 		out << measure->barline << "\n";
 	}
