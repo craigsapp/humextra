@@ -1,11 +1,10 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Mar 31 21:51:34 PST 2005
-// Last Modified: Thu Feb  9 07:34:18 PST 2012 SCORE display output by voice.
-// Last Modified: Sat Mar 30 13:14:05 PDT 2013 Allow segmented input.
-// Last Modified: Sat Mar 30 13:14:05 PDT 2013 Allow combined mass sections.
+// Last Modified: Tue Dec 19 15:11:21 PST 2023 Reorganize data into _VoiceInfo class.
 // Filename:      ...sig/examples/all/range.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/range.cpp
+// vim:           ts=3
 // Syntax:        C++; museinfo
 //
 // Description:   Calculate pitch histograms in a score of **kern data.
@@ -23,21 +22,57 @@
 #define OBJTAB "\t\t\t\t\t\t"
 #define SVGTAG "_99%svg%";
 
+class _VoiceInfo {
+	public:
+
+		vector<double> midibins;
+		string name;
+		string abbr;
+		int track;
+		bool kernQ;
+
+	public:
+		_VoiceInfo(void) {
+			clear();
+		}
+
+		void clear(void) {
+			name = "";
+			abbr = "";
+			midibins.resize(128);
+			fill(midibins.begin(), midibins.end(), 0.0);
+			track = -1;
+			kernQ = false;
+		}
+
+		ostream& print(ostream& out) {
+			out << "track: " << track << endl;
+			out << " name: " << name << endl;
+			out << " abbr: " << abbr << endl;
+			out << " kern: " << kernQ << endl;
+			out << " midi:";
+			for (int i=0; i<midibins.size(); i++) {
+				if (midibins[i] <= 0.0) {
+					continue;
+				} else {
+					cout << " " << i << ":" << midibins[i];
+				}
+			}
+			out << endl;
+			return out;
+		}
+
+};
+
 // function declarations
-void   checkOptions               (Options& opts, int argc, char* argv[]);
+void   processOptions             (Options& opts, int argc, char* argv[]);
 void   example                    (void);
 void   usage                      (const char* command);
-void   generateAnalysis           (HumdrumFile& infile,
-                                   vector<vector<double> >& rdata,
-                                   vector<int>& kernspines,
-                                   vector<string>& inames,
-                                   vector<string>& fileinstruments);
+void   generateAnalysis           (vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile);
 void   printAnalysis              (vector<double>& rdata);
-void   printPercentile            (vector<double>& midibins,
-                                   double percentile);
-double countNotesInRange          (vector<double>& midibins,
-                                   int low, int high);
-void   clearHistograms            (vector<vector<double> >& bins, int start = 0);
+void   printPercentile            (vector<double>& midibins, double percentile);
+double countNotesInRange          (vector<double>& midibins, int low, int high);
+void   fillHistograms             (vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile);
 void   getRange                   (int& rangeL, int& rangeH,
                                    const char* rangestring);
 int    getTessitura               (vector<double>& midibins);
@@ -46,25 +81,19 @@ int    getMedian                  (vector<double>& midibins);
 void   printScoreVoice            (string& voicestring, double hpos,
                                    vector<double>& midibins, int kernspine,
                                    double maxhist);
-void   getVoice                   (string& voicestring, HumdrumFile& infile,
-                                   int kernspine);
+void   getVoice                   (string& voicestring, HumdrumFile& infile, int kernspine);
 int    getMaxPitch                (vector<double>& midibins);
 int    getMinPitch                (vector<double>& midibins);
 int    getStaffBase12             (int pitch);
 double getVpos                    (double pitch, int staff);
 double getMaxValue                (vector<double>& bins);
-void   printScoreFile             (vector<vector<double> >& midibins,
-                                   HumdrumFile& infile,
-                                   vector<int>& kernspines,
-                                   vector<string>& inames);
+void   printScoreFile             (vector<_VoiceInfo>& voiceInfo,
+                                   HumdrumFile& infile);
 void   getTitle                   (string& titlestring, HumdrumFile& infile);
-void   growHistograms             (vector<vector<double> >& midibins,
-                                   int voices, vector<string>& binnames,
-                                   vector<string>& newnames);
 int    getVindex                  (int track, vector<int>& kernspines);
 int    getVindexInstrument        (int track, vector<int>& kernspines,
                                    vector<string>& fileinst,
-                                   vector<string>& inames);
+                                   vector<string>& nameByTrack);
 int    getTopQuartile             (vector<double>& midibins);
 int    getBottomQuartile          (vector<double>& midibins);
 int    getDiatonicInterval        (int note1, int note2);
@@ -77,12 +106,15 @@ int    getKeySignature            (HumdrumFile& infile);
 void   printHTMLStringEncodeSimple(const string& strang);
 void   printDiatonicPitchName     (int base12);
 const char* getTitle              (char* hbuffer, double value, int pitch);
-void   getInstrumentNames         (vector<string>& inames,
+void   getInstrumentNames         (vector<string>& nameByTrack,
                                    vector<int>& kernSpines,
                                    HumdrumFile& infile);
+void   getVoiceInfo               (vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile);
+void   mergeAllVoiceInfo          (vector<_VoiceInfo>& voiceInfo);
 
 // global variables
 Options      options;            // database for command-line arguments
+int          allQ         = 0;   // used with -a option
 int          durationQ    = 0;   // used with -d option
 int          debugQ       = 0;   // used with --debug option
 int          percentileQ  = 0;   // used with -p option
@@ -110,66 +142,36 @@ string       FILENAME     = "";
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-
 	// process the command-line options
-	checkOptions(options, argc, argv);
+	processOptions(options, argc, argv);
 	HumdrumStream streamer(options);
 	HumdrumFile infile;
+	vector<_VoiceInfo> voiceInfo;
 
-	// figure out the number of input files to process
-	// int numinputs = options.getArgCount();
-	vector<double> values;
-	values.resize(0);
-
-	vector<vector<double> > midibins;
-	vector<string> inames;
-	vector<string> tempnames;
-	midibins.resize(1);
-	clearHistograms(midibins);
-	vector<int> kernSpines;
-
-	// can only handle one input if SCORE display is being given.
-//   if (scoreQ && numinputs > 1) {
-//      numinputs = 1;
-//   }
-
-	// int i;
-	// infiles.clear();
-
+	// Can only handle one input if SCORE display is being given.
 	// if no command-line arguments read data file from standard input
-//   if (numinputs < 1) {
-//      infiles.read(cin);
-//   } else {
-//      FILENAME = options.getArg(1);
-//      infiles.read(options);
-//   }
-//
-
 	while (streamer.read(infile)) {
-		inames.resize(infile.getMaxTracks()+1);
-		inames.at(0) = "all";
-		infile.getTracksByExInterp(kernSpines, "**kern");
-		getInstrumentNames(tempnames, kernSpines, infile);
-		growHistograms(midibins, kernSpines.size(), inames, tempnames);
-		generateAnalysis(infile, midibins, kernSpines, inames, tempnames);
+		getVoiceInfo(voiceInfo, infile);
+		fillHistograms(voiceInfo, infile);
+		if (allQ) {
+			mergeAllVoiceInfo(voiceInfo);
+		}
+		for (int i=0; i<(int)voiceInfo.size(); i++) {
+			voiceInfo[i].print(cout);
+		}
+		break;
+		// generateAnalysis(infile, midibins, kernSpines, nameByTrack, tempnames);
 	}
-
-//   for (i=0; i<infiles.getCount(); i++) {
-//      infiles[i].getTracksByExInterp(kernSpines, "**kern");
-//      getInstrumentNames(tempnames, kernSpines, infiles[i]);
-//      growHistograms(midibins, kernSpines.size(), inames, tempnames);
-//      generateAnalysis(infiles[i], midibins, kernSpines, inames, tempnames);
-//   }
-//
+	exit(0);
 
 	if (xmlQ) {
 		printScoreXmlHeader();
 	}
 
 	if (!scoreQ) {
-		printAnalysis(midibins[0]);
+		// printAnalysis(midibins[0]);
 	} else {
-		printScoreFile(midibins, infile, kernSpines, inames);
+		printScoreFile(voiceInfo, infile);
 	}
 
 	if (xmlQ) {
@@ -183,6 +185,66 @@ int main(int argc, char* argv[]) {
 ///////////////////////////////////////////////////////////////////////////
 
 
+//////////////////////////////
+//
+// mergeAllVoiceInfo --
+//
+
+void mergeAllVoiceInfo(vector<_VoiceInfo>& voiceInfo) {
+	for (int i=1; i<(int)voiceInfo.size(); i++) {
+		if (!voiceInfo[i].kernQ) {
+			continue;
+		}
+		for (int j=0; j<(int)voiceInfo[i].midibins.size(); j++) {
+			voiceInfo[0].midibins[j] += voiceInfo[i].midibins[j];
+		}
+	}
+}
+
+
+//////////////////////////////
+//
+// getVoiceInfo -- get names and track info for **kern spines.
+//
+
+void getVoiceInfo(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
+	voiceInfo.clear();
+	voiceInfo.resize(infile.getMaxTracks() + 1);
+	voiceInfo[0].name  = "all";
+	voiceInfo[0].abbr  = "all";
+	voiceInfo[0].track = 0;
+
+	for (int i=0; i<infile.getNumLines(); i++) {
+		if (infile[i].isData()) {
+			break;
+		}
+		if (!infile[i].hasSpines()) {
+			continue;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			int track = infile[i].getTrack(j);
+			voiceInfo[track].track = track;
+			if (strcmp(infile[i][j], "**kern") == 0) {
+				voiceInfo[track].kernQ = true;
+			}
+			if (!voiceInfo[track].kernQ) {
+				continue;
+			}
+			if (strncmp(infile[i][j], "*I\"", 3) == 0) {
+				voiceInfo[track].name = &infile[i][j][3];
+			}
+			if (strncmp(infile[i][j], "*I'", 3) == 0) {
+				voiceInfo[track].abbr = &infile[i][j][3];
+			}
+		}
+	}
+}
+
+
+
 
 //////////////////////////////
 //
@@ -192,16 +254,16 @@ int main(int argc, char* argv[]) {
 //      *I"name
 //
 
-void getInstrumentNames(vector<string>& inames, vector<int>& kernSpines,
+void getInstrumentNames(vector<string>& nameByTrack, vector<int>& kernSpines,
 		HumdrumFile& infile) {
 	PerlRegularExpression pre;
 	int i, j, k;
 	int track;
 	string name;
-	// inames.resize(kernSpines.size());
-	inames.resize(infile.getMaxTracks() + 1);
-	fill(inames.begin(), inames.end(), "");
-	inames.at(0) = "all";
+	// nameByTrack.resize(kernSpines.size());
+	nameByTrack.resize(infile.getMaxTracks() + 1);
+	fill(nameByTrack.begin(), nameByTrack.end(), "");
+	nameByTrack.at(0) = "all";
 	for (i=0; i<infile.getNumLines(); i++) {
 		if (!infile[i].isInterpretation()) {
 			continue;
@@ -212,7 +274,7 @@ void getInstrumentNames(vector<string>& inames, vector<int>& kernSpines,
 				track = infile[i].getPrimaryTrack(j);
 				for (k=0; k<(int)kernSpines.size(); k++) {
 					if (track == kernSpines[k]) {
-						inames[k] = name;
+						nameByTrack[k] = name;
 					}
 				}
 			}
@@ -253,56 +315,50 @@ void printScoreXmlFooter(void) {
 
 //////////////////////////////
 //
-// growHistograms -- Make sure there is enough space for all voices
-//     to be stored in the histogram set.
+// fillHistograms -- Store notes in score by MIDI note number.
 //
 
-void growHistograms(vector<vector<double> >& midibins, int voices,
-		vector<string>& binnames, vector<string>& newnames) {
-
-	int hasnames = 1;
-	int i, j;
-	for (i=0; i<(int)newnames.size(); i++) {
-		if (newnames[i].size() == 0) {
-			hasnames = 0;
-			break;
+void fillHistograms(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
+	for (int i=0; i<infile.getNumLines(); i++) {
+		if (!infile[i].isData()) {
+			continue;
 		}
-	}
-
-	int oldsize = (int)midibins.size();
-
-	if (!hasnames) {
-		if (voices <= oldsize-1) {
-			return;
-		}
-		midibins.resize(voices+1);
-		clearHistograms(midibins, oldsize);
-		return;
-	}
-
-	// match new instrment names to old names.
-	int newcount = 0;
-	int hasname;
-	for (i=0; i<(int)newnames.size(); i++) {
-		hasname = -1;
-		for (j=0; j<(int)binnames.size(); j++) {
-			if (newnames[i] == binnames[j]) {
-				hasname = j;
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			if (!infile[i].isKern(j)) {
+				continue;
+			}
+			if (strcmp(infile[i][j], ".") == 0) {
+				continue;
+			}
+			vector<string> tokens;
+			infile[i].getTokens(tokens, j);
+			int track = infile[i].getTrack(j);
+			for (int k=0; k<(int)tokens.size(); k++) {
+				if (strchr(tokens[k].c_str(), 'r') != NULL) {
+					continue;
+				}
+				int midi = Convert::kernToMidiNoteNumber(tokens[k]);
+				if (midi < 0) {
+					continue;
+				}
+				if (midi > 127) {
+					continue;
+				}
+				if (durationQ) {
+					double duration = Convert::kernToDuration(tokens[k]);
+					voiceInfo[track].midibins[midi] += duration;
+				} else {
+					if (strchr(tokens[k].c_str(), ']') != NULL) {
+						continue;
+					}
+					if (strchr(tokens[k].c_str(), '_') != NULL) {
+						continue;
+					}
+					voiceInfo[track].midibins[midi]++;
+				}
 			}
 		}
-		if (hasname < 0) {
-			// add new name to list
-			newcount++;
-			binnames.push_back(newnames[i]);
-		} else {
-			// instrument already exists, so don't do anything
-		}
 	}
-	if (newcount > 0) {
-		midibins.resize(midibins.size() + newcount);
-		clearHistograms(midibins, oldsize);
-	}
-
 }
 
 
@@ -466,9 +522,7 @@ void printXmlEncodedText(const string& strang) {
 // printScoreFile --
 //
 
-void printScoreFile(vector<vector<double> >& midibins, HumdrumFile& infile,
-	vector<int>& kernspines, vector<string>& inames) {
-
+void printScoreFile(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
 	string titlestring;
 	if (titleQ) {
 		titlestring = Title;
@@ -602,7 +656,7 @@ void printScoreFile(vector<vector<double> >& midibins, HumdrumFile& infile,
 	vector<double> hpos;
 	double minn = 25;
 	double maxx = 170.0;
-	hpos.resize(kernspines.size());
+	// hpos.resize(kernspines.size());
 	hpos.back() = minn;
 	hpos[0] = maxx;
 	int i;
@@ -614,7 +668,7 @@ void printScoreFile(vector<vector<double> >& midibins, HumdrumFile& infile,
 	}
 
 	for (i=hpos.size()-1; i>=0; i--) {
-		printScoreVoice(inames.at(i), hpos.at(i), midibins.at(i), kernspines.at(i), 17.6);
+		// printScoreVoice(nameByTrack.at(i), hpos.at(i), midibins.at(i), kernspines.at(i), 17.6);
 	}
 
 	if (xmlQ) {
@@ -1626,10 +1680,11 @@ void printPercentile(vector<double>& midibins, double percentile) {
 
 //////////////////////////////
 //
-// checkOptions -- validate and process command-line options.
+// processOptions -- validate and process command-line options.
 //
 
-void checkOptions(Options& opts, int argc, char* argv[]) {
+void processOptions(Options& opts, int argc, char* argv[]) {
+	opts.define("a|all=b", "generate all-voice analysis");
 	opts.define("c|range|count=s:60-71", "count notes in a particular range");
 	opts.define("d|duration=b",      "weight pitches by duration");
 	opts.define("f|fraction=b",      "display histogram fractions");
@@ -1686,6 +1741,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	printQ       = opts.getBoolean("print");
 	pitchQ       = opts.getBoolean("pitch");
 	durationQ    = opts.getBoolean("duration");
+	allQ         = opts.getBoolean("all");
 	percentileQ  = opts.getBoolean("percentile");
 	rangeQ       = opts.getBoolean("range");
 	getRange(rangeL, rangeH, opts.getString("range").c_str());
@@ -1794,8 +1850,9 @@ void usage(const char* command) {
 // generateAnalysis --
 //
 
+/*
 void generateAnalysis(HumdrumFile& infile, vector<vector<double> >& midibins,
-		vector<int>& kernspines, vector<string>& inames,
+		vector<int>& kernspines, vector<string>& nameByTrack,
 		vector<string>& fileinstruments) {
 	int i, j, k;
 
@@ -1817,7 +1874,7 @@ void generateAnalysis(HumdrumFile& infile, vector<vector<double> >& midibins,
 				vindex = getVindex(infile[i].getPrimaryTrack(j), kernspines);
 			} else {
 				vindex = getVindexInstrument(infile[i].getPrimaryTrack(j),
-					kernspines, fileinstruments, inames);
+					kernspines, fileinstruments, nameByTrack);
 				vindex--;
 			}
 			if (strcmp(infile[i][j], ".") == 0) {  // ignore null tokens
@@ -1867,6 +1924,7 @@ void generateAnalysis(HumdrumFile& infile, vector<vector<double> >& midibins,
 		}
 	}
 }
+*/
 
 
 
@@ -1875,12 +1933,12 @@ void generateAnalysis(HumdrumFile& infile, vector<vector<double> >& midibins,
 // getVindexInstrument -- Return the index into the midibins array which
 //    represents the given track.
 //
-//    track -> kernspines index -> fileinst -> inames -> return index of inames (which matches
+//    track -> kernspines index -> fileinst -> nameByTrack -> return index of nameByTrack (which matches
 //         index of midibins).
 //
 
 int getVindexInstrument(int track, vector<int>& kernspines,
-		vector<string>& fileinst, vector<string>& inames) {
+		vector<string>& fileinst, vector<string>& nameByTrack) {
 	int i;
 	int findex = -1;
 	for (i=0; i<(int)kernspines.size(); i++) {
@@ -1891,8 +1949,8 @@ int getVindexInstrument(int track, vector<int>& kernspines,
 	if (findex < 0) {
 		return -1;
 	}
-	for (i=0; i<(int)inames.size(); i++) {
-		if (fileinst[findex] == inames[i]) {
+	for (i=0; i<(int)nameByTrack.size(); i++) {
+		if (fileinst[findex] == nameByTrack[i]) {
 			return i;
 		}
 	}

@@ -130,6 +130,7 @@ class HumdrumRecord {
       int               getType            (void) const;
 
       int               isData             (void) const;
+
       int               isEmpty            (void) const;
       int               isGlobalComment    (void) const;
       int               isBibliographic    (void) const;
@@ -142,6 +143,7 @@ class HumdrumRecord {
       int               isLocalComment     (void) const;
       int               isComment          (void) const;
       int               isExInterp         (int index, const char* string);
+      int               isKern             (int index);
       int               hasSpines          (void) const;
       int               isSpineLine        (void) { return hasSpines(); }
       int               isNullToken        (int index);
