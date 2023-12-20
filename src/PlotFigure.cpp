@@ -13,10 +13,9 @@
 
 #include "PlotFigure.h"
 
-#include <math.h>
-#include <string.h>
-
 #include <cctype>
+#include <cmath>
+#include <cstring>
 #include <fstream>
 
 using namespace std;
@@ -95,11 +94,7 @@ PlotFigure::PlotFigure(void) {
 void PlotFigure::read(const char* filename) {
 	fstream infile;
 
-	#ifndef OLDCPP
-		infile.open(filename, ios::in);
-	#else
-		infile.open(filename, ios::in | ios::nocreate);
-	#endif
+	infile.open(filename, ios::in);
 
 	if (!infile.is_open()) {
 		cout << "Error: cannot open file: " << filename << endl;

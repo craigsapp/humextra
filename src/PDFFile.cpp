@@ -14,8 +14,7 @@
 #include "PDFFile.h"
 #include "PerlRegularExpression.h"
 
-#include <string.h>
-
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>

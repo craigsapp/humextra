@@ -14,10 +14,9 @@
 #include "MuseRecordBasic.h"
 #include "Enum_muserec.h"
 
-#include <stdio.h>
-#include <string.h>
-
 #include <cctype>
+#include <cstdio>
+#include <cstring>
 #include <sstream>
 
 using namespace std;

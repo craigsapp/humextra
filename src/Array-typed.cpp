@@ -12,13 +12,9 @@
 
 #include "Array.h"
 
-#ifndef OLDCPP
-	#include <ostream>
-	using namespace std;
-#else
-	#include <ostream.h>
-#endif
+#include <ostream>
 
+using namespace std;
 
 
 /////////////////////////////

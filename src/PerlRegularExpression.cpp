@@ -157,16 +157,14 @@
 //
 //////////////////////////////////////////////////
 
-
-#include <string.h>
-
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <string>
-
 #include "PerlRegularExpression.h"
 #include "Array.h"
+
+#include <cstring>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace std;
 

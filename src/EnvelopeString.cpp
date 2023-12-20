@@ -10,11 +10,10 @@
 
 #include "EnvelopeString.h"
 
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include <cctype>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <sstream>

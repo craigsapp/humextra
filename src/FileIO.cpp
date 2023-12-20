@@ -18,10 +18,10 @@
 //
 
 #include "sigConfiguration.h"
-#include "assert.h"
-#include "string.h"
 #include "FileIO.h"
 
+#include <cassert>
+#include <cstring>
 #include <iostream>
 
 using namespace std;

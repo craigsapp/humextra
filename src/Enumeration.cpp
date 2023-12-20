@@ -13,9 +13,7 @@
 
 #include "Enumeration.h"
 
-#ifndef OLDCPP
-	using namespace std;
-#endif
+using namespace std;
 
 
 //////////////////////////////

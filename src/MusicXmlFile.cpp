@@ -71,11 +71,11 @@
 #include "Convert.h"
 #include "PerlRegularExpression.h"
 
-#include <string.h>
-#include <stdio.h>
-
 #include <cctype>
+#include <cstdio>
+#include <cstring>
 
+using namespace std;
 using namespace CSL::XML;
 
 /* For debugging partstaves and partoffset... */

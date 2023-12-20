@@ -10,8 +10,7 @@
 #include "PosixRegularExpression.h"
 #include "Array.h"
 
-#include <string.h>
-
+#include <cstring>
 #include <iostream>
 #include <sstream>
 

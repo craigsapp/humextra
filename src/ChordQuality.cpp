@@ -20,8 +20,7 @@
 #include "ChordQuality.h"
 #include "HumdrumEnumerations.h"
 
-#include <string.h>
-
+#include <cstring>
 #include <sstream>
 
 using namespace std;

@@ -31,14 +31,13 @@
 //                segments data into spines.
 //
 
-#include <stdio.h>
-#include <string.h>
-
-#include <cctype>
-
 #include "Convert.h"
 #include "HumdrumRecord.h"
 #include "PerlRegularExpression.h"
+
+#include <cctype>
+#include <cstdio>
+#include <cstring>
 #include <sstream>
 
 using namespace std;

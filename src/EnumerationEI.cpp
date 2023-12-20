@@ -16,6 +16,7 @@
 
 using namespace std;
 
+
 // static declarations
 int EnumerationEI::nextenumeration = 1000;
 

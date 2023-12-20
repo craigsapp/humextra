@@ -12,14 +12,13 @@
 
 #include "PerformDataRecord.h"
 
-#include <stdio.h>
-#include <string.h>
-
 #ifndef VISUAL
 	#include <sys/types.h>   /* needed by regex.h */
 	#include <regex.h>
 #endif
 
+#include <cstdio>
+#include <cstring>
 #include <iomanip>
 
 using namespace std;

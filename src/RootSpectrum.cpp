@@ -14,8 +14,8 @@
 #include "PlotFigure.h"
 #include "Convert.h"
 
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <cstring>
 
 using namespace std;
 

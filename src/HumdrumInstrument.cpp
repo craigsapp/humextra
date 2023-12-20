@@ -15,11 +15,12 @@
 #include "gminstruments.h"
 #include "HumdrumInstrument.h"
 
-#include <string.h>
+#include <cstring>
 
 using namespace std;
 
 typedef long TEMP64BITFIX;
+
 
 // declare static variables
 SigCollection< _HumdrumInstrument > HumdrumInstrument::data(0);

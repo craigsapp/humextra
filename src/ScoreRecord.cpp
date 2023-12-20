@@ -19,9 +19,8 @@
 #include "PerlRegularExpression.h"
 #include "Convert.h"
 
-#include <stdio.h>
-#include <string.h>
-
+#include <cstdio>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <sstream>

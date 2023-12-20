@@ -14,12 +14,11 @@
 #include "ScoreRecordSimple.h"
 #include "Convert.h"
 
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-
-#include <iostream>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 
 using namespace std;

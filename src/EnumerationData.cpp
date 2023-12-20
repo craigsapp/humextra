@@ -14,12 +14,11 @@
 
 #include "EnumerationData.h"
 
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include <stdlib.h>
-#include <string.h>
 
 using namespace std;
-
 
 
 //////////////////////////////

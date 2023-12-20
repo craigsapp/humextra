@@ -33,13 +33,14 @@
 #include "CheckSum.h"
 
 #include <cctype>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+
+using namespace std;
 
 char HumdrumFileBasic::empty[1] = {0};
 

@@ -12,9 +12,9 @@
 //
 
 #include "CheckSum.h"
-#include <string.h>
-#include <assert.h>
 
+#include <cassert>
+#include <cstring>
 #include <sstream>
 #include <string>
 

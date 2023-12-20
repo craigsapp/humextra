@@ -10,11 +10,10 @@
 
 #include "PixelColor.h"
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-
 #include <cctype>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 
 using namespace std;

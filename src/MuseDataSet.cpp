@@ -14,10 +14,9 @@
 #include "MuseDataSet.h"
 #include "PerlRegularExpression.h"
 
-#include <string.h>
-
-#include <sstream>
+#include <cstring>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -95,13 +94,7 @@ int MuseDataSet::readPart(istream& input) {
 
 void MuseDataSet::read(const char* filename) {
 	MuseDataSet::clear();
-
-	#ifndef OLDCPP
-		ifstream infile(filename, ios::in);
-	#else
-		ifstream infile(filename, ios::in | ios::nocreate);
-	#endif
-
+	ifstream infile(filename, ios::in);
 	MuseDataSet::read(infile);
 }
 

@@ -17,8 +17,8 @@
 
 #include "ScoreParameters.h"
 
-#include <string.h>
-#include <math.h>
+#include <cstring>
+#include <cmath>
 
 using namespace std;
 

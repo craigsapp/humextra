@@ -14,10 +14,9 @@
 #include "Enum_muserec.h"
 #include "PerlRegularExpression.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 #include <cctype>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <sstream>
 
@@ -424,12 +423,7 @@ void MuseData::read(istream& input) {
 
 
 void MuseData::read(const char* filename) {
-	#ifndef OLDCPP
-		ifstream infile(filename, ios::in);
-	#else
-		ifstream infile(filename, ios::in | ios::nocreate);
-	#endif
-
+	ifstream infile(filename, ios::in);
 	MuseData::read(infile);
 }
 

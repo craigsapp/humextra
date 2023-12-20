@@ -14,10 +14,9 @@
 #include "PlotData.h"
 #include "PlotFigure.h"
 
-#include <string.h>
-#include <stdlib.h>
-
 #include <cctype>
+#include <cstdlib>
+#include <cstring>
 #include <sstream>
 
 using namespace std;

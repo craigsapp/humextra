@@ -59,23 +59,20 @@
 #include "Convert.h"
 #include "PerlRegularExpression.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 #include <cctype>
-#include <math.h>
-
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#define SSTREAM stringstream
-#define CSTRING str().c_str()
+
 using namespace std;
 
 // #define ROUNDERR 0.005
 // Changed on Tue Mar 23 17:48:42 PST 2004
 #define ROUNDERR 0.005
-
 
 
 //////////////////////////////
@@ -464,7 +461,7 @@ int HumdrumFile::processLinesForCombine(HumdrumFile& output, HumdrumFile& A,
 		HumdrumFile& B, int debug) {
 	int a = 0;
 	int b = 0;
-	SSTREAM sout;
+	stringstream sout;
 	int i;
 	int foundStart = 0;   // boolean for finding start of data
 
@@ -1355,7 +1352,7 @@ int HumdrumFile::processLinesForCombine(HumdrumFile& output, HumdrumFile& A,
 		cout << "CONTENTS OF FILE FOR DEBUGGING INFO:" << endl;
 		sout << ends;
 		sout << "\n";
-		cout << sout.CSTRING;
+		cout << sout.str().c_str();
 	}
 	output.read(sout);
 

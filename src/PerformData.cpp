@@ -13,11 +13,10 @@
 
 #include "PerformData.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
 #include <cctype>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 
@@ -263,12 +262,7 @@ void PerformData::inputHumdrumMidiFile(const char* filename) {
 	add(temp);                            // add default tempo to performance
 
 	// open the input file for reading
-
-	#ifndef OLDCPP
-		fstream input(filename, ios::in);
-	#else
-		fstream input(filename, ios::in | ios::nocreate);
-	#endif
+	fstream input(filename, ios::in);
 
 	if (!input.is_open()) {
 		cout << "Error: cannot open file: " << filename << " for reading" << endl;

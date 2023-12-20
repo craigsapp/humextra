@@ -19,9 +19,8 @@
 
 #include "ScorePageBase.h"
 
-#include <string.h>
-#include <math.h>
-
+#include <cmath>
+#include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -30,10 +29,12 @@ using namespace std;
 
 typedef long TEMP64BITFIX;
 
+
 // Static class variables:
 double ScorePageBase::Lbuffer  = 0.025;
 double ScorePageBase::Bbuffer  = 0.0625;
 double ScorePageBase::StaffLen = 7.5;
+
 
 //////////////////////////////
 //
@@ -308,18 +309,10 @@ void ScorePageBase::initializeTrailer(long serial) {
 void ScorePageBase::readFile(const char* filename, int verboseQ) {
 	int binaryQ = 0;  // to test if reading a binary or ASCII data file.
 
-	#ifndef OLDCPP
-		#ifdef VISUAL
-			ifstream testfile(filename, ios::binary);
-		#else
-			ifstream testfile(filename);
-		#endif
+	#ifdef VISUAL
+		ifstream testfile(filename, ios::binary);
 	#else
-		#ifdef VISUAL
-			ifstream testfile(filename, ios::nocreate | ios::binary);
-		#else
-			ifstream testfile(filename, ios::nocreate);
-		#endif
+		ifstream testfile(filename);
 	#endif
 
 	if (!testfile.is_open()) {
@@ -355,11 +348,7 @@ void ScorePageBase::readFile(const char* filename, int verboseQ) {
 //
 
 void ScorePageBase::readAscii(const char* filename, int verboseQ) {
-	#ifndef OLDCPP
-		ifstream infile(filename, ios::in);
-	#else
-		ifstream infile(filename, ios::in | ios::nocreate);
-	#endif
+	ifstream infile(filename, ios::in);
 
 	if (!infile.is_open()) {
 		cerr << "Error: cannot read file: " << filename << endl;
@@ -456,18 +445,10 @@ void ScorePageBase::readAsciiScoreLine(istream& infile, ScoreRecord& record,
 //
 
 void ScorePageBase::readBinary(const char* filename, int verboseQ) {
-	#ifndef OLDCPP
-		#ifdef VISUAL
-			fstream infile(filename, ios::in | ios::binary);
-		#else
-			fstream infile(filename, ios::in);
-		#endif
+	#ifdef VISUAL
+		fstream infile(filename, ios::in | ios::binary);
 	#else
-		#ifdef VISUAL
-			fstream infile(filename, ios::in | ios::nocreate | ios::binary);
-		#else
-			fstream infile(filename, ios::in | ios::nocreate);
-		#endif
+		fstream infile(filename, ios::in);
 	#endif
 
 	if (!infile.is_open()) {
@@ -596,18 +577,10 @@ float ScorePageBase::readLittleFloat(istream& instream) {
 
 void ScorePageBase::writeBinary(const char* filename) {
 
-	#ifndef OLDCPP
-		#ifdef VISUAL
-			fstream outfile(filename, ios::out | ios::binary);
-		#else
-			fstream outfile(filename, ios::out);
-		#endif
+	#ifdef VISUAL
+		fstream outfile(filename, ios::out | ios::binary);
 	#else
-		#ifdef VISUAL
-			fstream outfile(filename, ios::out | ios::noreplace | ios::binary);
-		#else
-			fstream outfile(filename, ios::out | ios::noreplace);
-		#endif
+		fstream outfile(filename, ios::out);
 	#endif
 
 	if (!outfile.is_open()) {

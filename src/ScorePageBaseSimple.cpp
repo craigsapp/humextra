@@ -16,12 +16,11 @@
 
 #include "ScorePageBaseSimple.h"
 
-#include <string.h>
-#include <math.h>
-
-#include <iostream>
-#include <iomanip>
+#include <cmath>
+#include <cstring>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 
 using namespace std;
 
@@ -185,18 +184,10 @@ int ScorePageBaseSimple::findStaff(int staffno) {
 void ScorePageBaseSimple::readFile(const char* filename, int verboseQ) {
 	int binaryQ = 0;
 
-	#ifndef OLDCPP
-		#ifdef VISUAL
-			ifstream testfile(filename, ios::binary);
-		#else
-			ifstream testfile(filename);
-		#endif
+	#ifdef VISUAL
+		ifstream testfile(filename, ios::binary);
 	#else
-		#ifdef VISUAL
-			ifstream testfile(filename, ios::nocreate | ios::binary);
-		#else
-			ifstream testfile(filename, ios::nocreate);
-		#endif
+		ifstream testfile(filename);
 	#endif
 
 	if (!testfile.is_open()) {
@@ -231,11 +222,7 @@ void ScorePageBaseSimple::readFile(const char* filename, int verboseQ) {
 //
 
 void ScorePageBaseSimple::readAscii(const char* filename, int verboseQ) {
-	#ifndef OLDCPP
-		fstream infile(filename, ios::in);
-	#else
-		fstream infile(filename, ios::in | ios::nocreate);
-	#endif
+	fstream infile(filename, ios::in);
 
 	if (!infile.is_open()) {
 		cerr << "Error: cannot read file: " << filename << endl;
@@ -413,18 +400,10 @@ void ScorePageBaseSimple::writeBinary(const char* filename) {
 
 	float version = getVersion();
 
-	#ifndef OLDCPP
-		#ifdef VISUAL
-			fstream outfile(filename, ios::out | ios::binary);
-		#else
-			fstream outfile(filename, ios::out);
-		#endif
+	#ifdef VISUAL
+		fstream outfile(filename, ios::out | ios::binary);
 	#else
-		#ifdef VISUAL
-			fstream outfile(filename, ios::out | ios::noreplace | ios::binary);
-		#else
-			fstream outfile(filename, ios::out | ios::noreplace);
-		#endif
+		fstream outfile(filename, ios::out);
 	#endif
 
 	if (!outfile.is_open()) {
@@ -509,18 +488,10 @@ void ScorePageBaseSimple::writeBinary4Byte(const char* filename) {
 void ScorePageBaseSimple::readBinary(const char* filename, int verboseQ) {
 	clear();
 
-	#ifndef OLDCPP
-		#ifdef VISUAL
-			fstream infile(filename, ios::in | ios::binary);
-		#else
-			fstream infile(filename, ios::in);
-		#endif
+	#ifdef VISUAL
+		fstream infile(filename, ios::in | ios::binary);
 	#else
-		#ifdef VISUAL
-			fstream infile(filename, ios::in | ios::nocreate | ios::binary);
-		#else
-			fstream infile(filename, ios::in | ios::nocreate);
-		#endif
+		fstream infile(filename, ios::in);
 	#endif
 
 	if (!infile.is_open()) {

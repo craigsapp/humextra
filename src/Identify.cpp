@@ -13,8 +13,8 @@
 
 #include "Identify.h"
 
-#include <string.h>
 #include <cctype>
+#include <cstring>
 
 using namespace std;
 

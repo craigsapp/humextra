@@ -163,11 +163,7 @@ int HumdrumFileSet::readAppend(const char* filename) {
 #endif
 
 	ifstream infile;
-	#ifndef OLDCPP
-		infile.open(filename, ios::in);
-	#else
-		infile.open(filename, ios::in | ios::nocreate);
-	#endif
+	infile.open(filename, ios::in);
 
 	if (!infile) {
 		cerr << "Error: could not open file: " << filename << endl;
