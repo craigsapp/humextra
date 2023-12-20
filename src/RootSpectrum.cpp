@@ -5,7 +5,7 @@
 // Last Modified: Tue Dec 24 18:25:44 PST 2002
 // Filename:      ...sig/include/sigInfo/RootSpectrum.cpp
 // Web Address:   http://sig.sapp.org/include/sigInfo/RootSpectrum.cpp
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Store and calculate chord root calculations.
 //
@@ -17,10 +17,7 @@
 #include <math.h>
 #include <string.h>
 
-#ifndef OLDCPP
-   using namespace std;
-#endif
-
+using namespace std;
 
 
 //////////////////////////////
@@ -28,20 +25,20 @@
 // RootSpectrum::RootSpectrum --
 //
 
-RootSpectrum::RootSpectrum(void) { 
-   values.setSize(40);
-   values.allowGrowth(0);
-   values.setAll(100000.0);
-   power = 1.0;
-   rhythmOn();
-   melodyOn();
-   rhythmLinear();
-   setMeterBias(3.0);
-   setDurationBias(4.0);
-   setMelodyScaleFactor(1.0);
-   setResolutionFactor(1.0);
-   setDurationWeight(0.25);
-   setMetricLevelWeight(0.25);
+RootSpectrum::RootSpectrum(void) {
+	values.setSize(40);
+	values.allowGrowth(0);
+	values.setAll(100000.0);
+	power = 1.0;
+	rhythmOn();
+	melodyOn();
+	rhythmLinear();
+	setMeterBias(3.0);
+	setDurationBias(4.0);
+	setMelodyScaleFactor(1.0);
+	setResolutionFactor(1.0);
+	setDurationWeight(0.25);
+	setMetricLevelWeight(0.25);
 }
 
 
@@ -51,8 +48,8 @@ RootSpectrum::RootSpectrum(void) {
 // RootSpectrum::~RootSpectrum --
 //
 
-RootSpectrum::~RootSpectrum() { 
-   values.setSize(0);
+RootSpectrum::~RootSpectrum() {
+	values.setSize(0);
 }
 
 
@@ -63,13 +60,13 @@ RootSpectrum::~RootSpectrum() {
 //
 
 int RootSpectrum::bestIndex(void) {
-   int output = 0;
-   for (int i=1; i<getSize(); i++) {
-      if (values[i] < values[output]) {
-         output = i;
-      }
-   }
-   return output;
+	int output = 0;
+	for (int i=1; i<getSize(); i++) {
+		if (values[i] < values[output]) {
+			output = i;
+		}
+	}
+	return output;
 }
 
 
@@ -80,8 +77,8 @@ int RootSpectrum::bestIndex(void) {
 //   an unmodified form.
 //
 
-double RootSpectrum::getRawScore(int index) { 
-   return values[index];
+double RootSpectrum::getRawScore(int index) {
+	return values[index];
 }
 
 
@@ -92,12 +89,12 @@ double RootSpectrum::getRawScore(int index) {
 //
 
 double RootSpectrum::getInvScore(int index) {
-   double output = 1.0/values[index];
-   if (getPower() != 1.0) {
-      return pow(output, getPower());
-   } else {
-      return output;
-   }
+	double output = 1.0/values[index];
+	if (getPower() != 1.0) {
+		return pow(output, getPower());
+	} else {
+		return output;
+	}
 }
 
 
@@ -109,7 +106,7 @@ double RootSpectrum::getInvScore(int index) {
 //
 
 double RootSpectrum::getPower(void) {
-   return power;
+	return power;
 }
 
 
@@ -121,18 +118,18 @@ double RootSpectrum::getPower(void) {
 //
 
 void RootSpectrum::setPower(double aPower) {
-   power = aPower;
+	power = aPower;
 }
 
 
 
 //////////////////////////////
 //
-// RootSpectrum::getDurationWeight -- 
+// RootSpectrum::getDurationWeight --
 //
 
-double RootSpectrum::getDurationWeight(void) { 
-   return durationWeight;
+double RootSpectrum::getDurationWeight(void) {
+	return durationWeight;
 }
 
 
@@ -142,8 +139,8 @@ double RootSpectrum::getDurationWeight(void) {
 // RootSpectrum::setDurationWeight --
 //
 
-void RootSpectrum::setDurationWeight(double aWeight) { 
-   durationWeight = aWeight;
+void RootSpectrum::setDurationWeight(double aWeight) {
+	durationWeight = aWeight;
 }
 
 
@@ -153,8 +150,8 @@ void RootSpectrum::setDurationWeight(double aWeight) {
 // RootSpectrum::getMetricLevelWeight --
 //
 
-double RootSpectrum::getMetricLevelWeight(void) { 
-   return levelWeight;
+double RootSpectrum::getMetricLevelWeight(void) {
+	return levelWeight;
 }
 
 
@@ -164,8 +161,8 @@ double RootSpectrum::getMetricLevelWeight(void) {
 // RootSpectrum::setMetricLevelWeight --
 //
 
-void RootSpectrum::setMetricLevelWeight(double aWeight) { 
-   levelWeight = aWeight;
+void RootSpectrum::setMetricLevelWeight(double aWeight) {
+	levelWeight = aWeight;
 }
 
 
@@ -175,9 +172,9 @@ void RootSpectrum::setMetricLevelWeight(double aWeight) {
 // RootSpectrum::setRhythmWeights --
 //
 
-void RootSpectrum::setRhythmWeights(double durWeight, double levWeight) { 
-   durationWeight = durWeight;
-   levelWeight    = levWeight;
+void RootSpectrum::setRhythmWeights(double durWeight, double levWeight) {
+	durationWeight = durWeight;
+	levelWeight    = levWeight;
 }
 
 
@@ -187,12 +184,12 @@ void RootSpectrum::setRhythmWeights(double durWeight, double levWeight) {
 // RootSpectrum::setDuration --
 //
 
-void RootSpectrum::setDuration(int aState) { 
-   if (aState == 0) {
-      durationOff();
-   } else {
-      durationOn();
-   }
+void RootSpectrum::setDuration(int aState) {
+	if (aState == 0) {
+		durationOff();
+	} else {
+		durationOn();
+	}
 }
 
 
@@ -203,12 +200,12 @@ void RootSpectrum::setDuration(int aState) {
 //
 
 
-void RootSpectrum::setMetricLevel(int aState) { 
-   if (aState == 0) {
-      metricLevelOff();
-   } else {
-      metricLevelOn();
-   }
+void RootSpectrum::setMetricLevel(int aState) {
+	if (aState == 0) {
+		metricLevelOff();
+	} else {
+		metricLevelOn();
+	}
 }
 
 
@@ -218,9 +215,9 @@ void RootSpectrum::setMetricLevel(int aState) {
 // RootSpectrum::rhythmOn -- enable duration and metric weightings.
 //
 
-void RootSpectrum::rhythmOn(void) { 
-   durationOn();
-   metricLevelOn();
+void RootSpectrum::rhythmOn(void) {
+	durationOn();
+	metricLevelOn();
 }
 
 
@@ -230,9 +227,9 @@ void RootSpectrum::rhythmOn(void) {
 // RootSpectrum::rhythmOff -- disable duration and metric weightings.
 //
 
-void RootSpectrum::rhythmOff(void) { 
-   durationOff();
-   metricLevelOff();
+void RootSpectrum::rhythmOff(void) {
+	durationOff();
+	metricLevelOff();
 }
 
 
@@ -242,8 +239,8 @@ void RootSpectrum::rhythmOff(void) {
 // RootSpectrum::durationOn -- enable duration weighting
 //
 
-void RootSpectrum::durationOn(void) { 
-   durationQ = 1;
+void RootSpectrum::durationOn(void) {
+	durationQ = 1;
 }
 
 
@@ -253,8 +250,8 @@ void RootSpectrum::durationOn(void) {
 // RootSpectrum::durationOff -- disable duration weighting
 //
 
-void RootSpectrum::durationOff(void) { 
-   durationQ = 0;
+void RootSpectrum::durationOff(void) {
+	durationQ = 0;
 }
 
 
@@ -264,8 +261,8 @@ void RootSpectrum::durationOff(void) {
 // RootSpectrum::metricLevelOn -- enable metric level weighting.
 //
 
-void RootSpectrum::metricLevelOn(void) { 
-   levelQ = 1;
+void RootSpectrum::metricLevelOn(void) {
+	levelQ = 1;
 }
 
 
@@ -275,8 +272,8 @@ void RootSpectrum::metricLevelOn(void) {
 // RootSpectrum::metricLevelOff -- disable metric level weighting.
 //
 
-void RootSpectrum::metricLevelOff(void) { 
-   levelQ = 0;
+void RootSpectrum::metricLevelOff(void) {
+	levelQ = 0;
 }
 
 
@@ -287,8 +284,7 @@ void RootSpectrum::metricLevelOff(void) {
 //
 
 void RootSpectrum::melodyOn(void) {
-    melodyQ = 1;
-
+	melodyQ = 1;
 }
 
 
@@ -299,29 +295,29 @@ void RootSpectrum::melodyOn(void) {
 //
 
 void RootSpectrum::melodyOff(void) {
-   melodyQ = 0;
+	melodyQ = 0;
 }
 
 
 
 //////////////////////////////
 //
-// RootSpectrum::setMelodyScaleFactor -- 
+// RootSpectrum::setMelodyScaleFactor --
 //
 
 void RootSpectrum::setMelodyScaleFactor(double aFactor) {
-   melodyScaleFactor = aFactor;
+	melodyScaleFactor = aFactor;
 }
 
 
 
 //////////////////////////////
 //
-// RootSpectrum::setMelodyScaleFactor -- 
+// RootSpectrum::setMelodyScaleFactor --
 //
 
 double RootSpectrum::getMelodyScaleFactor(void) {
-   return melodyScaleFactor;
+	return melodyScaleFactor;
 }
 
 
@@ -335,12 +331,12 @@ double RootSpectrum::getMelodyScaleFactor(void) {
 //
 
 double RootSpectrum::getNormInvScore(int index) {
-   double output = values[bestIndex()]/values[index];
-   if (getPower() != 1.0) {
-      return pow(output, getPower());
-   } else {
-      return output;
-   }
+	double output = values[bestIndex()]/values[index];
+	if (getPower() != 1.0) {
+		return pow(output, getPower());
+	} else {
+		return output;
+	}
 }
 
 
@@ -350,8 +346,8 @@ double RootSpectrum::getNormInvScore(int index) {
 // RootSpectrum::getSize -- should always return 40 (the base-40 octave)
 //
 
-int RootSpectrum::getSize(void) { 
-   return values.getSize();
+int RootSpectrum::getSize(void) {
+	return values.getSize();
 }
 
 
@@ -362,8 +358,8 @@ int RootSpectrum::getSize(void) {
 // RootSpectrum::operator[] -- same as getScore();
 //
 
-double& RootSpectrum::operator[](int index) { 
-   return values[index];
+double& RootSpectrum::operator[](int index) {
+	return values[index];
 }
 
 
@@ -376,10 +372,10 @@ double& RootSpectrum::operator[](int index) {
 //
 
 
-ostream& RootSpectrum::printMMA(const char* label, ostream& out, 
-      int functionsQ, int normQ) {
-   if (functionsQ != 0) {
-      out << 
+ostream& RootSpectrum::printMMA(const char* label, ostream& out,
+		int functionsQ, int normQ) {
+	if (functionsQ != 0) {
+		out <<
 "(* Functions for displaying 2-D root spectra *)\n"
 "\n"
 "RootPlotDensity[array_?ListQ, repeat_?IntegerQ:2] := Module[\n"
@@ -418,74 +414,74 @@ ostream& RootSpectrum::printMMA(const char* label, ostream& out,
 "(* Display root spectra in 3-D: \n"
 " *    Show[SurfaceGraphics[rspec" << label << "], ViewPoint -> {1, 0, 0}];\n"
 " *)\n";
-   }
+	}
 
-   out.setf(ios::fixed);
-   out << "\nrspec" << label << " = {\n";
-   out << "\t\t{";                   // C
-   if (normQ) {
-      out << getNormInvScore(38) << "," 
-          << getNormInvScore(39) << ","
-          << getNormInvScore(0) << "," << getNormInvScore(1) << ","
-          << getNormInvScore(2) << "}, (* C *)\n"
-          << "\t\t{"                       // E
-          << getNormInvScore(10) << "," << getNormInvScore(11) << ","
-          << getNormInvScore(12) << "," << getNormInvScore(13) << ","
-          << getNormInvScore(14) << "}, (* E *)\n"
-          << "\t\t{";                      // G
-      out << getNormInvScore(21) << "," << getNormInvScore(22) << ",";
-      out << getNormInvScore(23) << "," << getNormInvScore(24) << ",";
-      out << getNormInvScore(25) << "}, (* G *)\n";
-      out << "\t\t{";                      // B
-      out << getNormInvScore(33) << "," << getNormInvScore(34) << ",";
-      out << getNormInvScore(35) << "," << getNormInvScore(36) << ",";
-      out << getNormInvScore(37) << "}, (* B *)\n";
-      out << "\t\t{";                      // D
-      out << getNormInvScore(4) << "," << getNormInvScore(5) << ",";
-      out << getNormInvScore(6) << "," << getNormInvScore(7) << ",";
-      out << getNormInvScore(8) << "}, (* D *)\n";
-      out << "\t\t{";                      // F
-      out << getNormInvScore(15) << "," << getNormInvScore(16) << ",";
-      out << getNormInvScore(17) << "," << getNormInvScore(18) << ",";
-      out << getNormInvScore(19) << "}, (* F *)\n";
-      out << "\t\t{";                      // A
-      out << getNormInvScore(27) << "," << getNormInvScore(28) << ",";
-      out << getNormInvScore(29) << "," << getNormInvScore(30) << ",";
-      out << getNormInvScore(31) << "}}; (* A *)\n";
-      out << endl;
-   } else {
-      out << getInvScore(38) << "," << getInvScore(39) << ",";
-      out << getInvScore(0) << "," << getInvScore(1) << ",";
-      out << getInvScore(2) << "}, (* C *)\n";
-      out << "\t\t{";                      // E
-      out << getInvScore(10) << "," << getInvScore(11) << ",";
-      out << getInvScore(12) << "," << getInvScore(13) << ",";
-      out << getInvScore(14) << "}, (* E *)\n";
-      out << "\t\t{";                      // G
-      out << getInvScore(21) << "," << getInvScore(22) << ",";
-      out << getInvScore(23) << "," << getInvScore(24) << ",";
-      out << getInvScore(25) << "}, (* G *)\n";
-      out << "\t\t{";                      // B
-      out << getInvScore(33) << "," << getInvScore(34) << ",";
-      out << getInvScore(35) << "," << getInvScore(36) << ",";
-      out << getInvScore(37) << "}, (* B *)\n";
-      out << "\t\t{";                      // D
-      out << getInvScore(4) << "," << getInvScore(5) << ",";
-      out << getInvScore(6) << "," << getInvScore(7) << ",";
-      out << getInvScore(8) << "}, (* D *)\n";
-      out << "\t\t{";                      // F
-      out << getInvScore(15) << "," << getInvScore(16) << ",";
-      out << getInvScore(17) << "," << getInvScore(18) << ",";
-      out << getInvScore(19) << "}, (* F *)\n";
-      out << "\t\t{";                      // A
-      out << getInvScore(27) << "," << getInvScore(28) << ",";
-      out << getInvScore(29) << "," << getInvScore(30) << ",";
-      out << getInvScore(31) << "}}; (* A *)\n";
-      out << endl;
-   }
+	out.setf(ios::fixed);
+	out << "\nrspec" << label << " = {\n";
+	out << "\t\t{";                   // C
+	if (normQ) {
+		out << getNormInvScore(38) << ","
+			 << getNormInvScore(39) << ","
+			 << getNormInvScore(0) << "," << getNormInvScore(1) << ","
+			 << getNormInvScore(2) << "}, (* C *)\n"
+			 << "\t\t{"                       // E
+			 << getNormInvScore(10) << "," << getNormInvScore(11) << ","
+			 << getNormInvScore(12) << "," << getNormInvScore(13) << ","
+			 << getNormInvScore(14) << "}, (* E *)\n"
+			 << "\t\t{";                      // G
+		out << getNormInvScore(21) << "," << getNormInvScore(22) << ",";
+		out << getNormInvScore(23) << "," << getNormInvScore(24) << ",";
+		out << getNormInvScore(25) << "}, (* G *)\n";
+		out << "\t\t{";                      // B
+		out << getNormInvScore(33) << "," << getNormInvScore(34) << ",";
+		out << getNormInvScore(35) << "," << getNormInvScore(36) << ",";
+		out << getNormInvScore(37) << "}, (* B *)\n";
+		out << "\t\t{";                      // D
+		out << getNormInvScore(4) << "," << getNormInvScore(5) << ",";
+		out << getNormInvScore(6) << "," << getNormInvScore(7) << ",";
+		out << getNormInvScore(8) << "}, (* D *)\n";
+		out << "\t\t{";                      // F
+		out << getNormInvScore(15) << "," << getNormInvScore(16) << ",";
+		out << getNormInvScore(17) << "," << getNormInvScore(18) << ",";
+		out << getNormInvScore(19) << "}, (* F *)\n";
+		out << "\t\t{";                      // A
+		out << getNormInvScore(27) << "," << getNormInvScore(28) << ",";
+		out << getNormInvScore(29) << "," << getNormInvScore(30) << ",";
+		out << getNormInvScore(31) << "}}; (* A *)\n";
+		out << endl;
+	} else {
+		out << getInvScore(38) << "," << getInvScore(39) << ",";
+		out << getInvScore(0) << "," << getInvScore(1) << ",";
+		out << getInvScore(2) << "}, (* C *)\n";
+		out << "\t\t{";                      // E
+		out << getInvScore(10) << "," << getInvScore(11) << ",";
+		out << getInvScore(12) << "," << getInvScore(13) << ",";
+		out << getInvScore(14) << "}, (* E *)\n";
+		out << "\t\t{";                      // G
+		out << getInvScore(21) << "," << getInvScore(22) << ",";
+		out << getInvScore(23) << "," << getInvScore(24) << ",";
+		out << getInvScore(25) << "}, (* G *)\n";
+		out << "\t\t{";                      // B
+		out << getInvScore(33) << "," << getInvScore(34) << ",";
+		out << getInvScore(35) << "," << getInvScore(36) << ",";
+		out << getInvScore(37) << "}, (* B *)\n";
+		out << "\t\t{";                      // D
+		out << getInvScore(4) << "," << getInvScore(5) << ",";
+		out << getInvScore(6) << "," << getInvScore(7) << ",";
+		out << getInvScore(8) << "}, (* D *)\n";
+		out << "\t\t{";                      // F
+		out << getInvScore(15) << "," << getInvScore(16) << ",";
+		out << getInvScore(17) << "," << getInvScore(18) << ",";
+		out << getInvScore(19) << "}, (* F *)\n";
+		out << "\t\t{";                      // A
+		out << getInvScore(27) << "," << getInvScore(28) << ",";
+		out << getInvScore(29) << "," << getInvScore(30) << ",";
+		out << getInvScore(31) << "}}; (* A *)\n";
+		out << endl;
+	}
 
 
-   return out;
+	return out;
 }
 
 
@@ -496,55 +492,55 @@ ostream& RootSpectrum::printMMA(const char* label, ostream& out,
 //    default value out = cout, type = DISPLAY_DIATONIC, invQ = 1, normQ = 0
 //
 
-ostream& RootSpectrum::printHumdrum(ostream& out, int type, 
-      int invQ, int normQ) { 
-   int i;
-   double value = 0.0;
-   int findex;
-   char buffer[64] = {0};
-   Array<int> bestorder;
-   getBestOrdering(bestorder);
-   if (durationQ) {
-      out << "!! duration weighting: " << getDurationWeight() << "\n";
-   }
-   if (levelQ) {
-      out << "!! metric weighting:   " << getMetricLevelWeight() << "\n";
-   }
-   out << "**kern\t**rootscore\n";
-   for (i=0; i<40; i++) {
-      switch (type) {
-         case DISPLAY_CHROMATIC:
-            findex = (15 + i * 23) % 40;
-            break;
-         case DISPLAY_BEST:
-            findex = bestorder[i];
-            break;
-         case DISPLAY_DIATONIC:
-         default:
-            findex = (i-2+40)%40;
-      }
-      Convert::base40ToKern(buffer, 64, (findex+2)%40+4*40);
-      if (buffer[0] == '\0') {
-         continue;
-      }
+ostream& RootSpectrum::printHumdrum(ostream& out, int type,
+		int invQ, int normQ) {
+	int i;
+	double value = 0.0;
+	int findex;
+	char buffer[64] = {0};
+	Array<int> bestorder;
+	getBestOrdering(bestorder);
+	if (durationQ) {
+		out << "!! duration weighting: " << getDurationWeight() << "\n";
+	}
+	if (levelQ) {
+		out << "!! metric weighting:   " << getMetricLevelWeight() << "\n";
+	}
+	out << "**kern\t**rootscore\n";
+	for (i=0; i<40; i++) {
+		switch (type) {
+			case DISPLAY_CHROMATIC:
+				findex = (15 + i * 23) % 40;
+				break;
+			case DISPLAY_BEST:
+				findex = bestorder[i];
+				break;
+			case DISPLAY_DIATONIC:
+			default:
+				findex = (i-2+40)%40;
+		}
+		Convert::base40ToKern(buffer, 64, (findex+2)%40+4*40);
+		if (buffer[0] == '\0') {
+			continue;
+		}
 
-      if (normQ && invQ) {
-         value = getNormInvScore(findex);
-      } else if (invQ) {
-         value = getInvScore(findex);
-      } else {
-         value = values[findex];
-      }
-      if (value > 0.0001) {
-         out << buffer << "\t" << value << "\n";
-      } else {
-         out.setf(ios::fixed);
-         out << buffer << "\t" << value << "\n";
-         out.unsetf(ios::fixed);
-      }
-   }
-   out << "*-\t*-\n";
-   return out;
+		if (normQ && invQ) {
+			value = getNormInvScore(findex);
+		} else if (invQ) {
+			value = getInvScore(findex);
+		} else {
+			value = values[findex];
+		}
+		if (value > 0.0001) {
+			out << buffer << "\t" << value << "\n";
+		} else {
+			out.setf(ios::fixed);
+			out << buffer << "\t" << value << "\n";
+			out.unsetf(ios::fixed);
+		}
+	}
+	out << "*-\t*-\n";
+	return out;
 }
 
 
@@ -558,17 +554,17 @@ ostream& RootSpectrum::printHumdrum(ostream& out, int type,
 class _index_value { public: double value; int index; };
 
 void RootSpectrum::getBestOrdering(Array<int>& bestordering) {
-   Array<_index_value> iv(40);
-   int i;
-   for (i=0; i<iv.getSize(); i++) {
-      iv[i].index = i;
-      iv[i].value = values[i];
-   }
-   qsort(iv.getBase(), iv.getSize(), sizeof(_index_value), minfloat);
-   bestordering.setSize(40);
-   for (i=0; i<bestordering.getSize(); i++) {
-      bestordering[i] = iv[i].index;
-   }
+	Array<_index_value> iv(40);
+	int i;
+	for (i=0; i<iv.getSize(); i++) {
+		iv[i].index = i;
+		iv[i].value = values[i];
+	}
+	qsort(iv.getBase(), iv.getSize(), sizeof(_index_value), minfloat);
+	bestordering.setSize(40);
+	for (i=0; i<bestordering.getSize(); i++) {
+		bestordering[i] = iv[i].index;
+	}
 }
 
 
@@ -579,15 +575,15 @@ void RootSpectrum::getBestOrdering(Array<int>& bestordering) {
 //
 
 int RootSpectrum::minfloat(const void* a, const void* b) {
-   _index_value& A = *((_index_value*)a);   
-   _index_value& B = *((_index_value*)b);   
-   if (A.value < B.value) {
-      return -1;
-   } else if (A.value > B.value) {
-      return +1;
-   } else {
-      return 0;
-   }
+	_index_value& A = *((_index_value*)a);
+	_index_value& B = *((_index_value*)b);
+	if (A.value < B.value) {
+		return -1;
+	} else if (A.value > B.value) {
+		return +1;
+	} else {
+		return 0;
+	}
 }
 
 
@@ -601,85 +597,85 @@ int RootSpectrum::minfloat(const void* a, const void* b) {
 //
 
 ostream& RootSpectrum::printXfig(ostream& out, const char* title, int type) {
-   PlotFigure figure;
-   PlotData   data;
-   figure.allocatePoints(40);
-   int i;
-   double yvalue;
-   double angle = 90.0 * 3.14159624/180.0;
-   double max = getInvScore(bestIndex());
-   double pointsize = 0.007 * max;
-   int justify = -1;   // left
-   Array<int> bestorder;
-   getBestOrdering(bestorder);
-   int count = 0;
-   double fontsize = 14.0;
-   char buffer[64] = {0};
-   int nextindex = -1;
-   int lastindex = -1;
-   int findex    = -1;
-   for (i=0; i<40; i++) {
-      lastindex = findex;     
-      switch (type) {
-         case DISPLAY_CHROMATIC:
-            findex = (15 + i * 23) % 40;
-            if (i+1<40) {
-               nextindex = (15 + (i+1) * 23) % 40;
-            } else {
-               nextindex = -1;
-            }
-            break;
-         case DISPLAY_BEST:
-            findex = bestorder[i];
-            if (i+1 < 40) {
-               nextindex = bestorder[i+1];
-            } else {
-               nextindex = -1;
-            }
-            break;
-         case DISPLAY_DIATONIC:
-         default:
-            findex = (i-2+40)%40;
-            if (i+1<40) {
-               nextindex = (i+1-2+40)%40;
-            } else {
-               nextindex = -1;
-            }
-      }
-      Convert::base40ToKern(buffer, 64, ((findex+2)%40) + 4*40);
-      if (buffer[0] == '\0') {
-         continue;
-      }
-      yvalue = getInvScore(findex);
-      figure.addText(buffer, count+0.2, -0.080 * max, fontsize, angle, justify);
-      if (i > 0 && i < 39 && lastindex >=0 && lastindex < 40 && 
-            nextindex >= 0 && nextindex < 40) {
-         if (type == DISPLAY_CHROMATIC && (strcmp(buffer, "b##") == 0)) {
-            // do not display B## as a peak
-         } else if ((values[findex] < values[lastindex]) && 
-             (values[findex] < values[nextindex]) ) {
-            figure.addText(buffer, count, 0.02 * max + yvalue, 
-               fontsize - fontsize/8.0, 0, 0);
-         }
-      }
-      figure.addPoint(count, yvalue, pointsize);
-      data.addPoint(count, yvalue);
+	PlotFigure figure;
+	PlotData   data;
+	figure.allocatePoints(40);
+	int i;
+	double yvalue;
+	double angle = 90.0 * 3.14159624/180.0;
+	double max = getInvScore(bestIndex());
+	double pointsize = 0.007 * max;
+	int justify = -1;   // left
+	Array<int> bestorder;
+	getBestOrdering(bestorder);
+	int count = 0;
+	double fontsize = 14.0;
+	char buffer[64] = {0};
+	int nextindex = -1;
+	int lastindex = -1;
+	int findex    = -1;
+	for (i=0; i<40; i++) {
+		lastindex = findex;
+		switch (type) {
+			case DISPLAY_CHROMATIC:
+				findex = (15 + i * 23) % 40;
+				if (i+1<40) {
+					nextindex = (15 + (i+1) * 23) % 40;
+				} else {
+					nextindex = -1;
+				}
+				break;
+			case DISPLAY_BEST:
+				findex = bestorder[i];
+				if (i+1 < 40) {
+					nextindex = bestorder[i+1];
+				} else {
+					nextindex = -1;
+				}
+				break;
+			case DISPLAY_DIATONIC:
+			default:
+				findex = (i-2+40)%40;
+				if (i+1<40) {
+					nextindex = (i+1-2+40)%40;
+				} else {
+					nextindex = -1;
+				}
+		}
+		Convert::base40ToKern(buffer, 64, ((findex+2)%40) + 4*40);
+		if (buffer[0] == '\0') {
+			continue;
+		}
+		yvalue = getInvScore(findex);
+		figure.addText(buffer, count+0.2, -0.080 * max, fontsize, angle, justify);
+		if (i > 0 && i < 39 && lastindex >=0 && lastindex < 40 &&
+				nextindex >= 0 && nextindex < 40) {
+			if (type == DISPLAY_CHROMATIC && (strcmp(buffer, "b##") == 0)) {
+				// do not display B## as a peak
+			} else if ((values[findex] < values[lastindex]) &&
+					(values[findex] < values[nextindex]) ) {
+				figure.addText(buffer, count, 0.02 * max + yvalue,
+					fontsize - fontsize/8.0, 0, 0);
+			}
+		}
+		figure.addPoint(count, yvalue, pointsize);
+		data.addPoint(count, yvalue);
 
 
-      count++;
-   }
-   figure.setYMin(0.0);
-   figure.setXRangeAutoOff();
-   figure.setXMin(-0.5);
-   figure.setXMax(34.5);
-   figure.addPlot(data);
-   figure.setYLabel("Inverse Score");
-   figure.setXLabel("Root Pitch");
-   figure.setTitle(title);
-   figure.yTicksOn();
-   figure.setYTicksDelta(0.1);
+		count++;
+	}
+	figure.setYMin(0.0);
+	figure.setXRangeAutoOff();
+	figure.setXMin(-0.5);
+	figure.setXMax(34.5);
+	figure.addPlot(data);
+	figure.setYLabel("Inverse Score");
+	figure.setXLabel("Root Pitch");
+	figure.setTitle(title);
+	figure.yTicksOn();
+	figure.setYTicksDelta(0.1);
 
-   return figure.printXfig(out);
+	return figure.printXfig(out);
 }
 
 
@@ -691,8 +687,8 @@ ostream& RootSpectrum::printXfig(ostream& out, const char* title, int type) {
 //
 
 ostream& RootSpectrum::printPlot(ostream& out, int type) {
-   // not implemented yet, just output xfig code instead
-   return printXfig(out);
+	// not implemented yet, just output xfig code instead
+	return printXfig(out);
 }
 
 
@@ -709,118 +705,118 @@ ostream& RootSpectrum::printPlot(ostream& out, int type) {
 //
 
 
-int RootSpectrum::calculate(IntervalWeight& distances, HumdrumFile& infile, 
-      int startline, int stopline, int debugQ) {
+int RootSpectrum::calculate(IntervalWeight& distances, HumdrumFile& infile,
+		int startline, int stopline, int debugQ) {
 
-   int i;
-   int j;
+	int i;
+	int j;
 
-   Array<double>& rootscores = values;
+	Array<double>& rootscores = values;
 
-   double chordstartbeat = infile[startline].getAbsBeat();
-   double chordendbeat   = infile[stopline].getAbsBeat();
+	double chordstartbeat = infile[startline].getAbsBeat();
+	double chordendbeat   = infile[stopline].getAbsBeat();
 
-   // extract note data
-   Array<double> absbeat;
-   Array<int>    pitches;
-   Array<double> durations;
-   Array<double> levels;
-   Array<Array<int> > lastpitches;   // pitches which approach note
-   Array<Array<int> > nextpitches;   // pitches which leave note
+	// extract note data
+	Array<double> absbeat;
+	Array<int>    pitches;
+	Array<double> durations;
+	Array<double> levels;
+	Array<Array<int> > lastpitches;   // pitches which approach note
+	Array<Array<int> > nextpitches;   // pitches which leave note
 
-   char buffer[64] = {0};
-   if (!melodyQ) {
-      infile.getNoteArray(absbeat, pitches, durations, levels, startline,
-         stopline);
+	char buffer[64] = {0};
+	if (!melodyQ) {
+		infile.getNoteArray(absbeat, pitches, durations, levels, startline,
+			stopline);
 
-      if (debugQ) {
-         cout << "!! Note information from line " << startline + 1
-           << " to line " << stopline + 1 << "\n"
-           << "!! **dur     = duration of the note in quarter note units.\n"
-           << "!! **absbeat = absolute beat position of note from start (beat 0)\n"
-           << "!! **level   = metric level of the note on linear scale\n";
-         cout << "**kern\t**dur\t**level\t**absbeat\n";
-         for (i=0; i<pitches.getSize(); i++) {
-            cout << Convert::base40ToKern(buffer, 64, pitches[i]) << "\t";
-            cout << durations[i] << "\t";
-            cout << levels[i]    << "\t";
-            cout << absbeat[i]   << "\n";
-         }
-         cout << "*-\t*-\t*-\t*-\n";
-      }
-   } else {
-      infile.getNoteArray2(absbeat, pitches, durations, levels, 
-         lastpitches, nextpitches, startline, stopline);
+		if (debugQ) {
+			cout << "!! Note information from line " << startline + 1
+			     << " to line " << stopline + 1 << "\n"
+			     << "!! **dur     = duration of the note in quarter note units.\n"
+			     << "!! **absbeat = absolute beat position of note from start (beat 0)\n"
+			     << "!! **level   = metric level of the note on linear scale\n";
+			cout << "**kern\t**dur\t**level\t**absbeat\n";
+			for (i=0; i<pitches.getSize(); i++) {
+				cout << Convert::base40ToKern(buffer, 64, pitches[i]) << "\t";
+				cout << durations[i] << "\t";
+				cout << levels[i]    << "\t";
+				cout << absbeat[i]   << "\n";
+			}
+			cout << "*-\t*-\t*-\t*-\n";
+		}
+	} else {
+		infile.getNoteArray2(absbeat, pitches, durations, levels,
+			lastpitches, nextpitches, startline, stopline);
 
-      if (debugQ) {
-         cout << "!! Note information from line " << startline + 1
-           << " to line " << stopline + 1 << "\n"
-           << "!! **dur     = duration of the note in quarter note units.\n"
-           << "!! **absbeat = absolute beat position of note from start (beat 0)\n"
-           << "!! **level   = metric level of the note on linear scale\n";
-         cout << "**kern\t**last\t**next\t**dur\t**level\t**absbeat\n";
-         for (i=0; i<pitches.getSize(); i++) {
-            cout << Convert::base40ToKern(buffer, 64, pitches[i]) << "\t";
-   
-            if (lastpitches[i].getSize() == 0) {
-               cout << "." << "\t";
-            } else {
-               for (j=0; j<lastpitches[i].getSize(); j++) {
-                  cout << Convert::base40ToKern(buffer, 64, lastpitches[i][j]); 
-                  if (j<lastpitches[i].getSize() - 1) {
-                     cout << " ";
-                  }
-               }
-               cout << "\t";
-            }
-   
-            if (nextpitches[i].getSize() == 0) {
-               cout << "." << "\t";
-            } else {
-               for (j=0; j<nextpitches[i].getSize(); j++) {
-                  cout << Convert::base40ToKern(buffer, 64, nextpitches[i][j]); 
-                  if (j<nextpitches[i].getSize() - 1) {
-                     cout << " ";
-                  }
-               }
-               cout << "\t";
-            }
-   
-            cout << durations[i] << "\t";
-            cout << levels[i]    << "\t";
-            cout << absbeat[i]   << "\n";
-         }
-         cout << "*-\t*-\t*-\t*-\n";
-      }
-   }
+		if (debugQ) {
+			cout << "!! Note information from line " << startline + 1
+			     << " to line " << stopline + 1 << "\n"
+			     << "!! **dur     = duration of the note in quarter note units.\n"
+			     << "!! **absbeat = absolute beat position of note from start (beat 0)\n"
+			     << "!! **level   = metric level of the note on linear scale\n";
+			cout << "**kern\t**last\t**next\t**dur\t**level\t**absbeat\n";
+			for (i=0; i<pitches.getSize(); i++) {
+				cout << Convert::base40ToKern(buffer, 64, pitches[i]) << "\t";
 
-   if (pitches.getSize() == 0) {
-      // give up if there are no notes in the specified region
-      values.setAll(100000.0);
-      return -1;
-   }
+				if (lastpitches[i].getSize() == 0) {
+					cout << "." << "\t";
+				} else {
+					for (j=0; j<lastpitches[i].getSize(); j++) {
+						cout << Convert::base40ToKern(buffer, 64, lastpitches[i][j]);
+						if (j<lastpitches[i].getSize() - 1) {
+							cout << " ";
+						}
+					}
+					cout << "\t";
+				}
 
-   rootscores.setSize(40);
-   rootscores.setAll(0.0);
-   double melodyscaling;
+				if (nextpitches[i].getSize() == 0) {
+					cout << "." << "\t";
+				} else {
+					for (j=0; j<nextpitches[i].getSize(); j++) {
+						cout << Convert::base40ToKern(buffer, 64, nextpitches[i][j]);
+						if (j<nextpitches[i].getSize() - 1) {
+							cout << " ";
+						}
+					}
+					cout << "\t";
+				}
 
-   for (i=0; i<rootscores.getSize(); i++) {
-      for (j=0; j<pitches.getSize(); j++) {
-         if (melodyQ) {
-            melodyscaling = getMelodicScaling(i, pitches[j], 
-               lastpitches[j], nextpitches[j], distances, 
-               absbeat[j], chordstartbeat, chordendbeat, durations[j]);
-         } else {
-            melodyscaling = 1.0;
-         }
-         rootscores[i] += distances[(pitches[j]-i+400)%40] *
-            durationscaling(durations[j]) * 
-            metricscaling(levels[j]) *
-            melodyscaling;
-      }
-   }
+				cout << durations[i] << "\t";
+				cout << levels[i]    << "\t";
+				cout << absbeat[i]   << "\n";
+			}
+			cout << "*-\t*-\t*-\t*-\n";
+		}
+	}
 
-   return bestIndex();
+	if (pitches.getSize() == 0) {
+		// give up if there are no notes in the specified region
+		values.setAll(100000.0);
+		return -1;
+	}
+
+	rootscores.setSize(40);
+	rootscores.setAll(0.0);
+	double melodyscaling;
+
+	for (i=0; i<rootscores.getSize(); i++) {
+		for (j=0; j<pitches.getSize(); j++) {
+			if (melodyQ) {
+				melodyscaling = getMelodicScaling(i, pitches[j],
+					lastpitches[j], nextpitches[j], distances,
+					absbeat[j], chordstartbeat, chordendbeat, durations[j]);
+			} else {
+				melodyscaling = 1.0;
+			}
+			rootscores[i] += distances[(pitches[j]-i+400)%40] *
+				durationscaling(durations[j]) *
+				metricscaling(levels[j]) *
+				melodyscaling;
+		}
+	}
+
+	return bestIndex();
 }
 
 
@@ -837,45 +833,45 @@ int RootSpectrum::calculate(IntervalWeight& distances, HumdrumFile& infile,
 //
 
 int RootSpectrum::nonchordtoneQ(int root, int note) {
-   int interval = ((note-2) - root + 400) % 40;
-   switch (interval) {
-      case 0:   // note is tonic
-      case 11:  // note is 3rd
-      case 12:  // note is 3rd
-      case 22:  // note is 5th
-      case 23:  // note is 5th
-      case 24:  // note is 5th
-      case 33:  // note is 7th
-      case 34:  // note is 7th
-      case 35:  // note is 7th
-      case 36:  // note is 7th
-         return 0;
-         break;
-      default:
-         return 1;  // note is a chord tone
-   }
-   return 1;
+	int interval = ((note-2) - root + 400) % 40;
+	switch (interval) {
+		case 0:   // note is tonic
+		case 11:  // note is 3rd
+		case 12:  // note is 3rd
+		case 22:  // note is 5th
+		case 23:  // note is 5th
+		case 24:  // note is 5th
+		case 33:  // note is 7th
+		case 34:  // note is 7th
+		case 35:  // note is 7th
+		case 36:  // note is 7th
+			return 0;
+			break;
+		default:
+			return 1;  // note is a chord tone
+	}
+	return 1;
 }
 
 int RootSpectrum::nonchordtoneQno7th(int root, int note) {
-   int interval = ((note-2) - root + 400) % 40;
-   switch (interval) {
-      case 0:   // note is tonic
-      case 11:  // note is 3rd
-      case 12:  // note is 3rd
-      case 22:  // note is 5th
-      case 23:  // note is 5th
-      case 24:  // note is 5th
+	int interval = ((note-2) - root + 400) % 40;
+	switch (interval) {
+		case 0:   // note is tonic
+		case 11:  // note is 3rd
+		case 12:  // note is 3rd
+		case 22:  // note is 5th
+		case 23:  // note is 5th
+		case 24:  // note is 5th
 //      case 33:  // note is 7th
 //      case 34:  // note is 7th
 //      case 35:  // note is 7th
 //      case 36:  // note is 7th
-         return 0;
-         break;
-      default:
-         return 1;  // note is a chord tone
-   }
-   return 1;
+			return 0;
+			break;
+		default:
+			return 1;  // note is a chord tone
+	}
+	return 1;
 }
 
 
@@ -888,132 +884,132 @@ int RootSpectrum::nonchordtoneQno7th(int root, int note) {
 //
 //
 
-double RootSpectrum::getMelodicScaling(int root, int note, 
-      Array<int>& lastpitches, Array<int>& nextpitches, 
-      IntervalWeight& distances, double absbeat, double chordstartbeat, 
-      double chordendbeat, double duration) {
+double RootSpectrum::getMelodicScaling(int root, int note,
+		Array<int>& lastpitches, Array<int>& nextpitches,
+		IntervalWeight& distances, double absbeat, double chordstartbeat,
+		double chordendbeat, double duration) {
 
 
-   if (!melodyQ) {
-      return 1.0;
-   }
+	if (!melodyQ) {
+		return 1.0;
+	}
 
-   double scalefactor = getMelodyScaleFactor();
+	double scalefactor = getMelodyScaleFactor();
 
-   if (lastpitches.getSize() == 0 && nextpitches.getSize() == 0) {
-      // check to see if the note is non-harmonic with respect to root
-      if (nonchordtoneQ(root, note)) {
-         return nonresolutionscaling;
-      } else {
-         return 1.0;
-      }
-   }
+	if (lastpitches.getSize() == 0 && nextpitches.getSize() == 0) {
+		// check to see if the note is non-harmonic with respect to root
+		if (nonchordtoneQ(root, note)) {
+			return nonresolutionscaling;
+		} else {
+			return 1.0;
+		}
+	}
 
-   int i;
-   int testchordn;
-   int testnonharmn;
+	int i;
+	int testchordn;
+	int testnonharmn;
 
-   // check to see if there is a non-harmonic candidate in lastpitches.
-   for (i=0; i<lastpitches.getSize(); i++) {
-        testnonharmn = ((note-2) - root + 400) % 40;
-        testchordn = ((lastpitches[i]-2) - root + 400) % 40;
+	// check to see if there is a non-harmonic candidate in lastpitches.
+	for (i=0; i<lastpitches.getSize(); i++) {
+		testnonharmn = ((note-2) - root + 400) % 40;
+		testchordn = ((lastpitches[i]-2) - root + 400) % 40;
 
-      // ascending non-harmonic tones
-      if (testchordn == 11 && testnonharmn == 5)  { return scalefactor; }
-      if (testchordn == 12 && testnonharmn == 5)  { return scalefactor; }
-      if (testchordn == 11 && testnonharmn == 6)  { return scalefactor; }
-      if (testchordn == 12 && testnonharmn == 6)  { return scalefactor; }
-      if (testchordn == 22 && testnonharmn == 16) { return scalefactor; }
-      if (testchordn == 23 && testnonharmn == 16) { return scalefactor; }
-      if (testchordn == 22 && testnonharmn == 17) { return scalefactor; }
-      if (testchordn == 23 && testnonharmn == 17) { return scalefactor; }
-      if (testchordn == 24 && testnonharmn == 17) { return scalefactor; }
-      if (testchordn == 23 && testnonharmn == 18) { return scalefactor; }
-      if (testchordn == 24 && testnonharmn == 18) { return scalefactor; }
-      if (testchordn == 33 && testnonharmn == 27) { return scalefactor; }
-      if (testchordn == 34 && testnonharmn == 27) { return scalefactor; }
-      if (testchordn == 33 && testnonharmn == 28) { return scalefactor; }
-      if (testchordn == 34 && testnonharmn == 28) { return scalefactor; }
-      if (testchordn == 35 && testnonharmn == 28) { return scalefactor; }
-      if (testchordn == 34 && testnonharmn == 29) { return scalefactor; }
-      if (testchordn == 35 && testnonharmn == 29) { return scalefactor; }
-      if (testchordn == 36 && testnonharmn == 29) { return scalefactor; }
-      if (testchordn == 35 && testnonharmn == 30) { return scalefactor; }
-      if (testchordn == 36 && testnonharmn == 30) { return scalefactor; }
- 
-      // decending non-harmonic tones
-      if (testchordn ==  0 && testnonharmn ==  5) { return scalefactor; }
-      if (testchordn ==  0 && testnonharmn ==  6) { return scalefactor; }
-      if (testchordn == 11 && testnonharmn == 16) { return scalefactor; }
-      if (testchordn == 11 && testnonharmn == 17) { return scalefactor; }
-      if (testchordn == 12 && testnonharmn == 17) { return scalefactor; }
-      if (testchordn == 12 && testnonharmn == 18) { return scalefactor; }
-      if (testchordn == 22 && testnonharmn == 27) { return scalefactor; }
-      if (testchordn == 22 && testnonharmn == 28) { return scalefactor; }
-      if (testchordn == 23 && testnonharmn == 28) { return 0.05 * scalefactor; }
-      if (testchordn == 23 && testnonharmn == 29) { return 0.05 * scalefactor; }
-      if (testchordn == 24 && testnonharmn == 29) { return scalefactor; }
-      if (testchordn == 24 && testnonharmn == 30) { return scalefactor; }
+		// ascending non-harmonic tones
+		if (testchordn == 11 && testnonharmn == 5)  { return scalefactor; }
+		if (testchordn == 12 && testnonharmn == 5)  { return scalefactor; }
+		if (testchordn == 11 && testnonharmn == 6)  { return scalefactor; }
+		if (testchordn == 12 && testnonharmn == 6)  { return scalefactor; }
+		if (testchordn == 22 && testnonharmn == 16) { return scalefactor; }
+		if (testchordn == 23 && testnonharmn == 16) { return scalefactor; }
+		if (testchordn == 22 && testnonharmn == 17) { return scalefactor; }
+		if (testchordn == 23 && testnonharmn == 17) { return scalefactor; }
+		if (testchordn == 24 && testnonharmn == 17) { return scalefactor; }
+		if (testchordn == 23 && testnonharmn == 18) { return scalefactor; }
+		if (testchordn == 24 && testnonharmn == 18) { return scalefactor; }
+		if (testchordn == 33 && testnonharmn == 27) { return scalefactor; }
+		if (testchordn == 34 && testnonharmn == 27) { return scalefactor; }
+		if (testchordn == 33 && testnonharmn == 28) { return scalefactor; }
+		if (testchordn == 34 && testnonharmn == 28) { return scalefactor; }
+		if (testchordn == 35 && testnonharmn == 28) { return scalefactor; }
+		if (testchordn == 34 && testnonharmn == 29) { return scalefactor; }
+		if (testchordn == 35 && testnonharmn == 29) { return scalefactor; }
+		if (testchordn == 36 && testnonharmn == 29) { return scalefactor; }
+		if (testchordn == 35 && testnonharmn == 30) { return scalefactor; }
+		if (testchordn == 36 && testnonharmn == 30) { return scalefactor; }
 
-   }
+		// decending non-harmonic tones
+		if (testchordn ==  0 && testnonharmn ==  5) { return scalefactor; }
+		if (testchordn ==  0 && testnonharmn ==  6) { return scalefactor; }
+		if (testchordn == 11 && testnonharmn == 16) { return scalefactor; }
+		if (testchordn == 11 && testnonharmn == 17) { return scalefactor; }
+		if (testchordn == 12 && testnonharmn == 17) { return scalefactor; }
+		if (testchordn == 12 && testnonharmn == 18) { return scalefactor; }
+		if (testchordn == 22 && testnonharmn == 27) { return scalefactor; }
+		if (testchordn == 22 && testnonharmn == 28) { return scalefactor; }
+		if (testchordn == 23 && testnonharmn == 28) { return 0.05 * scalefactor; }
+		if (testchordn == 23 && testnonharmn == 29) { return 0.05 * scalefactor; }
+		if (testchordn == 24 && testnonharmn == 29) { return scalefactor; }
+		if (testchordn == 24 && testnonharmn == 30) { return scalefactor; }
 
-   // check to see if there is a non-harmonic candidate in nextpitches.
-   for (i=0; i<nextpitches.getSize(); i++) {
-      testnonharmn = ((note-2) - root + 400) % 40;
-      testchordn = ((nextpitches[i]-2) - root + 400) % 40;
+	}
 
-      // ascending non-harmonic tones
-      if (testchordn == 11 && testnonharmn == 5)  { return scalefactor; }
-      if (testchordn == 12 && testnonharmn == 5)  { return scalefactor; }
-      if (testchordn == 11 && testnonharmn == 6)  { return scalefactor; }
-      if (testchordn == 12 && testnonharmn == 6)  { return scalefactor; }
-      if (testchordn == 22 && testnonharmn == 16) { return scalefactor; }
-      if (testchordn == 23 && testnonharmn == 16) { return scalefactor; }
-      if (testchordn == 22 && testnonharmn == 17) { return scalefactor; }
-      if (testchordn == 23 && testnonharmn == 17) { return scalefactor; }
-      if (testchordn == 24 && testnonharmn == 17) { return scalefactor; }
-      if (testchordn == 23 && testnonharmn == 18) { return scalefactor; }
-      if (testchordn == 24 && testnonharmn == 18) { return scalefactor; }
-      if (testchordn == 33 && testnonharmn == 27) { return scalefactor; }
-      if (testchordn == 34 && testnonharmn == 27) { return scalefactor; }
-      if (testchordn == 33 && testnonharmn == 28) { return scalefactor; }
-      if (testchordn == 34 && testnonharmn == 28) { return scalefactor; }
-      if (testchordn == 35 && testnonharmn == 28) { return scalefactor; }
-      if (testchordn == 34 && testnonharmn == 29) { return scalefactor; }
-      if (testchordn == 35 && testnonharmn == 29) { return scalefactor; }
-      if (testchordn == 36 && testnonharmn == 29) { return scalefactor; }
-      if (testchordn == 35 && testnonharmn == 30) { return scalefactor; }
-      if (testchordn == 36 && testnonharmn == 30) { return scalefactor; }
+	// check to see if there is a non-harmonic candidate in nextpitches.
+	for (i=0; i<nextpitches.getSize(); i++) {
+		testnonharmn = ((note-2) - root + 400) % 40;
+		testchordn = ((nextpitches[i]-2) - root + 400) % 40;
 
-      // decending non-harmonic tones
-      if (testchordn ==  0 && testnonharmn ==  5)   { return scalefactor; }
-      if (testchordn ==  0 && testnonharmn ==  6) { return scalefactor; }
-      if (testchordn == 11 && testnonharmn == 16) { return scalefactor; }
-      if (testchordn == 11 && testnonharmn == 17) { return scalefactor; }
-      if (testchordn == 12 && testnonharmn == 17) { return scalefactor; }
-      if (testchordn == 12 && testnonharmn == 18) { return scalefactor; }
-      if (testchordn == 22 && testnonharmn == 27) { return scalefactor; }
-      if (testchordn == 22 && testnonharmn == 28) { return scalefactor; }
-      if (testchordn == 23 && testnonharmn == 28) { return scalefactor; }
-      if (testchordn == 23 && testnonharmn == 29) {
-         // 6-5 suspensions
-         return 0.8 * scalefactor;
-      }
-      if (testchordn == 24 && testnonharmn == 29)  { return scalefactor; } 
-      if (testchordn == 24 && testnonharmn == 30)  { return scalefactor; }
+		// ascending non-harmonic tones
+		if (testchordn == 11 && testnonharmn == 5)  { return scalefactor; }
+		if (testchordn == 12 && testnonharmn == 5)  { return scalefactor; }
+		if (testchordn == 11 && testnonharmn == 6)  { return scalefactor; }
+		if (testchordn == 12 && testnonharmn == 6)  { return scalefactor; }
+		if (testchordn == 22 && testnonharmn == 16) { return scalefactor; }
+		if (testchordn == 23 && testnonharmn == 16) { return scalefactor; }
+		if (testchordn == 22 && testnonharmn == 17) { return scalefactor; }
+		if (testchordn == 23 && testnonharmn == 17) { return scalefactor; }
+		if (testchordn == 24 && testnonharmn == 17) { return scalefactor; }
+		if (testchordn == 23 && testnonharmn == 18) { return scalefactor; }
+		if (testchordn == 24 && testnonharmn == 18) { return scalefactor; }
+		if (testchordn == 33 && testnonharmn == 27) { return scalefactor; }
+		if (testchordn == 34 && testnonharmn == 27) { return scalefactor; }
+		if (testchordn == 33 && testnonharmn == 28) { return scalefactor; }
+		if (testchordn == 34 && testnonharmn == 28) { return scalefactor; }
+		if (testchordn == 35 && testnonharmn == 28) { return scalefactor; }
+		if (testchordn == 34 && testnonharmn == 29) { return scalefactor; }
+		if (testchordn == 35 && testnonharmn == 29) { return scalefactor; }
+		if (testchordn == 36 && testnonharmn == 29) { return scalefactor; }
+		if (testchordn == 35 && testnonharmn == 30) { return scalefactor; }
+		if (testchordn == 36 && testnonharmn == 30) { return scalefactor; }
 
-   }
+		// decending non-harmonic tones
+		if (testchordn ==  0 && testnonharmn ==  5)   { return scalefactor; }
+		if (testchordn ==  0 && testnonharmn ==  6) { return scalefactor; }
+		if (testchordn == 11 && testnonharmn == 16) { return scalefactor; }
+		if (testchordn == 11 && testnonharmn == 17) { return scalefactor; }
+		if (testchordn == 12 && testnonharmn == 17) { return scalefactor; }
+		if (testchordn == 12 && testnonharmn == 18) { return scalefactor; }
+		if (testchordn == 22 && testnonharmn == 27) { return scalefactor; }
+		if (testchordn == 22 && testnonharmn == 28) { return scalefactor; }
+		if (testchordn == 23 && testnonharmn == 28) { return scalefactor; }
+		if (testchordn == 23 && testnonharmn == 29) {
+			// 6-5 suspensions
+			return 0.8 * scalefactor;
+		}
+		if (testchordn == 24 && testnonharmn == 29)  { return scalefactor; }
+		if (testchordn == 24 && testnonharmn == 30)  { return scalefactor; }
 
-   // check for pedal tone
-   if (pedaltone(root, note, absbeat, chordstartbeat, chordendbeat, duration)) {
-      return scalefactor;
-   }
+	}
 
-   if (nonchordtoneQno7th(root, note)) {
-      return nonresolutionscaling;
-   } 
+	// check for pedal tone
+	if (pedaltone(root, note, absbeat, chordstartbeat, chordendbeat, duration)) {
+		return scalefactor;
+	}
 
-   return 1.0;
+	if (nonchordtoneQno7th(root, note)) {
+		return nonresolutionscaling;
+	}
+
+	return 1.0;
 }
 
 
@@ -1022,17 +1018,17 @@ double RootSpectrum::getMelodicScaling(int root, int note,
 // pedaltone -- return true if the note is probably a pedal tone.
 //
 
-int RootSpectrum::pedaltone(int root, int note, double absbeat, 
-      double chordstartbeat, double chordendbeat, double duration) {
-   // int rootinterval = ((note-2) - root + 400) % 40;
-   // For now, just return true if the note starts before the chord
-   // starts and ends after the chord ends.
+int RootSpectrum::pedaltone(int root, int note, double absbeat,
+		double chordstartbeat, double chordendbeat, double duration) {
+	// int rootinterval = ((note-2) - root + 400) % 40;
+	// For now, just return true if the note starts before the chord
+	// starts and ends after the chord ends.
 
-   if (absbeat < chordstartbeat && (absbeat + duration > chordendbeat)) {
-      return 1;
-   } else {
-      return 0;
-   }
+	if (absbeat < chordstartbeat && (absbeat + duration > chordendbeat)) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 
@@ -1044,7 +1040,7 @@ int RootSpectrum::pedaltone(int root, int note, double absbeat,
 //
 
 void RootSpectrum::durationLinear(void) {
-   durlinear = 1;
+	durlinear = 1;
 }
 
 
@@ -1056,7 +1052,7 @@ void RootSpectrum::durationLinear(void) {
 //
 
 void RootSpectrum::durationLog(void) {
-   durlinear = 0;
+	durlinear = 0;
 }
 
 
@@ -1068,7 +1064,7 @@ void RootSpectrum::durationLog(void) {
 //
 
 void RootSpectrum::meterLinear(void) {
-   metlinear = 1;
+	metlinear = 1;
 }
 
 
@@ -1080,7 +1076,7 @@ void RootSpectrum::meterLinear(void) {
 //
 
 void RootSpectrum::meterLog(void) {
-   metlinear = 0;
+	metlinear = 0;
 }
 
 
@@ -1092,8 +1088,8 @@ void RootSpectrum::meterLog(void) {
 //
 
 void RootSpectrum::rhythmLinear(void) {
-   durationLinear();
-   meterLinear();
+	durationLinear();
+	meterLinear();
 }
 
 
@@ -1105,8 +1101,8 @@ void RootSpectrum::rhythmLinear(void) {
 //
 
 void RootSpectrum::rhythmLog(void) {
-   durationLog();
-   meterLog();
+	durationLog();
+	meterLog();
 }
 
 
@@ -1117,7 +1113,7 @@ void RootSpectrum::rhythmLog(void) {
 //
 
 void RootSpectrum::setMeterBias(double aBias) {
-   meterBias = aBias;
+	meterBias = aBias;
 }
 
 
@@ -1128,7 +1124,7 @@ void RootSpectrum::setMeterBias(double aBias) {
 //
 
 void RootSpectrum::setDurationBias(double aBias) {
-   durationBias = aBias;
+	durationBias = aBias;
 }
 
 
@@ -1140,7 +1136,7 @@ void RootSpectrum::setDurationBias(double aBias) {
 //
 
 double RootSpectrum::getDurationBias(void) {
-   return durationBias;
+	return durationBias;
 }
 
 
@@ -1152,7 +1148,7 @@ double RootSpectrum::getDurationBias(void) {
 //
 
 double RootSpectrum::getMeterBias(void) {
-   return meterBias;
+	return meterBias;
 }
 
 
@@ -1163,14 +1159,14 @@ double RootSpectrum::getMeterBias(void) {
 //
 
 double RootSpectrum::durationscaling(double duration) {
-   if (durationQ == 0) {
-      return 1.0;
-   }
-   if (durlinear) {
-      return pow(duration, getDurationWeight());
-   } else {
-      return durationBias + log(duration);
-   }
+	if (durationQ == 0) {
+		return 1.0;
+	}
+	if (durlinear) {
+		return pow(duration, getDurationWeight());
+	} else {
+		return durationBias + log(duration);
+	}
 }
 
 
@@ -1181,14 +1177,14 @@ double RootSpectrum::durationscaling(double duration) {
 //
 
 double RootSpectrum::metricscaling(double level) {
-   if (levelQ == 0) {
-      return 1.0;
-   }
-   if (metlinear) {
-      return pow(level, getMetricLevelWeight());
-   } else {
-      return meterBias + log(level);
-   }
+	if (levelQ == 0) {
+		return 1.0;
+	}
+	if (metlinear) {
+		return pow(level, getMetricLevelWeight());
+	} else {
+		return meterBias + log(level);
+	}
 }
 
 
@@ -1202,7 +1198,7 @@ double RootSpectrum::metricscaling(double level) {
 
 
 void RootSpectrum::setResolutionFactor(double aFactor) {
-   nonresolutionscaling = aFactor;   
+	nonresolutionscaling = aFactor;
 }
 
 
@@ -1213,10 +1209,8 @@ void RootSpectrum::setResolutionFactor(double aFactor) {
 //
 
 double RootSpectrum::getResolutionFactor(void) {
-   return nonresolutionscaling;
+	return nonresolutionscaling;
 }
 
 
 
-
-// md5sum: 4fdb177212e4320f83b3e2f5b8bf9a2f RootSpectrum.cpp [20050403]

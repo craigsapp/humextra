@@ -6,7 +6,7 @@
 // Last Modified: Wed Jun 24 15:25:10 PDT 2009 (updated for GCC 4.4)
 // Filename:      ...sig/src/sigInfo/Identify.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/Identify.cpp
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Helping class to identify various string formats.
 //
@@ -16,10 +16,7 @@
 #include <string.h>
 #include <cctype>
 
-#ifndef OLDCPP
-   using namespace std;
-#endif
-
+using namespace std;
 
 
 //////////////////////////////
@@ -28,11 +25,11 @@
 //
 
 int Identify::humdrumNullField(const char* aField) {
-   if (strcmp(aField, ".") == 0) {
-      return 1;
-   } else {
-      return 0;
-   }
+	if (strcmp(aField, ".") == 0) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 
@@ -43,32 +40,31 @@ int Identify::humdrumNullField(const char* aField) {
 //
 
 int Identify::kernTimeSignature(const char* kernString) {
-   // meter tandem interpretation must start with a '*'
-   if (kernString[0] != '*') {
-      return 0;
-   }
+	// meter tandem interpretation must start with a '*'
+	if (kernString[0] != '*') {
+		return 0;
+	}
 
-   // next character after '*' must be a number:
-   if (!std::isdigit(kernString[1])) {
-      return 0;
-   }
+	// next character after '*' must be a number:
+	if (!std::isdigit(kernString[1])) {
+		return 0;
+	}
 
-   // there must be a '/' in the string:
-   const char* slash = strchr(kernString, '/');
-   if (slash == NULL) {
-      return 0;
-   }
+	// there must be a '/' in the string:
+	const char* slash = strchr(kernString, '/');
+	if (slash == NULL) {
+		return 0;
+	}
 
-   // The next character after a slash must be a number
-   if (!std::isdigit(slash[1])) {
-      return 0;
-   }
-  
-   // got this far, so assume that input is a time signature   
+	// The next character after a slash must be a number
+	if (!std::isdigit(slash[1])) {
+		return 0;
+	}
 
-   return 1;
+	// got this far, so assume that input is a time signature
+
+	return 1;
 }
 
 
 
-// md5sum: 10ca2402db078436f0cc70329e4815db Identify.cpp [20050403]

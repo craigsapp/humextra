@@ -5,7 +5,7 @@
 // Last Modified: Tue Mar 24 18:40:22 PST 2009
 // Filename:      ...sig/src/sigInfo/ScoreParametersSimple.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/ScoreParametersSimple.cpp
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Base class for SCORE musical objects.
 //
@@ -14,10 +14,7 @@
 
 #include <string.h>
 
-#ifndef OLDCPP
-   using namespace std;
-#endif
-
+using namespace std;
 
 
 ///////////////////////////////
@@ -25,21 +22,21 @@
 // ScoreParametersSimple::ScoreParametersSimple --
 //
 
-ScoreParametersSimple::ScoreParametersSimple(void) { 
-   fixedParameters.setSize(0);
-   keyParameters.setSize(0);
+ScoreParametersSimple::ScoreParametersSimple(void) {
+	fixedParameters.setSize(0);
+	keyParameters.setSize(0);
 }
 
 
-ScoreParametersSimple::ScoreParametersSimple(ScoreParametersSimple& item) { 
-   fixedParameters = item.fixedParameters;
-   clearKeyParams();
-   keyParameters.setSize(item.keyParameters.getSize());
-   keyParameters.setSize(0);
-   int i;
-   for (i=0; i<item.keyParameters.getSize(); i++) {
-      appendKeyParameter(item.keyParameters[i].getBase());
-   }
+ScoreParametersSimple::ScoreParametersSimple(ScoreParametersSimple& item) {
+	fixedParameters = item.fixedParameters;
+	clearKeyParams();
+	keyParameters.setSize(item.keyParameters.getSize());
+	keyParameters.setSize(0);
+	int i;
+	for (i=0; i<item.keyParameters.getSize(); i++) {
+		appendKeyParameter(item.keyParameters[i].getBase());
+	}
 }
 
 
@@ -50,8 +47,8 @@ ScoreParametersSimple::ScoreParametersSimple(ScoreParametersSimple& item) {
 //
 
 void ScoreParametersSimple::clear(void) {
-   fixedParameters.setSize(0);
-   clearKeyParams();
+	fixedParameters.setSize(0);
+	clearKeyParams();
 }
 
 
@@ -61,12 +58,12 @@ void ScoreParametersSimple::clear(void) {
 // ScoreParametersSimple::getValue -- starting offset at 1.
 //
 
-float ScoreParametersSimple::getValue(int index) { 
-   float output = 0.0;
-   if (index < fixedParameters.getSize()) {
-      output = fixedParameters[index];
-   }
-   return output;
+float ScoreParametersSimple::getValue(int index) {
+	float output = 0.0;
+	if (index < fixedParameters.getSize()) {
+		output = fixedParameters[index];
+	}
+	return output;
 }
 
 
@@ -76,12 +73,12 @@ float ScoreParametersSimple::getValue(int index) {
 // ScoreParametersSimple::getPValue -- starting offset at 1.
 //
 
-float ScoreParametersSimple::getPValue(int index) { 
-   float output = 0.0;
-   if (index-1 < fixedParameters.getSize()) {
-      output = fixedParameters[index-1];
-   }
-   return output;
+float ScoreParametersSimple::getPValue(int index) {
+	float output = 0.0;
+	if (index-1 < fixedParameters.getSize()) {
+		output = fixedParameters[index-1];
+	}
+	return output;
 }
 
 
@@ -91,17 +88,17 @@ float ScoreParametersSimple::getPValue(int index) {
 // ScoreParametersSimple::setValue -- starting offset at 0.
 //
 
-void  ScoreParametersSimple::setValue(int index, float value) { 
-   if (index < fixedParameters.getSize()) {
-      fixedParameters[index] = value;
-   } else {
-      int oldsize = fixedParameters.getSize();
-      fixedParameters.setSize(index+1);
-      for (int i=oldsize; i<index+1; i++) {
-         fixedParameters[i] = 0.0;
-      }
-      fixedParameters[index] = value;
-   }
+void  ScoreParametersSimple::setValue(int index, float value) {
+	if (index < fixedParameters.getSize()) {
+		fixedParameters[index] = value;
+	} else {
+		int oldsize = fixedParameters.getSize();
+		fixedParameters.setSize(index+1);
+		for (int i=oldsize; i<index+1; i++) {
+			fixedParameters[i] = 0.0;
+		}
+		fixedParameters[index] = value;
+	}
 }
 
 
@@ -111,17 +108,17 @@ void  ScoreParametersSimple::setValue(int index, float value) {
 // ScoreParametersSimple::setPValue -- starting offset at 1.
 //
 
-void  ScoreParametersSimple::setPValue(int index, float value) { 
-   if (index-1 < fixedParameters.getSize()) {
-      fixedParameters[index-1] = value;
-   } else {
-      int oldsize = fixedParameters.getSize();
-      fixedParameters.setSize(index);
-      for (int i=oldsize; i<index; i++) {
-         fixedParameters[i] = 0.0;
-      }
-      fixedParameters[index-1] = value;
-   }
+void  ScoreParametersSimple::setPValue(int index, float value) {
+	if (index-1 < fixedParameters.getSize()) {
+		fixedParameters[index-1] = value;
+	} else {
+		int oldsize = fixedParameters.getSize();
+		fixedParameters.setSize(index);
+		for (int i=oldsize; i<index; i++) {
+			fixedParameters[i] = 0.0;
+		}
+		fixedParameters[index-1] = value;
+	}
 }
 
 
@@ -132,13 +129,13 @@ void  ScoreParametersSimple::setPValue(int index, float value) {
 //
 
 ScoreParametersSimple& ScoreParametersSimple::operator=(ScoreParametersSimple& anItem) {
-   if (&anItem == this) {
-      return *this;
-   }
-   fixedParameters = anItem.fixedParameters;
-   keyParameters = anItem.keyParameters;
+	if (&anItem == this) {
+		return *this;
+	}
+	fixedParameters = anItem.fixedParameters;
+	keyParameters = anItem.keyParameters;
 
-   return *this;
+	return *this;
 }
 
 
@@ -149,7 +146,7 @@ ScoreParametersSimple& ScoreParametersSimple::operator=(ScoreParametersSimple& a
 //
 
 int ScoreParametersSimple::getFixedSize(void) {
-   return fixedParameters.getSize();
+	return fixedParameters.getSize();
 }
 
 
@@ -160,7 +157,7 @@ int ScoreParametersSimple::getFixedSize(void) {
 //
 
 void ScoreParametersSimple::setFixedSize(int value) {
-   fixedParameters.setSize(value);
+	fixedParameters.setSize(value);
 }
 
 
@@ -171,7 +168,7 @@ void ScoreParametersSimple::setFixedSize(int value) {
 //
 
 int ScoreParametersSimple::getKeySize(void) {
-   return keyParameters.getSize();
+	return keyParameters.getSize();
 }
 
 
@@ -182,30 +179,30 @@ int ScoreParametersSimple::getKeySize(void) {
 //
 
 void ScoreParametersSimple::print(void) {
-   int i;
-   for (i=0; i<fixedParameters.getSize(); i++) {
-      cout << fixedParameters[i] << " ";
-   }
-   cout << endl;
-   for (i=0; i<keyParameters.getSize(); i++) {
-      cout << keyParameters[i].getBase() << endl;
-   }
+	int i;
+	for (i=0; i<fixedParameters.getSize(); i++) {
+		cout << fixedParameters[i] << " ";
+	}
+	cout << endl;
+	for (i=0; i<keyParameters.getSize(); i++) {
+		cout << keyParameters[i].getBase() << endl;
+	}
 }
 
 
 
 //////////////////////////////
 //
-// ScoreParametersSimple::setAllocSize -- set the allocation size of the 
+// ScoreParametersSimple::setAllocSize -- set the allocation size of the
 //   class if the current allocation size is smaller.
 //
 
 void ScoreParametersSimple::setAllocSize(int aSize) {
-   if (aSize > fixedParameters.getAllocSize()) {
-      int oldsize = fixedParameters.getSize();
-      fixedParameters.setSize(aSize);
-      fixedParameters.setSize(oldsize);
-   }
+	if (aSize > fixedParameters.getAllocSize()) {
+		int oldsize = fixedParameters.getSize();
+		fixedParameters.setSize(aSize);
+		fixedParameters.setSize(oldsize);
+	}
 }
 
 
@@ -213,7 +210,7 @@ void ScoreParametersSimple::setAllocSize(int aSize) {
 //////////////////////////////////////////////////////////////////////////
 //
 // Private Functions
-// 
+//
 
 
 //////////////////////////////
@@ -222,7 +219,7 @@ void ScoreParametersSimple::setAllocSize(int aSize) {
 //
 
 void ScoreParametersSimple::clearKeyParams(void) {
-   keyParameters.setSize(0);
+	keyParameters.setSize(0);
 }
 
 
@@ -232,14 +229,12 @@ void ScoreParametersSimple::clearKeyParams(void) {
 //
 
 void ScoreParametersSimple::appendKeyParameter(const char* string) {
-    int length = strlen(string);
-    int index = keyParameters.getSize();
-    keyParameters.setSize(keyParameters.getSize()+1);
-    keyParameters[index].setSize(length+1);
-    strcpy(keyParameters[index].getBase(), string);
+	int length = strlen(string);
+	int index = keyParameters.getSize();
+	keyParameters.setSize(keyParameters.getSize()+1);
+	keyParameters[index].setSize(length+1);
+	strcpy(keyParameters[index].getBase(), string);
 }
 
 
 
-
-// md5sum: 28ccec826d946c540a9937f0129ce915 ScoreParametersSimple.cpp [20050403]

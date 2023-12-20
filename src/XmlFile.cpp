@@ -5,33 +5,20 @@
 // Last Modified: Fri Jun 24 14:54:42 PDT 2011
 // Filename:      ...sig/src/sigInfo/XmlFile.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/XmlFile.cpp
-// Syntax:        C++ 
-// 
+// Syntax:        C++
+//
 // Description:   A class that stores a list of XML text fragments and
 //                parses the element structure.
 //
 
-#ifndef OLDCPP
-   #include <sstream>
-   #include <fstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>     /* for Windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #include <fstream.h>
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-   
 #include "PerlRegularExpression.h"
 #include "XmlFile.h"
-#include <string.h>
+
+#include <cstring>
+#include <fstream>
 #include <iomanip>
+
+using namespace std;
 
 
 //////////////////////////////
@@ -39,15 +26,15 @@
 // XmlFile::XmlFile --
 //
 
-XmlFile::XmlFile(void) { 
-   elements.setSize(0);
-   parsedQ = 0;
+XmlFile::XmlFile(void) {
+	elements.setSize(0);
+	parsedQ = 0;
 }
 
 
-XmlFile::XmlFile(int allocationSize) { 
-   elements.setSize(0);
-   parsedQ = 0;
+XmlFile::XmlFile(int allocationSize) {
+	elements.setSize(0);
+	parsedQ = 0;
 }
 
 
@@ -57,41 +44,41 @@ XmlFile::XmlFile(int allocationSize) {
 // XmlFile::~XmlFile --
 //
 
-XmlFile::~XmlFile() { 
-   clear();
+XmlFile::~XmlFile() {
+	clear();
 }
 
 
 
 //////////////////////////////
 //
-// XmlFile::clearElements -- remove all contents of the data and the 
+// XmlFile::clearElements -- remove all contents of the data and the
 //       parsed element data.
 //
 
 void XmlFile::clearElements(void) {
-   int i;
-   for (i=0; i<elements.getSize(); i++) {
-      if (elements[i] != NULL) {
-         delete elements[i];
-      }
-      elements[i] = NULL;
-   }
-   elements.setSize(0);
-   parsedQ = 0;
+	int i;
+	for (i=0; i<elements.getSize(); i++) {
+		if (elements[i] != NULL) {
+			delete elements[i];
+		}
+		elements[i] = NULL;
+	}
+	elements.setSize(0);
+	parsedQ = 0;
 }
 
 
 
 //////////////////////////////
 //
-// XmlFile::clear -- remove all contents of the data and the parsed element 
+// XmlFile::clear -- remove all contents of the data and the parsed element
 //       data.
 //
 
 void XmlFile::clear(void) {
-   clearElements();
-   xmlitems.clear();
+	clearElements();
+	xmlitems.clear();
 }
 
 
@@ -104,7 +91,7 @@ void XmlFile::clear(void) {
 //
 
 int XmlFile::getItemSize(void) const {
-   return xmlitems.getSize();
+	return xmlitems.getSize();
 }
 
 
@@ -117,10 +104,10 @@ int XmlFile::getItemSize(void) const {
 //
 
 int XmlFile::getElementSize(void) {
-   if (!isParsed()) {
-      parseElements();
-   }
-   return elements.getSize();
+	if (!isParsed()) {
+		parseElements();
+	}
+	return elements.getSize();
 }
 
 
@@ -134,7 +121,7 @@ int XmlFile::getElementSize(void) {
 //
 
 int XmlFile::getItemIndexBySerial(int aserial) const {
-   return xmlitems.getIndexBySerial(aserial);
+	return xmlitems.getIndexBySerial(aserial);
 }
 
 
@@ -145,7 +132,7 @@ int XmlFile::getItemIndexBySerial(int aserial) const {
 //
 
 int XmlFile::getItemSerial(int index) const {
-   return xmlitems.getSerial(index);
+	return xmlitems.getSerial(index);
 }
 
 
@@ -156,7 +143,7 @@ int XmlFile::getItemSerial(int index) const {
 //
 
 XmlElement& XmlFile::operator[](int index) {
-   return *(elements[index]);
+	return *(elements[index]);
 }
 
 
@@ -167,7 +154,7 @@ XmlElement& XmlFile::operator[](int index) {
 //
 
 XmlItem& XmlFile::getItem(int index) {
-   return xmlitems[index];
+	return xmlitems[index];
 }
 
 
@@ -177,19 +164,19 @@ XmlItem& XmlFile::getItem(int index) {
 // XmlFile::read --
 //
 
-void XmlFile::read(const char* filename) { 
-   clear();
-   xmlitems.read(filename);
-   parsedQ = 0;
-   parseElements();
+void XmlFile::read(const char* filename) {
+	clear();
+	xmlitems.read(filename);
+	parsedQ = 0;
+	parseElements();
 }
 
 
-void XmlFile::read(istream& input) { 
-   clear();
-   xmlitems.read(input);
-   parsedQ = 0;
-   parseElements();
+void XmlFile::read(istream& input) {
+	clear();
+	xmlitems.read(input);
+	parsedQ = 0;
+	parseElements();
 }
 
 
@@ -201,8 +188,8 @@ void XmlFile::read(istream& input) {
 //
 
 int XmlFile::appendItem(Array<char>& item) {
-   parsedQ = 0;
-   return xmlitems.appendItem(item);
+	parsedQ = 0;
+	return xmlitems.appendItem(item);
 }
 
 
@@ -216,8 +203,8 @@ int XmlFile::appendItem(Array<char>& item) {
 //
 
 int XmlFile::insertItem(Array<char>& item, int index) {
-   parsedQ = 0;
-   return xmlitems.insertItem(item, index);
+	parsedQ = 0;
+	return xmlitems.insertItem(item, index);
 }
 
 
@@ -228,8 +215,8 @@ int XmlFile::insertItem(Array<char>& item, int index) {
 //
 
 int XmlFile::deleteItem(int index) {
-   parsedQ = 0;
-   return xmlitems.deleteItem(index);
+	parsedQ = 0;
+	return xmlitems.deleteItem(index);
 }
 
 
@@ -240,12 +227,12 @@ int XmlFile::deleteItem(int index) {
 //
 
 ostream& XmlFile::printElementList(ostream& out) {
-   int i;
-   XmlFile& xmlfile = *this;
-   for (i=0; i<getElementSize(); i++) {
-      out << xmlfile[i].getName() << "\n";
-   }
-   return out;
+	int i;
+	XmlFile& xmlfile = *this;
+	for (i=0; i<getElementSize(); i++) {
+		out << xmlfile[i].getName() << "\n";
+	}
+	return out;
 }
 
 
@@ -262,32 +249,32 @@ ostream& XmlFile::printElementList(ostream& out) {
 //
 
 void XmlFile::parseElements(void) {
-   if (parsedQ) {
-      return;
-   }
+	if (parsedQ) {
+		return;
+	}
 
-   clearElements();
-   elements.setSize(xmlitems.getSize());
-   elements.setSize(0);
+	clearElements();
+	elements.setSize(xmlitems.getSize());
+	elements.setSize(0);
 
-   int i;
-   for (i=0; i<xmlitems.getSize(); i++) {
-      if (xmlitems[i].isElement()) {
-         i = processElement(i);
-      } else {
-      }
-   }
+	int i;
+	for (i=0; i<xmlitems.getSize(); i++) {
+		if (xmlitems[i].isElement()) {
+			i = processElement(i);
+		} else {
+		}
+	}
 
-   parseAttributes();
+	parseAttributes();
 
-   parsedQ = 1;
+	parsedQ = 1;
 }
 
 
 
 //////////////////////////////
 //
-// XmlFile::parseAttributes -- Extract textual list of attributes 
+// XmlFile::parseAttributes -- Extract textual list of attributes
 //    and store them in key/value array for later access.
 //
 
@@ -304,86 +291,86 @@ void XmlFile::parseAttributes(void) {
 //
 
 int XmlFile::processElement(int index) {
-   PerlRegularExpression pre;
+	PerlRegularExpression pre;
 
-   int startindex = index;
-   int endindex   = index;
+	int startindex = index;
+	int endindex   = index;
 
-   if (pre.search(xmlitems[index].cstr(), "^\\s*<\\s*([^\\s>]+).*/\\s*>")) {
-      // element starts/ends at the same index point.
-      // No need to do any further processing so just store and continue.
-      XmlElement *ptr = new XmlElement;
-      ptr->setName(pre.getSubmatch(1));
-      ptr->setStartSerial(xmlitems.getSerial(startindex));
-      ptr->setEndSerial(xmlitems.getSerial(startindex));
-      elements.append(ptr);
-      return endindex;  // index will be incremented in calling function
-   }
+	if (pre.search(xmlitems[index].cstr(), "^\\s*<\\s*([^\\s>]+).*/\\s*>")) {
+		// element starts/ends at the same index point.
+		// No need to do any further processing so just store and continue.
+		XmlElement *ptr = new XmlElement;
+		ptr->setName(pre.getSubmatch(1));
+		ptr->setStartSerial(xmlitems.getSerial(startindex));
+		ptr->setEndSerial(xmlitems.getSerial(startindex));
+		elements.append(ptr);
+		return endindex;  // index will be incremented in calling function
+	}
 
-   // element-start tag is the input, so search for its ending
-   // in the data.  Apply a recursive processing of children
-   // elements at the same time.
+	// element-start tag is the input, so search for its ending
+	// in the data.  Apply a recursive processing of children
+	// elements at the same time.
 
 
-   if (!pre.search(xmlitems[index].cstr(), "^\\s*<\\s*([^\\s>]+)")) {
-      // malformed (empty) element tag, skip it.
-      return index;
-   }
+	if (!pre.search(xmlitems[index].cstr(), "^\\s*<\\s*([^\\s>]+)")) {
+		// malformed (empty) element tag, skip it.
+		return index;
+	}
 
-   pre.getSubmatch(1); // fill in the internal match with element name
+	pre.getSubmatch(1); // fill in the internal match with element name
 
-   // search for the ending tag like "</element>"
-   SigString endname("<\\s*/\\s*");
-   endname += pre.getSubmatch();
-   endname += "\\s*>";
+	// search for the ending tag like "</element>"
+	SigString endname("<\\s*/\\s*");
+	endname += pre.getSubmatch();
+	endname += "\\s*>";
 
-   // start name is the regular expression for a starting element name
-   SigString startname("<\\s*");
-   startname += pre.getSubmatch();
-   startname += "[\\s>";
+	// start name is the regular expression for a starting element name
+	SigString startname("<\\s*");
+	startname += pre.getSubmatch();
+	startname += "[\\s>";
 
-   // create and store the current element (so that intervening elements
-   // can be place in the list in the correct order.
-   XmlElement *ptr = new XmlElement;
-   ptr->setName(pre.getSubmatch());
-   ptr->setStartSerial(xmlitems.getSerial(startindex));
-   elements.append(ptr);
-   // set the end index later with ptr->setEndSerial();
+	// create and store the current element (so that intervening elements
+	// can be place in the list in the correct order.
+	XmlElement *ptr = new XmlElement;
+	ptr->setName(pre.getSubmatch());
+	ptr->setStartSerial(xmlitems.getSerial(startindex));
+	elements.append(ptr);
+	// set the end index later with ptr->setEndSerial();
 
-   int i = index+1;
-   PerlRegularExpression pre2;
+	int i = index+1;
+	PerlRegularExpression pre2;
 
-   while (i<xmlitems.getSize()) {
-      if (!xmlitems[i].isElement()) {
-         // not an xml element marker, so continue to next item.
-         i++;
-         continue;
-      }
+	while (i<xmlitems.getSize()) {
+		if (!xmlitems[i].isElement()) {
+			// not an xml element marker, so continue to next item.
+			i++;
+			continue;
+		}
 
-      // check for single-tag element:
-      if (pre2.search(xmlitems[i].cstr(), "^\\s*<([^\\s>]+).*/\\s*>")) {
-         // found a single-item element process it and continue;
-         i = processElement(i) + 1;
-         continue;
-      }
+		// check for single-tag element:
+		if (pre2.search(xmlitems[i].cstr(), "^\\s*<([^\\s>]+).*/\\s*>")) {
+			// found a single-item element process it and continue;
+			i = processElement(i) + 1;
+			continue;
+		}
 
-      // check for an ending tag which matches current element
-      if (pre2.search(xmlitems[i].cstr(), endname.getBase())) {
-         ptr->setEndSerial(xmlitems.getSerial(i));
-         i++;
-         continue;
-      }
+		// check for an ending tag which matches current element
+		if (pre2.search(xmlitems[i].cstr(), endname.getBase())) {
+			ptr->setEndSerial(xmlitems.getSerial(i));
+			i++;
+			continue;
+		}
 
-      // check for element starting, and process if so:
-      if (pre2.search(xmlitems[i].cstr(), "^\\s*<([^\\s>]+).*\\s*>")) {
-         i = processElement(i) + 1;
-         continue;
-      }
+		// check for element starting, and process if so:
+		if (pre2.search(xmlitems[i].cstr(), "^\\s*<([^\\s>]+).*\\s*>")) {
+			i = processElement(i) + 1;
+			continue;
+		}
 
-      i++;
-   }
+		i++;
+	}
 
-   return i;
+	return i;
 }
 
 
@@ -394,7 +381,7 @@ int XmlFile::processElement(int index) {
 //
 
 int XmlFile::isParsed(void) {
-   return parsedQ;
+	return parsedQ;
 }
 
 
@@ -411,15 +398,13 @@ int XmlFile::isParsed(void) {
 //
 
 ostream& operator<<(ostream& out, XmlFile& xmlfile) {
-   int i;
-   int asize = xmlfile.getItemSize();
-   for (i=0; i<asize; i++) {
-      out << xmlfile.getItem(i).getBase();
-   }
-   return out;
+	int i;
+	int asize = xmlfile.getItemSize();
+	for (i=0; i<asize; i++) {
+		out << xmlfile.getItem(i).getBase();
+	}
+	return out;
 }
 
 
 
-
-// md5sum: 05e1e67705ebcb2bfa1afad9e504582c XmlFile.cpp [20050403]

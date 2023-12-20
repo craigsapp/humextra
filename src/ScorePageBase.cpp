@@ -9,7 +9,7 @@
 // Last Modified: Sun Aug 26 00:55:11 PDT 2012 Renovated
 // Filename:      ...sig/src/sigInfo/ScorePageBase.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/ScorePageBase.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Base class for ScorePage.  This class handles reading/writing
 //                of a ScorePage, and handles all of the data variables for
@@ -22,16 +22,11 @@
 #include <string.h>
 #include <math.h>
 
-#ifndef OLDCPP
-   #include <iostream>
-   #include <iomanip>
-   #include <fstream>
-   using namespace std;
-#else
-   #include <iostream.h>
-   #include <iomanip.h>
-   #include <fstream.h>
-#endif
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+
+using namespace std;
 
 typedef long TEMP64BITFIX;
 
@@ -45,26 +40,26 @@ double ScorePageBase::StaffLen = 7.5;
 // ScorePageBase::ScorePageBase -- Constructors.
 //
 
-ScorePageBase::ScorePageBase(void) { 
-   // Initialize space for the main data array, set the allocation 
-   // size to 10,000 and the regrowth size to +100,000 if it exceeds 
-   // the initial allocation size.
-   data.setSize(10000);
-   data.setGrowth(100000);
-   data.setSize(0);
+ScorePageBase::ScorePageBase(void) {
+	// Initialize space for the main data array, set the allocation
+	// size to 10,000 and the regrowth size to +100,000 if it exceeds
+	// the initial allocation size.
+	data.setSize(10000);
+	data.setGrowth(100000);
+	data.setSize(0);
 
-   // clear all other variables
-   clearAll();
+	// clear all other variables
+	clearAll();
 }
 
 
-ScorePageBase::ScorePageBase(ScorePageBase& aPage) { 
-   data.setSize(10000);
-   data.setGrowth(100000);
-   data.setSize(0);
+ScorePageBase::ScorePageBase(ScorePageBase& aPage) {
+	data.setSize(10000);
+	data.setGrowth(100000);
+	data.setSize(0);
 
-   ScorePageBase& thispage = *this;
-   thispage = aPage;
+	ScorePageBase& thispage = *this;
+	thispage = aPage;
 }
 
 
@@ -74,8 +69,8 @@ ScorePageBase::ScorePageBase(ScorePageBase& aPage) {
 // ScorePageBase::~ScorePageBase -- Destructor.
 //
 
-ScorePageBase::~ScorePageBase() { 
-   clearAll();
+ScorePageBase::~ScorePageBase() {
+	clearAll();
 }
 
 
@@ -86,88 +81,88 @@ ScorePageBase::~ScorePageBase() {
 //
 
 ScorePageBase& ScorePageBase::operator=(ScorePageBase &aPage) {
-   int i, j;
+	int i, j;
 
-   if (this == &aPage) {
-      return *this;       // don't copy self
-   }
-   clear();
+	if (this == &aPage) {
+		return *this;       // don't copy self
+	}
+	clear();
 
-   // (1) Main data storage:
-   data.setSize(aPage.data.getSize()*2);  // allocate extra for growing
-   data.setSize(aPage.data.getSize());
-   data.setGrowth(1000000);
-   for (i=0; i<data.getSize(); i++) {
-      data[i] = new ScoreRecord;
-      *(data[i]) = *(aPage.data[i]);
-   }
-   trailer           = aPage.trailer;
+	// (1) Main data storage:
+	data.setSize(aPage.data.getSize()*2);  // allocate extra for growing
+	data.setSize(aPage.data.getSize());
+	data.setGrowth(1000000);
+	for (i=0; i<data.getSize(); i++) {
+		data[i] = new ScoreRecord;
+		*(data[i]) = *(aPage.data[i]);
+	}
+	trailer           = aPage.trailer;
 
-   // (2) Print variables:
-   rotate     = aPage.rotate;
-   scale      = aPage.scale;
-   pageWidth  = aPage.pageWidth;
-   pageHeight = aPage.pageHeight;
-   lmargin    = aPage.lmargin;
-   bmargin    = aPage.bmargin;
-   tDPI       = aPage.tDPI;
-   oDPI       = aPage.oDPI;
-   lineWidth  = aPage.lineWidth;
-   mirror     = aPage.mirror;
-   setStroke  = aPage.setStroke;
+	// (2) Print variables:
+	rotate     = aPage.rotate;
+	scale      = aPage.scale;
+	pageWidth  = aPage.pageWidth;
+	pageHeight = aPage.pageHeight;
+	lmargin    = aPage.lmargin;
+	bmargin    = aPage.bmargin;
+	tDPI       = aPage.tDPI;
+	oDPI       = aPage.oDPI;
+	lineWidth  = aPage.lineWidth;
+	mirror     = aPage.mirror;
+	setStroke  = aPage.setStroke;
 
-   // (3) Sequence data:
-   pagePrintSequence = aPage.pagePrintSequence;
-   lineStaffSequence.setSize(aPage.lineStaffSequence.getSize());
-   for (i=0; i<lineStaffSequence.getSize(); i++) {
-      lineStaffSequence[i] = aPage.lineStaffSequence[i];
-   }
-   lineSystemSequence.setSize(aPage.lineSystemSequence.getSize());
-   for (i=0; i<lineSystemSequence.getSize(); i++) {
-      lineSystemSequence[i] = aPage.lineSystemSequence[i];
-   }
-   lineSystemStaffSequence.setSize(aPage.lineSystemStaffSequence.getSize());
-   for (i=0; i<lineSystemStaffSequence.getSize(); i++) {
-      lineSystemStaffSequence[i].setSize(
-            aPage.lineSystemStaffSequence[i].getSize());
-      for (j=0; j<lineSystemStaffSequence[i].getSize(); j++) {
-         lineSystemStaffSequence[i][j] = aPage.lineSystemStaffSequence[i][j];
-      }
-   }
-  
+	// (3) Sequence data:
+	pagePrintSequence = aPage.pagePrintSequence;
+	lineStaffSequence.setSize(aPage.lineStaffSequence.getSize());
+	for (i=0; i<lineStaffSequence.getSize(); i++) {
+		lineStaffSequence[i] = aPage.lineStaffSequence[i];
+	}
+	lineSystemSequence.setSize(aPage.lineSystemSequence.getSize());
+	for (i=0; i<lineSystemSequence.getSize(); i++) {
+		lineSystemSequence[i] = aPage.lineSystemSequence[i];
+	}
+	lineSystemStaffSequence.setSize(aPage.lineSystemStaffSequence.getSize());
+	for (i=0; i<lineSystemStaffSequence.getSize(); i++) {
+		lineSystemStaffSequence[i].setSize(
+				aPage.lineSystemStaffSequence[i].getSize());
+		for (j=0; j<lineSystemStaffSequence[i].getSize(); j++) {
+			lineSystemStaffSequence[i][j] = aPage.lineSystemStaffSequence[i][j];
+		}
+	}
 
 
-   pageSystemSequence = aPage.pageSystemSequence;
-   pageStaffSequence.setSize(aPage.pageStaffSequence.getSize());
-   for (i=0; i<pageStaffSequence.getSize(); i++) {
-      pageStaffSequence[i] = aPage.pageStaffSequence[i];
-   }
 
-   // (4) Lookup tables:
-   maxStaffNumber        = aPage.maxStaffNumber;
-   pageStaffList         = aPage.pageStaffList;
-   pageStaffListReverse  = aPage.pageStaffListReverse;
-   itemSystemStaffIndex  = aPage.itemSystemStaffIndex;
-   P2ToSystemIdx         = aPage.P2ToSystemIdx;
-   P2ToSystemStaffIdx    = aPage.P2ToSystemStaffIdx;
-   systemStaffIdxToP2    = aPage.systemStaffIdxToP2;
+	pageSystemSequence = aPage.pageSystemSequence;
+	pageStaffSequence.setSize(aPage.pageStaffSequence.getSize());
+	for (i=0; i<pageStaffSequence.getSize(); i++) {
+		pageStaffSequence[i] = aPage.pageStaffSequence[i];
+	}
 
-   // (5) Analytic data:
-   systemRhythm.setSize(aPage.systemRhythm.getSize());
-   for (i=0; i<systemRhythm.getSize(); i++) {
-      systemRhythm[i] = aPage.systemRhythm[i];
-   }
-   systemDuration  = aPage.systemDuration;
-   pageDuration    = aPage.pageDuration;
+	// (4) Lookup tables:
+	maxStaffNumber        = aPage.maxStaffNumber;
+	pageStaffList         = aPage.pageStaffList;
+	pageStaffListReverse  = aPage.pageStaffListReverse;
+	itemSystemStaffIndex  = aPage.itemSystemStaffIndex;
+	P2ToSystemIdx         = aPage.P2ToSystemIdx;
+	P2ToSystemStaffIdx    = aPage.P2ToSystemStaffIdx;
+	systemStaffIdxToP2    = aPage.systemStaffIdxToP2;
 
-   // (6) Analytic booleans: 
-   sortAnalysisQ   = aPage.sortAnalysisQ;
-   printAnalysisQ  = aPage.printAnalysisQ;
-   systemAnalysisQ = aPage.systemAnalysisQ;
-   pitchAnalysisQ  = aPage.pitchAnalysisQ;
-   rhythmAnalysisQ = aPage.rhythmAnalysisQ;
+	// (5) Analytic data:
+	systemRhythm.setSize(aPage.systemRhythm.getSize());
+	for (i=0; i<systemRhythm.getSize(); i++) {
+		systemRhythm[i] = aPage.systemRhythm[i];
+	}
+	systemDuration  = aPage.systemDuration;
+	pageDuration    = aPage.pageDuration;
 
-   return *this;
+	// (6) Analytic booleans:
+	sortAnalysisQ   = aPage.sortAnalysisQ;
+	printAnalysisQ  = aPage.printAnalysisQ;
+	systemAnalysisQ = aPage.systemAnalysisQ;
+	pitchAnalysisQ  = aPage.pitchAnalysisQ;
+	rhythmAnalysisQ = aPage.rhythmAnalysisQ;
+
+	return *this;
 }
 
 
@@ -179,17 +174,17 @@ ScorePageBase& ScorePageBase::operator=(ScorePageBase &aPage) {
 //
 
 void ScorePageBase::clear(void) {
-   for (int i=0; i<data.getSize(); i++) {
-      delete data[i];
-      data[i] = NULL;
-   }
-   data.setSize(0);
+	for (int i=0; i<data.getSize(); i++) {
+		delete data[i];
+		data[i] = NULL;
+	}
+	data.setSize(0);
 
-   // create a default trailer
-   initializeTrailer();
+	// create a default trailer
+	initializeTrailer();
 
-   // clear analysis variables
-   invalidateAnalyses();
+	// clear analysis variables
+	invalidateAnalyses();
 }
 
 
@@ -201,25 +196,25 @@ void ScorePageBase::clear(void) {
 //
 
 void ScorePageBase::clearPrintVariables(void) {
-   rotate     = 0;     // landscape mode
-   scale      = 1.0;   // music size on page (default to width of LETTER)
-   pageWidth  = 8.5;   // width of page (LETTER width by default)
-   pageHeight = 11.0;  // height of page (LETTER width by default)
-   lmargin    = 0.50;  // left page margin (excluding Lbuffer)
-   bmargin    = 0.75;  // bottom page margin (excluding Bbuffer)
-   tDPI       = 600;   // target rendering DPI (for calculating line width)
-   oDPI       = 600;   // actual rendering DPI (for calc'ting bitmap positions)
-   lineWidth  = 4;     // The width of stroked lines in output (will be
-                       //    5 pixels after setStrokeAdjust adjusts the lines).
-   mirror     = 0;     // Don't revers the left-right axis when printing.
-   setStroke  = 1;     // Use setStrokeAdjust when rendering vector graphics.
+	rotate     = 0;     // landscape mode
+	scale      = 1.0;   // music size on page (default to width of LETTER)
+	pageWidth  = 8.5;   // width of page (LETTER width by default)
+	pageHeight = 11.0;  // height of page (LETTER width by default)
+	lmargin    = 0.50;  // left page margin (excluding Lbuffer)
+	bmargin    = 0.75;  // bottom page margin (excluding Bbuffer)
+	tDPI       = 600;   // target rendering DPI (for calculating line width)
+	oDPI       = 600;   // actual rendering DPI (for calc'ting bitmap positions)
+	lineWidth  = 4;     // The width of stroked lines in output (will be
+							  //    5 pixels after setStrokeAdjust adjusts the lines).
+	mirror     = 0;     // Don't revers the left-right axis when printing.
+	setStroke  = 1;     // Use setStrokeAdjust when rendering vector graphics.
 
-   // These print variables are fixed:
-   //
-   // Lbuffer = 0.025;  // extra width added to lmargin
-   // Bbuffer = 0.0625;
-   // StaffLen = 7.5;
-   // Lbuffer = 0.025;
+	// These print variables are fixed:
+	//
+	// Lbuffer = 0.025;  // extra width added to lmargin
+	// Bbuffer = 0.0625;
+	// StaffLen = 7.5;
+	// Lbuffer = 0.025;
 }
 
 
@@ -230,8 +225,8 @@ void ScorePageBase::clearPrintVariables(void) {
 //
 
 void ScorePageBase::clearAll(void) {
-   clear();
-   clearPrintVariables();
+	clear();
+	clearPrintVariables();
 }
 
 
@@ -244,57 +239,57 @@ void ScorePageBase::clearAll(void) {
 
 void ScorePageBase::invalidateAnalyses(void) {
 
-   // (3) Sequence data:
-   pagePrintSequence.setSize(0);
-   lineStaffSequence.setSize(0);
-   lineSystemSequence.setSize(0);
-   lineSystemStaffSequence.setSize(0);
-   pageSystemSequence.setSize(0);
-   pageStaffSequence.setSize(0);
+	// (3) Sequence data:
+	pagePrintSequence.setSize(0);
+	lineStaffSequence.setSize(0);
+	lineSystemSequence.setSize(0);
+	lineSystemStaffSequence.setSize(0);
+	pageSystemSequence.setSize(0);
+	pageStaffSequence.setSize(0);
 
-   // (4) Lookup tables:
-   maxStaffNumber = -1;
-   pageStaffList.setSize(0);
-   pageStaffListReverse.setSize(0);
-   itemSystemStaffIndex.setSize(0);
-   P2ToSystemIdx.setSize(0);
-   systemStaffIdxToP2.setSize(0);
+	// (4) Lookup tables:
+	maxStaffNumber = -1;
+	pageStaffList.setSize(0);
+	pageStaffListReverse.setSize(0);
+	itemSystemStaffIndex.setSize(0);
+	P2ToSystemIdx.setSize(0);
+	systemStaffIdxToP2.setSize(0);
 
-   // (5) rhythm analysis variables:
-   systemRhythm.setSize(0);
-   systemDuration.setSize(0);
-   pageDuration = 0.0;
+	// (5) rhythm analysis variables:
+	systemRhythm.setSize(0);
+	systemDuration.setSize(0);
+	pageDuration = 0.0;
 
-   // (6) Analytic booleans:
-   sortAnalysisQ   = 0;
-   printAnalysisQ  = 0;
-   systemAnalysisQ = 0;
-   pitchAnalysisQ  = 0;
-   rhythmAnalysisQ = 0;
-   
-   // not deleting the pitch analyses which are stored as a key parameter
-   // inside of each note object.
+	// (6) Analytic booleans:
+	sortAnalysisQ   = 0;
+	printAnalysisQ  = 0;
+	systemAnalysisQ = 0;
+	pitchAnalysisQ  = 0;
+	rhythmAnalysisQ = 0;
+
+	// not deleting the pitch analyses which are stored as a key parameter
+	// inside of each note object.
 }
 
 
 
 //////////////////////////////
 //
-// initializeTrailer --  Place dummy information in the trailer. 
+// initializeTrailer --  Place dummy information in the trailer.
 //     This data may be overwritten when reading a binary SCORE file.
 //   devault value: serial = 0x50504153
 //
 
 void ScorePageBase::initializeTrailer(long serial) {
-   union { long i; float f; } u;
-   u.i = serial;
+	union { long i; float f; } u;
+	u.i = serial;
 
-   trailer.setSize(4);
-   trailer[0] = 0.0;  // units: 0.0 = inches, 1.0 = centimeters
-   trailer[1] = 3.0;  // version of score being used
-   trailer[2] = u.f;  // serial number of program 
-   trailer[3] = 0.0;  // always zero?
-   trailer.allowGrowth(0);
+	trailer.setSize(4);
+	trailer[0] = 0.0;  // units: 0.0 = inches, 1.0 = centimeters
+	trailer[1] = 3.0;  // version of score being used
+	trailer[2] = u.f;  // serial number of program
+	trailer[3] = 0.0;  // always zero?
+	trailer.allowGrowth(0);
 }
 
 
@@ -311,68 +306,68 @@ void ScorePageBase::initializeTrailer(long serial) {
 //
 
 void ScorePageBase::readFile(const char* filename, int verboseQ) {
-   int binaryQ = 0;  // to test if reading a binary or ASCII data file.
+	int binaryQ = 0;  // to test if reading a binary or ASCII data file.
 
-   #ifndef OLDCPP
-      #ifdef VISUAL
-         ifstream testfile(filename, ios::binary);
-      #else 
-         ifstream testfile(filename);
-      #endif
-   #else 
-      #ifdef VISUAL
-         ifstream testfile(filename, ios::nocreate | ios::binary);
-      #else 
-         ifstream testfile(filename, ios::nocreate);
-      #endif
-   #endif
+	#ifndef OLDCPP
+		#ifdef VISUAL
+			ifstream testfile(filename, ios::binary);
+		#else
+			ifstream testfile(filename);
+		#endif
+	#else
+		#ifdef VISUAL
+			ifstream testfile(filename, ios::nocreate | ios::binary);
+		#else
+			ifstream testfile(filename, ios::nocreate);
+		#endif
+	#endif
 
-   if (!testfile.is_open()) {
-      cerr << "Error: cannot read the file: " << filename << endl;
-      exit(1);
-   }
+	if (!testfile.is_open()) {
+		cerr << "Error: cannot read the file: " << filename << endl;
+		exit(1);
+	}
 
-   testfile.seekg(-4, ios::end);
-   unsigned char databytes[4] = {0xff};
-   testfile.read((char*)databytes, 4); 
-   if (databytes[0] == 0x00 && databytes[1] == 0x3c && databytes[2] == 0x1c && 
-         databytes[3] == 0xc6) {
-      binaryQ = 1;
-   } else {
-      binaryQ = 0;
-   }
-   testfile.seekg(0, ios::beg);
+	testfile.seekg(-4, ios::end);
+	unsigned char databytes[4] = {0xff};
+	testfile.read((char*)databytes, 4);
+	if (databytes[0] == 0x00 && databytes[1] == 0x3c && databytes[2] == 0x1c &&
+			databytes[3] == 0xc6) {
+		binaryQ = 1;
+	} else {
+		binaryQ = 0;
+	}
+	testfile.seekg(0, ios::beg);
 
-   if (binaryQ) {
-      readBinary(testfile, verboseQ);
-   } else {
-      readAscii(testfile, verboseQ);
-   }
+	if (binaryQ) {
+		readBinary(testfile, verboseQ);
+	} else {
+		readAscii(testfile, verboseQ);
+	}
 }
 
 
 
 //////////////////////////////
 //
-// ScorePageBase::readAscii -- Read data in PMX format from given input 
+// ScorePageBase::readAscii -- Read data in PMX format from given input
 //     textfile.
 //     default value: verboseQ = 0
 //
 
-void ScorePageBase::readAscii(const char* filename, int verboseQ) { 
-   #ifndef OLDCPP
-      ifstream infile(filename, ios::in);
-   #else
-      ifstream infile(filename, ios::in | ios::nocreate);
-   #endif
+void ScorePageBase::readAscii(const char* filename, int verboseQ) {
+	#ifndef OLDCPP
+		ifstream infile(filename, ios::in);
+	#else
+		ifstream infile(filename, ios::in | ios::nocreate);
+	#endif
 
-   if (!infile.is_open()) {
-      cerr << "Error: cannot read file: " << filename << endl;
-      exit(1);
-   }
+	if (!infile.is_open()) {
+		cerr << "Error: cannot read file: " << filename << endl;
+		exit(1);
+	}
 
-   readAscii(infile, verboseQ);
-   infile.close();
+	readAscii(infile, verboseQ);
+	infile.close();
 }
 
 
@@ -383,14 +378,14 @@ void ScorePageBase::readAscii(const char* filename, int verboseQ) {
 //      PMX data format from an input stream.
 //
 
-void ScorePageBase::readAscii(istream& infile, int verboseQ) { 
-   clear();
+void ScorePageBase::readAscii(istream& infile, int verboseQ) {
+	clear();
 
-   ScoreRecord record;
-   while (!infile.eof()) {
-      readAsciiScoreLine(infile, record);
-      appendItem(record);
-   }
+	ScoreRecord record;
+	while (!infile.eof()) {
+		readAsciiScoreLine(infile, record);
+		appendItem(record);
+	}
 }
 
 
@@ -402,53 +397,53 @@ void ScorePageBase::readAscii(istream& infile, int verboseQ) {
 //
 
 void ScorePageBase::readAsciiScoreLine(istream& infile, ScoreRecord& record,
-      int verboseQ) {
-   char buffer[1024] = {0};
-   infile.getline(buffer, 1000, '\n');
-   if (verboseQ) {
-      cout << "#Read line: " << buffer << endl;
-   }
+		int verboseQ) {
+	char buffer[1024] = {0};
+	infile.getline(buffer, 1000, '\n');
+	if (verboseQ) {
+		cout << "#Read line: " << buffer << endl;
+	}
 
-   record.clear();
-   record.setAllocSize(100);
-   char* ptr = strtok(buffer, "\n\t ");
-   float number = 0.0;
-   int counter = 0;
-   if (ptr != NULL) {
-      if (strcmp(ptr, "t") == 0) {
-         // text parameter
-         number = 16.0;
-         record.setValue(counter++, number);
-         ptr = strtok(NULL, "\n\t ");
-         while (ptr != NULL) {
-            number = (float)strtod(ptr, NULL);
-            record.setValue(counter++, number);
-            ptr = strtok(NULL, "\n\t ");
-         }
-         // now read the text line for a text item
-         infile.getline(buffer, 1000, '\n');
-         if (verboseQ) {
-            cout << "#Read text line: " << buffer << endl;
-         }
-         record.setTextData(buffer);
-         int length = strlen(buffer);
-         record.setPValue(12, (float)length);
-      } else {
-         // non-text parameter
-         number = (float)strtod(ptr, NULL);
-         if (number == 0.0) {
-            return;
-         } else {
-            record.setValue(counter++, number);
-            ptr = strtok(NULL, "\n\t ");
-            while (ptr != NULL) {
-               number = (float)strtod(ptr, NULL);
-               record.setValue(counter++, number);
-               ptr = strtok(NULL, "\n\t ");
-            }
-         }
-      }
-   } 
+	record.clear();
+	record.setAllocSize(100);
+	char* ptr = strtok(buffer, "\n\t ");
+	float number = 0.0;
+	int counter = 0;
+	if (ptr != NULL) {
+		if (strcmp(ptr, "t") == 0) {
+			// text parameter
+			number = 16.0;
+			record.setValue(counter++, number);
+			ptr = strtok(NULL, "\n\t ");
+			while (ptr != NULL) {
+				number = (float)strtod(ptr, NULL);
+				record.setValue(counter++, number);
+				ptr = strtok(NULL, "\n\t ");
+			}
+			// now read the text line for a text item
+			infile.getline(buffer, 1000, '\n');
+			if (verboseQ) {
+				cout << "#Read text line: " << buffer << endl;
+			}
+			record.setTextData(buffer);
+			int length = strlen(buffer);
+			record.setPValue(12, (float)length);
+		} else {
+			// non-text parameter
+			number = (float)strtod(ptr, NULL);
+			if (number == 0.0) {
+				return;
+			} else {
+				record.setValue(counter++, number);
+				ptr = strtok(NULL, "\n\t ");
+				while (ptr != NULL) {
+					number = (float)strtod(ptr, NULL);
+					record.setValue(counter++, number);
+					ptr = strtok(NULL, "\n\t ");
+				}
+			}
+		}
+	}
 }
 
 
@@ -461,26 +456,26 @@ void ScorePageBase::readAsciiScoreLine(istream& infile, ScoreRecord& record,
 //
 
 void ScorePageBase::readBinary(const char* filename, int verboseQ) {
-   #ifndef OLDCPP
-      #ifdef VISUAL
-         fstream infile(filename, ios::in | ios::binary);
-      #else
-         fstream infile(filename, ios::in);
-      #endif
-   #else
-      #ifdef VISUAL
-         fstream infile(filename, ios::in | ios::nocreate | ios::binary);
-      #else
-         fstream infile(filename, ios::in | ios::nocreate);
-      #endif
-   #endif
+	#ifndef OLDCPP
+		#ifdef VISUAL
+			fstream infile(filename, ios::in | ios::binary);
+		#else
+			fstream infile(filename, ios::in);
+		#endif
+	#else
+		#ifdef VISUAL
+			fstream infile(filename, ios::in | ios::nocreate | ios::binary);
+		#else
+			fstream infile(filename, ios::in | ios::nocreate);
+		#endif
+	#endif
 
-   if (!infile.is_open()) {
-      cerr << "Error: cannot open file: " << filename << endl;
-      exit(1);
-   }
+	if (!infile.is_open()) {
+		cerr << "Error: cannot open file: " << filename << endl;
+		exit(1);
+	}
 
-   readBinary(infile, verboseQ);
+	readBinary(infile, verboseQ);
 }
 
 
@@ -492,67 +487,67 @@ void ScorePageBase::readBinary(const char* filename, int verboseQ) {
 //
 
 void ScorePageBase::readBinary(istream& infile, int verboseQ) {
-   clear();
+	clear();
 
-   // first read the count of 4-byte numbers/text chunks in the data file.
-   int numbercount = readLittleShort(infile);
-   int readcount = 0;   // number of numbers which have been read
-   if (verboseQ) {
-      cout << "#NUMBER COUNT OF FILE IS " << numbercount << endl;
-   }
+	// first read the count of 4-byte numbers/text chunks in the data file.
+	int numbercount = readLittleShort(infile);
+	int readcount = 0;   // number of numbers which have been read
+	if (verboseQ) {
+		cout << "#NUMBER COUNT OF FILE IS " << numbercount << endl;
+	}
 
-   // now read the count of numbers in the trailer
-   infile.seekg(-8, ios::end);
-   int trailerSize = (int)readLittleFloat(infile);
+	// now read the count of numbers in the trailer
+	infile.seekg(-8, ios::end);
+	int trailerSize = (int)readLittleFloat(infile);
 
-   // go back to the start of the file, after the first number
-   infile.seekg(2, ios::beg);
+	// go back to the start of the file, after the first number
+	infile.seekg(2, ios::beg);
 
-   double number = 0.0;
-   data.allowGrowth(1);
-   // now read each data number and store
-   while (!infile.eof()) {
-      if (numbercount - readcount - trailerSize - 1 == 0) {
-         break;
-      } else if (numbercount - readcount - trailerSize - 1< 0) {
-         cout << "Error reading file: data mixes with trailer: " 
-              << numbercount - readcount - trailerSize - 1
-              << endl;
-         exit(1);
-      } else {
-         number = readLittleFloat(infile);
-         number = ScoreParameters::roundFractionDigits(number, 3);
-         readcount++;
-         if (verboseQ) {
-            if (number - (int)number > 0.0) {
-               cout << "# Error in number parameter count: " << number << endl;
-               exit(1);
-            }
-         }
+	double number = 0.0;
+	data.allowGrowth(1);
+	// now read each data number and store
+	while (!infile.eof()) {
+		if (numbercount - readcount - trailerSize - 1 == 0) {
+			break;
+		} else if (numbercount - readcount - trailerSize - 1< 0) {
+			cout << "Error reading file: data mixes with trailer: "
+				  << numbercount - readcount - trailerSize - 1
+				  << endl;
+			exit(1);
+		} else {
+			number = readLittleFloat(infile);
+			number = ScoreParameters::roundFractionDigits(number, 3);
+			readcount++;
+			if (verboseQ) {
+				if (number - (int)number > 0.0) {
+					cout << "# Error in number parameter count: " << number << endl;
+					exit(1);
+				}
+			}
 
-         readcount += (int)number;
-         data[data.getSize()]->readBinary(infile, (int)number);
-      }
-   }
+			readcount += (int)number;
+			data[data.getSize()]->readBinary(infile, (int)number);
+		}
+	}
 
-   if (verboseQ) { 
-      cout << "#Elements: " << data.getSize() << endl;
-      cout << "#READING Trailer: " << endl;
-   }
+	if (verboseQ) {
+		cout << "#Elements: " << data.getSize() << endl;
+		cout << "#READING Trailer: " << endl;
+	}
 
-   while (number != -9999.0 && !infile.eof()) {
-      number = readLittleFloat(infile);
-      trailer.append(number);
-      if (verboseQ) {
-         cout << "#TRAILER NUMBER: " << number << endl;
-      }
-      readcount++;
-   }
+	while (number != -9999.0 && !infile.eof()) {
+		number = readLittleFloat(infile);
+		trailer.append(number);
+		if (verboseQ) {
+			cout << "#TRAILER NUMBER: " << number << endl;
+		}
+		readcount++;
+	}
 
-   if (readcount != numbercount) {
-      cerr << "#Warning: expecting " << numbercount << " number in file "
-           << " but read " << readcount << endl;
-   }
+	if (readcount != numbercount) {
+		cerr << "#Warning: expecting " << numbercount << " number in file "
+			  << " but read " << readcount << endl;
+	}
 }
 
 
@@ -564,12 +559,12 @@ void ScorePageBase::readBinary(istream& infile, int verboseQ) {
 //
 
 int ScorePageBase::readLittleShort(istream& input) {
-   unsigned char byteinfo[2];
-   input.read((char*)byteinfo, 2);
-   int output = 0;
-   output = byteinfo[1];
-   output = (output << 8) | byteinfo[0];
-   return output;
+	unsigned char byteinfo[2];
+	input.read((char*)byteinfo, 2);
+	int output = 0;
+	output = byteinfo[1];
+	output = (output << 8) | byteinfo[0];
+	return output;
 }
 
 
@@ -580,16 +575,16 @@ int ScorePageBase::readLittleShort(istream& input) {
 //      format.
 //
 
-float ScorePageBase::readLittleFloat(istream& instream) { 
-   unsigned char byteinfo[4];
-   instream.read((char*)byteinfo, 4);
-   union { float f; unsigned int i; } num;
-   num.i = 0;
-   num.i = byteinfo[3];
-   num.i = (num.i << 8) | byteinfo[2];
-   num.i = (num.i << 8) | byteinfo[1];
-   num.i = (num.i << 8) | byteinfo[0];
-   return num.f;
+float ScorePageBase::readLittleFloat(istream& instream) {
+	unsigned char byteinfo[4];
+	instream.read((char*)byteinfo, 4);
+	union { float f; unsigned int i; } num;
+	num.i = 0;
+	num.i = byteinfo[3];
+	num.i = (num.i << 8) | byteinfo[2];
+	num.i = (num.i << 8) | byteinfo[1];
+	num.i = (num.i << 8) | byteinfo[0];
+	return num.f;
 }
 
 
@@ -601,27 +596,27 @@ float ScorePageBase::readLittleFloat(istream& instream) {
 
 void ScorePageBase::writeBinary(const char* filename) {
 
-   #ifndef OLDCPP
-      #ifdef VISUAL
-         fstream outfile(filename, ios::out | ios::binary);
-      #else
-         fstream outfile(filename, ios::out);
-      #endif
-   #else
-      #ifdef VISUAL
-         fstream outfile(filename, ios::out | ios::noreplace | ios::binary);
-      #else
-         fstream outfile(filename, ios::out | ios::noreplace);
-      #endif
-   #endif
+	#ifndef OLDCPP
+		#ifdef VISUAL
+			fstream outfile(filename, ios::out | ios::binary);
+		#else
+			fstream outfile(filename, ios::out);
+		#endif
+	#else
+		#ifdef VISUAL
+			fstream outfile(filename, ios::out | ios::noreplace | ios::binary);
+		#else
+			fstream outfile(filename, ios::out | ios::noreplace);
+		#endif
+	#endif
 
-   if (!outfile.is_open()) {
-      cerr << "Error: cannot write file: " << filename << endl;
-      exit(1);
-   }
+	if (!outfile.is_open()) {
+		cerr << "Error: cannot write file: " << filename << endl;
+		exit(1);
+	}
 
-   writeBinary(outfile);
-   outfile.close();
+	writeBinary(outfile);
+	outfile.close();
 }
 
 
@@ -634,62 +629,62 @@ void ScorePageBase::writeBinary(const char* filename) {
 //
 
 ostream& ScorePageBase::writeBinary(ostream& outfile) {
-   float version = getVersion();
+	float version = getVersion();
 
-   // first write the number of numbers in the data file.
-   // use a dummy value of 0 for now
-   char dummy[4] = {0};
-   if (version < 6) {
-      outfile.write(dummy, 2);
-   } else {
-      outfile.write(dummy, 4);
-   }
-   int writecount = 0;   // number of numbers which have been read
+	// first write the number of numbers in the data file.
+	// use a dummy value of 0 for now
+	char dummy[4] = {0};
+	if (version < 6) {
+		outfile.write(dummy, 2);
+	} else {
+		outfile.write(dummy, 4);
+	}
+	int writecount = 0;   // number of numbers which have been read
 
-   int i;
-   for (i=0; i<data.getSize(); i++) {
-      writecount += data[i]->writeBinary(outfile);
-   }
+	int i;
+	for (i=0; i<data.getSize(); i++) {
+		writecount += data[i]->writeBinary(outfile);
+	}
 
-   // write the trailer
-   for (i=trailer.getSize()-1; i>=0; i--) {
-      writeLittleFloat(outfile, trailer[i]);
-      writecount++;
-   }
-   // write the size of the trailer (plus one more for this field)
-   writeLittleFloat(outfile, trailer.getSize() + 1);
-   writecount++;
+	// write the trailer
+	for (i=trailer.getSize()-1; i>=0; i--) {
+		writeLittleFloat(outfile, trailer[i]);
+		writecount++;
+	}
+	// write the size of the trailer (plus one more for this field)
+	writeLittleFloat(outfile, trailer.getSize() + 1);
+	writecount++;
 
-   // write the end of file marker
-   writeLittleFloat(outfile, -9999.0);
-   writecount++;
+	// write the end of file marker
+	writeLittleFloat(outfile, -9999.0);
+	writecount++;
 
-   if ((version < 6) && (writecount > 0x7fff)) {
-      cerr << "Warning: data count (" << writecount << ") exceeds safe level"
-           << endl;
-   }
+	if ((version < 6) && (writecount > 0x7fff)) {
+		cerr << "Warning: data count (" << writecount << ") exceeds safe level"
+			  << endl;
+	}
 
-   // go back to the start of the file and fill in the number of numbers
-   outfile.seekp(0);
-   if (version < 6) {
-      // write two byte counter
-      unsigned char blo = writecount & 0xff;
-      unsigned char bhi = (writecount >> 8) & 0xff;
-      outfile.write((char*)&blo, 1);
-      outfile.write((char*)&bhi, 1);
-   } else {
-      // write four-byte counter 
-      unsigned char bloest = writecount & 0xff;
-      unsigned char bloer  = (writecount >> 8)  & 0xff;
-      unsigned char bhier  = (writecount >> 16) & 0xff;
-      unsigned char bhiest = (writecount >> 24) & 0xff;
-      outfile.write((char*)&bloest, 1);
-      outfile.write((char*)&bloer,  1);
-      outfile.write((char*)&bhier,  1);
-      outfile.write((char*)&bhiest, 1);
-   }
+	// go back to the start of the file and fill in the number of numbers
+	outfile.seekp(0);
+	if (version < 6) {
+		// write two byte counter
+		unsigned char blo = writecount & 0xff;
+		unsigned char bhi = (writecount >> 8) & 0xff;
+		outfile.write((char*)&blo, 1);
+		outfile.write((char*)&bhi, 1);
+	} else {
+		// write four-byte counter
+		unsigned char bloest = writecount & 0xff;
+		unsigned char bloer  = (writecount >> 8)  & 0xff;
+		unsigned char bhier  = (writecount >> 16) & 0xff;
+		unsigned char bhiest = (writecount >> 24) & 0xff;
+		outfile.write((char*)&bloest, 1);
+		outfile.write((char*)&bloer,  1);
+		outfile.write((char*)&bhier,  1);
+		outfile.write((char*)&bhiest, 1);
+	}
 
-   return outfile;
+	return outfile;
 }
 
 
@@ -701,8 +696,8 @@ ostream& ScorePageBase::writeBinary(ostream& outfile) {
 //
 
 void ScorePageBase::writeBinary2Byte(const char* filename) {
-   setVersion(3.0);
-   writeBinary(filename);
+	setVersion(3.0);
+	writeBinary(filename);
 }
 
 
@@ -716,8 +711,8 @@ void ScorePageBase::writeBinary2Byte(const char* filename) {
 //
 
 void ScorePageBase::writeBinary4Byte(const char* filename) {
-   setVersion(6.0);
-   writeBinary(filename);
+	setVersion(6.0);
+	writeBinary(filename);
 }
 
 
@@ -728,15 +723,15 @@ void ScorePageBase::writeBinary4Byte(const char* filename) {
 //      format.
 //
 
-void ScorePageBase::writeLittleFloat(ostream& out, float number) { 
-   union { float f; unsigned int i; } num;
-   num.f = number;
-   char byteinfo[4];
-   byteinfo[0] = (char)( num.i        & 0xff);
-   byteinfo[1] = (char)((num.i >> 8)  & 0xff);
-   byteinfo[2] = (char)((num.i >> 16) & 0xff);
-   byteinfo[3] = (char)((num.i >> 24) & 0xff);
-   out.write(byteinfo, 4);
+void ScorePageBase::writeLittleFloat(ostream& out, float number) {
+	union { float f; unsigned int i; } num;
+	num.f = number;
+	char byteinfo[4];
+	byteinfo[0] = (char)( num.i        & 0xff);
+	byteinfo[1] = (char)((num.i >> 8)  & 0xff);
+	byteinfo[2] = (char)((num.i >> 16) & 0xff);
+	byteinfo[3] = (char)((num.i >> 24) & 0xff);
+	out.write(byteinfo, 4);
 }
 
 
@@ -748,66 +743,66 @@ void ScorePageBase::writeLittleFloat(ostream& out, float number) {
 //     default value: verboseQ = 0
 //
 
-void ScorePageBase::printAscii(ostream& out, int roundQ, int verboseQ) { 
-   int i, j;
-   if (verboseQ) {
-      cout << "# OBJECTS TO WRITE: " << data.getSize() << endl;
-   }
-   Array<Array<char> > buffers;
-   buffers.setSize(data.getSize() * 2);
-   buffers.setSize(0);
+void ScorePageBase::printAscii(ostream& out, int roundQ, int verboseQ) {
+	int i, j;
+	if (verboseQ) {
+		cout << "# OBJECTS TO WRITE: " << data.getSize() << endl;
+	}
+	Array<Array<char> > buffers;
+	buffers.setSize(data.getSize() * 2);
+	buffers.setSize(0);
 
-   char buffer1[10000] = {0};
-   char buffer2[10000] = {0};
-   int index;
-   Array<char> spaces;
-   spaces.setSize(10000);
-   spaces.setAll(1);
-   int length;
+	char buffer1[10000] = {0};
+	char buffer2[10000] = {0};
+	int index;
+	Array<char> spaces;
+	spaces.setSize(10000);
+	spaces.setAll(1);
+	int length;
 
-   for (i=0; i<data.getSize(); i++) {
-      // data[i]->printAscii(out, verboseQ);
-      data[i]->printAscii(buffer1, buffer2, 10000, roundQ, verboseQ);
-      index = buffers.getSize();
-      buffers.setSize(buffers.getSize()+1);
-      length = strlen(buffer1);
-      buffers[index].setSize(length+1);
-      strcpy(buffers[index].getBase(), buffer1);
-      for (j=0; j<length; j++) {
-         if (buffer1[j] != ' ') {
-            spaces[j] = 0;
-         }
-      }
-      
-      length = strlen(buffer2);
-      if (length > 0) {
-         index = buffers.getSize();
-         buffers.setSize(buffers.getSize()+1);
-         buffers[index].setSize(length+1);
-         strcpy(buffers[index].getBase(), buffer2);
-      }
-      
-      // out << '\n';
-   }
+	for (i=0; i<data.getSize(); i++) {
+		// data[i]->printAscii(out, verboseQ);
+		data[i]->printAscii(buffer1, buffer2, 10000, roundQ, verboseQ);
+		index = buffers.getSize();
+		buffers.setSize(buffers.getSize()+1);
+		length = strlen(buffer1);
+		buffers[index].setSize(length+1);
+		strcpy(buffers[index].getBase(), buffer1);
+		for (j=0; j<length; j++) {
+			if (buffer1[j] != ' ') {
+				spaces[j] = 0;
+			}
+		}
 
-   for (i=0; i<buffers.getSize(); i++) {
-      if ((i>0) && (strchr(buffers[i-1].getBase(), 't') != NULL)) {
-         out << buffers[i].getBase();
-      } else {
-         for (j=0; j<buffers[i].getSize()-1; j++) {
-            if (spaces[j] == 0) {
-               out << buffers[i][j];
-            } else if ((spaces[j] == 1) && (spaces[j+1] != 1)) {
-               out << buffers[i][j];
-            }
-         }
-	 // don't print the null character:
-         // out << buffers[i][buffers[i].getSize()-1];
-      }
-      out << "\n";
-   }
+		length = strlen(buffer2);
+		if (length > 0) {
+			index = buffers.getSize();
+			buffers.setSize(buffers.getSize()+1);
+			buffers[index].setSize(length+1);
+			strcpy(buffers[index].getBase(), buffer2);
+		}
 
-   out << flush;
+		// out << '\n';
+	}
+
+	for (i=0; i<buffers.getSize(); i++) {
+		if ((i>0) && (strchr(buffers[i-1].getBase(), 't') != NULL)) {
+			out << buffers[i].getBase();
+		} else {
+			for (j=0; j<buffers[i].getSize()-1; j++) {
+				if (spaces[j] == 0) {
+					out << buffers[i][j];
+				} else if ((spaces[j] == 1) && (spaces[j+1] != 1)) {
+					out << buffers[i][j];
+				}
+			}
+			// don't print the null character:
+			// out << buffers[i][buffers[i].getSize()-1];
+		}
+		out << "\n";
+	}
+
+	out << flush;
 }
 
 
@@ -822,78 +817,78 @@ void ScorePageBase::printAscii(ostream& out, int roundQ, int verboseQ) {
 //     default value: verboseQ = 0
 //
 
-void ScorePageBase::printAsciiWithExtraParameters(ostream& out, int roundQ, 
-      int verboseQ) {
-   int i, j;
-   if (verboseQ) {
-      cout << "# OBJECTS TO WRITE IS " << data.getSize() << endl;
-   }
-   Array<Array<char> > buffers;
-   buffers.setSize(data.getSize() * 2);
-   buffers.setSize(0);
+void ScorePageBase::printAsciiWithExtraParameters(ostream& out, int roundQ,
+		int verboseQ) {
+	int i, j;
+	if (verboseQ) {
+		cout << "# OBJECTS TO WRITE IS " << data.getSize() << endl;
+	}
+	Array<Array<char> > buffers;
+	buffers.setSize(data.getSize() * 2);
+	buffers.setSize(0);
 
-   Array<int> bufferindex(data.getSize() * 2);
-   bufferindex.setSize(0);
+	Array<int> bufferindex(data.getSize() * 2);
+	bufferindex.setSize(0);
 
-   char buffer1[10000] = {0};
-   char buffer2[10000] = {0};
-   int index;
-   Array<char> spaces;
-   spaces.setSize(10000);
-   spaces.setAll(1);
-   int length;
+	char buffer1[10000] = {0};
+	char buffer2[10000] = {0};
+	int index;
+	Array<char> spaces;
+	spaces.setSize(10000);
+	spaces.setAll(1);
+	int length;
 
-   for (i=0; i<data.getSize(); i++) {
-      // data[i].printAscii(out, verboseQ);
-      data[i]->printAscii(buffer1, buffer2, 10000, roundQ, verboseQ);
-      index = buffers.getSize();
-      buffers.setSize(buffers.getSize()+1);
-      length = strlen(buffer1);
-      bufferindex.append(i);
-      buffers[index].setSize(length+1);
-      strcpy(buffers[index].getBase(), buffer1);
-      for (j=0; j<length; j++) {
-         if (buffer1[j] != ' ') {
-            spaces[j] = 0;
-         }
-      }
-      
-      length = strlen(buffer2);
-      if (length > 0) {
-         index = buffers.getSize();
-         bufferindex.append(i);
-         buffers.setSize(buffers.getSize()+1);
-         buffers[index].setSize(length+1);
-         strcpy(buffers[index].getBase(), buffer2);
-      }
-      
-      // out << '\n';
-   }
+	for (i=0; i<data.getSize(); i++) {
+		// data[i].printAscii(out, verboseQ);
+		data[i]->printAscii(buffer1, buffer2, 10000, roundQ, verboseQ);
+		index = buffers.getSize();
+		buffers.setSize(buffers.getSize()+1);
+		length = strlen(buffer1);
+		bufferindex.append(i);
+		buffers[index].setSize(length+1);
+		strcpy(buffers[index].getBase(), buffer1);
+		for (j=0; j<length; j++) {
+			if (buffer1[j] != ' ') {
+				spaces[j] = 0;
+			}
+		}
 
-   for (i=0; i<buffers.getSize(); i++) {
-      if ((i>0) && (strncmp(buffers[i-1].getBase(), "t", 1) == 0)) {
-         out << buffers[i].getBase();
-         out << "\n";
-         data[bufferindex[i]]->printAsciiExtraParameters(out, roundQ, verboseQ);
-      } else {
-         for (j=0; j<buffers[i].getSize()-1; j++) {
-            if (spaces[j] == 0) {
-               out << buffers[i][j];
-            } else if ((spaces[j] == 1) && (spaces[j+1] != 1)) {
-               out << buffers[i][j];
-            }
-         }
-	 // don't print the null character:
-         // out << buffers[i][buffers[i].getSize()-1];
-         out << "\n";
-         if (strncmp(buffers[i].getBase(), "t", 1) != 0) {
-            data[bufferindex[i]]->printAsciiExtraParameters(out, roundQ, 
-                  verboseQ);
-         }
-      }
-   }
+		length = strlen(buffer2);
+		if (length > 0) {
+			index = buffers.getSize();
+			bufferindex.append(i);
+			buffers.setSize(buffers.getSize()+1);
+			buffers[index].setSize(length+1);
+			strcpy(buffers[index].getBase(), buffer2);
+		}
 
-   out << flush;
+		// out << '\n';
+	}
+
+	for (i=0; i<buffers.getSize(); i++) {
+		if ((i>0) && (strncmp(buffers[i-1].getBase(), "t", 1) == 0)) {
+			out << buffers[i].getBase();
+			out << "\n";
+			data[bufferindex[i]]->printAsciiExtraParameters(out, roundQ, verboseQ);
+		} else {
+			for (j=0; j<buffers[i].getSize()-1; j++) {
+				if (spaces[j] == 0) {
+					out << buffers[i][j];
+				} else if ((spaces[j] == 1) && (spaces[j+1] != 1)) {
+					out << buffers[i][j];
+				}
+			}
+			// don't print the null character:
+			// out << buffers[i][buffers[i].getSize()-1];
+			out << "\n";
+			if (strncmp(buffers[i].getBase(), "t", 1) != 0) {
+				data[bufferindex[i]]->printAsciiExtraParameters(out, roundQ,
+						verboseQ);
+			}
+		}
+	}
+
+	out << flush;
 }
 
 //
@@ -909,12 +904,12 @@ void ScorePageBase::printAsciiWithExtraParameters(ostream& out, int roundQ,
 //////////////////////////////
 //
 // ScorePageBase::getSize --  Returns the number of objects on the page.
-//    This returns the size of the data array, or equivalently, the 
+//    This returns the size of the data array, or equivalently, the
 //    printOrder array.
 //
 
 int ScorePageBase::getSize(void) {
-   return data.getSize();
+	return data.getSize();
 }
 
 
@@ -926,8 +921,8 @@ int ScorePageBase::getSize(void) {
 //    for SCORE version 3 and less).
 //
 
-ScoreRecord& ScorePageBase::operator[](int index) { 
-   return *(data[index]);
+ScoreRecord& ScorePageBase::operator[](int index) {
+	return *(data[index]);
 }
 
 
@@ -937,52 +932,52 @@ ScoreRecord& ScorePageBase::operator[](int index) {
 // ScorePageBase::appendItem --  Add an item to the end of the main data array.
 //
 
-void ScorePageBase::appendItem(ScoreRecord& aRecord) { 
-   invalidateAnalyses();
+void ScorePageBase::appendItem(ScoreRecord& aRecord) {
+	invalidateAnalyses();
 
-   data.increase(1);
-   data.last() = new ScoreRecord;
-   *(data.last()) = aRecord;
+	data.increase(1);
+	data.last() = new ScoreRecord;
+	*(data.last()) = aRecord;
 }
 
 
 void ScorePageBase::appendItem(ScorePageBase& aPage) {
-   int i;
-   for (i=0; i<aPage.getSize(); i++) {
-      appendItem(aPage[i]);
-   }
+	int i;
+	for (i=0; i<aPage.getSize(); i++) {
+		appendItem(aPage[i]);
+	}
 }
 
 
 void ScorePageBase::appendItem(SigCollection<ScoreRecord>& recs) {
-   int i;
-   for (i=0; i<recs.getSize(); i++) {
-      appendItem(recs[i]);
-   }
+	int i;
+	for (i=0; i<recs.getSize(); i++) {
+		appendItem(recs[i]);
+	}
 }
 
 void ScorePageBase::appendItem(SigCollection<ScoreRecord*>& recs) {
-   int i;
-   for (i=0; i<recs.getSize(); i++) {
-      appendItem(*(recs[i]));
-   }
+	int i;
+	for (i=0; i<recs.getSize(); i++) {
+		appendItem(*(recs[i]));
+	}
 }
 
 
 
 //////////////////////////////
 //
-// ScorePageBase::shrinkParameters -- Compact all ScoreRecords in the 
-//      data array.  So that there are no values at the end of the 
+// ScorePageBase::shrinkParameters -- Compact all ScoreRecords in the
+//      data array.  So that there are no values at the end of the
 //      parameter list which are 0.0.  This is used to compress the data
 //      before printing it.
 //
 
 void ScorePageBase::shrinkParameters(void) {
-   int i;
-   for (i=0; i<data.getSize(); i++) {
-      data[i]->shrink();
-   }
+	int i;
+	for (i=0; i<data.getSize(); i++) {
+		data[i]->shrink();
+	}
 }
 
 //
@@ -1001,7 +996,7 @@ void ScorePageBase::shrinkParameters(void) {
 //
 
 void ScorePageBase::setVersion(float value) {
-   trailer[trailer.getSize()-1-3] = value;
+	trailer[trailer.getSize()-1-3] = value;
 }
 
 
@@ -1012,7 +1007,7 @@ void ScorePageBase::setVersion(float value) {
 //
 
 void ScorePageBase::setVersionWinScore(void) {
-   trailer[trailer.getSize()-1-3] = 6.0;
+	trailer[trailer.getSize()-1-3] = 6.0;
 }
 
 
@@ -1023,7 +1018,7 @@ void ScorePageBase::setVersionWinScore(void) {
 //
 
 float ScorePageBase::getVersion(void) {
-   return trailer[trailer.getSize()-1-3];
+	return trailer[trailer.getSize()-1-3];
 }
 
 
@@ -1034,9 +1029,9 @@ float ScorePageBase::getVersion(void) {
 //
 
 void ScorePageBase::setSerial(long value) {
-   union { long i; float f; } u;
-   u.i = value;
-   trailer[trailer.getSize()-1-4] = u.f;
+	union { long i; float f; } u;
+	u.i = value;
+	trailer[trailer.getSize()-1-4] = u.f;
 }
 
 
@@ -1048,9 +1043,9 @@ void ScorePageBase::setSerial(long value) {
 //
 
 long ScorePageBase::getSerial(void) {
-   union { long i; float f; } u;
-   u.f = trailer[trailer.getSize()-1-4];
-   return u.i;
+	union { long i; float f; } u;
+	u.f = trailer[trailer.getSize()-1-4];
+	return u.i;
 }
 
 //
@@ -1066,13 +1061,13 @@ long ScorePageBase::getSerial(void) {
 //////////////////////////////
 //
 // ScorePageBase::analyzeSort -- Process "data" array and sort for use
-//     in pagePrintSequence and 
+//     in pagePrintSequence and
 //
 //
 
 void ScorePageBase::analyzeSort(void) {
-   createDefaultPrintSortOrder();
-   createLineStaffSequence();
+	createDefaultPrintSortOrder();
+	createLineStaffSequence();
 }
 
 
@@ -1086,10 +1081,10 @@ void ScorePageBase::analyzeSort(void) {
 //
 
 void ScorePageBase::createDefaultPrintSortOrder(void) {
-   pagePrintSequence.setSize(getSize());
-   pagePrintSequence.allowGrowth(0);
-   pagePrintSequence.setAll(0, 1);
-   printAnalysisQ = 1;
+	pagePrintSequence.setSize(getSize());
+	pagePrintSequence.allowGrowth(0);
+	pagePrintSequence.setAll(0, 1);
+	printAnalysisQ = 1;
 }
 
 
@@ -1102,79 +1097,79 @@ void ScorePageBase::createDefaultPrintSortOrder(void) {
 //
 
 void ScorePageBase::createLineStaffSequence(void) {
-   int i;
+	int i;
 
-   ScorePageBase& thispage = *this;
-  
-   // first set the number of staves to 100.  The list will be indexed by
-   // the P2 value of the object (staff 0 will not be used for regular staves).
-   // Currently staff count on a page of 99 or less is allowed.
-   lineStaffSequence.setSize(100);
-   for (i=0; i<lineStaffSequence.getSize(); i++) {
-      lineStaffSequence[i].setSize(0);
-   }
+	ScorePageBase& thispage = *this;
 
-   // count the number of objects on each staff (so that the space
-   // can be preallocated).
-   Array<int> objcount(100);
-   objcount.setAll(0);
-   int staffnum;
-   for (i=0; i<thispage.getSize(); i++) {
-      staffnum = thispage[i].getStaffNumber();
-      if (staffnum < 0 || staffnum >= 100) {
-         continue;
-      }
-      objcount[staffnum]++;
-   }
+	// first set the number of staves to 100.  The list will be indexed by
+	// the P2 value of the object (staff 0 will not be used for regular staves).
+	// Currently staff count on a page of 99 or less is allowed.
+	lineStaffSequence.setSize(100);
+	for (i=0; i<lineStaffSequence.getSize(); i++) {
+		lineStaffSequence[i].setSize(0);
+	}
 
-   // pre-allocate space for each staff;
-   for (i=0; i<lineStaffSequence.getSize(); i++) {
-      lineStaffSequence.setSize(objcount[i]);
-      lineStaffSequence.setGrowth(1000);
-      lineStaffSequence.setSize(0);
-   }
+	// count the number of objects on each staff (so that the space
+	// can be preallocated).
+	Array<int> objcount(100);
+	objcount.setAll(0);
+	int staffnum;
+	for (i=0; i<thispage.getSize(); i++) {
+		staffnum = thispage[i].getStaffNumber();
+		if (staffnum < 0 || staffnum >= 100) {
+			continue;
+		}
+		objcount[staffnum]++;
+	}
 
-   // split out objects by staff number:
-   maxStaffNumber = -1;
-   for (i=0; i<thispage.getSize(); i++) {
-      staffnum = thispage[i].getStaffNumber();
-      if (staffnum < 0 || staffnum >= 100) {
-         continue;
-      }
-      if (staffnum > maxStaffNumber) {
-         maxStaffNumber = staffnum;
-      }
-      lineStaffSequence[staffnum].append(i);
-   }
+	// pre-allocate space for each staff;
+	for (i=0; i<lineStaffSequence.getSize(); i++) {
+		lineStaffSequence.setSize(objcount[i]);
+		lineStaffSequence.setGrowth(1000);
+		lineStaffSequence.setSize(0);
+	}
 
-   // Identify which staves have any data on them and store
-   // a list of these staves in pageStaffList.
-   pageStaffList.setSize(100);
-   pageStaffList.setSize(0);
-   for (i=0; i<lineStaffSequence.getSize(); i++) {
-      if (lineStaffSequence[i].getSize() > 0) {
-         pageStaffList.append(i);
-      }
-   }
-   // Create a reverse mapping of pageStaffList which can find the 
-   // consecutive staff enumeration from the P2 value.  The P2 value
-   // must be between 0 (but really 1 for real data) and 99.
-   pageStaffListReverse.setSize(100);
-   pageStaffListReverse.setAll(-1);
-   for (i=0; i<pageStaffList.getSize(); i++) {
-      pageStaffListReverse[pageStaffList[i]] = i;
-   }
+	// split out objects by staff number:
+	maxStaffNumber = -1;
+	for (i=0; i<thispage.getSize(); i++) {
+		staffnum = thispage[i].getStaffNumber();
+		if (staffnum < 0 || staffnum >= 100) {
+			continue;
+		}
+		if (staffnum > maxStaffNumber) {
+			maxStaffNumber = staffnum;
+		}
+		lineStaffSequence[staffnum].append(i);
+	}
 
-   // Sort each stave from left to right (hpos) and ties from low to high
-   // (vpos), and ties by P1 (object type).
-   for (i=0; i<lineStaffSequence.getSize(); i++) {
-      if (lineStaffSequence[i].getSize() == 0) {
-         continue;
-      }
-      sortByHpos(lineStaffSequence[i]);
-   }
+	// Identify which staves have any data on them and store
+	// a list of these staves in pageStaffList.
+	pageStaffList.setSize(100);
+	pageStaffList.setSize(0);
+	for (i=0; i<lineStaffSequence.getSize(); i++) {
+		if (lineStaffSequence[i].getSize() > 0) {
+			pageStaffList.append(i);
+		}
+	}
+	// Create a reverse mapping of pageStaffList which can find the
+	// consecutive staff enumeration from the P2 value.  The P2 value
+	// must be between 0 (but really 1 for real data) and 99.
+	pageStaffListReverse.setSize(100);
+	pageStaffListReverse.setAll(-1);
+	for (i=0; i<pageStaffList.getSize(); i++) {
+		pageStaffListReverse[pageStaffList[i]] = i;
+	}
 
-   sortAnalysisQ = 1;
+	// Sort each stave from left to right (hpos) and ties from low to high
+	// (vpos), and ties by P1 (object type).
+	for (i=0; i<lineStaffSequence.getSize(); i++) {
+		if (lineStaffSequence[i].getSize() == 0) {
+			continue;
+		}
+		sortByHpos(lineStaffSequence[i]);
+	}
+
+	sortAnalysisQ = 1;
 }
 
 
@@ -1186,7 +1181,7 @@ void ScorePageBase::createLineStaffSequence(void) {
 //
 
 void ScorePageBase::sortByHpos(Array<int>& objects) {
-   ScorePageBase::quickSortByDataIndex(objects, 0, objects.getSize()-1);
+	ScorePageBase::quickSortByDataIndex(objects, 0, objects.getSize()-1);
 }
 
 
@@ -1194,32 +1189,32 @@ void ScorePageBase::sortByHpos(Array<int>& objects) {
 //////////////////////////////
 //
 // ScorePageBase::quickSortByDataIndex -- Called by sortByHpos() and does all
-//    of the actual sorting.  Uses the contents of the data array for 
+//    of the actual sorting.  Uses the contents of the data array for
 //    comparison of indices.
 //
 
-void ScorePageBase::quickSortByDataIndex(Array<int>& indexes, 
-      int starti, int endi) {
-   if (starti < endi) {
-      int pivotvalue = indexes[starti];
-      int left = starti - 1;
-      int right = endi + 1;
- 
-      for(;;) {
-         while (isGreater(indexes[--right], pivotvalue));
-         while (isLess(indexes[++left], pivotvalue));
- 
-         if (left >= right) break;
- 
-         int temp = indexes[right];
-         indexes[right] = indexes[left];
-         indexes[left] = temp;
-      }
+void ScorePageBase::quickSortByDataIndex(Array<int>& indexes,
+		int starti, int endi) {
+	if (starti < endi) {
+		int pivotvalue = indexes[starti];
+		int left = starti - 1;
+		int right = endi + 1;
 
-      int pivot = right;
-      quickSortByDataIndex(indexes, starti, pivot);
-      quickSortByDataIndex(indexes, pivot+1, endi);
-   }
+		for(;;) {
+			while (isGreater(indexes[--right], pivotvalue));
+			while (isLess(indexes[++left], pivotvalue));
+
+			if (left >= right) break;
+
+			int temp = indexes[right];
+			indexes[right] = indexes[left];
+			indexes[left] = temp;
+		}
+
+		int pivot = right;
+		quickSortByDataIndex(indexes, starti, pivot);
+		quickSortByDataIndex(indexes, pivot+1, endi);
+	}
 }
 
 
@@ -1231,30 +1226,30 @@ void ScorePageBase::quickSortByDataIndex(Array<int>& indexes,
 //
 
 int ScorePageBase::isGreater(int a, int b) {
-   // primary sort by hpos
-   if (data[a]->getHpos() > data[b]->getHpos()) {
-      return 1;
-   } else if (data[a]->getHpos() < data[b]->getHpos()) {
-      return 0;
-   }
+	// primary sort by hpos
+	if (data[a]->getHpos() > data[b]->getHpos()) {
+		return 1;
+	} else if (data[a]->getHpos() < data[b]->getHpos()) {
+		return 0;
+	}
 
-   // ties sorted by vpos
-   if (data[a]->getVpos() > data[b]->getVpos()) {
-      return 1;
-   } else if (data[a]->getVpos() < data[b]->getVpos()) {
-      return 0;
-   }
+	// ties sorted by vpos
+	if (data[a]->getVpos() > data[b]->getVpos()) {
+		return 1;
+	} else if (data[a]->getVpos() < data[b]->getVpos()) {
+		return 0;
+	}
 
-   // ties sorted by (int)P1 value
-   if ((int)data[a]->getValue(P1) > (int)data[b]->getValue(P1)) {
-      return 1;
-   } else if ((int)data[a]->getValue(P1) < (int)data[b]->getValue(P1)) {
-      return 0;
-   }
+	// ties sorted by (int)P1 value
+	if ((int)data[a]->getValue(P1) > (int)data[b]->getValue(P1)) {
+		return 1;
+	} else if ((int)data[a]->getValue(P1) < (int)data[b]->getValue(P1)) {
+		return 0;
+	}
 
-   // same hpos, same vpos, same P1, so determine that two objects are equal
-   // (neither is greater than the other):
-   return 0;
+	// same hpos, same vpos, same P1, so determine that two objects are equal
+	// (neither is greater than the other):
+	return 0;
 }
 
 
@@ -1266,30 +1261,30 @@ int ScorePageBase::isGreater(int a, int b) {
 //
 
 int ScorePageBase::isLess(int a, int b) {
-   // primary sort by hpos
-   if (data[a]->getHpos() < data[b]->getHpos()) {
-      return 1;
-   } else if (data[a]->getHpos() > data[b]->getHpos()) {
-      return 0;
-   }
+	// primary sort by hpos
+	if (data[a]->getHpos() < data[b]->getHpos()) {
+		return 1;
+	} else if (data[a]->getHpos() > data[b]->getHpos()) {
+		return 0;
+	}
 
-   // ties sorted by vpos
-   if (data[a]->getVpos() < data[b]->getVpos()) {
-      return 1;
-   } else if (data[a]->getVpos() > data[b]->getVpos()) {
-      return 0;
-   }
+	// ties sorted by vpos
+	if (data[a]->getVpos() < data[b]->getVpos()) {
+		return 1;
+	} else if (data[a]->getVpos() > data[b]->getVpos()) {
+		return 0;
+	}
 
-   // ties sorted by (int)P1 value
-   if ((int)data[a]->getValue(P1) < (int)data[b]->getValue(P1)) {
-      return 1;
-   } else if ((int)data[a]->getValue(P1) > (int)data[b]->getValue(P1)) {
-      return 0;
-   }
+	// ties sorted by (int)P1 value
+	if ((int)data[a]->getValue(P1) < (int)data[b]->getValue(P1)) {
+		return 1;
+	} else if ((int)data[a]->getValue(P1) > (int)data[b]->getValue(P1)) {
+		return 0;
+	}
 
-   // same hpos, same vpos, same P1, so determine that two objects are equal
-   // (neither is less than the other):
-   return 0;
+	// same hpos, same vpos, same P1, so determine that two objects are equal
+	// (neither is less than the other):
+	return 0;
 }
 
 
@@ -1299,44 +1294,44 @@ int ScorePageBase::isLess(int a, int b) {
 
 //////////////////////////////
 //
-// ScorePageBase::compareSystemIndexes -- sort staff number, then 
+// ScorePageBase::compareSystemIndexes -- sort staff number, then
 //     horizontal position, then item code, then vertical position.
 //
 
 int ScorePageBase::compareSystemIndexes(const void* A, const void* B) {
-   ScoreRecord& a = *((ScoreRecord*)A);
-   ScoreRecord& b = *((ScoreRecord*)B);
+	ScoreRecord& a = *((ScoreRecord*)A);
+	ScoreRecord& b = *((ScoreRecord*)B);
 
-   if (a.getPValue(2) < b.getPValue(2)) {
-      return -1;
-   } else if (a.getPValue(2) > b.getPValue(2)) {
-      return 1;
-   }
+	if (a.getPValue(2) < b.getPValue(2)) {
+		return -1;
+	} else if (a.getPValue(2) > b.getPValue(2)) {
+		return 1;
+	}
 
-   // staff line tie: resolve by horizontal postion
-   if (a.getPValue(3) < b.getPValue(3)) {
-      return -1;
-   } else if (a.getPValue(3) > b.getPValue(3)) {
-      return 1;
-   }
+	// staff line tie: resolve by horizontal postion
+	if (a.getPValue(3) < b.getPValue(3)) {
+		return -1;
+	} else if (a.getPValue(3) > b.getPValue(3)) {
+		return 1;
+	}
 
-   // horizontal postion tie: resolve by code item
-   if (a.getPValue(1) < b.getPValue(1)) {
-      return -1;
-   } else if (a.getPValue(1) > b.getPValue(1)) {
-      return 1;
-   }
+	// horizontal postion tie: resolve by code item
+	if (a.getPValue(1) < b.getPValue(1)) {
+		return -1;
+	} else if (a.getPValue(1) > b.getPValue(1)) {
+		return 1;
+	}
 
-   // still a tie: sort from lowest vertical postion to highest
-   // vertical position
-   if (a.getPValue(4) < b.getPValue(4)) {
-      return -1;
-   } else if (a.getPValue(4) > b.getPValue(4)) {
-      return 1;
-   }
+	// still a tie: sort from lowest vertical postion to highest
+	// vertical position
+	if (a.getPValue(4) < b.getPValue(4)) {
+		return -1;
+	} else if (a.getPValue(4) > b.getPValue(4)) {
+		return 1;
+	}
 
-   // still a tie: give up and say they are equal
-   return 0;
+	// still a tie: give up and say they are equal
+	return 0;
 
 }
 
@@ -1350,39 +1345,39 @@ int ScorePageBase::compareSystemIndexes(const void* A, const void* B) {
 //
 
 int ScorePageBase::compareStaff(const void* A, const void* B) {
-   ScoreRecord& a = **((ScoreRecord**)A);
-   ScoreRecord& b = **((ScoreRecord**)B);
+	ScoreRecord& a = **((ScoreRecord**)A);
+	ScoreRecord& b = **((ScoreRecord**)B);
 
-   if (a.getPValue(2) < b.getPValue(2)) {
-      return -1;
-   } else if (a.getPValue(2) > b.getPValue(2)) {
-      return 1;
-   }
+	if (a.getPValue(2) < b.getPValue(2)) {
+		return -1;
+	} else if (a.getPValue(2) > b.getPValue(2)) {
+		return 1;
+	}
 
-   // staff line tie: resolve by horizontal postion
-   if (a.getPValue(3) < b.getPValue(3)) {
-      return -1;
-   } else if (a.getPValue(3) > b.getPValue(3)) {
-      return 1;
-   }
+	// staff line tie: resolve by horizontal postion
+	if (a.getPValue(3) < b.getPValue(3)) {
+		return -1;
+	} else if (a.getPValue(3) > b.getPValue(3)) {
+		return 1;
+	}
 
-   // horizontal postion tie: resolve by code item
-   if (a.getPValue(1) < b.getPValue(1)) {
-      return -1;
-   } else if (a.getPValue(1) > b.getPValue(1)) {
-      return 1;
-   }
+	// horizontal postion tie: resolve by code item
+	if (a.getPValue(1) < b.getPValue(1)) {
+		return -1;
+	} else if (a.getPValue(1) > b.getPValue(1)) {
+		return 1;
+	}
 
-   // still a tie: sort from lowest vertical postion to highest
-   // vertical position
-   if (a.getPValue(4) < b.getPValue(4)) {
-      return -1;
-   } else if (a.getPValue(4) > b.getPValue(4)) {
-      return 1;
-   }
+	// still a tie: sort from lowest vertical postion to highest
+	// vertical position
+	if (a.getPValue(4) < b.getPValue(4)) {
+		return -1;
+	} else if (a.getPValue(4) > b.getPValue(4)) {
+		return 1;
+	}
 
-   // still a tie: give up and say they are equal
-   return 0;
+	// still a tie: give up and say they are equal
+	return 0;
 
 }
 
@@ -1397,44 +1392,44 @@ int ScorePageBase::compareStaff(const void* A, const void* B) {
 //
 
 int ScorePageBase::compareSystem(const void* A, const void* B) {
-   ScoreRecord& a = *(((SystemRecord*)A)->ptr);
-   ScoreRecord& b = *(((SystemRecord*)B)->ptr);
+	ScoreRecord& a = *(((SystemRecord*)A)->ptr);
+	ScoreRecord& b = *(((SystemRecord*)B)->ptr);
 
-   // Sort by horizontal postion
-   if (a.getPValue(3) < b.getPValue(3)) {
-      return -1;
-   } else if (a.getPValue(3) > b.getPValue(3)) {
-      return 1;
-   }
+	// Sort by horizontal postion
+	if (a.getPValue(3) < b.getPValue(3)) {
+		return -1;
+	} else if (a.getPValue(3) > b.getPValue(3)) {
+		return 1;
+	}
 
-   // then by staff line
-   if (a.getPValue(2) < b.getPValue(2)) {
-      return -1;
-   } else if (a.getPValue(2) > b.getPValue(2)) {
-      return 1;
-   }
+	// then by staff line
+	if (a.getPValue(2) < b.getPValue(2)) {
+		return -1;
+	} else if (a.getPValue(2) > b.getPValue(2)) {
+		return 1;
+	}
 
-   // horizontal postion tie: resolve by code item
-   if (a.getPValue(1) < b.getPValue(1)) {
-      return -1;
-   } else if (a.getPValue(1) > b.getPValue(1)) {
-      return 1;
-   }
+	// horizontal postion tie: resolve by code item
+	if (a.getPValue(1) < b.getPValue(1)) {
+		return -1;
+	} else if (a.getPValue(1) > b.getPValue(1)) {
+		return 1;
+	}
 
-   // still a tie: sort from lowest vertical postion to highest
-   // vertical position
-   if (a.getPValue(4) < b.getPValue(4)) {
-      return -1;
-   } else if (a.getPValue(4) > b.getPValue(4)) {
-      return 1;
-   }
+	// still a tie: sort from lowest vertical postion to highest
+	// vertical position
+	if (a.getPValue(4) < b.getPValue(4)) {
+		return -1;
+	} else if (a.getPValue(4) > b.getPValue(4)) {
+		return 1;
+	}
 
-   // still a tie: give up and say they are equal
-   return 0;
+	// still a tie: give up and say they are equal
+	return 0;
 
 }
 
 */
 
 
-// md5sum: e1c6f792fbddebf040ffe0355fedb619 ScorePageBase.cpp [20050403]
+

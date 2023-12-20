@@ -15,14 +15,14 @@
 //////////////////////////////////////////////////
 //
 // pcre *pcre_compile (
-//        const          char  *pattern, 
+//        const          char  *pattern,
 //                       int    options,
-//        const          char **errptr,  
+//        const          char **errptr,
 //                       int   *erroffset,
 //        const unsigned char  *tableptr);
 //
 // pattern: regular expression you are going to search with
-// options: 
+// options:
 //  PCRE_ANCHORED         Force pattern anchoring
 //  PCRE_AUTO_CALLOUT     Compile automatic callouts
 //  PCRE_BSR_ANYCRLF      \R matches only CR, LF, or CRLF
@@ -40,11 +40,11 @@
 //  PCRE_NEWLINE_CR       Set CR as the newline sequence
 //  PCRE_NEWLINE_CRLF     Set CRLF as the newline sequence
 //  PCRE_NEWLINE_LF       Set LF as the newline sequence
-//  PCRE_NO_AUTO_CAPTURE  Disable numbered capturing parentheses 
+//  PCRE_NO_AUTO_CAPTURE  Disable numbered capturing parentheses
 //                        (named ones available)
 //  PCRE_UNGREEDY         Invert greediness of quantifiers
 //  PCRE_UTF8             Run in UTF-8 mode
-//  PCRE_NO_UTF8_CHECK    Do not check the pattern for UTF-8 validity 
+//  PCRE_NO_UTF8_CHECK    Do not check the pattern for UTF-8 validity
 //                        (only relevant if PCRE_UTF8 is set)
 // errptr = pointer to an error string if compile is unsuccessful.
 // erroroffset = index of start of error (presumably)
@@ -55,13 +55,13 @@
 //////////////////////////////////////////////////
 //
 // int pcre_exec(
-//         const pcre       *code, 
+//         const pcre       *code,
 //         const pcre_extra *extra,
-//         const char       *subject, 
-//               int         length, 
+//         const char       *subject,
+//               int         length,
 //               int         startoffset,
-//               int         options, 
-//               int        *ovector, 
+//               int         options,
+//               int        *ovector,
 //               int         ovecsize);
 //
 // code:        PCRE structure created with pcre_compile().
@@ -69,7 +69,7 @@
 // subject:     String to search.
 // length:      Length of string to search.
 // startoffset: Offset in bytes in the subject at which to start matching.
-// options: 
+// options:
 //    PCRE_ANCHORED    == Match only at the first position.
 //    PCRE_BSR_ANYCRLF == \R matche only CR, LF, or CRLF.
 //    PCRE_BSR_UNICODE == \R matches all Unicoe line endings.
@@ -87,7 +87,7 @@
 // ovector:  Vector of ints for matching offsets.
 //    [0] = starting index
 //    [1] = stopping index
-//    [2] = 
+//    [2] =
 // ovecsize: size of ovector divided by three
 //
 //
@@ -119,10 +119,10 @@
 //////////////////////////////////////////////////
 //
 // pcre_extra* pcre_study(
-//        const pcre  *code, 
-//        int          options, 
+//        const pcre  *code,
+//        int          options,
 //        const char **errptr);
-// 
+//
 // If a compiled pattern is going to be used several times, it is worth
 // spending more time analyzing it in order to speed up the time taken for
 // matching. The function pcre_study() takes a pointer to a compiled pattern
@@ -130,20 +130,20 @@
 // information that will help speed up matching, pcre_study() returns a
 // pointer to a pcre_extra block, in which the study_data field points to
 // the results of the study.
-// 
+//
 // The returned value from pcre_study() can be passed directly to
 // pcre_exec(). However, a pcre_extra block also contains other fields that
 // can be set by the caller before the block is passed; these are described
 // below in the section on matching a pattern.
-// 
+//
 // If studying the pattern does not produce any additional information
 // pcre_study() returns NULL. In that circumstance, if the calling program
 // wants to pass any of the other fields to pcre_exec(), it must set up
 // its own pcre_extra block.
-// 
+//
 // The second argument of pcre_study() contains option bits. At present,
 // no options are defined, and this argument should always be zero.
-// 
+//
 // The third argument for pcre_study() is a pointer for an error message. If
 // studying succeeds (even if no data is returned), the variable it points
 // to is set to NULL. Otherwise it is set to point to a textual error
@@ -177,30 +177,30 @@ using namespace std;
 //
 
 PerlRegularExpression::PerlRegularExpression(void) {
-   valid       = 0;
-   globalQ     = 0;
-   extendedQ   = 1;  // always extended for PCRE
-   ignorecaseQ = 0;
-   studyQ      = 0;
-   anchorQ     = 0;
+	valid       = 0;
+	globalQ     = 0;
+	extendedQ   = 1;  // always extended for PCRE
+	ignorecaseQ = 0;
+	studyQ      = 0;
+	anchorQ     = 0;
 
-   output_substrings.setSize(3 * 100);  // has to be a multiple of 3
-   output_substrings.setAll(0);
+	output_substrings.setSize(3 * 100);  // has to be a multiple of 3
+	output_substrings.setAll(0);
 
-   pre = NULL;
-   pe  = NULL;
+	pre = NULL;
+	pe  = NULL;
 
-   search_string.setSize(1);
-   search_string[0]  = '\0';
+	search_string.setSize(1);
+	search_string[0]  = '\0';
 
-   replace_string.setSize(1);
-   replace_string[0] = '\0';
+	replace_string.setSize(1);
+	replace_string[0] = '\0';
 
-   substring.setSize(1);
-   substring[0] = '\0';
+	substring.setSize(1);
+	substring[0] = '\0';
 
-   input_string.setSize(1);
-   input_string[0] = '\0';
+	input_string.setSize(1);
+	input_string[0] = '\0';
 }
 
 
@@ -211,11 +211,10 @@ PerlRegularExpression::PerlRegularExpression(void) {
 //
 
 PerlRegularExpression::~PerlRegularExpression() {
-   if (pre != NULL) {
-      pcre_free(pre);
-      pre = NULL;
-   }
-	 
+	if (pre != NULL) {
+		pcre_free(pre);
+		pre = NULL;
+	}
 }
 
 
@@ -226,9 +225,9 @@ PerlRegularExpression::~PerlRegularExpression() {
 //
 
 void PerlRegularExpression::setReplaceString(const char* replacestring) {
-   int len = strlen(replacestring);
-   replace_string.setSize(len+1);
-   strcpy(replace_string.getBase(), replacestring);
+	int len = strlen(replacestring);
+	replace_string.setSize(len+1);
+	strcpy(replace_string.getBase(), replacestring);
 }
 
 
@@ -240,11 +239,11 @@ void PerlRegularExpression::setReplaceString(const char* replacestring) {
 //
 
 int PerlRegularExpression::getSubmatchStart(int index) {
-   int output = -1;
-   if (index < 100) {
-      output = output_substrings[index*2];
-   }
-   return output;
+	int output = -1;
+	if (index < 100) {
+		output = output_substrings[index*2];
+	}
+	return output;
 }
 
 
@@ -252,24 +251,24 @@ int PerlRegularExpression::getSubmatchStart(int index) {
 //////////////////////////////
 //
 // PerlRegularExpression::getSubmatchEnd -- returns the character
-//    byte offset of the character after the last character in search 
+//    byte offset of the character after the last character in search
 //    string for the index-th match.
 //
 
 int PerlRegularExpression::getSubmatchEnd(int index) {
-   int output = -1;
-   if (index < 100) {
-      output = output_substrings[index*2+1];
-   }
-   return output;
+	int output = -1;
+	if (index < 100) {
+		output = output_substrings[index*2+1];
+	}
+	return output;
 }
 
 
 
 //////////////////////////////
 //
-//  PerlRegularExpression::getSubmatch -- Returns the specified 
-//      submatch from the last search which was done.  Index 0 
+//  PerlRegularExpression::getSubmatch -- Returns the specified
+//      submatch from the last search which was done.  Index 0
 //      contains the total match, and indices 1 and higher contain
 //      any substring matches which are specified by placing ()
 //      markers around part of the regular expression used in searching.
@@ -277,33 +276,33 @@ int PerlRegularExpression::getSubmatchEnd(int index) {
 //
 
 const char* PerlRegularExpression::getSubmatch(int index) {
-   int start = 0;
-   int stop  = 0;
-   int len   = 0;
-	 
-   if (index < 100) {
-      start = output_substrings[index*2];
-      stop  = output_substrings[index*2+1];
-      len   = stop - start;
-   }
+	int start = 0;
+	int stop  = 0;
+	int len   = 0;
 
-   if (len <= 0) {
-      substring.setSize(1);
-      substring[0] = '\0';
-      return substring.getBase();
-   }
+	if (index < 100) {
+		start = output_substrings[index*2];
+		stop  = output_substrings[index*2+1];
+		len   = stop - start;
+	}
 
-   if (len+start+1 > input_string.getSize()) {
-      // match entry is invalid, so return empty string
-      substring.setSize(1);
-      substring[0] = '\0';
-      return substring.getBase();
-   }
+	if (len <= 0) {
+		substring.setSize(1);
+		substring[0] = '\0';
+		return substring.getBase();
+	}
 
-   substring.setSize(len+1);
-   strncpy(substring.getBase(), input_string.getBase()+start, len);
-   substring[substring.getSize()-1] = '\0';
-   return substring.getBase();
+	if (len+start+1 > input_string.getSize()) {
+		// match entry is invalid, so return empty string
+		substring.setSize(1);
+		substring[0] = '\0';
+		return substring.getBase();
+	}
+
+	substring.setSize(len+1);
+	strncpy(substring.getBase(), input_string.getBase()+start, len);
+	substring[substring.getSize()-1] = '\0';
+	return substring.getBase();
 }
 
 
@@ -312,7 +311,7 @@ const char* PerlRegularExpression::getSubmatch(int index) {
 // have to be re-copied into the temporary storage string.
 
 const char* PerlRegularExpression::getSubmatch(void) {
-   return substring.getBase();
+	return substring.getBase();
 }
 
 
@@ -322,12 +321,12 @@ const char* PerlRegularExpression::getSubmatch(void) {
 //
 
 void PerlRegularExpression::setSearchString(const char* searchstring) {
-   if (strcmp(searchstring, search_string.getBase()) != 0) {
-      valid = 0;
-      int len = strlen(searchstring);
-      search_string.setSize(len+1);
-      strcpy(search_string.getBase(), searchstring);
-   }
+	if (strcmp(searchstring, search_string.getBase()) != 0) {
+		valid = 0;
+		int len = strlen(searchstring);
+		search_string.setSize(len+1);
+		strcpy(search_string.getBase(), searchstring);
+	}
 }
 
 
@@ -338,7 +337,7 @@ void PerlRegularExpression::setSearchString(const char* searchstring) {
 //
 
 void PerlRegularExpression::setGlobal(void) {
-   globalQ = 1;
+	globalQ = 1;
 }
 
 
@@ -349,7 +348,7 @@ void PerlRegularExpression::setGlobal(void) {
 //
 
 void PerlRegularExpression::setSingle(void) {
-   globalQ = 0;
+	globalQ = 0;
 }
 
 
@@ -360,10 +359,10 @@ void PerlRegularExpression::setSingle(void) {
 //
 
 void PerlRegularExpression::setExtendedSyntax(void) {
-   if (extendedQ != 1) {
-      extendedQ = 1;
-      valid = 0;
-   }
+	if (extendedQ != 1) {
+		extendedQ = 1;
+		valid = 0;
+	}
 }
 
 
@@ -374,10 +373,10 @@ void PerlRegularExpression::setExtendedSyntax(void) {
 //
 
 void PerlRegularExpression::setBasicSyntax(void) {
-   if (extendedQ != 0) {
-      extendedQ = 0;
-      valid = 0;
-   }
+	if (extendedQ != 0) {
+		extendedQ = 0;
+		valid = 0;
+	}
 }
 
 
@@ -391,7 +390,7 @@ void PerlRegularExpression::setBasicSyntax(void) {
 //
 
 void PerlRegularExpression::setAnchor(void) {
-     anchorQ = 1;
+	anchorQ = 1;
 }
 
 
@@ -404,7 +403,7 @@ void PerlRegularExpression::setAnchor(void) {
 //
 
 void PerlRegularExpression::setNoAnchor(void) {
-    anchorQ = 0;
+	anchorQ = 0;
 }
 
 
@@ -415,10 +414,10 @@ void PerlRegularExpression::setNoAnchor(void) {
 //
 
 void PerlRegularExpression::setIgnoreCase(void) {
-   if (ignorecaseQ != 1) {
-      ignorecaseQ = 1;
-      valid = 0;
-   }
+	if (ignorecaseQ != 1) {
+		ignorecaseQ = 1;
+		valid = 0;
+	}
 }
 
 
@@ -429,10 +428,10 @@ void PerlRegularExpression::setIgnoreCase(void) {
 //
 
 void PerlRegularExpression::setNoIgnoreCase(void) {
-   if (ignorecaseQ != 0) {
-      ignorecaseQ = 0;
-      valid = 0;
-   }
+	if (ignorecaseQ != 0) {
+		ignorecaseQ = 0;
+		valid = 0;
+	}
 }
 
 
@@ -444,39 +443,39 @@ void PerlRegularExpression::setNoIgnoreCase(void) {
 
 void PerlRegularExpression::initializeSearch(void) {
 
-   int compflags = 0;
-   // PCRE always uses extended regular expressions
-   if (ignorecaseQ) {
-      compflags |= PCRE_CASELESS;
-   }
-   if (anchorQ) {
-      compflags |= PCRE_ANCHORED;
-   }
+	int compflags = 0;
+	// PCRE always uses extended regular expressions
+	if (ignorecaseQ) {
+		compflags |= PCRE_CASELESS;
+	}
+	if (anchorQ) {
+		compflags |= PCRE_ANCHORED;
+	}
 
-   if (pre != NULL) {
-      pcre_free(pre);
-      pre = NULL;
-   }
+	if (pre != NULL) {
+		pcre_free(pre);
+		pre = NULL;
+	}
 
-   pre = pcre_compile(search_string.getBase(), compflags, &compile_error,
-      &error_offset, NULL);
-		     
-   if (pre == NULL) {
-      cerr << "Error trying to understand regular expression: "
-           << search_string.getBase() << endl;
-      cerr << "Reason: ";
-      if (compile_error != NULL) {
-         cout << compile_error << endl;
-      } else {
-         cout << "None." << endl;
-      }
-      cerr << "Error offset: " << error_offset << endl;
-      cerr << endl;
-      exit(1);
-   }
+	pre = pcre_compile(search_string.getBase(), compflags, &compile_error,
+		&error_offset, NULL);
 
-   valid = 1;
-   studyQ = 0;
+	if (pre == NULL) {
+		cerr << "Error trying to understand regular expression: "
+			  << search_string.getBase() << endl;
+		cerr << "Reason: ";
+		if (compile_error != NULL) {
+			cout << compile_error << endl;
+		} else {
+			cout << "None." << endl;
+		}
+		cerr << "Error offset: " << error_offset << endl;
+		cerr << endl;
+		exit(1);
+	}
+
+	valid = 1;
+	studyQ = 0;
 }
 
 
@@ -487,8 +486,8 @@ void PerlRegularExpression::initializeSearch(void) {
 //
 
 void PerlRegularExpression::initializeSearchAndStudy(void) {
-   initializeSearch();
-   studySearch();
+	initializeSearch();
+	studySearch();
 }
 
 
@@ -499,8 +498,8 @@ void PerlRegularExpression::initializeSearchAndStudy(void) {
 //
 
 void PerlRegularExpression::initializeSearchAndStudy(const char* searchstring) {
-   initializeSearch(searchstring);
-   studySearch();
+	initializeSearch(searchstring);
+	studySearch();
 }
 
 
@@ -513,12 +512,12 @@ void PerlRegularExpression::initializeSearchAndStudy(const char* searchstring) {
 
 void PerlRegularExpression::initializeSearch(const char* searchstring) {
 
-   setSearchString(searchstring);
-   if (valid) {
-      return;
-   } else {
-      initializeSearch();
-   }
+	setSearchString(searchstring);
+	if (valid) {
+		return;
+	} else {
+		initializeSearch();
+	}
 
 }
 
@@ -530,23 +529,23 @@ void PerlRegularExpression::initializeSearch(const char* searchstring) {
 //
 
 void PerlRegularExpression::studySearch() {
-   if (pre == NULL) {
-      studyQ = 0;
-      return;
-   }
-	     
-   if (studyQ == 0) {
-      const char* statusMessage = "";
-      studyQ = 1;
-      // how should any old structure that pe points to be disposed?
-      pe = pcre_study(pre, 0, &statusMessage);
-      if (statusMessage != NULL) {
-         cerr << "WARNING: problem studying regular expression: " << endl;
-         cerr << statusMessage << endl;
-         studyQ = 0;
-      }
-      
-   }
+	if (pre == NULL) {
+		studyQ = 0;
+		return;
+	}
+
+	if (studyQ == 0) {
+		const char* statusMessage = "";
+		studyQ = 1;
+		// how should any old structure that pe points to be disposed?
+		pe = pcre_study(pre, 0, &statusMessage);
+		if (statusMessage != NULL) {
+			cerr << "WARNING: problem studying regular expression: " << endl;
+			cerr << statusMessage << endl;
+			studyQ = 0;
+		}
+
+	}
 }
 
 
@@ -559,66 +558,66 @@ void PerlRegularExpression::studySearch() {
 //
 
 int PerlRegularExpression::sar(string& inout, const string& searchstring,
-      const string& replacestring, const string& optionstring)  {
-   Array<char> inout2;
-   inout2.setSize(inout.size() + 1);
-   strcpy(inout2.getBase(), inout.c_str());
-   int count = sar(inout2, searchstring.c_str(), replacestring.c_str(),
-         optionstring.c_str());
-   inout = inout2.getBase();
-   return count;
+		const string& replacestring, const string& optionstring)  {
+	Array<char> inout2;
+	inout2.setSize(inout.size() + 1);
+	strcpy(inout2.getBase(), inout.c_str());
+	int count = sar(inout2, searchstring.c_str(), replacestring.c_str(),
+			optionstring.c_str());
+	inout = inout2.getBase();
+	return count;
 }
 
 
 int PerlRegularExpression::sar(vector<char>& inout, const string& searchstring,
-      const string& replacestring, const string& optionstring)  {
-   Array<char> inout2;
-   inout2.setSize(inout.size() + 1);
-   strncpy(inout2.getBase(), inout.data(), inout.size());
-   inout2[inout2.getSize()-1] = '\0';
-   int count = sar(inout2, searchstring.c_str(), replacestring.c_str(),
-         optionstring.c_str());
-   int i;
-   inout.reserve(inout2.getSize());
-   for (i=0; i<inout2.getSize()-1; i++) {
-      inout[i] = inout2[i];
-   }
-   return count;
+		const string& replacestring, const string& optionstring)  {
+	Array<char> inout2;
+	inout2.setSize(inout.size() + 1);
+	strncpy(inout2.getBase(), inout.data(), inout.size());
+	inout2[inout2.getSize()-1] = '\0';
+	int count = sar(inout2, searchstring.c_str(), replacestring.c_str(),
+			optionstring.c_str());
+	int i;
+	inout.reserve(inout2.getSize());
+	for (i=0; i<inout2.getSize()-1; i++) {
+		inout[i] = inout2[i];
+	}
+	return count;
 }
 
 
 int PerlRegularExpression::sar(Array<char>& inout, const char* searchstring,
-      const char* replacestring, const char* optionstring)  {
+		const char* replacestring, const char* optionstring)  {
 
-   int i;
-   if (optionstring != NULL) {
-      i = 0; 
-      int g_found = 0;
-      int i_found = 0;
-      while (optionstring[i] != '\0')  {
-         switch (optionstring[i]) {
-            case 'g': setGlobal();     g_found = 1; break;
-            case 'i': setIgnoreCase(); i_found = 1; break;
-         }
-	 i++;
-      }
-      if (g_found == 0) {
-         setSingle();
-      }
-      if (i_found == 0) {
-         setNoIgnoreCase();
-      }
-   }
+	int i;
+	if (optionstring != NULL) {
+		i = 0;
+		int g_found = 0;
+		int i_found = 0;
+		while (optionstring[i] != '\0')  {
+			switch (optionstring[i]) {
+				case 'g': setGlobal();     g_found = 1; break;
+				case 'i': setIgnoreCase(); i_found = 1; break;
+			}
+			i++;
+		}
+		if (g_found == 0) {
+			setSingle();
+		}
+		if (i_found == 0) {
+			setNoIgnoreCase();
+		}
+	}
 
-   if (search(inout.getBase(), searchstring) == 0) {
-      return 0;
-   }
+	if (search(inout.getBase(), searchstring) == 0) {
+		return 0;
+	}
 
-   Array<char> temp_buffer;
-   temp_buffer.setSize(inout.getSize());
-   strcpy(temp_buffer.getBase(), inout.getBase());
-   return searchAndReplace(inout, temp_buffer.getBase(), searchstring, 
-         replacestring);
+	Array<char> temp_buffer;
+	temp_buffer.setSize(inout.getSize());
+	strcpy(temp_buffer.getBase(), inout.getBase());
+	return searchAndReplace(inout, temp_buffer.getBase(), searchstring,
+			replacestring);
 }
 
 
@@ -628,179 +627,179 @@ int PerlRegularExpression::sar(Array<char>& inout, const char* searchstring,
 // PerlRegularExpression::tr -- translate characters
 //
 
-void PerlRegularExpression::tr(string& inout, const string& inputlist, 
-      const string& outputlist) {
+void PerlRegularExpression::tr(string& inout, const string& inputlist,
+		const string& outputlist) {
 
-   char table[256];
-   for (int i=0; i<256; i++) {
-      table[i] = i;
-   }
+	char table[256];
+	for (int i=0; i<256; i++) {
+		table[i] = i;
+	}
 
-   vector<char> inchars;
-   vector<char> outchars;
-   inchars.reserve(256);  
-   outchars.reserve(256);  
+	vector<char> inchars;
+	vector<char> outchars;
+	inchars.reserve(256);
+	outchars.reserve(256);
 
-   expandList(inchars, inputlist);
-   expandList(outchars, outputlist);
+	expandList(inchars, inputlist);
+	expandList(outchars, outputlist);
 
-   // cout  << "INPUTLIST  " << inchars.getBase() << endl;
-   // cout  << "OUTPUTLIST " << outchars.getBase() << endl;
-   int maxx = (int)inchars.size();
-   if ((int)outchars.size() < maxx) {
-      maxx = (int)outchars.size();
-   }
-  
-   for (int i=0; i<maxx; i++) {
-      table[(unsigned char)inchars[i]] = outchars[i];
-   }
+	// cout  << "INPUTLIST  " << inchars.getBase() << endl;
+	// cout  << "OUTPUTLIST " << outchars.getBase() << endl;
+	int maxx = (int)inchars.size();
+	if ((int)outchars.size() < maxx) {
+		maxx = (int)outchars.size();
+	}
 
-   for (int i=0; i<(int)inout.size(); i++) {
-      inout[i] = table[(unsigned char)inout[i]];
-   }
+	for (int i=0; i<maxx; i++) {
+		table[(unsigned char)inchars[i]] = outchars[i];
+	}
+
+	for (int i=0; i<(int)inout.size(); i++) {
+		inout[i] = table[(unsigned char)inout[i]];
+	}
 }
 
 
 
-void PerlRegularExpression::tr(Array<char>& inout, const char* inputlist, 
-      const char* outputlist) {
-   char table[256];
-   int i;
-   for (i=0; i<256; i++) {
-      table[i] = i;
-   }
+void PerlRegularExpression::tr(Array<char>& inout, const char* inputlist,
+		const char* outputlist) {
+	char table[256];
+	int i;
+	for (i=0; i<256; i++) {
+		table[i] = i;
+	}
 
-   Array<char> inchars;
-   Array<char> outchars;
-   inchars.setSize(256);  
-   inchars.setGrowth(256);  
-   inchars.setSize(0);  
-   outchars.setSize(256);  
-   outchars.setGrowth(256);  
-   outchars.setSize(0);  
+	Array<char> inchars;
+	Array<char> outchars;
+	inchars.setSize(256);
+	inchars.setGrowth(256);
+	inchars.setSize(0);
+	outchars.setSize(256);
+	outchars.setGrowth(256);
+	outchars.setSize(0);
 
-   expandList(inchars, inputlist);
-   expandList(outchars, outputlist);
+	expandList(inchars, inputlist);
+	expandList(outchars, outputlist);
 
-   // cout  << "INPUTLIST  " << inchars.getBase() << endl;
-   // cout  << "OUTPUTLIST " << outchars.getBase() << endl;
-   int maxx = inchars.getSize();
-   if (outchars.getSize() < maxx) {
-      maxx = outchars.getSize();
-   }
-  
-   for (i=0; i<maxx; i++) {
-      table[(unsigned char)inchars[i]] = outchars[i];
-   }
+	// cout  << "INPUTLIST  " << inchars.getBase() << endl;
+	// cout  << "OUTPUTLIST " << outchars.getBase() << endl;
+	int maxx = inchars.getSize();
+	if (outchars.getSize() < maxx) {
+		maxx = outchars.getSize();
+	}
 
-   for (i=0; i<inout.getSize(); i++) {
-      inout[i] = table[(unsigned char)inout[i]];
-   }
+	for (i=0; i<maxx; i++) {
+		table[(unsigned char)inchars[i]] = outchars[i];
+	}
+
+	for (i=0; i<inout.getSize(); i++) {
+		inout[i] = table[(unsigned char)inout[i]];
+	}
 }
 
 
 
 //////////////////////////////
 //
-// PerlRegularExpression::expandList -- expand a translation string into 
+// PerlRegularExpression::expandList -- expand a translation string into
 //     individual characters.
 //
 
 
-void PerlRegularExpression::expandList(vector<char>& expandlist, 
-     const string& input) {
+void PerlRegularExpression::expandList(vector<char>& expandlist,
+		const string& input) {
 
-   char ch;
-   int target;
-   int source;
+	char ch;
+	int target;
+	int source;
 
-   int i = 0;
-   while (input[i] != '\0') {
-      switch (input[i]) {
-         case '-': 
-            if ((i == 0) || (input[i+1] == '\0')) {
-               // treat as a regular character
-               ch = '-';
-               expandlist.push_back(ch);
-            } else {
-               // treat as a character range marker
-               // literal markers are not allowed after dash
-               // in this implementation of tr
-               target = (unsigned char)input[i+1];
-               source = (unsigned char)input[i-1];
-               for (int j=source+1; j<=target; j++) {
-                  ch = (char)j;
-                  expandlist.push_back(ch);
-               }
-               i += 1;
-            }
-            break;
-         case '\\':                    // deal with \n, \t, \r in the future...
-            if (input[i+1] != '\0') {
-               ch = input[i+1];
-               expandlist.push_back(ch);
-               i++;
-            }
-            break;
-         default:
-	    ch = input[i];
-            expandlist.push_back(ch);
-      }
-      i++;
-   }
+	int i = 0;
+	while (input[i] != '\0') {
+		switch (input[i]) {
+			case '-':
+				if ((i == 0) || (input[i+1] == '\0')) {
+					// treat as a regular character
+					ch = '-';
+					expandlist.push_back(ch);
+				} else {
+					// treat as a character range marker
+					// literal markers are not allowed after dash
+					// in this implementation of tr
+					target = (unsigned char)input[i+1];
+					source = (unsigned char)input[i-1];
+					for (int j=source+1; j<=target; j++) {
+						ch = (char)j;
+						expandlist.push_back(ch);
+					}
+					i += 1;
+				}
+				break;
+			case '\\':                    // deal with \n, \t, \r in the future...
+				if (input[i+1] != '\0') {
+					ch = input[i+1];
+					expandlist.push_back(ch);
+					i++;
+				}
+				break;
+			default:
+				ch = input[i];
+				expandlist.push_back(ch);
+		}
+		i++;
+	}
 
-   ch = '\0';
-   expandlist.push_back(ch);
-   expandlist.resize((int)expandlist.size()-1);
+	ch = '\0';
+	expandlist.push_back(ch);
+	expandlist.resize((int)expandlist.size()-1);
 }
 
 
-void PerlRegularExpression::expandList(Array<char>& expandlist, 
-     const string& input) {
+void PerlRegularExpression::expandList(Array<char>& expandlist,
+		const string& input) {
 
-   char ch;
-   int target;
-   int source;
+	char ch;
+	int target;
+	int source;
 
-   int j;
-   int i = 0;
-   while (input[i] != '\0') {
-      switch (input[i]) {
-         case '-': 
-            if ((i == 0) || (input[i+1] == '\0')) {
-               // treat as a regular character
-               ch = '-';
-               expandlist.append(ch);
-            } else {
-               // treat as a character range marker
-               // literal markers are not allowed after dash
-               // in this implementation of tr
-               target = (unsigned char)input[i+1];
-               source = (unsigned char)input[i-1];
-               for (j=source+1; j<=target; j++) {
-                  ch = (char)j;
-                  expandlist.append(ch);
-               }
-               i+= 1;
-            }
-            break;
-         case '\\':                    // deal with \n, \t, \r in the future...
-            if (input[i+1] != '\0') {
-               ch = input[i+1];
-               expandlist.append(ch);
-               i++;
-            }
-            break;
-         default:
-	    ch = input[i];
-            expandlist.append(ch);
-      }
-      i++;
-   }
+	int j;
+	int i = 0;
+	while (input[i] != '\0') {
+		switch (input[i]) {
+			case '-':
+				if ((i == 0) || (input[i+1] == '\0')) {
+					// treat as a regular character
+					ch = '-';
+					expandlist.append(ch);
+				} else {
+					// treat as a character range marker
+					// literal markers are not allowed after dash
+					// in this implementation of tr
+					target = (unsigned char)input[i+1];
+					source = (unsigned char)input[i-1];
+					for (j=source+1; j<=target; j++) {
+						ch = (char)j;
+						expandlist.append(ch);
+					}
+					i+= 1;
+				}
+				break;
+			case '\\':                    // deal with \n, \t, \r in the future...
+				if (input[i+1] != '\0') {
+					ch = input[i+1];
+					expandlist.append(ch);
+					i++;
+				}
+				break;
+			default:
+				ch = input[i];
+				expandlist.append(ch);
+		}
+		i++;
+	}
 
-   ch = '\0';
-   expandlist.append(ch);
-   expandlist.setSize(expandlist.getSize()-1);
+	ch = '\0';
+	expandlist.append(ch);
+	expandlist.setSize(expandlist.getSize()-1);
 }
 
 
@@ -811,25 +810,25 @@ void PerlRegularExpression::expandList(Array<char>& expandlist,
 //    search string was replaced.
 //
 
-int PerlRegularExpression::searchAndReplace(Array<char>& output, 
-      const char* input, const char* searchstring, const char* replacestring) {
-   initializeSearch(searchstring);
-   setReplaceString(replacestring);
+int PerlRegularExpression::searchAndReplace(Array<char>& output,
+		const char* input, const char* searchstring, const char* replacestring) {
+	initializeSearch(searchstring);
+	setReplaceString(replacestring);
 
-   return searchAndReplace(output, input);
+	return searchAndReplace(output, input);
 }
 
 
-int PerlRegularExpression::searchAndReplace(string& output, 
-      const string& input, const string& searchstring, 
-      const string&  replacestring) {
-   initializeSearch(searchstring.c_str());
-   setReplaceString(replacestring.c_str());
+int PerlRegularExpression::searchAndReplace(string& output,
+		const string& input, const string& searchstring,
+		const string&  replacestring) {
+	initializeSearch(searchstring.c_str());
+	setReplaceString(replacestring.c_str());
 
-   Array<char> output2;
-   int count = searchAndReplace(output2, input.c_str());
-   output = output2.getBase();
-   return count;
+	Array<char> output2;
+	int count = searchAndReplace(output2, input.c_str());
+	output = output2.getBase();
+	return count;
 }
 
 
@@ -840,180 +839,180 @@ int PerlRegularExpression::searchAndReplace(string& output,
 //   the same search and replace from a previous call.
 //
 
-int PerlRegularExpression::searchAndReplace(string& output, 
-      const string& input) {
-   Array<char> output2;
-   int count = searchAndReplace(output2, input.c_str());
-   output = output2.getBase();
-   return count;
+int PerlRegularExpression::searchAndReplace(string& output,
+		const string& input) {
+	Array<char> output2;
+	int count = searchAndReplace(output2, input.c_str());
+	output = output2.getBase();
+	return count;
 }
 
 
-int PerlRegularExpression::searchAndReplace(Array<char>& output, 
-      const char* input) {
+int PerlRegularExpression::searchAndReplace(Array<char>& output,
+		const char* input) {
 
-   const char* ptr = input;
-   if (valid == 0) {
-      initializeSearch();
-   }
+	const char* ptr = input;
+	if (valid == 0) {
+		initializeSearch();
+	}
 
-   stringstream tempdata;
-   int counter = 0;
-   int i;
-   int len    = strlen(ptr);
-   int status;
-   if (studyQ) {
-      status = pcre_exec(pre, pe, ptr, len, 0, 0, 
-            output_substrings.getBase(), output_substrings.getSize()/3);
-   } else {
-      status = pcre_exec(pre, NULL, ptr, len, 0, 0, 
-            output_substrings.getBase(), output_substrings.getSize()/3);
-   }
-   
-   while (status >= 0) {
-      counter++;
-      for (i=0; i<output_substrings[0]; i++) {
-         tempdata << ptr[i];
-      }
-      tempdata << replace_string.getBase();
-      ptr   += output_substrings[1];
-      len   -= output_substrings[1];
-      // REG_NOTBOL = start of ptr is not Beginning Of Line
-      if (studyQ) {
-         status = pcre_exec(pre, pe, ptr, len, 0, PCRE_NOTBOL, 
-            output_substrings.getBase(), output_substrings.getSize()/3);
-      } else {
-         status = pcre_exec(pre, NULL, ptr, len, 0, PCRE_NOTBOL, 
-            output_substrings.getBase(), output_substrings.getSize()/3);
-      }
-      if (!globalQ) {
-         break;
-      }
-      if (ptr[0] == '\0') {
-         break;
-      }
-   }
+	stringstream tempdata;
+	int counter = 0;
+	int i;
+	int len    = strlen(ptr);
+	int status;
+	if (studyQ) {
+		status = pcre_exec(pre, pe, ptr, len, 0, 0,
+			output_substrings.getBase(), output_substrings.getSize()/3);
+	} else {
+		status = pcre_exec(pre, NULL, ptr, len, 0, 0,
+			output_substrings.getBase(), output_substrings.getSize()/3);
+	}
 
-   if (ptr[0] != '\0') {
-      tempdata << ptr;   // store the piece of input after last replace.
-   }
-   tempdata << ends;
-   len = strlen(tempdata.str().c_str());
-   output.setSize(len+1);
-   strcpy(output.getBase(), tempdata.str().c_str());
-   return counter;
+	while (status >= 0) {
+		counter++;
+		for (i=0; i<output_substrings[0]; i++) {
+			tempdata << ptr[i];
+		}
+		tempdata << replace_string.getBase();
+		ptr   += output_substrings[1];
+		len   -= output_substrings[1];
+		// REG_NOTBOL = start of ptr is not Beginning Of Line
+		if (studyQ) {
+			status = pcre_exec(pre, pe, ptr, len, 0, PCRE_NOTBOL,
+				output_substrings.getBase(), output_substrings.getSize()/3);
+		} else {
+			status = pcre_exec(pre, NULL, ptr, len, 0, PCRE_NOTBOL,
+				output_substrings.getBase(), output_substrings.getSize()/3);
+		}
+		if (!globalQ) {
+			break;
+		}
+		if (ptr[0] == '\0') {
+			break;
+		}
+	}
+
+	if (ptr[0] != '\0') {
+		tempdata << ptr;   // store the piece of input after last replace.
+	}
+	tempdata << ends;
+	len = strlen(tempdata.str().c_str());
+	output.setSize(len+1);
+	strcpy(output.getBase(), tempdata.str().c_str());
+	return counter;
 }
 
 
 
 //////////////////////////////
 //
-// PerlRegularExpression::search --  returns 0 if match was not found, 
+// PerlRegularExpression::search --  returns 0 if match was not found,
 //   otherwise returns the index+1 of the first match found.
 //     default value: optionstring = NULL
 //
 
-int PerlRegularExpression::search(Array<char>& input, 
-      const char* searchstring, const char* optionstring) {
-   return PerlRegularExpression::search(input.getBase(), searchstring,
-         optionstring);
+int PerlRegularExpression::search(Array<char>& input,
+		const char* searchstring, const char* optionstring) {
+	return PerlRegularExpression::search(input.getBase(), searchstring,
+			optionstring);
 }
 
 
-int PerlRegularExpression::search(const vector<char>& input, 
-      const string& searchstring, const string& optionstring) {
-   string input2;
-   for (int i=0; i<(int)input.size(); i++) {
-      input2[i] = input[i];
-   }
-   return PerlRegularExpression::search(input2, searchstring,
-         optionstring);
+int PerlRegularExpression::search(const vector<char>& input,
+		const string& searchstring, const string& optionstring) {
+	string input2;
+	for (int i=0; i<(int)input.size(); i++) {
+		input2[i] = input[i];
+	}
+	return PerlRegularExpression::search(input2, searchstring,
+			optionstring);
 }
 
-int PerlRegularExpression::search(const string& input, 
-      const string& searchstring, const string& optionstring) {
-   return PerlRegularExpression::search(input.c_str(), searchstring.c_str(),
-         optionstring.c_str());
+int PerlRegularExpression::search(const string& input,
+		const string& searchstring, const string& optionstring) {
+	return PerlRegularExpression::search(input.c_str(), searchstring.c_str(),
+			optionstring.c_str());
 }
 
 
 int PerlRegularExpression::search(const char* input, const char* searchstring,
-      const char* optionstring) {
+		const char* optionstring) {
 
-   setSearchString(searchstring);
-   if (valid == 0) {
-      initializeSearch();
-   }
+	setSearchString(searchstring);
+	if (valid == 0) {
+		initializeSearch();
+	}
 
-   int i;
-   if (optionstring != NULL) {
-      i = 0; 
-      int g_found = 0;
-      int i_found = 0;
-      while (optionstring[i] != '\0')  {
-         switch (optionstring[i]) {
-            case 'g': setGlobal();     g_found = 1; break;
-            case 'i': setIgnoreCase(); i_found = 1; break;
-         }
-	 i++;
-      }
-      if (g_found == 0) {
-         setSingle();
-      }
-	        
-      if (i_found == 0) {
-         setNoIgnoreCase();
-      }
-   }
+	int i;
+	if (optionstring != NULL) {
+		i = 0;
+		int g_found = 0;
+		int i_found = 0;
+		while (optionstring[i] != '\0')  {
+			switch (optionstring[i]) {
+				case 'g': setGlobal();     g_found = 1; break;
+				case 'i': setIgnoreCase(); i_found = 1; break;
+			}
+			i++;
+		}
+		if (g_found == 0) {
+			setSingle();
+		}
 
-   return search(input);
+		if (i_found == 0) {
+			setNoIgnoreCase();
+		}
+	}
+
+	return search(input);
 }
 
 
 
 //////////////////////////////
 //
-// PerlRegularExpression::search --  returns 0 if match was not found, 
+// PerlRegularExpression::search --  returns 0 if match was not found,
 //   otherwise returns the index+1 of the first match found.  Uses the
 //   previous used/specified search pattern and options.
 //
 
 int PerlRegularExpression::search(const Array<char>& input) {
-   return PerlRegularExpression::search(input.getBase());
+	return PerlRegularExpression::search(input.getBase());
 }
 
 
 int PerlRegularExpression::search(const string& input) {
-   return PerlRegularExpression::search(input.c_str());
+	return PerlRegularExpression::search(input.c_str());
 }
 
 
 int PerlRegularExpression::search(const char* input) {
-   if (valid == 0) {
-      initializeSearch();
-   }
+	if (valid == 0) {
+		initializeSearch();
+	}
 
-   int len = strlen(input);
-   input_string.setSize(len+1);
-   strcpy(input_string.getBase(), input);
+	int len = strlen(input);
+	input_string.setSize(len+1);
+	strcpy(input_string.getBase(), input);
 
-   int status;
+	int status;
 
-   if (studyQ) {
-      status = pcre_exec(pre, pe, input_string.getBase(), len, 0, 0, 
-         output_substrings.getBase(), output_substrings.getSize());
-   } else {
-      status = pcre_exec(pre, NULL, input_string.getBase(), len, 0, 0, 
-         output_substrings.getBase(), output_substrings.getSize());
-   }
+	if (studyQ) {
+		status = pcre_exec(pre, pe, input_string.getBase(), len, 0, 0,
+			output_substrings.getBase(), output_substrings.getSize());
+	} else {
+		status = pcre_exec(pre, NULL, input_string.getBase(), len, 0, 0,
+			output_substrings.getBase(), output_substrings.getSize());
+	}
 
-   if (status >= 0) {
-      // successful match, so return position of beginning of first match
-      // plus one.
-      return output_substrings[0]+1;
-   } else {
-      return 0;
-   }
+	if (status >= 0) {
+		// successful match, so return position of beginning of first match
+		// plus one.
+		return output_substrings[0]+1;
+	} else {
+		return 0;
+	}
 }
 
 
@@ -1031,97 +1030,97 @@ int PerlRegularExpression::search(const char* input) {
 // output tokens, like is done in PERL.
 //
 
-int PerlRegularExpression::getTokens(Array<Array<char>>& output, 
-      const char* separator, const char* input) {
+int PerlRegularExpression::getTokens(Array<Array<char>>& output,
+		const char* separator, const char* input) {
 
-   output.setSize(0);
-   if (output.getGrowth() == 4) {
-      // if there are going to be more than 4 elements in the
-      // output array, and the person who called this function
-      // did not explictly set the growth size for the array,
-      // then set it automatically to 1000 (but don't allocate
-      // any more space to the array until it is needed).
-      output.setGrowth(1000);
-   }
+	output.setSize(0);
+	if (output.getGrowth() == 4) {
+		// if there are going to be more than 4 elements in the
+		// output array, and the person who called this function
+		// did not explictly set the growth size for the array,
+		// then set it automatically to 1000 (but don't allocate
+		// any more space to the array until it is needed).
+		output.setGrowth(1000);
+	}
 
-   PerlRegularExpression pre;
-   int flag;
-   pre.setAnchor();
-   const char* ptr = input;
+	PerlRegularExpression pre;
+	int flag;
+	pre.setAnchor();
+	const char* ptr = input;
 
-   // skip over any initial separator 
-   flag = pre.search(ptr, separator);
-   if (flag) {
-      ptr = ptr + pre.getSubmatchEnd(0);
-   }
+	// skip over any initial separator
+	flag = pre.search(ptr, separator);
+	if (flag) {
+		ptr = ptr + pre.getSubmatchEnd(0);
+	}
 
-   Array<char> spat;
-   spat.setSize(strlen("(..*?)()") + strlen(separator) + 1);
-   strcpy(spat.getBase(), "(..*?)(");
-   strcat(spat.getBase(), separator);
-   strcat(spat.getBase(), ")");
+	Array<char> spat;
+	spat.setSize(strlen("(..*?)()") + strlen(separator) + 1);
+	strcpy(spat.getBase(), "(..*?)(");
+	strcat(spat.getBase(), separator);
+	strcat(spat.getBase(), ")");
 
-   int oindex;
-   int stepsize;
-   int i;
-   int strsize;
-   char* cptr;
-   // remember: anchor is still active
-   while (pre.search(ptr, spat.getBase())) {
-      oindex = output.getSize();
-      output.setSize(oindex+1);
-      strsize = pre.getSubmatchEnd(1) - pre.getSubmatchStart(1);
-      output[oindex].setSize(strsize + 1);
-      cptr = output[oindex].getBase();
-      for (i=0; i<strsize; i++) {
-         cptr[i] = ptr[i];
-      }
-      cptr[strsize] = '\0';
-      stepsize = pre.getSubmatchEnd(2);
-      if (stepsize > 0) {
-         ptr += stepsize;
-      }
-      if (stepsize <= 0) {
-         break;
-      }
-   }
+	int oindex;
+	int stepsize;
+	int i;
+	int strsize;
+	char* cptr;
+	// remember: anchor is still active
+	while (pre.search(ptr, spat.getBase())) {
+		oindex = output.getSize();
+		output.setSize(oindex+1);
+		strsize = pre.getSubmatchEnd(1) - pre.getSubmatchStart(1);
+		output[oindex].setSize(strsize + 1);
+		cptr = output[oindex].getBase();
+		for (i=0; i<strsize; i++) {
+			cptr[i] = ptr[i];
+		}
+		cptr[strsize] = '\0';
+		stepsize = pre.getSubmatchEnd(2);
+		if (stepsize > 0) {
+			ptr += stepsize;
+		}
+		if (stepsize <= 0) {
+			break;
+		}
+	}
 
-   if (ptr[0] != '\0') {
-      oindex = output.getSize();
-      output.setSize(oindex+1);
-      strsize = strlen(ptr);
-      output[oindex].setSize(strsize + 1);
-      strcpy(output[oindex].getBase(), ptr);
-   }
+	if (ptr[0] != '\0') {
+		oindex = output.getSize();
+		output.setSize(oindex+1);
+		strsize = strlen(ptr);
+		output[oindex].setSize(strsize + 1);
+		strcpy(output[oindex].getBase(), ptr);
+	}
 
-   return output.getSize();
+	return output.getSize();
 }
 
 
-int PerlRegularExpression::getTokens(Array<SigString>& output, 
-      const char* separator, const char* input) {
-   Array<Array<char>> pretokens;
-   getTokens(pretokens, separator, input);
-   int i;
-   output.setSize(pretokens.getSize());
-   for (i=0; i<output.getSize(); i++) {
-      output[i] = pretokens[i];
-   }
-   return output.getSize();
+int PerlRegularExpression::getTokens(Array<SigString>& output,
+		const char* separator, const char* input) {
+	Array<Array<char>> pretokens;
+	getTokens(pretokens, separator, input);
+	int i;
+	output.setSize(pretokens.getSize());
+	for (i=0; i<output.getSize(); i++) {
+		output[i] = pretokens[i];
+	}
+	return output.getSize();
 }
 
 
 
-int PerlRegularExpression::getTokens(vector<string>& output, 
-      const string& separator, const string& input) {
-   Array<Array<char>> pretokens;
-   getTokens(pretokens, separator.c_str(), input.c_str());
-   int i;
-   output.resize(pretokens.getSize());
-   for (i=0; i<(int)output.size(); i++) {
-      output[i] = pretokens[i].getBase();
-   }
-   return output.size();
+int PerlRegularExpression::getTokens(vector<string>& output,
+		const string& separator, const string& input) {
+	Array<Array<char>> pretokens;
+	getTokens(pretokens, separator.c_str(), input.c_str());
+	int i;
+	output.resize(pretokens.getSize());
+	for (i=0; i<(int)output.size(); i++) {
+		output[i] = pretokens[i].getBase();
+	}
+	return output.size();
 }
 
 
@@ -1131,123 +1130,123 @@ int PerlRegularExpression::getTokens(vector<string>& output,
 // PerlRegularExpression::getTokensWithEmpties --
 //
 
-int PerlRegularExpression::getTokensWithEmpties(Array<Array<char>>& output, 
-      const char* separator, const char* input) {
+int PerlRegularExpression::getTokensWithEmpties(Array<Array<char>>& output,
+		const char* separator, const char* input) {
 
-   output.setSize(0);
-   if (output.getGrowth() == 4) {
-      // if there are going to be more than 4 elements in the
-      // output array, and the person who called this function
-      // did not explictly set the growth size for the array,
-      // then set it automatically to 1000 (but don't allocate
-      // any more space to the array until it is needed).
-      output.setGrowth(1000);
-   }
+	output.setSize(0);
+	if (output.getGrowth() == 4) {
+		// if there are going to be more than 4 elements in the
+		// output array, and the person who called this function
+		// did not explictly set the growth size for the array,
+		// then set it automatically to 1000 (but don't allocate
+		// any more space to the array until it is needed).
+		output.setGrowth(1000);
+	}
 
-   PerlRegularExpression pre;
-   int flag;
-   pre.setAnchor();
-   const char* ptr = input;
+	PerlRegularExpression pre;
+	int flag;
+	pre.setAnchor();
+	const char* ptr = input;
 
-   // skip over any initial separator 
-   flag = pre.search(ptr, separator);
-   if (flag) {
-      ptr = ptr + pre.getSubmatchEnd(0);
-   }
+	// skip over any initial separator
+	flag = pre.search(ptr, separator);
+	if (flag) {
+		ptr = ptr + pre.getSubmatchEnd(0);
+	}
 
-   Array<char> spat;
-   spat.setSize(strlen("(.*?)()") + strlen(separator) + 1);
-   strcpy(spat.getBase(), "(.*?)(");
-   strcat(spat.getBase(), separator);
-   strcat(spat.getBase(), ")");
+	Array<char> spat;
+	spat.setSize(strlen("(.*?)()") + strlen(separator) + 1);
+	strcpy(spat.getBase(), "(.*?)(");
+	strcat(spat.getBase(), separator);
+	strcat(spat.getBase(), ")");
 
-   int oindex;
-   int stepsize;
-   int i;
-   int strsize;
-   char* cptr;
-   // remember: anchor is still active
-   while (pre.search(ptr, spat.getBase())) {
-      oindex = output.getSize();
-      output.setSize(oindex+1);
-      strsize = pre.getSubmatchEnd(1) - pre.getSubmatchStart(1);
-      output[oindex].setSize(strsize + 1);
-      cptr = output[oindex].getBase();
-      for (i=0; i<strsize; i++) {
-         cptr[i] = ptr[i];
-      }
-      cptr[strsize] = '\0';
-      stepsize = pre.getSubmatchEnd(2);
-      if (stepsize > 0) {
-         ptr += stepsize;
-      }
-      if (stepsize <= 0) {
-         break;
-      }
-   }
+	int oindex;
+	int stepsize;
+	int i;
+	int strsize;
+	char* cptr;
+	// remember: anchor is still active
+	while (pre.search(ptr, spat.getBase())) {
+		oindex = output.getSize();
+		output.setSize(oindex+1);
+		strsize = pre.getSubmatchEnd(1) - pre.getSubmatchStart(1);
+		output[oindex].setSize(strsize + 1);
+		cptr = output[oindex].getBase();
+		for (i=0; i<strsize; i++) {
+			cptr[i] = ptr[i];
+		}
+		cptr[strsize] = '\0';
+		stepsize = pre.getSubmatchEnd(2);
+		if (stepsize > 0) {
+			ptr += stepsize;
+		}
+		if (stepsize <= 0) {
+			break;
+		}
+	}
 
-   if (ptr[0] != '\0') {
-      oindex = output.getSize();
-      output.setSize(oindex+1);
-      strsize = strlen(ptr);
-      output[oindex].setSize(strsize + 1);
-      strcpy(output[oindex].getBase(), ptr);
-   }
+	if (ptr[0] != '\0') {
+		oindex = output.getSize();
+		output.setSize(oindex+1);
+		strsize = strlen(ptr);
+		output[oindex].setSize(strsize + 1);
+		strcpy(output[oindex].getBase(), ptr);
+	}
 
-   return output.getSize();
+	return output.getSize();
 }
 
 
 
-int PerlRegularExpression::getTokensWithEmpties(vector<string>& output, 
-      const string& separator, const string& input) {
+int PerlRegularExpression::getTokensWithEmpties(vector<string>& output,
+		const string& separator, const string& input) {
 
-   output.clear();
-   output.reserve(100);
+	output.clear();
+	output.reserve(100);
 
-   PerlRegularExpression pre;
-   int flag;
-   pre.setAnchor();
-   const char* ptr = input.c_str();
+	PerlRegularExpression pre;
+	int flag;
+	pre.setAnchor();
+	const char* ptr = input.c_str();
 
-   // skip over any initial separator 
-   flag = pre.search(ptr, separator);
-   if (flag) {
-      ptr = ptr + pre.getSubmatchEnd(0);
-   }
+	// skip over any initial separator
+	flag = pre.search(ptr, separator);
+	if (flag) {
+		ptr = ptr + pre.getSubmatchEnd(0);
+	}
 
-   string spat = "(.*?)(";
-   spat += separator;
-   spat += ")";
+	string spat = "(.*?)(";
+	spat += separator;
+	spat += ")";
 
-   int oindex;
-   int stepsize;
-   int strsize;
-   // remember: anchor is still active
-   while (pre.search(ptr, spat.c_str())) {
-      oindex = (int)output.size();
-      output.resize(oindex+1);
-      strsize = pre.getSubmatchEnd(1) - pre.getSubmatchStart(1);
-      output[oindex].resize(strsize);
-      for (int i=0; i<strsize; i++) {
-         output[oindex][i] = ptr[i];
-      }
-      stepsize = pre.getSubmatchEnd(2);
-      if (stepsize > 0) {
-         ptr += stepsize;
-      }
-      if (stepsize <= 0) {
-         break;
-      }
-   }
+	int oindex;
+	int stepsize;
+	int strsize;
+	// remember: anchor is still active
+	while (pre.search(ptr, spat.c_str())) {
+		oindex = (int)output.size();
+		output.resize(oindex+1);
+		strsize = pre.getSubmatchEnd(1) - pre.getSubmatchStart(1);
+		output[oindex].resize(strsize);
+		for (int i=0; i<strsize; i++) {
+			output[oindex][i] = ptr[i];
+		}
+		stepsize = pre.getSubmatchEnd(2);
+		if (stepsize > 0) {
+			ptr += stepsize;
+		}
+		if (stepsize <= 0) {
+			break;
+		}
+	}
 
-   if (ptr[0] != '\0') {
-      oindex = (int)output.size();
-      output.resize(oindex+1);
-      output[oindex] = ptr;
-   }
+	if (ptr[0] != '\0') {
+		oindex = (int)output.size();
+		output.resize(oindex+1);
+		output[oindex] = ptr;
+	}
 
-   return (int)output.size();
+	return (int)output.size();
 }
 
 
@@ -1286,7 +1285,7 @@ CHARACTERS
 CHARACTER TYPES
 
   .          any character except newline;
-               in dotall mode, any character whatsoever
+             in dotall mode, any character whatsoever
   \C         one byte, even in UTF-8 mode (best avoided)
   \d         a decimal digit
   \D         a character that is not a decimal digit
@@ -1418,13 +1417,13 @@ ANCHORS AND SIMPLE ASSERTIONS
   \b          word boundary
   \B          not a word boundary
   ^           start of subject
-               also after internal newline in multiline mode
+              also after internal newline in multiline mode
   \A          start of subject
   $           end of subject
-               also before newline at end of subject
-               also before internal newline in multiline mode
+              also before newline at end of subject
+              also before internal newline in multiline mode
   \Z          end of subject
-               also before newline at end of subject
+              also before newline at end of subject
   \z          end of subject
   \G          first matching position in subject
 
@@ -1447,7 +1446,7 @@ CAPTURING
   (?P<name>...)  named capturing group (Python)
   (?:...)        non-capturing group
   (?|...)        non-capturing group; reset group numbers for
-                  capturing groups in each alternative
+                 capturing groups in each alternative
 
 
 ATOMIC GROUPS
@@ -1562,7 +1561,6 @@ CALLOUTS
   (?Cn)     callout with data n
 
 ******************************************************************************/
-
 
 
 

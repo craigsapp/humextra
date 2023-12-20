@@ -13,24 +13,14 @@
 
 #include "MuseRecordBasic.h"
 #include "Enum_muserec.h"
-#include <string.h>
-#include <cctype>
-#include <stdio.h>
 
-#ifndef OLDCPP
-   #include <sstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>
-   #else
-      #include <strstream.h>
-   #endif
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
+#include <stdio.h>
+#include <string.h>
+
+#include <cctype>
+#include <sstream>
+
+using namespace std;
 
 
 //////////////////////////////
@@ -39,46 +29,46 @@
 //
 
 MuseRecordBasic::MuseRecordBasic(void) {
-   recordString.setSize(81);
-   recordString[0] = '\0';
-   recordString.setGrowth(1024);
-   recordString.setSize(0);
-   setType(E_muserec_unknown);
-   lineindex = -1;
+	recordString.setSize(81);
+	recordString[0] = '\0';
+	recordString.setGrowth(1024);
+	recordString.setSize(0);
+	setType(E_muserec_unknown);
+	lineindex = -1;
 
-   absbeat.setValue(0,1);
-   lineduration.setValue(0,1);
-   noteduration.setValue(0,1);
+	absbeat.setValue(0,1);
+	lineduration.setValue(0,1);
+	noteduration.setValue(0,1);
 
-   b40pitch = -100;
-   nexttiednote = -1;
-   lasttiednote = -1;
-   roundBreve = 0;
+	b40pitch = -100;
+	nexttiednote = -1;
+	lasttiednote = -1;
+	roundBreve = 0;
 }
 
 
 // default value: index = -1;
 MuseRecordBasic::MuseRecordBasic(const char* aLine, int index) {
-   recordString.setSize(81);
-   recordString.setGrowth(1024);
-   recordString.setSize(0);
-   setLine(aLine);
-   setType(E_muserec_unknown);
-   lineindex = index;
+	recordString.setSize(81);
+	recordString.setGrowth(1024);
+	recordString.setSize(0);
+	setLine(aLine);
+	setType(E_muserec_unknown);
+	lineindex = index;
 
-   absbeat.setValue(0,1);
-   lineduration.setValue(0,1);
-   noteduration.setValue(0,1);
+	absbeat.setValue(0,1);
+	lineduration.setValue(0,1);
+	noteduration.setValue(0,1);
 
-   b40pitch = -100;
-   nexttiednote = -1;
-   lasttiednote = -1;
-   roundBreve = 0;
+	b40pitch = -100;
+	nexttiednote = -1;
+	lasttiednote = -1;
+	roundBreve = 0;
 }
 
 
 MuseRecordBasic::MuseRecordBasic(MuseRecordBasic& aRecord) {
-   *this = aRecord;
+	*this = aRecord;
 }
 
 
@@ -89,16 +79,16 @@ MuseRecordBasic::MuseRecordBasic(MuseRecordBasic& aRecord) {
 //
 
 MuseRecordBasic::~MuseRecordBasic() {
-   recordString.setSize(0);
+	recordString.setSize(0);
 
-   absbeat.setValue(0,1);
-   lineduration.setValue(0,1);
-   noteduration.setValue(0,1);
+	absbeat.setValue(0,1);
+	lineduration.setValue(0,1);
+	noteduration.setValue(0,1);
 
-   b40pitch = -100;
-   nexttiednote = -1;
-   lasttiednote = -1;
-   roundBreve = 0;
+	b40pitch = -100;
+	nexttiednote = -1;
+	lasttiednote = -1;
+	roundBreve = 0;
 }
 
 
@@ -109,9 +99,9 @@ MuseRecordBasic::~MuseRecordBasic() {
 //
 
 void MuseRecordBasic::clear(void) {
-   recordString.setSize(1);
-   recordString[0] = '\0';
-   recordString.setSize(0);
+	recordString.setSize(1);
+	recordString[0] = '\0';
+	recordString.setSize(0);
 }
 
 
@@ -122,16 +112,16 @@ void MuseRecordBasic::clear(void) {
 //
 
 int MuseRecordBasic::isEmpty(void) {
-   int i;
-   for (i=0; i<recordString.getSize(); i++) {
-      if (!std::isprint(recordString[i])) {
-         continue;
-      }
-      if (!std::isspace(recordString[i])) {
-         return 0;
-      }
-   }
-   return 1;
+	int i;
+	for (i=0; i<recordString.getSize(); i++) {
+		if (!std::isprint(recordString[i])) {
+			continue;
+		}
+		if (!std::isspace(recordString[i])) {
+			return 0;
+		}
+	}
+	return 1;
 }
 
 
@@ -144,16 +134,16 @@ int MuseRecordBasic::isEmpty(void) {
 //
 
 void MuseRecordBasic::extract(char* output, int start, int end) {
-   output[0] = '\0';
-   int i;
-   for (i=0; i<=end-start; i++) {
-      if (i+start <= getLength()) {
-         output[i] = getColumn(i+start);
-      } else {
-         output[i] = ' ';
-      }
-   }
-   output[i] = '\0';
+	output[0] = '\0';
+	int i;
+	for (i=0; i<=end-start; i++) {
+		if (i+start <= getLength()) {
+			output[i] = getColumn(i+start);
+		} else {
+			output[i] = ' ';
+		}
+	}
+	output[i] = '\0';
 }
 
 
@@ -165,34 +155,34 @@ void MuseRecordBasic::extract(char* output, int start, int end) {
 //
 
 char& MuseRecordBasic::getColumn(int columnNumber) {
-   int realindex = columnNumber - 1;
-   int length = recordString.getSize();
-   // originally the limiit for data columns was 80:
-   //if (realindex < 0 || realindex >= 80) {
-   //the new limit is somewhere above 900, but limit to 180
-   if (realindex < 0 || realindex >= 180) {
-      cerr << "Error trying to access column: " << columnNumber  << endl;
-      cerr << "CURRENT DATA: ===============================" << endl;
-      cerr << (*this);
-      exit(1);
-   } else if (realindex >= recordString.getSize()) {
-      recordString.setSize(realindex+1);
-      for (int i=length; i<=realindex; i++) {
-         recordString[i] = ' ';
-      }
-      // add a hidden null character after the real characters.
-      recordString.setSize(recordString.getSize()+1);
-      recordString[recordString.getSize()-1] = '\0';
-      recordString.setSize(recordString.getSize()-1);
-      // can't automatically grow; otherwise, the null character
-      // will disappear...
-      recordString.setGrowth(0);
-      if ((int)strlen(recordString.getBase()) != recordString.getSize()) {
-         cerr << "Funny error in MuseRecordBasic::getColumn: null found" << endl;
-      }
-   }
+	int realindex = columnNumber - 1;
+	int length = recordString.getSize();
+	// originally the limiit for data columns was 80:
+	//if (realindex < 0 || realindex >= 80) {
+	//the new limit is somewhere above 900, but limit to 180
+	if (realindex < 0 || realindex >= 180) {
+		cerr << "Error trying to access column: " << columnNumber  << endl;
+		cerr << "CURRENT DATA: ===============================" << endl;
+		cerr << (*this);
+		exit(1);
+	} else if (realindex >= recordString.getSize()) {
+		recordString.setSize(realindex+1);
+		for (int i=length; i<=realindex; i++) {
+			recordString[i] = ' ';
+		}
+		// add a hidden null character after the real characters.
+		recordString.setSize(recordString.getSize()+1);
+		recordString[recordString.getSize()-1] = '\0';
+		recordString.setSize(recordString.getSize()-1);
+		// can't automatically grow; otherwise, the null character
+		// will disappear...
+		recordString.setGrowth(0);
+		if ((int)strlen(recordString.getBase()) != recordString.getSize()) {
+			cerr << "Funny error in MuseRecordBasic::getColumn: null found" << endl;
+		}
+	}
 
-   return recordString[realindex];
+	return recordString[realindex];
 }
 
 
@@ -203,21 +193,21 @@ char& MuseRecordBasic::getColumn(int columnNumber) {
 //
 
 void MuseRecordBasic::getColumns(Array<char>& data, int startcol, int endcol) {
-   int charcount = endcol - startcol + 1;
-   if (charcount <= 0) {
-      data.setSize(1);
-      data[0] = '\0';
-      return;
-   }
-   data.setSize(charcount + 1);
-   data.allowGrowth(0);
-   
-   int i;
-   int ii = 0;
-   for (i=startcol; i<=endcol; i++) {
-      data[ii++] = getColumn(i);
-   }
-   data[ii] = '\0';
+	int charcount = endcol - startcol + 1;
+	if (charcount <= 0) {
+		data.setSize(1);
+		data[0] = '\0';
+		return;
+	}
+	data.setSize(charcount + 1);
+	data.allowGrowth(0);
+
+	int i;
+	int ii = 0;
+	for (i=startcol; i<=endcol; i++) {
+		data[ii++] = getColumn(i);
+	}
+	data[ii] = '\0';
 }
 
 
@@ -228,56 +218,56 @@ void MuseRecordBasic::getColumns(Array<char>& data, int startcol, int endcol) {
 //
 
 void MuseRecordBasic::setColumns(Array<char>& data, int startcol, int endcol) {
-   if (startcol > endcol) {
-      int temp = startcol;
-      startcol = endcol;
-      endcol = temp;
-   }
+	if (startcol > endcol) {
+		int temp = startcol;
+		startcol = endcol;
+		endcol = temp;
+	}
 
-   int dsize = data.getSize();
-   if (data[dsize-1] == '\0') {
-      // don't insert any null-termination of the string.
-      dsize--;
-   }
+	int dsize = data.getSize();
+	if (data[dsize-1] == '\0') {
+		// don't insert any null-termination of the string.
+		dsize--;
+	}
 
-   getColumn(endcol) = ' '; // allocate space if not already done
-   int i;
-   int ii;
-   for (i=startcol; i<=endcol; i++) {
-      ii = i - startcol;
-      if (ii < dsize) {
-         getColumn(i) = data[ii];
-      } else {
-         break;
-      }
-   }
+	getColumn(endcol) = ' '; // allocate space if not already done
+	int i;
+	int ii;
+	for (i=startcol; i<=endcol; i++) {
+		ii = i - startcol;
+		if (ii < dsize) {
+			getColumn(i) = data[ii];
+		} else {
+			break;
+		}
+	}
 }
 
 
 void MuseRecordBasic::setColumns(string& data, int startcol, int endcol) {
-   if (startcol > endcol) {
-      int temp = startcol;
-      startcol = endcol;
-      endcol = temp;
-   }
+	if (startcol > endcol) {
+		int temp = startcol;
+		startcol = endcol;
+		endcol = temp;
+	}
 
-   int dsize = (int)data.size();
-   if (data[dsize-1] == '\0') {
-      // don't insert any null-termination of the string.
-      dsize--;
-   }
+	int dsize = (int)data.size();
+	if (data[dsize-1] == '\0') {
+		// don't insert any null-termination of the string.
+		dsize--;
+	}
 
-   getColumn(endcol) = ' '; // allocate space if not already done
-   int i;
-   int ii;
-   for (i=startcol; i<=endcol; i++) {
-      ii = i - startcol;
-      if (ii < dsize) {
-         getColumn(i) = data[ii];
-      } else {
-         break;
-      }
-   }
+	getColumn(endcol) = ' '; // allocate space if not already done
+	int i;
+	int ii;
+	for (i=startcol; i<=endcol; i++) {
+		ii = i - startcol;
+		if (ii < dsize) {
+			getColumn(i) = data[ii];
+		} else {
+			break;
+		}
+	}
 }
 
 
@@ -290,7 +280,7 @@ void MuseRecordBasic::setColumns(string& data, int startcol, int endcol) {
 //
 
 int MuseRecordBasic::getLength(void) const {
-   return recordString.getSize();
+	return recordString.getSize();
 }
 
 
@@ -301,11 +291,11 @@ int MuseRecordBasic::getLength(void) const {
 //
 
 const char* MuseRecordBasic::getLine(void) {
-   // install a hidden null character after text, then return char* 
-   recordString.setSize(recordString.getSize()+1);
-   recordString[recordString.getSize()-1] = '\0';
-   recordString.setSize(recordString.getSize()-1);
-   return recordString.getBase();
+	// install a hidden null character after text, then return char*
+	recordString.setSize(recordString.getSize()+1);
+	recordString[recordString.getSize()-1] = '\0';
+	recordString.setSize(recordString.getSize()-1);
+	return recordString.getBase();
 }
 
 
@@ -316,7 +306,7 @@ const char* MuseRecordBasic::getLine(void) {
 //
 
 int MuseRecordBasic::getType(void) const {
-   return type;
+	return type;
 }
 
 
@@ -327,47 +317,47 @@ int MuseRecordBasic::getType(void) const {
 //
 
 MuseRecordBasic& MuseRecordBasic::operator=(MuseRecordBasic& aRecord) {
-   // don't copy onto self
-   if (&aRecord == this) {
-      return *this;
-   }
+	// don't copy onto self
+	if (&aRecord == this) {
+		return *this;
+	}
 
-   setLine(aRecord.getLine());
-   setType(aRecord.getType());
-   lineindex = aRecord.lineindex;
+	setLine(aRecord.getLine());
+	setType(aRecord.getType());
+	lineindex = aRecord.lineindex;
 
-   absbeat = aRecord.absbeat;
-   lineduration = aRecord.lineduration;
-   noteduration = aRecord.noteduration;
+	absbeat = aRecord.absbeat;
+	lineduration = aRecord.lineduration;
+	noteduration = aRecord.noteduration;
 
-   b40pitch     = aRecord.b40pitch;
-   nexttiednote = aRecord.nexttiednote;
-   lasttiednote = aRecord.lasttiednote;
+	b40pitch     = aRecord.b40pitch;
+	nexttiednote = aRecord.nexttiednote;
+	lasttiednote = aRecord.lasttiednote;
 
-   return *this;
+	return *this;
 }
 
 
 MuseRecordBasic& MuseRecordBasic::operator=(MuseRecordBasic* aRecord) {
-   *this = *aRecord;
-   return *this;
+	*this = *aRecord;
+	return *this;
 }
 
 
 MuseRecordBasic& MuseRecordBasic::operator=(const char* aLine) {
-   setLine(aLine);
-   setType(aLine[0]);
-   lineindex = -1;
+	setLine(aLine);
+	setType(aLine[0]);
+	lineindex = -1;
 
-   absbeat.setValue(0,1);
-   lineduration.setValue(0,1);
-   noteduration.setValue(0,1);
+	absbeat.setValue(0,1);
+	lineduration.setValue(0,1);
+	noteduration.setValue(0,1);
 
-   b40pitch     = -100;
-   nexttiednote = -1;
-   lasttiednote = -1;
+	b40pitch     = -100;
+	nexttiednote = -1;
+	lasttiednote = -1;
 
-   return *this;
+	return *this;
 }
 
 
@@ -378,7 +368,7 @@ MuseRecordBasic& MuseRecordBasic::operator=(const char* aLine) {
 //
 
 char& MuseRecordBasic::operator[](int index) {
-   return getColumn(index+1);
+	return getColumn(index+1);
 }
 
 
@@ -389,14 +379,14 @@ char& MuseRecordBasic::operator[](int index) {
 //
 
 void MuseRecordBasic::setLine(const char* aLine) {
-   int len = strlen(aLine);
-   recordString.setSize(len+1);
-   strcpy(recordString.getBase(), aLine);
-   // hide the null character:
-   recordString.setSize(recordString.getSize()-1);
+	int len = strlen(aLine);
+	recordString.setSize(len+1);
+	strcpy(recordString.getBase(), aLine);
+	// hide the null character:
+	recordString.setSize(recordString.getSize()-1);
 
-   // string lengths should not exceed 80 characters according
-   // to MuseData standard, so maybe have a warning or error if exceeded.
+	// string lengths should not exceed 80 characters according
+	// to MuseData standard, so maybe have a warning or error if exceeded.
 }
 
 
@@ -407,7 +397,7 @@ void MuseRecordBasic::setLine(const char* aLine) {
 //
 
 void MuseRecordBasic::setType(int aType) {
-   type = aType;
+	type = aType;
 }
 
 
@@ -420,8 +410,8 @@ void MuseRecordBasic::setType(int aType) {
 //
 
 void MuseRecordBasic::setTypeGraceNote(void) {
-   setType(E_muserec_note_grace);
-   (*this)[0] = 'g';
+	setType(E_muserec_note_grace);
+	(*this)[0] = 'g';
 }
 
 
@@ -429,14 +419,14 @@ void MuseRecordBasic::setTypeGraceNote(void) {
 //////////////////////////////
 //
 // MuseRecordBasic::setTypeGraceChordNote -- put a "g" in the first column,
-//    and a space in the second column.  Shift pitch information over if 
+//    and a space in the second column.  Shift pitch information over if
 //    it exists?  Maybe later.  Currently will destroy any pitch information.
 //
 
 void MuseRecordBasic::setTypeGraceChordNote(void) {
-   setType(E_muserec_note_grace_chord);
-   (*this)[0] = 'g';
-   (*this)[1] = ' ';
+	setType(E_muserec_note_grace_chord);
+	(*this)[0] = 'g';
+	(*this)[1] = ' ';
 }
 
 
@@ -447,12 +437,12 @@ void MuseRecordBasic::setTypeGraceChordNote(void) {
 //
 
 void MuseRecordBasic::shrink(void) {
-   int i = recordString.getSize() - 1;
-   while (i >= 0 && recordString[i] == ' ') {
-      recordString[i] = '\0';
-      recordString.setSize(recordString.getSize()-1);
-      i--;
-   }
+	int i = recordString.getSize() - 1;
+	while (i >= 0 && recordString[i] == ' ') {
+		recordString[i] = '\0';
+		recordString.setSize(recordString.getSize()-1);
+		i--;
+	}
 }
 
 
@@ -463,18 +453,18 @@ void MuseRecordBasic::shrink(void) {
 //
 
 void MuseRecordBasic::insertString(int column, const char* string) {
-   int len = strlen(string);
-   if (len == 0) {
-      return;
-   }
-   int index = column - 1;
-   // make sure that record has text data up to the end of sring in
-   // final location by preallocating the end location of string:
-   (*this)[index+len-1] = ' ';
-   int i;
-   for (i=0; i<len; i++) {
-      (*this)[i+index] = string[i];
-   }
+	int len = strlen(string);
+	if (len == 0) {
+		return;
+	}
+	int index = column - 1;
+	// make sure that record has text data up to the end of sring in
+	// final location by preallocating the end location of string:
+	(*this)[index+len-1] = ' ';
+	int i;
+	for (i=0; i<len; i++) {
+		(*this)[i+index] = string[i];
+	}
 }
 
 
@@ -486,20 +476,20 @@ void MuseRecordBasic::insertString(int column, const char* string) {
 //
 
 void MuseRecordBasic::insertStringRight(int column, const char* string) {
-   int len = strlen(string);
-   int index = column - 1;
-   // make sure that record has text data up to the end of sring in
-   // final location by preallocating the end location of string:
-   (*this)[index] = ' ';
-   int i;
-   int ii;
-   for (i=0; i<len; i++) {
-      ii = index - i;
-      if (ii < 0) {
-         break;
-      }
-      (*this)[ii] = string[len-i-1];
-   }
+	int len = strlen(string);
+	int index = column - 1;
+	// make sure that record has text data up to the end of sring in
+	// final location by preallocating the end location of string:
+	(*this)[index] = ' ';
+	int i;
+	int ii;
+	for (i=0; i<len; i++) {
+		ii = index - i;
+		if (ii < 0) {
+			break;
+		}
+		(*this)[ii] = string[len-i-1];
+	}
 }
 
 
@@ -511,36 +501,36 @@ void MuseRecordBasic::insertStringRight(int column, const char* string) {
 //
 
 void MuseRecordBasic::appendString(const char* astring) {
-   insertString(getLength()+1, astring);
+	insertString(getLength()+1, astring);
 }
 
 
 
 //////////////////////////////
 //
-// MuseRecord::appendInteger -- Insert an integer after the last character 
+// MuseRecord::appendInteger -- Insert an integer after the last character
 //     in the current line.
 //
 
 void MuseRecordBasic::appendInteger(int value) {
-   char buffer[32] = {0};
-   snprintf(buffer, 32, "%d", value);
-   insertString(getLength()+1, buffer);
+	char buffer[32] = {0};
+	snprintf(buffer, 32, "%d", value);
+	insertString(getLength()+1, buffer);
 }
 
 
 
 //////////////////////////////
 //
-// MuseRecord::appendRational -- Insert a rational after the last character 
+// MuseRecord::appendRational -- Insert a rational after the last character
 //     in the current line.
 //
 
 void MuseRecordBasic::appendRational(RationalNumber& value) {
-   SSTREAM tout;
-   value.printTwoPart(tout);
-   tout << ends;
-   insertString(getLength()+1, tout.CSTRING);
+	stringstream tout;
+	value.printTwoPart(tout);
+	tout << ends;
+	insertString(getLength()+1, tout.str().c_str());
 }
 
 
@@ -555,47 +545,47 @@ void MuseRecordBasic::appendRational(RationalNumber& value) {
 //
 
 void MuseRecordBasic::append(const char* format, ...) {
-   va_list valist;
-   int     i;
+	va_list valist;
+	int     i;
 
-   va_start(valist, format);
+	va_start(valist, format);
 
-   union Format_t {
-      int   i;
-      char *s;
-      int  *r;  // array of two integers for rational number
-   } FormatData;
+	union Format_t {
+		int   i;
+		char *s;
+		int  *r;  // array of two integers for rational number
+	} FormatData;
 
-   RationalNumber rn;
+	RationalNumber rn;
 
-   for (i=0; format[i] != '\0'; i++) {
-      switch (format[i]) {   // Type to expect.
-         case 'i':
-            FormatData.i = va_arg(valist, int);
-            appendInteger(FormatData.i);
-            break;
+	for (i=0; format[i] != '\0'; i++) {
+		switch (format[i]) {   // Type to expect.
+			case 'i':
+				FormatData.i = va_arg(valist, int);
+				appendInteger(FormatData.i);
+				break;
 
-         case 's':
-            FormatData.s = va_arg(valist, char *);
-            if (strlen(FormatData.s) > 0) {
-               appendString(FormatData.s);
-            }
-            break;
+			case 's':
+				FormatData.s = va_arg(valist, char *);
+				if (strlen(FormatData.s) > 0) {
+					appendString(FormatData.s);
+				}
+				break;
 
-         case 'r':
-             FormatData.r = va_arg(valist, int *);
-             rn.setValue(FormatData.r[0], FormatData.r[1]);
-             appendRational(rn);
-            break;
+			case 'r':
+				FormatData.r = va_arg(valist, int *);
+				rn.setValue(FormatData.r[0], FormatData.r[1]);
+				appendRational(rn);
+				break;
 
-         default:
-            // don't put any character other than "i", "r" or "s" 
-            // in the format string
-            break;
-      }
-   }
+			default:
+				// don't put any character other than "i", "r" or "s"
+				// in the format string
+				break;
+		}
+	}
 
-   va_end(valist);
+	va_end(valist);
 }
 
 
@@ -606,15 +596,15 @@ void MuseRecordBasic::append(const char* format, ...) {
 //
 
 void MuseRecordBasic::setString(Array<char>& astring) {
-   recordString = astring;
-   char nullchar = '\0';
-   int size = recordString.getSize();
-   if ((size > 0) && (recordString[size-1] == nullchar)) {
-      // chomp any null character at end of string
-      recordString.setSize(size-1);
-   }
-   recordString.append(nullchar);
-   recordString.setSize(recordString.getSize()-1);
+	recordString = astring;
+	char nullchar = '\0';
+	int size = recordString.getSize();
+	if ((size > 0) && (recordString[size-1] == nullchar)) {
+		// chomp any null character at end of string
+		recordString.setSize(size-1);
+	}
+	recordString.append(nullchar);
+	recordString.setSize(recordString.getSize()-1);
 }
 
 
@@ -625,13 +615,13 @@ void MuseRecordBasic::setString(Array<char>& astring) {
 
 
 void MuseRecordBasic::setAbsBeat(RationalNumber value) {
-   absbeat = value;
+	absbeat = value;
 }
 
 
 // default value botval = 1
 void MuseRecordBasic::setAbsBeat(int topval, int botval) {
-   absbeat.setValue(topval, botval);
+	absbeat.setValue(topval, botval);
 }
 
 
@@ -642,12 +632,12 @@ void MuseRecordBasic::setAbsBeat(int topval, int botval) {
 //
 
 double MuseRecordBasic::getAbsBeat(void) {
-   return absbeat.getFloat();
+	return absbeat.getFloat();
 }
 
 
 RationalNumber MuseRecordBasic::getAbsBeatR(void) {
-   return absbeat;
+	return absbeat;
 }
 
 
@@ -659,13 +649,13 @@ RationalNumber MuseRecordBasic::getAbsBeatR(void) {
 //
 
 void MuseRecordBasic::setLineDuration(RationalNumber value) {
-   lineduration = value;
+	lineduration = value;
 }
 
 
 // default value botval = 1
 void MuseRecordBasic::setLineDuration(int topval, int botval) {
-   lineduration.setValue(topval, botval);
+	lineduration.setValue(topval, botval);
 }
 
 
@@ -676,13 +666,13 @@ void MuseRecordBasic::setLineDuration(int topval, int botval) {
 //     in terms of quarter notes.
 //
 
-double MuseRecordBasic::getLineDuration(void) { 
-   return lineduration.getFloat();
+double MuseRecordBasic::getLineDuration(void) {
+	return lineduration.getFloat();
 }
 
 
-RationalNumber MuseRecordBasic::getLineDurationR(void) { 
-   return lineduration;
+RationalNumber MuseRecordBasic::getLineDurationR(void) {
+	return lineduration;
 }
 
 
@@ -694,14 +684,14 @@ RationalNumber MuseRecordBasic::getLineDurationR(void) {
 //     then the note duration should probably be 0...
 //
 
-void MuseRecordBasic::setNoteDuration(RationalNumber value) { 
-   noteduration = value;
+void MuseRecordBasic::setNoteDuration(RationalNumber value) {
+	noteduration = value;
 }
 
 
 // default value botval = 1
-void MuseRecordBasic::setNoteDuration(int topval, int botval) { 
-   noteduration.setValue(topval, botval);
+void MuseRecordBasic::setNoteDuration(int topval, int botval) {
+	noteduration.setValue(topval, botval);
 }
 
 
@@ -713,13 +703,13 @@ void MuseRecordBasic::setNoteDuration(int topval, int botval) {
 //     then the note duration should probably be 0...
 //
 
-double MuseRecordBasic::getNoteDuration(void) { 
-   return noteduration.getFloat();
+double MuseRecordBasic::getNoteDuration(void) {
+	return noteduration.getFloat();
 }
 
 
-RationalNumber MuseRecordBasic::getNoteDurationR(void) { 
-   return noteduration;
+RationalNumber MuseRecordBasic::getNoteDurationR(void) {
+	return noteduration;
 }
 
 
@@ -730,7 +720,7 @@ RationalNumber MuseRecordBasic::getNoteDurationR(void) {
 //
 
 void MuseRecordBasic::setLineIndex(int index) {
-   lineindex = index;
+	lineindex = index;
 }
 
 
@@ -738,24 +728,24 @@ void MuseRecordBasic::setLineIndex(int index) {
 //////////////////////////////
 //
 // MuseRecordBasic::isTied -- True if the note is tied to a note
-//    before or after it. 
+//    before or after it.
 //  0 = no ties
 //  1 = tied to previous note
 //  2 = tied to future note
 //  3 = tied to both previous and future note
 //
 
-int MuseRecordBasic::isTied(void) { 
-   int output = 0;
-   if (getLastTiedNoteLineIndex() >= 0) {
-      output += 1;
-   }
+int MuseRecordBasic::isTied(void) {
+	int output = 0;
+	if (getLastTiedNoteLineIndex() >= 0) {
+		output += 1;
+	}
 
-   if (getNextTiedNoteLineIndex() >= 0) {
-      output += 2;
-   }
-	 
-   return output;
+	if (getNextTiedNoteLineIndex() >= 0) {
+		output += 2;
+	}
+
+	return output;
 }
 
 
@@ -766,8 +756,8 @@ int MuseRecordBasic::isTied(void) {
 //
 
 
-int MuseRecordBasic::getLastTiedNoteLineIndex(void) { 
-   return lasttiednote;
+int MuseRecordBasic::getLastTiedNoteLineIndex(void) {
+	return lasttiednote;
 }
 
 
@@ -778,8 +768,8 @@ int MuseRecordBasic::getLastTiedNoteLineIndex(void) {
 //
 
 
-int MuseRecordBasic::getNextTiedNoteLineIndex(void) { 
-   return nexttiednote;
+int MuseRecordBasic::getNextTiedNoteLineIndex(void) {
+	return nexttiednote;
 }
 
 
@@ -790,8 +780,8 @@ int MuseRecordBasic::getNextTiedNoteLineIndex(void) {
 //
 
 
-void MuseRecordBasic::setLastTiedNoteLineIndex(int index) { 
-   lasttiednote = index;
+void MuseRecordBasic::setLastTiedNoteLineIndex(int index) {
+	lasttiednote = index;
 }
 
 
@@ -802,8 +792,8 @@ void MuseRecordBasic::setLastTiedNoteLineIndex(int index) {
 //
 
 
-void MuseRecordBasic::setNextTiedNoteLineIndex(int index) { 
-   nexttiednote = index;
+void MuseRecordBasic::setNextTiedNoteLineIndex(int index) {
+	nexttiednote = index;
 }
 
 
@@ -814,7 +804,7 @@ void MuseRecordBasic::setNextTiedNoteLineIndex(int index) {
 //
 
 void MuseRecordBasic::setRoundedBreve(void) {
-   roundBreve = 1;
+	roundBreve = 1;
 }
 
 
@@ -827,7 +817,7 @@ void MuseRecordBasic::setRoundedBreve(void) {
 //
 
 void MuseRecordBasic::setMarkupPitch(int aPitch) {
-   b40pitch = aPitch;
+	b40pitch = aPitch;
 }
 
 
@@ -840,7 +830,7 @@ void MuseRecordBasic::setMarkupPitch(int aPitch) {
 //
 
 int MuseRecordBasic::getMarkupPitch(void) {
-   return b40pitch;
+	return b40pitch;
 }
 
 
@@ -853,16 +843,15 @@ int MuseRecordBasic::getMarkupPitch(void) {
 //
 
 void MuseRecordBasic::cleanLineEnding(void) {
-   int i = recordString.getSize()-1;
-   // don't remove first space on line.
-   while ((i > 0) && (recordString[i] == ' ')) {  
-      recordString[i] = '\0';
-      recordString.setSize(recordString.getSize() - 1);
-      i = recordString.getSize() - 1;
-   }
+	int i = recordString.getSize()-1;
+	// don't remove first space on line.
+	while ((i > 0) && (recordString[i] == ' ')) {
+		recordString[i] = '\0';
+		recordString.setSize(recordString.getSize() - 1);
+		i = recordString.getSize() - 1;
+	}
 
 }
-
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -870,19 +859,16 @@ void MuseRecordBasic::cleanLineEnding(void) {
 
 //////////////////////////////
 //
-// operator<< 
+// operator<<
 //
 
 ostream& operator<<(ostream& out, MuseRecordBasic& aRecord) {
-   aRecord.shrink();  // have to shrink automatically because
-                      // muse2ps program chokes on line 9 of header
-		      // if it has more than one space on a blank line.
-   out << aRecord.getLine();
-   return out;
+	aRecord.shrink(); // have to shrink automatically because
+							// muse2ps program chokes on line 9 of header
+							// if it has more than one space on a blank line.
+	out << aRecord.getLine();
+	return out;
 }
 
 
 
-
-
-// md5sum: 17da8974becd492dfd9f275dfcc4004e MuseRecordBasic.cpp [20050403]

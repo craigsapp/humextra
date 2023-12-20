@@ -5,31 +5,18 @@
 // Last Modified: Tue Jun  7 13:04:06 PDT 2011
 // Filename:      ...sig/src/sigInfo/XmlItem.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/XmlItem.cpp
-// Syntax:        C++ 
-// 
+// Syntax:        C++
+//
 // Description:   A class that stores a list of XML text fragments.
 //
 
-#ifndef OLDCPP
-   #include <sstream>
-   #include <fstream>
-   #define SSTREAM stringstream
-   #define CSTRING str().c_str()
-   using namespace std;
-#else
-   #ifdef VISUAL
-      #include <strstrea.h>     /* for Windows 95 */
-   #else
-      #include <strstream.h>
-   #endif
-   #include <fstream.h>
-   #define SSTREAM strstream
-   #define CSTRING str()
-#endif
-   
 #include "PerlRegularExpression.h"
 #include "XmlItem.h"
-#include <string.h>
+
+#include <cstring>
+#include <fstream>
+
+using namespace std;
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -44,13 +31,13 @@
 //
 
 XmlItem::XmlItem(void) {
-   setSerial(-1);
-   setText("");
+	setSerial(-1);
+	setText("");
 }
 
 XmlItem::XmlItem(int serialnum, Array<char>& item) {
-   setSerial(serialnum);
-   setText(item);
+	setSerial(serialnum);
+	setText(item);
 }
 
 
@@ -61,7 +48,7 @@ XmlItem::XmlItem(int serialnum, Array<char>& item) {
 //
 
 int XmlItem::getType(void) const {
-   return itemtype;
+	return itemtype;
 }
 
 
@@ -73,7 +60,7 @@ int XmlItem::getType(void) const {
 //
 
 int XmlItem::isElement(void) const {
-   return 0x0004 & itemtype;
+	return 0x0004 & itemtype;
 }
 
 
@@ -85,7 +72,7 @@ int XmlItem::isElement(void) const {
 //
 
 int XmlItem::isSpace(void) const {
-   return 0x0010 & itemtype;
+	return 0x0010 & itemtype;
 }
 
 
@@ -97,7 +84,7 @@ int XmlItem::isSpace(void) const {
 //
 
 int XmlItem::isText(void) const {
-   return 0x0020 & itemtype;
+	return 0x0020 & itemtype;
 }
 
 
@@ -114,7 +101,7 @@ int XmlItem::isText(void) const {
 //
 
 void XmlItem::setSerial(int aserial) {
-   serial = aserial;
+	serial = aserial;
 }
 
 
@@ -126,13 +113,13 @@ void XmlItem::setSerial(int aserial) {
 //
 
 int XmlItem::setText(Array<char>& item) {
-   string = item;
-   return setType();
+	string = item;
+	return setType();
 }
 
 int XmlItem::setText(const char* item) {
-   string = item;
-   return setType();
+	string = item;
+	return setType();
 }
 
 
@@ -145,52 +132,52 @@ int XmlItem::setText(const char* item) {
 //
 
 int XmlItem::setType(void) {
-   PerlRegularExpression pre;
+	PerlRegularExpression pre;
 
-   if (pre.search(string.getBase(), "^\\s*$")) {
-      itemtype = XMLITEM_TYPE_WHITESPACE;
-      return itemtype;
-   }
+	if (pre.search(string.getBase(), "^\\s*$")) {
+		itemtype = XMLITEM_TYPE_WHITESPACE;
+		return itemtype;
+	}
 
-   if (!pre.search(string.getBase(), "^\\s*<")) {
-      itemtype = XMLITEM_TYPE_TEXT;
-      return itemtype;
-   }
+	if (!pre.search(string.getBase(), "^\\s*<")) {
+		itemtype = XMLITEM_TYPE_TEXT;
+		return itemtype;
+	}
 
-   if (pre.search(string.getBase(), "^\\s*<\\s*!\\s*-\\s*-\\s*")) {  
-      itemtype = XMLITEM_TYPE_COMMENT;
-      return itemtype;
-   }
-   
-   if (pre.search(string.getBase(), "^\\s*<\\s*!")) {
-      itemtype = XMLITEM_TYPE_BANG;
-      return itemtype;
-   }
+	if (pre.search(string.getBase(), "^\\s*<\\s*!\\s*-\\s*-\\s*")) {
+		itemtype = XMLITEM_TYPE_COMMENT;
+		return itemtype;
+	}
 
-   if (pre.search(string.getBase(), "^\\s*<\\s*\\?")) {
-      itemtype = XMLITEM_TYPE_QUESTION;
-      return itemtype;
-   }
+	if (pre.search(string.getBase(), "^\\s*<\\s*!")) {
+		itemtype = XMLITEM_TYPE_BANG;
+		return itemtype;
+	}
 
-   if (pre.search(string.getBase(), "^\\s*<\\s*[A-Z\\d].*\\s*/\\s*>")) {
-      itemtype = XMLITEM_TYPE_ELEMENTSOLO;
-      return itemtype;
-   }
+	if (pre.search(string.getBase(), "^\\s*<\\s*\\?")) {
+		itemtype = XMLITEM_TYPE_QUESTION;
+		return itemtype;
+	}
 
-   if (pre.search(string.getBase(), "^\\s*<\\s*/\\s*[A-Z\\d].*\\s*>")) {
-      itemtype = XMLITEM_TYPE_ELEMENTEND;
-      return itemtype;
-   }
+	if (pre.search(string.getBase(), "^\\s*<\\s*[A-Z\\d].*\\s*/\\s*>")) {
+		itemtype = XMLITEM_TYPE_ELEMENTSOLO;
+		return itemtype;
+	}
 
-   if (pre.search(string.getBase(), "^\\s*<\\s*[A-Za-z\\d].*\\s*>")) {
-      itemtype = XMLITEM_TYPE_ELEMENTSTART;
-      return itemtype;
-   }
+	if (pre.search(string.getBase(), "^\\s*<\\s*/\\s*[A-Z\\d].*\\s*>")) {
+		itemtype = XMLITEM_TYPE_ELEMENTEND;
+		return itemtype;
+	}
 
-   itemtype = XMLITEM_TYPE_UNKNOWN;
-   return itemtype;
+	if (pre.search(string.getBase(), "^\\s*<\\s*[A-Za-z\\d].*\\s*>")) {
+		itemtype = XMLITEM_TYPE_ELEMENTSTART;
+		return itemtype;
+	}
+
+	itemtype = XMLITEM_TYPE_UNKNOWN;
+	return itemtype;
 }
-   
+
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -199,11 +186,9 @@ int XmlItem::setType(void) {
 //
 
 ostream& operator<<(ostream& out, XmlItem& item) {
-   out << item.cstr();
-   return out;
+	out << item.cstr();
+	return out;
 }
 
 
 
-
-// md5sum: 05e1e67705ebcb2bfa1afad9e504582c XmlItem.cpp [20050403]

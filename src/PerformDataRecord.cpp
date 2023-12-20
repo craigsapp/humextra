@@ -16,17 +16,13 @@
 #include <string.h>
 
 #ifndef VISUAL
-   #include <sys/types.h>   /* needed by regex.h */
-   #include <regex.h>
+	#include <sys/types.h>   /* needed by regex.h */
+	#include <regex.h>
 #endif
 
-#ifndef OLDCPP
-   #include <iomanip>
-   using namespace std;
-#else
-   #include <iomanip.h>
-#endif
+#include <iomanip>
 
+using namespace std;
 
 
 //////////////////////////////
@@ -34,19 +30,19 @@
 // PerformDataRecord::PerformDataRecord --
 //
 
-PerformDataRecord::PerformDataRecord(void) { 
-   time = -1;
-   type = PERFORM_TYPE_NULL;
-   data.setSize(1);
-   data[0] = '\0';
-   data.allowGrowth(0);
+PerformDataRecord::PerformDataRecord(void) {
+	time = -1;
+	type = PERFORM_TYPE_NULL;
+	data.setSize(1);
+	data[0] = '\0';
+	data.allowGrowth(0);
 }
 
 
-PerformDataRecord::PerformDataRecord(PerformDataRecord& aRecord) { 
-   time = aRecord.time;
-   type = aRecord.type;
-   data = aRecord.data;
+PerformDataRecord::PerformDataRecord(PerformDataRecord& aRecord) {
+	time = aRecord.time;
+	type = aRecord.type;
+	data = aRecord.data;
 }
 
 
@@ -56,8 +52,8 @@ PerformDataRecord::PerformDataRecord(PerformDataRecord& aRecord) {
 // PerformDataRecord::~PerformDataRecord --
 //
 
-PerformDataRecord::~PerformDataRecord() { 
-   // do nothing
+PerformDataRecord::~PerformDataRecord() {
+	// do nothing
 }
 
 
@@ -69,7 +65,7 @@ PerformDataRecord::~PerformDataRecord() {
 //
 
 int PerformDataRecord::barQ(void) {
-   return measureQ();
+	return measureQ();
 }
 
 
@@ -81,11 +77,11 @@ int PerformDataRecord::barQ(void) {
 //
 
 int PerformDataRecord::beginQ(void) {
-   if (getType() == PERFORM_TYPE_BEGIN) {
-      return 1;
-   } else {
-      return 0;
-   }
+	if (getType() == PERFORM_TYPE_BEGIN) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 
@@ -97,11 +93,11 @@ int PerformDataRecord::beginQ(void) {
 //
 
 int PerformDataRecord::endQ(void) {
-   if (getType() == PERFORM_TYPE_END) {
-      return 1;
-   } else {
-      return 0;
-   }
+	if (getType() == PERFORM_TYPE_END) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 
@@ -112,8 +108,8 @@ int PerformDataRecord::endQ(void) {
 //     stored in this record.
 //
 
-char* PerformDataRecord::getData(void) { 
-   return data.getBase();
+char* PerformDataRecord::getData(void) {
+	return data.getBase();
 }
 
 
@@ -128,8 +124,8 @@ char* PerformDataRecord::getData(void) {
 //    zero character being included in the count.
 //
 
-int PerformDataRecord::getLength(void) { 
-   return data.getSize() - 1;
+int PerformDataRecord::getLength(void) {
+	return data.getSize() - 1;
 }
 
 
@@ -141,16 +137,16 @@ int PerformDataRecord::getLength(void) {
 //
 
 int PerformDataRecord::getMeasureNumber(void) {
-   int measure;
-   if (measureQ()) {
-      sscanf("BAR%4d", getData(), &measure);      
-      return measure;
-   } 
+	int measure;
+	if (measureQ()) {
+		sscanf("BAR%4d", getData(), &measure);
+		return measure;
+	}
 
-   cout << "Error: this data is not a measure marker" << endl;
-   exit(1);
+	cout << "Error: this data is not a measure marker" << endl;
+	exit(1);
 
-   return 0; // for compilers with buggy warning statements
+	return 0; // for compilers with buggy warning statements
 }
 
 
@@ -162,15 +158,15 @@ int PerformDataRecord::getMeasureNumber(void) {
 //
 
 double PerformDataRecord::getTempoNumber(void) {
-   int measure;
-   if (measureQ()) {
-      sscanf("TEMPO%4d", getData(), &measure);      
-      return measure;
-   }
-   cout << "Error: this data is not a measure marker" << endl;
-   exit(1);
+	int measure;
+	if (measureQ()) {
+		sscanf("TEMPO%4d", getData(), &measure);
+		return measure;
+	}
+	cout << "Error: this data is not a measure marker" << endl;
+	exit(1);
 
-   return 0; // for compilers with buggy warning statements
+	return 0; // for compilers with buggy warning statements
 }
 
 
@@ -182,8 +178,8 @@ double PerformDataRecord::getTempoNumber(void) {
 //     or it could be a delta time.
 //
 
-int PerformDataRecord::getTime(void) { 
-   return time;
+int PerformDataRecord::getTime(void) {
+	return time;
 }
 
 
@@ -194,8 +190,8 @@ int PerformDataRecord::getTime(void) {
 //     stored in this record.
 //
 
-int PerformDataRecord::getType(void) { 
-   return type;
+int PerformDataRecord::getType(void) {
+	return type;
 }
 
 
@@ -207,46 +203,46 @@ int PerformDataRecord::getType(void) {
 //
 
 int PerformDataRecord::match(const char* matchString) {
-   #ifdef VISUAL
-      int i=0;
-      int length = strlen(matchString);
-      char* stringToSearch = getData();
-      int found = 0;
-      while (stringToSearch[i] != '\0' && stringToSearch[i] != matchString[0]) {
-         if (strncmp(matchString, &stringToSearch[i], length) == 0) {
-            found = 1;
-            break;
-         } 
-         i++;
-      }
-      return found;  
-   #else
-      char* stringToSearch = getData();
-      regex_t    preg;     // compiled regular expression string structure
-      regmatch_t pmatch;   // sub expression matching structure
-    
-      // first, compile the regular expression to search with
-      int status = regcomp(&preg, matchString, REG_EXTENDED | REG_NOSUB);
-    
-      // Whenever you get a non-zero return code from regcomp()
-      // or regexec(), the regerror() function can provide a detailed
-      // message explaining what went wrong.
-      if (status != 0) {
-         cout << "Error: could not compile search string" << endl;
-         exit(1);
-      }
+	#ifdef VISUAL
+		int i=0;
+		int length = strlen(matchString);
+		char* stringToSearch = getData();
+		int found = 0;
+		while (stringToSearch[i] != '\0' && stringToSearch[i] != matchString[0]) {
+			if (strncmp(matchString, &stringToSearch[i], length) == 0) {
+				found = 1;
+				break;
+			}
+			i++;
+		}
+		return found;
+	#else
+		char* stringToSearch = getData();
+		regex_t    preg;     // compiled regular expression string structure
+		regmatch_t pmatch;   // sub expression matching structure
 
-      status = regexec(&preg, stringToSearch, 1, &pmatch, 0);
-    
-      regfree(&preg);
+		// first, compile the regular expression to search with
+		int status = regcomp(&preg, matchString, REG_EXTENDED | REG_NOSUB);
 
-      if (status == 0) {
-         return 1;          // string was matched
-      } else {
-         return 0;          // string was not matched
-      }
-     
-   #endif
+		// Whenever you get a non-zero return code from regcomp()
+		// or regexec(), the regerror() function can provide a detailed
+		// message explaining what went wrong.
+		if (status != 0) {
+			cout << "Error: could not compile search string" << endl;
+			exit(1);
+		}
+
+		status = regexec(&preg, stringToSearch, 1, &pmatch, 0);
+
+		regfree(&preg);
+
+		if (status == 0) {
+			return 1;          // string was matched
+		} else {
+			return 0;          // string was not matched
+		}
+
+	#endif
 }
 
 
@@ -258,11 +254,11 @@ int PerformDataRecord::match(const char* matchString) {
 //
 
 int PerformDataRecord::measureQ(void) {
-   if (getType() == PERFORM_TYPE_MEASURE) {
-      return 1;
-   } else {
-      return 0;
-   }
+	if (getType() == PERFORM_TYPE_MEASURE) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 
@@ -274,11 +270,11 @@ int PerformDataRecord::measureQ(void) {
 //
 
 int PerformDataRecord::midiQ(void) {
-   if (getType() == PERFORM_TYPE_MIDI) {
-      return 1;
-   } else {
-      return 0;
-   }
+	if (getType() == PERFORM_TYPE_MIDI) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 
@@ -290,14 +286,14 @@ int PerformDataRecord::midiQ(void) {
 //
 
 PerformDataRecord& PerformDataRecord::operator=(PerformDataRecord& aRecord) {
-   if (&aRecord == this) {
-      return *this;
-   }
-   time = aRecord.time;
-   type = aRecord.type;
-   data = aRecord.data;
+	if (&aRecord == this) {
+		return *this;
+	}
+	time = aRecord.time;
+	type = aRecord.type;
+	data = aRecord.data;
 
-   return *this;
+	return *this;
 }
 
 
@@ -309,61 +305,61 @@ PerformDataRecord& PerformDataRecord::operator=(PerformDataRecord& aRecord) {
 //
 
 ostream& PerformDataRecord::print(ostream& out) {
-   out << "time=" << getTime() << "  \ttype=";
+	out << "time=" << getTime() << "  \ttype=";
 
-   switch (getType()) {
-      case PERFORM_TYPE_NULL:
-         out << "null";
-         break;
-      case PERFORM_TYPE_TEXT:
-         out << "text: ";
-         out << getData();
-         break;
-      case PERFORM_TYPE_MIDI:
-         {
-         out << "midi: ";
-         int i = 0;
-         char* datax = getData();
-         int size = data.getSize() - 1;
-         while (i < size) {
-            if (datax[i] >= 0) {
-               out << (unsigned int)((unsigned char)datax[i]);
-               out << " ";
-            } else {
-               out << "0x";
-               out << hex << (unsigned int)((unsigned char)datax[i]) << dec;
-               out << " ";
-            }
-            i++;
-         }
-         }
-         break;
-      case PERFORM_TYPE_MEASURE:
-         out << "bar:  ";
-         out << getData();
-         break;
-      case PERFORM_TYPE_TEMPO:
-         out << "tempo ";
-         out << getData();
-         break;
-      case PERFORM_TYPE_CLEAR:
-         out << "clear ";
-         out << getData();
-         break;
-      case PERFORM_TYPE_IGNORED:
-         out << "ignored ";
-         break;
-      case PERFORM_TYPE_BEGIN:
-         out << "begin ";
-         break;
-      case PERFORM_TYPE_END:
-         out << "end ";
-         break;
-      default:
-         out << "UNKNOWN";
-   }
+	switch (getType()) {
+		case PERFORM_TYPE_NULL:
+			out << "null";
+			break;
+		case PERFORM_TYPE_TEXT:
+			out << "text: ";
+			out << getData();
+			break;
+		case PERFORM_TYPE_MIDI:
+			{
+			out << "midi: ";
+			int i = 0;
+			char* datax = getData();
+			int size = data.getSize() - 1;
+			while (i < size) {
+				if (datax[i] >= 0) {
+					out << (unsigned int)((unsigned char)datax[i]);
+					out << " ";
+				} else {
+					out << "0x";
+					out << hex << (unsigned int)((unsigned char)datax[i]) << dec;
+					out << " ";
+				}
+				i++;
+			}
+			}
+			break;
+		case PERFORM_TYPE_MEASURE:
+			out << "bar:  ";
+			out << getData();
+			break;
+		case PERFORM_TYPE_TEMPO:
+			out << "tempo ";
+			out << getData();
+			break;
+		case PERFORM_TYPE_CLEAR:
+			out << "clear ";
+			out << getData();
+			break;
+		case PERFORM_TYPE_IGNORED:
+			out << "ignored ";
+			break;
+		case PERFORM_TYPE_BEGIN:
+			out << "begin ";
+			break;
+		case PERFORM_TYPE_END:
+			out << "end ";
+			break;
+		default:
+			out << "UNKNOWN";
+	}
 
-   return out;
+	return out;
 }
 
 
@@ -375,14 +371,14 @@ ostream& PerformDataRecord::print(ostream& out) {
 //      default value: length = -1.
 //
 
-void PerformDataRecord::setBar(int aTime, const char* measureData, 
-      int length) { 
-   setMeasure(aTime, measureData, length);
+void PerformDataRecord::setBar(int aTime, const char* measureData,
+		int length) {
+	setMeasure(aTime, measureData, length);
 }
 
 
 void PerformDataRecord::setBar(int aTime, int aMeasure) {
-   setMeasure(aTime, aMeasure);
+	setMeasure(aTime, aMeasure);
 }
 
 
@@ -394,16 +390,16 @@ void PerformDataRecord::setBar(int aTime, int aMeasure) {
 //
 
 void PerformDataRecord::setClear(int aTime) {
-   data.setSize(5 + 2);
-   data.setSize(5 + 1);
-   strcpy(data.getBase(), "CLEAR");
-   data.allowGrowth(1);
-   char temp = '\0';
-   data.append(temp);
-   data.allowGrowth(0);
+	data.setSize(5 + 2);
+	data.setSize(5 + 1);
+	strcpy(data.getBase(), "CLEAR");
+	data.allowGrowth(1);
+	char temp = '\0';
+	data.append(temp);
+	data.allowGrowth(0);
 
-   setType(PERFORM_TYPE_CLEAR);
-   setTime(aTime);
+	setType(PERFORM_TYPE_CLEAR);
+	setTime(aTime);
 }
 
 
@@ -415,29 +411,29 @@ void PerformDataRecord::setClear(int aTime) {
 //      default value: length = -1.
 //
 
-void PerformDataRecord::setMeasure(int aTime, const char* measureData, 
-      int length) { 
-   if (length == -1) {
-      length = strlen(measureData);
-   }
+void PerformDataRecord::setMeasure(int aTime, const char* measureData,
+		int length) {
+	if (length == -1) {
+		length = strlen(measureData);
+	}
 
-   data.setSize(length + 2);
-   data.setSize(length + 1);
-   strcpy(data.getBase(), measureData);
-   data.allowGrowth(1);
-   char temp = '\0';
-   data.append(temp);
-   data.allowGrowth(0);
+	data.setSize(length + 2);
+	data.setSize(length + 1);
+	strcpy(data.getBase(), measureData);
+	data.allowGrowth(1);
+	char temp = '\0';
+	data.append(temp);
+	data.allowGrowth(0);
 
-   setType(PERFORM_TYPE_MEASURE);
-   setTime(aTime);
+	setType(PERFORM_TYPE_MEASURE);
+	setTime(aTime);
 }
 
 
 void PerformDataRecord::setMeasure(int aTime, int aMeasure) {
-   char measureString[128] = {0};
-   snprintf(measureString, 128, "BAR%3d", aMeasure);
-   setMeasure(aTime, measureString);
+	char measureString[128] = {0};
+	snprintf(measureString, 128, "BAR%3d", aMeasure);
+	setMeasure(aTime, measureString);
 }
 
 
@@ -449,29 +445,29 @@ void PerformDataRecord::setMeasure(int aTime, int aMeasure) {
 //      default value: length = -1.
 //
 
-void PerformDataRecord::setTempo(int aTime, const char* tempoData, 
-      int length) { 
-   if (length == -1) {
-      length = strlen(tempoData);
-   }
+void PerformDataRecord::setTempo(int aTime, const char* tempoData,
+		int length) {
+	if (length == -1) {
+		length = strlen(tempoData);
+	}
 
-   data.setSize(length + 2);
-   data.setSize(length + 1);
-   strcpy(data.getBase(), tempoData);
-   data.allowGrowth(1);
-   char temp = '\0';
-   data.append(temp);
-   data.allowGrowth(0);
+	data.setSize(length + 2);
+	data.setSize(length + 1);
+	strcpy(data.getBase(), tempoData);
+	data.allowGrowth(1);
+	char temp = '\0';
+	data.append(temp);
+	data.allowGrowth(0);
 
-   setType(PERFORM_TYPE_TEMPO);
-   setTime(aTime);
+	setType(PERFORM_TYPE_TEMPO);
+	setTime(aTime);
 }
 
 
 void PerformDataRecord::setTempo(int aTime, int aTempo) {
-   char tempoString[128] = {0};
-   snprintf(tempoString, 128, "TEMPO%3d", aTempo);
-   setTempo(aTime, tempoString);
+	char tempoString[128] = {0};
+	snprintf(tempoString, 128, "TEMPO%3d", aTempo);
+	setTempo(aTime, tempoString);
 }
 
 
@@ -482,18 +478,18 @@ void PerformDataRecord::setTempo(int aTime, int aTempo) {
 //    to be MIDI data which will be sent out at a specific time.
 //
 
-void PerformDataRecord::setMidi(int aTime, const char* someData, 
-      int length) { 
-   data.setSize(length + 2);             // extra space for safty
-   data.setSize(length);
-   strncpy(data.getBase(), someData, length);
-   data.allowGrowth(1);
-   char element = '\0';
-   data.append(element);                  // for string searching
-   data.allowGrowth(0);
+void PerformDataRecord::setMidi(int aTime, const char* someData,
+		int length) {
+	data.setSize(length + 2);             // extra space for safty
+	data.setSize(length);
+	strncpy(data.getBase(), someData, length);
+	data.allowGrowth(1);
+	char element = '\0';
+	data.append(element);                  // for string searching
+	data.allowGrowth(0);
 
-   setType(PERFORM_TYPE_MIDI);
-   setTime(aTime);
+	setType(PERFORM_TYPE_MIDI);
+	setTime(aTime);
 }
 
 
@@ -506,21 +502,21 @@ void PerformDataRecord::setMidi(int aTime, const char* someData,
 //
 
 void PerformDataRecord::setText(int aTime, const char* someText,
-       int length) { 
-   if (length == -1) {
-      length = strlen(someText);
-   }
+		int length) {
+	if (length == -1) {
+		length = strlen(someText);
+	}
 
-   data.setSize(length + 2);
-   data.setSize(length + 1);
-   strcpy(data.getBase(), someText);
-   data.allowGrowth(1);
-   char temp = '\0';
-   data.append(temp);
-   data.allowGrowth(0);
+	data.setSize(length + 2);
+	data.setSize(length + 1);
+	strcpy(data.getBase(), someText);
+	data.allowGrowth(1);
+	char temp = '\0';
+	data.append(temp);
+	data.allowGrowth(0);
 
-   setType(PERFORM_TYPE_TEXT);
-   setTime(aTime);
+	setType(PERFORM_TYPE_TEXT);
+	setTime(aTime);
 }
 
 
@@ -531,8 +527,8 @@ void PerformDataRecord::setText(int aTime, const char* someText,
 //   data.
 //
 
-void PerformDataRecord::setTime(int aTime) { 
-   time = aTime;
+void PerformDataRecord::setTime(int aTime) {
+	time = aTime;
 }
 
 
@@ -542,8 +538,8 @@ void PerformDataRecord::setTime(int aTime) {
 // PerformDataRecord::setType -- sets the type of the performance data.
 //
 
-void PerformDataRecord::setType(int aType) { 
-   type = aType;
+void PerformDataRecord::setType(int aType) {
+	type = aType;
 }
 
 
@@ -555,11 +551,11 @@ void PerformDataRecord::setType(int aType) {
 //
 
 int PerformDataRecord::tempoQ(void) {
-   if (getType() == PERFORM_TYPE_TEMPO) {
-      return 1;
-   } else {
-      return 0;
-   }
+	if (getType() == PERFORM_TYPE_TEMPO) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 
@@ -571,13 +567,12 @@ int PerformDataRecord::tempoQ(void) {
 //
 
 int PerformDataRecord::textQ(void) {
-   if (getType() == PERFORM_TYPE_TEXT) {
-      return 1;
-   } else {
-      return 0;
-   }
+	if (getType() == PERFORM_TYPE_TEXT) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 
 
-// md5sum: 88ed433f0e1993e60cf68a9c39474172 PerformDataRecord.cpp [20050403]

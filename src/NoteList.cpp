@@ -6,7 +6,7 @@
 // Last Modified: Sun Mar 24 12:10:00 PST 2002 (small changes for visual c++)
 // Filename:      ...sig/include/sigInfo/NoteList.cpp
 // Web Address:   http://sig.sapp.org/include/sigInfo/NoteList.cpp
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Used in chord and key identification in HumdrumFile class.
 //
@@ -14,10 +14,7 @@
 #include "Convert.h"
 #include "NoteList.h"
 
-#ifndef OLDCPP
-   using namespace std;
-#endif
-
+using namespace std;
 
 
 //////////////////////////////
@@ -25,8 +22,8 @@
 // NoteList::NoteList --
 //
 
-NoteList::NoteList(void) { 
-   // do nothing
+NoteList::NoteList(void) {
+	// do nothing
 }
 
 
@@ -36,8 +33,8 @@ NoteList::NoteList(void) {
 // NoteList::~NoteList --
 //
 
-NoteList::~NoteList() { 
-   clear();
+NoteList::~NoteList() {
+	clear();
 }
 
 
@@ -48,13 +45,13 @@ NoteList::~NoteList() {
 //
 
 void NoteList::clear(void) {
-      line      = 0;	 // the line number in the original HumdrumFile
-      track     = 0.0;   // the track number in the original HumdrumFile
-      dur       = 0.0;   // the tied duration of the note
-      level     = 0.0;   // the metric level of the note
-      absbeat   = 0.0;   // the absolute beat position of the note
-      pitch     = 0;     // the pitch of the note
-      realpitch = 0;     // the base 40 value of the note
+		line      = 0;     // the line number in the original HumdrumFile
+		track     = 0.0;   // the track number in the original HumdrumFile
+		dur       = 0.0;   // the tied duration of the note
+		level     = 0.0;   // the metric level of the note
+		absbeat   = 0.0;   // the absolute beat position of the note
+		pitch     = 0;     // the pitch of the note
+		realpitch = 0;     // the base 40 value of the note
 }
 
 
@@ -63,9 +60,9 @@ void NoteList::clear(void) {
 //
 // NoteList::getLine --
 //
- 
-const int NoteList::getLine(void) { 
-   return line;
+
+const int NoteList::getLine(void) {
+	return line;
 }
 
 
@@ -74,9 +71,9 @@ const int NoteList::getLine(void) {
 //
 // NoteList::getSpine --
 //
- 
-const int NoteList::getSpine(void) { 
-   return (int)spine;
+
+const int NoteList::getSpine(void) {
+	return (int)spine;
 }
 
 
@@ -85,9 +82,9 @@ const int NoteList::getSpine(void) {
 //
 // NoteList::getToken --
 //
- 
-const int NoteList::getToken(void) { 
-   return (int)token;
+
+const int NoteList::getToken(void) {
+	return (int)token;
 }
 
 
@@ -97,8 +94,8 @@ const int NoteList::getToken(void) {
 // NoteList::getPitch --
 //
 
-const int NoteList::getPitch(void) { 
-   return pitch;
+const int NoteList::getPitch(void) {
+	return pitch;
 }
 
 
@@ -108,8 +105,8 @@ const int NoteList::getPitch(void) {
 // NoteList::getLevel --
 //
 
-const double NoteList::getLevel(void) { 
-   return level;
+const double NoteList::getLevel(void) {
+	return level;
 }
 
 
@@ -119,8 +116,8 @@ const double NoteList::getLevel(void) {
 // NoteList::getAbsBeat --
 //
 
-const double NoteList::getAbsBeat(void) { 
-   return absbeat;
+const double NoteList::getAbsBeat(void) {
+	return absbeat;
 }
 
 
@@ -130,8 +127,8 @@ const double NoteList::getAbsBeat(void) {
 // NoteList::getFirstDur --
 //
 
-const double NoteList::getFirstDur(void) { 
-   return firstdur;
+const double NoteList::getFirstDur(void) {
+	return firstdur;
 }
 
 
@@ -141,8 +138,8 @@ const double NoteList::getFirstDur(void) {
 // NoteList::getDur --
 //
 
-const double NoteList::getDur(void) { 
-   return dur;
+const double NoteList::getDur(void) {
+	return dur;
 }
 
 
@@ -153,7 +150,7 @@ const double NoteList::getDur(void) {
 //
 
 const double NoteList::getDuration(void) {
-   return dur;
+	return dur;
 }
 
 
@@ -163,8 +160,8 @@ const double NoteList::getDuration(void) {
 // NoteList::getTrack --
 //
 
-const double NoteList::getTrack(void) { 
-   return track;
+const double NoteList::getTrack(void) {
+	return track;
 }
 
 
@@ -173,9 +170,9 @@ const double NoteList::getTrack(void) {
 //
 // NoteList::setLine --
 //
- 
-void NoteList::setLine(int aValue) { 
-   line = aValue;
+
+void NoteList::setLine(int aValue) {
+	line = aValue;
 }
 
 
@@ -184,9 +181,9 @@ void NoteList::setLine(int aValue) {
 //
 // NoteList::setSpine --
 //
- 
-void NoteList::setSpine(int aValue) { 
-   spine = (unsigned short)aValue;
+
+void NoteList::setSpine(int aValue) {
+	spine = (unsigned short)aValue;
 }
 
 
@@ -195,9 +192,9 @@ void NoteList::setSpine(int aValue) {
 //
 // NoteList::setToken --
 //
- 
-void NoteList::setToken(int aValue) { 
-   token = (unsigned short)aValue;
+
+void NoteList::setToken(int aValue) {
+	token = (unsigned short)aValue;
 }
 
 
@@ -207,9 +204,9 @@ void NoteList::setToken(int aValue) {
 // NoteList::setPitch --
 //
 
-void NoteList::setPitch(int aValue) { 
-   pitch = aValue;
-   realpitch = aValue;
+void NoteList::setPitch(int aValue) {
+	pitch = aValue;
+	realpitch = aValue;
 }
 
 
@@ -219,8 +216,8 @@ void NoteList::setPitch(int aValue) {
 // NoteList::setLevel --
 //
 
-void NoteList::setLevel(double aValue) { 
-   level = (float)aValue;
+void NoteList::setLevel(double aValue) {
+	level = (float)aValue;
 }
 
 
@@ -230,8 +227,8 @@ void NoteList::setLevel(double aValue) {
 // NoteList::setAbsBeat --
 //
 
-void NoteList::setAbsBeat(double aValue) { 
-   absbeat = (float)aValue;
+void NoteList::setAbsBeat(double aValue) {
+	absbeat = (float)aValue;
 }
 
 
@@ -241,8 +238,8 @@ void NoteList::setAbsBeat(double aValue) {
 // NoteList::setFirstDur --
 //
 
-void NoteList::setFirstDur(double aValue) { 
-   firstdur = (float)aValue;
+void NoteList::setFirstDur(double aValue) {
+	firstdur = (float)aValue;
 }
 
 
@@ -252,8 +249,8 @@ void NoteList::setFirstDur(double aValue) {
 // NoteList::setDur --
 //
 
-void NoteList::setDur(double aValue) { 
-   dur = (float)aValue;
+void NoteList::setDur(double aValue) {
+	dur = (float)aValue;
 }
 
 
@@ -264,7 +261,7 @@ void NoteList::setDur(double aValue) {
 //
 
 void NoteList::setDuration(double aValue) {
-   dur = (float)aValue;
+	dur = (float)aValue;
 }
 
 
@@ -274,8 +271,8 @@ void NoteList::setDuration(double aValue) {
 // NoteList::setTrack --
 //
 
-void NoteList::setTrack(double aValue) { 
-   track = (float)aValue;
+void NoteList::setTrack(double aValue) {
+	track = (float)aValue;
 }
 
 
@@ -285,8 +282,8 @@ void NoteList::setTrack(double aValue) {
 // NoteList::pitchBase12 --
 //
 
-void NoteList::pitchBase12(void) { 
-   pitch = Convert::base40ToMidiNoteNumber(realpitch);
+void NoteList::pitchBase12(void) {
+	pitch = Convert::base40ToMidiNoteNumber(realpitch);
 }
 
 
@@ -296,8 +293,8 @@ void NoteList::pitchBase12(void) {
 // NoteList::pitchBase12Class --
 //
 
-void NoteList::pitchBase12Class(void) { 
-   pitch = Convert::base40ToMidiNoteNumber(realpitch) % 12;
+void NoteList::pitchBase12Class(void) {
+	pitch = Convert::base40ToMidiNoteNumber(realpitch) % 12;
 }
 
 
@@ -307,8 +304,8 @@ void NoteList::pitchBase12Class(void) {
 // NoteList::pitchBase40 --
 //
 
-void NoteList::pitchBase40(void) { 
-   pitch = realpitch;
+void NoteList::pitchBase40(void) {
+	pitch = realpitch;
 }
 
 
@@ -318,13 +315,13 @@ void NoteList::pitchBase40(void) {
 // NoteList::pitchBase40Class --
 //
 
-void NoteList::pitchBase40Class(void) { 
-   pitch = realpitch % 40;
+void NoteList::pitchBase40Class(void) {
+	pitch = realpitch % 40;
 }
 
 
 //////////////////////////////////////////////////////////////////////////
-// 
+//
 // NoteListArray class definitions
 //
 
@@ -334,9 +331,9 @@ void NoteList::pitchBase40Class(void) {
 // NoteListArray::NoteListArray --
 //
 
-NoteListArray::NoteListArray(void) { 
-   setSize(0);
-   allowGrowth(1);
+NoteListArray::NoteListArray(void) {
+	setSize(0);
+	allowGrowth(1);
 }
 
 
@@ -347,7 +344,7 @@ NoteListArray::NoteListArray(void) {
 //
 
 NoteListArray::~NoteListArray() {
-   clear();
+	clear();
 }
 
 
@@ -358,11 +355,11 @@ NoteListArray::~NoteListArray() {
 //
 
 void NoteListArray::clear(void) {
-   int i, size;
-   size = getSize();
-   for (i=0; i<size; i++) {
-      (*this)[i].clear();
-   }
+	int i, size;
+	size = getSize();
+	for (i=0; i<size; i++) {
+		(*this)[i].clear();
+	}
 }
 
 
@@ -373,11 +370,11 @@ void NoteListArray::clear(void) {
 //
 
 void NoteListArray::pitchBase12(void) {
-   int i, size;
-   size = getSize();
-   for (i=0; i<size; i++) {
-      (*this)[i].pitchBase12();
-   }
+	int i, size;
+	size = getSize();
+	for (i=0; i<size; i++) {
+		(*this)[i].pitchBase12();
+	}
 }
 
 
@@ -388,11 +385,11 @@ void NoteListArray::pitchBase12(void) {
 //
 
 void NoteListArray::pitchBase12Class (void) {
-   int i, size;
-   size = getSize();
-   for (i=0; i<size; i++) {
-      (*this)[i].pitchBase12Class();
-   }
+	int i, size;
+	size = getSize();
+	for (i=0; i<size; i++) {
+		(*this)[i].pitchBase12Class();
+	}
 }
 
 
@@ -403,11 +400,11 @@ void NoteListArray::pitchBase12Class (void) {
 //
 
 void NoteListArray::pitchBase40(void) {
-   int i, size;
-   size = getSize();
-   for (i=0; i<size; i++) {
-      (*this)[i].pitchBase40();
-   }
+	int i, size;
+	size = getSize();
+	for (i=0; i<size; i++) {
+		(*this)[i].pitchBase40();
+	}
 }
 
 
@@ -418,11 +415,11 @@ void NoteListArray::pitchBase40(void) {
 //
 
 void NoteListArray::pitchBase40Class(void) {
-   int i, size;
-   size = getSize();
-   for (i=0; i<size; i++) {
-      (*this)[i].pitchBase40Class();
-   }
+	int i, size;
+	size = getSize();
+	for (i=0; i<size; i++) {
+		(*this)[i].pitchBase40Class();
+	}
 }
 
 
@@ -433,14 +430,14 @@ void NoteListArray::pitchBase40Class(void) {
 //
 
 ostream& operator<<(ostream& out, NoteList& nl) {
-   out << "(" << nl.getLine() << ", "
-               << nl.getSpine() << ", "
-               << nl.getToken() << ") p="
-               << nl.getPitch() << ", d="
-               << nl.getDur() << ", l="
-               << nl.getLevel();
-   return out;
+	out << "(" << nl.getLine() << ", "
+					<< nl.getSpine() << ", "
+					<< nl.getToken() << ") p="
+					<< nl.getPitch() << ", d="
+					<< nl.getDur() << ", l="
+					<< nl.getLevel();
+	return out;
 }
 
 
-// md5sum: d6f0e91d2e7799b3fefbf2bba7d21635 NoteList.cpp [20050403]
+

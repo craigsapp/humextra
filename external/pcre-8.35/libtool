@@ -1,6 +1,6 @@
 #! /bin/sh
 # Generated automatically by config.status (pcre) 8.35
-# Libtool was configured on host agviq:
+# Libtool was configured on host chyba.local:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
 # Provide generalized library-building support services.
@@ -76,13 +76,13 @@ PATH_SEPARATOR=":"
 
 # The host system.
 host_alias=
-host=x86_64-apple-darwin22.2.0
-host_os=darwin22.2.0
+host=aarch64-apple-darwin22.5.0
+host_os=darwin22.5.0
 
 # The build system.
 build_alias=
-build=x86_64-apple-darwin22.2.0
-build_os=darwin22.2.0
+build=aarch64-apple-darwin22.5.0
+build_os=darwin22.5.0
 
 # A sed program that does not truncate output.
 SED="/usr/bin/sed"
@@ -91,13 +91,13 @@ SED="/usr/bin/sed"
 Xsed="$SED -e 1s/^X//"
 
 # A grep program that handles long lines.
-GREP="/usr/local/bin/ggrep"
+GREP="/opt/homebrew/bin/ggrep"
 
 # An ERE matcher.
-EGREP="/usr/local/bin/ggrep -E"
+EGREP="/opt/homebrew/bin/ggrep -E"
 
 # A literal string matcher.
-FGREP="/usr/local/bin/ggrep -F"
+FGREP="/opt/homebrew/bin/ggrep -F"
 
 # A BSD- or MS-compatible name lister.
 NM="/usr/bin/nm -B"
@@ -291,7 +291,7 @@ finish_eval=""
 hardcode_into_libs=no
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/Library/Developer/CommandLineTools/usr/lib/clang/14.0.0  /usr/local/lib"
+sys_lib_search_path_spec="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/14.0.3  /usr/local/lib"
 
 # Detected run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/usr/local/lib /lib /usr/lib"
@@ -314,7 +314,7 @@ striplib="strip -x"
 
 
 # The linker used to build libraries.
-LD="/Library/Developer/CommandLineTools/usr/bin/ld"
+LD="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld"
 
 # How to create reloadable object files.
 reload_flag=" -r"
@@ -11956,7 +11956,7 @@ build_old_libs=`case $build_libtool_libs in yes) echo no;; *) echo yes;; esac`
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
 # The linker used to build libraries.
-LD="/Library/Developer/CommandLineTools/usr/bin/ld"
+LD="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld"
 
 # How to create reloadable object files.
 reload_flag=" -r"
