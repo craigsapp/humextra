@@ -558,6 +558,36 @@ RationalNumber Convert::kernToDurationR(const string& aKernString) {
 }
 
 
+//////////////////////////////
+//
+// Convert::kernToOctave -- 4 = middle C octave.
+//
+
+int Convert::kernToOctave(const string& buffer) {
+	int upper = 0;
+	int lower = 0;
+	for (int i=0; i<(int)buffer.size(); i++) {
+		char ch = buffer[i];
+		if (isspace(ch)) {
+			break;
+		}
+		if (!isalpha(ch)) {
+			continue;
+		}
+		if ((ch >= 'A') && (ch <= 'G')) {
+			upper++;
+		} else if ((ch >= 'a') && (ch <= 'g')) {
+			lower++;
+		}
+	}
+	if (upper) {
+		return 4 - upper;
+	} else {
+		return 3 + lower;
+	}
+}
+
+
 
 //////////////////////////////
 //

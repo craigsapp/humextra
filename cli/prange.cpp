@@ -13,23 +13,38 @@
 #include "PerlRegularExpression.h"
 #include "humdrum.h"
 
-#include <string.h>
 #include <math.h>
-#include <vector>
-#include <string>
 #include <numeric>
+#include <string.h>
+#include <string>
+#include <vector>
 
 #define OBJTAB "\t\t\t\t\t\t"
 #define SVGTAG "_99%svg%";
 
+#define SVGTEXT(text) \
+	if (defineQ) { \
+		cout << "SVG "; \
+	} else { \
+		cout << "t 1 1\n"; \
+		cout << SVGTAG; \
+	} \
+	printScoreEncodedText((text)); \
+	cout << "\n"; 
+
 class _VoiceInfo {
 	public:
-
+		vector<vector<double>> diatonic;
 		vector<double> midibins;
-		string name;
-		string abbr;
-		int track;
-		bool kernQ;
+		string name;  // name for instrument name of spine
+		string abbr;  // abbreviation for instrument name of spine
+		int track;    // track number for spine
+		bool kernQ;   // is spine a **kern spine?
+		double hpos;  // horizontal position on system for pitch range data for spine
+		vector<int> diafinal;    // finalis note diatonic pitch (4=middle-C octave)
+		vector<int> accfinal;    // finalis note accidental (0 = natural)
+		vector<string> namfinal; // name of voice for finalis note (for "all" display)
+		int index = -1;
 
 	public:
 		_VoiceInfo(void) {
@@ -41,34 +56,56 @@ class _VoiceInfo {
 			abbr = "";
 			midibins.resize(128);
 			fill(midibins.begin(), midibins.end(), 0.0);
+			diatonic.resize(7 * 12);
+			for (int i=0; i<(int)diatonic.size(); i++) {
+				diatonic[i].resize(6);
+				fill(diatonic[i].begin(), diatonic[i].end(), 0.0);
+			}
 			track = -1;
 			kernQ = false;
+			diafinal.clear();
+			accfinal.clear();
+			namfinal.clear();
+			index = -1;
 		}
 
 		ostream& print(ostream& out) {
-			out << "track: " << track << endl;
-			out << " name: " << name << endl;
-			out << " abbr: " << abbr << endl;
-			out << " kern: " << kernQ << endl;
-			out << " midi:";
+			out << "==================================" << endl;
+			out << "track:  " << track << endl;
+			out << " name:  " << name << endl;
+			out << " abbr:  " << abbr << endl;
+			out << " kern:  " << kernQ << endl;
+			out << " final:";
+			for (int i=0; i<(int)diafinal.size(); i++) {
+				out << " " << diafinal.at(i) << "/" << accfinal.at(i);
+			}
+			out << endl;
+			out << " midi:  ";
 			for (int i=0; i<midibins.size(); i++) {
-				if (midibins[i] <= 0.0) {
-					continue;
-				} else {
-					cout << " " << i << ":" << midibins[i];
+				if (midibins.at(i) > 0.0) {
+					out << " " << i << ":" << midibins.at(i);
 				}
 			}
 			out << endl;
+			out << " diat:  ";
+			for (int i=0; i<diatonic.size(); i++) {
+				if (diatonic.at(i).at(0) > 0.0) {
+					out << " " << i << ":" << diatonic.at(i).at(0);
+				}
+			}
+			out << endl;
+			out << "==================================" << endl;
 			return out;
 		}
 
 };
 
+
+
 // function declarations
 void   processOptions             (Options& opts, int argc, char* argv[]);
 void   example                    (void);
 void   usage                      (const char* command);
-void   generateAnalysis           (vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile);
 void   printAnalysis              (vector<double>& rdata);
 void   printPercentile            (vector<double>& midibins, double percentile);
 double countNotesInRange          (vector<double>& midibins, int low, int high);
@@ -76,67 +113,72 @@ void   fillHistograms             (vector<_VoiceInfo>& voiceInfo, HumdrumFile& i
 void   getRange                   (int& rangeL, int& rangeH,
                                    const char* rangestring);
 int    getTessitura               (vector<double>& midibins);
-double getMean                    (vector<double>& midibins);
-int    getMedian                  (vector<double>& midibins);
-void   printScoreVoice            (string& voicestring, double hpos,
-                                   vector<double>& midibins, int kernspine,
-                                   double maxhist);
+double getMean12                  (vector<double>& midibins);
+int    getMedian12                (vector<double>& midibins);
+void   printScoreVoice            (_VoiceInfo& voiceInfo, double maxvalue);
 void   getVoice                   (string& voicestring, HumdrumFile& infile, int kernspine);
-int    getMaxPitch                (vector<double>& midibins);
-int    getMinPitch                (vector<double>& midibins);
-int    getStaffBase12             (int pitch);
-double getVpos                    (double pitch, int staff);
-double getMaxValue                (vector<double>& bins);
+int    getMaxDiatonicIndex        (vector<vector<double>>& diatonic);
+int    getMinDiatonicIndex        (vector<vector<double>>& diatonic);
+int    getMinDiatonicAcc          (vector<vector<double>>& midibins, int index);
+int    getMaxDiatonicAcc          (vector<vector<double>>& midibins, int index);
+int    getStaffBase7              (int base7);
+double getVpos                    (double base7);
+double getMaxValue                (vector<vector<double>>& bins);
 void   printScoreFile             (vector<_VoiceInfo>& voiceInfo,
                                    HumdrumFile& infile);
 void   getTitle                   (string& titlestring, HumdrumFile& infile);
-int    getVindex                  (int track, vector<int>& kernspines);
-int    getVindexInstrument        (int track, vector<int>& kernspines,
-                                   vector<string>& fileinst,
-                                   vector<string>& nameByTrack);
 int    getTopQuartile             (vector<double>& midibins);
 int    getBottomQuartile          (vector<double>& midibins);
 int    getDiatonicInterval        (int note1, int note2);
-void   printScoreXmlHeader        (void);
-void   printScoreXmlFooter        (void);
 void   printFilenameBase          (const string& filename);
 void   printXmlEncodedText        (const string& strang);
 void   printScoreEncodedText      (const string& strang);
 int    getKeySignature            (HumdrumFile& infile);
 void   printHTMLStringEncodeSimple(const string& strang);
-void   printDiatonicPitchName     (int base12);
-const char* getTitle              (char* hbuffer, double value, int pitch);
+void   printDiatonicPitchName     (int base7, int acc);
+string getDiatonicPitchName       (int base7, int acc);
+string getNoteTitle               (double value, int diatonic, int acc);
 void   getInstrumentNames         (vector<string>& nameByTrack,
                                    vector<int>& kernSpines,
                                    HumdrumFile& infile);
 void   getVoiceInfo               (vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile);
 void   mergeAllVoiceInfo          (vector<_VoiceInfo>& voiceInfo);
+void   assignHorizontalPosition   (vector<_VoiceInfo>& voiceInfo, int minval, int maxval);
+void   mergeFinals                (vector<_VoiceInfo>& voiceInfo, 
+                                   vector<vector<int>>& diafinal,
+                                   vector<vector<int>>& accfinal);
+void   printKeySigCompression     (int keysig, int extra);
 
 // global variables
-Options      options;            // database for command-line arguments
-int          allQ         = 0;   // used with -a option
-int          durationQ    = 0;   // used with -d option
-int          debugQ       = 0;   // used with --debug option
-int          percentileQ  = 0;   // used with -p option
-int          addfractionQ = 0;   // used with -f option
-double       percentile   = 0.0; // used with -p option
-int          rangeQ       = 0;   // used with -r option
-int          rangeL       = 0;   // used with -r option
-int          pitchQ       = 0;   // used with --pitch option
-int          rangeH       = 0;   // used with -r option
-int          printQ       = 0;   // used with --print option
-int          normQ        = 0;   // used with -N option
-int          scoreQ       = 0;   // used with --score option
-int          xmlQ         = 0;   // used with --sx option
-int          diatonicQ    = 0;   // used with -D option
-int          hoverQ       = 0;   // used with --hover option
-int          quartileQ    = 0;   // used with --quartile option
-int          fillonlyQ    = 0;   // used with --fill option
-int          defineQ      = 1;   // used with --no-define option
-int          base40Q      = 0;   // used with --base40 option
-int          instrumentQ  = 0;   // used with -i option
-int          titleQ       = 0;   // used wit --title option
-string       Title        = "";  // used with --title option
+Options      options;              // database for command-line arguments
+int          allQ         = 0;     // used with -a option
+bool         durationQ    = false; // used with -d option
+bool         percentileQ  = false; // used with -p option
+bool         addfractionQ = false; // used with -f option
+double       percentile   = 0.0;   // used with -p option
+bool         rangeQ       = false; // used with -r option
+bool         localQ       = false; // used with -l option
+bool         reverseQ     = false; // used with -r option
+int          rangeL       = 0;     // used with -r option
+bool         pitchQ       = false; // used with --pitch option
+int          rangeH       = 0;     // used with -r option
+bool         printQ       = false; // used with --print option
+bool         normQ        = false; // used with -N option
+bool         scoreQ       = false; // used with --score option
+bool         diatonicQ    = false; // used with -D option
+bool         hoverQ       = false; // used with --hover option
+bool         keyQ         = true;  // used with --no-key option
+bool         finalisQ     = false; // used with --finalis option
+bool         quartileQ    = false; // used with --quartile option
+bool         fillonlyQ    = false; // used with --fill option
+bool         defineQ      = true;  // used with --no-define option
+bool         debugQ       = false; // used with --debug option
+bool         accQ         = false; // used with --acc option
+bool         base40Q      = false; // used with --base40 option
+bool         instrumentQ  = false; // used with -i option
+bool         titleQ       = false; // used wit --title option
+bool         notitleQ     = false; // used wit --no-title option
+string       Title        = "";    // used with --title option
 string       FILENAME     = "";
 
 ///////////////////////////////////////////////////////////////////////////
@@ -153,29 +195,19 @@ int main(int argc, char* argv[]) {
 	while (streamer.read(infile)) {
 		getVoiceInfo(voiceInfo, infile);
 		fillHistograms(voiceInfo, infile);
-		if (allQ) {
-			mergeAllVoiceInfo(voiceInfo);
+		if (debugQ) {
+			for (int i=0; i<(int)voiceInfo.size(); i++) {
+				voiceInfo[i].print(cerr);
+			}
 		}
-		for (int i=0; i<(int)voiceInfo.size(); i++) {
-			voiceInfo[i].print(cout);
-		}
-		break;
-		// generateAnalysis(infile, midibins, kernSpines, nameByTrack, tempnames);
-	}
-	exit(0);
 
-	if (xmlQ) {
-		printScoreXmlHeader();
+		if (scoreQ) {
+			printScoreFile(voiceInfo, infile);
+		}
 	}
 
 	if (!scoreQ) {
-		// printAnalysis(midibins[0]);
-	} else {
-		printScoreFile(voiceInfo, infile);
-	}
-
-	if (xmlQ) {
-		printScoreXmlFooter();
+		printAnalysis(voiceInfo[0].midibins);
 	}
 
 	return 0;
@@ -191,15 +223,31 @@ int main(int argc, char* argv[]) {
 //
 
 void mergeAllVoiceInfo(vector<_VoiceInfo>& voiceInfo) {
+	voiceInfo.at(0).diafinal.clear();
+	voiceInfo.at(0).accfinal.clear();
+
 	for (int i=1; i<(int)voiceInfo.size(); i++) {
 		if (!voiceInfo[i].kernQ) {
 			continue;
 		}
+		for (int j=0; j<(int)voiceInfo.at(i).diafinal.size(); j++) {
+			voiceInfo.at(0).diafinal.push_back(voiceInfo.at(i).diafinal.at(j));
+			voiceInfo.at(0).accfinal.push_back(voiceInfo.at(i).accfinal.at(j));
+			voiceInfo.at(0).namfinal.push_back(voiceInfo.at(i).name);
+		}
+
 		for (int j=0; j<(int)voiceInfo[i].midibins.size(); j++) {
 			voiceInfo[0].midibins[j] += voiceInfo[i].midibins[j];
 		}
+
+		for (int j=0; j<(int)voiceInfo.at(i).diatonic.size(); j++) {
+			for (int k=0; k<(int)voiceInfo.at(i).diatonic.at(k).size(); k++) {
+				voiceInfo[0].diatonic.at(j).at(k) += voiceInfo.at(i).diatonic.at(j).at(k);
+			}
+		}
 	}
 }
+
 
 
 //////////////////////////////
@@ -210,6 +258,9 @@ void mergeAllVoiceInfo(vector<_VoiceInfo>& voiceInfo) {
 void getVoiceInfo(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
 	voiceInfo.clear();
 	voiceInfo.resize(infile.getMaxTracks() + 1);
+	for (int i=0; i<(int)voiceInfo.size(); i++) {
+		voiceInfo.at(i).index = i;
+	}
 	voiceInfo[0].name  = "all";
 	voiceInfo[0].abbr  = "all";
 	voiceInfo[0].track = 0;
@@ -286,39 +337,16 @@ void getInstrumentNames(vector<string>& nameByTrack, vector<int>& kernSpines,
 
 //////////////////////////////
 //
-// printScoreXmlHeader --
-//
-
-void printScoreXmlHeader(void) {
-	cout << "<ScoreXML version=\"1.0\">\n";
-	cout << "\t<scoreHead>\n";
-	cout << "\t\t<info>\n";
-	cout << "\t\t\t<description>Pitch range information by voice</description>\n";
-	cout << "\t\t</info>\n";
-	cout << "\t</scoreHead>\n";
-	cout << "\t<scoreData>\n";
-}
-
-
-
-//////////////////////////////
-//
-// printScoreXmlFooter --
-//
-
-void printScoreXmlFooter(void) {
-	cout << "\t</scoreData>\n";
-	cout << "</ScoreXML>\n";
-}
-
-
-
-//////////////////////////////
-//
 // fillHistograms -- Store notes in score by MIDI note number.
 //
 
 void fillHistograms(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
+	// storage for finals info:
+	vector<vector<int>> diafinal;
+	vector<vector<int>> accfinal;
+	diafinal.resize(infile.getMaxTracks() + 1);
+	accfinal.resize(infile.getMaxTracks() + 1);
+
 	for (int i=0; i<infile.getNumLines(); i++) {
 		if (!infile[i].isData()) {
 			continue;
@@ -330,23 +358,55 @@ void fillHistograms(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
 			if (strcmp(infile[i][j], ".") == 0) {
 				continue;
 			}
+			int track = infile[i].getTrack(j);
+
+			diafinal.at(track).clear();
+			accfinal.at(track).clear();
+
 			vector<string> tokens;
 			infile[i].getTokens(tokens, j);
-			int track = infile[i].getTrack(j);
 			for (int k=0; k<(int)tokens.size(); k++) {
 				if (strchr(tokens[k].c_str(), 'r') != NULL) {
 					continue;
 				}
-				int midi = Convert::kernToMidiNoteNumber(tokens[k]);
-				if (midi < 0) {
+				int octave = Convert::kernToOctave(tokens[k]) + 3;
+				if (octave < 0) {
+					cerr << "Note too low: " << tokens[k] << endl;
 					continue;
 				}
-				if (midi > 127) {
+				if (octave >= 12) {
+					cerr << "Note too high: " << tokens[k] << endl;
 					continue;
+				}
+				int dpc    = (Convert::kernToDiatonicPitchClass(tokens[k]) - 'a' - 2 + 7) % 7;;
+				int acc    = Convert::kernToDiatonicAlteration(tokens[k]);
+				if (acc < -2) {
+					cerr << "Accidental too flat: " << tokens[k] << endl;
+					continue;
+				}
+				if (acc > +2) {
+					cerr << "Accidental too sharp: " << tokens[k] << endl;
+					continue;
+				}
+				int diatonic = dpc + 7 * octave;
+				int realdiatonic = dpc + 7 * (octave-3);
+
+				diafinal.at(track).push_back(realdiatonic);
+				accfinal.at(track).push_back(acc);
+
+				acc += 3;
+				int midi = Convert::kernToMidiNoteNumber(tokens[k]);
+				if (midi < 0) {
+					cerr << "MIDI pitch too low: " << tokens[k] << endl;
+				}
+				if (midi > 127) {
+					cerr << "MIDI pitch too high: " << tokens[k] << endl;
 				}
 				if (durationQ) {
 					double duration = Convert::kernToDuration(tokens[k]);
-					voiceInfo[track].midibins[midi] += duration;
+					voiceInfo[track].diatonic.at(diatonic).at(0) += duration;
+					voiceInfo[track].diatonic.at(diatonic).at(acc) += duration;
+					voiceInfo[track].midibins.at(midi) += duration;
 				} else {
 					if (strchr(tokens[k].c_str(), ']') != NULL) {
 						continue;
@@ -354,10 +414,32 @@ void fillHistograms(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
 					if (strchr(tokens[k].c_str(), '_') != NULL) {
 						continue;
 					}
-					voiceInfo[track].midibins[midi]++;
+					voiceInfo[track].diatonic.at(diatonic).at(0)++;
+					voiceInfo[track].diatonic.at(diatonic).at(acc)++;
+					voiceInfo[track].midibins.at(midi)++;
 				}
 			}
 		}
+	}
+
+	mergeFinals(voiceInfo, diafinal, accfinal);
+
+	// Sum all voices into midibins and diatonic arrays of vector position 0:
+	mergeAllVoiceInfo(voiceInfo);
+}
+
+
+
+//////////////////////////////
+//
+// mergeFinals --
+//
+
+void mergeFinals(vector<_VoiceInfo>& voiceInfo, vector<vector<int>>& diafinal,
+		vector<vector<int>>& accfinal) {
+	for (int i=0; i<(int)voiceInfo.size(); i++) {
+		voiceInfo.at(i).diafinal = diafinal.at(i);
+		voiceInfo.at(i).accfinal = accfinal.at(i);
 	}
 }
 
@@ -483,11 +565,7 @@ void printScoreEncodedText(const string& strang) {
 	pre.sar(newstring, "\\[",        "?[",   "g");
 	pre.sar(newstring, "\\]",        "?]",   "g");
 
-	if (xmlQ) {
-		printXmlEncodedText(newstring.c_str());
-	} else {
-		cout << newstring;
-	}
+	cout << newstring;
 }
 
 
@@ -526,156 +604,165 @@ void printScoreFile(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
 	string titlestring;
 	if (titleQ) {
 		titlestring = Title;
+	} else if (notitleQ) {
+		titlestring = "";
 	} else {
 		getTitle(titlestring, infile);
 	}
 
-	if (xmlQ) {
-		// print file start info;
-		cout << "\t\t<page>\n";
-		cout << "\t\t\t<pageData>\n";
-		cout << "\t\t\t\t<scoreFile>\n";
-		cout << "\t\t\t\t\t<fileHead>\n";
-		cout << "\t\t\t\t\t\t<name>";
-		printFilenameBase(FILENAME);
-		cout << "</name>\n";
-		cout << "\t\t\t\t\t\t<pmxExt>pmx";
-		cout << "</pmxExt>\n";
-		printReferenceRecords(infile);
-		cout << "\t\t\t\t\t</fileHead>\n";
-		cout << "\t\t\t\t\t<fileObjects>\n";
-	}
-
-	if ((!xmlQ) && defineQ) {
+	if (defineQ) {
 		cout << "#define SVG t 1 1 \\n_99%svg%\n";
 	}
 
+	string acctext = "g.bar.doubleflat path&#123;color:darkorange;stroke:darkorange;&#125;g.bar.flat path&#123;color:brown;stroke:brown;&#125;g.bar.sharp path&#123;color:royalblue;stroke:royalblue;&#125;g.bar.doublesharp path&#123;color:aquamarine;stroke:aquamarine;&#125;";
+	string hovertext = ".bar:hover path&#123;fill:red;color:red;stroke:red &#33;important&#125;";
+	string hoverfilltext = hovertext;
+
+	string text1 = "<style>";
+	text1 += hoverfilltext;
+	if (accQ) {
+		text1 += acctext;
+	}
+	text1 += "g.labeltext&#123;color:gray;&#125;";
+	text1 += "g.lastnote&#123;color:gray;&#125;";
+	text1 += "</style>";
+	string text2 = text1;
+	
+
 	// print CSS style information if requested
 	if (hoverQ) {
-		if (!xmlQ) {
-			if (defineQ) {
-				cout << "SVG ";
-			} else {
-				cout << "t 1 1\n";
-				cout << SVGTAG;
-			}
-			if (fillonlyQ) {
-				printScoreEncodedText("<style type=\"text/css\">.bar:hover path&#123;fill:red&#125;</style>");
-			} else {
-				printScoreEncodedText("<style type=\"text/css\">.bar:hover &#123;color:red;stroke:red&#125;</style>");
-			}
-			cout << "\n";
-		} else {
-			cout << OBJTAB << "<obj p1=\"16\" p2=\"1\"";
-			cout << " p3=\"2\" p4=\"20\" p5=\"1\" p6=\"1\" p7=\"0\"";
-			cout << " p8=\"0\" p9=\"0\" p10=\"0\" p11=\"-1\"";
-			cout << " text=\"" << SVGTAG;
-			if (fillonlyQ) {
-				printScoreEncodedText("<style type=\"text/css\">.bar:hover path&#123;fill:red&#125;</style>");
-			} else {
-				printScoreEncodedText("<style type=\"text/css\">.bar:hover &#123;color:red&#125;stroke:red;</style>");
-			}
-			cout << "\">\n";
-		}
+		SVGTEXT(text1);
 	}
 
-	// print title
-	if (!xmlQ) {
+	if (!titlestring.empty()) {
+		// print title
 		cout << "t 2 10 14 1 1 0 0 0 0 -1.35\n";
 		// cout << "_03";
 		printScoreEncodedText(titlestring);
 		cout << "\n";
-	} else {
-		cout << OBJTAB << "<obj p1=\"16\" p2=\"2\" p3=\"10\""
-			  <<    " p4=\"14\" p5=\"1\" p6=\"1\" p11=\"-1.35\" "
-			  <<    "text=\"";
-		printScoreEncodedText(titlestring);
-		cout << "\"/>\n";
 	}
 
 	// print duration label if duration weighting is being used
+	SVGTEXT("<g class=\"labeltext\">");
 	if (durationQ) {
-		if (!xmlQ) {
-			cout << "t 2 180.075 14 1 0.738 0 0 0 0 0\n";
-			cout << "_01(durations)\n";
-		} else {
-			cout << OBJTAB << "<obj p1=\"16\" p2=\"2\" p3=\"180.075\""
-				  <<    " p4=\"14\" p5=\"1\""
-				  <<    " p6=\"0.738\" text=\"_01(durations)\"/>\n";
-		}
+		cout << "t 2 185.075 14 1 0.738 0 0 0 0 0\n";
+		cout << "_00(durations)\n";
+	} else {
+		cout << "t 2 185.075 14 1 0.738 0 0 0 0 0\n";
+		cout << "_00(attacks)\n";
 	}
+	SVGTEXT("</g>");
 
 	// print staff lines
-	if (!xmlQ) {
-		cout << "8 1 0 0 0 200\n";   // staff 1
-		cout << "8 2 0 -6 0 200\n";   // staff 2
-	} else {
-		cout << OBJTAB << "<obj p1=\"8\" p2=\"1\" p6=\"200\"/>\n";
-		cout << OBJTAB << "<obj p1=\"8\" p2=\"2\" p4=\"-6\" "
-			  <<    "p6=\"200\"/>\n";
-	}
+	cout << "8 1 0 0 0 200\n";   // staff 1
+	cout << "8 2 0 -6 0 200\n";   // staff 2
 
 	int keysig = getKeySignature(infile);
 	// print key signature
 	if (keysig) {
-		if (!xmlQ) {
-			cout << "17 1 10 0 " << keysig << " 1.0\n";
-			cout << "17 2 10 0 " << keysig << "\n";
-		} else {
-			cout << OBJTAB << "<obj p1=\"17\" p2=\"1\" p3=\"10\" p4=\"0\"";
-			cout << " p5=\"" << keysig << "\" p6=\"1\"/>\n";
-			cout << OBJTAB << "<obj p1=\"17\" p2=\"2\" p3=\"10\" p4=\"0\"";
-			cout << " p5=\"" << keysig << "\"/>\n";
-		}
+		cout << "17 1 10 0 " << keysig << " 101.0";
+		printKeySigCompression(keysig, 0);
+		cout << endl;
+		cout << "17 2 10 0 " << keysig;
+		printKeySigCompression(keysig, 1);
+		cout << endl;
 	}
 
 	// print barlines
-	if (!xmlQ) {
-		cout << "14 1 0 2\n";         // starting barline
-		cout << "14 1 200 2\n";       // ending barline
-		cout << "14 1 0 2 8\n";       // curly brace at start
-	} else {
-		cout << OBJTAB << "<obj p1=\"14\" p2=\"1\" p4=\"2\"/>\n";
-		cout << OBJTAB << "<obj p1=\"14\" p2=\"1\" p3=\"200\" "
-			  <<    "p4=\"2\"/>\n";
-		cout << OBJTAB << "<obj p1=\"14\" p2=\"1\" p4=\"2\" "
-			  <<    "p5=\"8\"/>\n";
-	}
+	cout << "14 1 0 2\n";         // starting barline
+	cout << "14 1 200 2\n";       // ending barline
+	cout << "14 1 0 2 8\n";       // curly brace at start
 
 	// print clefs
-	if (!xmlQ) {
-		cout << "3 2 2\n";            // treble clef
-		cout << "3 1 2 0 1\n";        // bass clef
-	} else {
-		cout << OBJTAB << "<obj p1=\"3\" p2=\"2\" p3=\"2\"/>\n";
-		cout << OBJTAB << "<obj p1=\"3\" p2=\"1\" p3=\"2\" p5=\"1\"/>\n";
-	}
+	cout << "3 2 2\n";            // treble clef
+	cout << "3 1 2 0 1\n";        // bass clef
 
-	int ii;
-	// calculate the locations for each voice.
-	vector<double> hpos;
-	double minn = 25;
-	double maxx = 170.0;
-	// hpos.resize(kernspines.size());
-	hpos.back() = minn;
-	hpos[0] = maxx;
-	int i;
-	if (hpos.size() > 2) {
-		for (i=1; i<(int)hpos.size()-1; i++) {
-			ii = hpos.size() - i - 1;
-			hpos[i] = (double)ii / (hpos.size()-1) * (maxx - minn) + minn;
+	assignHorizontalPosition(voiceInfo, 25.0, 170.0);
+
+	double maxvalue = 0.0;
+	for (int i=1; i<(int)voiceInfo.size(); i++) {
+		double tempvalue = getMaxValue(voiceInfo.at(i).diatonic);
+		if (tempvalue > maxvalue) {
+			maxvalue = tempvalue;
 		}
 	}
 
-	for (i=hpos.size()-1; i>=0; i--) {
-		// printScoreVoice(nameByTrack.at(i), hpos.at(i), midibins.at(i), kernspines.at(i), 17.6);
+	for (int i=(int)voiceInfo.size()-1; i>0; i--) {
+		if (voiceInfo.at(i).kernQ) {
+			printScoreVoice(voiceInfo.at(i), maxvalue);
+		}
+	}
+	if (allQ) {
+		printScoreVoice(voiceInfo.at(0), maxvalue);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// printKeySigCompression --
+//
+
+void printKeySigCompression(int keysig, int extra) {
+	double compression = 0.0;
+	switch (abs(keysig)) {
+		case 0: compression = 0.0; break;
+		case 1: compression = 0.0; break;
+		case 2: compression = 0.0; break;
+		case 3: compression = 0.0; break;
+		case 4: compression = 0.9; break;
+		case 5: compression = 0.8; break;
+		case 6: compression = 0.7; break;
+		case 7: compression = 0.6; break;
+	}
+	if (compression <= 0.0) {
+		return;
+	}
+	for (int i=0; i<extra; i++) {
+		cout << " 0";
+	}
+	cout << " " << compression;
+}
+
+
+
+//////////////////////////////
+//
+// assignHorizontalPosition --
+//
+
+void assignHorizontalPosition(vector<_VoiceInfo>& voiceInfo, int minval, int maxval) {
+	int count = 0;
+	for (int i=1; i<(int)voiceInfo.size(); i++) {
+		if (voiceInfo[i].kernQ) {
+			count++;
+		}
+	}
+	if (allQ) {
+		count++;
 	}
 
-	if (xmlQ) {
-		cout << "\t\t\t\t\t</fileObjects>\n";
-		cout << "\t\t\t\t</scoreFile>\n";
-		cout << "\t\t\t</pageData>\n";
-		cout << "\t\t</page>\n";
+	vector<double> hpos(count, 0);
+	hpos[0] = maxval;
+	hpos.back() = minval;
+
+	if (hpos.size() > 2) {
+		for (int i=1; i<(int)hpos.size()-1; i++) {
+			int ii = hpos.size() - i - 1;
+			hpos[i] = (double)ii / (hpos.size()-1) * (maxval - minval) + minval;
+		}
+	}
+
+	int position = 0;
+	if (allQ) {
+		position = 1;
+		voiceInfo[0].hpos = hpos[0];
+	}
+	for (int i=0; i<(int)voiceInfo.size(); i++) {
+		if (voiceInfo.at(i).kernQ) {
+			voiceInfo.at(i).hpos = hpos.at(position++);
+		}
 	}
 }
 
@@ -687,13 +774,15 @@ void printScoreFile(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
 //
 
 int getKeySignature(HumdrumFile& infile) {
-	int i, j;
 	PerlRegularExpression pre;
-	for (i=0; i<infile.getNumLines(); i++) {
+	for (int i=0; i<infile.getNumLines(); i++) {
 		if (!infile[i].isInterpretation()) {
+			if (infile[i].isData()) {
+				break;
+			}
 			continue;
 		}
-		for (j=0; j<infile[i].getFieldCount(); j++) {
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			if (pre.search(infile[i][j], "^\\*k\\[(.*)\\]", "")) {
 				return Convert::kernKeyToNumber(infile[i][j]);
 			}
@@ -707,221 +796,163 @@ int getKeySignature(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// printScoreVoice -- print the range information for a particular voice.
+// printScoreVoice -- print the range information for a particular voice (in SCORE format).
 //
 
 
-void printScoreVoice(string& voicestring, double hpos, vector<double>& midibins,
-		int kernspine, double maxhist) {
+void printScoreVoice(_VoiceInfo& voiceInfo, double maxvalue) {
+	int mini = getMinDiatonicIndex(voiceInfo.diatonic);
+	int maxi = getMaxDiatonicIndex(voiceInfo.diatonic);
+	// int minacci = getMinDiatonicAcc(voiceInfo.diatonic, mini);
+	// int maxacci = getMaxDiatonicAcc(voiceInfo.diatonic, maxi);
+	int mindiatonic = mini - 3 * 7;
+	int maxdiatonic = maxi - 3 * 7;
+	// int minacc = minacci - 3;
+	// int maxacc = maxacci - 3;
 	
-	int minpitchbase12, maxpitchbase12;
-	int mini = getMinPitch(midibins);
-	int maxi = getMaxPitch(midibins);
-	
-	if (diatonicQ) {
-		minpitchbase12 = Convert::base7ToBase12(mini);
-		maxpitchbase12 = Convert::base7ToBase12(maxi);
-	} else {
-		minpitchbase12 = mini;
-		maxpitchbase12 = maxi;
-	}
-	if ((minpitchbase12 <= 0) && (maxpitchbase12 <= 0)) {
-		return;
-	}
-
 	int    staff;
 	double vpos;
 
 	int voicevpos = -3;
-	staff = getStaffBase12(minpitchbase12);
-	int lowestvpos = getVpos(minpitchbase12, staff);
+	staff = getStaffBase7(mindiatonic);
+	int lowestvpos = getVpos(mindiatonic);
 	if ((staff == 1) && (lowestvpos <= 0)) {
 		voicevpos += lowestvpos;
 		voicevpos -= 1;
 	}
 
-	double maxvalue = getMaxValue(midibins);
-	double value;
+	if (localQ || (voiceInfo.index == 0)) {
+		double localmaxvalue = getMaxValue(voiceInfo.diatonic);
+		maxvalue = localmaxvalue;
+	}
+	double width;
 	double hoffset = 2.3333;
+	double maxhist = 17.6;
 	int i;
-	int base12;
-	char hbuffer[1024] = {0};
+	int base7;
+
+
+	// print histogram bars
 	for (i=mini; i<=maxi; i++) {
-		if (midibins[i] == 0.0) {
+		if (voiceInfo.diatonic.at(i).at(0) <= 0.0) {
 			continue;
 		}
-		base12 = i;
-		if (diatonicQ) {
-			base12 = Convert::base7ToBase12(base12);
+		base7 = i - 3 * 7;
+		staff = getStaffBase7(base7);
+		vpos  = getVpos(base7);
+
+		// staring positions of accidentals:
+		vector<double> starthpos(6, 0.0);
+		for (int j=1; j<(int)starthpos.size(); j++) {
+			double width = maxhist * voiceInfo.diatonic.at(i).at(j)/maxvalue;
+			starthpos[j] = starthpos[j-1] + width;
 		}
-		staff = getStaffBase12(base12);
-		vpos  = getVpos(base12, staff);
-		value = midibins[i] / maxvalue * maxhist + hoffset;
-		if (!xmlQ) {
-			if (hoverQ) {
-				if (defineQ) {
-					cout << "SVG ";
-				} else {
-					cout << "t 1 1\n";
-					cout << SVGTAG;
-				}
-				getTitle(hbuffer, (int)midibins[i], i);
-				printScoreEncodedText(hbuffer);
-				cout << "\n";
+		for (int j=(int)starthpos.size() - 1; j>0; j--) {
+			starthpos[j] = starthpos[j-1];
+		}
+
+		// print chromatic alterations
+		for (int j=(int)voiceInfo.diatonic.at(i).size()-1; j>0; j--) {
+			if (voiceInfo.diatonic.at(i).at(j) <= 0.0) {
+				continue;
 			}
-			cout << "1 " << staff << " " << hpos << " " << vpos;
+			int acc = 0;
+			switch (j) {
+				case 1: acc = -2; break;
+				case 2: acc = -1; break;
+				case 3: acc =  0; break;
+				case 4: acc = +1; break;
+				case 5: acc = +2; break;
+			}
+
+			width = maxhist * voiceInfo.diatonic.at(i).at(j)/maxvalue + hoffset;
+			if (hoverQ) {
+				string title = getNoteTitle((int)voiceInfo.diatonic.at(i).at(j), base7, acc);
+				SVGTEXT(title);
+			}
+			cout << "1 " << staff << " " << (voiceInfo.hpos + starthpos.at(j) + hoffset) << " " << vpos;
 			cout << " 0 -1 4 0 0 0 99 0 0 ";
-			cout << value << "\n";
+			cout << width << "\n";
 			if (hoverQ) {
-				if (defineQ) {
-					cout << "SVG ";
-				} else {
-					cout << "t 1 1\n";
-					cout << SVGTAG;
-				}
-				printScoreEncodedText("</g>");
-				cout << "\n";
-			}
-		} else {
-			if (hoverQ) {
-				cout << OBJTAB << "<obj p1=\"16\" p2=\"1\"";
-				cout << " p3=\"2\" p4=\"20\" p5=\"1\" p6=\"1\" p7=\"0\"";
-				cout << " p8=\"0\" p9=\"0\" p10=\"0\" p11=\"-1\"";
-				cout << " text=\"" << SVGTAG;
-				getTitle(hbuffer, (int)midibins[i], i);
-				printScoreEncodedText(hbuffer);
-				cout << "\"/>\n";
-			}
-			cout << OBJTAB << "<obj p1=\"1\" p2=\"" << staff << "\" p3=\""
-				  << hpos << "\" p4=\"" << vpos << "\" p6=\"-1\" p7=\"4\""
-				  << " p11=\"99\" p14=\"" << value << "\"/>\n";
-			if (hoverQ) {
-				cout << OBJTAB << "<obj p1=\"16\" p2=\"1\"";
-				cout << " p3=\"2\" p4=\"20\" p5=\"1\" p6=\"1\" p7=\"0\"";
-				cout << " p8=\"0\" p9=\"0\" p10=\"0\" p11=\"-1\"";
-				cout << " text=\"" << SVGTAG;
-				printScoreEncodedText("</g>");
-				cout << "\"/>\n";
+				SVGTEXT("</g>");
 			}
 		}
 	}
-
-	if (voicestring.size() > 0) {
+	
+	string voicestring = voiceInfo.name;
+	if (voicestring.empty()) {
+		voicestring = voiceInfo.abbr;
+	}
+	if (!voicestring.empty()) {
 		// print voice name
 		double tvoffset = -2.0;
-		if (!xmlQ) {
-			cout << "t 1 " << hpos << " " << voicevpos
-				  << " 1 1 0 0 0 0 " << tvoffset;
-			cout << "\n";
-			cout << "_00";
-			printScoreEncodedText(voicestring);
-			cout << "\n";
+		cout << "t 1 " << voiceInfo.hpos << " " << voicevpos
+			  << " 1 1 0 0 0 0 " << tvoffset;
+		cout << "\n";
+		if (voicestring == "all") {
+			cout << "_02";
 		} else {
-			cout << OBJTAB << "<obj p1=\"16\" p2=\"1\" p3=\"" << hpos
-				  <<   "\" p4=\"" << voicevpos << "\" p5=\"1\" p6=\"1\" "
-				  <<   "p11=\"" << tvoffset << "\" text=\"" << "_00";
-			printScoreEncodedText(voicestring);
-			cout << "\"/>\n";
+			cout << "_00";
 		}
+		printScoreEncodedText(voicestring);
+		cout << "\n";
 	}
 
 	// print the lowest pitch in range
-	staff = getStaffBase12(minpitchbase12);
-	vpos = getVpos(minpitchbase12, staff);
-	if (!xmlQ) {
-		// if (hoverQ) {
-		//    if (defineQ) {
-		//       cout << "SVG ";
-		//    } else {
-		//       cout << "t 1 1\n";
-		//       cout << SVGTAG;
-		//    }
-		//    printScoreEncodedText("<g><title>");
-		//    printDiatonicPitchName(minpitchbase12);
-		//    cout << ": lowest note";
-		//    if (strlen(voicestring) > 0) {
-		//       cout <<  " of " << voicestring << "\'s range";
-		//    }
-		//    printScoreEncodedText("</title>\n");
-		// }
-		cout << "1 " << staff << " " << hpos << " " << vpos
-			  << " 0 0 4 0 0 -2\n";
-		//if (hoverQ) {
-		//   if (defineQ) {
-		//      cout << "SVG ";
-		//   } else {
-		//      cout << "t 1 1\n";
-		//      cout << SVGTAG;
-		//   }
-		//   printScoreEncodedText("</g>\n");
-		//}
-	} else {
-		cout << OBJTAB << "<obj p1=\"1\" p2=\"" << staff << "\" p3=\""
-			  << hpos << "\" p4=\"" << vpos << "\" p7=\"4\" p10=\"-2\"/>\n";
+	staff = getStaffBase7(mindiatonic);
+	vpos = getVpos(mindiatonic);
+	if (hoverQ) {
+		string content = "<g><title>";
+		content += getDiatonicPitchName(mindiatonic, 0);
+		content += ": lowest note";
+		if (!voicestring.empty()) {
+			content += " of ";
+			content += voicestring;
+			content += "'s range";
+		}
+		content += "</title>";
+		SVGTEXT(content);
+	}
+	cout << "1 " << staff << " " << voiceInfo.hpos << " " << vpos
+		  << " 0 0 4 0 0 -2\n";
+	if (hoverQ) {
+		SVGTEXT("</g>");
 	}
 
 	// print the highest pitch in range
-	staff = getStaffBase12(maxpitchbase12);
-	vpos = getVpos(maxpitchbase12, staff);
-	if (!xmlQ) {
-		// if (hoverQ) {
-		//    if (defineQ) {
-		//       cout << "SVG ";
-		//    } else {
-		//       cout << "t 1 1\n";
-		//       cout << SVGTAG;
-		//    }
-		//    printScoreEncodedText("<g><title>");
-		//    printDiatonicPitchName(maxpitchbase12);
-		//    cout << ": highest note";
-		//    if (strlen(voicestring) > 0) {
-		//       cout <<  " of " << voicestring << "\'s range";
-		//    }
-		//    printScoreEncodedText("</title>\n");
-		// }
-		cout << "1 " << staff << " " << hpos << " " << vpos
-			  << " 0 0 4 0 0 -2\n";
-		//if (hoverQ) {
-		//   if (defineQ) {
-		//      cout << "SVG ";
-		//   } else {
-		//      cout << "t 1 1\n";
-		//      cout << SVGTAG;
-		//   }
-		//   printScoreEncodedText("</g>\n");
-		//}
-	} else {
-		cout << OBJTAB << "<obj p1=\"1\" p2=\"" << staff << "\" p3=\""
-			  << hpos << "\" p4=\"" << vpos << "\" p7=\"4\" p10=\"-2\"/>\n";
+	staff = getStaffBase7(maxdiatonic);
+	vpos = getVpos(maxdiatonic);
+	if (hoverQ) {
+		string content = "<g><title>";
+		content += getDiatonicPitchName(maxdiatonic, 0);
+		content += ": highest note";
+		if (!voicestring.empty()) {
+			content += " of ";
+			content += voicestring;
+			content += "'s range";
+		}
+		content += "</title>";
+		SVGTEXT(content);
+	}
+	cout << "1 " << staff << " " << voiceInfo.hpos << " " << vpos
+		  << " 0 0 4 0 0 -2\n";
+	if (hoverQ) {
+		SVGTEXT("</g>");
 	}
 
-	/*
-	double mean = getMean(midibins);
-	// print the mean note
-	staff = getStaffBase12(mean);
-	vpos = getVpos(mean, staff);
-	cout << "1.0 " << staff << ".0 " << hpos << " ";
-	if (vpos > 0) {
-		cout << vpos + 100;
-	} else {
-		cout << vpos - 100;
-	}
-	cout << " 0.0 0.0 4.0 0.0 0.0 -5.0\n";
-	*/
+	double goffset  = -1.66;
+	double toffset  = 1.5;
+	double median12 = getMedian12(voiceInfo.midibins);
+	double median40 = Convert::base12ToBase40(median12);
+	double median7  = Convert::base40ToDiatonic(median40);
+	// int    acc      = Convert::base40ToAccidental(median40);
 
-	double goffset = -1.66;
-	double toffset = 1.5;
-
-	double median = getMedian(midibins);
-	if (diatonicQ) {
-		median = Convert::base7ToBase12(median);
-	}
-	staff = getStaffBase12(median);
-	vpos = getVpos(median, staff);
+	staff = getStaffBase7(median7);
+	vpos = getVpos(median7);
 
 	// these offsets are useful when the quartile pitches are not shown...
-	int vvpos = getDiatonicInterval(median, maxpitchbase12);
-	int vvpos2 = getDiatonicInterval(median, minpitchbase12);
+	int vvpos = maxdiatonic - median7 + 1;
+	int vvpos2 = median7 - mindiatonic + 1;
 	double offset = goffset;
 	if (vvpos <= 2) {
 		offset += toffset;
@@ -929,100 +960,58 @@ void printScoreVoice(string& voicestring, double hpos, vector<double>& midibins,
 		offset -= toffset;
 	}
 
-	// print the median note
-	if (!xmlQ) {
-		//if (hoverQ) {
-		//   if (defineQ) {
-		//      cout << "SVG ";
-		//   } else {
-		//      cout << "t 1 1\n";
-		//      cout << SVGTAG;
-		//   }
-		//   printScoreEncodedText("<g><title>");
-		//   printDiatonicPitchName(median);
-		//   cout << ": median note";
-		//   if (strlen(voicestring) > 0) {
-		//      cout <<  " of " << voicestring << "\'s range";
-		//   }
-		//   printScoreEncodedText("</title>\n");
-		//}
-		cout << "1 " << staff << " " << hpos << " ";
-		if (vpos > 0) {
-			cout << vpos + 100;
-		} else {
-			cout << vpos - 100;
+	if (hoverQ) {
+		string content = "<g><title>";
+		content += getDiatonicPitchName(median7, 0);
+		content += ": median note";
+		if (!voicestring.empty()) {
+			content += " of ";
+			content += voicestring;
+			content += "'s range";
 		}
-		cout << " 0 1 4 0 0 " << offset << "\n";
-		//if (hoverQ) {
-		//   if (defineQ) {
-		//      cout << "SVG ";
-		//   } else {
-		//      cout << "t 1 1\n";
-		//      cout << SVGTAG;
-		//   }
-		//   printScoreEncodedText("</g>\n");
-		//}
+		content += "</title>";
+		SVGTEXT(content);
+	}
+	cout << "1 " << staff << " " << voiceInfo.hpos << " ";
+	if (vpos > 0) {
+		cout << vpos + 100;
 	} else {
-		if (hoverQ) {
-			cout << OBJTAB << "<obj p1=\"16\" p2=\"1\" p3=\"1\" ";
-			cout <<    "text=\"";
-			printHTMLStringEncodeSimple("_99%svg%<g><title>: median note");
-			if (voicestring.size() > 0) {
-				cout <<  " for " << voicestring;
-			}
-			printHTMLStringEncodeSimple("<\\title>\n");
-		}
-		cout << OBJTAB << "<obj p1=\"1\" p2=\"" << staff << "\""
-			  << " p3=\"" << hpos << "\"" << " p4=\"";
-		if (vpos > 0) {
-			cout << vpos + 100;
-		} else {
-			cout << vpos - 100;
-		}
-		cout << "\" p6=\"1\" p7=\"4\" p10=\"" << offset << "\"/>\n";
-		if (hoverQ) {
-			cout << OBJTAB << "<obj p1=\"16\" p2=\"1\" p3=\"1\" text=\"";
-			printHTMLStringEncodeSimple("_99%svg <\\g>");
-			cout << "\"/>\n";
-		}
+		cout << vpos - 100;
+	}
+	cout << " 0 1 4 0 0 " << offset << "\n";
+	if (hoverQ) {
+		SVGTEXT("</g>");
 	}
 
-	int topquartile;
-	if (quartileQ) {
-		// print top quartile
-		topquartile = getTopQuartile(midibins);
-		if (diatonicQ) {
-			topquartile = Convert::base7ToBase12(topquartile);
-		}
-		staff = getStaffBase12(topquartile);
-		vpos = getVpos(topquartile, staff);
-		vvpos = getDiatonicInterval(median, topquartile);
-		if (vvpos <= 2) {
-			offset = goffset + toffset;
-		} else {
-			offset = goffset;
-		}
-		vvpos = getDiatonicInterval(maxpitchbase12, topquartile);
-		if (vvpos <= 2) {
-			offset = goffset + toffset;
-		}
-		if (!xmlQ) {
+	if (finalisQ) {
+		for (int f=0; f<(int)voiceInfo.diafinal.size(); f++) {
+			int diafinalis = voiceInfo.diafinal.at(f);
+			int accfinalis = voiceInfo.accfinal.at(f);
+			int staff = getStaffBase7(diafinalis);
+			int vpos = getVpos(diafinalis);
+			double goffset = -1.66;
+			double toffset = 3.5;
+
+			// these offsets are useful when the quartile pitches are not shown...
+			double offset = goffset;
+			offset += toffset;
+
 			if (hoverQ) {
-				if (defineQ) {
-					cout << "SVG ";
-				} else {
-					cout << "t 1 1\n";
-					cout << SVGTAG;
+				string content = "<g class=\"lastnote\"><title>";
+				content += getDiatonicPitchName(diafinalis, accfinalis);
+				content += ": last note";
+				if (!voicestring.empty()) {
+					content += " of ";
+					if (voiceInfo.index == 0) {
+						content += voiceInfo.namfinal.at(f);
+					} else {
+						content += voicestring;
+					}
 				}
-				printScoreEncodedText("<g><title>");
-				printDiatonicPitchName(topquartile);
-				cout << ": top quartile note";
-				if (voicestring.size() > 0) {
-					cout <<  " of " << voicestring << "\'s range";
-				}
-				printScoreEncodedText("</title>\n");
+				content += "</title>";
+				SVGTEXT(content);
 			}
-			cout << "1 " << staff << " " << hpos << " ";
+			cout << "1 " << staff << " " << voiceInfo.hpos << " ";
 			if (vpos > 0) {
 				cout << vpos + 100;
 			} else {
@@ -1030,87 +1019,105 @@ void printScoreVoice(string& voicestring, double hpos, vector<double>& midibins,
 			}
 			cout << " 0 0 4 0 0 " << offset << "\n";
 			if (hoverQ) {
-				if (defineQ) {
-					cout << "SVG ";
-				} else {
-					cout << "t 1 1\n";
-					cout << SVGTAG;
-				}
-				printScoreEncodedText("</g>\n");
+				SVGTEXT("</g>");
 			}
+		}
+	}
+
+	/* Needs fixing
+	int topquartile;
+	if (quartileQ) {
+		// print top quartile
+		topquartile = getTopQuartile(voiceInfo.midibins);
+		if (diatonicQ) {
+			topquartile = Convert::base7ToBase12(topquartile);
+		}
+		staff = getStaffBase7(topquartile);
+		vpos = getVpos(topquartile);
+		vvpos = median7 - topquartile + 1;
+		if (vvpos <= 2) {
+			offset = goffset + toffset;
 		} else {
-			cout << OBJTAB << "<obj p1=\"1\" p2=\"" << staff << "\""
-				  << " p3=\"" << hpos << "\"" << " p4=\"";
-			if (vpos > 0) {
-				cout << vpos + 100;
+			offset = goffset;
+		}
+		vvpos = maxdiatonic - topquartile + 1;
+		if (vvpos <= 2) {
+			offset = goffset + toffset;
+		}
+
+		if (hoverQ) {
+			if (defineQ) {
+				cout << "SVG ";
 			} else {
-				cout << vpos - 100;
+				cout << "t 1 1\n";
+				cout << SVGTAG;
 			}
-			cout << "\" p7=\"4\" p10=\"" << offset << "\"/>\n";
+			printScoreEncodedText("<g><title>");
+			printDiatonicPitchName(topquartile, 0);
+			cout << ": top quartile note";
+			if (voicestring.size() > 0) {
+				cout <<  " of " << voicestring << "\'s range";
+			}
+			printScoreEncodedText("</title>\n");
+		}
+		cout << "1 " << staff << " " << voiceInfo.hpos << " ";
+		if (vpos > 0) {
+			cout << vpos + 100;
+		} else {
+			cout << vpos - 100;
+		}
+		cout << " 0 0 4 0 0 " << offset << "\n";
+		if (hoverQ) {
+			SVGTEXT("</g>");
 		}
 	}
 	
 	// print bottom quartile
 	if (quartileQ) {
-		int bottomquartile = getBottomQuartile(midibins);
+		int bottomquartile = getBottomQuartile(voiceInfo.midibins);
 		if (diatonicQ) {
 			bottomquartile = Convert::base7ToBase12(bottomquartile);
 		}
-		staff = getStaffBase12(bottomquartile);
-		vpos = getVpos(bottomquartile, staff);
-		vvpos = getDiatonicInterval(median, bottomquartile);
+		staff = getStaffBase7(bottomquartile);
+		vpos = getVpos(bottomquartile);
+		vvpos = median7 - bottomquartile + 1;
 		if (vvpos <= 2) {
 			offset = goffset + toffset;
 		} else {
 			offset = goffset;
 		}
-		vvpos = getDiatonicInterval(minpitchbase12, bottomquartile);
+		vvpos = bottomquartile - mindiatonic + 1;
 		if (vvpos <= 2) {
 			offset = goffset - toffset;
 		}
-		if (!xmlQ) {
-			if (hoverQ) {
-				if (defineQ) {
-					cout << "SVG ";
-				} else {
-					cout << "t 1 1\n";
-					cout << SVGTAG;
-				}
-				printScoreEncodedText("<g><title>");
-				printDiatonicPitchName(bottomquartile);
-				cout << ": bottom quartile note";
-				if (voicestring.size() > 0) {
-					cout <<  " of " << voicestring << "\'s range";
-				}
-				printScoreEncodedText("</title>\n");
-			}
-			cout << "1.0 " << staff << ".0 " << hpos << " ";
-			if (vpos > 0) {
-				cout << vpos + 100;
+		if (hoverQ) {
+			if (defineQ) {
+				cout << "SVG ";
 			} else {
-				cout << vpos - 100;
+				cout << "t 1 1\n";
+				cout << SVGTAG;
 			}
-			cout << " 0 0 4 0 0 " << offset << "\n";
-			if (hoverQ) {
-				if (defineQ) {
-					cout << "SVG ";
-				} else {
-					cout << "t 1 1\n";
-					cout << SVGTAG;
-				}
-				printScoreEncodedText("</g>\n");
+			printScoreEncodedText("<g><title>");
+			printDiatonicPitchName(bottomquartile, 0);
+			cout << ": bottom quartile note";
+			if (voicestring.size() > 0) {
+				cout <<  " of " << voicestring << "\'s range";
 			}
+			printScoreEncodedText("</title>\n");
+		}
+		cout << "1.0 " << staff << ".0 " << voiceInfo.hpos << " ";
+		if (vpos > 0) {
+			cout << vpos + 100;
 		} else {
-			cout << OBJTAB << "<obj p1=\"1\" p2=\"" << staff << "\""
-				  << " p3=\"" << hpos << "\"" << " p4=\"";
-			if (vpos > 0) {
-				cout << vpos + 100;
-			} else {
-				cout << vpos - 100;
-			}
-			cout << "\" p7=\"4\" p10=\"" << offset << "\"/>\n";
+			cout << vpos - 100;
+		}
+		cout << " 0 0 4 0 0 " << offset << "\n";
+		if (hoverQ) {
+			SVGTEXT("</g>");
 		}
 	}
+	*/
+
 }
 
 
@@ -1120,15 +1127,31 @@ void printScoreVoice(string& voicestring, double hpos, vector<double>& midibins,
 // printDiatonicPitchName --
 //
 
-void printDiatonicPitchName(int base12) {
-	char buffer[16] = {0};
-	Convert::base12ToKern(buffer, 16, base12);
-	buffer[1] = '\0';
-	buffer[0] = toupper(buffer[0]);
-	cout << buffer;
-	int octave = base12 / 12 - 1;
-	snprintf(buffer, 16, "%d", octave);
-	cout << buffer;
+void printDiatonicPitchName(int base7, int acc) {
+	cout << getDiatonicPitchName(base7, acc);
+}
+
+
+
+//////////////////////////////
+//
+// getDiatonicPitchName --
+//
+
+string getDiatonicPitchName(int base7, int acc) {
+	string output;
+	int dpc = base7 % 7;
+	char letter = (dpc + 2) % 7 + 'A';
+	output += letter;
+	switch (acc) {
+		case -1: output += "&#9837;"; break;
+		case +1: output += "&#9839;"; break;
+		case -2: output += "&#119083;"; break;
+		case +2: output += "&#119082;"; break;
+	}
+	int octave = base7 / 7;
+	output += to_string(octave);
+	return output;
 }
 
 
@@ -1151,45 +1174,42 @@ void printHTMLStringEncodeSimple(const string& strang) {
 
 //////////////////////////////
 //
-// getTitle -- return the title of the histogram bar.
+// getNoteTitle -- return the title of the histogram bar.
+//    value = duration or count of notes
+//    diatonic = base7 value for note
+//    acc = accidental for diatonic note.
 //
 
-const char* getTitle(char* hbuffer, double value, int pitch) {
-	strcpy(hbuffer, "<g class=\"bar\"><title>");
-	char tempbuf[128] = {0};
-	char pitchstring[128] = {0};
-	int base12 = pitch;
-	if (diatonicQ) {
-		base12 = Convert::base7ToBase12(pitch);
+string getNoteTitle(double value, int diatonic, int acc) {
+	stringstream output;
+	output << "<g class=\"bar";
+	switch (acc) {
+		case -2: output << " doubleflat";  break;
+		case -1: output << " flat";        break;
+		case  0: output << " natural";     break;
+		case +1: output << " sharp";       break;
+		case +2: output << " doublesharp"; break;
 	}
-
-	Convert::base12ToKern(pitchstring, 128, base12);
-	pitchstring[1] = '\0';
-	pitchstring[0] = toupper(pitchstring[0]);
-	int octave = base12 / 12 - 1;
-	char obuf[16] = {0};
-	snprintf(obuf, 16, "%d", octave);
-
+	output << "\"";
+	output << "><title>";
 	if (durationQ) {
-		snprintf(tempbuf, 128, "%lf", value/8.0);
+		output << value / 8.0;
 		if (value/8.0 == 1.0) {
-			strcat(tempbuf, " long on ");
+			output << " long on ";
 		} else {
-			strcat(tempbuf, " longs on ");
+			output << " longs on ";
 		}
-		strcat(tempbuf, pitchstring);
+		output << getDiatonicPitchName(diatonic, acc);
 	} else {
-		snprintf(tempbuf, 128, "%d ", (int)value);
-		strcat(tempbuf, pitchstring);
-		strcat(tempbuf, obuf);
+		output << value;
+		output << " ";
+		output << getDiatonicPitchName(diatonic, acc);
 		if (value != 1.0) {
-			strcat(tempbuf, "s");
+			output << "s";
 		}
 	}
-	strcat(hbuffer, tempbuf);
-	strcat(hbuffer, "</title>");
-
-	return hbuffer;
+	output << "</title>";
+	return output.str();
 }
 
 
@@ -1200,8 +1220,8 @@ const char* getTitle(char* hbuffer, double value, int pitch) {
 //
 
 int getDiatonicInterval(int note1, int note2) {
-	int vpos1 = getVpos(note1, 0);
-	int vpos2 = getVpos(note2, 0);
+	int vpos1 = getVpos(note1);
+	int vpos2 = getVpos(note2);
 	return abs(vpos1 - vpos2) + 1;
 }
 
@@ -1257,39 +1277,37 @@ int getBottomQuartile(vector<double>& midibins) {
 
 
 
-
 //////////////////////////////
 //
 // getMaxValue --
 //
 
-double getMaxValue(vector<double>& bins) {
-	int i;
+double getMaxValue(vector<vector<double>>& bins) {
 	double maxi = 0;
-	for (i=1; i<(int)bins.size(); i++) {
-		if (bins[i] > bins[maxi]) {
+	for (int i=1; i<(int)bins.size(); i++) {
+		if (bins.at(i).at(0) > bins.at(maxi).at(0)) {
 			maxi = i;
 		}
 	}
-	return bins[maxi];
+	return bins.at(maxi).at(0);
 }
+
 
 
 //////////////////////////////
 //
-// getVpos == return the position on the staff given the MIDI pitch
+// getVpos == return the position on the staff given the diatonic pitch.
 //     and the staff. 1=bass, 2=treble.
+//     3 = bottom line of clef, 0 = space below first ledger line.
 //
 
-double getVpos(double pitch, int staff) {
-	int base40;
-
-	base40 = Convert::base12ToBase40(int(pitch));
-
-	if (staff == 2) {
-		return (Convert::base40ToScoreVPos(base40, 0) + (pitch - int(pitch)));
+double getVpos(double base7) {
+	if (base7 < 4 * 7) {
+		// bass clef
+		return base7 - (1 + 2*7);  // D2
 	} else {
-		return (Convert::base40ToScoreVPos(base40, 1) + (pitch - int(pitch)));
+		// treble clef
+		return base7 - (6 + 3*7);  // B3
 	}
 }
 
@@ -1297,11 +1315,11 @@ double getVpos(double pitch, int staff) {
 
 //////////////////////////////
 //
-// getStaffBase12 -- return 1 if less than middle C; otherwise return 2.
+// getStaffBase7 -- return 1 if less than middle C; otherwise return 2.
 //
 
-int getStaffBase12(int pitch) {
-	if (pitch < 60) {
+int getStaffBase7(int base7) {
+	if (base7 < 4 * 7) {
 		return 1;
 	} else {
 		return 2;
@@ -1311,13 +1329,12 @@ int getStaffBase12(int pitch) {
 
 //////////////////////////////
 //
-// getMaxPitch -- return the highest non-zero content.
+// getMaxDiatonicIndex -- return the highest non-zero content.
 //
 
-int getMaxPitch(vector<double>& midibins) {
-	int i;
-	for (i=midibins.size()-1; i>=0; i--) {
-		if (midibins[i] != 0.0) {
+int getMaxDiatonicIndex(vector<vector<double>>& diatonic) {
+	for (int i=diatonic.size()-1; i>=0; i--) {
+		if (diatonic.at(i).at(0) != 0.0) {
 			return i;
 		}
 	}
@@ -1328,13 +1345,44 @@ int getMaxPitch(vector<double>& midibins) {
 
 //////////////////////////////
 //
-// getMinPitch -- return the lowest non-zero content.
+// getMinDiatonicIndex -- return the lowest non-zero content.
 //
 
-int getMinPitch(vector<double>& midibins) {
-	int i;
-	for (i=0; i<(int)midibins.size(); i++) {
-		if (midibins[i] != 0.0) {
+int getMinDiatonicIndex(vector<vector<double>>& diatonic) {
+	for (int i=0; i<(int)diatonic.size(); i++) {
+		if (diatonic.at(i).at(0) != 0.0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+
+
+//////////////////////////////
+//
+// getMinDiatonicAcc -- return the lowest accidental.
+//
+
+int getMinDiatonicAcc(vector<vector<double>>& diatonic, int index) {
+	for (int i=1; i<(int)diatonic.at(index).size(); i++) {
+		if (diatonic.at(index).at(i) != 0.0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+
+
+//////////////////////////////
+//
+// getMaxDiatonicAcc -- return the highest accidental.
+//
+
+int getMaxDiatonicAcc(vector<vector<double>>& diatonic, int index) {
+	for (int i=(int)diatonic.at(index).size() - 1; i>0; i--) {
+		if (diatonic.at(index).at(i) != 0.0) {
 			return i;
 		}
 	}
@@ -1475,37 +1523,73 @@ void printAnalysis(vector<double>& midibins) {
 
 	int base12;
 	char buffer[1024] = {0};
-	for (i=0; i<(int)midibins.size(); i++) {
-		if (midibins[i] <= 0.0) {
-			continue;
+
+	if (!reverseQ) {
+		for (i=0; i<(int)midibins.size(); i++) {
+			if (midibins[i] <= 0.0) {
+				continue;
+			}
+			if (diatonicQ) {
+				base12 = Convert::base7ToBase12(i);
+			} else {
+				base12 = i;
+			}
+			cout << base12 << "\t";
+			if (pitchQ) {
+				cout << Convert::base12ToPitch(buffer, 1024, base12);
+			} else {
+				cout << Convert::base12ToKern(buffer, 1024, base12);
+			}
+			cout << "\t";
+			cout << midibins[i] / normval;
+			fracL = runningtotal/sum;
+			runningtotal += midibins[i];
+			fracH = runningtotal/sum;
+			fracA = (fracH + fracL)/2.0;
+			fracL = (int)(fracL * 10000.0 + 0.5)/10000.0;
+			fracH = (int)(fracH * 10000.0 + 0.5)/10000.0;
+			fracA = (int)(fracA * 10000.0 + 0.5)/10000.0;
+			if (addfractionQ) {
+				cout << "\t" << fracL;
+				cout << "\t" << fracA;
+				cout << "\t" << fracH;
+			}
+			cout << "\n";
 		}
-		if (diatonicQ) {
-			base12 = Convert::base7ToBase12(i);
-		} else {
-			base12 = i;
+	} else {
+		for (i=(int)midibins.size()-1; i>=0; i--) {
+			if (midibins[i] <= 0.0) {
+				continue;
+			}
+			if (diatonicQ) {
+				base12 = Convert::base7ToBase12(i);
+			} else {
+				base12 = i;
+			}
+			cout << base12 << "\t";
+			if (pitchQ) {
+				cout << Convert::base12ToPitch(buffer, 1024, base12);
+			} else {
+				cout << Convert::base12ToKern(buffer, 1024, base12);
+			}
+			cout << "\t";
+			cout << midibins[i] / normval;
+			fracL = runningtotal/sum;
+			runningtotal += midibins[i];
+			fracH = runningtotal/sum;
+			fracA = (fracH + fracL)/2.0;
+			fracL = (int)(fracL * 10000.0 + 0.5)/10000.0;
+			fracH = (int)(fracH * 10000.0 + 0.5)/10000.0;
+			fracA = (int)(fracA * 10000.0 + 0.5)/10000.0;
+			if (addfractionQ) {
+				cout << "\t" << fracL;
+				cout << "\t" << fracA;
+				cout << "\t" << fracH;
+			}
+			cout << "\n";
 		}
-		cout << base12 << "\t";
-		if (pitchQ) {
-			cout << Convert::base12ToPitch(buffer, 1024, base12);
-		} else {
-			cout << Convert::base12ToKern(buffer, 1024, base12);
-		}
-		cout << "\t";
-		cout << midibins[i] / normval;
-		fracL = runningtotal/sum;
-		runningtotal += midibins[i];
-		fracH = runningtotal/sum;
-		fracA = (fracH + fracL)/2.0;
-		fracL = (int)(fracL * 10000.0 + 0.5)/10000.0;
-		fracH = (int)(fracH * 10000.0 + 0.5)/10000.0;
-		fracA = (int)(fracA * 10000.0 + 0.5)/10000.0;
-		if (addfractionQ) {
-			cout << "\t" << fracL;
-			cout << "\t" << fracA;
-			cout << "\t" << fracH;
-		}
-		cout << "\n";
 	}
+
 	cout << "*-\t*-\t*-";
 	if (addfractionQ) {
 		cout << "\t*-";
@@ -1516,7 +1600,7 @@ void printAnalysis(vector<double>& midibins) {
 
 	cout << "!!tessitura:\t" << getTessitura(midibins) << " semitones\n";
 
-	double mean = getMean(midibins);
+	double mean = getMean12(midibins);
 	if (diatonicQ && (mean > 0)) {
 		mean = Convert::base7ToBase12(mean);
 	}
@@ -1529,16 +1613,13 @@ void printAnalysis(vector<double>& midibins) {
 	}
 	cout << ")" << "\n";
 
-	int median = getMedian(midibins);
-	if (diatonicQ && (median > 0)) {
-		median = Convert::base7ToBase12(median);
-	}
-	cout << "!!median:\t" << median;
+	int median12 = getMedian12(midibins);
+	cout << "!!median:\t" << median12;
 	cout << " (";
-	if (median < 0) {
+	if (median12 < 0) {
 		cout << "unpitched";
 	} else {
-		cout << Convert::base12ToKern(buffer, 1024, median);
+		cout << Convert::base12ToKern(buffer, 1024, median12);
 	}
 	cout << ")" << "\n";
 
@@ -1548,11 +1629,11 @@ void printAnalysis(vector<double>& midibins) {
 
 //////////////////////////////
 //
-// getMedian -- return the pitch on which half of pitches are above
+// getMedian12 -- return the pitch on which half of pitches are above
 //     and half are below.
 //
 
-int getMedian(vector<double>& midibins) {
+int getMedian12(vector<double>& midibins) {
 	double sum = accumulate(midibins.begin(), midibins.end(), 0.0);
 
 	double cumsum = 0.0;
@@ -1571,13 +1652,14 @@ int getMedian(vector<double>& midibins) {
 }
 
 
+
 //////////////////////////////
 //
-// getMean -- return the interval between the highest and lowest
+// getMean12 -- return the interval between the highest and lowest
 //     pitch in terms if semitones.
 //
 
-double getMean(vector<double>& midibins) {
+double getMean12(vector<double>& midibins) {
 	double top    = 0.0;
 	double bottom = 0.0;
 
@@ -1686,6 +1768,7 @@ void printPercentile(vector<double>& midibins, double percentile) {
 void processOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("a|all=b", "generate all-voice analysis");
 	opts.define("c|range|count=s:60-71", "count notes in a particular range");
+	opts.define("r|reverse=b", "Reverse list of notes in analysis from high to low");
 	opts.define("d|duration=b",      "weight pitches by duration");
 	opts.define("f|fraction=b",      "display histogram fractions");
 	opts.define("fill=b",            "change color of fill only");
@@ -1695,11 +1778,17 @@ void processOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("N|norm=b",          "normalize pitch counts");
 	opts.define("score=b",           "convert range info to SCORE");
 	opts.define("title=s:",          "Title for SCORE display");
+	opts.define("T|no-title=s:",     "Do not display a title");
 	opts.define("q|quartile=b",      "display quartile notes");
 	opts.define("i|instrument=b",    "categorize multiple inputs by instrument");
 	opts.define("sx|scorexml|score-xml|ScoreXML|scoreXML=b",
 					                     "output ScoreXML format");
 	opts.define("hover=b",           "include svg hover capabilities");
+	opts.define("no-key=b",          "do not display key signature");
+	opts.define("finalis|final|last=b", "include finalis note by voice");
+	opts.define("l|local|local-maximum|local-maxima=b",  "use maximum values by voice rather than all voices");
+	opts.define("jrp=b",             "set options for JRP style");
+	opts.define("acc|color-accidentals=b", "add color to accidentals in histogram");
 	opts.define("D|diatonic=b",
 			"diatonic counts ignore chormatic alteration");
 	opts.define("no-define=b", "Do not use defines in output SCORE data");
@@ -1731,10 +1820,6 @@ void processOptions(Options& opts, int argc, char* argv[]) {
 
 	scoreQ       = opts.getBoolean("score");
 	fillonlyQ    = opts.getBoolean("fill");
-	xmlQ         = opts.getBoolean("score-xml");
-	if (xmlQ) {
-		scoreQ = 1;
-	}
 	quartileQ    = opts.getBoolean("quartile");
 	debugQ       = opts.getBoolean("debug");
 	normQ        = opts.getBoolean("norm");
@@ -1742,16 +1827,32 @@ void processOptions(Options& opts, int argc, char* argv[]) {
 	pitchQ       = opts.getBoolean("pitch");
 	durationQ    = opts.getBoolean("duration");
 	allQ         = opts.getBoolean("all");
+	reverseQ     = opts.getBoolean("reverse");
 	percentileQ  = opts.getBoolean("percentile");
 	rangeQ       = opts.getBoolean("range");
+	localQ       = opts.getBoolean("local-maximum");
 	getRange(rangeL, rangeH, opts.getString("range").c_str());
 	addfractionQ = opts.getBoolean("fraction");
 	percentile   = opts.getDouble("percentile");
 	hoverQ       = opts.getBoolean("hover");
+	keyQ         = !opts.getBoolean("no-key");
+	finalisQ     = opts.getBoolean("finalis");
+	accQ         = opts.getBoolean("acc");
 	diatonicQ    = opts.getBoolean("diatonic");
 	instrumentQ  = opts.getBoolean("instrument");
+	notitleQ     = opts.getBoolean("no-title");
 	titleQ       = opts.getBoolean("title");
 	Title        = opts.getString("title");
+
+	if (opts.getBoolean("jrp")) {
+		// default style settings for JRP range displays:
+		scoreQ   = true;
+		allQ     = true;
+		hoverQ   = true;
+		accQ     = true;
+		finalisQ = true;
+		notitleQ = true;
+	}
 
 	// the percentile is a fraction from 0.0 to 1.0.
 	// if the percentile is above 1.0, then it is assumed
@@ -1841,137 +1942,6 @@ void usage(const char* command) {
 	cout <<
 	"                                                                        \n"
 	<< endl;
-}
-
-
-
-//////////////////////////////
-//
-// generateAnalysis --
-//
-
-/*
-void generateAnalysis(HumdrumFile& infile, vector<vector<double> >& midibins,
-		vector<int>& kernspines, vector<string>& nameByTrack,
-		vector<string>& fileinstruments) {
-	int i, j, k;
-
-	char buffer[1024] = {0};
-	int tokencount;
-	int keynum;
-	double duration;
-	int vindex;
-
-	for (i=0; i<infile.getNumLines(); i++) {
-		if (infile[i].getType() != E_humrec_data) {
-			continue;
-		}
-		for (j=0; j<infile[i].getFieldCount(); j++) {
-			if (strcmp(infile[i].getExInterp(j), "**kern") != 0) {
-				continue;
-			}
-			if (!instrumentQ) {
-				vindex = getVindex(infile[i].getPrimaryTrack(j), kernspines);
-			} else {
-				vindex = getVindexInstrument(infile[i].getPrimaryTrack(j),
-					kernspines, fileinstruments, nameByTrack);
-				vindex--;
-			}
-			if (strcmp(infile[i][j], ".") == 0) {  // ignore null tokens
-				continue;
-			}
-			tokencount = infile[i].getTokenCount(j);
-			for (k=0; k<tokencount; k++) {
-				infile[i].getToken(buffer, j, k);
-				if (strcmp(buffer, ".") == 0) {    // ignore strange null tokens
-					continue;
-				}
-				if (strchr(buffer, 'r') != NULL) { // ignore rests
-					continue;
-				}
-				if (!printQ && !durationQ) {
-					// filter out middle and ending tie notes if counting
-					// by sounding pitch
-					if (strchr(buffer, '_') != NULL) {
-					   continue;
-					}
-					if (strchr(buffer, ']') != NULL) {
-					   continue;
-					}
-				}
-				if (!diatonicQ) {
-					keynum = Convert::kernToMidiNoteNumber(buffer);
-				} else {
-					keynum = Convert::kernToDiatonicPitch(buffer);
-				}
-				if (keynum > 127) {
-					cout << "ERROR: Funny pitch: " << keynum
-					     << " = " << buffer << endl;
-				} else if (durationQ) {
-					duration = Convert::kernToDuration(buffer);
-					midibins[0][keynum] += duration;
-					midibins[vindex+1][keynum] += duration;
-				} else {
-					midibins[0][keynum] += 1.0;
-					if (vindex+1 >= (int)midibins.size()) {
-						midibins.resize(midibins.size()+1);
-						midibins.back().resize(40*11);
-						fill(midibins.back().begin(), midibins.back().end(), 0.0);
-					}
-					midibins[vindex+1][keynum] += 1.0;
-				}
-			}
-		}
-	}
-}
-*/
-
-
-
-//////////////////////////////
-//
-// getVindexInstrument -- Return the index into the midibins array which
-//    represents the given track.
-//
-//    track -> kernspines index -> fileinst -> nameByTrack -> return index of nameByTrack (which matches
-//         index of midibins).
-//
-
-int getVindexInstrument(int track, vector<int>& kernspines,
-		vector<string>& fileinst, vector<string>& nameByTrack) {
-	int i;
-	int findex = -1;
-	for (i=0; i<(int)kernspines.size(); i++) {
-		if (kernspines[i] == track) {
-			findex = i;
-		}
-	}
-	if (findex < 0) {
-		return -1;
-	}
-	for (i=0; i<(int)nameByTrack.size(); i++) {
-		if (fileinst[findex] == nameByTrack[i]) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-
-
-//////////////////////////////
-//
-// getVindex -- return the voice index of the primary track.
-//
-
-int getVindex(int track, vector<int>& kernspines) {
-	int i;
-	for (i=0; i<(int)kernspines.size(); i++) {
-		if (kernspines[i] == track) {
-			return i;
-		}
-	}
-	return -1;
 }
 
 

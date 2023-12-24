@@ -67,6 +67,7 @@ class Convert {
       static double    kernTimeSignatureTop      (const string& aKernString);
       static double    kernTimeSignatureBottomToDuration   
                                                  (const string& aKernString);
+      static int       kernToOctave              (const string& buffer);
       static int       kernToDiatonicPitch       (const string& buffer);
       static int       kernToDiatonicPitchClass  (const string& buffer);
       static int       kernToDiatonicPitchClassNumeric(const string& buffer);
