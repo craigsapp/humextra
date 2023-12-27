@@ -15,7 +15,10 @@
 
 #include "humdrum.h"
 #include "PerlRegularExpression.h"
+
 #include <string>
+
+using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -226,7 +229,8 @@ void processFileSeparate(HumdrumFile& infile) {
 		printTickLabels(cout, barvals.back());
 		printSeparateMensurations(cout, infile);
 
-		cout << "plot '-' w rgbimage\n";
+		cout << "plot '-' using 1:2:($3 * 255):($4 * 255):($5 * 255) with rgbimage" << endl;
+
 	}
 
 
