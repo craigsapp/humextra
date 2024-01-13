@@ -1778,7 +1778,7 @@ void processOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("N|norm=b",          "normalize pitch counts");
 	opts.define("score=b",           "convert range info to SCORE");
 	opts.define("title=s:",          "Title for SCORE display");
-	opts.define("T|no-title=s:",     "Do not display a title");
+	opts.define("T|no-title=b",      "Do not display a title");
 	opts.define("q|quartile=b",      "display quartile notes");
 	opts.define("i|instrument=b",    "categorize multiple inputs by instrument");
 	opts.define("sx|scorexml|score-xml|ScoreXML|scoreXML=b",
