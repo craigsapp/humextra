@@ -369,6 +369,25 @@ void fillHistograms(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
 				if (strchr(tokens[k].c_str(), 'r') != NULL) {
 					continue;
 				}
+				if (strchr(tokens[k].c_str(), 'R') != NULL) {
+					// non-pitched note
+					continue;
+				}
+				bool hasPitch = false;
+				for (int m=0; m<(int)tokens[k].size(); m++) {
+					char test = tokens[k].at(m);
+					if (!isalpha(test)) {
+						continue;
+					}
+					test = tolower(test);
+					if ((test >= 'a') && (test <= 'g')) {
+						hasPitch = true;
+						break;
+					}
+				}
+				if (!hasPitch) {
+					continue;
+				}
 				int octave = Convert::kernToOctave(tokens[k]) + 3;
 				if (octave < 0) {
 					cerr << "Note too low: " << tokens[k] << endl;
@@ -378,7 +397,7 @@ void fillHistograms(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
 					cerr << "Note too high: " << tokens[k] << endl;
 					continue;
 				}
-				int dpc    = (Convert::kernToDiatonicPitchClass(tokens[k]) - 'a' - 2 + 7) % 7;;
+				int dpc    = (Convert::kernToDiatonicPitchClass(tokens[k]) - 'a' - 2 + 7) % 7;
 				int acc    = Convert::kernToDiatonicAlteration(tokens[k]);
 				if (acc < -2) {
 					cerr << "Accidental too flat: " << tokens[k] << endl;
