@@ -53,6 +53,8 @@ int       LabelCount = 0;      // used for printing gnuplot labels
 int       ciconiaQ   = 1;
 int       Scale      = 2;
 string    yrange     = "";     // used with --yrange option
+string    titleFont  = "Times New Roman";
+// string    titleFont  = "Vera";
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -209,7 +211,7 @@ void processFileSeparate(HumdrumFile& infile) {
 		// style template:
 		// http://commons.wikimedia.org/wiki/File:Berlin_population2.svg
 		cout << "set term png size " << Scale * 800 << "," << Scale * 250
-			  << " enhanced font \"Vera,"
+			  << " enhanced font \"" << titleFont << ","
 			  << 10 * Scale << "\"\n";
 		cout << "set o\n";      // send to standard output
 		cout << "unset key\n";  // do not display legend
@@ -406,7 +408,8 @@ void printTitle(ostream& out, HumdrumFile& infile) {
 		out << ")";
 	}
 	// out << "\" offset 0,-1 font \"VeraSe," << Scale * 12 << "\"\n";
-	out << "\" offset 0,-0.75 font \"tt1095m_.ttf," << Scale * 16 << "\"\n";
+	// out << "\" offset 0,-0.75 font \"tt1095m_.ttf," << Scale * 16 << "\"\n";
+	out << "\" offset 0,-0.75 font \"" << titleFont << "," << Scale * 16 << "\"\n";
 	// tt1095m_.ttf  roman
 	// tt1096m_.ttf  italic
 	// tt1099m_.ttf  bold
@@ -640,12 +643,12 @@ ostream& placeMensuration(ostream& out, const string& mensur, double xpos,
 		} else {
 			out << "set label " << ++LabelCount << " \"C\" "  << "at first "
 				 << xpos+.5 << "," << graph << ypos
-				 << " center offset 0.3,0 front font \"Vera," << Scale * 10
+				 << " center offset 0.3,0 front font \"" << titleFont << "," << Scale * 10
 				 << "\" textcolor rgb "
 				 << "\"" << color << "\"\n";
 			out << "set label " << ++LabelCount << " \"|\" "  << "at first "
 				 << xpos+.5 << "," << graph << ypos
-				 << " center offset 0.3,0 front font \"Vera," << Scale * 10
+				 << " center offset 0.3,0 front font \"" << titleFont << "," << Scale * 10
 				 << "\" textcolor rgb "
 				 << "\"" << color << "\n";
 		}
@@ -659,13 +662,13 @@ ostream& placeMensuration(ostream& out, const string& mensur, double xpos,
 				 << "textcolor rgb \"" << color << "\"\n";
 			out << "set label " << ++LabelCount << " \"     2\" "  << "at first "
 				 << xpos+.5 << "," << graph << ypos
-				 << " center offset 0.3,0 front font \"Vera,"
+				 << " center offset 0.3,0 front font \"" << titleFont << ","
 				 << Scale * 10 << "\" "
 				 << "textcolor rgb \"" << color << "\"\n";
 		} else {
 			out << "set label " << ++LabelCount << " \"" << mensur << "\" "
 				 << "at first " << xpos+.5 << "," << graph
-				 << ypos << " center offset 0.3,0 front font \"Vera,"
+				 << ypos << " center offset 0.3,0 front font \"" << titleFont << ","
 				 << Scale * 10 << "\""
 				 << " textcolor rgb " << "\"" << color << "\"\n";
 		}
@@ -679,13 +682,13 @@ ostream& placeMensuration(ostream& out, const string& mensur, double xpos,
 				 << "textcolor rgb \"" << color << "\"\n";
 			out << "set label " << ++LabelCount << " \"     3\" "  << "at first "
 				 << xpos+.5 << "," << graph << ypos
-				 << " center offset 0.3,0 front font \"Vera,"
+				 << " center offset 0.3,0 front font \"" << titleFont << ","
 				 << Scale * 10 << "\" "
 				 << "textcolor rgb \"" << color << "\"\n";
 		} else {
 			out << "set label " << ++LabelCount << " \"" << mensur << "\" "
 				 << "at first " << xpos+.5 << "," << graph
-				 << ypos << " center offset 0.3,0 front font \"Vera,"
+				 << ypos << " center offset 0.3,0 front font \"" << titleFont << ","
 				 << Scale * 10 << "\""
 				 << " textcolor rgb " << "\"" << color << "\"\n";
 		}
@@ -700,12 +703,12 @@ ostream& placeMensuration(ostream& out, const string& mensur, double xpos,
 		} else {
 			out << "set label " << ++LabelCount << " \"O\" "  << "at first "
 				 << xpos+.5 << "," << graph << ypos
-				 << " center offset 0.3,0 front font \"Vera,"
+				 << " center offset 0.3,0 front font \"" << titleFont << ","
 				 << Scale * 10 << "\" textcolor rgb "
 				 << "\"" << color << "\"\n";
 			out << "set label " << ++LabelCount << " \"|\" "  << "at first "
 				 << xpos+.5 << "," << graph << ypos
-				 << " center offset 0.3,0 front font \"Vera," << Scale * 10
+				 << " center offset 0.3,0 front font \"" << titleFont << "," << Scale * 10
 				 << "\" textcolor rgb "
 				 << "\"" << color << "\"\n";
 		}
@@ -720,7 +723,7 @@ ostream& placeMensuration(ostream& out, const string& mensur, double xpos,
 		} else {
 			out << "set label " << ++LabelCount << " \"O\" "  << "at first "
 				 << xpos+.5 << "," << graph << ypos
-				 << " center offset 0.3,0 front font \"Vera,"
+				 << " center offset 0.3,0 front font \"" << titleFont << ","
 				 << Scale * 10 << "\" textcolor rgb "
 				 << "\"" << color << "\"\n";
 			out << "set label " << ++LabelCount << " \"\267\" "
@@ -740,7 +743,7 @@ ostream& placeMensuration(ostream& out, const string& mensur, double xpos,
 		} else {
 			out << "set label " << ++LabelCount << " \"C\" "  << "at first "
 				 << xpos+.5 << "," << graph << ypos
-				 << " center offset 0.3,0 front font \"Vera,"
+				 << " center offset 0.3,0 front font \"" << titleFont << ","
 				 << Scale * 10 << "\" textcolor rgb "
 				 << "\"" << color << "\"\n";
 			out << "set label " << ++LabelCount << " \"\267\" "
@@ -760,7 +763,7 @@ ostream& placeMensuration(ostream& out, const string& mensur, double xpos,
 		} else {
 			out << "set label " << ++LabelCount << " \"O\" "  << "at first "
 				 << xpos+.5 << "," << graph << ypos
-				 << " center offset 0.3,0 front font \"Vera,"
+				 << " center offset 0.3,0 front font \"" << titleFont << ","
 				 << Scale * 10 << "\" textcolor rgb "
 				 << "\"" << color << "\"\n";
 		}
@@ -768,14 +771,14 @@ ostream& placeMensuration(ostream& out, const string& mensur, double xpos,
 	} else if (mensur == "Cr") {
 		out << "set label " << ++LabelCount << " \"" << "C" << "\" "
 			 << "at first " << xpos+.5 << "," << graph
-			 << ypos << " center rotate by 180 offset 0.3,graph 0.04 front font \"Vera,"
+			 << ypos << " center rotate by 180 offset 0.3,graph 0.04 front font \"" << titleFont << ","
 			 << Scale * 10 << "\""
 			 << " textcolor rgb " << "\"" << color << "\"\n";
 
 	} else {
 		out << "set label " << ++LabelCount << " \"" << mensur << "\" "
 			 << "at first " << xpos+.5 << "," << graph
-			 << ypos << " center offset 0.3,0 front font \"Vera,"
+			 << ypos << " center offset 0.3,0 front font \"" << titleFont << ","
 			 << Scale * 10 << "\""
 			 << " textcolor rgb " << "\"" << color << "\"\n";
 	}
@@ -878,7 +881,7 @@ void processFile(HumdrumFile& infile) {
 		// style template:
 		// http://commons.wikimedia.org/wiki/File:Berlin_population2.svg
 		cout << "set term png size " << Scale * 800 << ","
-			  << Scale* 250 << " enhanced font \"Vera,"
+			  << Scale* 250 << " enhanced font \"" << titleFont << ","
 			  << Scale * 10 << "\"\n";
 		cout << "set o\n";      // send to standard output
 		cout << "unset key\n";  // do not display legend
