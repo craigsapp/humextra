@@ -705,7 +705,6 @@ void printScoreFile(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
 			maxvalue = tempvalue;
 		}
 	}
-
 	for (int i=(int)voiceInfo.size()-1; i>0; i--) {
 		if (voiceInfo.at(i).kernQ) {
 			printScoreVoice(voiceInfo.at(i), maxvalue);
@@ -822,6 +821,12 @@ int getKeySignature(HumdrumFile& infile) {
 void printScoreVoice(_VoiceInfo& voiceInfo, double maxvalue) {
 	int mini = getMinDiatonicIndex(voiceInfo.diatonic);
 	int maxi = getMaxDiatonicIndex(voiceInfo.diatonic);
+
+	if ((mini < 0) || (maxi < 0)) {
+		// no data for voice so skip
+		return;
+	}
+
 	// int minacci = getMinDiatonicAcc(voiceInfo.diatonic, mini);
 	// int maxacci = getMaxDiatonicAcc(voiceInfo.diatonic, maxi);
 	int mindiatonic = mini - 3 * 7;
@@ -849,7 +854,6 @@ void printScoreVoice(_VoiceInfo& voiceInfo, double maxvalue) {
 	double maxhist = 17.6;
 	int i;
 	int base7;
-
 
 	// print histogram bars
 	for (i=mini; i<=maxi; i++) {
