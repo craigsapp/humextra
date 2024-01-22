@@ -54,6 +54,8 @@ int       ciconiaQ   = 1;
 int       Scale      = 2;
 string    yrange     = "";     // used with --yrange option
 string    titleFont  = "Times New Roman";
+bool      m_titleQ   = false;
+string    m_title    = "";
 // string    titleFont  = "Vera";
 
 
@@ -396,20 +398,28 @@ void printTitle(ostream& out, HumdrumFile& infile) {
 		return;
 	}
 
-	out << "set title \"";
-	if (strlen(OPR) > 0) {
-		encodeText(out, OPR);
-		out << "  ";
+	// A title containing quote character probably needs to be excaped.
+	if (!m_titleQ) {
+		out << "set title \"";
+		if (strlen(OPR) > 0) {
+			encodeText(out, OPR);
+			out << "  ";
+		}
+		encodeText(out, OTL);
+		if (strlen(SCT) > 0) {
+			out << " (";
+			encodeText(out, SCT);
+			out << ")";
+		}
+		// out << "\" offset 0,-1 font \"VeraSe," << Scale * 12 << "\"\n";
+		// out << "\" offset 0,-0.75 font \"tt1095m_.ttf," << Scale * 16 << "\"\n";
+		out << "\" offset 0,-0.75 font \"" << titleFont << "," << Scale * 16 << "\"\n";
+	} else if (!m_title.empty()) {
+		out << "set title \"";
+		encodeText(out, m_title);
+		out << "\" offset 0,-0.75 font \"" << titleFont << "," << Scale * 16 << "\"\n";
 	}
-	encodeText(out, OTL);
-	if (strlen(SCT) > 0) {
-		out << " (";
-		encodeText(out, SCT);
-		out << ")";
-	}
-	// out << "\" offset 0,-1 font \"VeraSe," << Scale * 12 << "\"\n";
-	// out << "\" offset 0,-0.75 font \"tt1095m_.ttf," << Scale * 16 << "\"\n";
-	out << "\" offset 0,-0.75 font \"" << titleFont << "," << Scale * 16 << "\"\n";
+
 	// tt1095m_.ttf  roman
 	// tt1096m_.ttf  italic
 	// tt1099m_.ttf  bold
@@ -1102,6 +1112,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("g|gnuplot=b", "create gnuplot script");
 	opts.define("s|separate=b", "separate each voices values");
 	opts.define("yrange=s:", "set the vertical axis numeric range");
+	opts.define("t|title=s:", "set the title of the plot");
 
 	opts.define("author=b", "author of the program");
 	opts.define("version=b", "compilation info");
@@ -1134,6 +1145,11 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	separateQ = opts.getBoolean("separate");
 	if (opts.getBoolean("yrange")) {
 		yrange = opts.getString("yrange");
+	}
+
+	if (opts.getBoolean("title")) {
+		m_titleQ = true;
+		m_title = opts.getString("title");
 	}
 
 }
