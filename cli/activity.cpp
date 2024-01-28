@@ -127,8 +127,8 @@ void processFileSeparate(HumdrumFile& infile) {
 	PerlRegularExpression pre;
 	vector<int> barvals;
 	vector<vector<double> > cumvals;
-	barvals.reserve(100000);
-	cumvals.reserve(100000);
+	barvals.reserve(10000);
+	cumvals.reserve(10000);
 
 	vector<int> trackmap;
 	int vcount = getTrackMap(trackmap, infile);
@@ -208,13 +208,21 @@ void processFileSeparate(HumdrumFile& infile) {
 		}
 	}
 
-
 	if (gnuplotQ) {
 		// style template:
 		// http://commons.wikimedia.org/wiki/File:Berlin_population2.svg
 		cout << "set term png size " << Scale * 800 << "," << Scale * 250
 			  << " enhanced font \"" << titleFont << ","
 			  << 10 * Scale << "\"\n";
+		if (barvals.size() > 1) {
+			int minBar = barvals[0];
+			int maxBar = barvals.back();
+			// Extend the range by one to not clip starting/ending
+			// measure number boxes.
+			minBar--;
+			maxBar++;
+			cout << "set xrange [" << minBar << ":" << maxBar << "]" << endl;
+		}
 		cout << "set o\n";      // send to standard output
 		cout << "unset key\n";  // do not display legend
 		cout << "set xlabel \"measure\" offset 0,0.75\n";
@@ -237,12 +245,9 @@ void processFileSeparate(HumdrumFile& infile) {
 
 	}
 
-
 	if (gnuplotQ) {
-
 		double maxval = getMaximum(cumvals);
 		double color = 0.0;
-
 		for (i=0; i<(int)barvals.size(); i++) {
 			for (j=0; j<(int)cumvals[i].size(); j++) {
 				// color = 1.0 - (cumvals[i][j]+1)/maxval;
@@ -260,11 +265,7 @@ void processFileSeparate(HumdrumFile& infile) {
 				//  }
 			}
 		}
-
-
-
 	} else {
-
 		// print the results
 		int sum = 0;
 		for (i=0; i<(int)barvals.size(); i++) {
@@ -281,11 +282,9 @@ void processFileSeparate(HumdrumFile& infile) {
 		}
 	}
 
-
 	if (gnuplotQ) {
 		cout << "e\n";
 	}
-
 }
 
 
@@ -886,13 +885,17 @@ void processFile(HumdrumFile& infile) {
 		}
 	}
 
-
 	if (gnuplotQ) {
 		// style template:
 		// http://commons.wikimedia.org/wiki/File:Berlin_population2.svg
 		cout << "set term png size " << Scale * 800 << ","
 			  << Scale* 250 << " enhanced font \"" << titleFont << ","
 			  << Scale * 10 << "\"\n";
+		if (barvals.size() > 1) {
+			int minBar = barvals[0];
+			int maxBar = barvals.back();
+			cout << "set xrange [" << minBar << ":" << maxBar << "]" << endl;
+		}
 		cout << "set o\n";      // send to standard output
 		cout << "unset key\n";  // do not display legend
 		cout << "set xlabel \"measure\" offset 0,0.75\n";

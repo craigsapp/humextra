@@ -96,6 +96,8 @@ regression-fails-only:
 	(cd example; $(MAKE) regression-fails)
 
 push:
+	# Do not change any of the original pcre files:
+	git checkout external/pcre-8.35
 	git push
 
 #                                                                         #

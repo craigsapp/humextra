@@ -66,3 +66,14 @@ external/pcre-8.35/autom4te.cache/traces.6
 external/pcre-8.35/autom4te.cache/traces.7
 external/pcre-8.35/autom4te.cache/output.8
 external/pcre-8.35/autom4te.cache/traces.8
+external/pcre-8.35/.libs/pcregrep
+external/pcre-8.35/.libs/pcretest
+external/pcre-8.35/Makefile
+external/pcre-8.35/autom4te.cache/requests
+external/pcre-8.35/config.log
+external/pcre-8.35/config.status
+external/pcre-8.35/pcre_scanner_unittest
+external/pcre-8.35/pcre_stringpiece_unittest
+external/pcre-8.35/pcrecpp_unittest
+external/pcre-8.35/pcregrep
+external/pcre-8.35/pcretest
