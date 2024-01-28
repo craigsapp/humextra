@@ -5,7 +5,7 @@
 // Last Modified: Wed Jun  9 12:24:37 PDT 2010
 // Filename:      ...sig/include/SigInfo/MuseData.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/MuseData.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A class that stores a list of MuseRecords.
 //
@@ -120,18 +120,18 @@ class MuseData {
       Array<char>            name;
 
    protected:
-      void              processTie          (int eventindex, int recordindex, 
+      void              processTie          (int eventindex, int recordindex,
                                              int lastindex);
-      int               searchForPitch      (int eventindex, int b40, 
+      int               searchForPitch      (int eventindex, int b40,
                                              int track);
-      int               getNextEventIndex   (int startindex, 
+      int               getNextEventIndex   (int startindex,
 		                             RationalNumber target);
       void              constructTimeSequence(void);
-      void              insertEventBackwards (RationalNumber atime, 
+      void              insertEventBackwards (RationalNumber atime,
 		                              MuseRecord* arecord);
       int               getPartNameIndex    (void);
 };
-   
+
 
 ostream& operator<<(ostream& out, MuseData& musedata);
 

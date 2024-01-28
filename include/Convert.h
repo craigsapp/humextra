@@ -15,7 +15,7 @@
 // Last Modified: Sat Jan 22 17:13:36 PST 2011 (added kernToDurationNoDots)
 // Filename:      ...sig/include/sigInfo/Convert.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Convert.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   This class contains static function that can be used
 //                to convert from one data representation to another.
@@ -35,8 +35,8 @@
 
 
 class Convert {
-   public: 
- 
+   public:
+
    // enumeration databases
 
       static EnumerationEI        exint;
@@ -52,20 +52,20 @@ class Convert {
    // conversions dealing with **kern data
 
       static int       kernToMidiNoteNumber      (const string& aKernString);
-      static char*     durationToKernRhythm      (char* output, int outputMaxSize, double input, 
+      static char*     durationToKernRhythm      (char* output, int outputMaxSize, double input,
                                                    int timebase = 1);
       static char*     durationRToKernRhythm     (char* output, int outputMaxSize,
-                                                  RationalNumber input, 
+                                                  RationalNumber input,
                                                   int timebase = 1);
       static string    durationToKernRhythm      (double input, int timebase = 1);
-      static string    durationRToKernRhythm     (RationalNumber input, 
+      static string    durationRToKernRhythm     (RationalNumber input,
                                                   int timebase = 1);
       static double    kernToDuration            (const string& aKernString);
       static RationalNumber kernToDurationR      (const string& aKernString);
       static double    kernToDurationNoDots      (const string& aKernString);
       static RationalNumber kernToDurationNoDotsR (const string& aKernString);
       static double    kernTimeSignatureTop      (const string& aKernString);
-      static double    kernTimeSignatureBottomToDuration   
+      static double    kernTimeSignatureBottomToDuration
                                                  (const string& aKernString);
       static int       kernToOctave              (const string& buffer);
       static int       kernToDiatonicPitch       (const string& buffer);
@@ -85,14 +85,14 @@ class Convert {
 
       static ChordQuality chordQualityStringToValue (const string& aString);
       static int       chordQualityToBaseNote    (const ChordQuality& aQuality);
-      static void      chordQualityToNoteSet     (SigCollection<int>& noteSet, 
+      static void      chordQualityToNoteSet     (SigCollection<int>& noteSet,
                                                   const ChordQuality& aQuality);
       static int       chordQualityToInversion   (const string& aQuality);
       static int       chordQualityToRoot        (const string& aQuality);
       static int       chordQualityToType        (const string& aQuality);
-      static void      noteSetToChordQuality     (ChordQuality& cq, 
+      static void      noteSetToChordQuality     (ChordQuality& cq,
                                                   const SigCollection<int>& aSet);
-      static void      noteSetToChordQuality     (ChordQuality& cq, 
+      static void      noteSetToChordQuality     (ChordQuality& cq,
                                                   const vector<int>& aSet);
 
    // conversions dealing with base 40 system of notation
@@ -128,8 +128,8 @@ class Convert {
       static char*     base40ToTrans              (char* buffer, int outputMaxSize, int base40);
       static int       transToBase40              (const string& buffer);
 
-   // conversions dealing with MIDI base-12 system 
-   
+   // conversions dealing with MIDI base-12 system
+
       static char*     base12ToKern               (char* output, int outputMaxSize, int aPitch);
       static char*     base12ToPitch              (char* output, int outputMaxSize, int aPitch);
       static int       base12ToBase40             (int aPitch);
@@ -137,7 +137,7 @@ class Convert {
       static int       base7ToBase40              (int aPitch, int alter = 0);
 
    // conversions from frequency in hertz to MIDI note number
-      static int       freq2midi                  (double freq, 
+      static int       freq2midi                  (double freq,
                                                    double a440 = 440.0);
 
    // conversions dealing with **koto data
@@ -147,42 +147,42 @@ class Convert {
    // conversions related to serial interval descriptions
 
       static const char* base12ToTnSetName        (Array<int>& base12);
-      static void        base12ToTnSetNameAllSubsets(Array<int>& list, 
+      static void        base12ToTnSetNameAllSubsets(Array<int>& list,
                                                    Array<int>& notes);
-      static void      base12ToTnNormalForm       (Array<int>& tnorm, 
+      static void      base12ToTnNormalForm       (Array<int>& tnorm,
                                                    Array<int>& base12);
-      static void      base12ToNormalForm         (Array<int>& nform, 
+      static void      base12ToNormalForm         (Array<int>& nform,
                                                    Array<int>& base12);
-      static void      base40ToIntervalVector     (Array<int>& iv,  
+      static void      base40ToIntervalVector     (Array<int>& iv,
                                                       Array<int>& base40);
-      static void      base12ToIntervalVector     (Array<int>& iv,  
+      static void      base12ToIntervalVector     (Array<int>& iv,
                                                       Array<int>& base12);
 
       static string    base12ToTnSetName          (vector<int>& base12);
-      static void      base12ToTnSetNameAllSubsets(vector<int>& list, 
+      static void      base12ToTnSetNameAllSubsets(vector<int>& list,
                                                    vector<int>& notes);
-      static void      base12ToTnNormalForm       (vector<int>& tnorm, 
+      static void      base12ToTnNormalForm       (vector<int>& tnorm,
                                                    vector<int>& base12);
-      static void      base12ToNormalForm         (vector<int>& nform, 
+      static void      base12ToNormalForm         (vector<int>& nform,
                                                    vector<int>& base12);
-      static void      base40ToIntervalVector     (vector<int>& iv,  
+      static void      base40ToIntervalVector     (vector<int>& iv,
                                                    vector<int>& base40);
-      static void      base12ToIntervalVector     (vector<int>& iv,  
+      static void      base12ToIntervalVector     (vector<int>& iv,
                                                    vector<int>& base12);
 
    protected:
       // findBestNormalRotation used with bse12ToNormalForm
-      static int     findBestNormalRotation   (Array<int>& input, int asize, 
+      static int     findBestNormalRotation   (Array<int>& input, int asize,
                                                Array<int>& choices);
 
-      static int     calculateInversion       (int aType, int bassNote, 
+      static int     calculateInversion       (int aType, int bassNote,
                                                int root);
       static int     checkChord               (const SigCollection<int>& aSet);
       static int     intcompare               (const void* a, const void* b);
       static void    rotatechord              (SigCollection<int>& aChord);
       static void    addCombinations          (Array<Array<int> >& combinations,
-                                               Array<int>& input, 
-                                               Array<int>& temp, 
+                                               Array<int>& input,
+                                               Array<int>& temp,
                                                int q=0, int r=0);
 
 

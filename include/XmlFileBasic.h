@@ -5,7 +5,7 @@
 // Last Modified: Tue Jun  7 13:02:16 PDT 2011
 // Filename:      ...sig/include/SigInfo/XmlFileBasic.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/XmlFileBasic.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A class that stores a list of XML text fragments.
 //
@@ -48,15 +48,15 @@ class XmlFileBasic {
       void       parseXmlFile        (const char* filename);
       void       parseXmlStream      (istream& input);
 
-      void       extractText         (Array<char>& output, 
+      void       extractText         (Array<char>& output,
                                       Array<char>& trailingspace,
                                         istream& input);
       void       extractTag          (Array<char>& output, istream& input);
-      void       extractWhiteSpace   (Array<char>& output, 
+      void       extractWhiteSpace   (Array<char>& output,
                                         istream& input);
 
 };
-   
+
 
 ostream& operator<<(ostream& out, XmlFileBasic& xmlfile);
 

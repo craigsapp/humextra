@@ -5,7 +5,7 @@
 // Last Modified: Thu Mar 21 12:55:38 PDT 2013 added isInteger()
 // Filename:      ...sig/maint/code/base/RationalNumber/RationalNumber.h
 // Web Address:   http://sig.sapp.org/src/sigBase/RationalNumber.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Rational number class (fraction with an integer
 //                numerator and integer denominator).
@@ -54,13 +54,13 @@ class RationalNumber {
       RationalNumber  operator-  (void) const;
       RationalNumber  operator++ (int n);
       RationalNumber  operator-- (int n);
-   
+
       void            setValue      (int num, int den);
       int             getNumerator  (void) const { return _num; }
       int             getDenominator(void) const { return _den; }
       void            setNumerator  (int val) { _num = val; }
       void            setDenominator(int val) { _den = val; }
-      ostream&        printTwoPart  (ostream& out, const char* spacer = "+") 
+      ostream&        printTwoPart  (ostream& out, const char* spacer = "+")
                                     const;
       ostream&        printRecip    (ostream& out, const char* spacer = "%");
       void            zero          (void) { _num = 0; _den = 1; }
@@ -73,12 +73,12 @@ class RationalNumber {
       int             isInteger     (void) const;
 
       RationalNumber  _abs       (const RationalNumber &r);
-      RationalNumber  _min       (const RationalNumber &p, 
+      RationalNumber  _min       (const RationalNumber &p,
                                   const RationalNumber &q);
-      RationalNumber  _max       (const RationalNumber &p, 
+      RationalNumber  _max       (const RationalNumber &p,
                                   const RationalNumber &q);
       RationalNumber  convert_to_fraction (char *strNum);
-      double          Pow         (const RationalNumber &p, 
+      double          Pow         (const RationalNumber &p,
                                    const RationalNumber &q);
       double          Log         (const RationalNumber &r);
       double          Log10       (const RationalNumber &r);

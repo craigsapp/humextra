@@ -5,7 +5,7 @@
 // Last Modified: Sun Feb 10 19:42:48 PST 2002
 // Filename:      ...sig/src/sigInfo/ScoreParametersSimple.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/ScoreParametersSimple.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Base class for SCORE musical objects.
 //

@@ -80,7 +80,7 @@ void processFile(vector<int>& eventnums, HumdrumFile& infile) {
 
    vector<string> toks;
    int attack = 0;
-   
+
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isData()) {
          continue;
@@ -111,7 +111,7 @@ void processFile(vector<int>& eventnums, HumdrumFile& infile) {
             break;
          }
       }
-      
+
    }
 }
 
@@ -137,7 +137,7 @@ void printFile(vector<int>& eventnums, HumdrumFile& infile) {
          cout << infile[i] << endl;
          continue;
       }
- 
+
 
       if (infile[i].isData()) {
          if (prependQ) {
@@ -294,7 +294,7 @@ double getDuration(vector<int> values, HumdrumFile& infile, int line) {
    }
    if (endindex >= 0) {
       ts2 = infile[endindex].getAbsBeat();
-   } else { 
+   } else {
       ts2 = infile.getTotalDuration();
    }
    return ts2 - ts1;
@@ -400,7 +400,7 @@ void reduceKern(HumdrumFile& infile) {
    vector<string> toks;
    int nullQ = 0;
    int tieQ = 0;
-   
+
    for (i=infile.getNumLines()-1; i>=0; i--) {
       if ((strncmp(infile[i][0], "**", 2) == 0))  {
          for (j=0; j<infile[i].getFieldCount(); j++) {
@@ -528,7 +528,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");            // example usages
    opts.define("help=b");               // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

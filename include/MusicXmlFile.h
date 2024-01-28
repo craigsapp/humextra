@@ -5,7 +5,7 @@
 // Last Modified: Sun Apr  4 23:17:36 PDT 2004
 // Filename:      ...sig/include/sigInfo/MusicXmlFile.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/MusicXmlFile.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A class which parses a MusicXML File.
 //
@@ -69,7 +69,7 @@ class _MusicXmlItem {
       long   ticktime;
       long   tickdur;
       long   divisions;
-      
+
       int    humline;       // line in humdrum output which item is placed
       int    measureno;
       int    serialnum;
@@ -82,9 +82,9 @@ class _MusicXmlItem {
       CSL::XML::CXMLObject* obj;
       CSL::XML::CXMLObject* chordhead;
 
-      void clear(void)    { divisions = tickdur = ticktime = 0; 
+      void clear(void)    { divisions = tickdur = ticktime = 0;
                             ficta = humline = ownerserial = lyricnum = 0;
-                            chordhead = obj = NULL; 
+                            chordhead = obj = NULL;
                             measureno = serialnum = pitch = voice = type = 0; }
       _MusicXmlItem(void) { clear(); }
      ~_MusicXmlItem()     { clear(); }
@@ -126,7 +126,7 @@ class _NoteState {  // used in MusicXmlFile::printKernNote()
    int fermata;
 
    _NoteState(void) { clear(); }
-   
+
    void clear(void) {
       chordnote         = 0;
       tiestart          = 0;
@@ -155,7 +155,7 @@ class _NoteState {  // used in MusicXmlFile::printKernNote()
       staccatissimo     = 0;
       fermata           = 0;
    }
-   
+
    void incorporate(_NoteState& ns) {
       if (stemdir == 0) { stemdir = ns.stemdir; }
       staccato         |= ns.staccato;
@@ -198,7 +198,7 @@ class MusicXmlFile {
       static int getClefStaffNumber       (CSL::XML::CXMLObject* object);
       static ostream& printGraceNoteRhythm(ostream& out, _MusicXmlItem& item);
       static ostream& printGraceMarker    (ostream& out, _MusicXmlItem& item);
-      static char* getLyricText           (char* buffer, 
+      static char* getLyricText           (char* buffer,
                                            CSL::XML::CXMLObject* object);
       int        getStaffNumber           (CSL::XML::CXMLObject* object);
       void       fixMidiAccidentals       (void);
@@ -212,22 +212,22 @@ class MusicXmlFile {
    protected:
       void        addLyrics               (HumdrumFile& hfile, int staffno);
       void        fixMeasureNumbersForPart(int staffno);
-      int         getTimeSignatureTicks   (CSL::XML::CXMLObject* obj, 
+      int         getTimeSignatureTicks   (CSL::XML::CXMLObject* obj,
                                            int tickinfo);
       static void removeBorderSpaces      (char* buffer);
       static int  getIntFromCharacterData (CSL::XML::CXMLObject* object);
       void        checkPartStaff          (int partnum, int staff);
-      void        processSpineChanges     (SSTREAM& newstream, 
+      void        processSpineChanges     (SSTREAM& newstream,
                                            SSTREAM& oldstream, int staffno);
       void        fixPickupBarline        (void);
       void        fixPartPickups          (int partno);
       void        addStaffData            (void);
-      void        appendAllPartStaves     (int partnum, 
+      void        appendAllPartStaves     (int partnum,
                                            _MusicXmlItem& tempitem);
-      void        getInstrumentName       (CSL::XML::CXMLObject* object, 
-                                           int partnum, 
+      void        getInstrumentName       (CSL::XML::CXMLObject* object,
+                                           int partnum,
                                            CSL::XML::XMLString& idname);
-      char*       getCharacterData        (char* buffer, 
+      char*       getCharacterData        (char* buffer,
                                            CSL::XML::CXMLObject* object);
 
       // parsing functions
@@ -235,48 +235,48 @@ class MusicXmlFile {
       void      traverse                  (CSL::XML::CXMLObject* entry);
       void      process                   (CSL::XML::CXMLObject* entry);
       int       parseElement              (CSL::XML::CXMLObject* entry);
-      void      parsePart                 (CSL::XML::CXMLObject* entry, 
+      void      parsePart                 (CSL::XML::CXMLObject* entry,
                                            int partnum);
-      void      parseBackup               (CSL::XML::CXMLObject* object, 
+      void      parseBackup               (CSL::XML::CXMLObject* object,
                                            int partnum, long& ticktime);
-      void      parseForward              (CSL::XML::CXMLObject* object, 
+      void      parseForward              (CSL::XML::CXMLObject* object,
                                            int partnum, long& ticktime);
-      void      parseMeasure              (CSL::XML::CXMLObject* entry, 
+      void      parseMeasure              (CSL::XML::CXMLObject* entry,
                                            int partnum, long& ticktime);
-      void      parsePrint                (CSL::XML::CXMLObject* entry, 
+      void      parsePrint                (CSL::XML::CXMLObject* entry,
                                            int partnum, int ticktime);
-      void      parseBarline              (CSL::XML::CXMLObject* entry, 
+      void      parseBarline              (CSL::XML::CXMLObject* entry,
                                            int partnum, int ticktime);
-      void      parseNote                 (CSL::XML::CXMLObject* entry, 
+      void      parseNote                 (CSL::XML::CXMLObject* entry,
                                            int partnum, long& ticktime);
-      void      parseDirection            (CSL::XML::CXMLObject* object, 
+      void      parseDirection            (CSL::XML::CXMLObject* object,
                                            int partnum, long& ticktime);
-      void      parseSound                (CSL::XML::CXMLObject* entry, 
+      void      parseSound                (CSL::XML::CXMLObject* entry,
                                            int partnum, long& ticktime);
       int       parsePitch                (CSL::XML::CXMLObject* entry);
       int       parseFicta                (CSL::XML::CXMLObject* entry);
-      void      parseAttributes           (CSL::XML::CXMLObject* entry, 
+      void      parseAttributes           (CSL::XML::CXMLObject* entry,
                                            int partnum, long& ticktime);
       void      sortStaff                 (int partnum);
-      void      parseDirectionType        (CSL::XML::CXMLObject* object, 
+      void      parseDirectionType        (CSL::XML::CXMLObject* object,
                                            int partnum, long& ticktime,
                                            CSL::XML::CXMLElement* rootelement);
-      void      printDynamic              (ostream& out, int staffno, 
+      void      printDynamic              (ostream& out, int staffno,
                                            int index);
-      int       printInstrument           (ostream& out, int staffno, 
+      int       printInstrument           (ostream& out, int staffno,
                                            int index);
-      void      printText                 (ostream& out, int staffno, 
+      void      printText                 (ostream& out, int staffno,
                                            int index);
-      int       printSystemBreak          (ostream& out, 
+      int       printSystemBreak          (ostream& out,
                                            CSL::XML::CXMLObject* object);
-      int       printPageBreak            (ostream& out, 
+      int       printPageBreak            (ostream& out,
                                            CSL::XML::CXMLObject* object);
 
       // kern conversion functions
-      int       printKernNote             (ostream& out, int staffno, 
+      int       printKernNote             (ostream& out, int staffno,
                                            int index, int divisions);
-      void      getKernNoteProperties     (_NoteState& ns, 
-                                           CSL::XML::CXMLObject* object, 
+      void      getKernNoteProperties     (_NoteState& ns,
+                                           CSL::XML::CXMLObject* object,
                                            int tickdur);
       char*     getKernKey                (char* buffer, int outputMaxSize,
                                            CSL::XML::CXMLObject* object);
@@ -288,33 +288,33 @@ class MusicXmlFile {
                                            CSL::XML::CXMLObject* object);
       char*     getKernMetronome          (char* buffer, int outputMaxSize,
                                            CSL::XML::CXMLObject* object);
-      int       printMeasureStyle         (char* buffer, int partnum, 
+      int       printMeasureStyle         (char* buffer, int partnum,
                                            int index);
       int       getNextVoiceTime          (int staffno, int index, int voice);
       int       getInterpRestDuration     (char* interpbuffer, int outputMaxSize,
 		                                     int interptick, int divisions);
 
       // printing functions
-      ostream&  printTraverse             (ostream& out, 
+      ostream&  printTraverse             (ostream& out,
                                            CSL::XML::CXMLObject* entry);
-      ostream&  printEntry                (ostream& out, 
+      ostream&  printEntry                (ostream& out,
                                            CSL::XML::CXMLObject* entry);
-      ostream&  printElement              (ostream& out, 
+      ostream&  printElement              (ostream& out,
                                            CSL::XML::CXMLObject* entry);
-      ostream&  printCloseEvent           (ostream& out, 
+      ostream&  printCloseEvent           (ostream& out,
                                            CSL::XML::CXMLObject* entry);
-      ostream&  printCharacterData        (ostream& out, 
+      ostream&  printCharacterData        (ostream& out,
                                            CSL::XML::CXMLObject* entry);
-      ostream&  printComment              (ostream& out, 
+      ostream&  printComment              (ostream& out,
                                            CSL::XML::CXMLObject* entry);
-      ostream&  printGenericData          (ostream& out, 
+      ostream&  printGenericData          (ostream& out,
                                            CSL::XML::CXMLObject* entry);
-      ostream&  printCDataSection         (ostream& out, 
+      ostream&  printCDataSection         (ostream& out,
                                            CSL::XML::CXMLObject* entry);
-      ostream&  printDocument             (ostream& out, 
+      ostream&  printDocument             (ostream& out,
                                            CSL::XML::CXMLObject* entry);
-      ostream&  printString               (ostream& out, 
-                                           CSL::XML::CXMLCharacterData* 
+      ostream&  printString               (ostream& out,
+                                           CSL::XML::CXMLCharacterData*
                                            characters);
    private:
       CSL::XML::CXMLDocument*      xmldocument;
@@ -331,7 +331,7 @@ class MusicXmlFile {
       Array<int> partdynamics;  // used to identify if a part contains dynamics
       int humline;              // used to print lyrics
 
-      CSL::XML::XMLString getAttributeValue(CSL::XML::CXMLObject* object, 
+      CSL::XML::XMLString getAttributeValue(CSL::XML::CXMLObject* object,
                       const char* name);
 
       // Humdrum Conversion options:

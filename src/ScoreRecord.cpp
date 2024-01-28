@@ -45,7 +45,7 @@ ScoreRecord::ScoreRecord(void) {
 }
 
 
-ScoreRecord::ScoreRecord(ScoreRecord& a) {
+ScoreRecord::ScoreRecord(const ScoreRecord& a) {
 	pageIndex         = a.pageIndex;
 	systemLineIndex   = a.systemLineIndex;
 	systemStaffIndex  = a.systemStaffIndex;
@@ -88,7 +88,7 @@ ScoreRecord::~ScoreRecord(void) {
 // ScoreRecord::operator= --
 //
 
-ScoreRecord& ScoreRecord::operator=(ScoreRecord& a) {
+ScoreRecord& ScoreRecord::operator=(const ScoreRecord& a) {
 	if (&a== this) {
 		return *this;
 	}

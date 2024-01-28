@@ -5,7 +5,7 @@
 // Last Modified: Wed Jul 24 12:35:55 PDT 2002
 // Filename:      ...sig/include/sigInfo/IntervalWeight.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/IntervalWeight.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Creates interval weights for chord root calculations.
 //
@@ -25,7 +25,7 @@
 #define IWTYPE_SPIRAL        6
 
 class IntervalWeight {
-   public: 
+   public:
                   IntervalWeight   (void);
                  ~IntervalWeight   ();
 
@@ -54,14 +54,14 @@ class IntervalWeight {
       static void setCircular      (double theta, double ascale,
                                     Array<double>& anArray);
       void        setSpiral        (double radius, double height);
-      static void setSpiral        (double radius, double height, 
+      static void setSpiral        (double radius, double height,
                                     Array<double>& anArray);
 
       ostream&    newprint         (ostream& out);
 
- 
+
    private:
-      Array <double>   weights;   
+      Array <double>   weights;
       int              wtype;       // type of weighting being used
 
 };

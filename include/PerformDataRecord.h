@@ -48,7 +48,7 @@ class PerformDataRecord {
       void         setMeasure             (int aTime, const char* measureData,
                                              int length = -1);
       void         setMeasure             (int aTime, int aMeasure);
-      void         setMidi                (int aTime, const char* someData, 
+      void         setMidi                (int aTime, const char* someData,
                                              int length);
       void         setTempo               (int aTime, const char* tempoData,
                                              int length = -1);

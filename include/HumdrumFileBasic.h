@@ -11,7 +11,7 @@
 // Last Modified: Sat Apr 27 13:36:16 PDT 2013 added changeField()
 // Filename:      ...sig/include/sigInfo/HumdrumFileBasic.h
 // Web Address:   http://museinfo.sapp.org/include/sigInfo/HumdrumFileBasic.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Basic parsing functions for handling a Humdrum data file.
 //                Special musical parsing of the Humdrum file is done in
@@ -95,7 +95,7 @@ class HumdrumFileAddress {
 class HumdrumFileBasic {
    public:
                              HumdrumFileBasic (void);
-                             HumdrumFileBasic (const HumdrumFileBasic& 
+                             HumdrumFileBasic (const HumdrumFileBasic&
                                                  aHumdrumFileBasic);
                              HumdrumFileBasic (const char* filename);
                              HumdrumFileBasic (const string& filename);
@@ -125,9 +125,9 @@ class HumdrumFileBasic {
       HumdrumRecord&         getRecord        (int index);
       int                    getSegmentCount  (void);
       int                    getSpineCount    (int index);
-      int                    getTracksByExInterp(vector<int>& tracks, 
+      int                    getTracksByExInterp(vector<int>& tracks,
                                                  const string& exinterp);
-      int                    getTracksByExInterp(Array<int>& tracks, 
+      int                    getTracksByExInterp(Array<int>& tracks,
                                                  const string& exinterp);
 		int                    getKernTracks    (Array<int>& tracks);
 		int                    getKernTracks    (vector<int>& tracks);
@@ -174,7 +174,7 @@ class HumdrumFileBasic {
       // spine analysis functions:
       void       privateSpineAnalysis(void);
       int        predictNewSpineCount(HumdrumRecord& aRecord);
-      void       makeNewSpineInfo(vector<string>& spineinfo, 
+      void       makeNewSpineInfo(vector<string>& spineinfo,
                     HumdrumRecord& aRecord, int newsize, int& spineid,
                     vector<int>& ex);
       void       simplifySpineString(string& spinestring);
@@ -182,7 +182,7 @@ class HumdrumFileBasic {
 
       // determining the meaning of dots (null records)
       void       privateDotAnalysis(void);
-      void       readjustDotArrays(Array<int>& lastline, Array<int>& lastspine, 
+      void       readjustDotArrays(Array<int>& lastline, Array<int>& lastspine,
                        HumdrumRecord& record, int newsize);
 
 
@@ -191,22 +191,22 @@ class HumdrumFileBasic {
          void     readFromHumdrumURI       (const char* humdrumaddress);
          void     readFromJrpURI           (const char* jrpaddress);
          void     readFromHttpURI          (const char* webaddress);
-         int      getChunk                 (int socket_id, SSTREAM& inputdata, 
+         int      getChunk                 (int socket_id, SSTREAM& inputdata,
                                             char* buffer, int bufsize);
-         int      getFixedDataSize         (int socket_id, int datalength, 
-                                            SSTREAM& inputdata, char* buffer, 
+         int      getFixedDataSize         (int socket_id, int datalength,
+                                            SSTREAM& inputdata, char* buffer,
                                             int bufsize);
-         int      open_network_socket      (const char *hostname, 
+         int      open_network_socket      (const char *hostname,
                                             unsigned short int port);
-         void     prepare_address          (struct sockaddr_in *addr, 
+         void     prepare_address          (struct sockaddr_in *addr,
                                             const char *hostname,
                                             unsigned short int port);
       #endif
       public:
-         static char* getUriToUrlMapping   (char* buffer, int buffsize, 
+         static char* getUriToUrlMapping   (char* buffer, int buffsize,
                                             const char* uri);
 
-         static void extractEmbeddedDataFromPdf(ostream& outputData, 
+         static void extractEmbeddedDataFromPdf(ostream& outputData,
                                                 istream& inputData);
 };
 

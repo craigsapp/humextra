@@ -11,9 +11,9 @@
 // Filename:      ...sig/examples/all/notearray.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/notearray.cpp
 // Syntax:        C++; museinfo
-// 
+//
 // Description:   Generate a two-dimensional numeric array containing
-//                notes in the score in base-40, base-12, or base-7 
+//                notes in the score in base-40, base-12, or base-7
 //                representation.  Each data line represents a sonority
 //                with attacked notes in that sonority being positive
 //                numbers, and sustained notes from previous sonorities
@@ -27,7 +27,7 @@
 #include <algorithm>
 
 using namespace std;
-   
+
 #define STYLE_BASE40 40
 #define STYLE_BASE12 12
 #define STYLE_BASE7   7
@@ -47,30 +47,30 @@ using namespace std;
 #define TYPE_NEXT	7300
 
 // function declarations
-void getNoteArray           (vector<vector<int> >& notes, vector<int>& measpos, 
-                             vector<int>& linenum, HumdrumFile& infile, 
+void getNoteArray           (vector<vector<int> >& notes, vector<int>& measpos,
+                             vector<int>& linenum, HumdrumFile& infile,
                              int base, int flags);
-void printNoteArray         (vector<vector<int> >& notes, vector<int>& measpos, 
+void printNoteArray         (vector<vector<int> >& notes, vector<int>& measpos,
                              vector<int>& linenum, HumdrumFile& infile,
                              vector<double>& bardur, vector<double>& beatdur);
-void printComments          (HumdrumFile& infile, int startline, int stopline, 
+void printComments          (HumdrumFile& infile, int startline, int stopline,
                              int style);
 void printExclusiveInterpretations(int basecount);
-void printLine              (vector<vector<int> >& notes, 
-                             vector<vector<int> >& attacks, 
-                             vector<vector<int> >& lasts, 
-                             vector<vector<int> >& nexts, vector<int>& measpos, 
-                             vector<int>& linenum, vector<double>& bardur, 
-                             vector<double>& beatdur, HumdrumFile& infile, 
+void printLine              (vector<vector<int> >& notes,
+                             vector<vector<int> >& attacks,
+                             vector<vector<int> >& lasts,
+                             vector<vector<int> >& nexts, vector<int>& measpos,
+                             vector<int>& linenum, vector<double>& bardur,
+                             vector<double>& beatdur, HumdrumFile& infile,
                              int index, int style);
 void usage                  (const char* command);
 void example                (void);
 void checkOptions           (Options& opts, int argc, char* argv[]);
-void getNoteAttackIndexes   (vector<vector<int> >& attacks, 
+void getNoteAttackIndexes   (vector<vector<int> >& attacks,
                              vector<vector<int> >& notes, int offst);
-void getLastAttackIndexes   (vector<vector<int> >& lasts, 
+void getLastAttackIndexes   (vector<vector<int> >& lasts,
                              vector<vector<int> >& notes, int offset);
-void getNextAttackIndexes   (vector<vector<int> >& lasts, 
+void getNextAttackIndexes   (vector<vector<int> >& lasts,
                              vector<vector<int> >& notes, int offset);
 int  noteStartMarker        (vector<vector<int> >& notes, int line, int column);
 int  noteEndMarker          (vector<vector<int> >& notes, int line, int column);
@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
    vector<double>      beatdur;
    vector<int>         measpos;
    vector<int>         linenum;
- 
+
    HumdrumFile infile;
 
    // process the command-line options
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
       getNoteArray(notelist, measpos, linenum, infile, base, doubleQ);
       printNoteArray(notelist, measpos, linenum, infile, bardur, beatdur);
       OffsetSum += notelist.size();
-    
+
       if (!saQ) {
          Absoffset += infile.getTotalDurationR();
       }
@@ -184,13 +184,13 @@ int main(int argc, char** argv) {
          if (mathQ) {
             cout << "(* ********** *)\n";
          } else if (humdrumQ) {
-            cout << "!!!!!!!!!!\n";         
+            cout << "!!!!!!!!!!\n";
          } else {
             cout << "%%%%%%%%%%\n";
          }
       }
    }
-   
+
    return 0;
 }
 
@@ -211,8 +211,8 @@ void getMeasureDurations(vector<double>& bardur, HumdrumFile& infile) {
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].isBarline()) {
          value = infile[i].getBeat();
-      } 
-      bardur[i] = value;      
+      }
+      bardur[i] = value;
    }
 }
 
@@ -232,13 +232,13 @@ void getBeatDurations(vector<double>& bardur, HumdrumFile& infile) {
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].isInterpretation()) {
          if (pre.search(infile[i][0], "^\\*M(\\d+)/(\\d+)%(\\d+)")) {
-            
+
             value = 4.0 / atoi(pre.getSubmatch(2)) * atoi(pre.getSubmatch(3));
          } else if (pre.search(infile[i][0], "^\\*M(\\d+)/(\\d+)")) {
             value = 4.0 / atoi(pre.getSubmatch(2));
          }
-      } 
-      bardur[i] = value;      
+      }
+      bardur[i] = value;
    }
 }
 
@@ -246,7 +246,7 @@ void getBeatDurations(vector<double>& bardur, HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// getNoteArray -- 
+// getNoteArray --
 //    style:
 //       STYLE_BASE40 40: print as base-40 pitches
 //       STYLE_BASE12 12: print as base-12 pitches
@@ -257,7 +257,7 @@ void getBeatDurations(vector<double>& bardur, HumdrumFile& infile) {
 //    	1: turn on double-barline rest markers.
 //
 
-void getNoteArray(vector<vector<int> >& notes, vector<int>& measpos, 
+void getNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
       vector<int>& linenum, HumdrumFile& infile, int style, int flags) {
 
    notes.reserve(infile.getNumLines());
@@ -343,10 +343,10 @@ void getNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
          } else {
             ii = i;
             jj = j;
-            if (strchr(infile[ii][jj], '_') != NULL) { 
+            if (strchr(infile[ii][jj], '_') != NULL) {
                attack = -1;
             }
-            if (strchr(infile[ii][jj], ']') != NULL) { 
+            if (strchr(infile[ii][jj], ']') != NULL) {
                attack = -1;
             }
          }
@@ -357,10 +357,10 @@ void getNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
          } else {
             // now storing base-40, and converting to base-12/base-7 later
             // switch (style) {
-            //    case STYLE_BASE12: 
+            //    case STYLE_BASE12:
             //       baseval = Convert::base40ToMidiNoteNumber(baseval);
             //       break;
-            //    case STYLE_BASE7: 
+            //    case STYLE_BASE7:
             //       baseval = Convert::base40ToDiatonic(baseval);
             //       break;
             // }
@@ -425,12 +425,12 @@ void getNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
             break;
          }
       }
- 
+
       // increment the measure number if the beat of the end
-      // is at 1.  This will work unless the last sonority is a 
+      // is at 1.  This will work unless the last sonority is a
       // grace note.
       if (infile[linenum.back()].getBeat() == 1.0) {
-         measpos.back()++; 
+         measpos.back()++;
       }
    }
 
@@ -444,7 +444,7 @@ void getNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
 //
 
 void printNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
-      vector<int>& linenum, HumdrumFile& infile, vector<double>& bardur, 
+      vector<int>& linenum, HumdrumFile& infile, vector<double>& bardur,
       vector<double>& beatdur) {
 
    vector<vector<int> > attacks;
@@ -462,7 +462,7 @@ void printNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
 
    int i, j;
    for (i=0; i<(int)notes.size(); i++) {
-      if (i == 0) { 
+      if (i == 0) {
          if (commentQ && !typeQ) {
             printComments(infile, 0, linenum[0], humdrumQ);
          } else if (commentQ && typeQ) {
@@ -487,10 +487,10 @@ void printNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
          printComments(infile, linenum[i-1]+1, linenum[i], humdrumQ);
       }
       if (typeQ && i == 0) {
-         printLine(notes, attacks, lasts, nexts, measpos, linenum, 
+         printLine(notes, attacks, lasts, nexts, measpos, linenum,
                bardur, beatdur, infile, i, 1);
       } else {
-         printLine(notes, attacks, lasts, nexts, measpos, linenum, 
+         printLine(notes, attacks, lasts, nexts, measpos, linenum,
                bardur, beatdur, infile, i, 0);
       }
    }
@@ -501,7 +501,7 @@ void printNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
       if (lastQ)   { width++; }
       if (nextQ)   { width++; }
       if (kernQ)   { width++; }
-         
+
       int counter = notes[0].size();
       counter *= width;
       counter += indexQ + lineQ + measureQ + beatQ + absoluteQ + linedurQ;
@@ -540,7 +540,7 @@ void printNoteArray(vector<vector<int> >& notes, vector<int>& measpos,
 //     of notes (or the first rest in a series of rests) in each voice.
 //
 
-void getLastAttackIndexes(vector<vector<int> >& lasts, 
+void getLastAttackIndexes(vector<vector<int> >& lasts,
       vector<vector<int> >& notes, int offset) {
 
    int start = 0;
@@ -600,7 +600,7 @@ void getLastAttackIndexes(vector<vector<int> >& lasts,
                  // rest attack
                  lasts[i][j] = states[j];
                  states[j] = i + offset;
-              }  
+              }
            } else {
               lasts[i][j] = -1;
            }
@@ -618,7 +618,7 @@ void getLastAttackIndexes(vector<vector<int> >& lasts,
 //     of notes (or the first rest in a series of rests) in each voice.
 //
 
-void getNextAttackIndexes(vector<vector<int> >& nexts, 
+void getNextAttackIndexes(vector<vector<int> >& nexts,
       vector<vector<int> >& notes, int offset) {
 
    int start = 0;
@@ -665,7 +665,7 @@ void getNextAttackIndexes(vector<vector<int> >& nexts,
 //     of notes (or the first rest in a series of rests) in each voice.
 //
 
-void getNoteAttackIndexes(vector<vector<int> >& attacks, 
+void getNoteAttackIndexes(vector<vector<int> >& attacks,
       vector<vector<int> >& notes, int offset) {
 
    attacks.resize(notes.size());
@@ -710,10 +710,10 @@ void getNoteAttackIndexes(vector<vector<int> >& attacks,
 //    style == 1: index line (don't extract beat or absbeat from infile)
 //
 
-void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks, 
-      vector<vector<int> >& lasts, vector<vector<int> >& nexts, 
+void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks,
+      vector<vector<int> >& lasts, vector<vector<int> >& nexts,
       vector<int>& measpos, vector<int>& linenum, vector<double>& bardur,
-      vector<double>& beatdur, HumdrumFile& infile, 
+      vector<double>& beatdur, HumdrumFile& infile,
       int index, int style) {
 
    int& i = index;
@@ -723,11 +723,11 @@ void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks,
       cout << "{";
    }
 
-   if (indexQ) { 
+   if (indexQ) {
       cout << i + Offset + OffsetSum;
    }
 
-   if (lineQ) { 
+   if (lineQ) {
       if (indexQ) {
          if (mathQ) {
             cout << ",";
@@ -737,7 +737,7 @@ void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks,
       cout << linenum[i]+1;
    }
 
-   if (measureQ) { 
+   if (measureQ) {
       if (indexQ || lineQ) {
          if (mathQ) {
             cout << ",";
@@ -819,11 +819,11 @@ void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks,
          // print beat position as a floating-point number:
          cout << infile[linenum[i]].getAbsBeat() + Absoffset.getFloat();
       }
- 
+
    }
 
    if (linedurQ) {
-      if (indexQ || lineQ || measuredurQ || measureQ || beatdurQ || 
+      if (indexQ || lineQ || measuredurQ || measureQ || beatdurQ ||
             beatQ || absoluteQ) {
          if (mathQ) {
             cout << ",";
@@ -843,9 +843,9 @@ void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks,
          // print beat position as a floating-point number:
          cout << infile[linenum[i]].getDuration();
       }
- 
+
    }
-   if (indexQ || lineQ || measuredurQ || measureQ || beatdurQ || 
+   if (indexQ || lineQ || measuredurQ || measureQ || beatdurQ ||
          beatQ || absoluteQ || linedurQ) {
       if (mathQ) {
          cout << ",";
@@ -863,7 +863,7 @@ void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks,
       //if (kernQ && (style == 1) && typeQ) {
       // int ww = TYPE_KERN;
       //   values.push_back(ww);
-      //} 
+      //}
       if (vv < TYPE_NOTES) {
          if (vv < 0) {
             sign = -1;
@@ -871,12 +871,12 @@ void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks,
          } else {
             sign = +1;
          }
-         if (vv != 0) { 
+         if (vv != 0) {
             switch (style) {
-               case STYLE_BASE12: 
+               case STYLE_BASE12:
                   vv = Convert::base40ToMidiNoteNumber(vv);
                 break;
-               case STYLE_BASE7: 
+               case STYLE_BASE7:
                   vv = Convert::base40ToDiatonic(vv);
                   break;
             }
@@ -912,7 +912,7 @@ void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks,
          //}
          cout << "\t";
          if ((style == 1) && (i == 0)) {
-            cout << TYPE_KERN;         
+            cout << TYPE_KERN;
          } else {
             if (mathQ || quoteQ) {
                cout << "\"";
@@ -920,9 +920,9 @@ void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks,
 
             if (kerntieQ && noteStartMarker(notes, i, j / width)) {
                cout << "[";
-            } 
+            }
             if (doubletieQ && singleNote(notes, i, j / width)) {
-               cout << "["; 
+               cout << "[";
             }
 
             if (values[j] == 0) {
@@ -935,9 +935,9 @@ void printLine(vector<vector<int> >& notes, vector<vector<int> >& attacks,
                cout << "_";
             } else if (kerntieQ && noteEndMarker(notes, i, j / width)) {
                cout << "]";
-            } 
+            }
             if (doubletieQ && singleNote(notes, i, j / width)) {
-               cout << "]"; 
+               cout << "]";
             }
 
             if (mathQ || quoteQ) {
@@ -992,7 +992,7 @@ int singleNote(vector<vector<int> >& notes, int line, int column) {
    if (((int)notes.size() > start+1) && (line < (int)notes.size() - 1)) {
       nextpitch = notes[line+1][column];
    }
- 
+
    if (pitch > TYPE_MIN) {
       return 0;
    }
@@ -1157,9 +1157,9 @@ int noteEndMarker(vector<vector<int> >& notes, int line, int column) {
 
 //////////////////////////////
 //
-// printExclusiveInterpretations -- print ** markers at the start of 
+// printExclusiveInterpretations -- print ** markers at the start of
 //      each column of data.
-//      
+//
 //      Order of optional prefix columns:
 //      lineQ
 //      measureQ
@@ -1175,7 +1175,7 @@ void printExclusiveInterpretations(int basecount) {
    const char* prefix = "%%";
    if (humdrumQ || mathQ) {
       prefix = "**";
-   } 
+   }
 
    if (kernQ) {
       strcat(basename, "kern");
@@ -1218,75 +1218,75 @@ void printExclusiveInterpretations(int basecount) {
       } else {
          cout << prefix;
       }
-      cout << "idx\t"; 
+      cout << "idx\t";
    }
-   if (lineQ) { 
+   if (lineQ) {
       if ((startmark == 0) && mathQ) {
          cout << "(*";
          startmark++;
       } else {
          cout << prefix;
       }
-      cout << "line\t"; 
+      cout << "line\t";
    }
-   if (measureQ) { 
+   if (measureQ) {
       if ((startmark == 0) && mathQ) {
          cout << "(*";
          startmark++;
       } else {
          cout << prefix;
       }
-      cout << "bar\t"; 
-   }
-
-   if (measuredurQ) { 
-      if ((startmark == 0) && mathQ) {
-         cout << "(*";
-         startmark++;
-      } else {
-         cout << prefix;
-      }
-      cout << "mdur\t"; 
+      cout << "bar\t";
    }
 
-   if (beatdurQ) { 
+   if (measuredurQ) {
       if ((startmark == 0) && mathQ) {
          cout << "(*";
          startmark++;
       } else {
          cout << prefix;
       }
-      cout << "bdur\t"; 
+      cout << "mdur\t";
    }
 
-   if (beatQ) { 
+   if (beatdurQ) {
       if ((startmark == 0) && mathQ) {
          cout << "(*";
          startmark++;
       } else {
          cout << prefix;
       }
-      cout << "beat\t"; 
+      cout << "bdur\t";
    }
 
-   if (absoluteQ) { 
+   if (beatQ) {
       if ((startmark == 0) && mathQ) {
          cout << "(*";
          startmark++;
       } else {
          cout << prefix;
       }
-      cout << "abs\t"; 
+      cout << "beat\t";
    }
 
-   if (linedurQ) { 
+   if (absoluteQ) {
       if ((startmark == 0) && mathQ) {
          cout << "(*";
          startmark++;
       } else {
          cout << prefix;
       }
-      cout << "ldur\t"; 
+      cout << "abs\t";
+   }
+
+   if (linedurQ) {
+      if ((startmark == 0) && mathQ) {
+         cout << "(*";
+         startmark++;
+      } else {
+         cout << prefix;
+      }
+      cout << "ldur\t";
    }
 
    int i;
@@ -1313,11 +1313,11 @@ void printExclusiveInterpretations(int basecount) {
 
 //////////////////////////////
 //
-//  
+//
 // printComments -- print any comments
 //
 
-void printComments(HumdrumFile& infile, int startline, int stopline, 
+void printComments(HumdrumFile& infile, int startline, int stopline,
       int style) {
 
    int i;
@@ -1397,7 +1397,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");      // example usages
    opts.define("h|help=b");       // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

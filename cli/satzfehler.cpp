@@ -8,7 +8,7 @@
 //
 // Description:   Identify Satzfehler: one voices does 1-7-1 harmonic pattern
 //                while another voies sings at some point inbetween a 7.
-// 
+//
 
 #include "humdrum.h"
 #include <string>
@@ -29,21 +29,21 @@ void   checkOptions               (Options& opts, int argc, char* argv[]);
 void   example                    (void);
 void   usage                      (const char* command);
 int    analyzeSatzfehler          (HumdrumFile& infile);
-void   getNotes                   (HumdrumFile& infile, 
+void   getNotes                   (HumdrumFile& infile,
                                    Array<Array<NoteNode> >& notes,
                                    Array<int>& ktracks, Array<int>& rtracks);
 void   printNotes                 (Array<Array<NoteNode> >& notes);
-int    identifySatzfehler         (HumdrumFile& infile, 
+int    identifySatzfehler         (HumdrumFile& infile,
                                    Array<Array<NoteNode> >& notes,
                                    Array<int>& ktracks, Array<int>& rtracks);
 int    checkForStazfehler         (HumdrumFile& infile, int startline,
                                    int endline, int xtrack, int tpitch,
                                     Array<int>& targetlines,
                                     Array<int>& targetspines);
-void   markToken                  (HumdrumFile& infile, int line, int spine, 
+void   markToken                  (HumdrumFile& infile, int line, int spine,
                                    string& signifier);
-void  extractSatzfehler           (HumdrumFile& infile, int line, int spine, 
-		                             Array<int>& targetlines, 
+void  extractSatzfehler           (HumdrumFile& infile, int line, int spine,
+		                             Array<int>& targetlines,
                                    Array<int>& targetspines);
 
 // global variables
@@ -74,10 +74,10 @@ int main(int argc, char* argv[]) {
       if (markQ) {
          cout << infiles[i];
          if (count) {
-            cout << "!!!RDF**kern: " << Signifier 
+            cout << "!!!RDF**kern: " << Signifier
                  << " = Satzfehler note" << endl;
          }
-      } 
+      }
       if (countQ) {
          if (markQ) {
             cout << "!!saztfehler-count: " << count << endl;
@@ -142,8 +142,8 @@ int identifySatzfehler(HumdrumFile& infile, Array<Array<NoteNode> >& notes,
 				targetspines[0] = notes[i][j-2].spine;
 				targetspines[1] = notes[i][j-1].spine;
 				targetspines[2] = notes[i][j-0].spine;
-            status = checkForStazfehler(infile, notes[i][j-2].startline, 
-               notes[i][j].startline, notes[i][j-1].track, 
+            status = checkForStazfehler(infile, notes[i][j-2].startline,
+               notes[i][j].startline, notes[i][j-1].track,
                notes[i][j-1].base40, targetlines, targetspines);
             if (status) {
                counter++;
@@ -152,9 +152,9 @@ int identifySatzfehler(HumdrumFile& infile, Array<Array<NoteNode> >& notes,
                if (fileQ) {
                   cout << infile.getFilename() << "\t";
                }
-               cout << "m" << notes[i][j-2].measure 
+               cout << "m" << notes[i][j-2].measure
                       << endl;
-            } 
+            }
          }
       }
    }
@@ -165,7 +165,7 @@ int identifySatzfehler(HumdrumFile& infile, Array<Array<NoteNode> >& notes,
 
 //////////////////////////////
 //
-// markToken -- 
+// markToken --
 //
 
 void markToken(HumdrumFile& infile, int line, int spine, string& signifier) {
@@ -183,7 +183,7 @@ void markToken(HumdrumFile& infile, int line, int spine, string& signifier) {
 //
 
 int checkForStazfehler(HumdrumFile& infile, int startline,
-      int endline, int xtrack, int tpitch, 
+      int endline, int xtrack, int tpitch,
 		Array<int>& targetlines, Array<int>& targetspines) {
    int i, j, k;
    int tpc = tpitch % 40;
@@ -231,7 +231,7 @@ int checkForStazfehler(HumdrumFile& infile, int startline,
 // extractSatzfehler --
 //
 
-void extractSatzfehler(HumdrumFile& infile, int line, int spine, 
+void extractSatzfehler(HumdrumFile& infile, int line, int spine,
 		Array<int>& targetlines, Array<int>& targetspines) {
 
 	int track1 = infile[targetlines[0]].getPrimaryTrack(targetspines[0]);
@@ -356,11 +356,11 @@ void getNotes(HumdrumFile& infile, Array<Array<NoteNode> >& notes,
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("debug=b",       "trace input parsing");   
-   opts.define("author=b",      "author of the program");   
-   opts.define("version=b",     "compilation information"); 
-   opts.define("example=b",     "example usage"); 
-   opts.define("h|help=b",      "short description"); 
+   opts.define("debug=b",       "trace input parsing");
+   opts.define("author=b",      "author of the program");
+   opts.define("version=b",     "compilation information");
+   opts.define("example=b",     "example usage");
+   opts.define("h|help=b",      "short description");
 
    opts.define("s|signifier=s:Z",   "Satzfehler marker in data");
    opts.define("c|count=b",         "count Satzfehlers");
@@ -368,7 +368,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("x|extract=b",       "extract Satzfehler voice pairs");
 
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

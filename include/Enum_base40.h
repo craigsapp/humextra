@@ -5,7 +5,7 @@
 // Last Modified: Tue Jul  7 23:02:54 PDT 1998
 // Filename:      ...sig/include/sigInfo/Enum_base40.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Enum_base40.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Base-40 pitch and interval repersentation defines.
 //

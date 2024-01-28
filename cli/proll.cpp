@@ -4,7 +4,7 @@
 // Last Modified: Fri Jun 12 22:58:34 PDT 2009 Renamed vector class
 // Last Modified: Mon Feb 21 08:29:14 PST 2011 Added --match
 // Last Modified: Sun Feb 27 15:09:29 PST 2011 Added fixed vocal colors
-// Last Modified: Thu Nov 14 12:17:29 PST 2013 Added choice of P3/P6 image 
+// Last Modified: Thu Nov 14 12:17:29 PST 2013 Added choice of P3/P6 image
 // Last Modified: Thu Nov 14 14:01:01 PST 2013 Changed P3 to default output
 // Last Modified: Wed Aug 20 11:16:46 PDT 2014 Added JSON output
 // Last Modified: Mon Feb  2 00:13:08 PST 2015 Fixed due to new comp. restr.
@@ -34,26 +34,26 @@ typedef vector<PixelColor> PixelRow;
 void   checkOptions             (Options& opts, int argc, char* argv[]);
 void   example                  (void);
 void   usage                    (const string& command);
-void   generateBackground       (HumdrumFile& infile, int rfactor, 
-							            vector<PixelRow>& picturedata, 
+void   generateBackground       (HumdrumFile& infile, int rfactor,
+							            vector<PixelRow>& picturedata,
 							            vector<PixelRow>& background);
 int    generatePicture          (HumdrumFile& infile, vector<PixelRow>& picture,
 							            int style);
-void   printPicture             (vector<PixelRow>& picturedata, 
-							            vector<PixelRow>& background, int rfactor, 
-							            int cfactor, int minp, int maxp, 
+void   printPicture             (vector<PixelRow>& picturedata,
+							            vector<PixelRow>& background, int rfactor,
+							            int cfactor, int minp, int maxp,
 							            HumdrumFile& infile);
-void   placeNote                (vector<PixelRow>& picture, int pitch, 
-							            double start, double duration, int min, 
+void   placeNote                (vector<PixelRow>& picture, int pitch,
+							            double start, double duration, int min,
 							            PixelColor& color, double factor, int match);
-PixelColor makeColor            (HumdrumFile& infile, int line, int spine, 
+PixelColor makeColor            (HumdrumFile& infile, int line, int spine,
 							            int style, vector<int>& rhylev, int track);
 void   getMarkChars             (vector<char>& marks, HumdrumFile& infile);
 int    isMatch                  (vector<char>& marks, const string& buffer);
 string getInstrument            (HumdrumFile& infile, int spine);
 void   createJsonProll          (HumdrumFile& infile);
-void   printJsonNote            (ostream& out, int b40, RationalNumber& duration, 
-							            const string& kern, HumdrumFile& infile, int line, 
+void   printJsonNote            (ostream& out, int b40, RationalNumber& duration,
+							            const string& kern, HumdrumFile& infile, int line,
 							            int field, int token, vector<double>& tempos,
 		                           vector<double>& realtimes);
 void   printRationalNumber      (ostream& out, RationalNumber& rat);
@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
 	} else {
 		int rfactor = generatePicture(infile, picturedata, style);
 		generateBackground(infile, rfactor, picturedata, background);
-		printPicture(picturedata, background, rfactor, cfactor, 
+		printPicture(picturedata, background, rfactor, cfactor,
 				gminpitch, gmaxpitch, infile);
 	}
 
@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
 
 //////////////////////////////
 //
-// createJsonProll -- Create Proll data for display in 
+// createJsonProll -- Create Proll data for display in
 //
 
 void createJsonProll(HumdrumFile& infile) {
@@ -208,7 +208,7 @@ void createJsonProll(HumdrumFile& infile) {
 					pi(staves[rktracks[track]], 4);
 					staves[rktracks[track]] << "{\n";
 				}
-				printJsonNote(staves[rktracks[track]], b40, duration, buffer, 
+				printJsonNote(staves[rktracks[track]], b40, duration, buffer,
 						infile, i, j, k, tempos, realtimes);
 
 				if (b40 > partmax[rktracks[track]]) {
@@ -240,7 +240,7 @@ void createJsonProll(HumdrumFile& infile) {
 
 		pi(cout, 4);
 		cout << "[\n";
-	  
+
 		cout << staves[i].str();
 
 		pi(cout, 4);
@@ -248,7 +248,7 @@ void createJsonProll(HumdrumFile& infile) {
 
 		pi(cout, 4);
 		cout << "]\n";
-  
+
 		if (i > 0) {
 			pi(cout, 2);
 			cout << "},\n";
@@ -391,11 +391,11 @@ void printJsonHeader(HumdrumFile& infile, int indent, vector<int>& ktracks,
 	cout << year;
 	if (month < 10) {
 		cout << "0";
-	} 
+	}
 	cout << month;
 	if (day < 10) {
 		cout << "0";
-	} 
+	}
 	cout << day;
 	cout << "\",\n";
 
@@ -432,7 +432,7 @@ void printJsonHeader(HumdrumFile& infile, int indent, vector<int>& ktracks,
 	cout << "\t\"maxpitch\"\t:\t";
 	printPitch(cout, maxpitch, "");
 	cout << ",\n";
-	
+
 
 	pi(cout, indent);
 	cout << "\t\"rangemin\"\t:\t";
@@ -465,7 +465,7 @@ void printJsonHeader(HumdrumFile& infile, int indent, vector<int>& ktracks,
 	cout << "],\n";
 
 	printBarlines(cout, infile, indent, realtimes);
-	
+
 	printTempos(cout, infile, indent, tempos);
 
 	pi(cout, indent);
@@ -481,7 +481,7 @@ void printJsonHeader(HumdrumFile& infile, int indent, vector<int>& ktracks,
 void calculateTempos(HumdrumFile& infile, vector<double>& tempos) {
 	tempos.resize(infile.getNumLines());
 	std::fill(tempos.begin(), tempos.end(), 0);
-	
+
 	for (int i=0; i<infile.getNumLines(); i++) {
 		if (infile[i].isData()) {
 			continue;
@@ -527,13 +527,13 @@ void calculateTempos(HumdrumFile& infile, vector<double>& tempos) {
 void printTempos(ostream& out, HumdrumFile& infile, int indent, vector<double>& tempos) {
 	pi(out, indent);
 	out << "\t\"tempos\"\t:\n";
-	
+
 	pi(out, indent);
 	out << "\t\t[\n";
 
 	indent++;
 	indent++;
-	
+
 	int barinit = 0;
 	PerlRegularExpression pre;
 	RationalNumber timeval;
@@ -554,7 +554,7 @@ void printTempos(ostream& out, HumdrumFile& infile, int indent, vector<double>& 
 		} else {
 			barinit = 1;
 		}
-	
+
 		pi(out, indent);
 		out << "{\"time\":";
 		timeval = infile[i].getAbsBeatR();
@@ -577,13 +577,13 @@ void printBarlines(ostream& out, HumdrumFile& infile, int indent, vector<double>
 	int i;
 	pi(out, indent);
 	out << "\t\"barlines\"\t:\n";
-	
+
 	pi(out, indent);
 	out << "\t\t[\n";
 
 	indent++;
 	indent++;
-	
+
 	int barinit = 0;
 	int number;
 	int terminal;
@@ -622,7 +622,7 @@ void printBarlines(ostream& out, HumdrumFile& infile, int indent, vector<double>
 		} else {
 			barinit = 1;
 		}
-	
+
 		pi(out, indent);
 		out << "{\"time\":";
 		timeval = infile[i].getAbsBeatR();
@@ -631,7 +631,7 @@ void printBarlines(ostream& out, HumdrumFile& infile, int indent, vector<double>
 		if (number >= 0) {
 			out << ", \"label\":\"" << number << "\"";
 		}
-		
+
 		if (terminal) {
 			out << ", \"terminal\":\"" << "true" << "\"";
 		}
@@ -662,7 +662,7 @@ void printMensuration(ostream& out, HumdrumFile& infile, int index) {
 		if (!infile[i].isGlobalComment()) {
 			continue;
 		}
-		if (pre.search(infile[i][0], 
+		if (pre.search(infile[i][0],
 				"^!!primary-mensuration:\\s*met\\(([^)]+)\\)")) {
 			out << ", \"mensuration\":\"" << pre.getSubmatch(1) << "\"";
 			return;
@@ -689,7 +689,7 @@ void printMensuration(ostream& out, HumdrumFile& infile, int index) {
 		if (!infile[i].isGlobalComment()) {
 			continue;
 		}
-		if (pre.search(infile[i][0], 
+		if (pre.search(infile[i][0],
 				"^!!primary-mensuration:\\s*met\\(([^)]+)\\)")) {
 			out << ", \"mensuration\":\"" << pre.getSubmatch(1) << "\"";
 			return;
@@ -758,7 +758,7 @@ void printSectionLabel(ostream& out, HumdrumFile& infile, int line) {
 // printJsonNote --
 //
 
-void printJsonNote(ostream& out, int b40, RationalNumber& duration, const string& kern, 
+void printJsonNote(ostream& out, int b40, RationalNumber& duration, const string& kern,
 		HumdrumFile& infile, int line, int field, int token, vector<double>& tempos,
 		vector<double>& realtimes) {
 	int indent = 4;
@@ -766,42 +766,42 @@ void printJsonNote(ostream& out, int b40, RationalNumber& duration, const string
 	RationalNumber metpos    = infile[line].getBeatR();
 	RationalNumber starttime = infile[line].getAbsBeatR();
 
-//   pi(out, indent); 
+//   pi(out, indent);
 //   out << "{\n";
 
-	pi(out, indent); 
+	pi(out, indent);
 	out << "\t\"pitch\"\t\t:\t";
 	printPitch(out, b40, kern);
 	out << ",\n";
 
-	pi(out, indent); 
+	pi(out, indent);
 	out << "\t\"starttime\"\t:\t";
 	printRationalNumber(out, starttime);
 	out << ",\n";
 
-	pi(out, indent); 
+	pi(out, indent);
 	out << "\t\"starttimesec\"\t:\t";
 	out << realtimes[line];
 	out << ",\n";
 
-	pi(out, indent); 
+	pi(out, indent);
 	out << "\t\"duration\"\t:\t";
 	printRationalNumber(out, duration);
 	out << ",\n";
 
-	// assuming tempo does not change during note 
+	// assuming tempo does not change during note
 	// (should mostly be true).
-	pi(out, indent); 
+	pi(out, indent);
 	out << "\t\"durationsec\"\t:\t";
 	out << duration.getFloat() * 60.0 / tempos[line];
 	out << ",\n";
 
-	pi(out, indent); 
+	pi(out, indent);
 	out << "\t\"metpos\"\t:\t";
 	printRationalNumber(out, metpos);
 	out << "\n";
 
-//   pi(out, indent); 
+//   pi(out, indent);
 //   out << "}\n";
 
 }
@@ -820,7 +820,7 @@ void printPitch(ostream& out, int b40, const string& kern) {
 	char buffer[32] = {0};
 
 	Convert::base40ToKern(buffer, 32, b40 % 40 + 120);
-	
+
 	if ((accid == 0) && (kern.find('n') == std::string::npos)) {
 		accid = -100000;
 	}
@@ -840,7 +840,7 @@ void printPitch(ostream& out, int b40, const string& kern) {
 
 //////////////////////////////
 //
-// printRationalNumber --  
+// printRationalNumber --
 //
 
 void printRationalNumber(ostream& out, RationalNumber& rat) {
@@ -915,7 +915,7 @@ void printPicture(vector<PixelRow>& picturedata, vector<PixelRow>& background,
 						background[i][j].writePpm6(cout);
 					}
 				} else {
-					if ((i > 0) && (cfactor > 1) && (m == cfactor-1) && 
+					if ((i > 0) && (cfactor > 1) && (m == cfactor-1) &&
 							(picturedata[i-1][j] == picturedata[i][j])) {
 						temp = picturedata[i][j] * 0.667;
 						if (P3Q) {
@@ -957,7 +957,7 @@ int generatePicture(HumdrumFile& infile, vector<PixelRow>& picture, int
 	infile.analyzeRhythm("4");
 	int min = infile.getMinTimeBase();
 	double totaldur = infile.getTotalDuration();
-	
+
 	int columns = (int)(totaldur * min / 4.0 + 0.5) + 5;
 	if (columns > 50000) {
 		cout << "Error: picture will be too big to generate" << endl;
@@ -993,7 +993,7 @@ int generatePicture(HumdrumFile& infile, vector<PixelRow>& picture, int
 		// reverse sign so that long notes are positive.
 		rhylev[i] = -rhylev[i];
 	}
-	
+
 	PixelColor color;
 	int minpitch = 128;
 	int maxpitch = -1;
@@ -1013,7 +1013,7 @@ int generatePicture(HumdrumFile& infile, vector<PixelRow>& picture, int
 				}
 				// duration = Convert::kernToDuration(infile[i][j]);
 				duration = infile.getTiedDuration(i, j);
-				color = makeColor(infile, i, j, style, rhylev, 
+				color = makeColor(infile, i, j, style, rhylev,
 						infile[i].getPrimaryTrack(j));
 				for (k=0; k<infile[i].getTokenCount(j); k++) {
 					infile[i].getToken(buffer, j, k);
@@ -1036,10 +1036,10 @@ int generatePicture(HumdrumFile& infile, vector<PixelRow>& picture, int
 						maxpitch = pitch;
 					}
 					if (isMatch(marks, buffer)) {
-						placeNote(picture, pitch, start, duration, min, 
+						placeNote(picture, pitch, start, duration, min,
 							   color, factor, 1);
 					} else {
-						placeNote(picture, pitch, start, duration, min, 
+						placeNote(picture, pitch, start, duration, min,
 							   color, factor, 0);
 					}
 				}
@@ -1126,7 +1126,7 @@ PixelColor makeColor(HumdrumFile& infile, int line, int spine, int style,
 				output.setColor("black");
 			}
 			break;
-			
+
 		case 'H':    // color spines by hue
 		default:
 			trackCount = infile.getMaxTracks();
@@ -1176,7 +1176,7 @@ string getInstrument(HumdrumFile& infile, int track) {
 // placeNote -- draw a note in the picture area
 //
 
-void placeNote(vector<PixelRow>& picture, int pitch, double start, 
+void placeNote(vector<PixelRow>& picture, int pitch, double start,
 		double duration, int min, PixelColor& color, double factor, int match) {
 	int startindex = (int)(start * min / 4.0 * factor);
 	int endindex = (int)((start + duration) * min / 4.0 * factor) - 1;
@@ -1198,18 +1198,18 @@ void placeNote(vector<PixelRow>& picture, int pitch, double start,
 			picture[pitch][i] = zcolor;
 		} else {
 			if (match) {
-				picture[pitch][i].Red   = (2*zcolor.Red 
+				picture[pitch][i].Red   = (2*zcolor.Red
 						+ picture[pitch][i].Red)/3;
-				picture[pitch][i].Green = (2*zcolor.Green 
+				picture[pitch][i].Green = (2*zcolor.Green
 						+ picture[pitch][i].Green)/3;
-				picture[pitch][i].Blue  = (2*zcolor.Blue 
+				picture[pitch][i].Blue  = (2*zcolor.Blue
 						+ picture[pitch][i].Blue)/3;
 			} else {
-				picture[pitch][i].Red   = (color.Red 
+				picture[pitch][i].Red   = (color.Red
 						+ picture[pitch][i].Red)/2;
-				picture[pitch][i].Green = (color.Green 
+				picture[pitch][i].Green = (color.Green
 						+ picture[pitch][i].Green)/2;
-				picture[pitch][i].Blue  = (color.Blue 
+				picture[pitch][i].Blue  = (color.Blue
 						+ picture[pitch][i].Blue)/2;
 			}
 		}
@@ -1223,7 +1223,7 @@ void placeNote(vector<PixelRow>& picture, int pitch, double start,
 // generateBackground -- create the picture.
 //
 
-void generateBackground(HumdrumFile& infile, int rfactor, 
+void generateBackground(HumdrumFile& infile, int rfactor,
 		vector<PixelRow>& picturedata, vector<PixelRow>& background) {
 
 	background.resize(picturedata.size());
@@ -1274,8 +1274,8 @@ void generateBackground(HumdrumFile& infile, int rfactor,
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-	opts.define("w|width=i:3000",      "maximum width allowable for image");   
-	opts.define("h|height=i:400",      "maximum height allowable for image");   
+	opts.define("w|width=i:3000",      "maximum width allowable for image");
+	opts.define("h|height=i:400",      "maximum height allowable for image");
 	opts.define("M|no-measure=b",      "do not display measure lines on image");
 	opts.define("K|no-keyboard=b",     "do not display keyboard in background");
 	opts.define("f|filename=s",        "used to label file with standard input");
@@ -1289,13 +1289,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("met=d:232",           "tempo control from metrical symbols");
 	opts.define("met2=d:336",          "tempo control from metrical symbols, older era");
 
-	opts.define("debug=b",          "trace input parsing");   
-	opts.define("author=b",         "author of the program");   
-	opts.define("version=b",        "compilation information"); 
-	opts.define("example=b",        "example usage"); 
-	opts.define("help=b",           "short description"); 
+	opts.define("debug=b",          "trace input parsing");
+	opts.define("author=b",         "author of the program");
+	opts.define("version=b",        "compilation information");
+	opts.define("example=b",        "example usage");
+	opts.define("help=b",           "short description");
 	opts.process(argc, argv);
-	
+
 	// handle basic options:
 	if (opts.getBoolean("author")) {
 		cout << "Written by Craig Stuart Sapp, "
@@ -1393,9 +1393,9 @@ void getMarkChars(vector<char>& marks, HumdrumFile& infile) {
 			continue;
 		}
 		// !!!RDF**kern: N= mark color="#ff0000", root
-		if (pre.search(infile[i].getLine(), 
+		if (pre.search(infile[i].getLine(),
 				"^!!!RDF\\*\\*kern:\\s*([^\\s])\\s*=\\s*match", "i") ||
-			 pre.search(infile[i].getLine(), 
+			 pre.search(infile[i].getLine(),
 				"^!!!RDF\\*\\*kern:\\s*([^\\s])\\s*=\\s*mark", "i")
 			) {
 			value = pre.getSubmatch(1)[0];

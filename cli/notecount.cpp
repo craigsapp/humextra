@@ -86,7 +86,7 @@ void WorkInfo::clear(void) {
    }
    part.setSize(0);
 }
-   
+
 
 void CountInfo::clear(void) {
    base40pitch_sounding.setSize(400);
@@ -508,7 +508,7 @@ void processFile(HumdrumFile& infile, WorkInfo& cinfo) {
          pindex = rktracks[infile[i].getPrimaryTrack(j)];
 
          infile[i].getTokens(subtokens, j);
-         
+
          for (k=0; k<subtokens.getSize(); k++) {
             if (strchr(subtokens[k].getBase(), 'r') != NULL) {
                cinfo.rests++;

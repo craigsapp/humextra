@@ -5,7 +5,7 @@
 // Last Modified: Tue Jun 30 22:36:07 PDT 1998
 // Filename:      ...sig/include/SigInfo/MuseRecord.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/MuseRecord.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A class that stores one line of data for a Musedata file.
 //
@@ -45,7 +45,7 @@ class MuseRecord : public MuseRecordBasic {
       int              getBase40                    (void);
       void             setPitch                     (int base40, int chordnote = 0, int gracenote = 0);
       void             setPitch                     (const char* pitchname);
-      void             setPitchAtIndex              (int index, 
+      void             setPitchAtIndex              (int index,
                                                      const char* pitchname);
       void             setChordPitch                (const char* pitchname);
       void             setGracePitch                (const char* pitchname);
@@ -99,7 +99,7 @@ class MuseRecord : public MuseRecordBasic {
 
       // columns 10 -- 12 ---> blank
 
-      // columns 13 -- 80: graphical and interpretive information 
+      // columns 13 -- 80: graphical and interpretive information
 
       // column 13: footnote flag
       char*             getFootnoteFlagField        (char* output);
@@ -165,7 +165,7 @@ class MuseRecord : public MuseRecordBasic {
       char*            getStaff                     (char* output);
       int              getStaff                     (void);
       int              staffQ                       (void);
-      
+
       // column 25 ---> blank
 
       // columns 26 - 31: beam codes
@@ -191,7 +191,7 @@ class MuseRecord : public MuseRecordBasic {
       char*            getAdditionalNotationsField  (char* output);
       int              additionalNotationsQ         (void);
       int              getAddCount                  (void);
-      char*            getAddItem                   (int elementIndex, 
+      char*            getAddItem                   (int elementIndex,
                                                        char* output);
       int              addAdditionalNotation        (char symbol);
       int              addAdditionalNotation        (const char*  symbol);
@@ -200,7 +200,7 @@ class MuseRecord : public MuseRecordBasic {
       int              addEditorialLevelQ           (void);
       //  protected:   getAddElementIndex
       int              findField                    (const char* key);
-      int              findField                    (char key, int mincol, 
+      int              findField                    (char key, int mincol,
                                                      int maxcol);
       // int              getNotationLevel
       int              getSlurStartColumn           (void);
@@ -212,7 +212,7 @@ class MuseRecord : public MuseRecordBasic {
       char*            getVerse                     (int index, char* output);
 
       // general functions for note records:
-      char*            getKernNoteStyle             (char* output, 
+      char*            getKernNoteStyle             (char* output,
                                                        int beams = 0,
                                                        int stems = 0);
       char*            getKernNoteAccents           (char* output);
@@ -227,7 +227,7 @@ class MuseRecord : public MuseRecordBasic {
       int              getFigureCount               (void);
 
       // columns 3 -- 5 ---> blank
-      
+
       // columns 6 -- 8: figure division pointer advancement (duration)
       char*            getFigurePointerField        (char* output);
       int              figurePointerQ               (void);
@@ -244,7 +244,7 @@ class MuseRecord : public MuseRecordBasic {
       char*            getFigureFields              (char* output);
       int              figureFieldsQ                (void);
       char*            getFigure                    (int index, char* output);
- 
+
 
    //////////////////////////////
    // functions which work with combined records ('b', 'i'):
@@ -277,14 +277,14 @@ class MuseRecord : public MuseRecordBasic {
       char*            getAttributeList             (char* output);
       int              attributeQ                   (const char* attribute);
       int              getAttributeInt              (char attribute);
-      int              getAttributeString           (char* output, 
+      int              getAttributeString           (char* output,
                                                        const char* attribute);
 
 
    //
    //////////////////////////////
 
-      char*            getKernRestStyle             (char* output, 
+      char*            getKernRestStyle             (char* output,
                                                        int quarter = 16);
 
    protected:
@@ -297,7 +297,7 @@ class MuseRecord : public MuseRecordBasic {
       char*            zerase                       (char* output, int num);
 
 };
-   
+
 
 
 #endif  /* _MUSERECORD_H_INCLUDED */

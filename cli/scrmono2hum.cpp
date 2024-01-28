@@ -76,7 +76,7 @@ class Thing {
       int ending;      // ending marker for multiple endings
       int repeattype;  // 1 = forward repeat, 2 = end repeat, 3 = both
       double absbeat;  // absolute beat position in music (quarter note = beat)
-      
+
       Thing(void) { clear(); }
       void clear(void) {
          type = 0; loc = -1; dur = 0.0; clef = 0; index = 0; finalbar = 0;
@@ -100,7 +100,7 @@ class Extra {
       double   measurebeat;
       int      precedence;
       int      mark;
-    
+
       Extra(void) { clear(); }
       void clear(void) {
          text[0] = '\0'; duration = -1; measure = -1; measurebeat = 1.0;
@@ -110,8 +110,8 @@ class Extra {
 
 
 class Thru {
-   public: 
-      int seg; 
+   public:
+      int seg;
       int ending;
    Thru(void) { clear(); }
    void clear(void) { seg = ending = 0; }
@@ -121,16 +121,16 @@ class Thru {
 
 // function declarations:
 void  extractPitches     (ScorePageSimple& score);
-void  printKern          (ostream& out, ScorePageSimple& score, Array<Thing>& things, 
+void  printKern          (ostream& out, ScorePageSimple& score, Array<Thing>& things,
                           Array<char1024>& header, Array<char1024>& trailer,
                           Array<Extra>& extras, Array<Thru>& thruinfo);
 void  printClef          (ostream& out, int clef);
 void  applySlurs         (ScorePageSimple& score, Array<Thing>& things);
 void  findMetronome      (ScorePageSimple& score, Array<Thing>& things);
 void  assignMeasure      (ScorePageSimple& score, Array<Thing>& things);
-void  storeItem          (ScoreRecord& record, int& clef, int& key, 
+void  storeItem          (ScoreRecord& record, int& clef, int& key,
                           Array<Thing>& things, int location, int index);
-void  cleanupThings      (ScorePageSimple& score, Array<Thing>& things, 
+void  cleanupThings      (ScorePageSimple& score, Array<Thing>& things,
                           Array<Extra>& extras, Array<Thru>& thruinfo);
 void  getThings          (ScorePageSimple& score, Array<Thing>& things);
 void  printKey           (ostream& out, int key);
@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
    int i;
    for (i=1; i<=options.getArgCount(); i++) {
       score.clear();
-      score.readFile(options.getArg(i).c_str(), verboseQ); 
+      score.readFile(options.getArg(i).c_str(), verboseQ);
       getThings(score, things);
       assignMeasure(score, things);
       applySlurs(score, things);
@@ -222,7 +222,7 @@ int main(int argc, char** argv) {
             fstream infile("/tmp/scrmono2hum-temp2", ios::in | ios::nocreate);
          #endif
          unsigned long value;
-         infile >> value; 
+         infile >> value;
          cout << "!!!VTS: " << value << endl;
          infile.close();
          status = system("rm /tmp/scrmono2hum-temp2");
@@ -230,7 +230,7 @@ int main(int argc, char** argv) {
          if (status < 0) {
             // avoid compiler warning
             status--;
-         } 
+         }
       }
 #endif /* VISUAL */
    }
@@ -246,7 +246,7 @@ int main(int argc, char** argv) {
 
 //////////////////////////////
 //
-// findMetronome -- look for metronome markings and apply to 
+// findMetronome -- look for metronome markings and apply to
 //   things.
 //
 
@@ -276,7 +276,7 @@ void findMetronome(ScorePageSimple& score, Array<Thing>& things) {
                   things[tindex].metronome = tempo;
                }
             }
-         } 
+         }
       }
    }
 
@@ -290,7 +290,7 @@ void findMetronome(ScorePageSimple& score, Array<Thing>& things) {
 // cleanupThings -- do finalization of items before printing in **kern format.
 //
 
-void cleanupThings(ScorePageSimple& score, Array<Thing>& things, 
+void cleanupThings(ScorePageSimple& score, Array<Thing>& things,
       Array<Extra>& extras, Array<Thru>& thruinfo) {
    int i;
 
@@ -368,7 +368,7 @@ void cleanupThings(ScorePageSimple& score, Array<Thing>& things,
    // remove consecutive barline markers due to repeats
    // at the starts of lines.
    for (i=0; i<things.getSize(); i++) {
-      if (i > 0 && things[i].type == P1_Barline && 
+      if (i > 0 && things[i].type == P1_Barline &&
           things[i-1].type == P1_Barline) {
          things[i-1].mstyle = (int)score.getStaff(things[i].loc,
                things[i].index).getPValue(5);
@@ -428,9 +428,9 @@ void assignMeasure(ScorePageSimple& score, Array<Thing>& things) {
             break;
          case P1_MeterSignature:
             // composite time signature are not yet handled.
-            top = (int)score.getStaff(things[i].loc, 
+            top = (int)score.getStaff(things[i].loc,
                   things[i].index).getPValue(5);
-            bottom = (int)score.getStaff(things[i].loc, 
+            bottom = (int)score.getStaff(things[i].loc,
                   things[i].index).getPValue(6);
             if (top == 0) {
                top = bottom;
@@ -463,7 +463,7 @@ void assignMeasure(ScorePageSimple& score, Array<Thing>& things) {
    }
 
 
-   // the penultimate measure is controlling even if 
+   // the penultimate measure is controlling even if
    // the last measure does not have a complete duration
    int count = 0;
    for (i=things.getSize()-1; i>=0; i--) {
@@ -488,7 +488,7 @@ void assignMeasure(ScorePageSimple& score, Array<Thing>& things) {
          tempmeterdur = things[i].meterdur;
          things[i].meterdur = lastmeterdur;
          lastmeterdur = tempmeterdur;
-      } 
+      }
    }
 
 
@@ -502,7 +502,7 @@ void assignMeasure(ScorePageSimple& score, Array<Thing>& things) {
             setcontrol = 0;
          }
          if (things[i].control == 0) {
-            if (fabs(things[i].ndur + things[i].nndur - things[i].meterdur) < 
+            if (fabs(things[i].ndur + things[i].nndur - things[i].meterdur) <
                   0.01) {
                things[i].control = 1;
                setcontrol = 1;
@@ -521,9 +521,9 @@ void assignMeasure(ScorePageSimple& score, Array<Thing>& things) {
    int pickupQ = 1;
    for (i=0; i<things.getSize(); i++) {
       if (things[i].type == P1_Barline) {
-         if (things[i].dur != 0.0 && 
+         if (things[i].dur != 0.0 &&
                fabs(things[i].dur - things[i].meterdur) < 0.01) {
-            pickupQ = 0; 
+            pickupQ = 0;
             break;
          } else if (things[i].dur != 0.0) {
             pickupQ = 1;
@@ -617,7 +617,7 @@ void applySlurs(ScorePageSimple& score, Array<Thing>& things) {
             }
             slurid++;
          }
-      } else if ((score[i].getPValue(1) == P1_Slur) && 
+      } else if ((score[i].getPValue(1) == P1_Slur) &&
               (score[i].getPValue(8) > 0)       &&
               (score[i].getPValue(9) >= 0)      ) {
          // a verse ending marker
@@ -674,7 +674,7 @@ void applySlurs(ScorePageSimple& score, Array<Thing>& things) {
 
 //////////////////////////////
 //
-// checkForTie -- look to see if slur is actually a tie and fix it 
+// checkForTie -- look to see if slur is actually a tie and fix it
 //   if necessary.
 //
 
@@ -702,7 +702,7 @@ void checkForTie(Array<Thing>& things, int id, int start) {
             things[i].slend2 = 0;
             tieQ = 1;
             break;
-         } 
+         }
       }
    }
 
@@ -798,8 +798,8 @@ int findNearestMeasure(ScorePageSimple& score, float pos, int staff) {
 // printKern -- print the things in the Thing array in **kern format.
 //
 
-void printKern(ostream& out, ScorePageSimple& score, Array<Thing>& things, 
-      Array<char1024>& header, Array<char1024>& trailer, 
+void printKern(ostream& out, ScorePageSimple& score, Array<Thing>& things,
+      Array<char1024>& header, Array<char1024>& trailer,
       Array<Extra>& extras, Array<Thru>& thruinfo) {
    int i, j;
    char pbuffer[128] = {0};
@@ -896,7 +896,7 @@ void printKern(ostream& out, ScorePageSimple& score, Array<Thing>& things,
          if (things[i].mstyle >= 0) {
             bartype = things[i].mstyle;
          } else {
-            bartype = (int)score.getStaff(things[i].loc, 
+            bartype = (int)score.getStaff(things[i].loc,
                   things[i].index).getPValue(5);
          }
          switch (bartype) {
@@ -908,7 +908,7 @@ void printKern(ostream& out, ScorePageSimple& score, Array<Thing>& things,
             case 6:    out << ":!!:"; break;
          }
          if (verboseQ) {
-            out << "(" << things[i].dur << ":" << things[i].ndur 
+            out << "(" << things[i].dur << ":" << things[i].ndur
                                          << ":" << things[i].nndur << ")";
             out << "[" << things[i].meterdur << "]";
             out << "{" << things[i].control << "}";
@@ -919,12 +919,12 @@ void printKern(ostream& out, ScorePageSimple& score, Array<Thing>& things,
          if (things[i].ending != 0) {
             cout << "!! ending " << things[i].ending << "\n";
          }
-        
+
          break;
       case P1_MeterSignature:
-         out << "*M" 
+         out << "*M"
               << (int)score.getStaff(things[i].loc,things[i].index).getPValue(5)
-              << "/" 
+              << "/"
               <<(int)score.getStaff(things[i].loc,things[i].index).getPValue(6);
          out << "\n";
          break;
@@ -979,7 +979,7 @@ void getThings(ScorePageSimple& score, Array<Thing>& things) {
 // storeItem -- store the SCORE item for later processing.
 //
 
-void storeItem(ScoreRecord& record, int& clef, int& key, 
+void storeItem(ScoreRecord& record, int& clef, int& key,
       Array<Thing>& things, int staffno, int index) {
    Thing tempthing;
    int tempkey;
@@ -1144,7 +1144,7 @@ char* getTitle(char* buffer, ScorePageSimple& score) {
 //
 
 void getHeaderAndTrailer(const char* globalfilename, const char* localfilename,
-      Array<char1024>& header, Array<char1024>& trailer, 
+      Array<char1024>& header, Array<char1024>& trailer,
       Array<Extra>& extras) {
    char1024 buffer;
    Array<char1024> gfile;
@@ -1163,7 +1163,7 @@ void getHeaderAndTrailer(const char* globalfilename, const char* localfilename,
          fstream ginfile(globalfilename, ios::in | ios::nocreate);
       #endif
       if (!ginfile.is_open()) {
-         cout << "Error: cannot open file " << globalfilename 
+         cout << "Error: cannot open file " << globalfilename
               << " for reading" << endl;
          exit(1);
       }
@@ -1183,7 +1183,7 @@ void getHeaderAndTrailer(const char* globalfilename, const char* localfilename,
          fstream linfile(localfilename, ios::in | ios::nocreate);
       #endif
       if (!linfile.is_open()) {
-         cout << "Error: cannot open file " << localfilename 
+         cout << "Error: cannot open file " << localfilename
               << " for reading" << endl;
          exit(1);
       }
@@ -1191,7 +1191,7 @@ void getHeaderAndTrailer(const char* globalfilename, const char* localfilename,
          linfile.getline(buffer.c, 1000, '\n');
          if (buffer.c[0] == '@' || buffer.c[0] == '!' ||
              buffer.c[0] == 'a' || buffer.c[0] == 'b' ||
-             buffer.c[0] == '=' || 
+             buffer.c[0] == '=' ||
              buffer.c[0] == 'A' || buffer.c[0] == 'B') {
             lfile.append(buffer);
          }
@@ -1249,7 +1249,7 @@ void getHeaderAndTrailer(const char* globalfilename, const char* localfilename,
          lloc[i] = 0;
          continue;
       }
- 
+
       lloc[i] = state;
    }
 
@@ -1307,7 +1307,7 @@ void getHeaderAndTrailer(const char* globalfilename, const char* localfilename,
 //////////////////////////////
 //
 // readExtraData -- read the external data records which will
-//   be placed into the automatically generated Humdrum data 
+//   be placed into the automatically generated Humdrum data
 //   read from the SCORE file.
 //
 
@@ -1365,10 +1365,10 @@ void readExtraData(Extra& extra, const char* string) {
 
 //////////////////////////////
 //
-// printExtras -- 
+// printExtras --
 //
 
-void printExtras(Array<Thing>& things, Array<Extra>& extras, int index, 
+void printExtras(Array<Thing>& things, Array<Extra>& extras, int index,
       ostream& out) {
 
    double currentloc = things[index].absbeat;
@@ -1400,16 +1400,16 @@ void printExtras(Array<Thing>& things, Array<Extra>& extras, int index,
 
          switch (extras[i].precedence) {
             case 'b':   // place before events
-               if (extras[i].duration > lastloc && 
+               if (extras[i].duration > lastloc &&
                    (extras[i].duration <= currentloc ||
                     currdiff < 0.01)) {
                    out << extras[i].text << "\n";
                    extras[i].mark = 1;
                }
                break;
-   
+
             case 'a':   // place after events
-               if (extras[i].duration < currentloc && 
+               if (extras[i].duration < currentloc &&
                    (extras[i].duration >= lastloc ||
                     lastdiff < 0.01)) {
                    out << extras[i].text << "\n";
@@ -1452,7 +1452,7 @@ double findDuration(Array<Thing>& things, int measure) {
    double output = -1.0;
    for (i=0; i<things.getSize(); i++) {
       if (things[i].type == P1_Barline && things[i].measure == measure) {
-         output = things[i].absbeat;   
+         output = things[i].absbeat;
          break;
       }
    }
@@ -1470,7 +1470,7 @@ double findDuration(Array<Thing>& things, int measure) {
 
 void generateThruInfo(Array<Thing>& things, Array<Thru>& thruinfo) {
    thruinfo.setSize(0);
-   
+
    int back = 0;
    int i = 0;
    int done = 0;
@@ -1524,7 +1524,7 @@ sillytag:
                   tempthru.seg = things[i].segment;
                   tempthru.ending = things[i].ending;
                   thruinfo.append(tempthru);
-               } 
+               }
          }
       }
       i++;
@@ -1580,7 +1580,7 @@ void printNoRep(Array<Thru>& thruinfo, ostream& out) {
          // already deleted
          continue;
       }
-      if ( (copy[i] == copy[i+2]) && 
+      if ( (copy[i] == copy[i+2]) &&
            (copy[i+1].seg == copy[i+3].seg) &&
            (copy[i+1].ending == copy[i+3].ending - 1) ) {
          copy[i].seg = 0;

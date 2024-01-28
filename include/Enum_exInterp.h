@@ -6,7 +6,7 @@
 // Last Modified: Wed Oct 18 12:58:50 PDT 2000
 // Filename:      ...sig/include/sigInfo/Enum_exInterp.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Enum_exInterp.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Default enumeration defined for the Humdrum
 //                Exclusive Enumeration class.
@@ -17,7 +17,7 @@
 
 #include "Enum_basic.h"
 
-#define E_UNKNOWN_EXINT       (0000)      
+#define E_UNKNOWN_EXINT       (0000)
 
 #define E_UNKNOWN_EXINT_NAME     "**unknown"
 

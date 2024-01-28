@@ -46,14 +46,14 @@ int       option_C = 0;   // used with -C option
 int       option_c = 0;   // used with -c option
 int       option_k = 0;   // used with -k option
 int       option_V = 0;   // used with -V option
- 
+
 //////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv) {
    // process the command-line options
    checkOptions(options, argc, argv);
    HumdrumFileSet infiles;
-   // infile.setAllocation(1123123);   // allow for very large inputs up to 
+   // infile.setAllocation(1123123);   // allow for very large inputs up to
    //                                  // million lines.
    int numinputs = options.getArgumentCount();
 
@@ -104,14 +104,14 @@ void processFile(HumdrumFile& infile, int setcount) {
       }
       if (option_d) {
          // remove null data lines if -d is specified
-         if (option_k && infile[i].isData() && 
+         if (option_k && infile[i].isData() &&
                infile[i].equalFieldsQ("**kern", ".")) {
             // remove if only all **kern spines are null.
             if (revQ) {
                cout << infile[i] << "\n";
             }
             continue;
-         } else if (!option_k && infile[i].isData() && 
+         } else if (!option_k && infile[i].isData() &&
                infile[i].equalDataQ(".")) {
             // remove null data lines if all spines are null.
             if (revQ) {
@@ -120,7 +120,7 @@ void processFile(HumdrumFile& infile, int setcount) {
             continue;
          }
       }
-      if (option_G && (infile[i].isGlobalComment() || 
+      if (option_G && (infile[i].isGlobalComment() ||
             infile[i].isBibliographic())) {
          // remove global comments if -G is specified
          if (revQ) {
@@ -142,7 +142,7 @@ void processFile(HumdrumFile& infile, int setcount) {
          }
          continue;
       }
-      if (option_i && infile[i].isInterpretation() && 
+      if (option_i && infile[i].isInterpretation() &&
             infile[i].equalDataQ("*")) {
          // remove null interpretation records
          if (revQ) {
@@ -157,7 +157,7 @@ void processFile(HumdrumFile& infile, int setcount) {
          }
          continue;
       }
-      if (option_l && infile[i].isLocalComment() && 
+      if (option_l && infile[i].isLocalComment() &&
             infile[i].equalDataQ("!")) {
          // remove null local comments
          if (revQ) {
@@ -194,7 +194,7 @@ void processFile(HumdrumFile& infile, int setcount) {
          }
          continue;
       }
-      if (option_c && (infile[i].isLocalComment() || 
+      if (option_c && (infile[i].isLocalComment() ||
             infile[i].isGlobalComment())) {
          // remove all comments (local & global)
          if (revQ) {
@@ -215,7 +215,7 @@ void processFile(HumdrumFile& infile, int setcount) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
@@ -240,12 +240,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("c=b",          "remove global and local comment lines");
 
 
-   opts.define("author=b",  "author of program"); 
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -284,7 +284,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       // remove all Humdrum file structure
       option_G = option_L = option_I = option_M = option_d = 1;
    }
-   
+
 }
 
 

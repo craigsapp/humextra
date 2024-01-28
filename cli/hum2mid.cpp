@@ -2114,7 +2114,7 @@ void checkForKeySignature(smf::MidiFile& outfile, HumdrumFile& infile, int line)
 	} else {
 		accid = (uchar)(0x100 + keynum);
 	}
-	
+
 	vector<uchar> metadata;
 	metadata.push_back(accid);
 	metadata.push_back(mode);

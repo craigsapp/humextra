@@ -32,24 +32,20 @@ EnvelopeString::EnvelopeString(void) {
 	envelope = NULL;
 	normalization = 1.0;
 	dimension = 0;
-	points = NULL;
+	m_points.resize(0);
 	absoluteType = 'm';
-	pointInterp.allowGrowth();
-	pointInterp.setSize(0);
-	pointParameter.allowGrowth();
-	pointInterp.setSize(0);
+	m_pointInterp.resize(0);
+	m_pointParameter.resize(0);
 }
 
 EnvelopeString::EnvelopeString(const char* aString) {
 	envelope = NULL;
 	normalization = 1.0;
 	dimension = 0;
-	points = NULL;
+	m_points.resize(0);
 	absoluteType = 'm';
-	pointInterp.allowGrowth();
-	pointInterp.setSize(0);
-	pointParameter.allowGrowth();
-	pointInterp.setSize(0);
+	m_pointInterp.resize(0);
+	m_pointParameter.resize(0);
 
 	setEnvelope(aString);
 }
@@ -65,9 +61,7 @@ EnvelopeString::~EnvelopeString() {
 	if (envelope != NULL) {
 		delete [] envelope;
 	}
-	if (points != NULL) {
-		delete [] points;
-	}
+   m_points.resize(0);
 }
 
 
@@ -116,8 +110,8 @@ double EnvelopeString::getLength(void) const {
 //
 
 int EnvelopeString::getNumPoints(void) const {
-	if (points != NULL) {
-		return points[0].getSize();
+   if (!m_points.empty()) {
+	   return (int)m_points[0].size();
 	} else {
 		return 0;
 	}
@@ -142,7 +136,7 @@ int EnvelopeString::getStickIndex(void) const {
 //
 
 double EnvelopeString::getValue(int a, int b) {
-	return points[b][a];
+	return m_points.at(b).at(a);
 }
 
 
@@ -153,23 +147,25 @@ double EnvelopeString::getValue(int a, int b) {
 //
 
 void EnvelopeString::print(void) {
-	int i, j;
+   if (m_points.empty()) {
+      return;
+   }
 
 	cout << "   Envelope Time Length = " << getLength() << endl;
 	cout << "   Default interpolation = " << defaultInterpolation << endl;
 	cout << "   Absolute Type = " << absoluteType << endl;
 	cout << "   Stick index = " << stickIndex << endl;
-	cout << "   Number of points = " << points[0].getSize() << endl;
-	for (i=0; i<points[0].getSize(); i++) {
-		for (j=0; j<getDimension(); j++) {
+	cout << "   Number of m_points = " << m_points[0].size() << endl;
+	for (int i=0; i<(int)m_points[0].size(); i++) {
+		for (int j=0; j<getDimension(); j++) {
 			cout.width(10);
-			cout << points[j][i] << "  ";
+			cout << m_points.at(j).at(i) << "  ";
 		}
 
-		if (pointInterp[i] != '\0') {
+		if (m_pointInterp[i] != '\0') {
 			cout.width(3);
-			cout << pointInterp[i] << "  ";
-			cout << pointParameter[i];
+			cout << m_pointInterp[i] << "  ";
+			cout << m_pointParameter[i];
 		} else {
 			cout.width(3);
 			cout << defaultInterpolation << "  ";
@@ -189,8 +185,8 @@ void EnvelopeString::print(void) {
 
 void EnvelopeString::removeStickPoint(void) {
 	for (int i=0; i<getNumPoints()-1; i++) {
-		if (points[0][i] < 0) {
-			points[0][i] = 1.0 + points[0][i];
+		if (m_points.at(0).at(i) < 0) {
+			m_points.at(0).at(i) = 1.0 + m_points.at(0).at(i);
 		}
 	}
 	stickIndex = -1;
@@ -320,11 +316,11 @@ void EnvelopeString::setStickIndex(int anIndex) {
 	if (anIndex == stickIndex) return;
 
 	for (int i=0; i<getNumPoints(); i++) {
-		if (points[0][i] < 0) {
-			points[0][i] = points[0][i] + 1.0;
+		if (m_points.at(0).at(i) < 0) {
+			m_points.at(0).at(i) = m_points.at(0).at(i) + 1.0;
 		}
 		if (i >= anIndex) {
-			points[0][i] = points[0][i] - 1.0;
+			m_points.at(0).at(i) = m_points.at(0).at(i) - 1.0;
 		}
 	}
 
@@ -631,14 +627,14 @@ void EnvelopeString::makeCLMenv(void) {
 		if (i != 0) {
 			newString << " ";
 		}
-		if (points[0][i] < 0.0) {
-			newString << (1.0 + points[0][i]) * getLength();
+		if (m_points.at(0).at(i) < 0.0) {
+			newString << (1.0 + m_points.at(0).at(i)) * getLength();
 		} else {
-			newString << points[0][i] * getLength();
+			newString << m_points.at(0).at(i) * getLength();
 		}
 		for (j=1; j<getDimension(); j++) {
 			newString << " ";
-			newString << points[j][i];
+			newString << m_points.at(j).at(i);
 		}
 	}
 	newString << ")";
@@ -663,20 +659,19 @@ void EnvelopeString::makeCLMenv(void) {
 
 void EnvelopeString::makeLISPenv(void) {
 	stringstream newString;
-	int i, j;
 
 	newString << "(";
-	for (i=0; i<points[0].getSize(); i++) {
+	for (int i=0; i<(int)m_points.at(0).size(); i++) {
 		// ignore stick point
 		newString << "(";
-		if (points[0][i] < 0.0) {
-			newString << (1.0 + points[0][i]) * getLength();
+		if (m_points[0][i] < 0.0) {
+			newString << (1.0 + m_points[0][i]) * getLength();
 		} else {
-			newString << points[0][i] * getLength();
+			newString << m_points[0][i] * getLength();
 		}
-		for (j=1; j<getDimension(); j++) {
+		for (int j=1; j<getDimension(); j++) {
 			newString << " ";
-			newString << points[j][i];
+			newString << m_points[j][i];
 		}
 		newString << ")";
 	}
@@ -702,22 +697,21 @@ void EnvelopeString::makeLISPenv(void) {
 
 void EnvelopeString::makeMKenv(void) {
 	stringstream newString;
-	int i, j;
 
 	newString << "[";
-	for (i=0; i<points[0].getSize(); i++) {
+	for (int i=0; i<(int)m_points.at(0).size(); i++) {
 		if (i == stickIndex) {
 			newString << "|";
 		}
 		newString << "(";
-		if (points[0][i] < 0.0) {
-			newString << (1.0 + points[0][i]) * getLength();
+		if (m_points[0][i] < 0.0) {
+			newString << (1.0 + m_points[0][i]) * getLength();
 		} else {
-			newString << points[0][i] * getLength();
+			newString << m_points[0][i] * getLength();
 		}
-		for (j=1; j<getDimension(); j++) {
+		for (int j=1; j<getDimension(); j++) {
 			newString << ", ";
-			newString << points[j][i];
+			newString << m_points[j][i];
 		}
 		newString << ")";
 	}
@@ -750,14 +744,14 @@ void EnvelopeString::makeMMAenv(void) {
 	for (i=0; i<getNumPoints(); i++) {
 		// ignore stick point
 		newString << "{";
-		if (points[0][i] < 0.0) {
-			newString << (1.0 + points[0][i]) * getLength();
+		if (m_points.at(0)[i] < 0.0) {
+			newString << (1.0 + m_points[0][i]) * getLength();
 		} else {
-			newString << points[0][i] * getLength();
+			newString << m_points[0][i] * getLength();
 		}
 		for (j=1; j<getDimension(); j++) {
 			newString << ", ";
-			newString << points[j][i];
+			newString << m_points[j][i];
 		}
 		if (i != getNumPoints()-1) {
 			newString << "},";
@@ -791,14 +785,14 @@ void EnvelopeString::makePLAINenv(void) {
 
 	for (i=0; i<getNumPoints(); i++) {
 		// ignore stick point
-		if (points[0][i] < 0.0) {
-			newString << (1.0 + points[0][i]) * getLength();
+		if (m_points.at(0).at(i) < 0.0) {
+			newString << (1.0 + m_points[0][i]) * getLength();
 		} else {
-			newString << points[0][i] * getLength();
+			newString << m_points[0][i] * getLength();
 		}
 		for (j=1; j<getDimension(); j++) {
 			newString << ", ";
-			newString << points[j][i];
+			newString << m_points[j][i];
 		}
 		if (i != getNumPoints()-1) {
 			newString << ", ";
@@ -825,7 +819,6 @@ void EnvelopeString::makePLAINenv(void) {
 
 void EnvelopeString::makeSIGenv(void) {
 	stringstream newString;
-	int i, j;
 
 	if (std::toupper(defaultInterpolation) != 'L') {
 		newString << defaultInterpolation;
@@ -833,30 +826,30 @@ void EnvelopeString::makeSIGenv(void) {
 	// put the default parameter here later.
 
 	newString << "(";
-	for (i=0; i<points[0].getSize(); i++) {
+	for (int i=0; i<(int)m_points.at(0).size(); i++) {
 		if (i == stickIndex) {
 			newString << " s;";
 		}
 		if (i != 0) {
 			newString << " ";
 		}
-		if (points[0][i] < 0.0) {
-			newString << (1.0 + points[0][i]) * getLength();
+		if (m_points[0][i] < 0.0) {
+			newString << (1.0 + m_points[0][i]) * getLength();
 		} else {
-			newString << points[0][i] * getLength();
+			newString << m_points[0][i] * getLength();
 		}
-		for (j=1; j<getDimension(); j++) {
+		for (int j=1; j<getDimension(); j++) {
 			newString << " ";
-			newString << points[j][i];
+			newString << m_points[j][i];
 		}
 
 		// deal with interpolation
-		if (pointInterp[i] != '\0') {
-			newString << " " << pointInterp[i];
+		if (m_pointInterp[i] != '\0') {
+			newString << " " << m_pointInterp[i];
 		}
 		// deal with default parameter here later.
 
-		if (i != points[0].getSize() - 1) {
+		if (i != (int)m_points[0].size() - 1) {
 			newString << ";";
 		}
 	}
@@ -891,9 +884,7 @@ void EnvelopeString::processCLMenv(const char* aString, int aDimension) {
 	defaultParameter = -9999;
 	absoluteType = 't';
 
-	Array<double> tempData;
-	tempData.allowGrowth();
-	tempData.setSize(0);
+	vector<double> tempData;
 
 	index = 0;
 	skipSpace(aString, index);
@@ -906,7 +897,7 @@ void EnvelopeString::processCLMenv(const char* aString, int aDimension) {
 
 	i = 0;
 	while (aString[index] != ')' && index < length) {
-		tempData[i++] = extractNumber(aString, index);
+		tempData.push_back(extractNumber(aString, index));
 		skipSpace(aString, index);
 	}
 	if (aString[index] != ')') {
@@ -926,38 +917,32 @@ void EnvelopeString::processCLMenv(const char* aString, int aDimension) {
 		exit(1);
 	}
 
-	if (tempData.getSize() % getDimension() != 0) {
+	if (tempData.size() % getDimension() != 0) {
 		cerr << "Error: CLM envelope must have right amount of data for "
 			  << "dimension : " << aString << endl;
 		exit(1);
 	}
-	int pointCount = tempData.getSize() / getDimension();
-	setLength(tempData[tempData.getSize()-getDimension()]);
+	int pointCount = (int)tempData.size() / getDimension();
+	setLength(tempData[(int)tempData.size()-getDimension()]);
 
-	if (points != NULL) {
-		delete [] points;
+   m_points.resize(0);
+   m_points.resize(getDimension());
+	for (i=0; i<(int)m_points.size(); i++) {
+		m_points[i].reserve(pointCount);
+		m_points[i].resize(0);
 	}
-
-	points = new Array<double>[getDimension()];
-	for (i=0; i<getDimension(); i++) {
-		points[i].allowGrowth();
-		points[i].setSize(pointCount);
-		points[i].setSize(0);
-	}
-	pointInterp.allowGrowth();
-	pointInterp.setSize(pointCount);
-	pointInterp.setSize(0);
-	pointParameter.allowGrowth();
-	pointParameter.setSize(pointCount);
-	pointParameter.setSize(0);
+	m_pointInterp.reserve(pointCount);
+	m_pointInterp.resize(0);
+	m_pointParameter.reserve(pointCount);
+	m_pointParameter.resize(0);
 
 	for (i=0; i<pointCount; i++) {
 		for (j=0; j<getDimension(); j++) {
-			points[j][i] = tempData[i * getDimension() + j];
+			m_points.at(j).at(i) = tempData.at(i * getDimension() + j);
 		}
-		points[0][i] /= getLength();
-		pointInterp[i] = '\0';
-		pointParameter[i] = -9999;
+		m_points[0][i] /= getLength();
+		m_pointInterp[i] = '\0';
+		m_pointParameter[i] = -9999;
 	}
 
 }
@@ -1059,25 +1044,20 @@ void EnvelopeString::processLISPenv(const char* aString) {
 
 
 	// process the rest of the envelope points
-	if (points != NULL) {
-		delete [] points;
-	}
-	points = new Array<double>[getDimension()];
-	for (i=0; i<getDimension(); i++) {
-		points[i].allowGrowth();
-		points[i].setSize(pointCount);
-		points[i].setSize(0);
-		points[i].append(testNumbers[i]);
-	}
-	pointInterp.allowGrowth();
-	pointInterp.setSize(pointCount);
-	pointInterp.setSize(0);
-	pointParameter.allowGrowth();
-	pointParameter.setSize(pointCount);
-	pointParameter.setSize(0);
+	m_points.resize(getDimension());
 
-	pointInterp[0] = '\0';
-	pointParameter[0] = -9999;
+	for (int i=0; i<(int)m_points.size(); i++) {
+		m_points[i].reserve(pointCount);
+		m_points[i].resize(0);
+		m_points[i].push_back(testNumbers[i]);
+	}
+	m_pointInterp.reserve(pointCount);
+	m_pointInterp.resize(0);
+	m_pointParameter.reserve(pointCount);
+	m_pointParameter.resize(0);
+
+	m_pointInterp[0] = '\0';
+	m_pointParameter[0] = -9999;
 
 	// no interpolation data allowed in envelope
 
@@ -1111,19 +1091,19 @@ void EnvelopeString::processLISPenv(const char* aString) {
 		}
 		index++;
 
-		points[0][i] = extractNumber(aString, index);
-		points[0][i] /= getLength();
-		if (points[0][i] < points[0][i-1]) {
+		m_points[0][i] = extractNumber(aString, index);
+		m_points[0][i] /= getLength();
+		if (m_points[0][i] < m_points[0][i-1]) {
 			cerr << "Error: time values in envelope must always increase." << endl;
-			cerr << "Check the time values: " << points[0][i-1] * getLength()
-			      << " and " << points[0][i-1] * getLength()
+			cerr << "Check the time values: " << m_points[0][i-1] * getLength()
+			      << " and " << m_points[0][i-1] * getLength()
 			      << " around character " << index + 1 << " in envelope: "
 			      << aString << endl;
 			exit(1);
 		}
 
-		pointInterp[i] = '\0';
-		pointParameter[i] = -9999;
+		m_pointInterp[i] = '\0';
+		m_pointParameter[i] = -9999;
 
 		// no interpolation data allowed in envelope
 
@@ -1132,7 +1112,7 @@ void EnvelopeString::processLISPenv(const char* aString) {
 		skipSpace(aString, index);
 		if (aString[index] != ')') {
 			for (j=1; j<getDimension(); j++) {
-				points[j][i] = extractNumber(aString, index);
+				m_points[j][i] = extractNumber(aString, index);
 				skipSpace(aString, index);
 				// no interpolation data allowed
 			}
@@ -1262,25 +1242,19 @@ void EnvelopeString::processMKenv(const char* aString) {
 
 
 	// process the rest of the envelope points
-	if (points != NULL) {
-		delete [] points;
-	}
-	points = new Array<double>[getDimension()];
+   m_points.resize(getDimension());
 	for (i=0; i<getDimension(); i++) {
-		points[i].allowGrowth();
-		points[i].setSize(pointCount);
-		points[i].setSize(0);
-		points[i].append(testNumbers[i]);
+		m_points[i].reserve(pointCount);
+		m_points[i].resize(0);
+		m_points[i].push_back(testNumbers[i]);
 	}
-	pointInterp.allowGrowth();
-	pointInterp.setSize(pointCount);
-	pointInterp.setSize(0);
-	pointParameter.allowGrowth();
-	pointParameter.setSize(pointCount);
-	pointParameter.setSize(0);
+	m_pointInterp.reserve(pointCount);
+	m_pointInterp.resize(0);
+	m_pointParameter.reserve(pointCount);
+	m_pointParameter.resize(0);
 
-	pointInterp[0] = '\0';
-	pointParameter[0] = -9999;
+	m_pointInterp[0] = '\0';
+	m_pointParameter[0] = -9999;
 
 	// no interpolation data allowed in envelope
 
@@ -1313,19 +1287,19 @@ void EnvelopeString::processMKenv(const char* aString) {
 		}
 		index++;
 
-		points[0][i] = extractNumber(aString, index);
-		points[0][i] /= getLength();
-		if (points[0][i] < points[0][i-1]) {
+		m_points[0][i] = extractNumber(aString, index);
+		m_points[0][i] /= getLength();
+		if (m_points[0][i] < m_points[0][i-1]) {
 			cerr << "Error: time values in envelope must always increase." << endl;
-			cerr << "Check the time values: " << points[0][i-1] * getLength()
-			      << " and " << points[0][i-1] * getLength()
+			cerr << "Check the time values: " << m_points[0][i-1] * getLength()
+			      << " and " << m_points[0][i-1] * getLength()
 			      << " around character " << index + 1 << " in envelope: "
 			      << aString << endl;
 			exit(1);
 		}
 
-		pointInterp[i] = '\0';
-		pointParameter[i] = -9999;
+		m_pointInterp[i] = '\0';
+		m_pointParameter[i] = -9999;
 
 		// no interpolation data allowed in envelope
 
@@ -1334,7 +1308,7 @@ void EnvelopeString::processMKenv(const char* aString) {
 		skipSpace(aString, index);
 		if (aString[index] != ')') {
 			for (j=1; j<getDimension(); j++) {
-				points[j][i] = extractNumber(aString, index);
+				m_points[j][i] = extractNumber(aString, index);
 				skipSpace(aString, index);
 
 				// no interpolation data allowed
@@ -1466,25 +1440,19 @@ void EnvelopeString::processMMAenv(const char* aString) {
 
 
 	// process the rest of the envelope points
-	if (points != NULL) {
-		delete [] points;
-	}
-	points = new Array<double>[getDimension()];
+	m_points.resize(getDimension());
 	for (i=0; i<getDimension(); i++) {
-		points[i].allowGrowth();
-		points[i].setSize(pointCount);
-		points[i].setSize(0);
-		points[i].append(testNumbers[i]);
+		m_points[i].reserve(pointCount);
+		m_points[i].resize(0);
+		m_points[i].push_back(testNumbers[i]);
 	}
-	pointInterp.allowGrowth();
-	pointInterp.setSize(pointCount);
-	pointInterp.setSize(0);
-	pointParameter.allowGrowth();
-	pointParameter.setSize(pointCount);
-	pointParameter.setSize(0);
+	m_pointInterp.reserve(pointCount);
+	m_pointInterp.resize(0);
+	m_pointParameter.reserve(pointCount);
+	m_pointParameter.resize(0);
 
-	pointInterp[0] = '\0';
-	pointParameter[0] = -9999;
+	m_pointInterp[0] = '\0';
+	m_pointParameter[0] = -9999;
 
 	// no interpolation data allowed in envelope
 
@@ -1518,19 +1486,19 @@ void EnvelopeString::processMMAenv(const char* aString) {
 		}
 		index++;
 
-		points[0][i] = extractNumber(aString, index);
-		points[0][i] /= getLength();
-		if (points[0][i] < points[0][i-1]) {
+		m_points[0][i] = extractNumber(aString, index);
+		m_points[0][i] /= getLength();
+		if (m_points[0][i] < m_points[0][i-1]) {
 			cerr << "Error: time values in envelope must always increase." << endl;
-			cerr << "Check the time values: " << points[0][i-1] * getLength()
-			      << " and " << points[0][i-1] * getLength()
+			cerr << "Check the time values: " << m_points[0][i-1] * getLength()
+			      << " and " << m_points[0][i-1] * getLength()
 			      << " around character " << index + 1 << " in envelope: "
 			      << aString << endl;
 			exit(1);
 		}
 
-		pointInterp[i] = '\0';
-		pointParameter[i] = -9999;
+		m_pointInterp[i] = '\0';
+		m_pointParameter[i] = -9999;
 
 		// no interpolation data allowed in envelope
 
@@ -1539,7 +1507,7 @@ void EnvelopeString::processMMAenv(const char* aString) {
 		skipSpace(aString, index);
 		if (aString[index] != '}') {
 			for (j=1; j<getDimension(); j++) {
-				points[j][i] = extractNumber(aString, index);
+				m_points[j][i] = extractNumber(aString, index);
 				skipSpace(aString, index);
 				// no interpolation data allowed
 			}
@@ -1587,9 +1555,7 @@ void EnvelopeString::processPLAINenv(const char* aString, int aDimension) {
 	defaultParameter = -9999;
 	absoluteType = 't';
 
-	Array<double> tempData;
-	tempData.allowGrowth();
-	tempData.setSize(0);
+	vector<double> tempData;
 
 	index = 0;
 	skipSpace(aString, index);
@@ -1601,7 +1567,7 @@ void EnvelopeString::processPLAINenv(const char* aString, int aDimension) {
 
 	i = 0;
 	while (aString[index] != '\0' && index < length) {
-		tempData[i++] = extractNumber(aString, index);
+		tempData.push_back(extractNumber(aString, index));
 		skipSpace(aString, index);
 	}
 
@@ -1616,38 +1582,31 @@ void EnvelopeString::processPLAINenv(const char* aString, int aDimension) {
 		exit(1);
 	}
 
-	if (tempData.getSize() % getDimension() != 0) {
+	if (tempData.size() % getDimension() != 0) {
 		cerr << "Error: PLAIN envelope must have enough points for dimension: "
 			  << aString << endl;
 		exit(1);
 	}
-	int pointCount = tempData.getSize() / getDimension();
-	setLength(tempData[tempData.getSize()-getDimension()]);
+	int pointCount = (int)tempData.size() / getDimension();
+	setLength(tempData.at((int)tempData.size()-getDimension()));
 
-	if (points != NULL) {
-		delete [] points;
-	}
-
-	points = new Array<double>[getDimension()];
+	m_points.resize(getDimension());
 	for (i=0; i<getDimension(); i++) {
-		points[i].allowGrowth();
-		points[i].setSize(pointCount);
-		points[i].setSize(0);
+		m_points[i].reserve(pointCount);
+		m_points[i].resize(0);
 	}
-	pointInterp.allowGrowth();
-	pointInterp.setSize(pointCount);
-	pointInterp.setSize(0);
-	pointParameter.allowGrowth();
-	pointParameter.setSize(pointCount);
-	pointParameter.setSize(0);
+	m_pointInterp.reserve(pointCount);
+	m_pointInterp.resize(0);
+	m_pointParameter.reserve(pointCount);
+	m_pointParameter.resize(0);
 
 	for (i=0; i<pointCount; i++) {
 		for (j=0; j<getDimension(); j++) {
-			points[j][i] = tempData[i * getDimension() + j];
+			m_points[j][i] = tempData.at(i * getDimension() + j);
 		}
-		points[0][i] /= getLength();
-		pointInterp[i] = '\0';
-		pointParameter[i] = -9999;
+		m_points[0][i] /= getLength();
+		m_pointInterp[i] = '\0';
+		m_pointParameter[i] = -9999;
 	}
 
 }
@@ -1751,41 +1710,35 @@ void EnvelopeString::processSIGenv(const char* aString) {
 
 
 	// process the rest of the envleope points
-	if (points != NULL) {
-		delete [] points;
-	}
-	points = new Array<double>[getDimension()];
+	m_points.resize(getDimension());
 	for (i=0; i<getDimension(); i++) {
-		points[i].allowGrowth();
-		points[i].setSize(pointCount);
-		points[i].setSize(0);
-		points[i].append(testNumbers[i]);
+		m_points[i].reserve(pointCount);
+		m_points[i].resize(0);
+		m_points[i].push_back(testNumbers[i]);
 	}
-	pointInterp.allowGrowth();
-	pointInterp.setSize(pointCount);
-	pointInterp.setSize(0);
-	pointParameter.allowGrowth();
-	pointParameter.setSize(pointCount);
-	pointParameter.setSize(0);
+	m_pointInterp.reserve(pointCount);
+	m_pointInterp.resize(0);
+	m_pointParameter.reserve(pointCount);
+	m_pointParameter.resize(0);
 
-	pointInterp[0] = '\0';
-	pointParameter[0] = -9999;
+	m_pointInterp[0] = '\0';
+	m_pointParameter[0] = -9999;
 
 	// check for any interpolation data in first point
 	if (std::isalpha(aString[index])) {
 		validateInterpolation(aString[index]);
-		pointInterp[0] = aString[index];
+		m_pointInterp[0] = aString[index];
 		index++;
 		// skip any whitespace and see if next char is ';' or ')'
 		// otherwise a parameter for interpolation
 		skipSpace(aString, index);
 		if (aString[index] == ';' || aString[index] == ')') {
-			pointParameter[0] = -9998;
+			m_pointParameter[0] = -9998;
 		} else {
-			pointParameter[0] = extractNumber(aString, index);
+			m_pointParameter[0] = extractNumber(aString, index);
 		}
 	} else {
-		pointInterp[0] = '\0';
+		m_pointInterp[0] = '\0';
 	}
 
 
@@ -1819,50 +1772,50 @@ void EnvelopeString::processSIGenv(const char* aString) {
 			index++;
 		}
 
-		points[0][i] = extractNumber(aString, index);
-		points[0][i] /= getLength();
-		if (points[0][i] < points[0][i-1]) {
+		m_points[0][i] = extractNumber(aString, index);
+		m_points[0][i] /= getLength();
+		if (m_points[0][i] < m_points[0][i-1]) {
 			cerr << "Error: time values in envelope must always increase." << endl;
-			cerr << "Check the time values: " << points[0][i-1] << " and "
-			     << points[0][i] << " in the envelope: " << aString << endl;
+			cerr << "Check the time values: " << m_points[0][i-1] << " and "
+			     << m_points[0][i] << " in the envelope: " << aString << endl;
 			exit(1);
 		}
 
-		pointInterp[i] = '\0';
-		pointParameter[i] = 0.0;
+		m_pointInterp[i] = '\0';
+		m_pointParameter[i] = 0.0;
 
 		// check for any interpolation data.
 		if (std::isalpha(aString[index])) {
-			pointInterp[i] = aString[index];
+			m_pointInterp[i] = aString[index];
 			// skip any whitespace and see if next char is ';' or ')'
 			// otherwise a parameter for interpolation
 			while (index < length && std::isspace(aString[index])) {
 				index++;
 			}
 			if (aString[index] == ';' || aString[index] == ')') {
-				pointParameter[i] = 0.0;
+				m_pointParameter[i] = 0.0;
 			} else {
-				pointParameter[i] = extractNumber(aString, index);
+				m_pointParameter[i] = extractNumber(aString, index);
 			}
 		}
 
 		j = 1;
 		if (aString[index] != ';' && aString[index] != ')') {
 			for (j=1; j<getDimension(); j++) {
-				points[j][i] = extractNumber(aString, index);
+				m_points[j][i] = extractNumber(aString, index);
 
 				// check for any interpolation data.
 				if (std::isalpha(aString[index])) {
 					validateInterpolation(aString[index]);
-					pointInterp[i] = aString[index];
+					m_pointInterp[i] = aString[index];
 					index++;
 					// skip any whitespace and see if next char is ';' or ')'
 					// otherwise a parameter for interpolation
 					skipSpace(aString, index);
 					if (aString[index] == ';' || aString[index] == ')') {
-						pointParameter[i] = -9998;
+						m_pointParameter[i] = -9998;
 					} else {
-						pointParameter[i] = extractNumber(aString, index);
+						m_pointParameter[i] = extractNumber(aString, index);
 					}
 				}
 			}
@@ -1871,7 +1824,7 @@ void EnvelopeString::processSIGenv(const char* aString) {
 		// allow for "sticky data" which carries over if not specified:
 		if (j < getDimension()) {
 			for (k=j; k<getDimension(); k++) {
-				points[k][i] = points[k][i-1];
+				m_points[k][i] = m_points[k][i-1];
 			}
 		}
 
@@ -1919,20 +1872,19 @@ void EnvelopeString::adjustForStick(void) {
 	}
 
 	int i = 0;
-	int j;
-	if (pointInterp[i] == pointInterp[pointInterp.getSize()-1]) {
-		i = pointInterp.getSize()-1;
-		while (i>0 && pointInterp[i] <= 0) {
-			pointInterp[i+1] = pointInterp[i];
-			pointParameter[i+1] = pointInterp[i];
-			for (j=0; j<getDimension(); j++) {
-				points[j][i+1] = points[j][i];
+	if (m_pointInterp[i] == m_pointInterp[(int)m_pointInterp.size()-1]) {
+		i = (int)m_pointInterp.size()-1;
+		while (i>0 && m_pointInterp[i] <= 0) {
+			m_pointInterp[i+1] = m_pointInterp[i];
+			m_pointParameter[i+1] = m_pointInterp[i];
+			for (int j=0; j<getDimension(); j++) {
+				m_points[j][i+1] = m_points[j][i];
 			}
 			i--;
 		}
 	}
 
-	points[0][stickIndex] = fabs(points[0][stickIndex]);
+	m_points[0][stickIndex] = fabs(m_points[0][stickIndex]);
 
 }
 

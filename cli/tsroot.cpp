@@ -17,7 +17,7 @@
 // Requires the following ancillary programs:
 //	(1) meter -- Melisma meter program which adds Beat information to
 //	    note data.
-//      (2) harmony -- Melisma root analysis program which adds chord 
+//      (2) harmony -- Melisma root analysis program which adds chord
 //	    analysis data to meter program output.
 // 	(3) kern2melisma -- museinfo program which converts **kern data into
 //          melisma Note data.
@@ -30,8 +30,8 @@
 //          analysis into a temprary Humdrum data file.
 //
 // programs are expected to be in two directories:
-// 
-// meldir = set with --meldir option.  This is the location of the 
+//
+// meldir = set with --meldir option.  This is the location of the
 //          melisma music analyzer command-line programs (meter, harmony, key).
 // midir  = set with --midir option.  This is the location of museinfo programs.
 //
@@ -67,25 +67,25 @@ void      usage              (const string& command);
 void      processFile        (const string& filename, HumdrumFile& infile);
 void      analyzeTiming      (HumdrumFile& infile, vector<double>& timings,
                               vector<double>& tempo);
-void      getAnalysisTimes   (vector<int>& analysistimes, 
+void      getAnalysisTimes   (vector<int>& analysistimes,
                               HumdrumFile& rootanalysis);
-void      printAnalysis      (HumdrumFile& rootanalysis, 
+void      printAnalysis      (HumdrumFile& rootanalysis,
                               HumdrumFile& romananalysis,
                               HumdrumFile& infile);
 int       getClosestRootLine (vector<int>& analysistimes, int targettime);
 void      getDataLineTimings (vector<int>& linetimes, HumdrumFile& infile);
 string    getMatchRoot     (int matchline, HumdrumFile& hfile);
 void      createParameterFile(const string& parametertmpname);
-void      getRomanAnalysisTimes(vector<int>& romantimes, 
+void      getRomanAnalysisTimes(vector<int>& romantimes,
                               HumdrumFile& romananalysis);
-void      getRomanAnalysisLines(vector<int>& romanlines, 
-                              vector<int>& romantimes, 
-                              vector<int>& linetimes, 
+void      getRomanAnalysisLines(vector<int>& romanlines,
+                              vector<int>& romantimes,
+                              vector<int>& linetimes,
                               HumdrumFile& romananalysis);
-string    getRomanData       (HumdrumFile& romananalysis, 
+string    getRomanData       (HumdrumFile& romananalysis,
                               vector<int>& romanlines, int target);
-void      printRomanKey      (HumdrumFile& romananalysis, 
-                              vector<int>& romanlines, int target, 
+void      printRomanKey      (HumdrumFile& romananalysis,
+                              vector<int>& romanlines, int target,
                               HumdrumRecord& aRecord);
 
 /////////////////////////////////////////////////////////////////
@@ -164,7 +164,7 @@ void processFile(const string& filename, HumdrumFile& infile) {
       int randval = lrand48();
    #else
       int randval = rand();
-   #endif 
+   #endif
 
    if (verboseQ) {
       cout << "Random value is: " << randval << endl;
@@ -174,7 +174,7 @@ void processFile(const string& filename, HumdrumFile& infile) {
    string commandbuffer;
    string tmpname;           // output from the harmony2humdrum command
    string tmpname2;          // output from the key2humdrum command
-   string parametertmpname;  // key parameter file 
+   string parametertmpname;  // key parameter file
    string harmonytmpname;
 
    tmpname  = tmpdir;
@@ -310,7 +310,7 @@ void createParameterFile(const string& parametertmpname) {
       exit(1);
    }
 
-   pfile << 
+   pfile <<
       "verbosity=2\n"
       "default_profile_value = 1.5\n"
       "npc_or_tpc_profile=1\n"
@@ -332,7 +332,7 @@ void createParameterFile(const string& parametertmpname) {
 // printAnalysis --  match Melismla Music Analyzer output back to Humdrum data.
 //
 
-void printAnalysis(HumdrumFile& rootanalysis, HumdrumFile& romananalysis, 
+void printAnalysis(HumdrumFile& rootanalysis, HumdrumFile& romananalysis,
       HumdrumFile& infile) {
    string romandatum = ".";
    vector<int> analysistimes;
@@ -495,7 +495,7 @@ void printAnalysis(HumdrumFile& rootanalysis, HumdrumFile& romananalysis,
                cout << matchroot;
             }
             cout << endl;
-            
+
             break;
          case E_humrec_none:
          case E_humrec_empty:
@@ -521,7 +521,7 @@ void printAnalysis(HumdrumFile& rootanalysis, HumdrumFile& romananalysis,
 // printRomanKey --
 //
 
-void printRomanKey(HumdrumFile& romananalysis, vector<int>& romanlines, 
+void printRomanKey(HumdrumFile& romananalysis, vector<int>& romanlines,
    int target, HumdrumRecord& aRecord) {
 
    int i;
@@ -555,7 +555,7 @@ void printRomanKey(HumdrumFile& romananalysis, vector<int>& romanlines,
             cout << "*";
             if (j < aRecord.getFieldCount() - 1) {
                cout << "\t";
-            } 
+            }
          }
       } else {
          if (harmonyQ) {
@@ -584,7 +584,7 @@ void printRomanKey(HumdrumFile& romananalysis, vector<int>& romanlines,
 // getRomanData --
 //
 
-string getRomanData(HumdrumFile& romananalysis, vector<int>& romanlines, 
+string getRomanData(HumdrumFile& romananalysis, vector<int>& romanlines,
    int target) {
 
    int i;
@@ -621,7 +621,7 @@ string getRomanData(HumdrumFile& romananalysis, vector<int>& romanlines,
 // getRomanAnalysisLines --
 //
 
-void getRomanAnalysisLines(vector<int>& romanlines, vector<int>& romantimes, 
+void getRomanAnalysisLines(vector<int>& romanlines, vector<int>& romantimes,
    vector<int>& linetimes, HumdrumFile& romananalysis) {
 
    romanlines.resize(romantimes.size());
@@ -785,7 +785,7 @@ int getClosestRootLine(vector<int>& analysistimes, int targettime) {
          mindiffline = i;
       }
    }
-  
+
    if (mindiff < 20) {
       return mindiffline;
    } else {
@@ -841,7 +841,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");         // example usages
    opts.define("h|help=b");          // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -905,7 +905,7 @@ void usage(const string& command) {
 //
 // analyzeTiming -- determing the absolute time position of each
 //     line in the file. (Borrowed from the addtime program).
-// 
+//
 
 void analyzeTiming(HumdrumFile& infile, vector<double>& timings,
       vector<double>& tempo) {
@@ -934,7 +934,7 @@ void analyzeTiming(HumdrumFile& infile, vector<double>& timings,
       }
 
       tempo[i] = currtempo;
-      timings[i] = timings[i-1] + (infile[i].getAbsBeat() - 
+      timings[i] = timings[i-1] + (infile[i].getAbsBeat() -
             infile[i-1].getAbsBeat()) * 60.0/currtempo;
 
    }

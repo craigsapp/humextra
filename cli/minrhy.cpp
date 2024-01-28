@@ -24,7 +24,7 @@ void      usage                (const char* command);
 int       findlcm              (Array<int>& list);
 int       findlcmR             (Array<RationalNumber>& list);
 int       GCD                  (int a, int b);
-void      insertRhythm         (Array<RationalNumber>& allrhythms, 
+void      insertRhythm         (Array<RationalNumber>& allrhythms,
                                  RationalNumber value);
 void      sortArray            (Array<RationalNumber>& rhythms);
 int       ratcomp              (const void* a, const void* b);
@@ -235,13 +235,13 @@ int findlcmR(Array<RationalNumber>& rhythms) {
    return findlcm(plain);
 }
 
- 
+
 
 //////////////////////////////
 //
 // GCD -- greatest common divisor
 //
- 
+
 int GCD(int a, int b) {
    if (b == 0) {
       return a;
@@ -250,11 +250,11 @@ int GCD(int a, int b) {
    a = b;
    b = z;
    int output = GCD(a, b);
-   if (debugQ) {  
+   if (debugQ) {
       cout << "GCD of " << a << " and " << b << " is " << output << endl;
    }
    return output;
-}    
+}
 
 
 
@@ -264,7 +264,7 @@ int GCD(int a, int b) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("l|list=b", "list time units used in file");  
+   opts.define("l|list=b", "list time units used in file");
    opts.define("P|no-path=b", "don't show path in filename");
 
    opts.define("debug=b");              // determine bad input line num
@@ -273,7 +273,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");            // example usages
    opts.define("h|help=b");             // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

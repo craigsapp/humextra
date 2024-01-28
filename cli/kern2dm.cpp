@@ -6,10 +6,10 @@
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/kern2notelist.cpp
 // Syntax:        C++; museinfo
 //
-// Description:   Converts kern data into the format used in 
+// Description:   Converts kern data into the format used in
 //                Director Musices, a program that genrates
 // 		  computer-based performances of musical scores.
-// 
+//
 
 #include "humdrum.h"
 
@@ -198,7 +198,7 @@ int parseInterpretation(HumdrumFile& infile, int line, int track) {
             } else {
                status = 1;
             }
-         } else if (infile[line][i][0] == '*' && 
+         } else if (infile[line][i][0] == '*' &&
                infile[line][i][length-1] == ':') {
             key = Convert::kernToBase40(infile[line][i]);
             if (std::isupper(infile[line][i][1])) {
@@ -265,7 +265,7 @@ void convertKernNoteToDM(HumdrumFile& infile, int line, int spine, int track) {
    cout << "n (";
    if (notecount > 1) {
       cout << "(";
-   } 
+   }
    for (int i=0; i<notecount; i++){
       printNote(notes[i]);
       if (i < notecount - 1) {
@@ -274,7 +274,7 @@ void convertKernNoteToDM(HumdrumFile& infile, int line, int spine, int track) {
    }
    if (notecount > 1) {
       cout << ")";
-   } 
+   }
    cout << " ";
    printFractionDuration(duration);
    cout << ")";
@@ -381,7 +381,7 @@ void printFractionDuration(double duration) {
 //
 
 void printPitchClass(int base40) {
-   switch ((base40 % 40) - 2) {	
+   switch ((base40 % 40) - 2) {
       case -2:  cout << "Cbb";	break; case -1:  cout << "Cb";	break;
       case 0:   cout << "C";	break; case 1:   cout << "C#";	break;
       case 2:   cout << "C##";	break; case 3:   cout << "X";	break;
@@ -428,13 +428,13 @@ void printNote(int base40) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("debug=b",           "trace input parsing");   
-   opts.define("author=b",          "author of the program");   
-   opts.define("version=b",         "compilation information"); 
-   opts.define("example=b",         "example usage"); 
-   opts.define("h|help=b",          "short description"); 
+   opts.define("debug=b",           "trace input parsing");
+   opts.define("author=b",          "author of the program");
+   opts.define("version=b",         "compilation information");
+   opts.define("example=b",         "example usage");
+   opts.define("h|help=b",          "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

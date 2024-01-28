@@ -1,6 +1,6 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Note:          Adapted from the Humdrum Toolkit program "simil":
-//                   simil.c 1.3 92/04/21 by Keith Orpen, University of 
+//                   simil.c 1.3 92/04/21 by Keith Orpen, University of
 //                   Waterloo, Ontario.
 // Creation Date: Tue Nov 17 14:35:26 PST 2009
 // Last Modified: Tue Dec  8 20:06:25 PST 2009
@@ -32,44 +32,44 @@
 void      checkOptions          (Options& opts, int argc, char** argv);
 void      example               (void);
 void      usage                 (const char* command);
-void      readTemplateContents  (Array<Array<char> >& storage, 
+void      readTemplateContents  (Array<Array<char> >& storage,
                                  const char* filename);
-void      readTemplateContents  (Array<Array<char> >& storage, 
+void      readTemplateContents  (Array<Array<char> >& storage,
                                  istream& filename);
 void      printTemplate         (Array<Array<char> >& storage);
 int       chooseSpine           (const char* interp, HumdrumFile& infile);
-void      fillSourceData        (Array<Array<char> >& sourcedata, 
-                                 Array<int>& datalines, 
+void      fillSourceData        (Array<Array<char> >& sourcedata,
+                                 Array<int>& datalines,
 		                 HumdrumFile& infile, int spine, int nulltest);
-void      usual_thing           (Array<double>& results, 
-                                 Array<Array<char> >& sourcedata, 
-                                 Array<Array<char> >& templatedata);
-void      unusual_thing         (Array<Array<double> >& results, 
-                                 Array<Array<char> >& sourcedata, 
-				 Array<Array<char> >& templatedata, 
-                                 int sublen);
-void      printResults          (Array<double>& results, 
+void      usual_thing           (Array<double>& results,
                                  Array<Array<char> >& sourcedata,
                                  Array<Array<char> >& templatedata);
-void      printResultsSubString (Array<Array<double> >& results, 
-                                 Array<Array<char> >& sourcedata, 
+void      unusual_thing         (Array<Array<double> >& results,
+                                 Array<Array<char> >& sourcedata,
+				 Array<Array<char> >& templatedata,
+                                 int sublen);
+void      printResults          (Array<double>& results,
+                                 Array<Array<char> >& sourcedata,
                                  Array<Array<char> >& templatedata);
-double    dlv                   (Array<Array<char> >& s1, int offset1, 
+void      printResultsSubString (Array<Array<double> >& results,
+                                 Array<Array<char> >& sourcedata,
+                                 Array<Array<char> >& templatedata);
+double    dlv                   (Array<Array<char> >& s1, int offset1,
                                  Array<Array<char> >& s2, int offset2);
-void      doDamerauLevenshteinAnalysis(Array<Array<char> >& sourcedata, 
+void      doDamerauLevenshteinAnalysis(Array<Array<char> >& sourcedata,
                                  Array<Array<char> >& templatedata);
 double    dlvcharstar           (char** set1, int len1, char** set2, int len2);
-double    dlvstring             (Array<Array<char> >& set1, int offset1, 
+double    dlvstring             (Array<Array<char> >& set1, int offset1,
                                  Array<Array<char> >& set2, int offset2,
                                  int temlen);
 double    dlvint                (int *s1, int len1, int *s2, int len2);
-double    dlv                   (Array<Array<char> >& set1, int offset1, 
+double    dlv                   (Array<Array<char> >& set1, int offset1,
                                  Array<Array<char> >& set2, int offset2);
 int       getMinIndex           (Array<double>& list);
 void      printSubStringInfo    (Array<double>& list, double target);
 void      printWeights          (void);
 void      readEditWeights       (const char* filename);
-void      printSequence         (Array<Array<char> >& sourcedata, int index, 
+void      printSequence         (Array<Array<char> >& sourcedata, int index,
                                  int size, int flag);
 
 // User interface variables:
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
       sourcearg   = 2;
       templatearg = 1;
    }
-   
+
    if (options.getArgCount() == 2) {
       infile.read(options.getArg(sourcearg));
       readTemplateContents(templatedata, options.getArg(templatearg).c_str());
@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
       cout << "TEMPLATE DATA: " << endl;
       printTemplate(templatedata);
    }
-        
+
 
    doDamerauLevenshteinAnalysis(sourcedata, templatedata);
 
@@ -166,14 +166,14 @@ int main(int argc, char** argv) {
 //    in analysis.
 //
 
-void fillSourceData(Array<Array<char> >& sourcedata, Array<int>& datalines, 
+void fillSourceData(Array<Array<char> >& sourcedata, Array<int>& datalines,
       HumdrumFile& infile, int spine, int nulltest) {
 
    sourcedata.setSize(infile.getNumLines());
    sourcedata.setSize(0);
    datalines.setSize(infile.getNumLines());
    datalines.setSize(0);
-   
+
    int strsize;
    int i, j;
    int index;
@@ -225,8 +225,8 @@ int chooseSpine(const char* interp, HumdrumFile& infile) {
          return i;
       }
    }
-	     
-   cerr << "Error: A " << interp 
+
+   cerr << "Error: A " << interp
         << " data spine is not present in the source" << endl;
    exit(1);
 
@@ -279,7 +279,7 @@ void readEditWeights(const char* filename) {
       strcpy(storage.getBase(), buffer);
       weightfile.getline(buffer, 1024);
       pre.sar(storage, "\\s*#.*", "", "");
-      if (pre.search(storage, 
+      if (pre.search(storage,
             "^\\s*(d1|d2|r1|r2|s0|s1|s2|s3)\\s+([\\d.+\\-]+)", "i")) {
          if (pre2.search(pre.getSubmatch(1), "D1", "i")) {
             weight_D1 = atof(pre.getSubmatch(2));
@@ -354,7 +354,7 @@ void readTemplateContents(Array<Array<char> >& storage, istream& instream) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
@@ -382,15 +382,15 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    options.define("S2|s2=d:1.0", "scr for sub by element repeated in S2");
    options.define("S3|s3=d:1.0", "scr for sub by element repeated in S1 & S2");
 
-   opts.define("author=b",  "author of program"); 
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
-      cout << "Adapted by Craig Stuart Sapp 2009" 
+      cout << "Adapted by Craig Stuart Sapp 2009"
            << " from the simil program written by Keith Opern 1992"
 	   << endl;
       exit(0);
@@ -406,7 +406,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       example();
       exit(0);
    }
-   
+
    xlen      =  options.getInteger("x");
    reverseQ  =  options.getBoolean("r");
    scalingQ  = !options.getBoolean("n");
@@ -471,9 +471,9 @@ void usage(const char* command) {
 // doDamerauLevenshteinAnalysis --
 //
 
-void doDamerauLevenshteinAnalysis(Array<Array<char> >& sourcedata, 
+void doDamerauLevenshteinAnalysis(Array<Array<char> >& sourcedata,
       Array<Array<char> >& templatedata) {
-   
+
    if (xlen <= 0) {
       Array<double> sresults;
       usual_thing(sresults, sourcedata, templatedata);
@@ -502,8 +502,8 @@ double normalize2(double d, int len) {
 // unusual_thing -- Do sub-string matching
 //
 
-void unusual_thing(Array<Array<double> >& results, 
-      Array<Array<char> >& sourcedata, Array<Array<char> >& templatedata, 
+void unusual_thing(Array<Array<double> >& results,
+      Array<Array<char> >& sourcedata, Array<Array<char> >& templatedata,
       int sublen) {
 
    int i, j;
@@ -559,7 +559,7 @@ int getMinIndex(Array<double>& list) {
 //
 // printSubStringInfo -- print all of the substrings which are
 //   at an equal or higher similarity measurement value than
-//   the target.  The thresholding is done on the raw edit 
+//   the target.  The thresholding is done on the raw edit
 //   distance values, so the threshold is for a minimum rather
 //   than a maximum.
 //
@@ -586,7 +586,7 @@ void printSubStringInfo(Array<double>& list, double target) {
 // printResultsSubString --
 //
 
-void printResultsSubString(Array<Array<double> >& results, 
+void printResultsSubString(Array<Array<double> >& results,
       Array<Array<char> >& sourcedata, Array<Array<char> >& templatedata) {
    int i;
    double value;
@@ -698,9 +698,9 @@ void printResults(Array<double>& results, Array<Array<char> >& sourcedata,
 //////////////////////////////
 //
 // printSequence --
-// 
+//
 
-void printSequence(Array<Array<char> >& sourcedata, int index, int size, 
+void printSequence(Array<Array<char> >& sourcedata, int index, int size,
       int flag) {
    int i;
    if (size <= 0) {
@@ -725,7 +725,7 @@ void printSequence(Array<Array<char> >& sourcedata, int index, int size,
 // usual_thing --
 //
 
-void usual_thing(Array<double>& results, Array<Array<char> >& sourcedata, 
+void usual_thing(Array<double>& results, Array<Array<char> >& sourcedata,
       Array<Array<char> >& templatedata) {
 
    int len = (int)fabs(sourcedata.getSize() - templatedata.getSize() + 1);
@@ -763,23 +763,23 @@ void printWeights(void) {
 
 //////////////////////////////
 //
-// dlv -- Compute the Damerau-Levenshtein distance of two arrays of 
-//      integers,  subject to specified weights.           
-//      
+// dlv -- Compute the Damerau-Levenshtein distance of two arrays of
+//      integers,  subject to specified weights.
+//
 //      dlv         = DLV raw value from Array<char> using dlvcharstar.
 //      dlvstring   = DLV raw value from Array<char> data.
 //      dlvcharstar = DLV raw value from char* data.
 //      dlvint      = DLV raw value from int data. (original function)
 //
 
-double dlv(Array<Array<char> >& set1, int offset1, 
+double dlv(Array<Array<char> >& set1, int offset1,
       Array<Array<char> >& set2, int offset2) {
 
    Array<char*> list1;
    Array<char*> list2;
    if (offset1 < 0) { offset1 = 0; }
    if (offset2 < 0) { offset2 = 0; }
-   
+
    int size1 = set1.getSize() - offset1;
    int size2 = set2.getSize() - offset2;
 
@@ -804,7 +804,7 @@ double dlv(Array<Array<char> >& set1, int offset1,
 
 
 
-double dlvstring(Array<Array<char> >& set1, int offset1, 
+double dlvstring(Array<Array<char> >& set1, int offset1,
       Array<Array<char> >& set2, int offset2, int temlen = -1) {
 
    int len1 = set1.getSize() - offset1;
@@ -819,7 +819,7 @@ double dlvstring(Array<Array<char> >& set1, int offset1,
 
    if (len1 > len2) {
       len = len2;
-   } 
+   }
 
    if (temlen < len) {
       len = temlen;
@@ -846,7 +846,7 @@ double dlvstring(Array<Array<char> >& set1, int offset1,
 
    for (i=0; i<len; i++, s1index++)  {
       m = min[mindex++];
-      if ((s1index>0) && 
+      if ((s1index>0) &&
           (strcmp(set1[s1index].getBase(), set1[s1index-1].getBase()) == 0)) {
          m += weight_R1;
       } else {
@@ -854,44 +854,44 @@ double dlvstring(Array<Array<char> >& set1, int offset1,
       }
       min[mindex] = m;
    }
-   
+
    s2index = offset2;
    for (j=0; j<len; j++, s2index++)  {
-      rep2 = (s2index>0 && (strcmp(set2[s2index].getBase(), 
+      rep2 = (s2index>0 && (strcmp(set2[s2index].getBase(),
 				   set2[s2index-1].getBase()) == 0));
       mindex = 0;
       cost = min[mindex];
       m = cost + (rep2 ? weight_R2 : weight_D2);
-   
+
       min[mindex++] = m;
-   
+
       s1index = offset1;
       for (i=0; i<len; i++, s1index++)  {
-         rep1 = (s1index>0) && 
-             (strcmp(set1[s1index].getBase(), 
+         rep1 = (s1index>0) &&
+             (strcmp(set1[s1index].getBase(),
                      set1[s1index-1].getBase()) == 0);
-	       
+
          m += rep1 ? weight_R1 : weight_D1;
-   
+
          if (strcmp(set1[s1index].getBase(),set2[s2index].getBase()) == 0) {
             val = cost;
          } else  {
             if (rep1) {
                val = cost + (rep2? weight_S3:weight_S1);
-            } else { 
+            } else {
                val = cost + (rep2? weight_S2:weight_S0);
             }
          }
          if (val < m) {
             m = val;
          }
-   
+
 	 cost = min[mindex];
          val = cost + (rep2 ? weight_R2 : weight_D2);
          if (val < m) {
             m = val;
          }
-   
+
 	 min[mindex++] = m;
       }
    }
@@ -926,25 +926,25 @@ double dlvint(int *s1, int len1, int *s2, int len2) {
       } else {
          m += weight_D1;
       }
-   
+
       *mptr = m;
       }
-   
+
       s2ptr = s2;
       for (j=len2; --j>=0; s2ptr++)  {
       char rep2 = (s2ptr>s2 && *s2ptr==*(s2ptr-1));
-   
+
       mptr = min;
       m = (cost = *mptr) + (rep2? weight_R2:weight_D2);
-   
+
       *mptr++ = m;
-   
+
       s1ptr = s1;
       for (i=len1; --i>=0; s1ptr++)  {
          char rep1 = (s1ptr>s1 && *s1ptr==*(s1ptr-1));
-   
+
          m += (rep1? weight_R1:weight_D1);
-   
+
          if (*s1ptr==*s2ptr)
          val = cost;
          else  {
@@ -954,10 +954,10 @@ double dlvint(int *s1, int len1, int *s2, int len2) {
             val = cost + (rep2? weight_S2:weight_S0);
          }
          if (val < m) { m = val; }
-   
+
          val = (cost = *mptr) + (rep2? weight_R2:weight_D2);
          if (val < m) m = val;
-   
+
          *mptr++ = m;
       }
    }
@@ -974,7 +974,7 @@ double dlvcharstar(char** set1, int len1, char** set2, int len2) {
 
    if (len1 > len2) {
       len = len2;
-   } 
+   }
 
    double cost, val, m;
    int i, j;
@@ -997,7 +997,7 @@ double dlvcharstar(char** set1, int len1, char** set2, int len2) {
 
    for (i=0; i<len; i++, s1index++)  {
       m = min[mindex++];
-      if ((s1index>0) && 
+      if ((s1index>0) &&
           (strcmp(set1[s1index], set1[s1index-1]) == 0)) {
          m += weight_R1;
       } else {
@@ -1005,44 +1005,44 @@ double dlvcharstar(char** set1, int len1, char** set2, int len2) {
       }
       min[mindex] = m;
    }
-   
+
    s2index = 0;
    for (j=0; j<len; j++, s2index++)  {
-      rep2 = (s2index>0 && (strcmp(set2[s2index], 
+      rep2 = (s2index>0 && (strcmp(set2[s2index],
 				   set2[s2index-1]) == 0));
       mindex = 0;
       cost = min[mindex];
       m = cost + (rep2 ? weight_R2 : weight_D2);
-   
+
       min[mindex++] = m;
-   
+
       s1index = 0;
       for (i=0; i<len; i++, s1index++)  {
-         rep1 = (s1index>0) && 
-             (strcmp(set1[s1index], 
+         rep1 = (s1index>0) &&
+             (strcmp(set1[s1index],
                      set1[s1index-1]) == 0);
-	       
+
          m += rep1 ? weight_R1 : weight_D1;
-   
+
          if (strcmp(set1[s1index],set2[s2index]) == 0) {
             val = cost;
          } else  {
             if (rep1) {
                val = cost + (rep2? weight_S3:weight_S1);
-            } else { 
+            } else {
                val = cost + (rep2? weight_S2:weight_S0);
             }
          }
          if (val < m) {
             m = val;
          }
-   
+
 	 cost = min[mindex];
          val = cost + (rep2 ? weight_R2 : weight_D2);
          if (val < m) {
             m = val;
          }
-   
+
 	 min[mindex++] = m;
       }
    }

@@ -27,17 +27,17 @@ class PerlRegularExpression {
    public:
            PerlRegularExpression    (void);
           ~PerlRegularExpression    ();
-   
-      int  search                   (Array<char>& input, 
+
+      int  search                   (Array<char>& input,
                                      const char* searchstring,
                                      const char* optionstring = NULL);
-      int  search                   (const vector<char>& input, 
+      int  search                   (const vector<char>& input,
                                      const string& searchstring,
                                      const string& optionstring = "");
-      int  search                   (const string& input, 
+      int  search                   (const string& input,
                                      const string& searchstring,
                                      const string& optionstring = "");
-      int  search                   (const char* input, 
+      int  search                   (const char* input,
                                      const char* searchstring,
                                      const char* optionstring = NULL);
       int  search                   (const Array<char>& input);
@@ -45,10 +45,10 @@ class PerlRegularExpression {
       int  search                   (const char* input);
 
       int  searchAndReplace         (Array<char>& output, const char* input,
-                                     const char* searchstring, 
+                                     const char* searchstring,
                                      const char* replacestring);
       int  searchAndReplace         (string& output, const string& input,
-                                     const string& searchstring, 
+                                     const string& searchstring,
                                      const string& replacestring);
       int  searchAndReplace         (Array<char>& output, const char* input);
       int  searchAndReplace         (string& output, const string& input);
@@ -66,30 +66,30 @@ class PerlRegularExpression {
                                      const string& replacestring,
                                      const string& optionstring = "");
 
-      void tr                       (Array<char>& inout, 
-                                     const char* inputlist, 
+      void tr                       (Array<char>& inout,
+                                     const char* inputlist,
                                      const char* outputlist);
 
-      void tr                       (string& inout, 
-                                     const string& inputlist, 
+      void tr                       (string& inout,
+                                     const string& inputlist,
                                      const string& outputlist);
 
-      static int getTokens          (Array<SigString>& output, 
-                                     const char* separator, 
+      static int getTokens          (Array<SigString>& output,
+                                     const char* separator,
                                      const char* input);
 
-      static int getTokens          (Array<Array<char>>& output, 
-                                     const char* separator, 
+      static int getTokens          (Array<Array<char>>& output,
+                                     const char* separator,
                                      const char* input);
 
-      static int getTokens          (vector<string>& output, 
-                                     const string& separator, 
+      static int getTokens          (vector<string>& output,
+                                     const string& separator,
                                      const string& input);
 
-      static int getTokensWithEmpties(Array<Array<char>>& output, 
+      static int getTokensWithEmpties(Array<Array<char>>& output,
                                       const char* separator, const char* input);
 
-      static int getTokensWithEmpties(vector<string>& output, 
+      static int getTokensWithEmpties(vector<string>& output,
                                       const string& separator, const string& input);
 
       void initializeSearch         (void);
@@ -126,7 +126,7 @@ class PerlRegularExpression {
       int   studyQ;
 
       pcre* pre;                    // Perl-Compatible RegEx compile structure
-      pcre_extra* pe;               // Extra data structure for analyzing 
+      pcre_extra* pe;               // Extra data structure for analyzing
                                     // pcre* information for faster searches.
       const char* compile_error;
       int   error_offset;
@@ -134,15 +134,15 @@ class PerlRegularExpression {
       Array<int> output_substrings; // list of substring matches
       Array<char> substring;        // storage for a substring match
 
-      Array<char> input_string;     // storage for input string 
+      Array<char> input_string;     // storage for input string
       Array<char> search_string;    // regular expression
       Array<char> replace_string;
 
    private:
-      void expandList               (Array<char>& expandlist, 
-                                     const string& input); 
-      void expandList               (vector<char>& expandlist, 
-                                     const string& input); 
+      void expandList               (Array<char>& expandlist,
+                                     const string& input);
+      void expandList               (vector<char>& expandlist,
+                                     const string& input);
 
 };
 

@@ -7,7 +7,7 @@
 // Last Modified: Sat Oct 14 19:16:34 PDT 2000 (extracted EnumerationEI.cpp)
 // Filename:      ...sig/include/sigInfo/EnumerationEI.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/EnumerationEI.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Enumeration database for Humdrum exclusive interpretations.
 //
@@ -25,7 +25,7 @@ class EnumerationEI : public Enumeration {
             EnumerationEI        (void);
 
      int    add                  (const char* aString);
-     void   add                  (int aValue, const char* aString, 
+     void   add                  (int aValue, const char* aString,
                                     int allocType = ENUM_TRANSIENT_ALLOC);
 
    private:

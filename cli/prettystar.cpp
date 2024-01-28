@@ -8,7 +8,7 @@
 //
 // Description: Extract all spines from a multi-spine file into
 //             single-column output.
-// 
+//
 
 #include "humdrum.h"
 #include "SigString.h"
@@ -83,33 +83,33 @@ int       getInterpretationCount(HumdrumFile& infile, int line);
 char*     getInterpName         (char* buffer, HumdrumRecord& line, int index);
 int       getInterpNum          (HumdrumRecord& line, int index);
 void      printUnknownInterpretations(HumdrumFile& infile);
-void      getBlockList          (HumdrumFile& infile, vector<int>& starti, 
+void      getBlockList          (HumdrumFile& infile, vector<int>& starti,
                                  vector<int>& endi, int initQ);
 void      printSortedInterpretations(HumdrumFile& infile, int starti, int endi,
                                  int blockcount);
 int       nameToNumber          (const string& name);
 const char* numberToName        (int number);
-void      processInterpretationType(int target,  HumdrumFile& infile, 
-                                 int starti, vector<vector<int> >& types, 
+void      processInterpretationType(int target,  HumdrumFile& infile,
+                                 int starti, vector<vector<int> >& types,
                                  int blockcount);
-void      printInterpretationType(int target, HumdrumFile& infile, int starti, 
+void      printInterpretationType(int target, HumdrumFile& infile, int starti,
                                  vector<vector<int> >& types, int blockcount);
-int       hasType               (int target, vector<vector<int> >& types, 
+int       hasType               (int target, vector<vector<int> >& types,
                                  int blocktype);
-void      printUnknownLines     (HumdrumFile& infile, int starti, 
+void      printUnknownLines     (HumdrumFile& infile, int starti,
                                  vector<vector<int> >& types);
-void      checkForWarnings      (HumdrumFile& infile, int starti, int endi, 
+void      checkForWarnings      (HumdrumFile& infile, int starti, int endi,
                                  vector<vector<int> >& types);
 int       checkForMixedInterpretations(vector<int>& types);
-void      seachForInterpretation (HumdrumFile& infile, 
+void      seachForInterpretation (HumdrumFile& infile,
                                  const string& SearchString);
-void      seachListForInterpretation(HumdrumFile& infile, 
+void      seachListForInterpretation(HumdrumFile& infile,
                                  const string& SearchString);
 
 // block parsing functions:
-void      fillFieldData          (vector<int>& field, const string& fieldstring, 
+void      fillFieldData          (vector<int>& field, const string& fieldstring,
                                   HumdrumFile& infile);
-void      processFieldEntry      (vector<int>& field, const string& string, 
+void      processFieldEntry      (vector<int>& field, const string& string,
                                   HumdrumFile& infile, int maxblock);
 void      removeDollarsFromString(string& buffer, int maxblock);
 
@@ -429,7 +429,7 @@ void seachForInterpretation(HumdrumFile& infile, const string& SearchString) {
 			}
 			for (i=starti[b]; i<=endi[b]; i++) {
 				for (j=0; j<infile[i].getFieldCount(); j++) {
-					testval = getInterpNum(infile[i], j);            
+					testval = getInterpNum(infile[i], j);
 					if (testval == target) {
 						if (count++ != 0) {
 							cout << ",";
@@ -490,7 +490,7 @@ void seachListForInterpretation(HumdrumFile& infile, const string& SearchString)
 			}
 			for (i=starti[b]; i<=endi[b]; i++) {
 				for (j=0; j<infile[i].getFieldCount(); j++) {
-					testval = getInterpNum(infile[i], j);            
+					testval = getInterpNum(infile[i], j);
 					if (testval == target) {
 						cout << infile[i][j] << "\n";
 					}
@@ -658,7 +658,7 @@ void printSortedInterpretations(HumdrumFile& infile, int starti, int endi,
 	}
 
 	if (FirstSort[blockcount] == 0) {
-		processInterpretationType(TYPE_EXPANDLABEL, infile, starti, types, 
+		processInterpretationType(TYPE_EXPANDLABEL, infile, starti, types,
 				!FirstSort[blockcount]);
 	}
 
@@ -667,7 +667,7 @@ void printSortedInterpretations(HumdrumFile& infile, int starti, int endi,
 	}
 
 	for (int i=0; i<(int)sortOrder.size(); i++) {
-		processInterpretationType(sortOrder[i], infile, starti, types, 
+		processInterpretationType(sortOrder[i], infile, starti, types,
 				!FirstSort[blockcount]);
 	}
 
@@ -680,10 +680,10 @@ void printSortedInterpretations(HumdrumFile& infile, int starti, int endi,
 
 //////////////////////////////
 //
-// checkForWarnings -- 
+// checkForWarnings --
 //
 
-void checkForWarnings(HumdrumFile& infile, int starti, int endi, 
+void checkForWarnings(HumdrumFile& infile, int starti, int endi,
 		vector<vector<int> >& types) {
 	int i, j;
 	int mixed = 0;
@@ -697,7 +697,7 @@ void checkForWarnings(HumdrumFile& infile, int starti, int endi,
 				cout << FILENAME << "\t=================" << "\n";
 				LASTFILENAME = FILENAME;
 			}
-			cout << "!!WARNING: mixed interpretation types on line " 
+			cout << "!!WARNING: mixed interpretation types on line "
 				  << starti+i+1 << "\n";
 			cout << infile[starti+i] << "\n";
 		}
@@ -729,7 +729,7 @@ int checkForMixedInterpretations(vector<int>& types) {
 			// shouldn't happen, but just in case
 			continue;
 		}
-		if (types[i] == TYPE_EMPTY) {  
+		if (types[i] == TYPE_EMPTY) {
 			continue;
 		}
 		if (found == 123456) {
@@ -750,10 +750,10 @@ int checkForMixedInterpretations(vector<int>& types) {
 // printUnknownLines --
 //
 
-void printUnknownLines(HumdrumFile& infile, int starti, 
+void printUnknownLines(HumdrumFile& infile, int starti,
 		vector<vector<int> >& types) {
 
-	// first print all lines which consist only of 
+	// first print all lines which consist only of
 	// unknowns, used, or empty interpretations.
 
 	int i, j;
@@ -789,7 +789,7 @@ void printUnknownLines(HumdrumFile& infile, int starti,
 // processInterpretationType --
 //
 
-void processInterpretationType(int target,  HumdrumFile& infile, 
+void processInterpretationType(int target,  HumdrumFile& infile,
 		int starti, vector<vector<int> >& types, int blockcount) {
 	int hastype = hasType(target, types, blockcount);
 	while (hastype) {
@@ -835,7 +835,7 @@ int hasType(int target, vector<vector<int> >& types, int blockcount) {
 // printInterpretationType --
 //
 
-void printInterpretationType(int target, HumdrumFile& infile, int starti, 
+void printInterpretationType(int target, HumdrumFile& infile, int starti,
 		vector<vector<int> >& types, int blockcount) {
 	int i, j;
 	int found;
@@ -891,7 +891,7 @@ int getInterpretationCount(HumdrumFile& infile, int line) {
 // getBlockList --
 //
 
-void getBlockList(HumdrumFile& infile, vector<int>& starti, vector<int>& endi, 
+void getBlockList(HumdrumFile& infile, vector<int>& starti, vector<int>& endi,
 	int initQ) {
 
 	starti.reserve(10000);
@@ -926,7 +926,7 @@ void getBlockList(HumdrumFile& infile, vector<int>& starti, vector<int>& endi,
 		blockcount++;
 	}
 }
-	
+
 
 
 //////////////////////////////
@@ -1052,7 +1052,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("example=b");            // example usages
 	opts.define("h|help=b");             // short description
 	opts.process(argc, argv);
-	
+
 	// handle basic options:
 	if (opts.getBoolean("author")) {
 		cout << "Written by Craig Stuart Sapp, "
@@ -1133,7 +1133,7 @@ void usage(const string& command) {
 // fillFieldData --
 //
 
-void fillFieldData(vector<int>& field, const string& fieldstring, 
+void fillFieldData(vector<int>& field, const string& fieldstring,
 		HumdrumFile& infile) {
 
 	vector<int> starti;
@@ -1166,7 +1166,7 @@ void fillFieldData(vector<int>& field, const string& fieldstring,
 
 	int i;
 	for (i=0; i<(int)tempfield.size(); i++) {
-		field[tempfield[i]-1] = 1; 
+		field[tempfield[i]-1] = 1;
 	}
 }
 
@@ -1174,13 +1174,13 @@ void fillFieldData(vector<int>& field, const string& fieldstring,
 
 //////////////////////////////
 //
-// processFieldEntry -- 
+// processFieldEntry --
 //   3-6 expands to 3 4 5 6
 //   $   expands to maximum block number
 //   $-1 expands to maximum spine track minus 1, etc.
 //
 
-void processFieldEntry(vector<int>& field, const string& astring, 
+void processFieldEntry(vector<int>& field, const string& astring,
 		HumdrumFile& infile, int maxblock) {
 
 	PerlRegularExpression pre;
@@ -1204,25 +1204,25 @@ void processFieldEntry(vector<int>& field, const string& astring,
 		int lastone  = strtol(pre.getSubmatch(2), NULL, 10);
 
 		if ((firstone < 1) && (firstone != 0)) {
-			cerr << "Error: range token: \"" << astring << "\"" 
+			cerr << "Error: range token: \"" << astring << "\""
 				  << " contains too small a number at start: " << firstone << endl;
 			cerr << "Minimum number allowed is " << 1 << endl;
 			exit(1);
 		}
 		if ((lastone < 1) && (lastone != 0)) {
-			cerr << "Error: range token: \"" << astring << "\"" 
+			cerr << "Error: range token: \"" << astring << "\""
 				  << " contains too small a number at end: " << lastone << endl;
 			cerr << "Minimum number allowed is " << 1 << endl;
 			exit(1);
 		}
 		if (firstone > maxblock) {
-			cerr << "Error: range token: \"" << astring << "\"" 
+			cerr << "Error: range token: \"" << astring << "\""
 				  << " contains number too large at start: " << firstone << endl;
 			cerr << "Maximum number allowed is " << maxblock << endl;
 			exit(1);
 		}
 		if (lastone > maxblock) {
-			cerr << "Error: range token: \"" << astring << "\"" 
+			cerr << "Error: range token: \"" << astring << "\""
 				  << " contains number too large at end: " << lastone << endl;
 			cerr << "Maximum number allowed is " << maxblock << endl;
 			exit(1);
@@ -1241,13 +1241,13 @@ void processFieldEntry(vector<int>& field, const string& astring,
 	} else if (pre.search(buffer, "^(\\d+)")) {
 		int value = strtol(pre.getSubmatch(1), NULL, 10);
 		if ((value < 1) && (value != 0)) {
-			cerr << "Error: range token: \"" << astring << "\"" 
+			cerr << "Error: range token: \"" << astring << "\""
 				  << " contains too small a number at end: " << value << endl;
 			cerr << "Minimum number allowed is " << 1 << endl;
 			exit(1);
 		}
 		if (value > maxblock) {
-			cerr << "Error: range token: \"" << astring << "\"" 
+			cerr << "Error: range token: \"" << astring << "\""
 				  << " contains number too large at start: " << value << endl;
 			cerr << "Maximum number allowed is " << maxblock << endl;
 			exit(1);
@@ -1268,7 +1268,7 @@ void removeDollarsFromString(string& buffer, int maxblock) {
 	char buf2[128] = {0};
 	int value2;
 	if (debugQ) {
-		cout << "IN DOLLAR STRING MAXBLOCK = " << maxblock << endl; 
+		cout << "IN DOLLAR STRING MAXBLOCK = " << maxblock << endl;
 	}
 
 	if (pre.search(buffer, "\\$$")) {
@@ -1277,7 +1277,7 @@ void removeDollarsFromString(string& buffer, int maxblock) {
 	}
 
 	if (debugQ) {
-		cout << "IN DOLLAR STRING = " << buffer << endl; 
+		cout << "IN DOLLAR STRING = " << buffer << endl;
 	}
 
 	if (pre.search(buffer, "\\$(?![\\d-])")) {

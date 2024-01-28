@@ -7,7 +7,7 @@
 // Syntax:        C++; museinfo
 //
 // Description:   Convert ottava sections between sounding and score forms.
-// 
+//
 // *8va = found in sounding score which indicates that the following
 //        music is printed one octave lower than it sounds when printed.
 // *8va/V = found in visual score which indicates that the following
@@ -17,7 +17,7 @@
 // *15ba, *15ba/V = used for quintessima basso (two octaves down) indications.
 //
 // Signifiers cancelled by adding an "X" in front of the prevailing
-// ottava marker: *X8va, *X8va/V, *X8ba, *X8ba/V, *X15ma, *X15ma/V, 
+// ottava marker: *X8va, *X8va/V, *X8ba, *X8ba/V, *X15ma, *X15ma/V,
 // *X15ba, *X15ba/V.
 //
 
@@ -38,13 +38,13 @@ void      checkOptions       (Options& opts, int argc, char* argv[]);
 void      example            (void);
 void      usage              (const string& command);
 void      processFile        (HumdrumFile& infile);
-void      checkLineForOttavas(HumdrumFile& infile, int index, 
+void      checkLineForOttavas(HumdrumFile& infile, int index,
                               vector<int>& states);
-void      printDataLine      (HumdrumFile& infile, int line, 
+void      printDataLine      (HumdrumFile& infile, int line,
                               vector<int>& octavestate, int direction);
-void      printNoteData      (HumdrumRecord& dataline, int index, 
+void      printNoteData      (HumdrumRecord& dataline, int index,
                               int transpose);
-void      printTandemInterpretation(HumdrumFile& infile, int line, 
+void      printTandemInterpretation(HumdrumFile& infile, int line,
                               int direction);
 
 // global variables
@@ -89,7 +89,7 @@ void processFile(HumdrumFile& infile) {
 	for (int i=0; i<infile.getNumLines(); i++) {
 		if (infile[i].getType() == E_humrec_interpretation) {
 			checkLineForOttavas(infile, i, octavestate);
-		} 
+		}
 		if (infile[i].getType() == E_humrec_data) {
 			printDataLine(infile, i, octavestate, direction);
 		} else if (infile[i].getType() == E_humrec_interpretation) {
@@ -212,7 +212,7 @@ void printNoteData(HumdrumRecord& dataline, int index, int transpose) {
 		cout << dataline[index];
 		return;
 	}
- 
+
 	int tokencount = dataline.getTokenCount(index);
 	int i;
 	int j;
@@ -231,14 +231,14 @@ void printNoteData(HumdrumRecord& dataline, int index, int transpose) {
 			slen = strlen(buffer);
 			printQ = 0;
 			for (j=0; j<slen; j++) {
-				if (toupper(buffer[j]) == 'A' || 
-					toupper(buffer[j]) == 'B' || 
-					toupper(buffer[j]) == 'C' || 
-					toupper(buffer[j]) == 'D' || 
-					toupper(buffer[j]) == 'E' || 
-					toupper(buffer[j]) == 'F' || 
-					toupper(buffer[j]) == 'G' || 
-					buffer[j] == '#' || 
+				if (toupper(buffer[j]) == 'A' ||
+					toupper(buffer[j]) == 'B' ||
+					toupper(buffer[j]) == 'C' ||
+					toupper(buffer[j]) == 'D' ||
+					toupper(buffer[j]) == 'E' ||
+					toupper(buffer[j]) == 'F' ||
+					toupper(buffer[j]) == 'G' ||
+					buffer[j] == '#' ||
 					buffer[j] == '-'  ) {
 					if (printQ == 0) {
 						Convert::base40ToKern(newpitch, 32, pitch);
@@ -342,7 +342,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("example=b");         // example usages
 	opts.define("h|help=b");          // short description
 	opts.process(argc, argv);
-	
+
 	// handle basic options:
 	if (opts.getBoolean("author")) {
 		cout << "Written by Craig Stuart Sapp, "

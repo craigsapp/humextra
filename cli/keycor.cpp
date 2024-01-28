@@ -13,8 +13,8 @@
 //
 // Description:   Key correlation measurements using the Krumhansl-Schmuckler
 //		  key-finding algorithm. (and also the Gabura algorithm).
-// 
-// 
+//
+//
 
 #include "humdrum.h"
 #include <math.h>
@@ -28,16 +28,16 @@ void   printAnalysis            (int bestkey, Array<double>& scores,
                                  Array<int>& b40hist, HumdrumFile& infile);
 void   usage                    (const char* command);
 void   readWeights              (const char* filename);
-int    analyzeKeyRawCorrelation (double* scores, double* distribution, 
-                                 int* pitch, double* durations, int size, 
-                                 int rhythmQ, double* majorKey, 
+int    analyzeKeyRawCorrelation (double* scores, double* distribution,
+                                 int* pitch, double* durations, int size,
+                                 int rhythmQ, double* majorKey,
                                  double* minorKey);
-int    analyzeKeyEuclidean      (double* scores, double* distribution, 
-                                 int* pitch, double* durations, int size, 
-                                 int rhythmQ, double* majorKey, 
+int    analyzeKeyEuclidean      (double* scores, double* distribution,
+                                 int* pitch, double* durations, int size,
+                                 int rhythmQ, double* majorKey,
                                  double* minorKey);
 void   normalizeData            (double* data, int asize);
-void   adjustData               (double* data, int asize, double mean, 
+void   adjustData               (double* data, int asize, double mean,
                                  double sd);
 double getStandardDeviation     (double mean, double* data, int asize);
 double getMean                  (double* data, int asize);
@@ -47,12 +47,12 @@ void   analyzeContinuously      (HumdrumFile& infile, int windowsize,
                                  double* minorKey);
 void   loadHistograms           (Array<Array<double> >& histograms,
                                  HumdrumFile& infile, int segments);
-void   addToHistogramDouble     (Array<Array<double> >& histogram, int pc, 
-                                 double start, double dur, double tdur, 
+void   addToHistogramDouble     (Array<Array<double> >& histogram, int pc,
+                                 double start, double dur, double tdur,
 				 int segments);
-void   createHistogram          (Array<double>& pitchhist, int start, 
+void   createHistogram          (Array<double>& pitchhist, int start,
                                  int count, Array<Array<double> >& segments);
-void   identifyKeyDouble        (Array<double>& histogram, 
+void   identifyKeyDouble        (Array<double>& histogram,
                                  Array<double>& correlations,
                                  double* majorKey, double* minorKey);
 void   printBestKey             (int keynumber);
@@ -60,11 +60,11 @@ double pearsonCorrelation       (int size, double* x, double* y);
 void   printCorrelation         (double value, int style);
 void   printHistogramTotals     (Array<Array<double> >& segments);
 double getConfidence            (Array<double>& cors, int best);
-void   getLocations             (Array<double>& measures, HumdrumFile& infile, 
+void   getLocations             (Array<double>& measures, HumdrumFile& infile,
                                  int segments);
 void   getBase40Histogram       (Array<int>& base40, HumdrumFile& infile);
 int    identifyBranchCut        (int base12, Array<int>& base40);
-void   printErrorMarker         (HumdrumFile& infile, int best40, 
+void   printErrorMarker         (HumdrumFile& infile, int best40,
                                  const char* mode);
 
 // user interface variables
@@ -234,7 +234,7 @@ double minorKeySimple[12] = {
    0.0,    // A
    1.0,    // A#
    0.0};   // B
-   
+
 
 double majorKeyUser[12] = {0};
 double minorKeyUser[12] = {0};
@@ -273,12 +273,12 @@ int main(int argc, char* argv[]) {
          infiles.readAppend(options.getArg(i+1));
       }
    }
-  
+
    for (i=0; i<infiles.getCount(); i++) {
       filename = infiles[i].getFilename();
 
       if (continuousQ) {
-         analyzeContinuously(infiles[i], windowsize, stepsize, majorKey, 
+         analyzeContinuously(infiles[i], windowsize, stepsize, majorKey,
                minorKey);
          continue;
       }
@@ -289,17 +289,17 @@ int main(int argc, char* argv[]) {
       }
 
       if (rawQ) {
-	 if (normalizeQ) { 
+	 if (normalizeQ) {
             normalizeData(majorKey, 12);
             normalizeData(minorKey, 12);
          }
-         bestkey = analyzeKeyRawCorrelation(scores.getBase(), 
+         bestkey = analyzeKeyRawCorrelation(scores.getBase(),
                distribution.getBase(), pitch.getBase(), duration.getBase(),
                pitch.getSize(), rhythmQ, majorKey, minorKey);
       } else if (euclideanQ) {
          equalizeData(majorKey, 12, 1.0);
          equalizeData(minorKey, 12, 1.0);
-         bestkey = analyzeKeyEuclidean(scores.getBase(), 
+         bestkey = analyzeKeyEuclidean(scores.getBase(),
                distribution.getBase(), pitch.getBase(), duration.getBase(),
                pitch.getSize(), rhythmQ, majorKey, minorKey);
       } else {
@@ -308,7 +308,7 @@ int main(int argc, char* argv[]) {
                      majorKey, minorKey);
       }
       getBase40Histogram(b40hist, infiles[i]);
-      printAnalysis(bestkey, scores, distribution, filename, b40hist, 
+      printAnalysis(bestkey, scores, distribution, filename, b40hist,
             infiles[i]);
    }
 
@@ -344,14 +344,14 @@ void analyzeContinuously(HumdrumFile& infile, int windowsize,
       segments[i].allowGrowth(0);
       segments[i].setAll(0);
    }
-	    
+
    loadHistograms(segments, infile, segmentCount);
 
    if (debugQ) {
       printHistogramTotals(segments);
    }
 
-   Array<Array<double> > pitchhist; 
+   Array<Array<double> > pitchhist;
    Array<Array<double> > correlations;
 
    pitchhist.setSize(segmentCount-windowsize);
@@ -426,7 +426,7 @@ void getLocations(Array<double>& measures, HumdrumFile& infile, int segments) {
    for (i=1; i<segments; i++) {
       if (measures[i] < 0) {
          measures[i] = measures[i-1];
-      } 
+      }
    }
 
    index = -1;
@@ -479,7 +479,7 @@ double getConfidence(Array<double>& cors, int best) {
    if (output > 100.0) {
       output = 100.0;
    }
-	     
+
    return output;
 }
 
@@ -528,7 +528,7 @@ void printCorrelation(double value, int style) {
       return;
    }
    if (value == 1.0) {
-      cout << "1.000"; 
+      cout << "1.000";
       return;
    } else if (value == 0.0) {
       cout << "0.000";
@@ -630,7 +630,7 @@ void printBestKey(int keynumber) {
 // createHistogram --
 //
 
-void createHistogram(Array<double>& pitchhist, int start, int count, 
+void createHistogram(Array<double>& pitchhist, int start, int count,
    Array<Array<double> >& segments) {
 
    pitchhist.setAll(0);
@@ -732,7 +732,7 @@ void loadHistograms(Array<Array<double> >& histograms,
             if (duration <= 0.0) {
                continue;   // ignore grace notes and strange objects
             }
-            
+
             addToHistogramDouble(histograms, pitch,
                   start, duration, totalduration, segments);
          }
@@ -747,7 +747,7 @@ void loadHistograms(Array<Array<double> >& histograms,
 // addToHistogramDouble -- fill the histogram in the right spots.
 //
 
-void addToHistogramDouble(Array<Array<double> >& histogram, int pc, 
+void addToHistogramDouble(Array<Array<double> >& histogram, int pc,
       double start, double dur, double tdur, int segments) {
 
    pc = pc % 12;
@@ -782,7 +782,7 @@ void addToHistogramDouble(Array<Array<double> >& histogram, int pc,
 
 //////////////////////////////
 //
-// printAnalysis -- 
+// printAnalysis --
 //
 
 void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist,
@@ -805,7 +805,7 @@ void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist,
       cout << durhist[1]  << "";   // C#
       cout << "};" << endl;
       return;
-   } 
+   }
 
    int best40;
 
@@ -880,7 +880,7 @@ void printErrorMarker(HumdrumFile& infile, int best40, const char* mode) {
       }
       if (foundQ) {
          break;
-      }      
+      }
    }
    if (!foundQ) {
       cout << "?";
@@ -913,18 +913,18 @@ void printErrorMarker(HumdrumFile& infile, int best40, const char* mode) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("a|all=b",             "show all scores");   
-   opts.define("Aarden|aarden|aa=b",  "use Aarden profiles");   
-   opts.define("Bellman|bellman|bb=b","use Bellman profiles");   
-   opts.define("Krumhansl|k|kk=b",    "use Krumhansl-Kessler profiles");   
-   opts.define("Temperley|temperley|kp|=b","use Kostka-Payne profiles");   
+   opts.define("a|all=b",             "show all scores");
+   opts.define("Aarden|aarden|aa=b",  "use Aarden profiles");
+   opts.define("Bellman|bellman|bb=b","use Bellman profiles");
+   opts.define("Krumhansl|k|kk=b",    "use Krumhansl-Kessler profiles");
+   opts.define("Temperley|temperley|kp|=b","use Kostka-Payne profiles");
    opts.define("G|gabura|raw=b",      "use raw correlation");
    opts.define("n|normalize=b",       "normalize raw correlation input data");
    opts.define("e|euclidean=b",       "euclidean keyfinding method");
-   opts.define("s|simple=b",          "do simple profile");   
-   opts.define("D|no-duration=b",     "ignore duration of notes in input");   
-   opts.define("f|frequency|freq=b",  "show pitch frequencies");   
-   opts.define("F|Freq=b",            "pitch frequencies MMA by fifths");   
+   opts.define("s|simple=b",          "do simple profile");
+   opts.define("D|no-duration=b",     "ignore duration of notes in input");
+   opts.define("f|frequency|freq=b",  "show pitch frequencies");
+   opts.define("F|Freq=b",            "pitch frequencies MMA by fifths");
    opts.define("w|weights=s:",        "weighting factor file");
    opts.define("step=d:1.0",          "step size for continuous analysis");
    opts.define("window=i:32",         "window size for continuous analysis");
@@ -933,13 +933,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("l|name=b",            "print filenames");
    opts.define("error|errors=b", "print * marker on analyses which are errors");
 
-   opts.define("debug=b",       "trace input parsing");   
-   opts.define("author=b",      "author of the program");   
-   opts.define("version=b",     "compilation information"); 
-   opts.define("example=b",     "example usage"); 
-   opts.define("h|help=b",      "short description"); 
+   opts.define("debug=b",       "trace input parsing");
+   opts.define("author=b",      "author of the program");
+   opts.define("version=b",     "compilation information");
+   opts.define("example=b",     "example usage");
+   opts.define("h|help=b",      "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -1074,8 +1074,8 @@ void usage(const char* command) {
 // analyzeKeyEuclidean --
 //
 
-int analyzeKeyEuclidean (double* scores, double* distribution, 
-      int* pitch, double* durations, int size, int rhythmQ, double* majorKey, 
+int analyzeKeyEuclidean (double* scores, double* distribution,
+      int* pitch, double* durations, int size, int rhythmQ, double* majorKey,
       double* minorKey) {
 
    int i, j;
@@ -1106,7 +1106,7 @@ int analyzeKeyEuclidean (double* scores, double* distribution,
    double maj_temp;
    double min_temp;
    int subscript;
-     
+
    double* r_major = scores;
    double* r_minor = scores + 12;
    double value_maj;
@@ -1114,7 +1114,7 @@ int analyzeKeyEuclidean (double* scores, double* distribution,
 
    for (i=0; i<12; i++) {
       maj_temp = min_temp = 0;
-   
+
       // Examine all pitches for each key,
       for (j=0; j<12; j++) {
          subscript = (i+j)%12;
@@ -1124,7 +1124,7 @@ int analyzeKeyEuclidean (double* scores, double* distribution,
          maj_temp += (value_maj * value_maj);
          min_temp += (value_min * value_min);
       }
-      
+
       if (maj_temp <= 0.0) {
          r_major[i] = 0.0;
       } else {
@@ -1160,7 +1160,7 @@ int analyzeKeyEuclidean (double* scores, double* distribution,
 //   a size of 24 or greater.  input array pitch must have a size of "size".
 //
 
-int analyzeKeyRawCorrelation(double* scores, double* distribution, int* pitch, 
+int analyzeKeyRawCorrelation(double* scores, double* distribution, int* pitch,
       double* durations, int size, int rhythmQ, double* majorKey,
       double* minorKey) {
    int i, j;
@@ -1193,20 +1193,20 @@ int analyzeKeyRawCorrelation(double* scores, double* distribution, int* pitch,
    double maj_temp;
    double min_temp;
    int subscript;
-     
+
    double* r_major = scores;
    double* r_minor = scores + 12;
 
    for (i=0; i<12; i++) {
       maj_temp = min_temp = 0;
-   
+
       // Examine all pitches for each key,
       for (j=0; j<12; j++) {
          subscript = (i+j)%12;
          maj_temp += (majorKey[j] * distribution[subscript]);
          min_temp += (minorKey[j] * distribution[subscript]);
       }
-      
+
       if (maj_temp <= 0.0) {
          r_major[i] = 0.0;
       } else {
@@ -1344,8 +1344,8 @@ void equalizeData2(double* data, int asize, double summation) {
 //////////////////////////////
 //
 // getBase40Histogram -- Get the enharmonic pitch-class histogram for the
-//    music.  Counts note attacks only not weighted by durations, but 
-//    difference between duration weighting and not duration weighting 
+//    music.  Counts note attacks only not weighted by durations, but
+//    difference between duration weighting and not duration weighting
 //    should be negligible.
 //
 
@@ -1396,12 +1396,12 @@ void getBase40Histogram(Array<int>& base40, HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// identifyBranchCut -- distinguish between G# major and A-flat minor 
+// identifyBranchCut -- distinguish between G# major and A-flat minor
 //     for example.  Currently only checking for enharmonic differences
-//     between black-key notes (i.e., cannot distinguish between 
+//     between black-key notes (i.e., cannot distinguish between
 //     C major and B-sharp major, although the function could be
 //     generalized to do so).  Returns a base-40 pitch class which
-//     can represent diatonic pitches with up to 2 chromatic step 
+//     can represent diatonic pitches with up to 2 chromatic step
 //     alterations.
 //
 
@@ -1415,7 +1415,7 @@ int identifyBranchCut(int base12, Array<int>& base40) {
    }
 
    int sdia, fdia;
-   
+
    if (accidental == -1) {
       sdia = (diatonic+6)%7;
       fdia = diatonic;
@@ -1426,7 +1426,7 @@ int identifyBranchCut(int base12, Array<int>& base40) {
       // something strange happened
       return tval % 40;
    }
-  
+
    int sb40, fb40;
    sb40 = (Convert::base7ToBase40(sdia+4*7) + 1)%40;
    fb40 = (Convert::base7ToBase40(fdia+4*7) - 1)%40;

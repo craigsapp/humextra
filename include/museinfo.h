@@ -5,7 +5,7 @@
 // Last Modified: Wed Jul 31 17:04:27 PDT 2002
 // Filename:      ...sig/include/sigInfo/museinfo.h
 // Web Address:   http://sig.sapp.org/src/sigInfo/museinfo.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Includes all header files necessary for museinfo
 //		  library.

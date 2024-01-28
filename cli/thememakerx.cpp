@@ -35,17 +35,17 @@ void      example                (void);
 void      usage                  (const char* command);
 void      createIncipit          (HumdrumFile& hfile, const char* filename,
                                   const char* sourcebase, int limit);
-void      extractPitchSequence   (Array<int>& pitches, Array<int>& phrase, 
+void      extractPitchSequence   (Array<int>& pitches, Array<int>& phrase,
                                   HumdrumFile& hfile);
 int       is_directory           (const char* path);
 int       is_file                (const char* path);
 void      processArgument        (const char* path);
-void      createOutputName       (char* outfile, const char* filename, 
+void      createOutputName       (char* outfile, const char* filename,
                                   const char* target, const char* sourcebase);
 void      checkTargetDirectory   (const char* outfile);
-void      getPhrasesAndNoteLines (Array<int>& lines, Array<int>& phrase, 
+void      getPhrasesAndNoteLines (Array<int>& lines, Array<int>& phrase,
                                   HumdrumFile& hfile);
-int       getEndingLine          (Array<int>& lines, Array<int>& phrase, 
+int       getEndingLine          (Array<int>& lines, Array<int>& phrase,
                                   HumdrumFile& hfile, int limit);
 
 // User interface variables:
@@ -167,7 +167,7 @@ int is_directory(const char* path) {
    struct stat filestat;
    if (stat(path, &filestat)) {
       return 0;
-   } 
+   }
    return S_ISDIR(filestat.st_mode);
 }
 
@@ -178,7 +178,7 @@ int is_directory(const char* path) {
 // createIncipit --
 //
 
-void createIncipit(HumdrumFile& hfile, const char* filename, 
+void createIncipit(HumdrumFile& hfile, const char* filename,
       const char* sourcebase, int limit) {
    char outfile[4096] = {0};
    createOutputName(outfile, filename, target, sourcebase);
@@ -272,7 +272,7 @@ int getEndingLine(Array<int>& lines, Array<int>& phrase, HumdrumFile& hfile,
 
    for (i=start; i>=0; i--) {
       if (i>0 && (phrase[i] != phrase[i-1])) {
-         phraseboundary = i; 
+         phraseboundary = i;
          break;
       }
    }
@@ -294,7 +294,7 @@ int getEndingLine(Array<int>& lines, Array<int>& phrase, HumdrumFile& hfile,
 // getPhrasesAndNoteLines --
 //
 
-void getPhrasesAndNoteLines(Array<int>& lines, Array<int>& phrase, 
+void getPhrasesAndNoteLines(Array<int>& lines, Array<int>& phrase,
       HumdrumFile& hfile) {
 
    lines.setSize(hfile.getNumLines());
@@ -346,7 +346,7 @@ void getPhrasesAndNoteLines(Array<int>& lines, Array<int>& phrase,
 // createOutputName --
 //
 
-void createOutputName(char* outfile, const char* filename, 
+void createOutputName(char* outfile, const char* filename,
       const char* target, const char* sourcebase) {
    strcpy(outfile, target);
    strcat(outfile, "/");
@@ -404,7 +404,7 @@ void checkTargetDirectory(const char* outfile) {
             exit(1);
          }
       }
-      strcat(fulldir, "/");      
+      strcat(fulldir, "/");
       ptr = strtok(NULL, "/");
    }
 }
@@ -459,7 +459,7 @@ void extractPitchSequence(Array<int>& pitches, HumdrumFile& hfile) {
                // ignore rests and other strange things
                break;
             }
-            pitches.append(pitch); 
+            pitches.append(pitch);
             if (limitQ) {
                if (pitches.getSize() >= limit) {
                   return;
@@ -477,21 +477,21 @@ void extractPitchSequence(Array<int>& pitches, HumdrumFile& hfile) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("debug=b",        "print debug information"); 
+   opts.define("debug=b",        "print debug information");
    opts.define("l|limit=i:30",   "upper limit the number of extracted notes");
    opts.define("m|min=i:10",     "lower limit on number of extracted notes");
    opts.define("t|target=s:.",   "filename target base for recursive output");
 
-   opts.define("author=b",  "author of program"); 
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("h|help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -509,7 +509,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       example();
       exit(0);
    }
-   
+
    debugQ      = opts.getBoolean("debug");
    limitQ      = opts.getBoolean("limit");
    limit       = opts.getInteger("limit");

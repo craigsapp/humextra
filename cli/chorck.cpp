@@ -90,7 +90,7 @@ void   sortErrorMessages   (Error* errors, int size);
 void   sortVoices          (void);
 void   writeoutput         (HumdrumFile& infile);
 int    getVoiceCount       (HumdrumRecord& record);
-void   marknote            (HumdrumFile& infile, int line, int spine, 
+void   marknote            (HumdrumFile& infile, int line, int spine,
                             const string& mark);
 
 void   error1(HumdrumFile& infile);
@@ -1250,7 +1250,7 @@ void error3(HumdrumFile& infile) {
 		if ((bass-newbass+400)%40 == 0) {
 			goto tenorvoice3;
 		}
-	
+
 
 		if (tenor != 0 && newtenor != 0 && bdir != tdir) {
 			if ((tenor-bass+400)%40 == 23 && (newtenor-newbass+400)%40 == 23) {

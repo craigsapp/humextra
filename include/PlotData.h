@@ -6,7 +6,7 @@
 // Filename:      ...sig/maint/code/base/PlotData/PlotData.cpp
 // Web Address:   http://sig.sapp.org/include/sigBase/PlotData.cpp
 // Documentation: http://sig.sapp.org/doc/classes/PlotData
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Plot data and style options for PlotFigure class.
 //
@@ -39,14 +39,14 @@ class PlotData {
       int         commentQ        (void);
       int         getXFigDepth    (void);
       ostream&    printXfig       (ostream& out, PlotFigure& figure);
-      void        getPlotRange    (double& axmin, double& axmax, double& aymin, 
+      void        getPlotRange    (double& axmin, double& axmax, double& aymin,
                                    double& aymax);
-      void        setData         (Array<double>& xvals, Array<double>& yvals, 
+      void        setData         (Array<double>& xvals, Array<double>& yvals,
                                    const char* aComment);
       void        addPoint        (double xvalue, double yvalue);
       void        setComment      (const char* aComment);
       const char* getComment      (void);
-      int         getPointsInRange(double minx, double maxx, 
+      int         getPointsInRange(double minx, double maxx,
                                    double miny, double maxy);
 
    private:

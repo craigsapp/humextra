@@ -5,7 +5,7 @@
 // Last Modified: Mon Jun  8 21:35:18 PDT 1998
 // Filename:      ...sig/include/sigInfo/Enum_basic.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Enum_basic.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   The basic enumeration defines.
 //

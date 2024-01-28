@@ -9,7 +9,7 @@
 // Filename:      ...sig/maint/code/base/SigCollection/SigCollection.h
 // Web Address:   http://sig.sapp.org/include/sigBase/SigCollection.h
 // Documentation: http://sig.sapp.org/doc/classes/SigCollection
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A dynamic array which can grow as necessary.
 //                This class can hold any type of item, but the
@@ -20,6 +20,9 @@
 #ifndef _SIGCOLLECTION_H_INCLUDED
 #define _SIGCOLLECTION_H_INCLUDED
 
+#include <cstddef>
+#include <memory>
+
 // Name change to avoid namespace collision with an Apple typedef
 //#define SigCollection Collection
 
@@ -29,7 +32,7 @@ class SigCollection {
                 SigCollection     (void);
                 SigCollection     (int arraySize);
                 SigCollection     (int arraySize, type *aCollection);
-                SigCollection     (SigCollection<type>& aCollection);
+                SigCollection     (const SigCollection<type>& aCollection);
                ~SigCollection     ();
 
       void      allowGrowth       (int status = 1);
@@ -42,7 +45,7 @@ class SigCollection {
       type     *pointer           (void);
       void      setAllocSize      (long aSize);
       void      setGrowth         (long growth);
-      long      getGrowth         (void) { return growthAmount; }
+      long      getGrowth         (void) { return this->m_growthAmount; }
       void      setSize           (long newSize);
       type&     operator[]        (int arrayIndex);
       type      operator[]        (int arrayIndex) const;
@@ -54,15 +57,15 @@ class SigCollection {
 
 
    protected:
-      long      size;             // actual array size
-      long      allocSize;        // maximum allowable array size
-      type     *array;            // where the array data is stored
-      char      allowGrowthQ;     // allow/disallow growth
-      long      growthAmount;     // number of elements to grow by if index
-				  //    element one beyond max size is accessed
-      long maxSize;               // the largest size the array is allowed 
-                                  //    to grow to, if 0, then ignore max
-  
+      long      m_size = 0;                   // actual array size
+      long      m_allocSize = 0;              // maximum allowable array size
+      std::unique_ptr<type[]> m_array = NULL; // where the array data is stored
+      char      m_allowGrowthQ = true;        // allow/disallow growth
+      long      m_growthAmount = 8;           // number of elements to grow by if index
+                                              //    element one beyond max size is accessed
+      long      m_maxSize = 0;                // the largest size the array is allowed
+                                              //    to grow to, if 0, then ignore max
+
       void      shrinkTo          (long aSize);
 };
 

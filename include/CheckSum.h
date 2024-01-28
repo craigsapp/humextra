@@ -4,7 +4,7 @@
 // Last Modified: Mon Feb 14 07:40:09 PST 2011
 // Filename:      ...sig/maint/code/base/CheckSum/CheckSum.h
 // Web Address:   http://sig.sapp.org/include/sigBase/CheckSum.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Handles calculating checksums in various formats.
 // 		  Currently CRC32 (cksum command)
@@ -28,14 +28,14 @@
    #define SSTREAM strstream
    #define CSTRING str()
 #endif
-   
+
 
 #include "Array.h"
 
 struct MD5_CTX {              // MD5 context
-   unsigned long state[4];    // state (ABCD) 
-   unsigned long count[2];    // number of bits, modulo 2^64 (lsb first) 
-   unsigned char buffer[64];  // input buffer 
+   unsigned long state[4];    // state (ABCD)
+   unsigned long count[2];    // number of bits, modulo 2^64 (lsb first)
+   unsigned char buffer[64];  // input buffer
 };
 
 class CheckSum {
@@ -55,14 +55,14 @@ class CheckSum {
 
       // md5sum calculation functions
       static void MD5Init      (MD5_CTX *context);
-      static void MD5Update    (MD5_CTX *context, unsigned char *input, 
+      static void MD5Update    (MD5_CTX *context, unsigned char *input,
                                 unsigned int inputLen);
       static void MD5Final     (unsigned char digest[16], MD5_CTX *context);
-      static void MD5Transform (unsigned long state[4], 
+      static void MD5Transform (unsigned long state[4],
                                 unsigned char block[64]);
-      static void Encode       (unsigned char *output, unsigned long *input, 
+      static void Encode       (unsigned char *output, unsigned long *input,
                                 unsigned int len);
-      static void Decode       (unsigned long *output, unsigned char *input, 
+      static void Decode       (unsigned long *output, unsigned char *input,
                                 unsigned int len);
 
 };

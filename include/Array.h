@@ -11,12 +11,12 @@
 // Filename:      ...sig/maint/code/base/Array/Array.h
 // Web Address:   http://sig.sapp.org/include/sigBase/Array.h
 // Documentation: http://sig.sapp.org/doc/classes/Array
-// Syntax:        C++ 
+// Syntax:        C++
 //
-// Description:   An array which can grow dynamically.  Array is derived from 
-//                the SigCollection class and adds various mathematical 
-//                operators to the SigCollection class.  The Array template 
-//                class is used for storing numbers of any type which can 
+// Description:   An array which can grow dynamically.  Array is derived from
+//                the SigCollection class and adds various mathematical
+//                operators to the SigCollection class.  The Array template
+//                class is used for storing numbers of any type which can
 //                be added, multiplied and divided into one another.
 //
 

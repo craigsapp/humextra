@@ -11,7 +11,7 @@
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/theloc.cpp
 // Syntax:        C++; museinfo
 //
-// Description:   Identify the location of an index note in a files as 
+// Description:   Identify the location of an index note in a files as
 //                output from "themax --location".
 //
 // Todo: If a mark is added with -m or --mchar, the program should
@@ -38,33 +38,33 @@ void      checkOptions          (Options& opts, int argc, char** argv);
 void      example               (void);
 void      usage                 (const string& command);
 void      processData           (istream& input);
-void      extractDataFromInputLine(string& filename, 
-                                  string& voicename, int& track, 
-                                  int& subtrack, vector<int>& starts, 
+void      extractDataFromInputLine(string& filename,
+                                  string& voicename, int& track,
+                                  int& subtrack, vector<int>& starts,
                                   vector<int>& endings, char* inputline);
-void      prepareSearchPaths    (vector<string>& paths, 
+void      prepareSearchPaths    (vector<string>& paths,
                                  const string& pathlist);
 int       fileexists            (string& jointname, string& filename,
                                  string& path);
-void      getFileAndPath        (string& fileandpath, 
-                                 string& filename, 
+void      getFileAndPath        (string& fileandpath,
+                                 string& filename,
                                  vector<string>& paths);
-int       findNote              (int nth, HumdrumFile& infile, int& cur, 
+int       findNote              (int nth, HumdrumFile& infile, int& cur,
                                  int& row, int& col, int track, int subtrack,
                                  int& measure);
-void      fillMeterInfo         (HumdrumFile& infile, 
+void      fillMeterInfo         (HumdrumFile& infile,
                                  vector<RationalNumber>& meterbot, int track);
-void      markNotes             (HumdrumFile& infile, int row, int col, 
-                                 int track, int subtrack, int matchlen, 
+void      markNotes             (HumdrumFile& infile, int row, int col,
+                                 int track, int subtrack, int matchlen,
                                  const string& marker);
-void      processDataLine       (HumdrumFile& infile, const string& inputline, 
-                                 string& filename, 
-                                 string& lastfilename, 
-                                 string& voicename, int track, 
-                                 int subtrack, vector<int>& starts, 
+void      processDataLine       (HumdrumFile& infile, const string& inputline,
+                                 string& filename,
+                                 string& lastfilename,
+                                 string& voicename, int track,
+                                 int subtrack, vector<int>& starts,
                                  vector<int>& endings);
 void      printDash             (void);
-void      displayNoteLocationInfo(HumdrumFile& infile, int num, int row, 
+void      displayNoteLocationInfo(HumdrumFile& infile, int num, int row,
                                 int col, int measure,
                                 vector<RationalNumber>& meterbot);
 
@@ -100,7 +100,7 @@ string      marker       = "@";   // used with --marker option
 int main(int argc, char** argv) {
    // process the command-line options
    checkOptions(options, argc, argv);
- 
+
    ifstream input;
    int numinputs = options.getArgumentCount();
    for (int i=0; i<numinputs || i==0; i++) {
@@ -154,7 +154,7 @@ void processData(istream& input) {
          continue;
       }
 
-      extractDataFromInputLine(filename, voicename, track, subtrack, starts, 
+      extractDataFromInputLine(filename, voicename, track, subtrack, starts,
             endings, inputline);
       if (track > 0) {
          processDataLine(infile, inputline, filename, lastfilename, voicename,
@@ -162,7 +162,7 @@ void processData(istream& input) {
          lastfilename = filename;
       } else {
          // echo input lines which are not understood (comments?)
-         cout << inputline << endl; 
+         cout << inputline << endl;
       }
 
    } while (!input.eof());
@@ -174,7 +174,7 @@ void processData(istream& input) {
 
    // flush any data needing to be printed (such as for markQ):
 	filename = "";
-   processDataLine(infile, "", filename, lastfilename, voicename, track, 
+   processDataLine(infile, "", filename, lastfilename, voicename, track,
          subtrack, starts, endings);
 }
 
@@ -185,9 +185,9 @@ void processData(istream& input) {
 // processDataLine --
 //
 
-void processDataLine(HumdrumFile& infile, const string& inputline, 
-      string& filename, string& lastfilename, 
-      string& voicename, int track, int subtrack, vector<int>& starts, 
+void processDataLine(HumdrumFile& infile, const string& inputline,
+      string& filename, string& lastfilename,
+      string& voicename, int track, int subtrack, vector<int>& starts,
       vector<int>& endings) {
 
    PerlRegularExpression pre;
@@ -212,7 +212,7 @@ void processDataLine(HumdrumFile& infile, const string& inputline,
    }
 
    string tempstr;
-	
+
    if (filename != lastfilename) {
       if (lastfilename != "") {
          if (markQ) {
@@ -222,7 +222,7 @@ void processDataLine(HumdrumFile& infile, const string& inputline,
                      ) {
                cout << "!!!RDF**kern: " << pre.getSubmatch(1);
                cout << "= matched note";
-               if (pre.search(marker, 
+               if (pre.search(marker,
                      "color\\s*=\\s*\"?([^\\s\"\\)\\(,;]+)\"?", "")) {
 
 						tempstr = marker;
@@ -254,7 +254,7 @@ void processDataLine(HumdrumFile& infile, const string& inputline,
                cout << "!!!MATCHLEN:\t" << matchlen << endl;
             }
             if (filename == "") {
-               // empty filename is a dummy to force last line of 
+               // empty filename is a dummy to force last line of
                // input to be processed correctly if markQ or similar is used.
                return;
             }
@@ -288,7 +288,7 @@ void processDataLine(HumdrumFile& infile, const string& inputline,
       cout << track;
       cout << "\t";
    }
-   
+
    int row = 0;
    int col = 0;
    int cur = 0;   // current nth numbered note in the given track
@@ -313,20 +313,20 @@ void processDataLine(HumdrumFile& infile, const string& inputline,
    int state;
    int estate;
    for (i=0; i<(int)starts.size(); i++) {
-      state = findNote(starts[i], infile, cur, row, col, track, 
+      state = findNote(starts[i], infile, cur, row, col, track,
             subtrack, measure);
       if (state == 0) {
          continue;
       }
       if (((int)endings.size() >0) && (endings[i] >= 0)) {
-         estate = findNote(endings[i], infile, ecur, erow, ecol, 
+         estate = findNote(endings[i], infile, ecur, erow, ecol,
          track, subtrack, emeasure);
       } else {
          estate = 0;
       }
       if (markQ) {
          if (((int)endings.size() > 0) && (endings[i] >= 0)) {
-            markNotes(infile, row, col, track, subtrack, 
+            markNotes(infile, row, col, track, subtrack,
                   endings[i]-starts[i]+1, marker);
          } else {
             markNotes(infile, row, col, track, subtrack, matchlen, marker);
@@ -336,7 +336,7 @@ void processDataLine(HumdrumFile& infile, const string& inputline,
          displayNoteLocationInfo(infile, starts[i], row, col, measure, meterbot);
          if (((int)endings.size() > 0) && (endings[i] >= 0) && estate) {
             printDash();
-            displayNoteLocationInfo(infile, endings[i], erow, ecol, emeasure, 
+            displayNoteLocationInfo(infile, endings[i], erow, ecol, emeasure,
                   meterbot);
          }
       }
@@ -364,7 +364,7 @@ void processDataLine(HumdrumFile& infile, const string& inputline,
 void printDash(void) {
    if (dispNoteQ || dispLineQ || dispColumnQ || dispAbsBeatQ || dispMeasureQ ||
          dispBeatQ || dispFracQ || percentQ || dispQBeatQ) {
-      cout << "-";  
+      cout << "-";
    }
 }
 
@@ -399,7 +399,7 @@ void displayNoteLocationInfo(HumdrumFile& infile, int num, int row, int col,
    if (percentQ) {
       double percent = infile.getTotalDuration();
       if (percent > 0.0) {
-         percent = int(infile[row].getAbsBeat() / percent * 1000.0 
+         percent = int(infile[row].getAbsBeat() / percent * 1000.0
                + 0.5) / 10.0;
       }
       cout << "P" << percent;
@@ -409,12 +409,12 @@ void displayNoteLocationInfo(HumdrumFile& infile, int num, int row, int col,
    }
    if (dispBeatQ) {
       if (rationalQ) {
-         RationalNumber tval = (infile[row].getBeatR()-1) * 
+         RationalNumber tval = (infile[row].getBeatR()-1) *
                                   (meterbot[row] / four) + 1;
          cout << "B";
          tval.printTwoPart(cout);
       } else {
-         cout << "B" << (infile[row].getBeat()-1) * 
+         cout << "B" << (infile[row].getBeat()-1) *
                          (meterbot[row].getFloat() / 4.0) + 1;
       }
    }
@@ -490,7 +490,7 @@ void markNotes(HumdrumFile& infile, int row, int col, int track, int subtrack,
             if (tieQ) {
                foundcount--;  // suppress from count later on
                tiestate = 1;
-            } 
+            }
          } else if (strchr(infile[i][j], ']') != NULL) {
             if (tieQ) {
                // don't subtract one from foundcount (this is the last note)
@@ -538,7 +538,7 @@ void markNotes(HumdrumFile& infile, int row, int col, int track, int subtrack,
             // } else if (tieQ && (strchr(infile[i][j], '_') != NULL)) {
             //    foundcount--;
             // }
-         } 
+         }
       }
    }
 veryend: ;
@@ -551,7 +551,7 @@ veryend: ;
 // fillMeterInfo --
 //
 
-void fillMeterInfo(HumdrumFile& infile, vector<RationalNumber>& meterbot, 
+void fillMeterInfo(HumdrumFile& infile, vector<RationalNumber>& meterbot,
       int track) {
 
    int top;
@@ -564,7 +564,7 @@ void fillMeterInfo(HumdrumFile& infile, vector<RationalNumber>& meterbot,
    int i, j;
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isInterpretation()) {
-         meterbot[i] = current;         
+         meterbot[i] = current;
          continue;
       }
       for (j=0; j<infile[i].getFieldCount(); j++) {
@@ -593,7 +593,7 @@ void fillMeterInfo(HumdrumFile& infile, vector<RationalNumber>& meterbot,
 //     returns 0 if nth note cannot be found in track.
 //
 
-int findNote(int nth, HumdrumFile& infile, int& cur, int& row, int& col, 
+int findNote(int nth, HumdrumFile& infile, int& cur, int& row, int& col,
       int track, int subtrack, int& measure) {
    int direction = 1;
 
@@ -628,7 +628,7 @@ int findNote(int nth, HumdrumFile& infile, int& cur, int& row, int& col,
          }
          scount++;
          if (subtrack == scount) {
-            if (strcmp(infile[i][j], ".") == 0) { 
+            if (strcmp(infile[i][j], ".") == 0) {
                // skip null tokens (could make search faster
                // if null token references were utilized).
                break;
@@ -636,7 +636,7 @@ int findNote(int nth, HumdrumFile& infile, int& cur, int& row, int& col,
             // currently only considering tracks to be **kern data,
             // but should be generalized later (so don't exit from "r"
             // or "]" or "_" for non **kern data.
-            if (strchr(infile[i][j], 'r') != NULL) { 
+            if (strchr(infile[i][j], 'r') != NULL) {
                // skip null tokens (could make search faster
                // if null token references were utilized).
                break;
@@ -650,11 +650,11 @@ int findNote(int nth, HumdrumFile& infile, int& cur, int& row, int& col,
             // the following statements are not quite right (consider
             // chords with only some notes being tied?)
             // but this will be dependent on tindex's behavior.
-            if (strchr(infile[i][j], ']') != NULL) { 
+            if (strchr(infile[i][j], ']') != NULL) {
                // skip endings of ties.
                break;
             }
-            if (strchr(infile[i][j], '_') != NULL) { 
+            if (strchr(infile[i][j], '_') != NULL) {
                // skip continuation ties.
                break;
             }
@@ -664,7 +664,7 @@ int findNote(int nth, HumdrumFile& infile, int& cur, int& row, int& col,
                row = i;
                col = j;
                return 1;
-            } 
+            }
             break;
          }
       }
@@ -684,12 +684,12 @@ int findNote(int nth, HumdrumFile& infile, int& cur, int& row, int& col,
 // getFileAndPath -- given a particular filename and a list of directory
 //    paths to search, return the first file which is found which matches
 //    the filename in the list of directory paths.  First search using
-//    the complete filename.  Then if the filename with any attached 
+//    the complete filename.  Then if the filename with any attached
 //    directory information is not found, then remove the directory
-//    information and search again.  
+//    information and search again.
 //
 
-void getFileAndPath(string& fileandpath, string& filename, 
+void getFileAndPath(string& fileandpath, string& filename,
    vector<string>& paths) {
    PerlRegularExpression pre;
 
@@ -713,7 +713,7 @@ void getFileAndPath(string& fileandpath, string& filename,
 		fileandpath = "";
    }
 
-   // check to see if removing the directory name already attached 
+   // check to see if removing the directory name already attached
    // to the filename helps:
 
    string tempfilename = filename;
@@ -736,7 +736,7 @@ void getFileAndPath(string& fileandpath, string& filename,
 //    create the filename is given back to the calling function.
 //
 
-void JoinDirToPath(string& jointname, string& path, 
+void JoinDirToPath(string& jointname, string& path,
       string& filename) {
 
    PerlRegularExpression pre;
@@ -766,7 +766,7 @@ void JoinDirToPath(string& jointname, string& path,
 // fileexists --
 //
 
-int fileexists(string& jointname, string& filename, 
+int fileexists(string& jointname, string& filename,
       string& path) {
    JoinDirToPath(jointname, path, filename);
    if (access(jointname.c_str(), F_OK) != -1) {
@@ -787,8 +787,8 @@ int fileexists(string& jointname, string& filename,
 // extractDataFromInputLine --
 //
 
-void extractDataFromInputLine(string& filename, 
-      string& voicename, int& track, int& subtrack, vector<int>& starts, 
+void extractDataFromInputLine(string& filename,
+      string& voicename, int& track, int& subtrack, vector<int>& starts,
       vector<int>& endings, char* inputline) {
 	filename = "";
    track = 0;
@@ -829,7 +829,7 @@ void extractDataFromInputLine(string& filename,
          endings.push_back(negone);
       }
       ptr = ptr + pre.getSubmatchEnd(5);
-      while (pre.search(ptr, "^(\\d+)([^\\s]*\\s*)")) { 
+      while (pre.search(ptr, "^(\\d+)([^\\s]*\\s*)")) {
          value = atoi(pre.getSubmatch(1));
          starts.push_back(value);
          if (pre2.search(pre.getSubmatch(2), "-(\\d+)", "")) {
@@ -861,7 +861,7 @@ void extractDataFromInputLine(string& filename,
          endings.push_back(negone);
       }
       ptr = ptr + pre.getSubmatchEnd(3);
-      while (pre.search(ptr, "^(\\d+)([^\\s]*\\s*)")) { 
+      while (pre.search(ptr, "^(\\d+)([^\\s]*\\s*)")) {
          value = atoi(pre.getSubmatch(1));
          starts.push_back(value);
          if (pre2.search(pre.getSubmatch(2), "-(\\d+)", "")) {
@@ -891,7 +891,7 @@ void extractDataFromInputLine(string& filename,
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
@@ -917,13 +917,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("all=b", "display all location formats");
    opts.define("tie|ties=b", "display search markers on tie middle/end notes");
 
-   opts.define("debug=b",  "author of program"); 
-   opts.define("author=b",  "author of program"); 
+   opts.define("debug=b",  "author of program");
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -987,7 +987,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       dispQBeatQ   = 1;  // used with -q option
       dispBeatQ    = 1;  // used with -B option
    }
-   
+
    prepareSearchPaths(paths, opts.getString("path").c_str());
 }
 

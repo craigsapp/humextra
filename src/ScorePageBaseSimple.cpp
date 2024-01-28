@@ -33,9 +33,8 @@ using namespace std;
 ScorePageBaseSimple::ScorePageBaseSimple(void) {
 	sortQ = 0;
 
-	data.setSize(10000);
-	data.setGrowth(10000);
-	data.setSize(0);
+	m_data.reserve(10000);
+	m_data.resize(0);
 
 	trailer.setSize(100);
 	trailer.setGrowth(100);
@@ -87,7 +86,7 @@ ScorePageBaseSimple::~ScorePageBaseSimple() {
 //
 
 void ScorePageBaseSimple::clear(void) {
-	data.setSize(0);
+	m_data.resize(0);
 	initializeTrailer();
 
 	// system analysis variables
@@ -114,7 +113,7 @@ ScorePageBaseSimple& ScorePageBaseSimple::operator=(ScorePageBaseSimple &aPage) 
 	if (this == &aPage) {
 		return *this;
 	}
-	data           = aPage.data;
+	m_data         = aPage.m_data;
 	trailer        = aPage.trailer;
 	sortQ          = aPage.sortQ;
 	systemAnalysisQ= aPage.systemAnalysisQ;
@@ -154,16 +153,16 @@ int ScorePageBaseSimple::findStaff(int staffno) {
 	testrec.setValue(3, 0.0);     // vertical pos
 
 	void* searchresult;
-	searchresult = bsearch(&testrec, data.getBase(), data.getSize(),
+	searchresult = bsearch(&testrec, m_data.data(), m_data.size(),
 			sizeof(ScoreRecord), staffsearch);
 	if (searchresult == NULL) {
 		return -1;
 	} else {
 		int start = (int)(((ScoreRecord*)searchresult -
-				data.getBase())/sizeof(ScoreRecord));
+				m_data.data())/sizeof(ScoreRecord));
 		int i;
 		for (i=start; i>=0; i++) {
-			if ((int)data[i].getPValue(2) != staffno) {
+			if ((int)m_data.at(i).getPValue(2) != staffno) {
 				return i+1;
 			}
 		}
@@ -230,13 +229,12 @@ void ScorePageBaseSimple::readAscii(const char* filename, int verboseQ) {
 	}
 
 	ScoreRecord record;
-	int i = 0;
-	data.allowGrowth(1);
+	// int i = 0;
 	while (!infile.eof()) {
-		readAsciiScoreLine(infile, data[i++]);
+      m_data.resize(m_data.size() + 1);
+		readAsciiScoreLine(infile, m_data.back());
 	}
-	data.setSize(data.getSize()-1);
-	data.allowGrowth(0);
+	m_data.resize((int)m_data.size()-1);
 
 	// union { long i; float f; } u;
 	// u.i = 0x50504153;
@@ -277,10 +275,10 @@ void ScorePageBaseSimple::initializeTrailer(long serial) {
 void ScorePageBaseSimple::printAscii(ostream& out, int roundQ, int verboseQ) {
 	int i, j;
 	if (verboseQ) {
-		cout << "; OBJECTS TO WRITE: " << data.getSize() << endl;
+		cout << "; OBJECTS TO WRITE: " << m_data.size() << endl;
 	}
 	Array<Array<char> > buffers;
-	buffers.setSize(data.getSize() * 2);
+	buffers.setSize(m_data.size() * 2);
 	buffers.setSize(0);
 
 	char buffer1[10000] = {0};
@@ -291,9 +289,9 @@ void ScorePageBaseSimple::printAscii(ostream& out, int roundQ, int verboseQ) {
 	spaces.setAll(1);
 	int length;
 
-	for (i=0; i<data.getSize(); i++) {
-		// data[i].printAscii(out, verboseQ);
-		data[i].printAscii(buffer1, buffer2, 10000, roundQ, verboseQ);
+	for (i=0; i<(int)m_data.size(); i++) {
+		// m_data[i].printAscii(out, verboseQ);
+		m_data[i].printAscii(buffer1, buffer2, 10000, roundQ, verboseQ);
 		index = buffers.getSize();
 		buffers.setSize(buffers.getSize()+1);
 		length = strlen(buffer1);
@@ -422,8 +420,8 @@ void ScorePageBaseSimple::writeBinary(const char* filename) {
 	int writecount = 0;   // number of numbers which have been read
 
 	int i;
-	for (i=0; i<data.getSize(); i++) {
-		writecount += data[i].writeBinary(outfile);
+	for (i=0; i<(int)m_data.size(); i++) {
+		writecount += m_data[i].writeBinary(outfile);
 	}
 
 	// write the trailer
@@ -514,7 +512,6 @@ void ScorePageBaseSimple::readBinary(const char* filename, int verboseQ) {
 	infile.seekg(2, ios::beg);
 
 	float number = 0;
-	data.allowGrowth(1);
 	// now read each data number and store
 	while (!infile.eof()) {
 		if (numbercount - readcount - trailerSize - 1 == 0) {
@@ -534,13 +531,15 @@ void ScorePageBaseSimple::readBinary(const char* filename, int verboseQ) {
 			}
 
 			readcount += (int)number;
-			data[data.getSize()].readBinary(infile, (int)number);
+         // check the following line added when converting to vectors:
+         m_data.resize(m_data.size() + 1);
+			m_data.back().readBinary(infile, (int)number);
 		}
 	}
 
 
 	if (verboseQ) {
-		cout << "Elements: " << data.getSize() << endl;
+		cout << "Elements: " << m_data.size() << endl;
 		cout << "READING Trailer: " << endl;
 	}
 
@@ -570,7 +569,7 @@ void ScorePageBaseSimple::readBinary(const char* filename, int verboseQ) {
 //
 
 int ScorePageBaseSimple::getSize(void) {
-	return data.getSize();
+	return (int)m_data.size();
 }
 
 
@@ -581,7 +580,7 @@ int ScorePageBaseSimple::getSize(void) {
 //
 
 ScoreRecord& ScorePageBaseSimple::operator[](int index) {
-	return data[index];
+	return m_data[index];
 }
 
 
@@ -591,8 +590,8 @@ ScoreRecord& ScorePageBaseSimple::operator[](int index) {
 // ScorePageBaseSimple::appendItem --
 //
 
-void ScorePageBaseSimple::appendItem(ScoreRecord& aRecord) {
-	data.append(aRecord);
+void ScorePageBaseSimple::appendItem(const ScoreRecord& aRecord) {
+	m_data.push_back(aRecord);
 }
 
 void ScorePageBaseSimple::appendItem(ScorePageBaseSimple& aPage) {
@@ -621,12 +620,11 @@ void ScorePageBaseSimple::getItemsPosition(Array<int>& indices, float position,
 		int staff, float tolerance) {
 	indices.setSize(0);
 	indices.allowGrowth(1);
-	int i;
-	for (i=0; i<data.getSize(); i++) {
-		if (fabs(position - data[i].getPValue(3)) <= tolerance) {
+	for (int i=0; i<(int)m_data.size(); i++) {
+		if (fabs(position - m_data[i].getPValue(3)) <= tolerance) {
 			if (staff == 99) {
 				indices.append(i);
-			} else if (staff == (int)data[i].getPValue(2)) {
+			} else if (staff == (int)m_data[i].getPValue(2)) {
 				indices.append(i);
 			}
 		}
@@ -704,8 +702,9 @@ float ScorePageBaseSimple::readLittleFloat(istream& instream) {
 
 void ScorePageBaseSimple::shrinkParameters(void) {
 	int i;
-	for (i=0; i<data.getSize(); i++) {
-		data[i].shrink();
+	for (i=0; i<(int)m_data.size(); i++) {
+      // Fix this vector conversion line:
+		m_data[i].shrink();
 	}
 }
 
@@ -777,7 +776,7 @@ void ScorePageBaseSimple::readAsciiScoreLine(istream& infile, ScoreRecord& recor
 
 int ScorePageBaseSimple::sortByStaff(void) {
 	sortQ = 1;
-	qsort(data.getBase(), data.getSize(), sizeof(ScoreRecord), compareStaff);
+	qsort(m_data.data(), m_data.size(), sizeof(ScoreRecord), compareStaff);
 	return sortQ;
 }
 

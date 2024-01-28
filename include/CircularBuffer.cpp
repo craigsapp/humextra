@@ -9,7 +9,7 @@
 //
 // Description:   A Circular buffer designed to handle MIDI input,
 //                but able to store any type of object.  Elements
-//                can be read out of the buffer in two ways. 
+//                can be read out of the buffer in two ways.
 //                (1) from a read pointer which extracts the
 //                elements in order by following the write pointer,
 //                and (2) from an index operator related to the
@@ -17,7 +17,7 @@
 //                object[0] is the last value written into the
 //                buffer and object[-1] (or object[1]) is the
 //                item written just before that.
-//              
+//
 //
 
 #ifndef _CIRCULARBUFFER_CPP_INCLUDED
@@ -51,7 +51,7 @@ CircularBuffer<type>::CircularBuffer(void) {
 template<class type>
 CircularBuffer<type>::CircularBuffer(int maxElements) {
    if (maxElements < 0) {
-      cerr << "Error: cannot have a negative number of elements: " 
+      cerr << "Error: cannot have a negative number of elements: "
            << maxElements << endl;
       exit(1);
    }
@@ -153,7 +153,7 @@ int CircularBuffer<type>::getCount(void) const {
 // CircularBuffer::getSize -- returns the allocated size of the buffer.
 //
 
-template<class type>  
+template<class type>
 int CircularBuffer<type>::getSize(void) const {
    return size;
 }
@@ -198,7 +198,7 @@ type& CircularBuffer<type>::operator[](int index) {
    while (realIndex < 0) {
       realIndex += getSize();
    }
-   
+
    return buffer[realIndex];
 }
 
@@ -229,12 +229,12 @@ void CircularBuffer<type>::reset(void) {
    readIndex = writeIndex = getSize() - 1;
    itemCount = 0;
 }
- 
-  
+
+
 
 //////////////////////////////
 //
-// CircularBuffer::setSize -- warning: will throw out all previous data 
+// CircularBuffer::setSize -- warning: will throw out all previous data
 //    stored in buffer.
 //
 
@@ -257,7 +257,7 @@ void CircularBuffer<type>::setSize(int aSize) {
       buffer = new type[aSize];
       reset();
    }
-}   
+}
 
 
 

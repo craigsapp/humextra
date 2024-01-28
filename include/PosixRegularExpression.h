@@ -19,23 +19,23 @@ class PosixRegularExpression {
    public:
            PosixRegularExpression   (void);
 	  ~PosixRegularExpression   ();
-	    
-      int  search                   (const char* input, 
+
+      int  search                   (const char* input,
 		                     const char* searchstring);
       int  search                   (const char* input);
 
       int  searchAndReplace         (Array<char>& output, const char* input,
-                                     const char* searchstring, 
+                                     const char* searchstring,
 				     const char* replacestring);
-      int  searchAndReplace         (Array<char>& output, 
+      int  searchAndReplace         (Array<char>& output,
                                      const char* input);
       int  sar                      (Array<char>& inout,
                                      const char* searchstring,
                                      const char* replacestring,
                                      const char* optionstring = NULL);
 
-      void tr                       (Array<char>& inout, 
-		                     const char* inputlist, 
+      void tr                       (Array<char>& inout,
+		                     const char* inputlist,
 		                     const char* outputlist);
 
       void initializeSearch         (const char* searchstring);
@@ -64,11 +64,11 @@ class PosixRegularExpression {
       Array<char> replace_string;
 
    private:
-      void expandList               (Array<char>& expandlist, 
-                                     const char* input); 
+      void expandList               (Array<char>& expandlist,
+                                     const char* input);
 
 };
-	
+
 #endif  /* _REGULAREXPRESSION_H_INCLUDED */
 
 

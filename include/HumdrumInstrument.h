@@ -5,9 +5,9 @@
 // Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
 // Filename:      ...sig/include/sigInfo/HumdrumInstrument.h
 // Web Address:   http://museinfo.sapp.org/include/sigInfo/HumdrumInstrument.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
-// Description:   Special enumeration class for processing Humdrum 
+// Description:   Special enumeration class for processing Humdrum
 //                instrument names.
 //
 

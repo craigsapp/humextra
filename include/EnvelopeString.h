@@ -5,22 +5,22 @@
 // Filename:      ...sig/maint/code/base/EnvelopeString/EnvelopeString.h
 // Web Address:   http://sig.sapp.org/include/sigBase/EnvelopeString.h
 // Documentation: http://sig.sapp.org/doc/classes/EnvelopeString
-// Syntax:        C++ 
+// Syntax:        C++
 //
 
 #ifndef _ENVELOPESTRING_H_INCLUDED
 #define _ENVELOPESTRING_H_INCLUDED
 
-
-#include "Array.h"
+#include <vector>
+#include <ostream>
 
 #define UNKNOWN_ENV     (0)
 #define CLM_ENV         (1)
 #define LISP_ENV        (2)
 #define MUSICKIT_ENV    (3)
-   #define MK_ENV          (3)
+#define MK_ENV          (3)
 #define MATHEMATICA_ENV (4)
-   #define MMA_ENV         (4)
+#define MMA_ENV         (4)
 #define PLAIN_ENV       (5)
 #define SIG_ENV         (6)
 
@@ -30,7 +30,7 @@ class EnvelopeString {
                         EnvelopeString    (void);
                         EnvelopeString    (const char* aString);
                        ~EnvelopeString    ();
-      
+
       int               getDimension      (void) const;
       const char*       getEnvelope       (void);
       double            getLength         (void) const;
@@ -39,7 +39,7 @@ class EnvelopeString {
       int               getStickIndex     (void) const;
       void              print             (void);
       void              removeStickPoint  (void);
-      void              setEnvelope       (const char* aString, 
+      void              setEnvelope       (const char* aString,
                                              int aDimension = -1,
                                              int stringType = UNKNOWN_ENV);
       void              setInterpolation  (char aType);
@@ -56,19 +56,19 @@ class EnvelopeString {
       void              setSyntaxSIG      (void);
 
    protected:
-      char*             envelope;         // string to hold in/out envelope
-      int               stickIndex;       // location of the stick point
-      int               outputType;       // syntax for output envelope
-      int               modified;         // Q if need to recalc envelope
-      char              absoluteType;     // secs or samples used for time
-      double            normalization;    // last time value in envelope
-      int               dimension;        // num items in env point
-      char              defaultInterpolation;  // interp if local interp = 0
-      double            defaultParameter; // parameter for default interp
-      Array<double>*    points;           // points of envelope
-      Array<char>       pointInterp;      // local interpolation types
-      Array<double>     pointParameter;   // local interpolation parameters
- 
+      char*             envelope;             // string to hold in/out envelope
+      int               stickIndex;           // location of the stick point
+      int               outputType;           // syntax for output envelope
+      int               modified;             // Q if need to recalc envelope
+      char              absoluteType;         // secs or samples used for time
+      double            normalization;        // last time value in envelope
+      int               dimension;            // num items in env point
+      char              defaultInterpolation; // interp if local interp = 0
+      double            defaultParameter;     // parameter for default interp
+      std::vector<std::vector<double>> m_points; // points of envelope
+      std::vector<char>   m_pointInterp;      // local interpolation types
+      std::vector<double> m_pointParameter;   // local interpolation parameters
+
    private:
       int               determineType     (const char* aString);
       double            extractNumber     (const char* aString, int& index);
@@ -79,7 +79,7 @@ class EnvelopeString {
       void              makeMMAenv        (void);
       void              makePLAINenv      (void);
       void              makeSIGenv        (void);
-      void              processCLMenv     (const char* aString, 
+      void              processCLMenv     (const char* aString,
                                                            int dimension = -1);
       void              processLISPenv    (const char* aString);
       void              processMKenv      (const char* aString);
@@ -96,7 +96,7 @@ class EnvelopeString {
 };
 
 
-ostream& operator<<(ostream& out, EnvelopeString& aString);
+std::ostream& operator<<(std::ostream& out, EnvelopeString& aString);
 
 
 

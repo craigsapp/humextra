@@ -5,7 +5,7 @@
 // Last Modified: Wed Jul 31 17:27:18 PDT 2002 added setRow() and setColumn()
 // Last Modified: Sun Feb 20 17:45:39 PST 2011 added setAll()
 // Filename:      /home/craig/sigNet/Matrix.h
-// Syntax:        C++ 
+// Syntax:        C++
 // $Smake:        smake %b.cpp
 //
 
@@ -24,7 +24,7 @@
 
 template<class type>
 class Matrix {
-   public: 
+   public:
                     Matrix         (void);
                     Matrix         (const Matrix<type>& aMatrix);
                     Matrix         (int rowCount, int columnCount);
@@ -55,13 +55,13 @@ class Matrix {
 
 
    // static functions:
-   static Matrix<type>& multiply 
+   static Matrix<type>& multiply
       (Matrix<type>& output, const Matrix<type>& one, Matrix<type>& two);
-   static Matrix<type>& multiply 
+   static Matrix<type>& multiply
       (Matrix<type>& output, Matrix<type>& one, type aScalar);
-   static Matrix<type>& add   
+   static Matrix<type>& add
       (Matrix<type>& output, const Matrix<type>& one, const Matrix<type>& two);
-   static void          transpose      
+   static void          transpose
       (Matrix<type>& output, const Matrix<type>& one);
 
    protected:

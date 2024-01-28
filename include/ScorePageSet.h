@@ -6,7 +6,7 @@
 // Last Modified: Fri Jul 27 14:03:57 PDT 2012 (added some system functionality)
 // Filename:      ...sig/src/sigInfo/ScorePageSet.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/ScorePageSet.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A page of SCORE data with analysis functions.
 //
@@ -42,10 +42,10 @@ class ScorePageSet {
       double         getDuration         (void);
       double         getAbsBeat          (int objidx);
       int            getSystemStaffIndex (int objidx);
-      int            getSysStaffIndex    (int objidx) 
+      int            getSysStaffIndex    (int objidx)
                                             { return getSystemStaffIndex(objidx); }
       int            getSystemStaffCount (void);
-      int            getSysStaffCount    (void) 
+      int            getSysStaffCount    (void)
                                             { return getSystemStaffCount(); }
       int            getPartCount        (void);
       ScoreRecord&   getItem             (int objidx);
@@ -59,14 +59,14 @@ class ScorePageSet {
 
       int            getTitle            (Array<char>& title);
       int            getComposer         (Array<char>& composer);
-      int            getInstrumentName   (int staffidxi, 
+      int            getInstrumentName   (int staffidxi,
                                           Array<char>& name);
       int            getInitialStaffIndent(void);
       int            getVerseCount       (int staffidx);
       int            getPartVerseCount   (int staffidx);
       int            getItemPage         (int objidx);
       int            getItemPageIndex    (int objidx);
-      
+
    private:
       Array<ScorePage*> pages;
       double            workDuration;
@@ -75,7 +75,7 @@ class ScorePageSet {
       Array<int>        verseCount;      // summarizes results of ScorePage::analyzeLyrics()
 
    protected:
-      void              identifyPageBreakHyphens  (int page1, int sys1idx, int page2, int sys2idx, 
+      void              identifyPageBreakHyphens  (int page1, int sys1idx, int page2, int sys2idx,
                                                    int staffidx);
 
 };

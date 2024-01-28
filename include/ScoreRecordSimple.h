@@ -6,7 +6,7 @@
 // Last Modified: Tue Mar 26 09:56:28 PST 2002 (added enum)
 // Filename:      ...sig/src/sigInfo/ScoreRecordSimple.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/ScoreRecordSimple.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A SCORE item parameter class
 //
@@ -62,10 +62,10 @@ class ScoreRecordSimple {
                      ScoreRecordSimple       (ScoreRecordSimple& a);
                     ~ScoreRecordSimple       ();
 
-      void           printAscii        (ostream& out, int roundQ = 1, 
+      void           printAscii        (ostream& out, int roundQ = 1,
 		                        int verboseQ = 0);
-      void           printAscii        (char* buffer1, char* buffer2, 
-                                        int max, int roundQ = 1, 
+      void           printAscii        (char* buffer1, char* buffer2,
+                                        int max, int roundQ = 1,
 					int verboseQ = 0);
       void           clear             (void);
       int            writeBinary       (ostream& out);
@@ -97,24 +97,24 @@ class ScoreRecordSimple {
       int            isTimesigItem     (void);
 
       // parameter item accessors:
-      int            getFixedSize     
+      int            getFixedSize
 	      (void) { return pi.getFixedSize(); };
-      float          getValue         
+      float          getValue
 	      (int index) { return pi.getValue(index); };
-      void           setValue         
+      void           setValue
               (int index, float value) { pi.setValue(index, value); };
-      float          getPValue         
+      float          getPValue
 	      (int index) { return pi.getPValue(index); };
-      void           setPValue         
+      void           setPValue
               (int index, float value) { pi.setPValue(index, value); };
-      void           setFixedSize    
+      void           setFixedSize
               (int value) { pi.setFixedSize(value); };
-      void           clearKeyParams     
+      void           clearKeyParams
 	      (void) { pi.clearKeyParams(); };
-      void           setAllocSize     
+      void           setAllocSize
 	      (int asize) { pi.setAllocSize(asize); };
 
-   
+
       int            getPitch          (void);
       void           setPitch          (int aPitch);
       float          getStartOffset    (void);
@@ -131,9 +131,9 @@ class ScoreRecordSimple {
       Array<char>      textfont;         // for storing optional font string
       Array<float>     analysisData;     // analysis data: duration and pitch
                                        // P1 = pitch (-1 for rest)
-                                       // P2 = duration offset from the start 
+                                       // P2 = duration offset from the start
                                        //      of the staff
-                                       // P3 = voice number 
+                                       // P3 = voice number
    private:
       void           writeLittleEndian (ostream& out, float number);
       float          readLittleEndian  (istream& instream);

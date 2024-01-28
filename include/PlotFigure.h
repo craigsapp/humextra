@@ -6,7 +6,7 @@
 // Filename:      ...sig/maint/code/base/PlotFigure/PlotFigure.h
 // Web Address:   http://sig.sapp.org/include/sigBase/PlotFigure.h
 // Documentation: http://sig.sapp.org/doc/classes/PlotFigure
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Plot data and style options
 //
@@ -84,7 +84,7 @@ class PlotFigure {
       void        setYRangeAutoOn (void);
       void        setXRangeAutoOff(void);
       void        setYRangeAutoOff(void);
-    
+
       void        xTicksOn        (void);
       void        yTicksOn        (void);
       void        xTicksOff       (void);
@@ -104,10 +104,10 @@ class PlotFigure {
 
       void        addVLine        (double position, const char* label);
       void        addHLine        (double position, const char* label);
-      void        addText         (const char* textstring, double xpos, 
-                                   double ypos, double aSize, double angle, 
+      void        addText         (const char* textstring, double xpos,
+                                   double ypos, double aSize, double angle,
                                    int orientation);
-   
+
       // point related functions
       void     pointAllocation (int aSize);
       void     addPoint        (double x, double y, double radius, int type=0);

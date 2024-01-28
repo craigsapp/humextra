@@ -9,7 +9,7 @@
 //
 // Description:   Key correlation measurements using the Krumhansl-Schmuckler
 //		  key-finding profile.
-// 
+//
 //		  By default, the comparison key profiles are
 //		  the Krumhansl probe-tone profiles.  If you
 //		  specify the --aa option, the program will use the
@@ -17,7 +17,7 @@
 //		  And -s will use a simple key profile which is
 //		  1 if it is a scale degree and 0 if it is a non-scale
 //		  degree.
-// 
+//
 
 #include "humdrum.h"
 #include <math.h>
@@ -30,16 +30,16 @@ void   printAnalysis            (int bestkey, Array<double>& scores,
                                  Array<double>& durhist);
 void   usage                    (const char* command);
 void   readWeights              (const char* filename);
-int    analyzeKeyRawCorrelation (double* scores, double* distribution, 
-                                 int* pitch, double* durations, int size, 
-                                 int rhythmQ, double* majorKey, 
+int    analyzeKeyRawCorrelation (double* scores, double* distribution,
+                                 int* pitch, double* durations, int size,
+                                 int rhythmQ, double* majorKey,
                                  double* minorKey);
-int    analyzeKeyEuclidean      (double* scores, double* distribution, 
-                                 int* pitch, double* durations, int size, 
-                                 int rhythmQ, double* majorKey, 
+int    analyzeKeyEuclidean      (double* scores, double* distribution,
+                                 int* pitch, double* durations, int size,
+                                 int rhythmQ, double* majorKey,
                                  double* minorKey);
 void   normalizeData            (double* data, int asize);
-void   adjustData               (double* data, int asize, double mean, 
+void   adjustData               (double* data, int asize, double mean,
                                  double sd);
 double getStandardDeviation     (double mean, double* data, int asize);
 double getMean                  (double* data, int asize);
@@ -205,7 +205,7 @@ double minorKeySimple[12] = {
    0.0,    // A
    1.0,    // A#
    0.0};   // B
-   
+
 
 double majorKeyUser[12] = {0};
 double minorKeyUser[12] = {0};
@@ -230,7 +230,7 @@ int main(int argc, char* argv[]) {
    Array<double> level;
    Array<double> distribution(12);
    Array<double> scores(24);
-  
+
    int bestkey = 0;
    int i, j;
    for (i=0; i<numinputs || i==0; i++) {
@@ -248,17 +248,17 @@ int main(int argc, char* argv[]) {
          pitch[j] = Convert::base40ToMidiNoteNumber(pitch[j]);
       }
       if (rawQ) {
-	 if (normalizeQ) { 
+	 if (normalizeQ) {
             normalizeData(majorKey, 12);
             normalizeData(minorKey, 12);
          }
-         bestkey = analyzeKeyRawCorrelation(scores.getBase(), 
+         bestkey = analyzeKeyRawCorrelation(scores.getBase(),
                distribution.getBase(), pitch.getBase(), duration.getBase(),
                pitch.getSize(), rhythmQ, majorKey, minorKey);
       } else if (euclideanQ) {
          equalizeData(majorKey, 12, 1.0);
          equalizeData(minorKey, 12, 1.0);
-         bestkey = analyzeKeyEuclidean(scores.getBase(), 
+         bestkey = analyzeKeyEuclidean(scores.getBase(),
                distribution.getBase(), pitch.getBase(), duration.getBase(),
                pitch.getSize(), rhythmQ, majorKey, minorKey);
       } else {
@@ -277,7 +277,7 @@ int main(int argc, char* argv[]) {
 
 //////////////////////////////
 //
-// printAnalysis -- 
+// printAnalysis --
 //
 
 void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist) {
@@ -299,14 +299,14 @@ void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist) {
       cout << durhist[1]  << "";   // C#
       cout << "};" << endl;
       return;
-   } 
+   }
 
    if (bestkey < 12) {
-      cout << "The best key is: " 
+      cout << "The best key is: "
            << Convert::base12ToKern(buffer, 64, bestkey+12*4)
            << " Major" << "\n";
    } else {
-      cout << "The best key is: " 
+      cout << "The best key is: "
            << Convert::base12ToKern(buffer, 64, bestkey+12*3)
            << " Minor" << "\n";
    }
@@ -334,26 +334,26 @@ void printAnalysis(int bestkey, Array<double>& scores, Array<double>& durhist) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("a|all=b",             "show all scores");   
-   opts.define("Aarden|aarden|aa=b",  "use Aarden profile");   
-   opts.define("Bellman|bellman|bb=b","use Bellman profile");   
-   opts.define("Temperley|temperley|kp|=b","use Kostka-Payne profile");   
+   opts.define("a|all=b",             "show all scores");
+   opts.define("Aarden|aarden|aa=b",  "use Aarden profile");
+   opts.define("Bellman|bellman|bb=b","use Bellman profile");
+   opts.define("Temperley|temperley|kp|=b","use Kostka-Payne profile");
    opts.define("raw=b",               "use raw correlation");
    opts.define("n|normalize=b",       "normalize raw correlation input data");
    opts.define("e|euclidean=b",       "euclidean keyfinding method");
-   opts.define("s|simple=b",          "do simple profile");   
-   opts.define("D|no-duration=b",     "ignore duration of notes in input");   
-   opts.define("f|frequency|freq=b",  "show pitch frequencies");   
-   opts.define("F|Freq=b",            "pitch frequencies MMA by fifths");   
+   opts.define("s|simple=b",          "do simple profile");
+   opts.define("D|no-duration=b",     "ignore duration of notes in input");
+   opts.define("f|frequency|freq=b",  "show pitch frequencies");
+   opts.define("F|Freq=b",            "pitch frequencies MMA by fifths");
    opts.define("w|weights=s:",        "weighting factor file");
 
-   opts.define("debug=b",       "trace input parsing");   
-   opts.define("author=b",      "author of the program");   
-   opts.define("version=b",     "compilation information"); 
-   opts.define("example=b",     "example usage"); 
-   opts.define("h|help=b",      "short description"); 
+   opts.define("debug=b",       "trace input parsing");
+   opts.define("author=b",      "author of the program");
+   opts.define("version=b",     "compilation information");
+   opts.define("example=b",     "example usage");
+   opts.define("h|help=b",      "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -479,8 +479,8 @@ void usage(const char* command) {
 // analyzeKeyEuclidean --
 //
 
-int analyzeKeyEuclidean (double* scores, double* distribution, 
-      int* pitch, double* durations, int size, int rhythmQ, double* majorKey, 
+int analyzeKeyEuclidean (double* scores, double* distribution,
+      int* pitch, double* durations, int size, int rhythmQ, double* majorKey,
       double* minorKey) {
 
    int i, j;
@@ -511,7 +511,7 @@ int analyzeKeyEuclidean (double* scores, double* distribution,
    double maj_temp;
    double min_temp;
    int subscript;
-     
+
    double* r_major = scores;
    double* r_minor = scores + 12;
    double value_maj;
@@ -519,7 +519,7 @@ int analyzeKeyEuclidean (double* scores, double* distribution,
 
    for (i=0; i<12; i++) {
       maj_temp = min_temp = 0;
-   
+
       // Examine all pitches for each key,
       for (j=0; j<12; j++) {
          subscript = (i+j)%12;
@@ -529,7 +529,7 @@ int analyzeKeyEuclidean (double* scores, double* distribution,
          maj_temp += (value_maj * value_maj);
          min_temp += (value_min * value_min);
       }
-      
+
       if (maj_temp <= 0.0) {
          r_major[i] = 0.0;
       } else {
@@ -565,7 +565,7 @@ int analyzeKeyEuclidean (double* scores, double* distribution,
 //   a size of 24 or greater.  input array pitch must have a size of "size".
 //
 
-int analyzeKeyRawCorrelation(double* scores, double* distribution, int* pitch, 
+int analyzeKeyRawCorrelation(double* scores, double* distribution, int* pitch,
       double* durations, int size, int rhythmQ, double* majorKey,
       double* minorKey) {
    int i, j;
@@ -598,20 +598,20 @@ int analyzeKeyRawCorrelation(double* scores, double* distribution, int* pitch,
    double maj_temp;
    double min_temp;
    int subscript;
-     
+
    double* r_major = scores;
    double* r_minor = scores + 12;
 
    for (i=0; i<12; i++) {
       maj_temp = min_temp = 0;
-   
+
       // Examine all pitches for each key,
       for (j=0; j<12; j++) {
          subscript = (i+j)%12;
          maj_temp += (majorKey[j] * distribution[subscript]);
          min_temp += (minorKey[j] * distribution[subscript]);
       }
-      
+
       if (maj_temp <= 0.0) {
          r_major[i] = 0.0;
       } else {

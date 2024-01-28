@@ -5,7 +5,7 @@
 // Last Modified: Fri Mar 11 21:25:24 PST 2016 Changed to STL
 // Filename:      ...sig/include/sigInfo/HumdrumStream.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/HumdrumStream.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Multi-movement manager for Humdrum files.  The class
 //                will accept files, standard input, URLs, URIs which
@@ -54,14 +54,14 @@ class HumdrumStream {
 
       void            clear              (void);
       int             eof                (void);
-   
+
       int             getFile            (HumdrumFile& infile);
       int             read               (HumdrumFile& infile);
 
    protected:
       ifstream        instream;         // used to read from list of files.
       stringstream    urlbuffer;        // used to read data over internet.
-      string          newfilebuffer;    // used to keep track of !!!!segment: 
+      string          newfilebuffer;    // used to keep track of !!!!segment:
                                         // records.
 
       vector<string>  filelist;         // used when not using cin
@@ -71,17 +71,17 @@ class HumdrumStream {
 
       // automatic URI downloading of data in read()
       #ifdef USING_URI
-      void     fillUrlBuffer            (stringstream& uribuffer, 
+      void     fillUrlBuffer            (stringstream& uribuffer,
                                          const char* uriname);
-      int      getChunk                 (int socket_id, 
+      int      getChunk                 (int socket_id,
                                          stringstream& inputdata, char* buffer,
                                          int bufsize);
-      int      getFixedDataSize         (int socket_id, int datalength, 
-                                         stringstream& inputdata, 
+      int      getFixedDataSize         (int socket_id, int datalength,
+                                         stringstream& inputdata,
                                          char* buffer, int bufsize);
-      int      open_network_socket      (const char *hostname, 
+      int      open_network_socket      (const char *hostname,
                                          unsigned short int port);
-      void     prepare_address          (struct sockaddr_in *addr, 
+      void     prepare_address          (struct sockaddr_in *addr,
                                          const char *hostname,
                                          unsigned short int port);
       #endif

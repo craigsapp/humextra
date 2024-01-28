@@ -5,7 +5,7 @@
 // Last Modified: Sun Feb 10 19:42:48 PST 2002
 // Filename:      ...sig/src/sigInfo/ScoreParameters.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/ScoreParameters.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Base class for SCORE musical objects.
 //
@@ -16,6 +16,7 @@
 #include "Array.h"
 
 #include <iostream>
+#include <string>
 
 class ScoreNamedParameter {
    public:
@@ -31,10 +32,10 @@ class ScoreNamedParameter {
       int          isValid                (void);
       int          isInvalid              (void);
       int          isNamed                (const char* aName);
-      ScoreNamedParameter& operator=      (ScoreNamedParameter& aKeyParam);
+      ScoreNamedParameter& operator=      (const ScoreNamedParameter& aKeyParam);
 
    private:
-      Array<char> name;    // name of the key parameter
+      std::string m_name;  // name of the key parameter
       double      value;   // value of the key parameter
 };
 
@@ -64,13 +65,13 @@ class ScoreParameters {
       double              getKeyValue         (int index);
 
       void                setValue            (int index, double value);
-      void                setValue            (const char* keyName, 
+      void                setValue            (const char* keyName,
                                                  double keyValue);
       void                setPValue           (int number, double value);
-      void                setPValue           (const char* keyName, 
+      void                setPValue           (const char* keyName,
                                                  double keyValue);
-     
-      ScoreParameters&    operator=           (ScoreParameters& anItem);
+
+      ScoreParameters&    operator=           (const ScoreParameters& anItem);
       void                setAllocSize        (int aSize);
       int                 getFixedSize        (void);
       void                setFixedSize        (int aSize);

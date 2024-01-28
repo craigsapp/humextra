@@ -7,8 +7,8 @@
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/time2tempo.cpp
 // Syntax:        C++; museinfo
 //
-// Description:   
-// 
+// Description:
+//
 
 #include "humdrum.h"
 #include <string.h>
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 // getTimings -- Get an array of the times for each line in the
 //     input file from a **time spine.  Currently only look for
 //     the first **time spine in the file.
-// 
+//
 
 void getTimings(HumdrumFile& infile, Array<double>& timings,
       Array<double>& tempo) {
@@ -104,7 +104,7 @@ void getTimings(HumdrumFile& infile, Array<double>& timings,
          }
       }
       if (infile[i].getType() != E_humrec_data) {
-         continue; 
+         continue;
       }
 
       for (j=0; j<infile[i].getFieldCount(); j++) {
@@ -130,13 +130,13 @@ void getTimings(HumdrumFile& infile, Array<double>& timings,
    }
 
    // the times have been extracted from the Humdrum data, so now
-   // convert them into tempo markings.  
+   // convert them into tempo markings.
 
    int lastindex = 0;
    double beatdur;
    double timedur;
    double atempo;
-   
+
    for (i=0; i<infile.getNumLines(); i++) {
       if (timings[i] < 0.0) {
          continue;
@@ -171,18 +171,18 @@ void getTimings(HumdrumFile& infile, Array<double>& timings,
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("a|append=b",   "append analysis to input data");   
-   opts.define("p|prepend=b",  "prepend analysis to input data");   
-   opts.define("R|no-round=b",  "do not round output tempos to nearest integer");   
+   opts.define("a|append=b",   "append analysis to input data");
+   opts.define("p|prepend=b",  "prepend analysis to input data");
+   opts.define("R|no-round=b",  "do not round output tempos to nearest integer");
    opts.define("f|fill=b",     "fill tempo spine removing null tokens");
 
-   opts.define("debug=b",   "trace input parsing");   
-   opts.define("author=b",  "author of the program");   
-   opts.define("version=b", "compilation information"); 
-   opts.define("example=b", "example usage"); 
-   opts.define("h|help=b",  "short description"); 
+   opts.define("debug=b",   "trace input parsing");
+   opts.define("author=b",  "author of the program");
+   opts.define("version=b", "compilation information");
+   opts.define("example=b", "example usage");
+   opts.define("h|help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -228,7 +228,7 @@ void example(void) {
 
 //////////////////////////////
 //
-// printAnalysis -- 
+// printAnalysis --
 //
 
 void printAnalysis(HumdrumFile& infile, Array<double>& timings,

@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Dec 26 03:28:25 PST 2010
 // Last Modified: Mon Feb  7 06:22:42 PST 2011 (added beam directions)
-// Filename:      ...sig/examples/all/autostem.cpp 
+// Filename:      ...sig/examples/all/autostem.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/autostem.cpp
 // Syntax:        C++; museinfo
 //
@@ -40,53 +40,53 @@ void      checkOptions         (Options& opts, int argc, char** argv);
 void      example              (void);
 void      usage                (const string& command);
 void      autostem             (HumdrumFile& infile);
-void      getClefInfo          (vector<vector<int> >& baseline, 
+void      getClefInfo          (vector<vector<int> >& baseline,
                                 HumdrumFile& infile);
-void      addStem              (char* output, const string& input, 
+void      addStem              (char* output, const string& input,
                                 const string& piece);
-void      processKernTokenStemsSimpleModel(HumdrumFile& infile, 
-                                vector<vector<int> >& baseline, 
+void      processKernTokenStemsSimpleModel(HumdrumFile& infile,
+                                vector<vector<int> >& baseline,
                                 int row, int col);
 void      removeStems          (ostream& out, HumdrumFile& infile);
 void      removeStem2          (HumdrumFile& infile, int row, int col);
 int       getVoice             (HumdrumFile& infile, int row, int col);
-void      getNotePositions     (vector<vector<vector<int> > >& notepos, 
-                                vector<vector<int> >& baseline, 
+void      getNotePositions     (vector<vector<vector<int> > >& notepos,
+                                vector<vector<int> >& baseline,
                                 HumdrumFile& infile);
-void      printNotePositions   (HumdrumFile& infile, 
+void      printNotePositions   (HumdrumFile& infile,
                                 vector<vector<vector<int> > >& notepos);
 void      getVoiceInfo         (vector<vector<int> >& voice, HumdrumFile& infile);
 void      printVoiceInfo       (HumdrumFile& infile, vector<vector<int> >& voice);
-void      processKernTokenStems(HumdrumFile& infile, 
+void      processKernTokenStems(HumdrumFile& infile,
                                 vector<vector<int> >& baseline, int row, int col);
 void      getMaxLayers         (vector<int>& maxlayer, vector<vector<int> >& voice,
                                 HumdrumFile& infile);
-void      assignStemDirections (vector<vector<int> >& stemdir, 
-                                vector<vector<int> > & voice, 
-                                vector<vector<vector<int> > >& notepos, 
+void      assignStemDirections (vector<vector<int> >& stemdir,
+                                vector<vector<int> > & voice,
+                                vector<vector<vector<int> > >& notepos,
                                 HumdrumFile& infile);
-void      assignBasicStemDirections(vector<vector<int> >& stemdir, 
-                                vector<vector<int> >& voice, 
-                                vector<vector<vector<int> > >& notepos, 
+void      assignBasicStemDirections(vector<vector<int> >& stemdir,
+                                vector<vector<int> >& voice,
+                                vector<vector<vector<int> > >& notepos,
                                 HumdrumFile& infile);
-int       determineChordStem   (vector<vector<int> >& voice, 
-                                vector<vector<vector<int> > >& notepos, 
+int       determineChordStem   (vector<vector<int> >& voice,
+                                vector<vector<vector<int> > >& notepos,
                                 HumdrumFile& infile, int row, int col);
-void      insertStems          (HumdrumFile& infile, 
+void      insertStems          (HumdrumFile& infile,
                                 vector<vector<int> >& stemdir);
-void      setStemDirection     (HumdrumFile& infile, int row, int col, 
+void      setStemDirection     (HumdrumFile& infile, int row, int col,
                                 int direction);
-void      getBeamState         (vector<vector<string > >& beams, 
+void      getBeamState         (vector<vector<string > >& beams,
                                 HumdrumFile& infile);
-void      countBeamStuff       (const string& token, int& start, int& stop, 
+void      countBeamStuff       (const string& token, int& start, int& stop,
                                 int& flagr, int& flagl);
-void      getBeamSegments      (vector<vector<Coord> >& beamednotes, 
-                                vector<vector<string > >& beamstates, 
+void      getBeamSegments      (vector<vector<Coord> >& beamednotes,
+                                vector<vector<string > >& beamstates,
                                 HumdrumFile& infile, vector<int> maxlayer);
-int       getBeamDirection     (vector<Coord>& coords,  
-                                vector<vector<int> >& voice, 
+int       getBeamDirection     (vector<Coord>& coords,
+                                vector<vector<int> >& voice,
                                 vector<vector<vector<int> > >& notepos);
-void      setBeamDirection     (vector<vector<int> >& stemdir, 
+void      setBeamDirection     (vector<vector<int> >& stemdir,
                                 vector<Coord>& bnote, int direction);
 
 
@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
 			cout << infile;
 			exit(0);
 		}
-	} 
+	}
 
 	autostem(infile);
 	cout << infile;
@@ -172,7 +172,7 @@ void removeStems(ostream& out, HumdrumFile& infile) {
 				pre.sar(buffer, "[\\\\/](?!x)", "", "g");
 			}
 			out << buffer;
-	
+
 			if (j < infile[i].getFieldCount()-1) {
 				out << "\t";
 			}
@@ -192,7 +192,7 @@ void removeStems(ostream& out, HumdrumFile& infile) {
 void autostem(HumdrumFile& infile) {
 	vector<vector<int> > baseline;
 	getClefInfo(baseline, infile);
-	
+
 	vector<vector<vector<int> > > notepos;     // staff line position of all notes
 	getNotePositions(notepos, baseline, infile);
 
@@ -231,7 +231,7 @@ void autostem(HumdrumFile& infile) {
 		for (j=0; j<infile[i].getFieldCount(); j++) {
 				if (!infile[i].isExInterp(j, "**kern")) {
 				continue;
-				} 
+				}
 				if (strcmp(infile[i][j], ".") == 0) {
 				continue;
 				}
@@ -330,8 +330,8 @@ void setStemDirection(HumdrumFile& infile, int row, int col, int direction) {
 // assignStemDirections --
 //
 
-void assignStemDirections(vector<vector<int> >& stemdir, 
-		vector<vector<int> > & voice, 
+void assignStemDirections(vector<vector<int> >& stemdir,
+		vector<vector<int> > & voice,
 		vector<vector<vector<int> > >& notepos, HumdrumFile& infile) {
 
 	vector<int> maxlayer;
@@ -373,7 +373,7 @@ void assignStemDirections(vector<vector<int> >& stemdir,
 // setBeamDirection --
 //
 
-void setBeamDirection(vector<vector<int> >& stemdir, vector<Coord>& bnote, 
+void setBeamDirection(vector<vector<int> >& stemdir, vector<Coord>& bnote,
 		int direction) {
 	int x;
 	int i, j;
@@ -392,7 +392,7 @@ void setBeamDirection(vector<vector<int> >& stemdir, vector<Coord>& bnote,
 // getBeamDirection -- return a consensus stem direction for beamed notes.
 //
 
-int getBeamDirection(vector<Coord>& coords, vector<vector<int> >& voice, 
+int getBeamDirection(vector<Coord>& coords, vector<vector<int> >& voice,
 		vector<vector<vector<int> > >& notepos) {
 
 	// voice values are presumed to be 0 at the moment.
@@ -451,12 +451,12 @@ int getBeamDirection(vector<Coord>& coords, vector<vector<int> >& voice,
 //
 // getBeamSegments -- arrange the beamed notes into a long list with
 //    each entry being a list of notes containing one beam.  Each
-//    beamed note set should have their beams all pointing in the same 
+//    beamed note set should have their beams all pointing in the same
 //    direction.
 //
 
-void getBeamSegments(vector<vector<Coord> >& beamednotes, 
-		vector<vector<string > >& beamstates, HumdrumFile& infile, 
+void getBeamSegments(vector<vector<Coord> >& beamednotes,
+		vector<vector<string > >& beamstates, HumdrumFile& infile,
 		vector<int> maxlayer) {
 
 	beamednotes.reserve(1000000);
@@ -469,7 +469,7 @@ void getBeamSegments(vector<vector<Coord> >& beamednotes,
 		beambuffer[i].resize(10); // layer  max 10, but allow growth
 		for (j=0; j<(int)beambuffer[i].size(); j++) {
 				beambuffer[i][j].reserve(100); // 100 notes in a beam expected as max
-				beambuffer[i][j].resize(0); 
+				beambuffer[i][j].resize(0);
 		}
 	}
 
@@ -530,7 +530,7 @@ void getBeamSegments(vector<vector<Coord> >& beamednotes,
 // getMaxLayers --
 //
 
-void getMaxLayers(vector<int>& maxlayer, vector<vector<int> >& voice, 
+void getMaxLayers(vector<int>& maxlayer, vector<vector<int> >& voice,
 		HumdrumFile& infile) {
 	int track;
 	maxlayer.resize(infile.getMaxTracks() + 1);
@@ -569,7 +569,7 @@ void getMaxLayers(vector<int>& maxlayer, vector<vector<int> >& voice,
 // 2 voices will be stemmed down always.
 // 3 and higher are still to be determined.
 //
-// Future enhancement of this algorithm: if one voice contains an invisible 
+// Future enhancement of this algorithm: if one voice contains an invisible
 // rest, then it will be ignored in the voice calculation.
 //
 
@@ -587,7 +587,7 @@ void getVoiceInfo(vector<vector<int> >& voice, HumdrumFile& infile) {
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 				if (!infile[i].isExInterp(j, "**kern")) {
 				continue;
-				} 
+				}
 				if (strcmp(infile[i][j], ".") == 0) {
 				continue;
 				}
@@ -626,7 +626,7 @@ void printVoiceInfo(HumdrumFile& infile, vector<vector<int> >& voice) {
 				cout << "!\n";
 				continue;
 		}
-		if (infile[i].isInterpretation()) { 
+		if (infile[i].isInterpretation()) {
 				if (strncmp(infile[i][0], "**", 2) == 0) {
 				cout << "**voice";
 				} else if (strcmp(infile[i][0], "*-") == 0) {
@@ -690,7 +690,7 @@ void printVoiceInfo(HumdrumFile& infile, vector<vector<int> >& voice) {
 //    ===== -4
 //
 
-void printNotePositions(HumdrumFile& infile, 
+void printNotePositions(HumdrumFile& infile,
 		vector<vector<vector<int> > >& notepos) {
 
 	PerlRegularExpression pre;
@@ -714,7 +714,7 @@ void printNotePositions(HumdrumFile& infile,
 				cout << "!\n";
 				continue;
 		}
-		if (infile[i].isInterpretation()) { 
+		if (infile[i].isInterpretation()) {
 				if (strncmp(infile[i][0], "**", 2) == 0) {
 				cout << "**vpos";
 				} else if (strcmp(infile[i][0], "*-") == 0) {
@@ -769,7 +769,7 @@ void printNotePositions(HumdrumFile& infile,
 // at positions from bottom to top: -4, -2, 0, +2, +4.
 //
 
-void getNotePositions(vector<vector<vector<int> > >& notepos, 
+void getNotePositions(vector<vector<vector<int> > >& notepos,
 		vector<vector<int> >& baseline, HumdrumFile& infile) {
 
 	notepos.resize(infile.getNumLines());
@@ -787,7 +787,7 @@ void getNotePositions(vector<vector<vector<int> > >& notepos,
 		for (j=0; j<infile[i].getFieldCount(); j++) {
 				if (!infile[i].isExInterp(j, "**kern")) {
 				continue;
-				} 
+				}
 				if (strcmp(infile[i][j], ".") == 0) {
 				// ignore null-tokens
 				continue;
@@ -816,7 +816,7 @@ void getNotePositions(vector<vector<vector<int> > >& notepos,
 // processKernTokenStems --
 //
 
-void processKernTokenStems(HumdrumFile& infile, 
+void processKernTokenStems(HumdrumFile& infile,
 		vector<vector<int> >& baseline, int row, int col) {
 
 	exit(1);
@@ -831,8 +831,8 @@ void processKernTokenStems(HumdrumFile& infile,
 // assignBasicStemDirections -- don't take beams into consideration.
 //
 
-void assignBasicStemDirections(vector<vector<int> >& stemdir, 
-		vector<vector<int> >& voice, vector<vector<vector<int> > >& notepos, 
+void assignBasicStemDirections(vector<vector<int> >& stemdir,
+		vector<vector<int> >& voice, vector<vector<vector<int> > >& notepos,
 		HumdrumFile& infile) {
 
 	int i, j;
@@ -872,8 +872,8 @@ void assignBasicStemDirections(vector<vector<int> >& stemdir,
 // determineChordStem --
 //
 
-int determineChordStem(vector<vector<int> >& voice, 
-		vector<vector<vector<int> > >& notepos, HumdrumFile& infile, int row, 
+int determineChordStem(vector<vector<int> >& voice,
+		vector<vector<vector<int> > >& notepos, HumdrumFile& infile, int row,
 		int col) {
 
 	if (notepos[row][col].size() == 0) {
@@ -900,16 +900,16 @@ int determineChordStem(vector<vector<int> >& voice,
 		}
 	}
 
-	// chord with more than one note so choose the extreme note as the 
+	// chord with more than one note so choose the extreme note as the
 	// one which decides the direction
- 
+
 	int i;
 	int minn = notepos[row][col][0];
 	int maxx = notepos[row][col][0];
 	for (i=1; i<(int)notepos[row][col].size(); i++) {
 		if (minn > notepos[row][col][i]) {
 				minn = notepos[row][col][i];
-		} 
+		}
 		if (maxx < notepos[row][col][i]) {
 				maxx = notepos[row][col][i];
 		}
@@ -941,7 +941,7 @@ int determineChordStem(vector<vector<int> >& voice,
 // processKernTokenStemsSimpleModel --
 //
 
-void processKernTokenStemsSimpleModel(HumdrumFile& infile, 
+void processKernTokenStemsSimpleModel(HumdrumFile& infile,
 		vector<vector<int> >& baseline, int row, int col) {
 
 	int k;
@@ -955,8 +955,8 @@ void processKernTokenStemsSimpleModel(HumdrumFile& infile,
 		if (duration >= 4) {
 				// whole note or larger for note/chord, to not append a stem
 				return;
-		} 
-		if ((strchr(infile[i][j], '/') != NULL) || 
+		}
+		if ((strchr(infile[i][j], '/') != NULL) ||
 				(strchr(infile[i][j], '/') != NULL)) {
 			if (removeallQ || overwriteallQ) {
 			if (strstr(infile[i][j], "/x") != NULL) {
@@ -986,7 +986,7 @@ void processKernTokenStemsSimpleModel(HumdrumFile& infile,
 	}
 
 	int voice = getVoice(infile, row, col);
-	
+
 	int len = strlen(infile[i][j]);
 	char buffer[128] = {0};
 	char buffer2[128] = {0};
@@ -1000,9 +1000,9 @@ void processKernTokenStemsSimpleModel(HumdrumFile& infile,
 				// if (duration >= 4) {
 				//    // whole note or larger for note/chord, do not append a stem
 				//    return;
-				// } 
+				// }
 		}
-		if (!((strchr(infile[i][j], '/') != NULL) || 
+		if (!((strchr(infile[i][j], '/') != NULL) ||
 				(strchr(infile[i][j], '\\') != NULL))) {
 			location = Convert::kernToDiatonicPitch(buffer) -
 				baseline[row][col] - Middle;
@@ -1101,12 +1101,12 @@ void addStem(char* output, const string& input, const string& piece) {
 ///////////////////////////////
 //
 // getClefInfo -- Identify the clef of each note in the score.
-//     Does not consider the case where a primary track contains 
+//     Does not consider the case where a primary track contains
 //     more than one clef at a time.
 //
 
 void getClefInfo(vector<vector<int> >& baseline, HumdrumFile& infile) {
-	vector<int> states(infile.getMaxTracks()+1, 
+	vector<int> states(infile.getMaxTracks()+1,
 			Convert::kernClefToBaseline("*clefG2"));
 
 	int i, j;
@@ -1147,7 +1147,7 @@ void getClefInfo(vector<vector<int> >& baseline, HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char** argv) {
@@ -1278,7 +1278,7 @@ void getBeamState(vector<vector<string > >& beams, HumdrumFile& infile) {
 	for (i=0; i<infile.getNumLines(); i++) {
 		gbinfo.clear();
 		if (infile[i].isMeasure()) {
-				// don't allow beams across barlines.  Mostly for 
+				// don't allow beams across barlines.  Mostly for
 				// preventing buggy beams from propagating...
 				for (t=1; t<=infile.getMaxTracks(); t++) {
 				std::fill(beamstate[t].begin(), beamstate[t].end(), 0);
@@ -1307,12 +1307,12 @@ void getBeamState(vector<vector<string > >& beams, HumdrumFile& infile) {
 				if (strcmp(infile[i][j], ".") == 0) {
 				// ignore null tokens
 				continue;
-				}         
+				}
 				if (strchr(infile[i][j], 'r') != NULL) {
 				// ignore rests.  Might be useful to not ignore
 				// rests if beams extent over rests...
 				continue;
-				}         
+				}
 				rn = Convert::kernToDurationR(infile[i][j]);
 				if (rn >= 1) {
 				beamstate[track][curlayer[track]] = 0;
@@ -1339,7 +1339,7 @@ void getBeamState(vector<vector<string > >& beams, HumdrumFile& infile) {
 				}
 				contin = gracestate[track][curlayer[track]];
 				contin -= stop;
-				for (ii=0; ii<contin; ii++) { 
+				for (ii=0; ii<contin; ii++) {
 					gbinfo += '=';
 				}
 				if (start > 0) {
@@ -1389,7 +1389,7 @@ void getBeamState(vector<vector<string > >& beams, HumdrumFile& infile) {
 				}
 				contin = beamstate[track][curlayer[track]];
 				contin -= stop;
-				for (ii=0; ii<contin; ii++) { 
+				for (ii=0; ii<contin; ii++) {
 					gbinfo += '=';
 				}
 				if (start > 0) {
@@ -1428,7 +1428,7 @@ void getBeamState(vector<vector<string > >& beams, HumdrumFile& infile) {
 // countBeamStuff --
 //
 
-void countBeamStuff(const string& token, int& start, int& stop, int& flagr, 
+void countBeamStuff(const string& token, int& start, int& stop, int& flagr,
 		int& flagl) {
 	int i = 0;
 	start = stop = flagr = flagl = 0;

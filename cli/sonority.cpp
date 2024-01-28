@@ -31,15 +31,15 @@ void    checkOptions        (Options& opts, int argc, char* argv[]);
 void    example             (void);
 void    processRecords      (HumdrumFile& infile);
 void    usage               (const string& command);
-void    fillStringWithNotes (char* string, ChordQuality& quality, 
+void    fillStringWithNotes (char* string, ChordQuality& quality,
                              HumdrumFile& infile, int line);
-int     identifyBassNote    (vector<int>& notes, 
+int     identifyBassNote    (vector<int>& notes,
                              HumdrumFile& infile, int line,
                              vector<int>& sounding);
-int     transitionalSonority(ChordQuality& quality, HumdrumFile& infile, 
+int     transitionalSonority(ChordQuality& quality, HumdrumFile& infile,
                              int line);
 void    printTriadImage     (HumdrumFile& infile, int rows, int cols);
-void    printBarlines       (HumdrumFile& infile, int numberheight, 
+void    printBarlines       (HumdrumFile& infile, int numberheight,
                              int numberwidth);
 double  getMeasureSize      (HumdrumFile& infile, int width);
 void    printLegend         (int legendheight, int legendwidth);
@@ -70,7 +70,7 @@ int          imagey    = 20;     // used with -I option
 int          octaveVal = -100;   // used with -o option
 int          barlinesQ = 0;      // used with -b option
 int          legendQ   = 0;      // used with -l option
-int          outlineQ  = 1;      // 
+int          outlineQ  = 1;      //
 int          filenameQ = 0;      // used with --filename option
 string       notesep;            // used with -N option
 const char* colorindex[26];
@@ -321,7 +321,7 @@ void printBarlines(HumdrumFile& infile, int numberheight, int numberwidth) {
 			} else {
 				style = 0;
 			}
-			position = int(numberwidth * infile[i].getAbsBeat() / 
+			position = int(numberwidth * infile[i].getAbsBeat() /
 					infile.getTotalDuration() + 0.5);
 			if ((number % 100) == 0) {
 				size = 10;
@@ -336,7 +336,7 @@ void printBarlines(HumdrumFile& infile, int numberheight, int numberwidth) {
 				if (measuresize < 3) {
 					// don't display single measure ticks if they
 					// are too closely spaced
-					size = 0; 
+					size = 0;
 				}
 			}
 		}
@@ -365,7 +365,7 @@ void printBarlines(HumdrumFile& infile, int numberheight, int numberwidth) {
 					}
 				}
 			}
-		} 
+		}
 	}
 
 	// print a empty line so that small measure markers can be seen
@@ -374,8 +374,8 @@ void printBarlines(HumdrumFile& infile, int numberheight, int numberwidth) {
 	}
 	cout << '\n';
 
-	for (i=0; i<(int)xaxis.size(); i++) {  
-		for (j=0; j<(int)xaxis[i].size(); j++) {  
+	for (i=0; i<(int)xaxis.size(); i++) {
+		for (j=0; j<(int)xaxis[i].size(); j++) {
 			cout << ' ' << colorindex[xaxis[i][j]];
 		}
 		cout << '\n';
@@ -408,15 +408,15 @@ double getMeasureSize(HumdrumFile& infile, int width) {
 			bar = number;
 			line = i;
 			if (bar == lastbar + 1) {
-				return 
-				(infile[line].getAbsBeat() - infile[lastline].getAbsBeat()) 
+				return
+				(infile[line].getAbsBeat() - infile[lastline].getAbsBeat())
 				/ infile.getTotalDuration() * width;
 			} else {
 				lastbar = bar;
 				lastline = line;
 			}
 		}
-		
+
 	}
 
 	return 5;
@@ -426,7 +426,7 @@ double getMeasureSize(HumdrumFile& infile, int width) {
 
 ///////////////////////////////
 //
-// printLegend -- print key color mappings as a keyboard 
+// printLegend -- print key color mappings as a keyboard
 //
 
 void printLegend(int legendheight, int legendwidth) {
@@ -434,7 +434,7 @@ void printLegend(int legendheight, int legendwidth) {
 	for (int i=0; i<(int)legend.size(); i++) {
 		legend[i].resize(legendwidth);
 		// set to background color:
-		std::fill(legend[i].begin(), legend[i].end(), 24); 
+		std::fill(legend[i].begin(), legend[i].end(), 24);
 	}
 
 	int startrow = legendheight / 5;
@@ -459,8 +459,8 @@ void printLegend(int legendheight, int legendwidth) {
 	int v, lastv = -1;
 	for (int i=startrow; i<=endrow; i++) {
 		for (int j=startcol; j<=endcol; j++) {
-			v = diatonic[int((double)(j-startcol)/(endcol-startcol+1)*7)]; 
-			if (dooutline && ((v != lastv) || 
+			v = diatonic[int((double)(j-startcol)/(endcol-startcol+1)*7)];
+			if (dooutline && ((v != lastv) ||
 					(j == endcol) || (i==startrow) || (i==endrow))) {
 				legend[i][j] = 25;
 			} else if (i > (endrow + startrow)/2) {  // major keys
@@ -560,7 +560,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("example=b",         "example usages");
 	opts.define("h|help=b",          "short description");
 	opts.process(argc, argv);
-	
+
 	// handle basic options:
 	if (opts.getBoolean("author")) {
 		cout << "Written by Craig Stuart Sapp, "
@@ -690,7 +690,7 @@ void processRecords(HumdrumFile& infile) {
 			case E_humrec_data_comment:
 				if (appendQ) {
 					cout << infile[i] << "\t";
-				} 
+				}
 				if (infile[i].equalFieldsQ("**kern")) {
 					cout << infile[i][0];
 				} else {
@@ -714,7 +714,7 @@ void processRecords(HumdrumFile& infile) {
 						cout << "**qual";
 					}
 				} else {
-					if (infile[i].equalFieldsQ("**kern") && 
+					if (infile[i].equalFieldsQ("**kern") &&
 							(!infile[i].isSpineManipulator(0))) {
 						cout << infile[i][0];
 					} else {
@@ -777,7 +777,7 @@ void processRecords(HumdrumFile& infile) {
 					if (tniQ) {
 						int inversion = -1;
 						if (strcmp(name, "3-11") == 0) {
-							if ((strcmp(cq[i].getTypeName(), "min") == 0) || 
+							if ((strcmp(cq[i].getTypeName(), "min") == 0) ||
 								(strcmp(cq[i].getTypeName(), "maj") == 0)) {
 								inversion = cq[i].getInversion();
 							}
@@ -796,7 +796,7 @@ void processRecords(HumdrumFile& infile) {
 					quality.makeString(aString, explicitQ);
 					if (strcmp(aString, "") != 0) {
 						if (strcmp(aString, unknown) == 0 || (
-								quality.getType()==E_chord_note && 
+								quality.getType()==E_chord_note &&
 								options.getBoolean("root"))
 								) {
 							char tempbuffer[128] = {0};
@@ -899,7 +899,7 @@ int transitionalSonority(ChordQuality& quality, HumdrumFile& infile, int line) {
 // fillStringWithNotes --
 //
 
-void fillStringWithNotes(char* string, ChordQuality& quality, 
+void fillStringWithNotes(char* string, ChordQuality& quality,
 		HumdrumFile& infile, int line) {
 
 	string[0] = '\0';
@@ -956,7 +956,7 @@ void fillStringWithNotes(char* string, ChordQuality& quality,
 // identifyBassnote --
 //
 
-int identifyBassNote(vector<int>& notes, HumdrumFile& infile, 
+int identifyBassNote(vector<int>& notes, HumdrumFile& infile,
 		int line, vector<int>& sounding) {
 	int j, k;
 	int output = -1;

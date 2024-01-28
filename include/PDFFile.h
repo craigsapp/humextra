@@ -4,9 +4,9 @@
 // Last Modified: Tue May 11 21:54:41 PDT 2010
 // Filename:      ...sig/include/sigInfo/PDFFile.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/PDFFile.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
-// Description:   
+// Description:
 //
 
 #ifndef _PDFFILE_H_INCLUDED
@@ -76,7 +76,7 @@ class PDFFile {
       void       buildIndirectObjectIndex(istream& file, int xrefoffset);
       static int getPreviousOffset       (istream& file);
       void       processXrefList         (istream& file, char firstdigit);
-      void       getOriginalTrailer      (SSTREAM& trailer, int filesize, 
+      void       getOriginalTrailer      (SSTREAM& trailer, int filesize,
                                           int xref, istream& file);
       void       expandObjectListing     (int newsize);
       void       makeEmbeddedFileList    (void);

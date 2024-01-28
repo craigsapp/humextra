@@ -23,7 +23,7 @@ using namespace std;
 
 // function declarations
 void      checkOptions       (Options& opts, int argc, char* argv[]);
-double    displayResults     (HumdrumFile& hfile, int count, 
+double    displayResults     (HumdrumFile& hfile, int count,
 					               const string& filename);
 void      example            (void);
 void      usage              (const string& command);
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
 
 	// figure out the number of input files to process
 	numinputs = options.getArgCount();
- 
+
 	string filename;
 	double total = 0.0;
 	int counter = 0;
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 			filename = options.getArg(i+1);
 			hfile.read(filename);
 		}
-	  
+
 		hfile.analyzeRhythm();
 		total += displayResults(hfile, numinputs, filename);
 		counter++;
@@ -84,7 +84,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("example=b");              // example usages
 	opts.define("h|help=b");               // short description
 	opts.process(argc, argv);
-	
+
 	// handle basic options:
 	if (opts.getBoolean("author")) {
 		cout << "Written by Craig Stuart Sapp, "
@@ -103,7 +103,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 		exit(0);
 	}
 }
-  
+
 
 
 //////////////////////////////

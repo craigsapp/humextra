@@ -5,7 +5,7 @@
 // Last Modified: Thu Jul  9 14:25:29 PDT 1998
 // Filename:      ...sig/include/sigInfo/Identify.h
 // Web Address:   http://sig.sapp.org/src/sigInfo/Identify.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Helping class to identify various string formats.
 //

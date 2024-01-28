@@ -5,7 +5,7 @@
 // Last Modified: Sat Jun 13 23:27:33 PDT 1998
 // Filename:      ...sig/include/sigInfo/Enum_humdrumRecord.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Enum_humdrumRecord.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 
 

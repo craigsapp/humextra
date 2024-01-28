@@ -5,7 +5,7 @@
 // Last Modified: Fri Mar 29 14:49:39 PDT 2013
 // Filename:      ...sig/include/sigInfo/HumdrumFileSet.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/HumdrumFileSet.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Collection of one or more Humdrum data sequences started
 //                with an exclusive interpretation and ending with *-.
@@ -47,33 +47,33 @@ class HumdrumFileSet {
       int                    read             (Options& options);
       int                    readAppend       (const char* filename);
       int                    readAppend       (const string& filename);
-      int                    readAppend       (istream& inStream, 
+      int                    readAppend       (istream& inStream,
                                                const char* filename = "");
 
    protected:
       Array<HumdrumFile*>    data;
 
-      void                   appendHumdrumFileContent(const char* filename, 
+      void                   appendHumdrumFileContent(const char* filename,
                                                SSTREAM& inbuffer);
 
       #ifdef USING_URI
       void                   readAppendFromHumdrumURI(SSTREAM& inputstream,
                                                 const char* humdrumaddress);
-      void                   readAppendFromJrpURI(SSTREAM& inputstream, 
+      void                   readAppendFromJrpURI(SSTREAM& inputstream,
                                                 const char* jrpaddress);
       void                   readAppendFromHttpURI(SSTREAM& inputstream,
                                                 const char* webaddress,
                                                 const char* filename = NULL);
-      int                    getChunk          (int socket_id, 
-                                                SSTREAM& inputstream, 
+      int                    getChunk          (int socket_id,
+                                                SSTREAM& inputstream,
                                                 char* buffer, int bufsize);
-      void                   prepare_address   (struct sockaddr_in *address, 
-                                                const char *hostname, 
+      void                   prepare_address   (struct sockaddr_in *address,
+                                                const char *hostname,
                                                 unsigned short int port);
-      int                    open_network_socket(const char *hostname, 
+      int                    open_network_socket(const char *hostname,
                                                 unsigned short int port);
-      int                    getFixedDataSize  (int socket_id, int datalength, 
-                                                SSTREAM& inputstream, 
+      int                    getFixedDataSize  (int socket_id, int datalength,
+                                                SSTREAM& inputstream,
                                                 char* buffer, int bufsize);
       #endif
 

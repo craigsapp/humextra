@@ -5,7 +5,7 @@
 // Last Modified: Mon Feb 10 17:08:20 PST 2003 (added voice-leading)
 // Filename:      ...sig/include/sigInfo/RootSpectrum.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/RootSpectrum.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Store and calculate chord root calculations.
 //
@@ -29,7 +29,7 @@
 
 
 class RootSpectrum {
-   public: 
+   public:
                   RootSpectrum   (void);
                  ~RootSpectrum   ();
 
@@ -61,18 +61,18 @@ class RootSpectrum {
 
       void        setDuration         (int aState);
       void        setMetricLevel      (int aState);
-      double      getDurationWeight   (void); 
-      void        setDurationWeight   (double aWeight); 
-      double      getMetricLevelWeight(void); 
-      void        setMetricLevelWeight(double aWeight); 
-      void        setRhythmWeights    (double durWeight, double levWeight); 
+      double      getDurationWeight   (void);
+      void        setDurationWeight   (double aWeight);
+      double      getMetricLevelWeight(void);
+      void        setMetricLevelWeight(double aWeight);
+      void        setRhythmWeights    (double durWeight, double levWeight);
 
       double      getPower            (void);
       void        setPower            (double aPower);
 
       // melodic parameters
-      void        melodyOn            (void);  
-      void        melodyOff           (void);  
+      void        melodyOn            (void);
+      void        melodyOff           (void);
       void        setMelodyScaleFactor(double aFactor);
       double      getMelodyScaleFactor(void);
       void        setResolutionFactor (double aFactor);
@@ -80,20 +80,20 @@ class RootSpectrum {
 
 
       // display functions
-      ostream&    printMMA         (const char* label, ostream& = cout, 
+      ostream&    printMMA         (const char* label, ostream& = cout,
                                     int functionsQ = 1, int normQ = 0);
-      ostream&    printXfig        (ostream& out = cout, 
+      ostream&    printXfig        (ostream& out = cout,
                                     const char* title = "Root Spectrum",
                                     int type = DISPLAY_DIATONIC);
       ostream&    printPlot        (ostream& out = cout,
                                     int type = DISPLAY_DIATONIC);
-      ostream&    printHumdrum     (ostream& out = cout, 
+      ostream&    printHumdrum     (ostream& out = cout,
                                     int type = DISPLAY_DIATONIC,
                                     int invQ = 1, int normQ = 0);
 
       // functions for the calculation of root scores
-      int         calculate        (IntervalWeight& distances, 
-                                    HumdrumFile& infile, int startline, 
+      int         calculate        (IntervalWeight& distances,
+                                    HumdrumFile& infile, int startline,
                                     int stopline, int debugQ = 0);
    private:
       Array <double> values;        // scores for each root.
@@ -113,16 +113,16 @@ class RootSpectrum {
       static int     minfloat       (const void* a, const void* b);
       double         durationscaling(double duration);
       double         metricscaling  (double level);
-      double         getMelodicScaling(int root, int note, 
-                                    Array<int>& lastpitches, 
-                                    Array<int>& nextpitches, 
-                                    IntervalWeight& distances, 
-                                    double absbeat, 
-                                    double chordstartbeat,  
-                                    double chordendbeat, 
+      double         getMelodicScaling(int root, int note,
+                                    Array<int>& lastpitches,
+                                    Array<int>& nextpitches,
+                                    IntervalWeight& distances,
+                                    double absbeat,
+                                    double chordstartbeat,
+                                    double chordendbeat,
                                     double duration);
-      int            pedaltone     (int root, int note, double absbeat, 
-                                    double chordstartbeat, 
+      int            pedaltone     (int root, int note, double absbeat,
+                                    double chordstartbeat,
                                     double chordendbeat, double duration);
       int            nonchordtoneQ  (int root, int note);
       int            nonchordtoneQno7th(int root, int note);

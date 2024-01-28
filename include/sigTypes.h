@@ -5,7 +5,7 @@
 // Last Modified: Sat Nov  2 10:36:18 PST 1996
 // Filename:      ...sig/maint/code/misc/sigTypes.h
 // Web Address:   http://sig.sapp.org/include/sig/sigTypes.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Typedefs for some common types used in sig.
 //

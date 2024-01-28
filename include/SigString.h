@@ -4,7 +4,7 @@
 // Last Modified: Sun Feb 20 13:22:08 PST 2011
 // Filename:      ...sig/maint/code/base/SigString/SigString.h
 // Web Address:   http://sig.sapp.org/include/sigBase/SigString.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Character array with a hidden null character at the
 //                end of the array, so that either binary or c string

@@ -18,14 +18,14 @@ void      checkOptions       (Options& opts, int argc, char* argv[]);
 void      example            (void);
 void      usage              (const char* command);
 void      processFile        (HumdrumFile& infile);
-void      printTrack         (ostream& out, int voice, int vcount, int track, 
-                              HumdrumFile& infile, int attribution, 
-                              Array<char>& genre);
+void      printTrack         (ostream& out, int voice, int vcount, int track,
+                              HumdrumFile& infile, int attribution,
+                              string& genre);
 int       getAttribution     (HumdrumFile& infile);
-void      getGenre           (Array<char>& genre, HumdrumFile& infile);
+void      getGenre           (string& genre, HumdrumFile& infile);
 int       getTrackSpine      (HumdrumFile& infile, int line, int track);
 
- 
+
 // global variables
 Options   options;             // database for command-line arguments
 
@@ -52,15 +52,15 @@ int main(int argc, char* argv[]) {
 //
 
 void processFile(HumdrumFile& infile) {
-   Array<int> ktracks;
+   vector<int> ktracks;
    infile.getTracksByExInterp(ktracks, "**kern");
-   int i; 
-   int size = ktracks.getSize();
+   int i;
+   int size = (int)ktracks.size();
    int attribution = getAttribution(infile);
-   Array<char> genre;
+   string genre;
    getGenre(genre, infile);
    for (i=size-1; i>=0; i--) {
-      printTrack(cout, size-i, size, ktracks[i], infile, attribution, genre);
+      printTrack(cout, size-i, size, ktracks.at(i), infile, attribution, genre);
    }
 }
 
@@ -71,10 +71,10 @@ void processFile(HumdrumFile& infile) {
 // getGenre --
 //
 
-void getGenre(Array<char>& genre, HumdrumFile& infile) {
+void getGenre(string& genre, HumdrumFile& infile) {
    PerlRegularExpression pre;
    int i;
-   genre.setSize(0);
+   genre = "";
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isBibliographic()) {
          continue;
@@ -93,7 +93,7 @@ void getGenre(Array<char>& genre, HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// getAttribution -- 
+// getAttribution --
 //
 
 int getAttribution(HumdrumFile& infile) {
@@ -118,8 +118,8 @@ int getAttribution(HumdrumFile& infile) {
 // printTrack --
 //
 
-void printTrack(ostream& out, int voice, int vcount, int track, 
-      HumdrumFile& infile, int attribution, Array<char>& genre) {
+void printTrack(ostream& out, int voice, int vcount, int track,
+      HumdrumFile& infile, int attribution, string& genre) {
    infile.analyzeRhythm("4");
    int i, j;
    PerlRegularExpression pre;
@@ -133,14 +133,14 @@ void printTrack(ostream& out, int voice, int vcount, int track,
    }
 
    out << tag << "\t";
-  
+
    if (attribution > 0) {
       cout << "*A" << attribution << " ";
    }
 
    out << "*V" << voice << "/" << vcount << " ";
- 
-   if (genre.getSize() > 0) {
+
+   if (!genre.empty()) {
       out << "*G" << genre << " ";
    }
 
@@ -181,7 +181,7 @@ void printTrack(ostream& out, int voice, int vcount, int track,
                restline = i;
             }
             continue;
-         } else { 
+         } else {
             b40 = Convert::kernToBase40(infile[i][j]);
             if (b40 <= 0) {
                // something strange happened...
@@ -195,7 +195,7 @@ void printTrack(ostream& out, int voice, int vcount, int track,
                restline = -1;
             }
             if (lastb40 > 0) {
-               interval = Convert::base40ToDiatonic(b40) - 
+               interval = Convert::base40ToDiatonic(b40) -
                      Convert::base40ToDiatonic(lastb40);
                if (interval >= 0) {
                   interval += 1;
@@ -246,7 +246,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");            // example usages
    opts.define("h|help=b");             // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

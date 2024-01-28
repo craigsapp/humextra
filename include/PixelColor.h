@@ -7,7 +7,7 @@
 // Filename:      ...sig/maint/code/base/PixelColor/PixelColor.h
 // Web Address:   http://sig.sapp.org/include/sigBase/PixelColor.h
 // Documentation: http://sig.sapp.org/doc/classes/PixelColor
-// Syntax:        C++ 
+// Syntax:        C++
 //
 
 #ifndef _PIXELCOLOR_H_INCLUDED
@@ -77,7 +77,7 @@ class PixelColor {
       void         writePpm3      (ostream& out);
 
    public:
-      uchar   Red; 
+      uchar   Red;
       uchar   Green;
       uchar   Blue;
 

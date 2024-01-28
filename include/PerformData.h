@@ -74,7 +74,7 @@ class PerformData {
       int           getMeasureValue            (const char* string);
       int           getNextLine                (char* buffer, istream& input);
       int           getSpineCount              (const char* aString);
-      void          processHumdrumData         (const char* currentLine, 
+      void          processHumdrumData         (const char* currentLine,
                                                   Array<int>& spine_list,
                                                   Array<int>& chan_list);
       void          processInterpLine          (const char* line,
@@ -83,7 +83,7 @@ class PerformData {
                                                   Array<int>& path_list);
       void          processExclusiveInterpLine (const char* line,
                                                   Array<int>& chan_list);
-      Array<char*>* segment                    (const char* line);  
+      Array<char*>* segment                    (const char* line);
 
 
 };

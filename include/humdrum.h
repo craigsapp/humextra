@@ -7,7 +7,7 @@
 // Last Modified: Fri Mar 29 23:28:32 PDT 2013 Added HumdrumFileSet.h
 // Filename:      ...sig/include/sigInfo/humdrum.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/humdrum.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Includes all header files necessary for humdrum classes.
 //
@@ -48,7 +48,7 @@
 
 // have to include for some template bug:
 //   #include "Options.cpph"
-// Works in this release and later: 
+// Works in this release and later:
 // gcc version egcs-2.91.66 19990314/Linux (egcs-1.1.2 release)
 
 #endif  /* _HUMDRUM_H_INCLUDED */

@@ -5,7 +5,7 @@
 // Last Modified: Wed Feb  2 12:13:11 PST 2011 Added *met extraction
 // Last Modified: Mon Apr  1 00:28:01 PDT 2013 Enabled multiple segment input
 // Last Modified: Tue Feb 23 04:40:04 PST 2016 Added --section option
-// Filename:      ...sig/examples/all/myank.cpp 
+// Filename:      ...sig/examples/all/myank.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/myank.cpp
 // Syntax:        C++; museinfo
 //
@@ -43,7 +43,7 @@ ostream& operator<<(ostream& out, Coord& value) {
 class MeasureInfo {
    public:
       MeasureInfo(void) { clear(); }
-      void clear(void)  { num = seg = start = stop = -1; 
+      void clear(void)  { num = seg = start = stop = -1;
          sclef.setSize(0); skeysig.setSize(0); skey.setSize(0);
          stimesig.setSize(0); smet.setSize(0); stempo.setSize(0);
          eclef.setSize(0); ekeysig.setSize(0); ekey.setSize(0);
@@ -86,7 +86,7 @@ class MeasureInfo {
       int stop;         // ending line of segment
       int tracks;       // number of primary tracks in file.
       HumdrumFile* file;
-    
+
       // musical settings at start of measure
       Array<Coord> sclef;     // starting clef of segment
       Array<Coord> skeysig;   // starting keysig of segment
@@ -137,7 +137,7 @@ ostream& operator<<(ostream& out, MeasureInfo& info) {
       if (info.stempo[i].isValid()) {
          out << "   START TEMPO   = " << infile[info.stempo[i].x][info.stempo[i].y]     << endl;
       }
-   
+
       if (info.eclef[i].isValid()) {
          out << "   END CLEF    = " << infile[info.eclef[i].x][info.eclef[i].y]       << endl;
       }
@@ -170,17 +170,17 @@ ostream& operator<<(ostream& out, MeasureInfo& info) {
 void      checkOptions         (Options& opts, int argc, char** argv);
 void      example              (void);
 void      usage                (const char* command);
-void      myank                (HumdrumFile& infile, 
+void      myank                (HumdrumFile& infile,
                                 Array<MeasureInfo>& outmeasure);
 void      removeDollarsFromString(Array<char>& buffer, int maxx);
-void      processFieldEntry    (Array<MeasureInfo>& field, const char* string, 
-                                HumdrumFile& infile, int maxmeasure, 
-                                Array<MeasureInfo>& inmeasures, 
+void      processFieldEntry    (Array<MeasureInfo>& field, const char* string,
+                                HumdrumFile& infile, int maxmeasure,
+                                Array<MeasureInfo>& inmeasures,
                                 Array<int>& inmap);
-void      expandMeasureOutList   (Array<MeasureInfo>& measureout, 
-                                Array<MeasureInfo>& measurein, 
+void      expandMeasureOutList   (Array<MeasureInfo>& measureout,
+                                Array<MeasureInfo>& measurein,
                                 HumdrumFile& infile, const char* optionstring);
-void      getMeasureStartStop  (Array<MeasureInfo>& measurelist, 
+void      getMeasureStartStop  (Array<MeasureInfo>& measurelist,
                                 HumdrumFile& infile);
 void      printEnding          (HumdrumFile& infile, int lastline, int adjlin);
 void      printStarting        (HumdrumFile& infile);
@@ -188,8 +188,8 @@ void      reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2);
 void      reconcileStartingPosition(HumdrumFile& infile, int index2);
 void      printJoinLine        (Array<int>& splits, int index, int count);
 void      printInvisibleMeasure(HumdrumFile& infile, int line);
-void      fillGlobalDefaults   (HumdrumFile& infile, 
-                                Array<MeasureInfo>& measurein, 
+void      fillGlobalDefaults   (HumdrumFile& infile,
+                                Array<MeasureInfo>& measurein,
                                 Array<int>& inmap);
 void      adjustGlobalInterpretations(HumdrumFile& infile, int ii,
                                 Array<MeasureInfo>& outmeasures, int index);
@@ -197,9 +197,9 @@ void      adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
                                 Array<MeasureInfo>& outmeasures, int index);
 void      getMarkString        (ostream& out, HumdrumFile& infile);
 void      printDoubleBarline   (HumdrumFile& infile, int line);
-void      insertZerothMeasure  (Array<MeasureInfo>& measurelist, 
+void      insertZerothMeasure  (Array<MeasureInfo>& measurelist,
                                 HumdrumFile& infile);
-void      getMetStates         (Array<Array<Coord> >& metstates, 
+void      getMetStates         (Array<Array<Coord> >& metstates,
                                 HumdrumFile& infile);
 Coord     getLocalMetInfo      (HumdrumFile& infile, int row, int track);
 int       atEndOfFile          (HumdrumFile& infile, int line);
@@ -242,7 +242,7 @@ int main(int argc, char** argv) {
    int i;
    for (i=0; i<infiles.getCount(); i++) {
       processFile(infiles[i], infiles.getCount());
-   } 
+   }
 
    return 0;
 }
@@ -269,7 +269,7 @@ void processFile(HumdrumFile& infile, int segmentCount) {
    strcpy(measurestring.getBase(), options.getString("measure").c_str());
    if (markQ) {
       stringstream mstring;
-      getMarkString(mstring, infile); 
+      getMarkString(mstring, infile);
       mstring << ends;
       measurestring.setSize(strlen(mstring.str().c_str())+1);
       strcpy(measurestring.getBase(), mstring.str().c_str());
@@ -285,9 +285,9 @@ void processFile(HumdrumFile& infile, int segmentCount) {
    if (debugQ) {
       cout << "MARK MEASURES: " << measurestring << endl;
    }
-   
+
    // expand to multiple measures later.
-   expandMeasureOutList(MeasureOutList, MeasureInList, infile, 
+   expandMeasureOutList(MeasureOutList, MeasureInList, infile,
          measurestring.getBase());
 
    if (inlistQ) {
@@ -339,7 +339,7 @@ void getMetStates(Array<Array<Coord> >& metstates, HumdrumFile& infile) {
                current[track].x = i;
                current[track].y = j;
             } else if (pre.search(infile[i][j], "^\\*M\\d+\\d+", "")) {
-               current[track] = getLocalMetInfo(infile, i, track);   
+               current[track] = getLocalMetInfo(infile, i, track);
             }
          }
       }
@@ -375,8 +375,8 @@ void getMetStates(Array<Array<Coord> >& metstates, HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// getLocalMetInfo -- search in the non-data region indicated by the 
-// input row for a *met entry in the input track.  Return empty 
+// getLocalMetInfo -- search in the non-data region indicated by the
+// input row for a *met entry in the input track.  Return empty
 // value if none found.
 //
 
@@ -399,8 +399,8 @@ Coord getLocalMetInfo(HumdrumFile& infile, int row, int track) {
    if (startline < 0) {
       startline = 0;
    }
-   i = row; 
-   while (i<infile.getNumLines()){ 
+   i = row;
+   while (i<infile.getNumLines()){
       if (infile[i].isData()) {
          stopline = i-1;
          break;
@@ -456,11 +456,11 @@ void getMarkString(ostream& out, HumdrumFile& infile)  {
       if (!infile[i].isBibliographic()) {
          continue;
       }
-      if (pre.search(infile[i][0], 
+      if (pre.search(infile[i][0],
             "!!!RDF\\*\\*kern\\s*:\\s*([^=])\\s*=\\s*match", "i")) {
          target = pre.getSubmatch(1)[0];
          mchar.append(target);
-      } else if (pre.search(infile[i][0], 
+      } else if (pre.search(infile[i][0],
             "!!!RDF\\*\\*kern\\s*:\\s*([^=])\\s*=\\s*mark", "i")) {
          target = pre.getSubmatch(1)[0];
          mchar.append(target);
@@ -561,7 +561,7 @@ void myank(HumdrumFile& infile, Array<MeasureInfo>& outmeasures) {
             if ((datastart == 0) && outmeasures[h].num == 0) {
                // not ideal setup...
                datastart = 1;
-            } else{ 
+            } else{
                adjustGlobalInterpretations(infile, i, outmeasures, h);
                printed = 1;
             }
@@ -657,7 +657,7 @@ void adjustGlobalInterpretations(HumdrumFile& infile, int ii,
 
    // the following lines will not work when non-contiguous measures are
    // elided.
-   //   if (!infile[ii].isInterpretation()) { 
+   //   if (!infile[ii].isInterpretation()) {
    //      return;
    //   }
 
@@ -1161,7 +1161,7 @@ void printInvisibleMeasure(HumdrumFile& infile, int line) {
          cout << "-";
          cout << pre.getSubmatch(2);
       } else {
-         cout << infile[line][j]; 
+         cout << infile[line][j];
       }
       if (j < infile[line].getFieldCount()-1) {
          cout << "\t";
@@ -1183,14 +1183,14 @@ void reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
 
    if (debugQ) {
       cout << "RECONCILING LINES " << index1+1 << " and " << index2+1 << endl;
-      cout << "FIELD COUNT OF " << index1+1 << " is " 
+      cout << "FIELD COUNT OF " << index1+1 << " is "
            << infile[index1].getFieldCount() << endl;
-      cout << "FIELD COUNT OF " << index2+1 << " is " 
+      cout << "FIELD COUNT OF " << index2+1 << " is "
            << infile[index2].getFieldCount() << endl;
    }
 
    // check to see if any changes need reconciling; otherwise, exit function
-   int i, j; 
+   int i, j;
    if (infile[index1].getFieldCount() == infile[index2].getFieldCount()) {
       int same = 1;
       for (i=0; i<infile[index1].getFieldCount(); i++) {
@@ -1219,7 +1219,7 @@ void reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
       strcat(buff1, "a");
       strcat(buff2, "b");
       for (j=0; j<infile[index2].getFieldCount()-1; j++) {
-         if ((strcmp(buff1, infile[index2].getSpineInfo(j).c_str()) == 0) 
+         if ((strcmp(buff1, infile[index2].getSpineInfo(j).c_str()) == 0)
                && (strcmp(buff2, infile[index2].getSpineInfo(j+1).c_str()) == 0)) {
             splits[i] = 1;
             hassplit++;
@@ -1245,7 +1245,7 @@ void reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
    //for (i=1; i<splits.getSize(); i++) {
    //   splits[i] += splits[i-1];
    //}
-  
+
    PerlRegularExpression pre1;
    PerlRegularExpression pre2;
    // handle joins one at a time, only look for binary joins at the moment.
@@ -1272,10 +1272,10 @@ void reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
          printJoinLine(splits, i, 2);
       }
    }
-   
+
    // handle *x switches, not perfect since ordering might need to be
    // handled between manipulators...
-   
+
 }
 
 
@@ -1312,7 +1312,7 @@ void printJoinLine(Array<int>& splits, int index, int count) {
 
 //////////////////////////////
 //
-// reconcileStartingPosition -- merge spines from start of data and 
+// reconcileStartingPosition -- merge spines from start of data and
 //    first measure in output.
 //
 
@@ -1326,7 +1326,7 @@ void reconcileStartingPosition(HumdrumFile& infile, int index2) {
    }
 }
 
-  
+
 
 //////////////////////////////
 //
@@ -1405,7 +1405,7 @@ void printEnding(HumdrumFile& infile, int lastline, int adjlin) {
    int marker = -1;
    int i;
    for (i=infile.getNumLines()-1; i>=0; i--) {
-      if (infile[i].isInterpretation() && (ending <0) 
+      if (infile[i].isInterpretation() && (ending <0)
             && (strcmp(infile[i][0], "*-") == 0)) {
          ending = i;
       }
@@ -1422,7 +1422,7 @@ void printEnding(HumdrumFile& infile, int lastline, int adjlin) {
    if (ending >= 0) {
       reconcileSpineBoundary(infile, adjlin, ending);
    }
-   
+
    int startline  = ending;
    if (marker >= 0) {
       // capture any comment which occur after the last measure
@@ -1446,7 +1446,7 @@ void printEnding(HumdrumFile& infile, int lastline, int adjlin) {
 //
 // getMeasureStartStop --  Get a list of the (numbered) measures in the
 //    input file, and store the start/stop lines for those measures.
-//    All data before the first numbered measure is in measure 0.  
+//    All data before the first numbered measure is in measure 0.
 //    although, if the first measure is not labeled, then ...
 //
 
@@ -1518,10 +1518,10 @@ void getMeasureStartStop(Array<MeasureInfo>& measurelist, HumdrumFile& infile) {
 
    for (i=infile.getNumLines()-1; i>=0; i--) {
       if ((lastdata < 0) && infile[i].isData()) {
-         lastdata = i; 
+         lastdata = i;
       }
       if ((lastmeasure < 0) && infile[i].isMeasure()) {
-         lastmeasure = i; 
+         lastmeasure = i;
       }
       if ((lastmeasure >= 0) && (lastdata >= 0)) {
          break;
@@ -1533,7 +1533,7 @@ void getMeasureStartStop(Array<MeasureInfo>& measurelist, HumdrumFile& infile) {
       lastmeasure = -1;
       lastdata    = -1;
    }
- 
+
    if ((barnum2 >= 0) && (lastend >= 0) && (dataend >= 0)) {
       current.clear();
       current.num = barnum2;
@@ -1609,7 +1609,7 @@ void getSectionString(string& sstring, HumdrumFile& infile, int sec) {
          }
          if (pre.search(infile[i][0], "(\\d+)")) {
             barnum = atoi(pre.getSubmatch(1));
-         } 
+         }
       }
    }
    if (second < 0) {
@@ -1649,7 +1649,7 @@ int atEndOfFile(HumdrumFile& infile, int line) {
 // insertZerothMeasure --
 //
 
-void insertZerothMeasure(Array<MeasureInfo>& measurelist, 
+void insertZerothMeasure(Array<MeasureInfo>& measurelist,
       HumdrumFile& infile) {
 
    PerlRegularExpression pre;
@@ -1701,8 +1701,8 @@ void insertZerothMeasure(Array<MeasureInfo>& measurelist,
 //     to extract.
 //
 
-void expandMeasureOutList(Array<MeasureInfo>& measureout, 
-      Array<MeasureInfo>& measurein, HumdrumFile& infile, 
+void expandMeasureOutList(Array<MeasureInfo>& measureout,
+      Array<MeasureInfo>& measurein, HumdrumFile& infile,
       const char* optionstring) {
 
    PerlRegularExpression pre;
@@ -1772,7 +1772,7 @@ void expandMeasureOutList(Array<MeasureInfo>& measureout,
    Array <char> ostring;
    ostring.setSize(strlen(optionstring)+1);
    strcpy(ostring.getBase(), optionstring);
- 
+
    removeDollarsFromString(ostring, maxmeasure);
 
    if (debugQ) {
@@ -1804,7 +1804,7 @@ void expandMeasureOutList(Array<MeasureInfo>& measureout,
 // fillGlobalDefaults -- keep track of the clef, key signature, key, etc.
 //
 
-void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein, 
+void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
       Array<int>& inmap) {
    int i, j;
    PerlRegularExpression pre;
@@ -1909,7 +1909,7 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
                   measurein[inmap[currmeasure]].stempo[track].x = -1;
                   measurein[inmap[currmeasure]].stempo[track].y = -1;
                }
-            } 
+            }
 
             if (strncmp(infile[i][j], "*clef", 5) == 0) {
                currclef[track].x = i;
@@ -1945,7 +1945,7 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
    }
 
    // store state of global music values at end of music
-   if ((currmeasure >= 0) && (currmeasure < inmap.getSize()) 
+   if ((currmeasure >= 0) && (currmeasure < inmap.getSize())
          && (inmap[currmeasure] >= 0)) {
       measurein[inmap[currmeasure]].eclef    = currclef;
       measurein[inmap[currmeasure]].ekeysig  = currkeysig;
@@ -2142,7 +2142,7 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
 
 //////////////////////////////
 //
-// processFieldEntry -- 
+// processFieldEntry --
 //   3-6 expands to 3 4 5 6
 //   $   expands to maximum spine track
 //   $0  expands to maximum spine track
@@ -2153,7 +2153,7 @@ void fillGlobalDefaults(HumdrumFile& infile, Array<MeasureInfo>& measurein,
 //   Ignore negative values and values which exceed the maximum value.
 //
 
-void processFieldEntry(Array<MeasureInfo>& field, const char* string, 
+void processFieldEntry(Array<MeasureInfo>& field, const char* string,
      HumdrumFile& infile, int maxmeasure, Array<MeasureInfo>& inmeasures,
      Array<int>& inmap) {
 
@@ -2178,13 +2178,13 @@ void processFieldEntry(Array<MeasureInfo>& field, const char* string,
       if (lastone  < 0         ) { lastone  = 0         ; }
 
       if ((firstone < 1) && (firstone != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << string << "\""
               << " contains too small a number at start: " << firstone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if ((lastone < 1) && (lastone != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << string << "\""
               << " contains too small a number at end: " << lastone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
@@ -2194,7 +2194,7 @@ void processFieldEntry(Array<MeasureInfo>& field, const char* string,
       if (firstone > lastone) {
          for (i=firstone; i>=lastone; i--) {
             if (inmap[i] >= 0) {
-               if ((field.getSize() > 0) && 
+               if ((field.getSize() > 0) &&
                      (field.last().stop == inmeasures[inmap[i]].start)) {
                   field.last().stop = inmeasures[inmap[i]].stop;
                } else {
@@ -2225,7 +2225,7 @@ void processFieldEntry(Array<MeasureInfo>& field, const char* string,
       } else {
          for (i=firstone; i<=lastone; i++) {
             if (inmap[i] >= 0) {
-               if ((field.getSize() > 0) && 
+               if ((field.getSize() > 0) &&
                      (field.last().stop == inmeasures[inmap[i]].start)) {
                   field.last().stop = inmeasures[inmap[i]].stop;
                } else {
@@ -2259,13 +2259,13 @@ void processFieldEntry(Array<MeasureInfo>& field, const char* string,
       // do something with letter later...
 
       if ((value < 1) && (value != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << string << "\""
               << " contains too small a number at end: " << value << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if (inmap[value] >= 0) {
-         if ((field.getSize() > 0) && 
+         if ((field.getSize() > 0) &&
                (field.last().stop == inmeasures[inmap[value]].start)) {
             field.last().stop = inmeasures[inmap[value]].stop;
          } else {
@@ -2326,7 +2326,7 @@ void removeDollarsFromString(Array<char>& buffer, int maxx) {
       if (outval < 0) {
          outval = 0;
       }
-      
+
       snprintf(tbuf, 1024, "%d", outval);
       strcpy(obuf, "\\");
       strcat(obuf, pre.getSubmatch());
@@ -2341,7 +2341,7 @@ void removeDollarsFromString(Array<char>& buffer, int maxx) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char** argv) {

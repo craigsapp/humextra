@@ -5,7 +5,7 @@
 // Last Modified: Thu Jun 17 13:17:57 PDT 2010
 // Filename:      ...sig/include/SigInfo/MuseDataSetSet.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/MuseDataSetSet.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A class that stores a collection of MuseDataSet files
 //                representing parts for the same score.
@@ -38,14 +38,14 @@ class MuseDataSet {
 
    protected:
       int               appendPart          (MuseData* musedata);
-      void              analyzeSetType      (Array<int>& types, 
+      void              analyzeSetType      (Array<int>& types,
                                              Array<string>& lines);
-      void              analyzePartSegments (Array<int>& startindex, 
-                                             Array<int>& stopindex, 
+      void              analyzePartSegments (Array<int>& startindex,
+                                             Array<int>& stopindex,
                                              Array<string> lines);
 
 };
-   
+
 
 ostream& operator<<(ostream& out, MuseDataSet& musedata);
 

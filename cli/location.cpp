@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
       }
       processFile(infile);
    }
-  
+
    return 0;
 }
 
@@ -180,7 +180,7 @@ int getStartingMeasure(HumdrumFile& infile) {
          return measure;
       }
    }
- 
+
    // shouldn't get here, but return 1 if it happens.
    return 1;
 }
@@ -222,7 +222,7 @@ void printLocation(HumdrumFile& infile, int line, int measure) {
       if (startQ && spaceQ) { cout << ' '; } startQ++;
       if (labelQ) { cout << 'B'; }
       if (rationalQ) {
-         rat = infile[line].getBeatR(); 
+         rat = infile[line].getBeatR();
          rat *= absFactor;
          rat.printTwoPart(cout);
       } else {
@@ -235,7 +235,7 @@ void printLocation(HumdrumFile& infile, int line, int measure) {
       if (startQ && spaceQ) { cout << ' '; } startQ++;
       if (labelQ) { cout << absChar; }
       if (rationalQ) {
-         rat = infile[line].getAbsBeatR(); 
+         rat = infile[line].getAbsBeatR();
          rat *= absFactor;
          rat.printTwoPart(cout);
       } else {
@@ -265,19 +265,19 @@ void printExclusiveInterpretation(void) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("a|append=b",       "append analysis data to input"); 
-   opts.define("p|prepend=b",      "prepend analysis data to input"); 
-   opts.define("b|beat=b",         "list beat in measure"); 
-   opts.define("q|quarter=b",      "list absolute beat in quarter notes"); 
-   opts.define("h|half=b",         "list absolute beat in half notes"); 
-   opts.define("w|whole=b",        "list absolute beat in whole notes"); 
-   opts.define("e|eighth=b",       "list absolute beat in eighth notes"); 
-   opts.define("x|sixteenth=b",    "list absolute beat in sixteenth notes"); 
-   opts.define("S|no-space=b",     "do not put spaces between location items"); 
-   opts.define("Q|no-quotes=b",    "do not put quotes around filenames"); 
-   opts.define("R|rational=b",     "use rational numbers instead of floats"); 
+   opts.define("a|append=b",       "append analysis data to input");
+   opts.define("p|prepend=b",      "prepend analysis data to input");
+   opts.define("b|beat=b",         "list beat in measure");
+   opts.define("q|quarter=b",      "list absolute beat in quarter notes");
+   opts.define("h|half=b",         "list absolute beat in half notes");
+   opts.define("w|whole=b",        "list absolute beat in whole notes");
+   opts.define("e|eighth=b",       "list absolute beat in eighth notes");
+   opts.define("x|sixteenth=b",    "list absolute beat in sixteenth notes");
+   opts.define("S|no-space=b",     "do not put spaces between location items");
+   opts.define("Q|no-quotes=b",    "do not put quotes around filenames");
+   opts.define("R|rational=b",     "use rational numbers instead of floats");
 
-   opts.define("m|measure|bar|barlines=b",   "display measure numbers"); 
+   opts.define("m|measure|bar|barlines=b",   "display measure numbers");
    opts.define("L|no-labels=b",    "do not display labels on data");
    opts.define("d|double=b",       "double labels before and after data");
    opts.define("f|filename=b",     "show filename");
@@ -289,7 +289,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");            // example usages
    opts.define("help=b");               // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

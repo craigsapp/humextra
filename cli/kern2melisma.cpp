@@ -7,9 +7,9 @@
 // Syntax:        C++; museinfo
 // Reference:     http://bobo.link.cs.cmu.edu/music-analysis
 //
-// Description:   Generates a list of pitches in a Humdrum file 
+// Description:   Generates a list of pitches in a Humdrum file
 //                according to the Melisma Music Analyzer file format
-//                for notes.  
+//                for notes.
 //
 
 #include "humdrum.h"
@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
@@ -70,12 +70,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("c|class=b", "display pitches in pitch class notation");
    opts.define("t|tempo|default-tempo=d:60.0", "tempo if none specified");
 
-   opts.define("author=b",  "author of program"); 
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("h|help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -152,7 +152,7 @@ void printOutput(HumdrumFile& hfile) {
    char buffer2[1024] = {0};
    double duration;
    for (i=0; i<hfile.getNumLines(); i++) {
-      currentmillisecond = currentmillisecond + 
+      currentmillisecond = currentmillisecond +
             lastduration * 60000.0 / tempo[i];
       lastduration = hfile[i].getDuration();
 
@@ -235,10 +235,10 @@ void printOutput(HumdrumFile& hfile) {
                continue;
             }
             double tempomark = 0.0;
-            if (strncmp(hfile[i][j], "*MM", 3) == 0 && 
+            if (strncmp(hfile[i][j], "*MM", 3) == 0 &&
                   std::isdigit(hfile[i][j][3])) {
                sscanf(hfile[i][j], "*MM%lf", &tempomark);
-               cout << "Info Tempo " << tempomark << " MM per quarter note" 
+               cout << "Info Tempo " << tempomark << " MM per quarter note"
                     << endl;
                break;
             }

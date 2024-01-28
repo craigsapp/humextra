@@ -111,7 +111,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b",    "example usages");
    opts.define("h|help=b",     "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

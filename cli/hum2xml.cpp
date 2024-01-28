@@ -45,7 +45,7 @@ void      convertAttributeToXML (HumdrumFile& infile, int line, int col,
                                  int voice);
 void      convertNoteToXML      (HumdrumFile& infile, int line, int col,
                                  int voice);
-void      pline                 (int level, const char* string, 
+void      pline                 (int level, const char* string,
                                  ostream& out = cout);
 void      usage                 (const char* command);
 double    convertNoteEntryToXML (HumdrumFile& infile, int line, int col,
@@ -85,7 +85,7 @@ void      setColorCharacters    (HumdrumFile& infile, string& colorchar,
                                  vector<string>& colorout);
 string    checkColor            (const char* note, string& colorchar,
                                  vector<string>& colorout);
-void      convertBnumForNote    (ostream& out, HumdrumFile& infile, int line, 
+void      convertBnumForNote    (ostream& out, HumdrumFile& infile, int line,
                                  int col);
 void      convertBassoContinuoFigureGroup(ostream& out, HumdrumFile& infile,
                                  int line, int col);
@@ -1239,7 +1239,7 @@ void convertBnumForNote(ostream& out, HumdrumFile& infile, int line, int col) {
 
    int ktrack = infile[line].getPrimaryTrack(col);
    int btrack = infile[line].getPrimaryTrack(bcol);
-   int ticks = checkForAnotherFigure(secondout, infile, line, line+1, 
+   int ticks = checkForAnotherFigure(secondout, infile, line, line+1,
          ktrack, btrack);
 
    if (firstout.str().size() > 0) {
@@ -1266,7 +1266,7 @@ void convertBnumForNote(ostream& out, HumdrumFile& infile, int line, int col) {
 // checkForAnotherFigure --
 //
 
-int checkForAnotherFigure(ostream& out, HumdrumFile& infile, int oline, 
+int checkForAnotherFigure(ostream& out, HumdrumFile& infile, int oline,
       int line, int ktrack, int btrack) {
 
    int i, j;
@@ -1283,7 +1283,7 @@ int checkForAnotherFigure(ostream& out, HumdrumFile& infile, int oline,
 			break;
       }
    }
-   
+
    if (tline < 0) {
       endtime = infile[infile.getNumLines()-1].getAbsBeatR();
       RationalNumber dur = endtime - starttime;
@@ -1332,7 +1332,7 @@ int checkForAnotherFigure(ostream& out, HumdrumFile& infile, int oline,
    }
 
    stringstream tempout;
-   int dur =  checkForAnotherFigure(tempout, infile, tline, tline+1, 
+   int dur =  checkForAnotherFigure(tempout, infile, tline, tline+1,
          ktrack, btrack);
 
    if (tempout.str().size() > 0) {

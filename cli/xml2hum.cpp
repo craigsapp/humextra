@@ -41,7 +41,7 @@ void      checkOptions      (Options& opts, int argc, char** argv);
 void      example           (void);
 void      usage             (const char* command);
 void      printTextString   (const char* string);
-void      printHumdrumPart  (HumdrumFile& hfile, const char* filebase, 
+void      printHumdrumPart  (HumdrumFile& hfile, const char* filebase,
                               int index, int max);
 
 //////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
       xmlfile.info(cout);
       exit(0);
    }
-   
+
    if (midifixQ) {
       xmlfile.fixMidiAccidentals();
    }
@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
    }
 
    if (staff <= 0) {
-      xmlfile.createHumdrumFile(hfile); 
+      xmlfile.createHumdrumFile(hfile);
    } else if (staff <= xmlfile.getStaffCount()) {
       xmlfile.humdrumPart(hfile, staff-1, debugQ);
    }
@@ -173,13 +173,13 @@ void printTextString(const char* string) {
       }
       // Mac OS X en-dash: could also do &ndash;
       if (string[i] == '\xD0') { cout << "-";   i+=1; continue; }
-      if (string[i] == '\xCB') { 
+      if (string[i] == '\xCB') {
          if (string[i+1] == '\x86') {
-            cout << "&agrave;";   i+=1; continue; 
+            cout << "&agrave;";   i+=1; continue;
          }
       }
 
-      
+
       cout << string[i];
    }
 
@@ -192,11 +192,11 @@ void printTextString(const char* string) {
 // printHumdrumPart -- print a humdrum part into a specific file.
 //
 
-void printHumdrumPart(HumdrumFile& hfile, const char* filebase, int index, 
+void printHumdrumPart(HumdrumFile& hfile, const char* filebase, int index,
    int max) {
    char buffer[1024] = {0};
    char num[32] = {0};
-   strcpy(buffer, filebase); 
+   strcpy(buffer, filebase);
    if ((index+1 < 10) && (max >= 10)) {
       strcat(buffer, "0");
    }

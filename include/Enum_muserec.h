@@ -5,10 +5,10 @@
 // Last Modified: Mon Jun  7 14:27:50 PDT 2010 (added header and empty enums)
 // Filename:      ...sig/include/sigInfo/Enum_muserec.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Enum_muserec.h
-// Syntax:        C++ 
+// Syntax:        C++
 // Reference:     Beyond Midi, page 410.
 //
-// Description:   An enumeration of MuseData record types 
+// Description:   An enumeration of MuseData record types
 //
 
 #ifndef _ENUM_MUSEREC_H_INCLUDED
@@ -64,7 +64,7 @@
 #define E_muserec_empty              'E'  // nothing on line and not header
                                           // or multi-line comment
 #define E_muserec_deleted            'D'  // deleted line
-					 
+
 // non-standard record types for MuseDataSet
 #define E_muserec_filemarker         '+'
 #define E_muserec_filename           'F'

@@ -5,7 +5,7 @@
 // Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
 // Filename:      ...sig/src/sigInfo/ScorePageBaseSimple.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/ScorePageBaseSimple.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A page of SCORE data
 //
@@ -15,12 +15,10 @@
 
 #include "ScoreRecord.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-   using namespace std;
-#else
-   #include <iostream.h>
-#endif
+#include <iostream>
+#include <vector>
+
+using namespace std;
 
 typedef Array<int> ArrayInt;
 
@@ -36,17 +34,17 @@ class ScorePageBaseSimple {
       int            getSize           (void);
       ScoreRecord&   operator[]        (int index);
 
-      void           appendItem        (ScoreRecord& aRecord);
+      void           appendItem        (const ScoreRecord& aRecord);
       void           addItem(ScoreRecord& aRecord) { appendItem(aRecord); };
 
       void           appendItem        (ScorePageBaseSimple& aPage);
       void           addItem(ScorePageBaseSimple& aPage) { appendItem(aPage); };
 
       void           appendItem        (SigCollection<ScoreRecord>& recs);
-      void           addItem           (SigCollection<ScoreRecord>& recs) 
+      void           addItem           (SigCollection<ScoreRecord>& recs)
                                           { appendItem(recs); };
 
-      void           getItemsPosition  (Array<int>& indices, float position, 
+      void           getItemsPosition  (Array<int>& indices, float position,
                                         int staff, float tolerance = 0.01);
 
       // sorting functions
@@ -54,7 +52,7 @@ class ScorePageBaseSimple {
       int            findStaff         (int staffno);
 
       // file I/O and printing functions
-      void           printAscii        (ostream& out, int roundQ = 1, 
+      void           printAscii        (std::ostream& out, int roundQ = 1,
 		                        int verboseQ = 0);
       void           readAscii         (const char* filename, int verboseQ = 0);
       void           readBinary        (const char* filename, int verboseQ = 0);
@@ -70,7 +68,7 @@ class ScorePageBaseSimple {
       long           getSerial         (void);
 
    protected:
-      SigCollection<ScoreRecord> data;
+      std::vector<ScoreRecord> m_data;
 
       Array<float> trailer;      // data which occurs at the end of a file
 
@@ -91,13 +89,13 @@ class ScorePageBaseSimple {
       Array<int> systemStart;    // starting index of items in systemind
 
    private:
-      void           writeLittleFloat  (ostream& out, float number);
-      float          readLittleFloat   (istream& instream);
-      int            readLittleShort   (istream& input);
+      void           writeLittleFloat  (std::ostream& out, float number);
+      float          readLittleFloat   (std::istream& instream);
+      int            readLittleShort   (std::istream& input);
       static int     staffsearch       (const void* A, const void* B);
       void           shrinkParameters  (void);
       void           initializeTrailer (long serial = 0x50504153);
-      void           readAsciiScoreLine(istream& infile, ScoreRecord& record,
+      void           readAsciiScoreLine(std::istream& infile, ScoreRecord& record,
                                         int verboseQ = 0);
    public:
       static int     compareStaff      (const void* A, const void* B);
@@ -106,7 +104,7 @@ class ScorePageBaseSimple {
 
 
 class SystemRecord {
-   public: 
+   public:
       SystemRecord(void) { clear(); }
      ~SystemRecord() { clear(); }
       void clear(void) { system = 0; index = 0; ptr = NULL; }

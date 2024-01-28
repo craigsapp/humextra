@@ -7,11 +7,11 @@
 // Last Modified: Sun Jul 10 00:20:04 PDT 2011 Avoid language duplicates
 // Last Modified: Wed Nov 12 14:40:01 PST 2014 Update for MEI 2013
 //
-// Filename:      ...sig/examples/all/hum2mei.cpp 
+// Filename:      ...sig/examples/all/hum2mei.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/hum2mei.cpp
 // Syntax:        C++; museinfo
 //
-// Description:   Converts Humdrum files into MEI data 
+// Description:   Converts Humdrum files into MEI data
 //                (monophonic spines only allowed at the moment).
 //
 
@@ -54,9 +54,9 @@
 class MeasureInfo {
    public:
            MeasureInfo(void) { clear(); }
-      void clear(void) { 
-            left     = right = BAR_NONE; 
-            num      = -1000; 
+      void clear(void) {
+            left     = right = BAR_NONE;
+            num      = -1000;
             complete = letter = 0;
             ispickup = pickupbefore = 0;
             nextbar  = lastbar = -1;
@@ -70,7 +70,7 @@ class MeasureInfo {
       int  lastbar;           // index of last barline
       char letter;            // sub measure enumeration
       char complete;          // c = complete, i = underfull, o = overfull
-      char pickupbefore;      // true if pickup measure preceeds this 
+      char pickupbefore;      // true if pickup measure preceeds this
       char ispickup;          // true if this measure is a pickup measure
       char valid;             // true if index represents a real barline
       Array<char> layers;
@@ -83,16 +83,16 @@ ostream& operator<<(ostream& out, MeasureInfo& m) {
       out << 0;
    } else {
       out << m.letter;
-   } 
+   }
    out << "\n";
    out << "last\t= "   << m.lastbar << "\tnext = "   << m.nextbar  << "\n";
    out << "left\t= "   << m.left    << "\tright = "  << m.right    << "\n";
-   out << "pickup\t= " << (int)m.ispickup 
+   out << "pickup\t= " << (int)m.ispickup
        << "\tpickup_before = " << (int)m.pickupbefore << "\n";
-   out << "complete= "; 
-   if (m.complete == 0) {  
+   out << "complete= ";
+   if (m.complete == 0) {
       out << 0;
-   } else { 
+   } else {
       out << m.complete;
    }
    out << "\n";
@@ -103,7 +103,7 @@ ostream& operator<<(ostream& out, MeasureInfo& m) {
    out << endl;
    return out;
 }
-	  
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -116,73 +116,73 @@ void      convertHumdrumToMei  (int indent, SSTREAM& out, HumdrumFile& infile);
 void      createMeiHeader      (int indent, SSTREAM& out, HumdrumFile& infile);
 void      createMeiMusic       (int indent, SSTREAM& out, HumdrumFile& infile);
 void      createMeiMusicBody   (int indent, SSTREAM& out, HumdrumFile& infile);
-void      createMeiMusicBodyMdiv(int indent, SSTREAM& out, 
+void      createMeiMusicBodyMdiv(int indent, SSTREAM& out,
                                HumdrumFile& infile);
-void      createMeiMusicBodyMdivScore(int indent, SSTREAM& out, 
+void      createMeiMusicBodyMdivScore(int indent, SSTREAM& out,
                                 HumdrumFile& infile);
-void      Indent               (SSTREAM& out, int indent, 
+void      Indent               (SSTREAM& out, int indent,
                                 const char* string = NULL);
 void      printHeadFiledesc    (int indent, SSTREAM& out, HumdrumFile& infile);
-void      printMeiheadProfiledesc(int indent, SSTREAM& out, 
+void      printMeiheadProfiledesc(int indent, SSTREAM& out,
                                 HumdrumFile& infile);
-void      printTitleStmtRespStmt(int indent, SSTREAM& out, 
+void      printTitleStmtRespStmt(int indent, SSTREAM& out,
                                 HumdrumFile& infile);
-void      printFiledescTitleStmt(int indent, SSTREAM& out, 
+void      printFiledescTitleStmt(int indent, SSTREAM& out,
                                 HumdrumFile& infile);
 void      printTitleStmtTitle  (int indent, SSTREAM& out, HumdrumFile& infile);
 void      printAsCdata         (SSTREAM& out, const char* string);
-void      printMdivScoreScoredef(int indent, SSTREAM& out, 
+void      printMdivScoreScoredef(int indent, SSTREAM& out,
 		                HumdrumFile& infile);
 void      printInitialKeySignature(SSTREAM& out, HumdrumFile& infile);
 void      printInitialMeterSignature(SSTREAM& out, HumdrumFile& infile);
 int       getMidiTicksPerQuarterNote(HumdrumFile& infile);
 void      printScoredefStaffgrp(int indent, SSTREAM& out, HumdrumFile& infile);
 void      getStaffCount        (Array<int>& primarytracks, HumdrumFile& infile);
-void      printStaffgrpStaffdef(int indent, SSTREAM& out, HumdrumFile& infile, 
+void      printStaffgrpStaffdef(int indent, SSTREAM& out, HumdrumFile& infile,
                                 Array<int>& tracks, int index);
 void      printInitialClef     (SSTREAM& out, HumdrumFile& infile, int ptrack);
-void      printBibliographicRecords(int indent, SSTREAM& out, 
+void      printBibliographicRecords(int indent, SSTREAM& out,
                                 HumdrumFile& infile);
 void      getSectionInfo       (Array<int>& sections, HumdrumFile& infile);
-void      printScoreSection    (int indent, SSTREAM& out, HumdrumFile& infile, 
+void      printScoreSection    (int indent, SSTREAM& out, HumdrumFile& infile,
                                 Array<int>& sections, int sindex);
 void      printSingleSection   (int indent, SSTREAM& out, HumdrumFile& infile,
                                 int startline, int stopline);
-void      printMeasure         (int indent, SSTREAM& out, HumdrumFile& infile, 
-                                Array<int>& measures, int mindex, 
+void      printMeasure         (int indent, SSTREAM& out, HumdrumFile& infile,
+                                Array<int>& measures, int mindex,
                                 int startsection, int stopsection,
 				Array<int>& ptrack);
-void      getMeasureInfoForSection(Array<int>& measures, HumdrumFile& infile, 
+void      getMeasureInfoForSection(Array<int>& measures, HumdrumFile& infile,
                                 int startline, int stopline);
 void      generateMeasureInfo  (Array<MeasureInfo>& minfo, HumdrumFile& infile);
 void      printBarlineStyle    (SSTREAM& out, int stylecode);
-void      calculateLayerInformation(Array<MeasureInfo>& minfo, 
+void      calculateLayerInformation(Array<MeasureInfo>& minfo,
                                 HumdrumFile& infile, Array<int>& ptrack);
-void      printMeasureStaff    (int indent, SSTREAM& out, HumdrumFile& infile, 
-                                Array<MeasureInfo>& minfo, int mindex, 
-                                int startsection, int stopsection, 
+void      printMeasureStaff    (int indent, SSTREAM& out, HumdrumFile& infile,
+                                Array<MeasureInfo>& minfo, int mindex,
+                                int startsection, int stopsection,
                                 Array<int>& ptrack, int staffindex);
-void      printStaffLayer      (int indent, SSTREAM& out, HumdrumFile& infile, 
-                                Array<MeasureInfo>& minfo, int mindex, 
-                                int startsection, int stopsection, 
-                                Array<int>& ptrack, int staffindex, 
+void      printStaffLayer      (int indent, SSTREAM& out, HumdrumFile& infile,
+                                Array<MeasureInfo>& minfo, int mindex,
+                                int startsection, int stopsection,
+                                Array<int>& ptrack, int staffindex,
                                 int layerindex);
-int       getLayerCountInMeasure(Array<MeasureInfo>& minfo, int mindex, 
-                                int startsection, int stopsection, 
+int       getLayerCountInMeasure(Array<MeasureInfo>& minfo, int mindex,
+                                int startsection, int stopsection,
                                 int staffindex);
-int       getLayerFieldIndex   (int primary, int lindex, int line, 
+int       getLayerFieldIndex   (int primary, int lindex, int line,
                                 HumdrumFile& infile);
-void      addElementToList     (Array<Array<int> >& layeritems, int lindex, 
+void      addElementToList     (Array<Array<int> >& layeritems, int lindex,
                                 int line, int spine);
-void      getLayerItems        (Array<Array<int> >& layeritems, 
-                                HumdrumFile& infile, 
-                                int staffindex, Array<int>& ptrack, 
-                                int layerindex, Array<MeasureInfo>& minfo, 
+void      getLayerItems        (Array<Array<int> >& layeritems,
+                                HumdrumFile& infile,
+                                int staffindex, Array<int>& ptrack,
+                                int layerindex, Array<MeasureInfo>& minfo,
                                 int mindex, int start, int stop);
-void      printLayerItems      (int indent, SSTREAM& out, 
+void      printLayerItems      (int indent, SSTREAM& out,
 		                Array<Array<int> >& layeritems,
                                 HumdrumFile& infile, Array<MeasureInfo>& minfo,
-			       	int mindex, int start, int stop, 
+			       	int mindex, int start, int stop,
                                 int layerindex);
 int       getStartOfData       (HumdrumFile& infile);
 int       getBeamAdjustment    (const char* token);
@@ -190,21 +190,21 @@ void      printNote            (int indent, SSTREAM& out, const char* string,
                                 int i, int j, int k, int layerindex);
 void      printRest            (int indent, SSTREAM& out, const char* string,
                                 int i, int j, int k, int layerindex);
-void      printKernData        (int indent, SSTREAM& out, HumdrumFile& infile, 
+void      printKernData        (int indent, SSTREAM& out, HumdrumFile& infile,
                                 int row, int col, int layerindex);
 void      printTempExpandRules (int indent, SSTREAM& out, HumdrumFile& infile);
 void      printDtdAlterations  (ostream& out);
 void      initializeGlobalVariables(HumdrumFile& infile);
-void      printProfiledescLangusage(int indent, SSTREAM& out, 
+void      printProfiledescLangusage(int indent, SSTREAM& out,
                                 HumdrumFile& infile, Array<const char*> langs);
 int       strcompare           (const void* A, const void* B);
 void      printMeiKeySignatureAttributes(SSTREAM& out, const char* keysig);
 void      printMeiKeyAttributes(SSTREAM& out, const char* key);
 void      printMeiMeterSymbolAttributes   (SSTREAM& out, const char* metstring);
 void      printMeiMeterSignatureAttributes(SSTREAM& out, const char* metersig);
-void      checkForTimeAndOrKeyChange(int indent, SSTREAM& out, 
-                                 HumdrumFile& infile, Array<int>& measures, 
-                                 int mindex, Array<int>& ptrack, 
+void      checkForTimeAndOrKeyChange(int indent, SSTREAM& out,
+                                 HumdrumFile& infile, Array<int>& measures,
+                                 int mindex, Array<int>& ptrack,
                                  Array<MeasureInfo>& minfo);
 void      printPreamble          (ostream& out);
 void      addToLANGS             (const char* lang);
@@ -218,7 +218,7 @@ const char*        IDMARKER = "sc"; // used for @id value generation
 int                DATASTART = 0;   // first line of actual data
 string             INDENT = "\t";   // indenting string
 Array<const char*> LANGS;           // for list of languages used in meiHead
-const char*        DTDLOCATION  = "/DTD/mei19b-full.dtd"; 
+const char*        DTDLOCATION  = "/DTD/mei19b-full.dtd";
 
 
 // User interface variables:
@@ -373,7 +373,7 @@ int validateHumdurmFile(HumdrumFile& infile) {
 
 void convertHumdrumToMei(int indent, SSTREAM& out, HumdrumFile& infile) {
    Indent(out, indent);
-   
+
    // MEI version 1.9.1b:
    // out << "<mei version=\"1.9.1b\">\n";
 
@@ -394,8 +394,8 @@ void convertHumdrumToMei(int indent, SSTREAM& out, HumdrumFile& infile) {
 //
 // createMeiHeader -- Fill in the <meiHead> section of <mei>
 //     <mei/meiHead>
-// 
-// <meiHead> 	(altmeiid*, filedesc, (encodingdesc?, profiledesc?), 
+//
+// <meiHead> 	(altmeiid*, filedesc, (encodingdesc?, profiledesc?),
 //               revisiondesc?)
 //
 
@@ -416,7 +416,7 @@ void createMeiHeader(int indent, SSTREAM& out, HumdrumFile& infile) {
    }
 
    // revisiondesc?
-   
+
 
    printBibliographicRecords(indent+1, out, infile);
 
@@ -450,7 +450,7 @@ void printMeiheadProfiledesc(int indent, SSTREAM& out, HumdrumFile& infile) {
 // printMeiheadProfiledesc --
 //
 
-void printProfiledescLangusage(int indent, SSTREAM& out, HumdrumFile& infile, 
+void printProfiledescLangusage(int indent, SSTREAM& out, HumdrumFile& infile,
    Array<const char*> langs) {
 
    Indent(out, indent);
@@ -463,7 +463,7 @@ void printProfiledescLangusage(int indent, SSTREAM& out, HumdrumFile& infile,
    int i;
    for (i=0; i<langs.getSize(); i++) {
       Indent(out, indent+1);
-      out << "<language " << xmlscope << "id=\"" << langs[i] 
+      out << "<language " << xmlscope << "id=\"" << langs[i]
           << "\" authority=\"iso639-2\"/>";
       const char* ptr = HumdrumRecord::getLanguageName(langs[i]);
       if (strlen(ptr) > 0) {
@@ -502,11 +502,11 @@ int strcompare(const void* A, const void* B) {
 //
 //  For the MEI 2010-05 converter, a more eleagant method is used using
 //  XML processing instructions for a theoretical Humdrum processor:
-//  <?Humdrum type="bib" key="COM" value="Bach, Johann Sebastian" 
+//  <?Humdrum type="bib" key="COM" value="Bach, Johann Sebastian"
 //      meaning="Composer's name"?>
 //
 
-void printBibliographicRecords(int indent, SSTREAM& out, 
+void printBibliographicRecords(int indent, SSTREAM& out,
       HumdrumFile& infile) {
 
    char buffer[1024] = {0};
@@ -534,7 +534,7 @@ void printBibliographicRecords(int indent, SSTREAM& out,
       printAsCdata(out, infile[i].getBibValue(buffer, 1024));
       out << "\"";
 
-      HumdrumRecord::getBibliographicMeaning(keymeaning, 
+      HumdrumRecord::getBibliographicMeaning(keymeaning,
             infile[i].getBibKey(buffer, 1024));
       if (keymeaning.getSize() > 1) {
          out << " meaning=\"";
@@ -559,8 +559,8 @@ void printBibliographicRecords(int indent, SSTREAM& out,
 //
 // printHeadFiledesc -- Fill in the <filedesc> section of <meiHead>
 //      <mei/meiHead/filedesc>
-// 
-// <filedesc> 		(titleStmt, editionStmt?, extent?, fingerprint?, 
+//
+// <filedesc> 		(titleStmt, editionStmt?, extent?, fingerprint?,
 //                       pubStmt, seriesStmt?, notesStmt?, sourceDesc?)
 //
 
@@ -572,7 +572,7 @@ void printHeadFiledesc(int indent, SSTREAM& out, HumdrumFile& infile) {
    // editionStmt?
    // extent?
    // fingerprint?
-  
+
    // pubStmt: just empty for now
    Indent(out, indent+1);
    out << "<pubStmt/>\n";
@@ -591,10 +591,10 @@ void printHeadFiledesc(int indent, SSTREAM& out, HumdrumFile& infile) {
 //
 // printFiledescTitleStmt -- Fill in the <titleStmt> section of <filedesc>
 //      <mei/meiHead/filedesc/titleStmt>
-// 
+//
 // <titleStmt> 		(title+, respStmt?)
 //
-// Container for title and responsibility meta-data. 
+// Container for title and responsibility meta-data.
 //
 
 void printFiledescTitleStmt(int indent, SSTREAM& out, HumdrumFile& infile) {
@@ -651,7 +651,7 @@ void addToLANGS(const char* lang) {
 //
 // printTitleStmtTitle -- Fill in the <titleStmt> section of <filedesc>
 //      <mei/meiHead/filedesc/titleStmt/title>
-// 
+//
 // <title>		(#PCDATA | extptr | extref | ptr | ref | address |
 //              annot | bibl | abbr | expan | name | corpname | persname |
 //              repository | periodname | stylename | date | rend | stack |
@@ -662,14 +662,14 @@ void addToLANGS(const char* lang) {
 // Title of a bibliographic entity. The type attribute may be used to
 // classify the title according to some convenient typology. Sample values
 // include:
-// 
-//   main         main title 
-//   subordinate  subtitle, title of part 
+//
+//   main         main title
+//   subordinate  subtitle, title of part
 //   abbreviated  abbreviated form of title
 //   alternative  alternate title by which the work is also known
 //   translated   translated form of title
 //   uniform      uniform title
-//  
+//
 //  The type attribute is provided for convenience in analysing titles
 //  and processing them according to their type; where such specialized
 //  processing is not necessary, there is no need for such analysis, and
@@ -678,7 +678,7 @@ void addToLANGS(const char* lang) {
 //  whether this is the title of an article, monograph, journal, series, or
 //  unpublished material. Title parts may be encoded in title sub-elements
 //  since title is included in model.textphrase.
-// 	
+// 
 //  Attribute	Type		   Value
 //  authority  	CDATA 	           #IMPLIED
 //  id    	ID                 #IMPLIED
@@ -720,7 +720,7 @@ void printTitleStmtTitle(int indent, SSTREAM& out, HumdrumFile& infile) {
             // MEI version 1.9.1b:
             // out << " lang=\"" << ptr << "\"";
             addToLANGS(ptr);
-         } 
+         }
 	 out << ">";
          printAsCdata(out, valuebuffer);
          out << "</title>\n";
@@ -836,7 +836,7 @@ void generateMeterInfo(Array<double>& measuredur, HumdrumFile& infile) {
          if (!pre.search(infile[i][j], "^\\*M(\\d+)/(\\d+)$")) {
             continue;
          }
-         md[i] = Convert::kernTimeSignatureTop(infile[i][j]) * 
+         md[i] = Convert::kernTimeSignatureTop(infile[i][j]) *
                  Convert::kernTimeSignatureBottomToDuration(infile[i][j]);
          break;
       }
@@ -861,7 +861,7 @@ void generateMeterInfo(Array<double>& measuredur, HumdrumFile& infile) {
 //    int  lastbar;           // index of last barline
 //    char letter;            // sub measure enumeration
 //    char complete;          // c = complete, i = underfull, o = overfull
-//    char pickupbefore;      // true if pickup measure preceeds this 
+//    char pickupbefore;      // true if pickup measure preceeds this
 //    char ispickup;          // true if this measure is a pickup measure
 //    char valid;             // true if index represents a real barline
 //    Array<char> layers;     // number of layers for each staff on line
@@ -919,14 +919,14 @@ void generateMeasureInfo(Array<MeasureInfo>& minfo, HumdrumFile& infile) {
          } else if (strcmp(pre.getSubmatch(), "-") == 0) {
             minfo[i].left = BAR_INVIS;
          } else {
-         cout << "<!-- UNKNOWN BARLINE STYLE: " << pre.getSubmatch() 
+         cout << "<!-- UNKNOWN BARLINE STYLE: " << pre.getSubmatch()
               << " -->\n" << endl;
          }
       } else {
          minfo[i].left = BAR_SINGLE;
       }
 
-      // store the complete marker: 
+      // store the complete marker:
       //    c = matches time signature
       //    i = incomplete, underfull
       //    o = overfull
@@ -956,15 +956,15 @@ void generateMeasureInfo(Array<MeasureInfo>& minfo, HumdrumFile& infile) {
          tempnext = i;
       }
    }
-	     
+
    int templast = -1;
    for (i=0; i<minfo.getSize(); i++) {
       minfo[i].lastbar = templast;
       if (minfo[i].valid) {
          templast = i;
-      } 
+      }
    }
-	     
+
    // finalize pickup measure information
    for (i=0; i<minfo.getSize(); i++) {
       if (minfo[i].valid) {
@@ -986,7 +986,7 @@ void generateMeasureInfo(Array<MeasureInfo>& minfo, HumdrumFile& infile) {
    // check for intermediate barlines between two
    // barlines with consecutive numbers
    for (i=0; i<minfo.getSize(); i++) {
-      if (minfo[i].valid == 0) {  
+      if (minfo[i].valid == 0) {
          continue;
       }
       if (minfo[i].num >= 0) {
@@ -1031,7 +1031,7 @@ void generateMeasureInfo(Array<MeasureInfo>& minfo, HumdrumFile& infile) {
 //    for each staff to be processed for each line of the Humdrum file.
 //
 
-void calculateLayerInformation(Array<MeasureInfo>& minfo, 
+void calculateLayerInformation(Array<MeasureInfo>& minfo,
       HumdrumFile& infile, Array<int>& ptrack) {
 
    Array<int> reverselookup;
@@ -1087,7 +1087,7 @@ void calculateLayerInformation(Array<MeasureInfo>& minfo,
 //	blocks of explanatory text.
 //
 
-void createMeiMusicBodyMdivScore(int indent, SSTREAM& out, 
+void createMeiMusicBodyMdivScore(int indent, SSTREAM& out,
       HumdrumFile& infile) {
    Indent(out, indent);
    out << "<score>\n";
@@ -1100,7 +1100,7 @@ void createMeiMusicBodyMdivScore(int indent, SSTREAM& out,
    getSectionInfo(sections, infile);
 
    if (sections.getSize() == 1) {
-      printSingleSection(indent+1, out, infile, sections[0], 
+      printSingleSection(indent+1, out, infile, sections[0],
             infile.getNumLines()-1);
    } else {
       int i;
@@ -1128,7 +1128,7 @@ void printSingleSection(int indent, SSTREAM& out, HumdrumFile& infile,
 
    int i;
    for (i=0; i<measures.getSize(); i++) {
-      printMeasure(indent, out, infile, measures, i, startline, 
+      printMeasure(indent, out, infile, measures, i, startline,
             stopline, PTRACK);
    }
 }
@@ -1140,7 +1140,7 @@ void printSingleSection(int indent, SSTREAM& out, HumdrumFile& infile,
 // getMeasuresInfoForSection --
 //
 
-void getMeasureInfoForSection(Array<int>& measures, HumdrumFile& infile, 
+void getMeasureInfoForSection(Array<int>& measures, HumdrumFile& infile,
       int startline, int stopline) {
 
    measures.setSize(10000);
@@ -1217,8 +1217,8 @@ void getMeasureInfoForSection(Array<int>& measures, HumdrumFile& infile,
 //    is started.
 //
 
-void checkForTimeAndOrKeyChange(int indent, SSTREAM& out, HumdrumFile& infile, 
-      Array<int>& measures, int mindex, Array<int>& ptrack, 
+void checkForTimeAndOrKeyChange(int indent, SSTREAM& out, HumdrumFile& infile,
+      Array<int>& measures, int mindex, Array<int>& ptrack,
       Array<MeasureInfo>& minfo) {
 
    if (minfo[measures[mindex]].valid == 0) {
@@ -1291,13 +1291,13 @@ void checkForTimeAndOrKeyChange(int indent, SSTREAM& out, HumdrumFile& infile,
 //    <measure>
 //
 
-void printMeasure(int indent, SSTREAM& out, HumdrumFile& infile, 
+void printMeasure(int indent, SSTREAM& out, HumdrumFile& infile,
       Array<int>& measures, int mindex, int startsection, int stopsection,
       Array<int>& ptrack) {
 
-   checkForTimeAndOrKeyChange(indent, out, infile, measures, mindex, 
+   checkForTimeAndOrKeyChange(indent, out, infile, measures, mindex,
       ptrack, MINFO);
-		    
+
 
    Indent(out, indent);
    out << "<measure";
@@ -1354,26 +1354,26 @@ void printMeasure(int indent, SSTREAM& out, HumdrumFile& infile,
 
    if (MINFO[measures[mindex]].num >= 0) {
       if ((letter == 'a') && (MINFO[measures[mindex]].nextbar >= 0)) {
-         out << " join=\"" << "m_" << IDMARKER << "_" 
+         out << " join=\"" << "m_" << IDMARKER << "_"
              << MINFO[measures[mindex]].nextbar << "\"";
       } else if ((letter == 'b') && (MINFO[measures[mindex]].lastbar >= 0)) {
-         out << " join=\"" << "m_" << IDMARKER << "_" 
+         out << " join=\"" << "m_" << IDMARKER << "_"
              << MINFO[measures[mindex]].lastbar << "\"";
       }
    }
-	     
+
    // All barlines are assumed to be MEI "control" barlines.
    // It is possible to have "non-control" barlines in Humdrum files,
    // but the HumdrumFile class currently does not permit them.
    if (verboseQ) {
       out << " control=\"true\"";
    }
-   
+
    out << ">\n";
 
    int i;
    for (i=0; i<ptrack.getSize(); i++) {
-      printMeasureStaff(indent+1, out, infile, MINFO, measures[mindex], 
+      printMeasureStaff(indent+1, out, infile, MINFO, measures[mindex],
          startsection, stopsection, ptrack, i);
    }
 
@@ -1389,7 +1389,7 @@ void printMeasure(int indent, SSTREAM& out, HumdrumFile& infile,
 //     <staff>
 //
 
-void printMeasureStaff(int indent, SSTREAM& out, HumdrumFile& infile, 
+void printMeasureStaff(int indent, SSTREAM& out, HumdrumFile& infile,
       Array<MeasureInfo>& minfo, int mindex, int startsection,
          int stopsection, Array<int>& ptrack, int staffindex) {
    Indent(out, indent);
@@ -1400,7 +1400,7 @@ void printMeasureStaff(int indent, SSTREAM& out, HumdrumFile& infile,
    out << ">\n";
 
 
-   int layercount = getLayerCountInMeasure(minfo, mindex, startsection, 
+   int layercount = getLayerCountInMeasure(minfo, mindex, startsection,
          stopsection, staffindex);
 
    int i;
@@ -1420,7 +1420,7 @@ void printMeasureStaff(int indent, SSTREAM& out, HumdrumFile& infile,
 // getLayerCountInMeasure -- return the maximum number of layers in the
 //
 
-int getLayerCountInMeasure(Array<MeasureInfo>& minfo, int mindex, 
+int getLayerCountInMeasure(Array<MeasureInfo>& minfo, int mindex,
       int startsection, int stopsection, int staffindex) {
 
    int maxcount = 0;
@@ -1451,7 +1451,7 @@ int getLayerCountInMeasure(Array<MeasureInfo>& minfo, int mindex,
 // printStaffLayer --
 //
 
-void printStaffLayer(int indent, SSTREAM& out, HumdrumFile& infile, 
+void printStaffLayer(int indent, SSTREAM& out, HumdrumFile& infile,
       Array<MeasureInfo>& minfo, int mindex, int startsection, int stopsection,
       Array<int>& ptrack, int staffindex, int layerindex) {
 
@@ -1479,13 +1479,13 @@ void printStaffLayer(int indent, SSTREAM& out, HumdrumFile& infile,
       stop = start;
       start = tempval;
    }
-	     
+
 
    Array<Array<int> > layeritems;
-   getLayerItems(layeritems, infile, staffindex, ptrack, layerindex, minfo, 
+   getLayerItems(layeritems, infile, staffindex, ptrack, layerindex, minfo,
          mindex, start, stop);
 
-   printLayerItems(indent+1, out, layeritems, infile, minfo, mindex, 
+   printLayerItems(indent+1, out, layeritems, infile, minfo, mindex,
          start, stop, layerindex);
 
    Indent(out, indent);
@@ -1500,7 +1500,7 @@ void printStaffLayer(int indent, SSTREAM& out, HumdrumFile& infile,
 //
 
 void printLayerItems(int indent, SSTREAM& out, Array<Array<int> >& layeritems,
-      HumdrumFile& infile, Array<MeasureInfo>& minfo, int mindex, int start, 
+      HumdrumFile& infile, Array<MeasureInfo>& minfo, int mindex, int start,
       int stop, int layerindex) {
 
    int bindent = 0;
@@ -1512,7 +1512,7 @@ void printLayerItems(int indent, SSTREAM& out, Array<Array<int> >& layeritems,
 
    int graceQ = 0;               // true if a grace note rhythm
    int lastgraceQ = 0;
- 
+
    PerlRegularExpression pre;
 
    int li;
@@ -1522,7 +1522,7 @@ void printLayerItems(int indent, SSTREAM& out, Array<Array<int> >& layeritems,
       j = layeritems[li][1];
       if (debugQ) {
          Indent(out, indent);
-         out << "<!-- (" << i << "," << j << ")\t=\t" << infile[i][j] 
+         out << "<!-- (" << i << "," << j << ")\t=\t" << infile[i][j]
              << "\t-->\n";
       }
 
@@ -1531,7 +1531,7 @@ void printLayerItems(int indent, SSTREAM& out, Array<Array<int> >& layeritems,
             // deal with <beam> containers
             lastgraceQ = graceQ;
             graceQ = pre.search(infile[i][j], "Q", "i");
-            if ((graceQ == 0) && (lastgraceQ != 0) 
+            if ((graceQ == 0) && (lastgraceQ != 0)
                   && (newgracebeamstate != 0)) {
                // turn of a hanging gracenote beam
                Indent(out, indent + --bindent);
@@ -1588,7 +1588,7 @@ void printLayerItems(int indent, SSTREAM& out, Array<Array<int> >& layeritems,
             break;
          default:
             Indent(out, indent);
-            out << "<!-- UNKNOWN DATALINE TYPE: " 
+            out << "<!-- UNKNOWN DATALINE TYPE: "
                 << infile[i].getType() << "  -->\n";
       }
 
@@ -1646,7 +1646,7 @@ void printKernData(int indent, SSTREAM& out, HumdrumFile& infile, int row,
 // printRest -- convert a Humdrum **kern rest in to an MEI rest.
 //
 
-void printRest(int indent, SSTREAM& out, const char* string, int i, int j, 
+void printRest(int indent, SSTREAM& out, const char* string, int i, int j,
       int k, int layerindex) {
    if (string == NULL) {
       return;
@@ -1654,7 +1654,7 @@ void printRest(int indent, SSTREAM& out, const char* string, int i, int j,
 
    if (debugQ) {
       Indent(out, indent);
-      out << "<!-- REST: " << string << " " << xmlscope << "id=\"n_" 
+      out << "<!-- REST: " << string << " " << xmlscope << "id=\"n_"
           << IDMARKER << "_";
       out << i << "_" << j;
       if (k >= 0) {
@@ -1672,7 +1672,7 @@ void printRest(int indent, SSTREAM& out, const char* string, int i, int j,
       out << "_" << k;
    }
    out << "\"";
-   
+
 
    // print rhythm information /////////////////////////////////////////
 
@@ -1689,20 +1689,20 @@ void printRest(int indent, SSTREAM& out, const char* string, int i, int j,
       } else if (strcmp(pre.getSubmatch(), "00") == 0) {
          out << " dur=\"long\"";
       } else if (durval > 0) {
-         //int visdur = int(pow(2.0, 
+         //int visdur = int(pow(2.0,
          //      (int(log((double)durval)/log(2.0))+0.00000001)));
-         int visdur = int(pow(2.0, 
+         int visdur = int(pow(2.0,
              int(log((double)durval)/log(2.0)+0.001) ));
          out << " dur=\"" << visdur << "\"";
       }
    }
-	     
+
    if (pre.search(string, "(\\.)")) {
       int dotcount = strlen(pre.getSubmatch(1));
       if ((dotcount >= 0) && (dotcount <= 4)) {
          // allowed range for dots in MEI 1.9b
          out << " dots=\"" << dotcount << "\"";
-      } 
+      }
    }
 
 
@@ -1716,7 +1716,7 @@ void printRest(int indent, SSTREAM& out, const char* string, int i, int j,
 // printNote -- convert a Humdrum **kern note in to an MEI note.
 //
 
-void printNote(int indent, SSTREAM& out, const char* string, int i, int j, 
+void printNote(int indent, SSTREAM& out, const char* string, int i, int j,
       int k, int layerindex) {
    if (string == NULL) {
       return;
@@ -1731,7 +1731,7 @@ void printNote(int indent, SSTREAM& out, const char* string, int i, int j,
 
    if (debugQ) {
       Indent(out, indent);
-      out << "<!-- NOTE: " << string << " " << xmlscope << "id=\"n_" 
+      out << "<!-- NOTE: " << string << " " << xmlscope << "id=\"n_"
           << IDMARKER << "_";
       out << i << "_" << j;
       if (k >= 0) {
@@ -1758,7 +1758,7 @@ void printNote(int indent, SSTREAM& out, const char* string, int i, int j,
       // kern data can contains rhythms with no pitches, but
       // disallow this case for now
       Indent(out, indent);
-      out << "<!-- Error: cannot find diatonic pitch class in: " 
+      out << "<!-- Error: cannot find diatonic pitch class in: "
           << string << " -->\n";
       return;
    }
@@ -1779,7 +1779,7 @@ void printNote(int indent, SSTREAM& out, const char* string, int i, int j,
          accid << "<accid accid=\"f\" func=\"edit\"/>";
       } else if (strcmp(pre.getSubmatch(), "n") == 0) {
          accid << "<accid accid=\"n\" func=\"edit\"/>";
-      } 
+      }
       edaccidQ = 1;
    } else if (pre.search(string, "([#n-]+)")) {
       if (strcmp(pre.getSubmatch(1), "##") == 0) {
@@ -1792,7 +1792,7 @@ void printNote(int indent, SSTREAM& out, const char* string, int i, int j,
          out << " accid=\"f\"";
       } else if (strcmp(pre.getSubmatch(), "n") == 0) {
          out << " accid=\"n\"";
-      } 
+      }
    }
 
    // print octave attribute:
@@ -1814,22 +1814,22 @@ void printNote(int indent, SSTREAM& out, const char* string, int i, int j,
       } else if (strcmp(pre.getSubmatch(), "00") == 0) {
          out << " dur=\"long\"";
       } else if (durval > 0) {
-         int visdur = int(pow(2.0, 
+         int visdur = int(pow(2.0,
              int(log((double)durval)/log(2.0)+0.001) ));
          out << " dur=\"" << visdur << "\"";
       }
    }
-	     
+
    if (pre.search(string, "(\\.)")) {
       int dotcount = strlen(pre.getSubmatch(1));
       if ((dotcount >= 0) && (dotcount <= 4)) {
          // allowed range for dots in MEI 1.9b
          out << " dots=\"" << dotcount << "\"";
-      } 
+      }
    }
 
    ////////////////////////////////////////////////////////////////////
-   
+
    // print tie information
    if (strchr(string, '[') != NULL) {
       out << " tie=\"i\"";
@@ -1875,7 +1875,7 @@ void printNote(int indent, SSTREAM& out, const char* string, int i, int j,
 
 //////////////////////////////
 //
-// getBeamAdjustment -- counts the difference in L and J beam start/end 
+// getBeamAdjustment -- counts the difference in L and J beam start/end
 //    markers.
 //
 
@@ -1902,8 +1902,8 @@ int getBeamAdjustment(const char* token) {
 // getLayerItems --
 //
 
-void getLayerItems(Array<Array<int> >& layeritems, HumdrumFile& infile, 
-      int staffindex, Array<int>& ptrack, int layerindex, 
+void getLayerItems(Array<Array<int> >& layeritems, HumdrumFile& infile,
+      int staffindex, Array<int>& ptrack, int layerindex,
       Array<MeasureInfo>& minfo, int mindex, int start, int stop) {
 
    layeritems.setSize(1000);
@@ -1936,7 +1936,7 @@ void getLayerItems(Array<Array<int> >& layeritems, HumdrumFile& infile,
       if (layerindex < minfo[i].layers[staffindex]-1) {
          continue;
       }
-      
+
       // tandem interpretations only stored on first layer of staff
       if (infile[i].isInterpretation() && (layerindex == 0)) {
          j = getLayerFieldIndex(ptrack[staffindex], layerindex, i, infile);
@@ -1952,7 +1952,7 @@ void getLayerItems(Array<Array<int> >& layeritems, HumdrumFile& infile,
          }
          continue;
       }
-  
+
       if (infile[i].isLocalComment()) {
          j = getLayerFieldIndex(ptrack[staffindex], layerindex, i, infile);
          if (j < 0) {
@@ -2012,7 +2012,7 @@ int getLayerFieldIndex(int primary, int lindex, int line, HumdrumFile& infile) {
 // addElemetntToList --
 //
 
-void addElementToList(Array<Array<int> >& layeritems, int lindex, 
+void addElementToList(Array<Array<int> >& layeritems, int lindex,
       int line, int spine) {
    layeritems[lindex].setSize(2);
    layeritems[lindex].allowGrowth(0);
@@ -2025,7 +2025,7 @@ void addElementToList(Array<Array<int> >& layeritems, int lindex,
 //////////////////////////////
 //
 // printBarlineStyle --
-// BAR_NONE     
+// BAR_NONE
 // BAR_SINGLE   single
 // BAR_END      end
 // BAR_RPTSTART rptstart
@@ -2057,7 +2057,7 @@ void printBarlineStyle(SSTREAM& out, int stylecode) {
 //   section/@id = name of section
 //
 
-void printScoreSection(int indent, SSTREAM& out, HumdrumFile& infile, 
+void printScoreSection(int indent, SSTREAM& out, HumdrumFile& infile,
    Array<int>& sections, int sindex) {
 
    Indent(out, indent);
@@ -2129,13 +2129,13 @@ void getSectionInfo(Array<int>& sections, HumdrumFile& infile) {
 // printMdivScoreScoredef --
 //      <mei/music/body/div/score/scoreDef>
 //
-// <scoreDef> 	(timeline*, chordTable?, symbolTable?, keysig?, pghead1?, 
+// <scoreDef> 	(timeline*, chordTable?, symbolTable?, keysig?, pghead1?,
 //               pghead2?, pgfoot1?, pgfoot2?, (staffGrp? | staffDef?))
 //
 // Container for score meta-information.
-// 
+//
 // Score-level encoding strategies for:
-// 
+//
 //    a) alternating meter sig, e.g. 2/4 3/4 in alternating measures (Read,
 //       p. 164-165) and combined meters (Read, p.166-168): explicitly
 //       encode meters, make them invisible, display both meter sigs at the
@@ -2155,8 +2155,8 @@ void getSectionInfo(Array<int>& sections, HumdrumFile& infile) {
 //       set meter.count=3.5
 //       The beat count may be displayed as a fraction or as its decimal
 //       equivalent.
-// 
-// 
+//
+//
 //  Attribute	        Type	                    Value
 //  beam.group    	CDATA 	                    #IMPLIED
 //  beam.rests    	true|false 	            #IMPLIED
@@ -2172,7 +2172,7 @@ void getSectionInfo(Array<int>& sections, HumdrumFile& infile) {
 //                      mixolydian|aeolian|locrian  #IMPLIED
 //  key.pname    	a|b|c|d|e|f|g 	            #IMPLIED
 //  key.sig.mixed    	CDATA 	                    #IMPLIED
-//  key.sig    	        7f|6f|5f|4f|3f|2f|1f|0|1s|2s|3s|4s|5s|6s|7s|mixed   
+//  key.sig    	        7f|6f|5f|4f|3f|2f|1f|0|1s|2s|3s|4s|5s|6s|7s|mixed
 //                                                  #IMPLIED
 //  meter.count    	CDATA 	                    #IMPLIED
 //  meter.sym    	common|cut                  #IMPLIED
@@ -2190,7 +2190,7 @@ void getSectionInfo(Array<int>& sections, HumdrumFile& infile) {
 //  tempus    	        [2-3] 	                    #IMPLIED
 //  trans.diat    	CDATA 	                    #IMPLIED
 //  trans.semi    	CDATA 	                    #IMPLIED
-//  
+//
 
 void printMdivScoreScoredef(int indent, SSTREAM& out, HumdrumFile& infile) {
    Indent(out, indent);
@@ -2209,7 +2209,7 @@ void printMdivScoreScoredef(int indent, SSTREAM& out, HumdrumFile& infile) {
    if (verboseQ) {
       out << " midi.div=\"" << MIDITPQ << "\"";
    }
-   
+
    out << ">\n";
 
    printScoredefStaffgrp(indent+1, out, infile);
@@ -2302,7 +2302,7 @@ void printScoredefStaffgrp(int indent, SSTREAM& out, HumdrumFile& infile) {
 //
 // getStaffCount -- count the number of **kern spines on
 //     the first instance of exclusive interpretations.
-// 
+//
 
 void getStaffCount(Array<int>& primarytracks, HumdrumFile& infile) {
    primarytracks.setSize(100);
@@ -2339,7 +2339,7 @@ void getStaffCount(Array<int>& primarytracks, HumdrumFile& infile) {
 // printStaffgrpStaffdef --
 //
 
-void printStaffgrpStaffdef(int indent, SSTREAM& out, HumdrumFile& infile, 
+void printStaffgrpStaffdef(int indent, SSTREAM& out, HumdrumFile& infile,
       Array<int>& tracks, int index) {
    Indent(out, indent);
    out << "<staffDef";
@@ -2360,7 +2360,7 @@ void printStaffgrpStaffdef(int indent, SSTREAM& out, HumdrumFile& infile,
 //  clef.line = what staffline the cleff is on
 //  clef.shape = G, GG, F, C, perc, TAB
 //  clef.trans = 8va, 8vb, 15va
-// 
+//
 // Types of **kern *clef's:
 // G	G clef (as used, for example in the treble staff)
 // F	F clef (as used, for example in the bass staff)
@@ -2408,7 +2408,7 @@ void printInitialClef(SSTREAM& out, HumdrumFile& infile, int ptrack) {
    if (clef == NULL) {
       return;
    }
-	     
+
    char buffer[128] = {0};
    strncpy(buffer, pre.getSubmatch(1), 32);
 
@@ -2426,7 +2426,7 @@ void printInitialClef(SSTREAM& out, HumdrumFile& infile, int ptrack) {
    } else if (strcmp(pre.getSubmatch(), "G") == 0) {
       out << " clef.shape=\"perc\"";
    }
-   
+
    if (pre.search(buffer, "(\\d)")) {
       out << " clef.line=\"";
       out << pre.getSubmatch(1);
@@ -2444,7 +2444,7 @@ void printInitialClef(SSTREAM& out, HumdrumFile& infile, int ptrack) {
       // transpose one octave higher
       out << " clef.trans=\"8va\"";
    }
-   
+
 }
 
 
@@ -2464,7 +2464,7 @@ int getMidiTicksPerQuarterNote(HumdrumFile& infile) {
       cerr << "Error: timebase is not divisible by 4: " << returnval << endl;
       exit(1);
    }
-	
+
    return returnval/4;
 }
 
@@ -2510,7 +2510,7 @@ void printInitialKeySignature(SSTREAM& out, HumdrumFile& infile) {
          break;
       }
    }
-   
+
    printMeiKeySignatureAttributes(out, keysig);
    printMeiKeyAttributes(out, key);
 }
@@ -2536,7 +2536,7 @@ void printMeiKeyAttributes(SSTREAM& out, const char* key) {
       PerlRegularExpression pre;
       pre.search(key, "^\\*([A-G])([#-]?):(.*)", "i");
       char pname = pre.getSubmatch(1)[0];
-      
+
       out << " key.pname=\"" << (char)tolower(pname) << "\"";
 
       char accid = pre.getSubmatch(2)[0];
@@ -2582,7 +2582,7 @@ void printMeiKeyAttributes(SSTREAM& out, const char* key) {
 //////////////////////////////
 //
 // printMeiKeySignatureAttributes -- convert **kern signature into
-//   and MEI key signature.  Assumes that the order of the pitches 
+//   and MEI key signature.  Assumes that the order of the pitches
 //   in *k[] are standard and consecutive.
 //
 
@@ -2685,7 +2685,7 @@ void printMeiMeterSymbolAttributes(SSTREAM& out, const char* metstring) {
          out << " meter.sym=\"common\"";
       } else if (pre.search(metstring, "\\*met\\(C|\\)", "i")) {
          out << " meter.sym=\"cut\"";
-      } 
+      }
    }
 }
 
@@ -2693,7 +2693,7 @@ void printMeiMeterSymbolAttributes(SSTREAM& out, const char* metstring) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char** argv) {
@@ -2730,7 +2730,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
    verboseQ = opts.getBoolean("verbose");
    INDENT   = opts.getString("indent");
 
-   // tab character in option is being eaten (probably by the 
+   // tab character in option is being eaten (probably by the
    // option parser, so if the INDENT string is empty, force it
    // to be a tab character.
    if (INDENT.size() == 0) {
@@ -2738,7 +2738,7 @@ void checkOptions(Options& opts, int argc, char** argv) {
    }
    if (opts.getBoolean("noxmlscope")) {
       xmlscope = "";
-   } 
+   }
 }
 
 
@@ -2757,7 +2757,7 @@ void Indent(SSTREAM& out, int indent, const char* string) {
    if (istring == NULL) {
       istring = INDENT.c_str();
    }
-	    
+
    if (indent > limit) {
       return;
    }

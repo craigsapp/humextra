@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 
 void processFile(HumdrumFile& infile) {
    infile.analyzeRhythm("4");
-   vector<int> ktracks; 
+   vector<int> ktracks;
    infile.getKernTracks(ktracks);
    int kcount = (int)ktracks.size();
    int maxtrack = infile.getMaxTracks();
@@ -124,13 +124,13 @@ void processFile(HumdrumFile& infile) {
             }
             storeNote(pcs[voice], startrow, endrow, pc);
             if (debugQ) {
-				   cout << "token=" << tokens[k] << "\tvoice="<<voice << "\tpc="<< pc 
+				   cout << "token=" << tokens[k] << "\tvoice="<<voice << "\tpc="<< pc
 				        << "\tstart=" << startrow << "\tend=" << endrow << endl;
 				}
          }
       }
    }
-   
+
 
    printAnalysis(pcs);
 }
@@ -192,7 +192,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");            // example usages
    opts.define("help=b");               // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

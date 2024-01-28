@@ -7,7 +7,7 @@
 // Last Modified: Fri Aug 24 09:52:39 PDT 2012 Renovated
 // Filename:      ...sig/src/sigInfo/ScoreRecord.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/ScoreRecord.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A SCORE item parameter class.  Inherits basic parameter
 //                management from ScoreParameters class.  This class adds
@@ -64,25 +64,25 @@ typedef enum {
 class ScoreRecord : public ScoreParameters {
    public:
                      ScoreRecord           (void);
-                     ScoreRecord           (ScoreRecord& a);
+                     ScoreRecord           (const ScoreRecord& a);
                     ~ScoreRecord           ();
 
       // General maintenance functions:
       void           clear                 (void);
       void           clearAnalysisVariables(void);
-      ScoreRecord&   operator=	           (ScoreRecord& a);
+      ScoreRecord&   operator=	           (const ScoreRecord& a);
 
       // Printing functions:
       int            writeBinary       (ostream& out);
       void           readBinary        (istream& instream, int pcount);
-      void           printAscii        (ostream& out, int roundQ = 1, 
-		                        int verboseQ = 0, 
+      void           printAscii        (ostream& out, int roundQ = 1,
+		                        int verboseQ = 0,
                                         const char* indent = "");
-      void           printAscii        (char* buffer1, char* buffer2, 
-                                        int max, int roundQ = 1, 
-					int verboseQ = 0, 
+      void           printAscii        (char* buffer1, char* buffer2,
+                                        int max, int roundQ = 1,
+					int verboseQ = 0,
                                         const char* indent = "");
-      void           printAsciiExtraParameters(ostream& out, int roundQ, 
+      void           printAsciiExtraParameters(ostream& out, int roundQ,
                                         int verboseQ,
                                         const char* indent = "");
       void           setTextFont       (const char* aString);
@@ -237,10 +237,10 @@ class ScoreRecord : public ScoreParameters {
       int            getSystemIndex          (void);
       void           setSystemIndex          (int anIndex);
 
-      // 
-      // Line-level indexing/location functions.  These are usually set 
+      //
+      // Line-level indexing/location functions.  These are usually set
       // automatically in the ScorePage class.
-      // 
+      //
 
       int             getSystemPosition      (void);
       int             getSystemPos           (void);
@@ -283,7 +283,7 @@ class ScoreRecord : public ScoreParameters {
       // static functions
       //
 
-      static int     getDiatonicAccidentalState(Array<int>& states, 
+      static int     getDiatonicAccidentalState(Array<int>& states,
                                         ScoreRecord& arecord);
       static int     getMiddleCVpos    (ScoreRecord& arecord);
       static Array<char>& convertScoreTextToHtmlText(Array<char>& astring);
@@ -297,7 +297,7 @@ class ScoreRecord : public ScoreParameters {
 
       // The textFont is used to set the font of an item independent of
       // the font inside of the text string for P1=16 objects.
-      // When a text record is printed, and this entry is not NULL or 
+      // When a text record is printed, and this entry is not NULL or
       // empty, then it will be printed first on the text line, followed
       // by the text string (which will have any prefixed font removed).
       char*          textFont;
@@ -314,7 +314,7 @@ class ScoreRecord : public ScoreParameters {
 
 
       // single-line position (on staff/system)
-      int lineStaffPos;    // Position of item on single staff line on page, 
+      int lineStaffPos;    // Position of item on single staff line on page,
                            //    such as "P2=4" (the 4th staff on the page).
       int lineSystemPos;   // Position of item on single system line on page,
                            //    such as the 0th system which is the top
@@ -324,13 +324,13 @@ class ScoreRecord : public ScoreParameters {
 
       // position of object on the page (continuous staff/part and system)
       int pageStaffPos;    // Position of item in continuous part staff on page.
-                           //    A time/space enumeration of all items for a 
+                           //    A time/space enumeration of all items for a
                            //    part on a given page.
       int pageSystemPos;   // Postion of item in continuous system on page
 
 
       // posistion of object on page set (work/movement)
-      int pagesetStaffPos; // Position of item in staff part across multiple 
+      int pagesetStaffPos; // Position of item in staff part across multiple
                            //    pages.
       int pagesetSystemPos;// Position of item in system across multiple pages.
 

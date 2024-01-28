@@ -9,7 +9,7 @@
 //
 // Description:   Embed a Humdrum file into a PDF file as an attachment.
 //
-// Links: 
+// Links:
 // PDF 1.7 reference (ISO 32000.1 2008):
 //    http://www.adobe.com/devnet/acrobat/pdfs/PDF32000_2008.pdf
 //    http://blogs.adobe.com/pdfdevjunkie/PDF_Inside_and_Out.pdf
@@ -35,36 +35,36 @@ using namespace std;
 #include <unistd.h>
 #include <time.h>
 
-   
+
 void      checkOptions        (Options& opts, int argc, char* argv[]);
 void      example             (void);
 void      usage               (const char* command);
-void      printMimeEncoding   (ostream& out, int count, char char1, char char2, 
+void      printMimeEncoding   (ostream& out, int count, char char1, char char2,
                                char char3);
 void      createStreamData    (ostream& out, stringstream& datatoencode,
                                const char* filename);
-int       printStreamObject   (ostream& out, int objnum, stringstream& datatoencode, 
+int       printStreamObject   (ostream& out, int objnum, stringstream& datatoencode,
                                const char* filename, Array<int>& objectindex,
                                Array<int>& offsetindex, int initialoffset);
-int       createFileEntry     (stringstream& out, HumdrumFile& infile, 
+int       createFileEntry     (stringstream& out, HumdrumFile& infile,
                                const char* filename, int nextobject,
-                               Array<int>& objectindex, 
+                               Array<int>& objectindex,
                                Array<int>& offsetindex, int initialoffset);
-int       generateNewXref     (stringstream& out, Array<int>& objectindex, 
+int       generateNewXref     (stringstream& out, Array<int>& objectindex,
                                Array<int>& offsetindex, int filesize);
 void      printPdfDate        (ostream& out, struct tm* date);
 void      addTrailerPrev      (Array<char>& trailerstring, int newprevoffset);
-int       linkToRootObject    (ostream& out, Array<int>& objectindex, 
-                               Array<int>& offsetindex, int initialoffset, 
-                               Array<char> trailerstring, int xrefoffset, 
+int       linkToRootObject    (ostream& out, Array<int>& objectindex,
+                               Array<int>& offsetindex, int initialoffset,
+                               Array<char> trailerstring, int xrefoffset,
                                istream& file, int nextobject,
                                PDFFile& pdffile);
 void      getObject           (ostream& out, istream& file, int offset);
-int       updateNamesObject   (ostream& out, Array<int>& objectindex, 
-                               Array<int>& offsetindex, int initialoffset, 
+int       updateNamesObject   (ostream& out, Array<int>& objectindex,
+                               Array<int>& offsetindex, int initialoffset,
                                ostream& file, int nextobject, int ndoffset);
-int       updateRootObject    (ostream& out, int rootobjnum, int initialoffset, 
-                               PDFFile& pdffile, Array<char>& rootstring, 
+int       updateRootObject    (ostream& out, int rootobjnum, int initialoffset,
+                               PDFFile& pdffile, Array<char>& rootstring,
                                Array<int>& objectindex, Array<int>& offsetindex,
                                int embedcount, int nextobject);
 void      addDictionaryEntry   (Array<char>& objectstring, Array<char>& entry);
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
       infile.clear();
       filename = options.getArg(i+1).c_str();
       infile.read(filename);
-      nextobject = createFileEntry(*filesegments[fcounter], infile, 
+      nextobject = createFileEntry(*filesegments[fcounter], infile,
             filename, nextobject, objectindex, offsetindex, initialoffset);
       initialoffset += filesegments[fcounter]->str().length();
       fcounter++;
@@ -170,8 +170,8 @@ int main(int argc, char** argv) {
       // If "hidden", the file will disappear if Save As... is used to save,
       // because the document root does not know about it.
       stringstream rootlink;
-      nextobject = linkToRootObject(rootlink, objectindex, offsetindex, 
-		         initialoffset, trailerstring, xrefoffset, *file, 
+      nextobject = linkToRootObject(rootlink, objectindex, offsetindex,
+		         initialoffset, trailerstring, xrefoffset, *file,
 			 nextobject, pdffile);
       cout << rootlink.str() << flush;
       initialoffset += rootlink.str().length();
@@ -183,13 +183,13 @@ int main(int argc, char** argv) {
    PerlRegularExpression pre;
    pre.sar(trailerstring, "\\/Size\\s+\\d+", replacement);
 
-   // remove any /Prev entry in trailer, and replace with 
+   // remove any /Prev entry in trailer, and replace with
    // new one
    addTrailerPrev(trailerstring, xrefoffset);
 
    stringstream xrefstream;
 
-   int newxrefoffset = generateNewXref(xrefstream, objectindex, 
+   int newxrefoffset = generateNewXref(xrefstream, objectindex,
 		   offsetindex, filesize);
    newxrefoffset += initialoffset;
    cout << xrefstream.str();
@@ -212,26 +212,26 @@ int main(int argc, char** argv) {
 
 //////////////////////////////
 //
-// linkToRootObject -- 
+// linkToRootObject --
 //
-//  Link embedded files to to root entry of PDF.  If the embedded 
-//  file is not linked from the Root entry, then it looks like it 
+//  Link embedded files to to root entry of PDF.  If the embedded
+//  file is not linked from the Root entry, then it looks like it
 //  is removed automatically when "Save As..." is used to save the file.
-//  
+//
 //  Basic algorithm:
 //
 //  (1) Locate the Root object (found from the Trailer /Root dictionary entry).
 //  (2) Identify any previous /Names entry in Root's dictionary
-//      such as:  
+//      such as:
 //         /Names 261 0 R
 //  (4) If no /Names entry, then add one to the Root object, and create entry.
-//  (3) If Root has a /Names entry, then update the indirect object 
+//  (3) If Root has a /Names entry, then update the indirect object
 //       (and probably don't need to update Root entry).
 //  (5) To create a /Names indirect object entry:
 //  (6) In the /Names indirect object listed in the Root, add a line such as:
-//             /EmbeddedFiles 400 0 R       
+//             /EmbeddedFiles 400 0 R
 //         [Note: have to figure out how to deal with multiple embedded files.]
-//         where 400 0 R is an indirect object for for an object which 
+//         where 400 0 R is an indirect object for for an object which
 //	 contains a /Names entry (name of object internally):
 //	 <<
 //	    /Names [(_^@U^@n^@t^@i^@t^@l^@e^@d^@ ^@O^@b^@j^@e^@c^@t) 398 0 R]
@@ -249,7 +249,7 @@ int main(int argc, char** argv) {
 //   Root object --> Names Dictionary --> Embedded List --> Embedded File
 //        Specification --> Embedded File Stream
 //
-// * Root object has a /Names entry in its dictionary which points to 
+// * Root object has a /Names entry in its dictionary which points to
 //     an indirect object that gives the Names dictionary of the Root object.
 //     (create a /Names entry if it does not already exist and update
 //      the Root object in the PDF file; otherwise, leave the original
@@ -291,7 +291,7 @@ int main(int argc, char** argv) {
 // * Embedded File Stream:
 //      Contains the actual contents of the embedded file plus some
 //      file content information:
-//      
+//
 //      12 0 obj
 //      <<
 //         /Type    /EmbeddedFile
@@ -320,15 +320,15 @@ int main(int argc, char** argv) {
 //
 //     The /Length field is required and gives the number of bytes
 //     between the string "stream\n" and endstream.  "stream" should
-//     have the newline 0x0a or "0x0d 0x0a" after it (but not 0x0d alone).  
-//     An optional newline before "endstream" is allowed, and will not be 
+//     have the newline 0x0a or "0x0d 0x0a" after it (but not 0x0d alone).
+//     An optional newline before "endstream" is allowed, and will not be
 //     considered part of the data inside of the stream.
-// 
+//
 //
 
-int linkToRootObject(ostream& out, Array<int>& objectindex, 
-      Array<int>& offsetindex, int initialoffset, Array<char> trailerstring, 
-      int xrefoffset, istream& file, int nextobject, PDFFile& pdffile) { 
+int linkToRootObject(ostream& out, Array<int>& objectindex,
+      Array<int>& offsetindex, int initialoffset, Array<char> trailerstring,
+      int xrefoffset, istream& file, int nextobject, PDFFile& pdffile) {
 
    // when this function is called, only embedded files have been
    // added to the PDF.  There are two indirect objects for each
@@ -362,7 +362,7 @@ int linkToRootObject(ostream& out, Array<int>& objectindex,
 
    //// if there is a /Names entry in dictionary, then don't bother updating
    //// the Root entry and instead go directly to the /Names object and modify.
-   //// If there is not a /Names entry, then add one as indirect object 
+   //// If there is not a /Names entry, then add one as indirect object
    //// and also insert a revised Root object.
 
    PerlRegularExpression pre;
@@ -370,7 +370,7 @@ int linkToRootObject(ostream& out, Array<int>& objectindex,
       // int namesobj = atol(pre.getSubmatch(1));
       // int namesver = atol(pre.getSubmatch(2));
       // ggg
-      // nextobject = updateNamesObject(out, objectindex, offsetindex, 
+      // nextobject = updateNamesObject(out, objectindex, offsetindex,
       //      initialoffset, file, nextobject, objectoffsets[namesobj]);
    } else {
       // update Root dictionary to add /Names entry, create Names dictionary
@@ -404,8 +404,8 @@ int linkToRootObject(ostream& out, Array<int>& objectindex,
 //   embedcount     == Number of embedded files added by program.
 //
 
-int updateRootObject(ostream& out, int rootobjnum, int initialoffset, 
-      PDFFile& pdffile, Array<char>& rootstring, Array<int>& objectindex, 
+int updateRootObject(ostream& out, int rootobjnum, int initialoffset,
+      PDFFile& pdffile, Array<char>& rootstring, Array<int>& objectindex,
       Array<int>& offsetindex, int embedcount, int nextobject) {
 
    stringstream newroot;
@@ -418,7 +418,7 @@ int updateRootObject(ostream& out, int rootobjnum, int initialoffset,
    int ndobjectnumber = pdffile.getObjectCount() + embedcount*2;
    int ndversion = 0;
    nextobject++;
- 
+
    Array<char> entry;
    entry.setSize(1024);
    snprintf(entry.getBase(), 1024, " /Names %d %d R ", ndobjectnumber, ndversion);
@@ -460,9 +460,9 @@ int updateRootObject(ostream& out, int rootobjnum, int initialoffset,
    embedlist << "\n";
    tempoffset = initialoffset + embedlist.str().length();
    offsetindex.append(tempoffset);
-   
+
    embedlist << embedlistobjnum << " 0 obj\n";
-   embedlist << "<<\n"; 
+   embedlist << "<<\n";
    embedlist << "   /Names [\n";
    int tempobjnum;
    char nullchar = (char)0;
@@ -515,8 +515,8 @@ int updateRootObject(ostream& out, int rootobjnum, int initialoffset,
 // endobj
 //
 
-int updateNamesObject(ostream& out, Array<int>& objectindex, 
-      Array<int>& offsetindex, int initialoffset, ifstream& file, 
+int updateNamesObject(ostream& out, Array<int>& objectindex,
+      Array<int>& offsetindex, int initialoffset, ifstream& file,
       int nextobject, int ndoffset) {
 
    stringstream ndstream;
@@ -535,26 +535,26 @@ int updateNamesObject(ostream& out, Array<int>& objectindex,
    Array<char> entry;
    entry.setSize(1000);
 
-   if (pre.search(ndstring.getBase(), 
+   if (pre.search(ndstring.getBase(),
          "/EmbeddedFiles\\s+(\\d+)\\s+(\\d+)\\s+R", "")) {
       // nothing to change in Name Dictionary, just
       // go to the list of embedded files...
       // int iobject = atol(pre.getSubmatch(1));
-      // nextobject = updateEmbeddedFileList(out, objectindex, offsetindex, 
-      //         initialoffset, file, nextobject, offsetindex[iobject]) 
+      // nextobject = updateEmbeddedFileList(out, objectindex, offsetindex,
+      //         initialoffset, file, nextobject, offsetindex[iobject])
       // ggg
    } else {
       // Add an /EmbeddedFiles entry to the Name Dictionary
       int assignednum = nextobject++;
       int version = 0;
-      snprintf(entry.getBase(), 1000, " /EmbeddedFiles %d %d R ", assignednum, 
+      snprintf(entry.getBase(), 1000, " /EmbeddedFiles %d %d R ", assignednum,
          version);
       entry.setSize(strlen(entry.getBase())+1);
       addDictionaryEntry(ndstring, entry);
       // print the new Root's name dictionay object
 
       // and create a list of embedded files.
-  
+
       // ggg
 
    }
@@ -662,14 +662,14 @@ void getObject(ostream& out, istream& file, int offset) {
 //    filesize == size in bytes of original file.
 //
 
-int generateNewXref(stringstream& finalout, Array<int>& objectindex, 
+int generateNewXref(stringstream& finalout, Array<int>& objectindex,
       Array<int>& offsetindex, int filesize) {
 
    stringstream out;
 
    // temporary code for testing:
    // filesize = 0;
-  
+
    int output = 0;
 
    out << "\n";
@@ -807,10 +807,10 @@ void addTrailerPrev(Array<char>& trailerstring, int newprevoffset) {
       // need to insert a /Prev entry (at end of dictionary)
       level = 0;
       for (i=newtrailer.getSize()-1; i>=0; i--) {
-         if (newtrailer[i] == '>') { 
+         if (newtrailer[i] == '>') {
             level++;
          }
-         if (newtrailer[i] == '<') { 
+         if (newtrailer[i] == '<') {
             level--;
          }
          if (level != 2) {
@@ -860,7 +860,7 @@ int createFileEntry(stringstream& out, HumdrumFile& infile, const char* filename
 // printStreamObject --
 //
 
-int printStreamObject(ostream& finalout, int objnum, stringstream& datatoencode, 
+int printStreamObject(ostream& finalout, int objnum, stringstream& datatoencode,
       const char* filename, Array<int>& objectindex, Array<int>& offsetindex,
       int initialoffset) {
    stringstream streamcontents;
@@ -901,7 +901,7 @@ int printStreamObject(ostream& finalout, int objnum, stringstream& datatoencode,
    out << ")\n";
    out << "      /Size         " <<  datatoencode.str().length() << "\n";
    out << "      /CheckSum     <";
-   CheckSum::getMD5Sum(out, datatoencode); 
+   CheckSum::getMD5Sum(out, datatoencode);
    // such as 5C94A7BE7C695C70271E29A26B5705C1
    out << ">\n";
    out << "   >>\n";
@@ -910,7 +910,7 @@ int printStreamObject(ostream& finalout, int objnum, stringstream& datatoencode,
    out << "stream" << newline;
    out << streamcontents.str();
    int len1 = streamcontents.str().length();
-   if ((streamcontents.str()[len1-1] != 0x0a) && 
+   if ((streamcontents.str()[len1-1] != 0x0a) &&
        (streamcontents.str()[len1-1] != 0x0d)) {
       out << "\n";
    }
@@ -918,14 +918,14 @@ int printStreamObject(ostream& finalout, int objnum, stringstream& datatoencode,
    out << "endobj\n";
 
    // print the file spec object: /////////////////////////////////////
-  
+
    Array<char> outfilename;
    int len = strlen(filename);
    outfilename.setSize(1000 + len);
    outfilename.setGrowth(1000);
    strcpy(outfilename.getBase(), filename);
    outfilename.setSize(len+1);
-   
+
    PerlRegularExpression pre;
 
    if (!keepdirQ) {
@@ -963,7 +963,7 @@ int printStreamObject(ostream& finalout, int objnum, stringstream& datatoencode,
 
 //////////////////////////////
 //
-// printPdfDate -- time is printed in UTC  plus deviation from UTC for 
+// printPdfDate -- time is printed in UTC  plus deviation from UTC for
 //       localtime.
 // example D:20050727143111-04'00'
 //         D:yyyymmddhhmmss-HH'MM'
@@ -976,7 +976,7 @@ void printPdfDate(ostream& out, struct tm* date) {
 
    // print time zone information (need to check on daylight savings)
 // Remove timezone info for now since Apple OS X is having difficulties.
-int value  = 0; 
+int value  = 0;
 //   int value = timezone;
    char sign = '-';
 //   if (timezone < 0) {
@@ -984,7 +984,7 @@ int value  = 0;
 //   }
 
    int hour = value / 3600;
-   int min  = value - hour * 3600;    
+   int min  = value - hour * 3600;
 
    if (min < 0) { min = 0; }
    out << sign;
@@ -1002,13 +1002,13 @@ int value  = 0;
 // createStreamData --
 //
 
-void createStreamData(ostream& out, stringstream& datatoencode, 
+void createStreamData(ostream& out, stringstream& datatoencode,
       const char* filename) {
    out << datatoencode.str();
 }
 
 
-void createStreamDataOld(ostream& out, stringstream& datatoencode, 
+void createStreamDataOld(ostream& out, stringstream& datatoencode,
       const char* filename) {
    datatoencode << ends;
 
@@ -1048,7 +1048,7 @@ void createStreamDataOld(ostream& out, stringstream& datatoencode,
 // printMimeEncoding -- Not used any longer...
 //
 
-void printMimeEncoding(ostream& out, int count, char char1, char char2, 
+void printMimeEncoding(ostream& out, int count, char char1, char char2,
       char char3) {
    static char table[64] = {
          'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -1092,7 +1092,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b", "example usages");
    opts.define("help=b",    "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

@@ -5,7 +5,7 @@
 // Last Modified: Wed Jul  1 11:08:00 PDT 1998
 // Filename:      ...sig/include/sigInfo/EnumerationMPC.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/EnumerationMPC.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 
 #ifndef _ENUMERATIONMPC_H_INCLUDED

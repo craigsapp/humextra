@@ -30,7 +30,7 @@
 		cout << SVGTAG; \
 	} \
 	printScoreEncodedText((text)); \
-	cout << "\n"; 
+	cout << "\n";
 
 class _VoiceInfo {
 	public:
@@ -81,14 +81,14 @@ class _VoiceInfo {
 			}
 			out << endl;
 			out << " midi:  ";
-			for (int i=0; i<midibins.size(); i++) {
+			for (int i=0; i<(int)midibins.size(); i++) {
 				if (midibins.at(i) > 0.0) {
 					out << " " << i << ":" << midibins.at(i);
 				}
 			}
 			out << endl;
 			out << " diat:  ";
-			for (int i=0; i<diatonic.size(); i++) {
+			for (int i=0; i<(int)diatonic.size(); i++) {
 				if (diatonic.at(i).at(0) > 0.0) {
 					out << " " << i << ":" << diatonic.at(i).at(0);
 				}
@@ -144,7 +144,7 @@ void   getInstrumentNames         (vector<string>& nameByTrack,
 void   getVoiceInfo               (vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile);
 void   mergeAllVoiceInfo          (vector<_VoiceInfo>& voiceInfo);
 void   assignHorizontalPosition   (vector<_VoiceInfo>& voiceInfo, int minval, int maxval);
-void   mergeFinals                (vector<_VoiceInfo>& voiceInfo, 
+void   mergeFinals                (vector<_VoiceInfo>& voiceInfo,
                                    vector<vector<int>>& diafinal,
                                    vector<vector<int>>& accfinal);
 void   printKeySigCompression     (int keysig, int extra);
@@ -646,7 +646,7 @@ void printScoreFile(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
 	text1 += "g.lastnote&#123;color:gray;&#125;";
 	text1 += "</style>";
 	string text2 = text1;
-	
+
 
 	// print CSS style information if requested
 	if (hoverQ) {
@@ -833,7 +833,7 @@ void printScoreVoice(_VoiceInfo& voiceInfo, double maxvalue) {
 	int maxdiatonic = maxi - 3 * 7;
 	// int minacc = minacci - 3;
 	// int maxacc = maxacci - 3;
-	
+
 	int    staff;
 	double vpos;
 
@@ -901,7 +901,7 @@ void printScoreVoice(_VoiceInfo& voiceInfo, double maxvalue) {
 			}
 		}
 	}
-	
+
 	string voicestring = voiceInfo.name;
 	if (voicestring.empty()) {
 		voicestring = voiceInfo.abbr;
@@ -1094,7 +1094,7 @@ void printScoreVoice(_VoiceInfo& voiceInfo, double maxvalue) {
 			SVGTEXT("</g>");
 		}
 	}
-	
+
 	// print bottom quartile
 	if (quartileQ) {
 		int bottomquartile = getBottomQuartile(voiceInfo.midibins);
@@ -1470,7 +1470,7 @@ void getTitle(string& titlestring, HumdrumFile& infile) {
 		if (strlen(buffer) > 0) {
 			titlestring += buffer;
 		}
-		
+
 	}
 }
 
@@ -1693,7 +1693,7 @@ double getMean12(vector<double>& midibins) {
 		}
 		top += midibins[i] * i;
 		bottom += midibins[i];
-	
+
 	}
 
 	if (bottom == 0) {
@@ -1822,7 +1822,7 @@ void processOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("example=b",     "example usage");
 	opts.define("h|help=b",      "short description");
 	opts.process(argc, argv);
-	
+
 	// handle basic options:
 	if (opts.getBoolean("author")) {
 		cout << "Written by Craig Stuart Sapp, "

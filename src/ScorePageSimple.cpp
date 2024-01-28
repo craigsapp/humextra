@@ -106,8 +106,8 @@ void ScorePageSimple::analyzeSystems(void) {
 	stavesfound.zero();
 	int currentstaff;
 
-	for (i=0; i<data.getSize(); i++) {
-		currentstaff = (int)(data[i].getPValue(2));
+	for (i=0; i<(int)m_data.size(); i++) {
+		currentstaff = (int)(m_data[i].getPValue(2));
 		if (stavesfound[currentstaff] == 0) {
 			if (maxStaffNumber < currentstaff) {
 				maxStaffNumber = currentstaff;
@@ -128,12 +128,12 @@ void ScorePageSimple::analyzeSystems(void) {
 	Array<int> measurelength;
 	measurelength.setSize(maxStaffNumber+1);
 	measurelength.zero();
-	for (i=1; i<data.getSize(); i++) {
-		if (data[i].isBarlineItem()) {
-			if (measurelength[(int)data[i].getPValue(2)] <
-					(int)data[i].getPValue(4)) {
-				measurelength[(int)data[i].getPValue(2)] =
-						(int)data[i].getPValue(4);
+	for (i=1; i<(int)m_data.size(); i++) {
+		if (m_data[i].isBarlineItem()) {
+			if (measurelength[(int)m_data[i].getPValue(2)] <
+					(int)m_data[i].getPValue(4)) {
+				measurelength[(int)m_data[i].getPValue(2)] =
+						(int)m_data[i].getPValue(4);
 			}
 		}
 	}
@@ -178,20 +178,20 @@ void ScorePageSimple::analyzeSystems(void) {
 	int oldStaffIndex;
 	int staffIndex;
 	for (i=0; i<getSize(); i++) {
-		staffIndex = (int)data[i].getPValue(2);
+		staffIndex = (int)m_data[i].getPValue(2);
 		if (staffStart[staffIndex] == -1) {
 			// new staff starts here
 			staffStart[staffIndex] = i;
 			if (i>0) {
 				// store the length of the previous staff
-				oldStaffIndex = (int)data[i-1].getPValue(2);
+				oldStaffIndex = (int)m_data[i-1].getPValue(2);
 				staffSize[oldStaffIndex] = i-1 - staffStart[oldStaffIndex] + 1;
 			}
 		}
 	}
 	// add the last staff size information
-	staffIndex = (int)data.last().getPValue(2);
-	staffSize[staffIndex] = data.getSize() - staffStart[staffIndex];
+	staffIndex = (int)m_data.back().getPValue(2);
+	staffSize[staffIndex] = m_data.size() - staffStart[staffIndex];
 
 	buildSystemIndexDatabase();
 }
@@ -205,20 +205,20 @@ void ScorePageSimple::analyzeSystems(void) {
 
 void ScorePageSimple::buildSystemIndexDatabase(void) {
 	Array<SystemRecord> temprecords;
-	temprecords.setSize(data.getSize());
+	temprecords.setSize(m_data.size());
 
 	int i;
 
 	for (i=0; i<temprecords.getSize(); i++) {
 		temprecords[i].index  = i;
-		temprecords[i].system = getSystem((int)data[i].getPValue(2));
-		temprecords[i].ptr    = &data[i];
+		temprecords[i].system = getSystem((int)m_data[i].getPValue(2));
+		temprecords[i].ptr    = &m_data[i];
 	}
 
 	qsort(temprecords.getBase(), temprecords.getSize(), sizeof(SystemRecord),
 			ScorePageBaseSimple::compareSystem);
 
-	systemind.setSize(data.getSize());
+	systemind.setSize(m_data.size());
 	for (i=0; i<systemind.getSize(); i++) {
 		systemind[i] = temprecords[i].index;
 	}
@@ -253,7 +253,7 @@ ScoreRecord&   ScorePageSimple::getSystemItem(int sysno, int index) {
 		analyzeSystems();
 	}
 	int realindex = systemind[systemStart[sysno] + index];
-	return data[realindex];
+	return m_data[realindex];
 }
 
 
@@ -280,10 +280,10 @@ int ScorePageSimple::getSystemSize(int sysno) {
 int ScorePageSimple::getMaxBarlineLength(int staffno) {
 	int i;
 	int output = 0;
-	for (i=0; i<data.getSize(); i++) {
-		if (data[i].isBarlineItem() && (int)data[i].getPValue(2) == staffno &&
-				(int)data[i].getPValue(4) > output) {
-			output = (int)data[i].getPValue(4);
+	for (i=0; i<(int)m_data.size(); i++) {
+		if (m_data[i].isBarlineItem() && (int)m_data[i].getPValue(2) == staffno &&
+				(int)m_data[i].getPValue(4) > output) {
+			output = (int)m_data[i].getPValue(4);
 		}
 	}
 
@@ -319,7 +319,7 @@ ScoreRecord& ScorePageSimple::getStaff(int staffno, int staffItem) {
 		analyzeSystems();
 	}
 
-	return data[staffStart[staffno]+staffItem];
+	return m_data[staffStart[staffno]+staffItem];
 }
 
 
@@ -405,59 +405,59 @@ int ScorePageSimple::assignPitch(int staff, int currentposition) {
 	p12accidentals.zero();
 	p12accidentals.allowGrowth(0);
 
-	while (data[i].getPValue(2) == staff) {
-		if (data[i].isKeysigItem()) {
-			keysig = (int)data[i].getPValue(5);
+	while (m_data[i].getPValue(2) == staff) {
+		if (m_data[i].isKeysigItem()) {
+			keysig = (int)m_data[i].getPValue(5);
 			resetAccidentals(accidentals, keysig);
-		} else if (data[i].isBarlineItem()) {
+		} else if (m_data[i].isBarlineItem()) {
 			resetAccidentals(accidentals, keysig);
-		} else if (data[i].isNoteItem()) {
-			switch ((int)data[i].getPValue(12)) {
+		} else if (m_data[i].isNoteItem()) {
+			switch ((int)m_data[i].getPValue(12)) {
 				case 1:          // place on staff above
 					// does not handle accidental alterations in affected staff
 					clefptr = &getClefAtLocation(staff+1,
-							data[currentposition].getPValue(3));
+							m_data[currentposition].getPValue(3));
 					keyptr  = &getKeysigAtLocation(staff+1,
-							data[currentposition].getPValue(3));
+							m_data[currentposition].getPValue(3));
 					p12clef = (int)clefptr->getPValue(5);
 					p12clefoffset = (int)clefptr->getPValue(4);
 					p12keysig = (int)keyptr->getPValue(5);
 					resetAccidentals(p12accidentals, p12keysig);
-					data[i].setPitch(convertPitchToBase40(
-							(int)(data[i].getPValue(4) + 0.5) % 100,
-							((int)data[i].getPValue(5)) % 10,
+					m_data[i].setPitch(convertPitchToBase40(
+							(int)(m_data[i].getPValue(4) + 0.5) % 100,
+							((int)m_data[i].getPValue(5)) % 10,
 							p12clef, p12clefoffset, p12accidentals));
 					break;
 				case 2:          // place on staff below
 					// does not handle accidental alterations in affected staff
 					clefptr = &getClefAtLocation(staff-1,
-							data[currentposition].getPValue(3));
+							m_data[currentposition].getPValue(3));
 					keyptr  = &getKeysigAtLocation(staff-1,
-							data[currentposition].getPValue(3));
+							m_data[currentposition].getPValue(3));
 					p12clef = (int)clefptr->getPValue(5);
 					p12clefoffset = (int)clefptr->getPValue(4);
 					p12keysig = (int)keyptr->getPValue(5);
 					resetAccidentals(p12accidentals, p12keysig);
-					data[i].setPitch(convertPitchToBase40(
-							(int)(data[i].getPValue(4) + 0.5) % 100,
-							((int)data[i].getPValue(5)) % 10,
+					m_data[i].setPitch(convertPitchToBase40(
+							(int)(m_data[i].getPValue(4) + 0.5) % 100,
+							((int)m_data[i].getPValue(5)) % 10,
 							p12clef, p12clefoffset, p12accidentals));
 					break;
 				case 0:          // place on current staff
 				default:
-					data[i].setPitch(convertPitchToBase40(
-							(int)(data[i].getPValue(4) + 0.5) % 100,
-							((int)data[i].getPValue(5)) % 10,
+					m_data[i].setPitch(convertPitchToBase40(
+							(int)(m_data[i].getPValue(4) + 0.5) % 100,
+							((int)m_data[i].getPValue(5)) % 10,
 							clef, clefoffset, accidentals));
 					break;
 			}
 
-		} else if (data[i].isRestItem()) {
-			data[i].setPitch(-1000);
-		} else if (data[i].isClefItem()) {
-			clef = (int)data[i].getPValue(5);
-			clefoffset = (int)data[i].getPValue(4) % 100;
-			if (data[i].getPValue(5) == 0.8) {         // Vocal tenor clef
+		} else if (m_data[i].isRestItem()) {
+			m_data[i].setPitch(-1000);
+		} else if (m_data[i].isClefItem()) {
+			clef = (int)m_data[i].getPValue(5);
+			clefoffset = (int)m_data[i].getPValue(4) % 100;
+			if (m_data[i].getPValue(5) == 0.8) {         // Vocal tenor clef
 				clef = 0;
 				clefoffset += 8;
 			}
@@ -500,16 +500,16 @@ ScoreRecord& ScorePageSimple::getClefAtLocation(int staffno, float position) {
 	}
 
 	int clefindex = -1;
-	while (i < data.getSize() && (int)data[i].getPValue(2) == staffno &&
-			data[i].getPValue(3) < position) {
-		if (data[i].isClefItem()) {
+	while (i < (int)m_data.size() && (int)m_data[i].getPValue(2) == staffno &&
+			m_data[i].getPValue(3) < position) {
+		if (m_data[i].isClefItem()) {
 			clefindex = i;
 		}
 		i++;
 	}
 
 	if (clefindex >= 0) {
-		return data[clefindex];
+		return m_data[clefindex];
 	}
 
 	defaultclef.setPValue(2, (float)staffno);
@@ -549,16 +549,16 @@ ScoreRecord& ScorePageSimple::getKeysigAtLocation(int staffno, float position) {
 	}
 
 	int keyindex = -1;
-	while (i < data.getSize() && (int)data[i].getPValue(2) == staffno &&
-			data[i].getPValue(3) < position) {
-		if (data[i].isKeysigItem()) {
+	while (i < (int)m_data.size() && (int)m_data[i].getPValue(2) == staffno &&
+			m_data[i].getPValue(3) < position) {
+		if (m_data[i].isKeysigItem()) {
 			keyindex = i;
 		}
 		i++;
 	}
 
 	if (keyindex >= 0) {
-		return data[keyindex];
+		return m_data[keyindex];
 	}
 
 	defaultkeysig.setPValue(2, (float)staffno);

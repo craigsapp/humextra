@@ -6,7 +6,7 @@
 // Last Modified: Thu Jun 10 00:11:08 PDT 2010 (added functions)
 // Filename:      ...sig/include/sigInfo/MuseRecordBasic.cpp
 // Web Address:   http://sig.sapp.org/include/sigInfo/MuseRecordBasic.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   basic data manipulations for lines in a Musedata file.
 //
@@ -33,20 +33,20 @@ class MuseRecordBasic {
                         MuseRecordBasic    (const char* aLine, int index = -1);
                         MuseRecordBasic    (MuseRecordBasic& aRecord);
                        ~MuseRecordBasic    ();
-  
+
       void              clear              (void);
       int               isEmpty            (void);
       void              cleanLineEnding    (void);
       void              extract            (char* output, int start, int stop);
       char&             getColumn          (int index);
-      void              getColumns         (Array<char>& data, int startcol, 
+      void              getColumns         (Array<char>& data, int startcol,
                                             int endcol);
-      void              setColumns         (Array<char>& data, int startcol, 
+      void              setColumns         (Array<char>& data, int startcol,
                                             int endcol);
-      void              setColumns         (string& data, int startcol, 
+      void              setColumns         (string& data, int startcol,
                                             int endcol);
       int               getLength          (void) const;
-      const char*       getLine            (void); 
+      const char*       getLine            (void);
       int               getLineIndex       (void) { return lineindex; }
       void              setLineIndex       (int index);
       int               getLineNumber      (void) { return lineindex+1; }
@@ -58,7 +58,7 @@ class MuseRecordBasic {
       MuseRecordBasic&  operator=          (MuseRecordBasic* aRecord);
       MuseRecordBasic&  operator=          (const char* aRecord);
       char&             operator[]         (int index);
-      void              setLine            (const char* aString); 
+      void              setLine            (const char* aString);
       void              setType            (int aType);
       void              shrink             (void);
       void              insertString       (int column, const char* string);
@@ -105,7 +105,7 @@ class MuseRecordBasic {
       int               lineindex;         // index into original file
       int               type;              // category of MuseRecordBasic record
       RationalNumber    absbeat;           // dur in quarter notes from start
-      RationalNumber    lineduration;      // duration of line 
+      RationalNumber    lineduration;      // duration of line
       RationalNumber    noteduration;      // duration of note
 
       int               b40pitch;          // base 40 pitch
@@ -116,7 +116,7 @@ class MuseRecordBasic {
       int               roundBreve;
 
 };
-   
+
 
 ostream& operator<<(ostream& out, MuseRecordBasic& aRecord);
 

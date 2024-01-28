@@ -8,7 +8,7 @@
 //
 // Description:   Add a spine indicating the time of performance for
 //                a given line of music.
-// 
+//
 
 #include "humdrum.h"
 
@@ -24,7 +24,7 @@ void   printAnalysis            (HumdrumFile& infile, vector<double>& timings,
 void   analyzeTiming            (HumdrumFile& infile, vector<double>& timings,
                                  vector<double>& tempo);
 void   usage                    (const string& command);
-void   generateSwing            (HumdrumFile& infile, vector<double>& timings, 
+void   generateSwing            (HumdrumFile& infile, vector<double>& timings,
                                  double amount);
 
 // global variables
@@ -126,7 +126,7 @@ void generateSwing(HumdrumFile& infile, vector<double>& timings, double amount) 
 				newtime = timings[nextdata[i]] - timings[lastdata[i]];
 				newtime = newtime * fraction;
 				newtime = newtime + timings[lastdata[i]];
-  
+
 				// fix the ending case later:
 				if (newtime >= timings[lastdata[i]]) {
 					timings[i] = newtime;
@@ -143,7 +143,7 @@ void generateSwing(HumdrumFile& infile, vector<double>& timings, double amount) 
 //
 // analyzeTiming -- determing the absolute time position of each
 //     line in the file.
-// 
+//
 
 void analyzeTiming(HumdrumFile& infile, vector<double>& timings,
 		vector<double>& tempo) {
@@ -170,7 +170,7 @@ void analyzeTiming(HumdrumFile& infile, vector<double>& timings,
 		}
 
 		tempo[i] = currtempo;
-		timings[i] = timings[i-1] + (infile[i].getAbsBeat() - 
+		timings[i] = timings[i-1] + (infile[i].getAbsBeat() -
 				infile[i-1].getAbsBeat()) * 60.0/currtempo;
 
 	}
@@ -185,18 +185,18 @@ void analyzeTiming(HumdrumFile& infile, vector<double>& timings,
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-	opts.define("o|offset=d:0.0",   "starting time offset");   
-	opts.define("s|seconds=b",      "use seconds as the time unit");   
-	opts.define("t|tempo=d:60.0",   "default tempo to use if none in file");   
-	opts.define("p|percent=d:60.0", "swing percentage 0=previous; 100=next");   
+	opts.define("o|offset=d:0.0",   "starting time offset");
+	opts.define("s|seconds=b",      "use seconds as the time unit");
+	opts.define("t|tempo=d:60.0",   "default tempo to use if none in file");
+	opts.define("p|percent=d:60.0", "swing percentage 0=previous; 100=next");
 
-	opts.define("debug=b",   "trace input parsing");   
-	opts.define("author=b",  "author of the program");   
-	opts.define("version=b", "compilation information"); 
-	opts.define("example=b", "example usage"); 
-	opts.define("h|help=b",  "short description"); 
+	opts.define("debug=b",   "trace input parsing");
+	opts.define("author=b",  "author of the program");
+	opts.define("version=b", "compilation information");
+	opts.define("example=b", "example usage");
+	opts.define("h|help=b",  "short description");
 	opts.process(argc, argv);
-	
+
 	// handle basic options:
 	if (opts.getBoolean("author")) {
 		cout << "Written by Craig Stuart Sapp, "
@@ -255,7 +255,7 @@ void example(void) {
 
 //////////////////////////////
 //
-// printAnalysis -- 
+// printAnalysis --
 //
 
 void printAnalysis(HumdrumFile& infile, vector<double>& timings,

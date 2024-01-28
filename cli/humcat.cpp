@@ -29,11 +29,11 @@ void      example               (void);
 void      usage                 (const char* command);
 void      printFile             (HumdrumFile& infile, int start, int stop);
 int       getIdTags             (vector<string>& idtags, HumdrumFile& infile);
-void      printFileID           (HumdrumFile& infile, int index, int count, 
+void      printFileID           (HumdrumFile& infile, int index, int count,
                                  vector<string>& primaryids);
 int       findTag               (vector<string>& primaryids, string& idtags);
-void      printLineID           (HumdrumFile& infile, int index, 
-                                 vector<string>& primaryids, 
+void      printLineID           (HumdrumFile& infile, int index,
+                                 vector<string>& primaryids,
 				 vector<string>& idtags);
 int       hasSegment            (HumdrumFile& infile);
 void      printFile             (HumdrumFile& infile);
@@ -106,13 +106,13 @@ int main(int argc, char** argv) {
                }
             } else {
                cout << infiles[currindex][i] << '\n';
-            } 
+            }
          }
          currindex = !currindex;
          continue;
       }
 
-      // print each file as it arrives.  
+      // print each file as it arrives.
       if (idtagQ) {
          printFileID(infiles[!currindex], 0, 0, idtags);
       } else {
@@ -188,7 +188,7 @@ int getIdTags(vector<string>& idtags, HumdrumFile& infile) {
    }
    int foundids = 0;
    char tag[128] = {0};
-   
+
    for (i=0; i<infile.getNumLines(); i++) {
       if (infile[i].getType() != E_humrec_data_comment) {
          continue;
@@ -246,7 +246,7 @@ void printFile(HumdrumFile& infile, int start, int stop) {
 // printFileID --
 //
 
-void printFileID(HumdrumFile& infile, int index, int count, 
+void printFileID(HumdrumFile& infile, int index, int count,
       vector<string>& primaryids) {
 
    vector<string> idtags;
@@ -289,7 +289,7 @@ void printFileID(HumdrumFile& infile, int index, int count,
 // printLineID --
 //
 
-void printLineID(HumdrumFile& infile, int index, vector<string>& primaryids, 
+void printLineID(HumdrumFile& infile, int index, vector<string>& primaryids,
       vector<string>& idtags) {
    vector<vector<int> > spines;
    spines.resize(primaryids.size());
@@ -339,7 +339,7 @@ int findTag(vector<string>& primaryids, string& idtags) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
@@ -347,12 +347,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("t|trailer=s:", "Trailer filename for placement in output");
    opts.define("s|segment=b", "Do not merge files, but leave as segments");
 
-   opts.define("author=b",  "author of program"); 
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -373,7 +373,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 
 
    segmentQ = opts.getBoolean("segment");
-   
+
 }
 
 

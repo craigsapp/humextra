@@ -5,7 +5,7 @@
 // Last Modified: Mon Jun  8 21:35:18 PDT 1998
 // Filename:      ...sig/include/sigInfo/EnumerationData.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/EnumerationData.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:
 //
@@ -34,7 +34,7 @@ class EnumerationData {
                                              allocType = ENUM_TRANSIENT_ALLOC);
                   EnumerationData         (const EnumerationData& aDatum);
                  ~EnumerationData         ();
- 
+
       int         allocatedQ              (void) const;
       int         compare                 (int aValue) const;
       int         compare                 (const char* aName) const;
@@ -49,7 +49,7 @@ class EnumerationData {
       int         operator>               (const EnumerationData& aDatum);
       void        setRelation             (int aValue, const char* aName, int
                                              allocType = ENUM_TRANSIENT_ALLOC);
-      void        setName                 (const char* aName, int allocType = 
+      void        setName                 (const char* aName, int allocType =
                                              ENUM_TRANSIENT_ALLOC);
       void        setValue                (int aValue);
 

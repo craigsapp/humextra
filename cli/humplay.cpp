@@ -269,7 +269,7 @@ void keyboardchar(int key) {
 			break;
 		case 'm':               // mute or unmute all tracks
 			if (number == 0) {
-				std::fill(trackmute.begin(), trackmute.end(), 
+				std::fill(trackmute.begin(), trackmute.end(),
 						!trackmute[(int)trackmute.size()-1]);
 				if (trackmute[0]) {
 					cout << "!! All spines are muted" << endl;

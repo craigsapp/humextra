@@ -5,7 +5,7 @@
 // Last Modified: Sun Jun 28 09:45:18 PDT 1998
 // Filename:      ...sig/include/sigInfo/Enum_mode.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Enum_mode.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Enumeration defines for various muscial scales.
 //

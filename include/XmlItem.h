@@ -5,7 +5,7 @@
 // Last Modified: Mon Jul 11 15:32:40 PDT 2011
 // Filename:      ...sig/include/SigInfo/XmlItem.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/XmlItem.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A class that stores a list of XML text fragments.
 //

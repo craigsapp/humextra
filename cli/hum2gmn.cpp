@@ -94,20 +94,20 @@ int main(int argc, char** argv) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("debug=b",  "print debug information"); 
-   opts.define("nocaution=b",  "print cautionary accidentals"); 
-   opts.define("r|reverse=b",  "reverse the order of the parts"); 
+   opts.define("debug=b",  "print debug information");
+   opts.define("nocaution=b",  "print cautionary accidentals");
+   opts.define("r|reverse=b",  "reverse the order of the parts");
 
-   opts.define("author=b",  "author of program"); 
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("h|help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -125,7 +125,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       example();
       exit(0);
    }
-   
+
    debugQ      = opts.getBoolean("debug");
    cautionaryQ = !opts.getBoolean("nocaution");
    reverseQ    = opts.getBoolean("reverse");
@@ -147,7 +147,7 @@ void example(void) {
 
 //////////////////////////////
 //
-// convertToGMN -- 
+// convertToGMN --
 //
 
 void convertToGMN(HumdrumFile& hfile) {
@@ -173,10 +173,10 @@ void convertToGMN(HumdrumFile& hfile) {
       }
    }
 
-   
+
    processHeader(hfile);
    print("{ ");    // print a system start
-  
+
 
    for (i=0; i<partspines.getSize(); i++) {
       resetGlobals();
@@ -206,7 +206,7 @@ void convertToGMN(HumdrumFile& hfile) {
          print("<time not available>");
       #endif
       print("\n");
-      
+
    }
 }
 
@@ -388,7 +388,7 @@ int getPartSpine(HumdrumFile& hfile, int part, int line) {
       if (part+1 == hfile[line].getPrimaryTrack(i)) {
          output = i;
          break;
-      } 
+      }
    }
 
    return output;
@@ -433,7 +433,7 @@ void convertMeasureToGMN(HumdrumFile& hfile, int part, int line) {
             }
          }
       }
-   
+
       if (endrep) {
          print("\\repeatEnd ");
       }
@@ -452,7 +452,7 @@ void convertMeasureToGMN(HumdrumFile& hfile, int part, int line) {
       doubleQ = 1;
    }
 
-   if (!repeatQ) { 
+   if (!repeatQ) {
       if (doubleQ) {
          print("\\endBar");
       } else {
@@ -495,7 +495,7 @@ int convertInterpretationToGMN(HumdrumFile& hfile, int part, int line) {
    // proces a clef
    if (strncmp(hfile[line][spine], "*clef", 5) == 0) {
       if (Gnoteinit == 0) {
-         print("\n\t"); 
+         print("\n\t");
       }
       char clef = 'x';
       int  ctype = -99;
@@ -503,7 +503,7 @@ int convertInterpretationToGMN(HumdrumFile& hfile, int part, int line) {
          clef = hfile[line][spine][5];
       }
       if (length >= 6 && std::isdigit(hfile[line][spine][6])) {
-         ctype = hfile[line][spine][6] - '0'; 
+         ctype = hfile[line][spine][6] - '0';
       }
       clef = std::tolower(clef);
       if (ctype != 99) {
@@ -520,7 +520,7 @@ int convertInterpretationToGMN(HumdrumFile& hfile, int part, int line) {
    if ((strncmp(hfile[line][spine], "*k[", 3) == 0)
          && (hfile[line][spine][length-1] == ']')) {
       if (Gnoteinit == 0) {
-         print("\n\t"); 
+         print("\n\t");
       }
       int pitch = 0;
       if (length > 4) {
@@ -564,14 +564,14 @@ int convertInterpretationToGMN(HumdrumFile& hfile, int part, int line) {
       int flag = sscanf(hfile[line][spine], "*M%d/%d", &top, &bottom);
       if (flag == 2) {
          if (Gnoteinit == 0) {
-            print("\n\t"); 
+            print("\n\t");
          }
          snprintf(buffer, 1024, "\\meter<\"%d/%d\">", top, bottom);
          print(buffer);
          print(" ");
       }
       return 0;
-   } 
+   }
 
 
    return 0;
@@ -685,7 +685,7 @@ void convertNoteToGMN(const char* note, int graceQ) {
          accidental--;
       }
    }
- 
+
    // process pitch
    if (strchr(note, 'r') != NULL) {
       restQ = 1;
@@ -728,7 +728,7 @@ void convertNoteToGMN(const char* note, int graceQ) {
       print("/");
       print(buffer);
    }
-   
+
 }
 
 
@@ -785,7 +785,7 @@ void processHeader(HumdrumFile& hfile) {
             convertBibliography(hfile[i]);
             break;
          case E_humrec_interpretation:
-            done = 1; 
+            done = 1;
             break;
       }
       if (done) break;
@@ -797,7 +797,7 @@ void processHeader(HumdrumFile& hfile) {
 
 //////////////////////////////
 //
-// convertBibliography --  print a bibliographic record (!!! -> %%%) 
+// convertBibliography --  print a bibliographic record (!!! -> %%%)
 //
 
 void convertBibliography(HumdrumRecord& bibrec) {
@@ -805,7 +805,7 @@ void convertBibliography(HumdrumRecord& bibrec) {
       print("\n");
    }
    print("%%%");
-   print(&(bibrec.getLine()[3])); 
+   print(&(bibrec.getLine()[3]));
    print("\n");
 }
 
@@ -813,7 +813,7 @@ void convertBibliography(HumdrumRecord& bibrec) {
 
 //////////////////////////////
 //
-// convertBibliography --  print a bibliographic record (!!! -> %%%) 
+// convertBibliography --  print a bibliographic record (!!! -> %%%)
 //
 
 void convertGlobalComment(HumdrumRecord& globalcomment) {

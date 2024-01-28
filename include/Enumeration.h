@@ -5,7 +5,7 @@
 // Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
 // Filename:      ...sig/include/sigInfo/Enumeration.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Enumeration.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Messy yet functional way of handling enumerations
 //                and their string equivalents.
@@ -32,7 +32,7 @@ class Enumeration {
                   Enumeration            (const Enumeration& anEnumeration);
                  ~Enumeration            ();
 
-      void        add                    (int aValue, const char* aString, int 
+      void        add                    (int aValue, const char* aString, int
                                             allocType = ENUM_TRANSIENT_ALLOC);
       void        add                    (const EnumerationData& aDatum);
       int         associate              (const char* aName, int
@@ -48,10 +48,10 @@ class Enumeration {
       void        print                  (ostream& out);
       void        printByValue           (ostream& out);
       void        printByName            (ostream& out);
-      void        setNullName            (const char* aName, int 
+      void        setNullName            (const char* aName, int
                                             allocType = ENUM_TRANSIENT_ALLOC);
 
-      
+
    protected:
       SigCollection<EnumerationData>  associations;
       SigCollection<EnumerationData*> sortByValue;

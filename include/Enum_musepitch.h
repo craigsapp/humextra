@@ -5,7 +5,7 @@
 // Last Modified: Wed Jul  1 11:00:11 PDT 1998
 // Filename:      ...sig/include/sigInfo/Enum_musepitch.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Enum_musepitch.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Enumeration defines for MuseData musical pitches.
 //

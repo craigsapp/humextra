@@ -5,7 +5,7 @@
 // Last Modified: Fri Jun 24 15:10:39 PDT 2011
 // Filename:      ...sig/include/SigInfo/XmlElement.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/XmlElement.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A class that stores a parsing of an XML item.
 //                For use inside of the XmlFile class.
@@ -68,7 +68,7 @@ class XmlElement {
       SigString         name;        // name of the element
       Array<SigString*> atkey;       // attribute keys
       Array<SigString*> atvalue;     // attribute values
-      
+
 };
 
 

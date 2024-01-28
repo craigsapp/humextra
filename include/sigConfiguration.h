@@ -5,12 +5,12 @@
 // Last Modified: Mon Dec  1 18:16:57 GMT-0800 1997
 // Filename:      ...sig/maint/code/misc/sigConfiguration.h
 // Web Address:   http://sig.sapp.org/include/sig/sigConfiguration.h
-// Syntax:        C 
+// Syntax:        C
 //
-// Description:  This file defines flags for different code setups: 
+// Description:  This file defines flags for different code setups:
 //	         You specify the OS in a compiler flag and this file takes care
 //	         of the rest of the defines for that OS.  This file should
-//         	 automatically be included in any file which uses any of the 
+//         	 automatically be included in any file which uses any of the
 //	         define flags below.
 //
 // OS setup defines to use in compiling files:

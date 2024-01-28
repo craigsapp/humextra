@@ -8273,7 +8273,7 @@ int verifyPart(MuseData& part) {
 		cout << "==========================================" << endl;
 	}
 
-	if (newmd5sum == oldmd5sum) { 
+	if (newmd5sum == oldmd5sum) {
 		output = 1;
 	} else {
 		output = 0;

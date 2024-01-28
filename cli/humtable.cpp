@@ -37,12 +37,12 @@ ostream& printHtmlPageFooter  (ostream& out);
 ostream& printHtmlPageFooter  (ostream& out);
 ostream& printCss             (ostream& out);
 ostream& printClassInfo       (ostream& out, HumdrumFile& infile, int line);
-void     getMarks             (HumdrumFile& infile, string& chars, 
+void     getMarks             (HumdrumFile& infile, string& chars,
                                vector<string>& colors);
-ostream& printMarkStyle       (ostream& out, HumdrumFile& infile, int line, 
-                               int track, string& chars, 
+ostream& printMarkStyle       (ostream& out, HumdrumFile& infile, int line,
+                               int track, string& chars,
                                vector<string>& colors);
-void     markupKernToken      (string& strang, HumdrumFile& infile, 
+void     markupKernToken      (string& strang, HumdrumFile& infile,
                                int line, int field);
 void     printHtmlCharacter   (ostream& out, char ch);
 void     markNullToken        (string& strang);
@@ -122,7 +122,7 @@ ostream& printCss(ostream& out) {
 
 //////////////////////////////
 //
-// printHtmlPageFooter -- 
+// printHtmlPageFooter --
 //
 
 ostream& printHtmlPageFooter(ostream& out) {
@@ -215,7 +215,7 @@ void createTable(ostream& out, HumdrumFile& infile) {
 //     considering **kern markers for the moment.
 //
 
-void getMarks(HumdrumFile& infile, string& chars, 
+void getMarks(HumdrumFile& infile, string& chars,
       vector<string>& colors) {
    string defaultcolor = "#dd0000";
    string color = defaultcolor;
@@ -225,7 +225,7 @@ void getMarks(HumdrumFile& infile, string& chars,
       if (!infile[i].isReferenceRecord()) {
          continue;
       }
-      if (pre.search(infile[i][0], 
+      if (pre.search(infile[i][0],
             "!!!RDF\\*\\*kern:\\s*([^\\s])\\s*=.*(match|mark).*note")) {
          marker = pre.getSubmatch(1)[0];
          if (pre.search(infile[i][0], "color\\s*=\\s*[\"']([^\"']+)[\"']")) {
@@ -342,11 +342,11 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
 
                if (strcmp(infile[i][j], ".") == 0) {
                   markNullToken(strang);
-               } else if (kernQ && infile[i].isData() && 
+               } else if (kernQ && infile[i].isData() &&
                    (infile.getTrackExInterp(track) == "**kern")) {
                  markupKernToken(strang, infile, i, j);
                } else {
-                  strang = infile[i][j]; 
+                  strang = infile[i][j];
                   pre.sar(strang, " ", "&nbsp;", "g");
                   // deal with HTML entities, just < and > for now:
                   pre.sar(strang, ">", "&gt;", "g");
@@ -383,11 +383,11 @@ void printFields(ostream& out, HumdrumFile& infile, int line) {
 
                if (strcmp(infile[i][j], ".") == 0) {
                   markNullToken(strang);
-               } else if (kernQ && infile[i].isData() && 
+               } else if (kernQ && infile[i].isData() &&
                    (infile.getTrackExInterp(track) == "**kern")) {
                  markupKernToken(strang, infile, i, j);
                } else {
-                  strang = infile[i][j]; 
+                  strang = infile[i][j];
                   pre.sar(strang, " ", "&nbsp;", "g");
                   // deal with HTML entities, just < and > for now:
                   pre.sar(strang, ">", "&gt;", "g");
@@ -431,7 +431,7 @@ void markNullToken(string& strang) {
 // markupKernToken --
 //
 
-void markupKernToken(string& strang, HumdrumFile& infile, 
+void markupKernToken(string& strang, HumdrumFile& infile,
       int line, int field) {
 
    stringstream buffer;
@@ -449,14 +449,14 @@ void markupKernToken(string& strang, HumdrumFile& infile,
          continue;
       }
       switch (ch) {
-         case '#': 
-         case '-': 
-         case 'n': 
-         case 'r': 
+         case '#':
+         case '-':
+         case 'n':
+         case 'r':
             states[i] = 1;   // pitch
             break;
-         case '%': 
-         case '.': 
+         case '%':
+         case '.':
             states[i] = 2;   // rhythm
             break;
       }
@@ -521,7 +521,7 @@ void printHtmlCharacter(ostream& out, char ch) {
       default  : out << ch;
    }
 }
-      
+
 
 
 //////////////////////////////
@@ -529,7 +529,7 @@ void printHtmlCharacter(ostream& out, char ch) {
 // printMarkStyle --  Have to do spine split marks as well.
 //
 
-ostream& printMarkStyle(ostream& out, HumdrumFile& infile, int line, 
+ostream& printMarkStyle(ostream& out, HumdrumFile& infile, int line,
       int track, string& chars, vector<string>& colors) {
    if (!infile[line].isData()) {
       return out;
@@ -543,7 +543,7 @@ ostream& printMarkStyle(ostream& out, HumdrumFile& infile, int line,
       if (ttrack != track) {
          continue;
       }
-      
+
       ii = line;
       jj = j;
       if (strcmp(infile[line][j], ".") == 0) {
@@ -606,7 +606,7 @@ void addLabelHyperlinks(string& strang) {
    PerlRegularExpression pre2;
    vector<string> tokens;
    pre2.getTokens(tokens, ",", pre.getSubmatch(2));
-   
+
    int i;
    for (i=0; i<(int)tokens.size(); i++) {
       buffer += "<a href=\"#";
@@ -641,10 +641,10 @@ void printReferenceRecord(ostream& out, HumdrumFile& infile, int line) {
       out << "><td colspan=" << infile.getMaxTracks() << ">";
       out << infile[i] << "</font></td></tr>\n";
       return;
-   } 
+   }
 
    string description;
-   
+
    infile[line].getBibliographicMeaning(description, pre.getSubmatch(1));
    PerlRegularExpression pre2;
    pre2.sar(description, "\"", "", "g");
@@ -703,7 +703,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b",         "example usages");
    opts.define("h|help=b",          "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

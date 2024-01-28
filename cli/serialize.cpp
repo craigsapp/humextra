@@ -9,7 +9,7 @@
 //
 // Description: Extract all spines from a multi-spine file into
 //      single-column output.
-// 
+//
 
 #include "humdrum.h"
 
@@ -25,16 +25,16 @@ int       printHeader        (HumdrumFile& infile);
 void      printFooter        (HumdrumFile& infile);
 void      printTrack         (HumdrumFile& infile, int track, int start);
 void      printOutput        (HumdrumFile& infile);
-int       interpmatch        (HumdrumFile& infile, int track, int start, 
+int       interpmatch        (HumdrumFile& infile, int track, int start,
                               string& interp);
-void      printChordSeparator(HumdrumFile& infile, int row, int col, 
+void      printChordSeparator(HumdrumFile& infile, int row, int col,
                               char separator, int nth);
 void      analyzeMaxSubSpines(HumdrumFile& infile, vector<int>& parmax);
-void      printSubTracks     (HumdrumFile& infile, int track, int start, 
+void      printSubTracks     (HumdrumFile& infile, int track, int start,
                               int submax);
-void      printSubSpine      (HumdrumFile& infile, int track, int start, 
+void      printSubSpine      (HumdrumFile& infile, int track, int start,
                               int subspine);
-void      printSubToken      (HumdrumFile& infile, int row, int col, 
+void      printSubToken      (HumdrumFile& infile, int row, int col,
                               char separator, int nth);
 
 
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
          fill(parmax.begin(), parmax.end(), 0);
       }
       Exstart = 0;
-      if ((infiles.getCount() > 1) && 
+      if ((infiles.getCount() > 1) &&
           (infiles[i].getFilename().size() > 0)) {
          cout << "!!!!SEGMENT: " << infiles[i].getFilename() << endl;
       }
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 
 //////////////////////////////
 //
-// analyzeMaxSubSpines -- find the largest number of sub-spines in each 
+// analyzeMaxSubSpines -- find the largest number of sub-spines in each
 //     spine.
 //
 
@@ -104,7 +104,7 @@ void analyzeMaxSubSpines(HumdrumFile& infile, vector<int>& parmax) {
    vector<int> linemax;
    linemax.resize(infile.getMaxTracks()+1);  // [0] is not used.
    fill(linemax.begin(), linemax.end(), 0);
-   
+
    int i, j;
    for (i=0; i<infile.getNumLines(); i++) {
       if (!infile[i].isData()) {
@@ -239,10 +239,10 @@ void printSubSpine(HumdrumFile& infile, int track, int start, int subspine) {
                }
                if (markerQ && (strcmp(infile[i][j], "*-") == 0)) {
                   // put marker at the end of the data for the spine so that
-                  // the context command will not mix data from 
+                  // the context command will not mix data from
                   // different spines. (grep -v out after context is run).
                   if (track == infile[i].getPrimaryTrack(j)) {
-                     cout << marker << "\n";                  
+                     cout << marker << "\n";
                   }
                }
                if ((strcmp(infile[i][0], "*-") == 0) && mergeQ) {
@@ -337,10 +337,10 @@ void printSubSpine(HumdrumFile& infile, int track, int start, int subspine) {
 
 //////////////////////////////
 //
-// interpmatch -- 
+// interpmatch --
 //
 
-int interpmatch(HumdrumFile& infile, int track, int start, 
+int interpmatch(HumdrumFile& infile, int track, int start,
       string& interp) {
    int i;
    for (i=0; i<infile[start].getFieldCount(); i++) {
@@ -434,10 +434,10 @@ void printTrack(HumdrumFile& infile, int track, int start) {
                }
                if (markerQ && (strcmp(infile[i][j], "*-") == 0)) {
                   // put marker at the end of the data for the spine so that
-                  // the context command will not mix data from 
+                  // the context command will not mix data from
                   // different spines. (grep -v out after context is run).
                   if (track == infile[i].getPrimaryTrack(j)) {
-                     cout << marker << "\n";                  
+                     cout << marker << "\n";
                   }
                }
                if ((strcmp(infile[i][0], "*-") == 0) && (mergeQ || parsubQ)) {
@@ -461,7 +461,7 @@ void printTrack(HumdrumFile& infile, int track, int start) {
                         // valid.
                         cout << "*" << "\n";
                      } else {
-                        if ((mergeQ || parsubQ) && 
+                        if ((mergeQ || parsubQ) &&
                               (strcmp(infile[i][j], "*-") == 0)) {
                            continue;
                         }
@@ -542,7 +542,7 @@ void printTrack(HumdrumFile& infile, int track, int start) {
 // printChordSeparator --
 //
 
-void printChordSeparator(HumdrumFile& infile, int row, int col, 
+void printChordSeparator(HumdrumFile& infile, int row, int col,
       char separator, int nth) {
 
    int count = infile[row].getTokenCount(col, separator);
@@ -572,14 +572,14 @@ void printChordSeparator(HumdrumFile& infile, int row, int col,
 
    int index = nth - 1;
    if (nth < 0) {
-      index = count + nth; 
+      index = count + nth;
    }
 
    if ((index < 0) || (index >= count)) {
       cout << ".";
       return;
    }
-   
+
    infile[row].getToken(buffer, col, index, len+1, separator);
    cout << buffer;
 }
@@ -624,7 +624,7 @@ int printHeader(HumdrumFile& infile) {
       if (infile[i].isInterpretation()) {
          output = i;
          break;
-      } 
+      }
       cout << infile[i] << endl;
    }
    return output;
@@ -657,7 +657,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");            // example usages
    opts.define("h|help=b");             // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -709,7 +709,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
       marker = opts.getString("marker");
    }
    parsubQ    = opts.getBoolean("parsub");
-  
+
 }
 
 

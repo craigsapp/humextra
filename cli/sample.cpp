@@ -22,7 +22,7 @@
 
 // function declarations
 void         checkOptions      (Options& opts, int argc, char* argv[]);
-void         createDataLine    (char* buffer, HumdrumFile& infile, int line, 
+void         createDataLine    (char* buffer, HumdrumFile& infile, int line,
                                 double duration, int style);
 void         example           (void);
 void         processRecords    (HumdrumFile& infile, HumdrumFile& outfile);
@@ -149,7 +149,7 @@ void example(void) {
 
 //////////////////////////////
 //
-// processRecords -- 
+// processRecords --
 //
 
 void processRecords(HumdrumFile& infile, HumdrumFile& outfile) {
@@ -177,11 +177,11 @@ void processRecords(HumdrumFile& infile, HumdrumFile& outfile) {
          outfile.appendLine(infile[i]);
          continue;
       }
- 
+
       state = 0;
       currbeat = infile[i].getAbsBeat();
       currdur = infile[i].getDuration();
-      while ((currbeat+currdur > targetbeat) || 
+      while ((currbeat+currdur > targetbeat) ||
             (fabs(currbeat-targetbeat) < 0.001)) {
 
          if (fabs(currbeat - targetbeat) < 0.0001) {
@@ -218,11 +218,11 @@ void processRecords(HumdrumFile& infile, HumdrumFile& outfile) {
 
 //////////////////////////////
 //
-// createDataLine -- 
+// createDataLine --
 //
 
-void createDataLine(char* buffer, HumdrumFile& infile, int line, 
-      double duration, int style) { 
+void createDataLine(char* buffer, HumdrumFile& infile, int line,
+      double duration, int style) {
    buffer[0] = '\0';
    if (style == 'x') {
       return;

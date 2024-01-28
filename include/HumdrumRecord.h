@@ -15,7 +15,7 @@
 // Last Modified: Sat Apr 20 12:15:42 PDT 2013 Added isNulToken()
 // Filename:      ...sig/include/sigInfo/HumdrumRecord.h
 // Webpage:       http://sig.sapp.org/include/sigInfo/HumdrumRecord.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Stores the data for one line in a HumdrumFile and
 //                segments data into spines.
@@ -36,15 +36,15 @@
 class HumdrumRecord {
    public:
                         HumdrumRecord      (void);
-                        HumdrumRecord      (const char* aLine, 
+                        HumdrumRecord      (const char* aLine,
                                               int aLineNum = -1);
                         HumdrumRecord      (const HumdrumRecord& aRecord);
                        ~HumdrumRecord      ();
-  
-      void              appendField        (const char* aField, 
+
+      void              appendField        (const char* aField,
                                               int anInterp = E_unknown,
                                               const char* spinetrace = "");
-      void              appendFieldEI      (const char* aField, 
+      void              appendFieldEI      (const char* aField,
                                              const char* anInterp = "**unknown",
                                              const char* spinetrace = "");
       void              changeField        (int aField, const char* aString);
@@ -68,8 +68,8 @@ class HumdrumRecord {
       RationalNumber    getMeasureDurationR(void) const;
       int               getDotLine         (int index);
       int               getDotSpine        (int index);
-      int               getDotField        (int index) 
-                                              { return getDotSpine(index); } 
+      int               getDotField        (int index)
+                                              { return getDotSpine(index); }
       double            getDuration        (void) const;
       RationalNumber    getDurationR       (void) const;
       int               getExInterpNum     (int fieldIndex) const;
@@ -77,55 +77,57 @@ class HumdrumRecord {
       int               getFieldCount      (void) const;
       int               getFieldCount      (const char* exinterp) const;
       int               getFieldCount      (int exinterp) const;
-      int               getFieldsByExInterp(Array<int>& fields, 
+      int               getFieldsByExInterp(Array<int>& fields,
                                             const char* exinterp);
-      int               getTracksByExInterp(Array<int>& tracks, 
+      int               getTracksByExInterp(Array<int>& tracks,
                                             const char* exinterp);
       char*             getBibKey          (char* buffer, int maxsize = 0);
       char*             getBibValue        (char* buffer, int maxsize = 0);
       char*             getBibKey          (Array<char>& buffer);
       char*             getBibValue        (Array<char>& buffer);
+      string            getBibKey          (const string& buffer);
+      string            getBibValue        (const string& buffer);
       const char*       getBibLangIso639_2 (const char* string = NULL);
       static const char*getLanguageName    (const char* code);
-      static const char*getBibliographicMeaning(Array<char>& output, 
+      static const char*getBibliographicMeaning(Array<char>& output,
                                             const char* code);
-      static string&    getBibliographicMeaning(string& output, 
+      static string&    getBibliographicMeaning(string& output,
                                             const string& code);
-      const char*       getLine            (void); 
-      int               getLineNum         (void) const; 
+      const char*       getLine            (void);
+      int               getLineNum         (void) const;
       int               getPrimaryTrack    (int spineNumber);
       double            getTrack           (int spineNumber);
       int               getTrackColumn     (int track);
       const string&     getSpineInfo       (int index) const;
       int               getSpinePrediction (void);
       int               getSpineWidth      (void);
-      void              changeToken        (int spineIndex, int tokenIndex,  
+      void              changeToken        (int spineIndex, int tokenIndex,
                                             const char* newtoken,
                                             char separator = ' ');
-      int               getTokenCount      (int fieldIndex, 
+      int               getTokenCount      (int fieldIndex,
                                               char separator = ' ');
-      char*             getToken           (char* buffer, int fieldIndex, 
-                                              int tokenIndex, 
-                                              int buffersize = -1, 
+      char*             getToken           (char* buffer, int fieldIndex,
+                                              int tokenIndex,
+                                              int buffersize = -1,
                                               char separator = ' ');
-      string&           getToken           (string& buffer, int fieldIndex, 
-                                              int tokenIndex, 
-                                              int buffersize = -1, 
+      string&           getToken           (string& buffer, int fieldIndex,
+                                              int tokenIndex,
+                                              int buffersize = -1,
                                               char separator = ' ');
-      string            getToken           (int fieldIndex, 
-                                              int tokenIndex, 
-                                              int buffersize = -1, 
+      string            getToken           (int fieldIndex,
+                                              int tokenIndex,
+                                              int buffersize = -1,
                                               char separator = ' ');
-      void              getTokens          (Array<Array<char> >& tokens, 
-                                              int fieldIndex, 
+      void              getTokens          (Array<Array<char> >& tokens,
+                                              int fieldIndex,
                                               char separator = ' ');
-      void              getTokens          (vector<string>& tokens, 
-                                              int fieldIndex, 
+      void              getTokens          (vector<string>& tokens,
+                                              int fieldIndex,
                                               char separator = ' ');
-      char*             getToken           (Array<char>& buffer, 
-                                              int fieldIndex, 
-                                              int tokenIndex, 
-                                              int buffersize = -1, 
+      char*             getToken           (Array<char>& buffer,
+                                              int fieldIndex,
+                                              int tokenIndex,
+                                              int buffersize = -1,
                                               char separator = ' ');
       int               getType            (void) const;
 
@@ -134,7 +136,7 @@ class HumdrumRecord {
       int               isEmpty            (void) const;
       int               isGlobalComment    (void) const;
       int               isBibliographic    (void) const;
-      int               isReferenceRecord  (void) const 
+      int               isReferenceRecord  (void) const
                               { return isBibliographic(); }
       int               isReference        (void) const
                               { return isBibliographic(); }
@@ -164,7 +166,7 @@ class HumdrumRecord {
       // Interpretation record functions:
       int               isInterpretation   (void) const;
       int               isExclusiveInterpretation (int index) const;
-      int               isExInterp         (int index) const 
+      int               isExInterp         (int index) const
 			      { return isExclusiveInterpretation(index); }
       int               isTandem           (void) const;
       int               isSpineManipulator (int index);
@@ -242,9 +244,9 @@ class HumdrumRecord {
       void              setDuration        (RationalNumber aValue);
       void              setDurationR       (RationalNumber aValue);
       void              setExInterp        (int fieldIndex, int interpretation);
-      void              setExInterp        (int fieldIndex, 
+      void              setExInterp        (int fieldIndex,
                                               const char* interpretation);
-      void              setLine            (const char* aString); 
+      void              setLine            (const char* aString);
       void              setToken           (int index, const char* aString);
       void              setToken           (int index, const string& aString);
       void              setLineNum         (int aLine);
@@ -267,13 +269,13 @@ class HumdrumRecord {
 
 
       // data storage for rhythmic analysis in relation to entire Humdrum File.
-      float             duration;       // duration of the record 
-      RationalNumber    durationR;      // duration of the record 
+      float             duration;       // duration of the record
+      RationalNumber    durationR;      // duration of the record
       float             meterloc;       // metric position of the record
       RationalNumber    meterlocR;      // metric position of the record
       float             absloc;         // absolute beat location of the record
       RationalNumber    abslocR;        // absolute beat location of the record
-      
+
       // private functions
       int               determineFieldCount(const char* aLine) const;
       int               determineType      (const char* aLine) const;
@@ -282,7 +284,7 @@ class HumdrumRecord {
       int               isParticularType   (const char* regexp,
                                             const char* exinterp);
 };
-   
+
 
 ostream& operator<<(ostream& out, HumdrumRecord& aRecord);
 

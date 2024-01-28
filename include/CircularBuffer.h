@@ -10,7 +10,7 @@
 //
 // Description:   A Circular buffer designed to handle MIDI input,
 //                but able to store any type of object.  Elements
-//                can be read out of the buffer in two ways. 
+//                can be read out of the buffer in two ways.
 //                (1) from a read pointer which extracts the
 //                elements in order by following the write pointer,
 //                and (2) from an index operator related to the
@@ -29,7 +29,7 @@ class CircularBuffer {
    public:
                     CircularBuffer     (void);
                     CircularBuffer     (int maxElements);
-                    CircularBuffer     (const CircularBuffer<type>& 
+                    CircularBuffer     (const CircularBuffer<type>&
                                            anotherBuffer);
                    ~CircularBuffer     ();
 

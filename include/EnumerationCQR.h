@@ -5,7 +5,7 @@
 // Last Modified: Fri Jun 12 23:08:20 PDT 1998
 // Filename:      sig/include/sigInfo/EnumerationCQR.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/EnumerationCQR.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Enumeration database for chord roots.
 //

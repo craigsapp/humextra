@@ -2,7 +2,7 @@
 ##
 ## Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 ## Creation Date: Sun Apr  3 15:34:28 PDT 2005
-## Last Modified: Wed Mar  9 12:46:27 PST 2016
+## Last Modified: Sat Jan 27 09:47:06 PM PST 2024
 ## Filename:      ...humextra/Makefile.programs
 ##
 ## Description:   This Makefile creates the Humdrum Extras library
@@ -160,8 +160,8 @@ DEFINES  += $(addprefix -D,$(OSSUBTYPE))
 
 PREFLAGS  = -O3 -Wall -I$(INCDIR) $(DEFINES)
 
-# Options class uses C++11 standard, so need to compile all code using C++11:
-PREFLAGS += -std=c++11
+# SigCollection class uses C++11 standard
+PREFLAGS += -std=c++14
 
 # Add -static flag to compile without dynamics libraries for better portability:
 # (-static flag doesn't work well with gethostbyname() used in Humdrum parser)

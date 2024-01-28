@@ -7,7 +7,7 @@
 // Last Modified: Sat Sep  1 15:34:49 PDT 2012 Renovated.
 // Filename:      ...sig/src/sigInfo/ScorePage.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/ScorePage.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A page of SCORE data with analysis functions which identify
 //                non-explicit structural organization of the data.  Inherits
@@ -48,17 +48,17 @@ class ScorePage : public ScorePageBase {
       // A "line system" is a system on a single line, not including
       // other line systems on the page.
       int            getSystemStaffCount(int sysidx);
-      int            getLSSCount          (int sysidx) 
+      int            getLSSCount          (int sysidx)
                         { return getSystemStaffCount(sysidx); }
       int            getSystemCount   (void);
-      int            getLSCount           (void) 
+      int            getLSCount           (void)
                         { return getSystemCount(); }
       int            getPageSystemStaffIndex(int itemidx);
       int            getPSSIndex(int itemidx)
                         { return getPageSystemStaffIndex(itemidx); }
 
 
-      // Analysis functions 
+      // Analysis functions
       void           analyzeContent       (void);
       void           analyzeSystems       (void);
 
@@ -80,14 +80,14 @@ class ScorePage : public ScorePageBase {
 
       double         getSystemDuration    (int sysIdx);
       void           getSystemObjectIndexes(int sysidx, Array<int>& list);
-      void           getStaffObjectIndexes(int sysidx, int staffidx, 
+      void           getStaffObjectIndexes(int sysidx, int staffidx,
                                            Array<int>& list);
       int            getSystemIndex       (int objidx);
       int            getSystemStaffIndex  (int objidx);
       int            getPageStaffNumber   (int objidx);
       int            getPageStaff         (int objidx);
       int            getSystemStaffItemIndex(int objidx);
-      int            getSysStaffIndex     (int objidx) 
+      int            getSysStaffIndex     (int objidx)
                                           {return getSystemStaffIndex(objidx);}
       int            getMaxBarlineLength  (int staffno);
       int            getMaxBarlineLength  (int sysidx, int staffidx);
@@ -111,11 +111,11 @@ class ScorePage : public ScorePageBase {
       int            getSysStaffItemCount (int sysidx, int staffidx) {
                         return getSystemStaffItemCount(sysidx, staffidx); }
       int            getSystemStaffP2     (int sysidx, int staffidx);
-      int            getSystemStaffItemNumber (int sysidx, int staffidx, 
+      int            getSystemStaffItemNumber (int sysidx, int staffidx,
                                                int objidx);
-      int            getSysStaffItemNumber (int sysidx, int staffidx, 
+      int            getSysStaffItemNumber (int sysidx, int staffidx,
                                             int objidx) {
-                        return getSystemStaffItemNumber(sysidx, staffidx, 
+                        return getSystemStaffItemNumber(sysidx, staffidx,
                                                         objidx); }
       ScoreRecord&   getSystemStaffItem   (int sysidx,int staffidx, int objidx);
       ScoreRecord&   getSysStaffItem      (int sysidx,int staffidx, int objidx){
@@ -124,37 +124,37 @@ class ScorePage : public ScorePageBase {
       void           packBase40Pitch      (void);
       double         getPageDuration      (void);
       int            hasDuration          (int objidx);
-      int            hasDuration          (int sysidx, int staffidx, 
+      int            hasDuration          (int sysidx, int staffidx,
                                            int objidx);
       double         getDuration          (int objidx);
-      double         getDuration          (int sysidx, int staffidx, 
+      double         getDuration          (int sysidx, int staffidx,
                                            int objidx);
       double         getPitch             (int objidx);
-      double         getPitch             (int sysidx, int staffidx, 
+      double         getPitch             (int sysidx, int staffidx,
                                            int objidx);
-      void           getSlurEndNotes      (int objidx, Array<int>& leftside, 
+      void           getSlurEndNotes      (int objidx, Array<int>& leftside,
                                            Array<int>& rightside);
-      void           getNotesAtHpos       (Array<int>& notes, int sysidx, 
+      void           getNotesAtHpos       (Array<int>& notes, int sysidx,
                                            int staffidx, double hpos);
       int            getSystemStaffLyricCount(int staffidx);
       int            getPageStaffLyricCount(int staffidx);
-      void           identifySystemBreakHyphens(int sys1idx, int sys2idx, 
+      void           identifySystemBreakHyphens(int sys1idx, int sys2idx,
                                            int staffidx);
       int            getLowestStaffOnSystem (int sysidx);
       double         getNextNotePositionOnStaff(int objidx);
       double         getPreviousNotePositionOnStaff(int objidx);
 
-      // pitch analysis functions 
+      // pitch analysis functions
       void           analyzePitchX        (void);
       ScoreRecord&   getClefAtLocation    (int staffno, float position);
       ScoreRecord&   getKeysigAtLocation  (int staffno, float position);
 
-      void           resetPitchSpellings  (int staffidx, int barheight, 
-                                           Array<Array<int> >& pitchstate, 
+      void           resetPitchSpellings  (int staffidx, int barheight,
+                                           Array<Array<int> >& pitchstate,
                                            Array<Array<int> >& keysig);
       void           fillPitchStatesWithKeySig(
-                                           Array<Array<int> >& pitchstate, 
-                                           int staffidx, 
+                                           Array<Array<int> >& pitchstate,
+                                           int staffidx,
                                            Array<Array<int> >& keysig);
       // duration analysis of each staff
 
@@ -162,23 +162,23 @@ class ScorePage : public ScorePageBase {
       // pitch analysis functions
       int            assignPitchX         (int staff, int currentposition);
       void           resetAccidentals     (Array<int>& accidentals, int keysig);
-      int            convertPitchToBase40 (int line, int acc, int clef, 
-                                           int clefoffset, 
+      int            convertPitchToBase40 (int line, int acc, int clef,
+                                           int clefoffset,
                                            Array<int>& accidentals);
       void           numberMeasures      (int sysidx, int objidx, double hpos,
                                           int barnum, double delta);
 
    private:
       void           identifyLyricsOnStaff(int sysidx, int staffidx);
-      void           processVerse      (int verse, int vpos, int sysidx, 
-                                        int staffidx, Array<int>& objlist, 
+      void           processVerse      (int verse, int vpos, int sysidx,
+                                        int staffidx, Array<int>& objlist,
                                         Array<double>& vposes);
-      void           storeNextEvent    (Array<double>& expectedStaffBeat, 
+      void           storeNextEvent    (Array<double>& expectedStaffBeat,
                                         double nextevent);
       double         getSmallestEvent  (Array<double>& expectedStaffBeat);
-      void           removeEvent       (Array<double>& expectedStaffBeat, 
+      void           removeEvent       (Array<double>& expectedStaffBeat,
                                         double currentSysDur);
- 
+
       // system analysis functions
       void           buildSystemIndexDatabase(void);
 

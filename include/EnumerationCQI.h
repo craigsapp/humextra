@@ -5,7 +5,7 @@
 // Last Modified: Fri Jun 12 22:55:09 PDT 1998
 // Filename:      ...sig/include/EnumerationCQI.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/EnumerationCQI.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Enumeration database for chord inversions.
 //

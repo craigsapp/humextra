@@ -6,7 +6,7 @@
 // Last Modified: Fri Jun 12 22:58:34 PDT 2009 (renamed SigCollection class)
 // Filename:      ...sig/include/sigInfo/NoteList.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/NoteList.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Used in chord and key identification in HumdrumFile class.
 //
@@ -24,12 +24,12 @@
 #endif
 
 class NoteList {
-   public: 
+   public:
                    NoteList         (void);
                   ~NoteList         ();
 
       void         clear            (void);
-  
+
       const int    getLine          (void);
       const int    getSpine         (void);
       const int    getToken         (void);
@@ -40,7 +40,7 @@ class NoteList {
       const double getDur           (void);
       const double getDuration      (void);
       const double getTrack         (void);
-  
+
       void         setLine          (int aValue);
       void         setSpine         (int aValue);
       void         setToken         (int aValue);

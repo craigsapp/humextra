@@ -1,8 +1,8 @@
 //
 // Copyright 2000 by Craig Stuart Sapp, All Rights Reserved.
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
-// Creation Date: Thu Jun 29 21:43:18 PDT 2000 
-// Last Modified: Thu Jun 29 21:43:22 PDT 2000 
+// Creation Date: Thu Jun 29 21:43:18 PDT 2000
+// Last Modified: Thu Jun 29 21:43:22 PDT 2000
 // Filename:      ...sig.sapp.org/include/sigInfo/Enum_embel.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Enum_embel.h
 // Syntax:        C++; museinfo
@@ -16,34 +16,34 @@
 
 #include "Enum_basic.h"
 
-#define E_embel_aln        (1)    
-#define E_embel_ant        (2)    
-#define E_embel_app        (3)    
-#define E_embel_apt        (4)    
-#define E_embel_arp        (5)    
-#define E_embel_arp7       (6)    
-#define E_embel_aun        (7)    
-#define E_embel_chg        (8)    
-#define E_embel_cln        (9)    
-#define E_embel_ct         (10)    
-#define E_embel_ct7        (11)    
-#define E_embel_cun        (12)    
-#define E_embel_cup        (13)    
-#define E_embel_et         (14)    
-#define E_embel_ln         (15)    
-#define E_embel_ped        (16)    
-#define E_embel_rep        (17)    
-#define E_embel_ret        (18)    
-#define E_embel_23ret      (19)    
-#define E_embel_78ret      (20)    
-#define E_embel_sus        (21)    
-#define E_embel_43sus      (22)    
-#define E_embel_98sus      (23)    
-#define E_embel_76sus      (24)    
-#define E_embel_un         (25)    
-#define E_embel_un7        (26)    
-#define E_embel_upt        (27)    
-#define E_embel_upt7       (28)    
+#define E_embel_aln        (1)
+#define E_embel_ant        (2)
+#define E_embel_app        (3)
+#define E_embel_apt        (4)
+#define E_embel_arp        (5)
+#define E_embel_arp7       (6)
+#define E_embel_aun        (7)
+#define E_embel_chg        (8)
+#define E_embel_cln        (9)
+#define E_embel_ct         (10)
+#define E_embel_ct7        (11)
+#define E_embel_cun        (12)
+#define E_embel_cup        (13)
+#define E_embel_et         (14)
+#define E_embel_ln         (15)
+#define E_embel_ped        (16)
+#define E_embel_rep        (17)
+#define E_embel_ret        (18)
+#define E_embel_23ret      (19)
+#define E_embel_78ret      (20)
+#define E_embel_sus        (21)
+#define E_embel_43sus      (22)
+#define E_embel_98sus      (23)
+#define E_embel_76sus      (24)
+#define E_embel_un         (25)
+#define E_embel_un7        (26)
+#define E_embel_upt        (27)
+#define E_embel_upt7       (28)
 
 #define E_embel_aln_name   "aln"
 #define E_embel_ant_name   "ant"

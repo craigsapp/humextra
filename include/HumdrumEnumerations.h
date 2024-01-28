@@ -6,7 +6,7 @@
 // Last Modified: Thu Jun 29 22:24:48 PDT 2000 (added EnumerationEmbellish)
 // Filename:      ...sig/include/sigInfo/HumdrumEnumerations.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/HumdrumEnumerations.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Enumeration includes for Humdrum musical data.
 //

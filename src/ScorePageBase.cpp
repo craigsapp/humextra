@@ -45,9 +45,8 @@ ScorePageBase::ScorePageBase(void) {
 	// Initialize space for the main data array, set the allocation
 	// size to 10,000 and the regrowth size to +100,000 if it exceeds
 	// the initial allocation size.
-	data.setSize(10000);
-	data.setGrowth(100000);
-	data.setSize(0);
+	m_data.reserve(10000);
+	m_data.resize(0);
 
 	// clear all other variables
 	clearAll();
@@ -55,9 +54,8 @@ ScorePageBase::ScorePageBase(void) {
 
 
 ScorePageBase::ScorePageBase(ScorePageBase& aPage) {
-	data.setSize(10000);
-	data.setGrowth(100000);
-	data.setSize(0);
+	m_data.reserve(10000);
+	m_data.resize(0);
 
 	ScorePageBase& thispage = *this;
 	thispage = aPage;
@@ -90,12 +88,11 @@ ScorePageBase& ScorePageBase::operator=(ScorePageBase &aPage) {
 	clear();
 
 	// (1) Main data storage:
-	data.setSize(aPage.data.getSize()*2);  // allocate extra for growing
-	data.setSize(aPage.data.getSize());
-	data.setGrowth(1000000);
-	for (i=0; i<data.getSize(); i++) {
-		data[i] = new ScoreRecord;
-		*(data[i]) = *(aPage.data[i]);
+	m_data.reserve(aPage.m_data.size()*2);  // allocate extra for growing
+	m_data.resize(aPage.m_data.size());
+	for (i=0; i<(int)m_data.size(); i++) {
+		m_data[i] = new ScoreRecord;
+		*(m_data[i]) = *(aPage.m_data[i]);
 	}
 	trailer           = aPage.trailer;
 
@@ -114,7 +111,10 @@ ScorePageBase& ScorePageBase::operator=(ScorePageBase &aPage) {
 
 	// (3) Sequence data:
 	pagePrintSequence = aPage.pagePrintSequence;
-	lineStaffSequence.setSize(aPage.lineStaffSequence.getSize());
+
+   int asize = aPage.lineStaffSequence.getSize();
+	lineStaffSequence.setSize(asize);
+
 	for (i=0; i<lineStaffSequence.getSize(); i++) {
 		lineStaffSequence[i] = aPage.lineStaffSequence[i];
 	}
@@ -175,11 +175,11 @@ ScorePageBase& ScorePageBase::operator=(ScorePageBase &aPage) {
 //
 
 void ScorePageBase::clear(void) {
-	for (int i=0; i<data.getSize(); i++) {
-		delete data[i];
-		data[i] = NULL;
+	for (int i=0; i<(int)m_data.size(); i++) {
+		delete m_data[i];
+		m_data[i] = NULL;
 	}
-	data.setSize(0);
+	m_data.resize(0);
 
 	// create a default trailer
 	initializeTrailer();
@@ -485,7 +485,6 @@ void ScorePageBase::readBinary(istream& infile, int verboseQ) {
 	infile.seekg(2, ios::beg);
 
 	double number = 0.0;
-	data.allowGrowth(1);
 	// now read each data number and store
 	while (!infile.eof()) {
 		if (numbercount - readcount - trailerSize - 1 == 0) {
@@ -507,12 +506,13 @@ void ScorePageBase::readBinary(istream& infile, int verboseQ) {
 			}
 
 			readcount += (int)number;
-			data[data.getSize()]->readBinary(infile, (int)number);
+         m_data.resize(m_data.size() + 1);
+			m_data.back()->readBinary(infile, (int)number);
 		}
 	}
 
 	if (verboseQ) {
-		cout << "#Elements: " << data.getSize() << endl;
+		cout << "#Elements: " << m_data.size() << endl;
 		cout << "#READING Trailer: " << endl;
 	}
 
@@ -615,8 +615,8 @@ ostream& ScorePageBase::writeBinary(ostream& outfile) {
 	int writecount = 0;   // number of numbers which have been read
 
 	int i;
-	for (i=0; i<data.getSize(); i++) {
-		writecount += data[i]->writeBinary(outfile);
+	for (i=0; i<(int)m_data.size(); i++) {
+		writecount += m_data[i]->writeBinary(outfile);
 	}
 
 	// write the trailer
@@ -719,10 +719,10 @@ void ScorePageBase::writeLittleFloat(ostream& out, float number) {
 void ScorePageBase::printAscii(ostream& out, int roundQ, int verboseQ) {
 	int i, j;
 	if (verboseQ) {
-		cout << "# OBJECTS TO WRITE: " << data.getSize() << endl;
+		cout << "# OBJECTS TO WRITE: " << m_data.size() << endl;
 	}
 	Array<Array<char> > buffers;
-	buffers.setSize(data.getSize() * 2);
+	buffers.setSize(m_data.size() * 2);
 	buffers.setSize(0);
 
 	char buffer1[10000] = {0};
@@ -733,9 +733,9 @@ void ScorePageBase::printAscii(ostream& out, int roundQ, int verboseQ) {
 	spaces.setAll(1);
 	int length;
 
-	for (i=0; i<data.getSize(); i++) {
-		// data[i]->printAscii(out, verboseQ);
-		data[i]->printAscii(buffer1, buffer2, 10000, roundQ, verboseQ);
+	for (i=0; i<(int)m_data.size(); i++) {
+		// (int)m_data[i]->printAscii(out, verboseQ);
+		m_data.at(i)->printAscii(buffer1, buffer2, 10000, roundQ, verboseQ);
 		index = buffers.getSize();
 		buffers.setSize(buffers.getSize()+1);
 		length = strlen(buffer1);
@@ -794,13 +794,13 @@ void ScorePageBase::printAsciiWithExtraParameters(ostream& out, int roundQ,
 		int verboseQ) {
 	int i, j;
 	if (verboseQ) {
-		cout << "# OBJECTS TO WRITE IS " << data.getSize() << endl;
+		cout << "# OBJECTS TO WRITE IS " << m_data.size() << endl;
 	}
 	Array<Array<char> > buffers;
-	buffers.setSize(data.getSize() * 2);
+	buffers.setSize(m_data.size() * 2);
 	buffers.setSize(0);
 
-	Array<int> bufferindex(data.getSize() * 2);
+	Array<int> bufferindex(m_data.size() * 2);
 	bufferindex.setSize(0);
 
 	char buffer1[10000] = {0};
@@ -811,9 +811,9 @@ void ScorePageBase::printAsciiWithExtraParameters(ostream& out, int roundQ,
 	spaces.setAll(1);
 	int length;
 
-	for (i=0; i<data.getSize(); i++) {
-		// data[i].printAscii(out, verboseQ);
-		data[i]->printAscii(buffer1, buffer2, 10000, roundQ, verboseQ);
+	for (i=0; i<(int)m_data.size(); i++) {
+		// m_data[i].printAscii(out, verboseQ);
+		m_data.at(i)->printAscii(buffer1, buffer2, 10000, roundQ, verboseQ);
 		index = buffers.getSize();
 		buffers.setSize(buffers.getSize()+1);
 		length = strlen(buffer1);
@@ -842,7 +842,7 @@ void ScorePageBase::printAsciiWithExtraParameters(ostream& out, int roundQ,
 		if ((i>0) && (strncmp(buffers[i-1].getBase(), "t", 1) == 0)) {
 			out << buffers[i].getBase();
 			out << "\n";
-			data[bufferindex[i]]->printAsciiExtraParameters(out, roundQ, verboseQ);
+			m_data.at(bufferindex[i])->printAsciiExtraParameters(out, roundQ, verboseQ);
 		} else {
 			for (j=0; j<buffers[i].getSize()-1; j++) {
 				if (spaces[j] == 0) {
@@ -855,7 +855,7 @@ void ScorePageBase::printAsciiWithExtraParameters(ostream& out, int roundQ,
 			// out << buffers[i][buffers[i].getSize()-1];
 			out << "\n";
 			if (strncmp(buffers[i].getBase(), "t", 1) != 0) {
-				data[bufferindex[i]]->printAsciiExtraParameters(out, roundQ,
+				m_data.at(bufferindex[i])->printAsciiExtraParameters(out, roundQ,
 						verboseQ);
 			}
 		}
@@ -882,7 +882,7 @@ void ScorePageBase::printAsciiWithExtraParameters(ostream& out, int roundQ,
 //
 
 int ScorePageBase::getSize(void) {
-	return data.getSize();
+	return (int)m_data.size();
 }
 
 
@@ -895,7 +895,7 @@ int ScorePageBase::getSize(void) {
 //
 
 ScoreRecord& ScorePageBase::operator[](int index) {
-	return *(data[index]);
+	return *(m_data.at(index));
 }
 
 
@@ -908,9 +908,9 @@ ScoreRecord& ScorePageBase::operator[](int index) {
 void ScorePageBase::appendItem(ScoreRecord& aRecord) {
 	invalidateAnalyses();
 
-	data.increase(1);
-	data.last() = new ScoreRecord;
-	*(data.last()) = aRecord;
+   m_data.resize(m_data.size());
+	m_data.back() = new ScoreRecord;
+	*(m_data.back()) = aRecord;
 }
 
 
@@ -947,9 +947,9 @@ void ScorePageBase::appendItem(SigCollection<ScoreRecord*>& recs) {
 //
 
 void ScorePageBase::shrinkParameters(void) {
-	int i;
-	for (i=0; i<data.getSize(); i++) {
-		data[i]->shrink();
+	for (int i=0; i<(int)m_data.size(); i++) {
+      // need to fix this re vector conversion:
+		m_data[i]->shrink();
 	}
 }
 
@@ -1200,23 +1200,23 @@ void ScorePageBase::quickSortByDataIndex(Array<int>& indexes,
 
 int ScorePageBase::isGreater(int a, int b) {
 	// primary sort by hpos
-	if (data[a]->getHpos() > data[b]->getHpos()) {
+	if (m_data[a]->getHpos() > m_data[b]->getHpos()) {
 		return 1;
-	} else if (data[a]->getHpos() < data[b]->getHpos()) {
+	} else if (m_data[a]->getHpos() < m_data[b]->getHpos()) {
 		return 0;
 	}
 
 	// ties sorted by vpos
-	if (data[a]->getVpos() > data[b]->getVpos()) {
+	if (m_data[a]->getVpos() > m_data[b]->getVpos()) {
 		return 1;
-	} else if (data[a]->getVpos() < data[b]->getVpos()) {
+	} else if (m_data[a]->getVpos() < m_data[b]->getVpos()) {
 		return 0;
 	}
 
 	// ties sorted by (int)P1 value
-	if ((int)data[a]->getValue(P1) > (int)data[b]->getValue(P1)) {
+	if ((int)m_data[a]->getValue(P1) > (int)m_data[b]->getValue(P1)) {
 		return 1;
-	} else if ((int)data[a]->getValue(P1) < (int)data[b]->getValue(P1)) {
+	} else if ((int)m_data[a]->getValue(P1) < (int)m_data[b]->getValue(P1)) {
 		return 0;
 	}
 
@@ -1235,23 +1235,23 @@ int ScorePageBase::isGreater(int a, int b) {
 
 int ScorePageBase::isLess(int a, int b) {
 	// primary sort by hpos
-	if (data[a]->getHpos() < data[b]->getHpos()) {
+	if (m_data[a]->getHpos() < m_data[b]->getHpos()) {
 		return 1;
-	} else if (data[a]->getHpos() > data[b]->getHpos()) {
+	} else if (m_data[a]->getHpos() > m_data[b]->getHpos()) {
 		return 0;
 	}
 
 	// ties sorted by vpos
-	if (data[a]->getVpos() < data[b]->getVpos()) {
+	if (m_data[a]->getVpos() < m_data[b]->getVpos()) {
 		return 1;
-	} else if (data[a]->getVpos() > data[b]->getVpos()) {
+	} else if (m_data[a]->getVpos() > m_data[b]->getVpos()) {
 		return 0;
 	}
 
 	// ties sorted by (int)P1 value
-	if ((int)data[a]->getValue(P1) < (int)data[b]->getValue(P1)) {
+	if ((int)m_data[a]->getValue(P1) < (int)m_data[b]->getValue(P1)) {
 		return 1;
-	} else if ((int)data[a]->getValue(P1) > (int)data[b]->getValue(P1)) {
+	} else if ((int)m_data[a]->getValue(P1) > (int)m_data[b]->getValue(P1)) {
 		return 0;
 	}
 

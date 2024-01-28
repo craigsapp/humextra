@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
 
 //////////////////////////////
 //
-// printTransformation -- 
+// printTransformation --
 //
 
 void printTransformation(HumdrumFile& hfile, Array<int>& transform) {
@@ -103,7 +103,7 @@ void printTransformation(HumdrumFile& hfile, Array<int>& transform) {
 
 //////////////////////////////
 //
-// printLine -- 
+// printLine --
 //
 
 void printLine(HumdrumFile& hfile, Array<int>& transform, int line) {
@@ -131,22 +131,22 @@ void printLine(HumdrumFile& hfile, Array<int>& transform, int line) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("f|field-order=s",      "reordering scheme of output"); 
-   opts.define("r|reverse=b",          "reverse the order of the spines"); 
-   opts.define("n|normal=b",           "convert score to normal order"); 
-   opts.define("p|primary=s:**kern",   "main spine for group reversals"); 
-   opts.define("d|determine|detect=b", "determine score ordering only"); 
+   opts.define("f|field-order=s",      "reordering scheme of output");
+   opts.define("r|reverse=b",          "reverse the order of the spines");
+   opts.define("n|normal=b",           "convert score to normal order");
+   opts.define("p|primary=s:**kern",   "main spine for group reversals");
+   opts.define("d|determine|detect=b", "determine score ordering only");
 
-   opts.define("author=b",  "author of program"); 
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("h|help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -188,7 +188,7 @@ void example(void) { }
 
 //////////////////////////////
 //
-// getTransformation -- 
+// getTransformation --
 //
 
 void getTransformation(HumdrumFile& hfile, Array<int>& transform) {
@@ -230,8 +230,8 @@ void getTransformation(HumdrumFile& hfile, Array<int>& transform) {
       double favg = 0.0;
       double lavg = 0.0;
       if (findex != lindex) {
-         favg = getAveragePitch(hfile, findex + 1);         
-         lavg = getAveragePitch(hfile, lindex + 1);         
+         favg = getAveragePitch(hfile, findex + 1);
+         lavg = getAveragePitch(hfile, lindex + 1);
       }
       if (favg > lavg) {
          if (determineQ) {
@@ -244,7 +244,7 @@ void getTransformation(HumdrumFile& hfile, Array<int>& transform) {
             if (hfile.getTrackExInterp(i) == "**kern") {
                transform.append(i);
                j = i+1;
-               while ((j <= maxspine) && 
+               while ((j <= maxspine) &&
                       (hfile.getTrackExInterp(j) != "**kern")) {
                   transform.append(j);
                   j++;
@@ -281,8 +281,8 @@ void getTransformation(HumdrumFile& hfile, Array<int>& transform) {
       if (hfile.getTrackExInterp(i) == buffer) {
          transform.append(i);
          j = i+1;
-         while ((j <= maxspine) && 
-                (hfile.getTrackExInterp(j) != buffer)) { 
+         while ((j <= maxspine) &&
+                (hfile.getTrackExInterp(j) != buffer)) {
             transform.append(j);
             j++;
          }
@@ -313,7 +313,7 @@ double getAveragePitch(HumdrumFile& hfile, int primaryTrack) {
             if (hfile[i].getPrimaryTrack(j) != primaryTrack) {
                continue;
             }
-            tokencount = hfile[i].getTokenCount(j); 
+            tokencount = hfile[i].getTokenCount(j);
             for (k=0; k<tokencount; k++) {
                hfile[i].getToken(buffer, j, k);
                if (strcmp(buffer, ".") == 0) {
@@ -325,11 +325,11 @@ double getAveragePitch(HumdrumFile& hfile, int primaryTrack) {
                if (strchr(buffer, 'r') != NULL) {
                   continue;
                }
-               if (strchr(buffer, '_') != NULL) {  
+               if (strchr(buffer, '_') != NULL) {
                   // don't bother with tied notes
                   continue;
                }
-               if (strchr(buffer, ']') != NULL) {  
+               if (strchr(buffer, ']') != NULL) {
                   // don't bother with tied notes
                   continue;
                }

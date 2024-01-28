@@ -8,7 +8,7 @@
 //
 // Filename:      ...sig/include/sigInfo/ChordQuality.cpp
 // Web Address:   http://sig.sapp.org/include/sigInfo/ChordQuality.cpp
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Data class for storing the description of a chord.
 //                The ChordQuality class has three properties:
@@ -30,7 +30,7 @@ class ChordQuality {
    public:
                          ChordQuality     (void);
                          ChordQuality     (const ChordQuality& aChordQuality);
-                         ChordQuality     (int aType, int anInversion, 
+                         ChordQuality     (int aType, int anInversion,
                                              int aRoot);
                         ~ChordQuality     ();
 
@@ -50,7 +50,7 @@ class ChordQuality {
       int                getType          (void) const;
       const char*        getTypeName      (void) const;
       void               makeString       (char* space, int pcsQ = 0);
-      void               print            (const char* aDisplayString, 
+      void               print            (const char* aDisplayString,
                                              ostream& out = cout) const;
       void               print            (ostream& out = cout) const;
       static void        setDisplay       (const char* aDisplayFormat);

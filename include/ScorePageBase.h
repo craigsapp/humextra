@@ -6,7 +6,7 @@
 // Last Modified: Sat Aug 25 18:20:06 PDT 2012 Renovated
 // Filename:      ...sig/src/sigInfo/ScorePageBase.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/ScorePageBase.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Base class for ScorePage.  This class handles reading/writing
 //                of a ScorePage, and handles all of the data variables for
@@ -18,12 +18,10 @@
 
 #include "ScoreRecord.h"
 
-#ifndef OLDCPP
-   #include <iostream>
-   using namespace std;
-#else
-   #include <iostream.h>
-#endif
+#include <iostream>
+#include <vector>
+
+using namespace std;
 
 
 class ScorePageBase {
@@ -44,32 +42,32 @@ class ScorePageBase {
 
    // file reading and writing functions:
       void           readFile          (const char* filename, int verboseQ = 0);
-      void           readFile          (istream& infile, int verboseQ = 0);
+      void           readFile          (std::istream& infile, int verboseQ = 0);
       void           readAscii         (const char* filename, int verboseQ = 0);
-      void           readAscii         (istream& infile, int verboseQ = 0);
-      void           readAsciiScoreLine(istream& infile, ScoreRecord& record,
+      void           readAscii         (std::istream& infile, int verboseQ = 0);
+      void           readAsciiScoreLine(std::istream& infile, ScoreRecord& record,
                                           int verboseQ = 0);
       void           readBinary        (const char* filename, int verboseQ = 0);
-      void           readBinary        (istream& infile, int verboseQ = 0);
+      void           readBinary        (std::istream& infile, int verboseQ = 0);
       void           writeBinary       (const char* filename);
-      ostream&       writeBinary       (ostream& outfile);
+      std::ostream&  writeBinary       (std::ostream& outfile);
       void           writeBinary2Byte  (const char* filename);
       void           writeBinary4Byte  (const char* filename);
-      void           printAscii        (ostream& out, int roundQ = 1, 
+      void           printAscii        (std::ostream& out, int roundQ = 1,
 		                        int verboseQ = 0);
-      void           printAsciiWithExtraParameters(ostream& out, int roundQ, 
+      void           printAsciiWithExtraParameters(std::ostream& out, int roundQ,
                                         int verboseQ);
 
    private:
-      float          readLittleFloat   (istream& instream);
-      int            readLittleShort   (istream& input);
-      void           writeLittleFloat  (ostream& out, float number);
+      float          readLittleFloat   (std::istream& instream);
+      int            readLittleShort   (std::istream& input);
+      void           writeLittleFloat  (std::ostream& out, float number);
 
    public:
    // data access/manipulation functions
       int            getSize            (void);
       ScoreRecord&   operator[]         (int index);
- 
+
       void           appendItem         (ScoreRecord& aRecord);
       void           appendItem         (ScorePageBase& aPage);
       void           appendItem         (SigCollection<ScoreRecord>& recs);
@@ -77,7 +75,7 @@ class ScorePageBase {
 
       void           addItem(ScoreRecord& aRecord) { appendItem(aRecord); };
       void           addItem(ScorePageBase& aPage) { appendItem(aPage); };
-      void           addItem            (SigCollection<ScoreRecord>& recs) 
+      void           addItem            (SigCollection<ScoreRecord>& recs)
                                            { appendItem(recs); };
    private:
       void           shrinkParameters   (void);
@@ -95,12 +93,12 @@ class ScorePageBase {
       void           createDefaultPrintSortOrder(void);
       void           createLineStaffSequence    (void);
 
-      ScoreRecord&   getItemByPrintOrder        (int index);   
+      ScoreRecord&   getItemByPrintOrder        (int index);
       int            getItemIndexByPrintOrder   (int index);
 
    protected:
       void           sortByHpos           (Array<int>& items);
-      void           quickSortByDataIndex (Array<int>& indexes, int starti, 
+      void           quickSortByDataIndex (Array<int>& indexes, int starti,
                                            int endi);
 
       int            isGreater           (int a, int b);
@@ -108,25 +106,25 @@ class ScorePageBase {
 
       //////////////////////////////
       //
-      // (1) Main data storage -- 
-      // 
+      // (1) Main data storage --
+      //
 
       // The data array contains a list of all SCORE items on the page
       // in the order in which they were read from the input file.
-      SigCollection<ScoreRecord*> data;
+      std::vector<ScoreRecord*> m_data;
 
       // Variable "trailer" is for storing the trailer of a SCORE binary file.
       // The trailer consists of at least 5 floats.  The numbers in
       // reverse order are:
       // 0: The last number is -9999.0 to indicate the end of the trailer
       // 1: The second to last number is a count of the number of 4-byte
-      //    numbers in the trailer.  Typically this is 5.0, but may be 
+      //    numbers in the trailer.  Typically this is 5.0, but may be
       //    larger in new versions of SCORE.
       // 2: The measurement unit code: 0.0 = inches, 1.0 = centimeters.
       // 3: The program version number which created the file.
       // 4: The program serial number (or 0.0 for version 3 or earlier)
       // 5: The last number in the trailer (i.e., the first number of the
-      //    trailer in the file is 0.0.  Normally this is the position in 
+      //    trailer in the file is 0.0.  Normally this is the position in
       //    the file which the parameter count for an item is given.
       //    Objects cannot have zero parameters, so when 0.0 is found,
       //    that indicates the start of the trailer.
@@ -168,7 +166,7 @@ class ScorePageBase {
       double pageWidth;
       double pageHeight;
 
-      // The left margin setting in the SCORE print menu (parameter 4, 
+      // The left margin setting in the SCORE print menu (parameter 4,
       // first number).  This is the distance from the left margin of the
       // page to the P3=0.0 point on the staff, not including an extra
       // width (called Lbuffer below) of 0.025 inches.  The default setting
@@ -187,7 +185,7 @@ class ScorePageBase {
 
       // The resolution print setting is for calculating the width of a line
       // in physical units.  The line width is specified as a pixel width.
-      // tDPI is equivalent to the RESOLUTION parameter from the SCORE 
+      // tDPI is equivalent to the RESOLUTION parameter from the SCORE
       // print menu. The oDPI variable is the actually desired DPI for a
       // bitmap image of the page (not necessarily the same as tDPI, but
       // it usually is).  The default RESOLUTION is 600 dots per inch.
@@ -198,7 +196,7 @@ class ScorePageBase {
       // controls the width of staff lines in particular, but also the width
       // of stems, and strokes around all graphical objects other than beams.
       // (Beams are handled from a setting in the SCORE preferences file
-      // found in the lib directory (prefs-4.scr).  The default value is 
+      // found in the lib directory (prefs-4.scr).  The default value is
       // 4.0 pixels when the RESOLUTION is 600.
       double lineWidth;
 
@@ -213,9 +211,9 @@ class ScorePageBase {
       // uniform line thicknesses in bitmap renderings of the PostScript
       // output.  By default this option is turned on when printing in
       // SCORE.  setStroke == 0 will turn off the setStroke option.
-      int setStroke;  
+      int setStroke;
 
-      
+
       /// Printing Constants //////////////////////////////////////////////
       //
       // These are variables which cannot be changed with the SCORE
@@ -261,24 +259,24 @@ class ScorePageBase {
 
       // lineStaffSequence is a array of items sorted left to right for
       // each staff on the page.  The first index number matches the P2 staff
-      // number of the SCORE item.  Note that the lineStaffSequence[0] list 
-      // is not used (possibly might be mapped to hidden parts on the line).  
-      // The size is lineStaffSequence is set to 100 staves.  If a staff does 
+      // number of the SCORE item.  Note that the lineStaffSequence[0] list
+      // is not used (possibly might be mapped to hidden parts on the line).
+      // The size is lineStaffSequence is set to 100 staves.  If a staff does
       // not have any items on it, it will have a size of 0;
       Array<Array<int> > lineStaffSequence;
 
-      // lineSystemSequence is similar to lineStaffSequence, but sorts all 
+      // lineSystemSequence is similar to lineStaffSequence, but sorts all
       // staves in the given system line from left to right.  The first index
       // number matches to the system line on the page.  The first system line
-      // (index 0) is at the top of the page, and the last is at the bottom 
-      // of the page.  Each system contains a grouping of staves which are 
-      // analyzed based on barlines in the analyzeSystems() function.  
+      // (index 0) is at the top of the page, and the last is at the bottom
+      // of the page.  Each system contains a grouping of staves which are
+      // analyzed based on barlines in the analyzeSystems() function.
       Array<Array<int> > lineSystemSequence;
 
       // lineSystemStaffSequence is a array of items sorted left to right for
       // each staff on each system on the page.  The first index number matches
-      // the system number on the page (from the top of the page down). The 
-      // second index number matches staff number f the SCORE item.  
+      // the system number on the page (from the top of the page down). The
+      // second index number matches staff number f the SCORE item.
       Array<Array<Array<int> > > lineSystemStaffSequence;
 
       // pageSystemSequence is an ordering of items as a single stream of
@@ -286,9 +284,9 @@ class ScorePageBase {
       // of lineSystemSequence data into a single dimension.
       Array<int> pageSystemSequence;
 
-      // pageStaffSequence is an ordering of items similar to 
-      // pageSystemSequence, but separated out by invidual system staves.  
-      // The first index value is the system staff index (not the P4 staff 
+      // pageStaffSequence is an ordering of items similar to
+      // pageSystemSequence, but separated out by invidual system staves.
+      // The first index value is the system staff index (not the P4 staff
       // number on the page).
       Array<Array<int> > pageStaffSequence;
 
@@ -302,7 +300,7 @@ class ScorePageBase {
       int maxStaffNumber;
 
       // pageStaffList indexes the number of staves on the page.  Its size
-      // may be smaller than maxStaffNumber if there are non-consecutive 
+      // may be smaller than maxStaffNumber if there are non-consecutive
       // staff numbers.  The staves are indexed from 0 starting at the bottom
       // of the page (pageStaffList[0] is the P2 value of the lowest staff
       // on the page) going upwards (pageStaffList.last() is the P2 value
@@ -315,7 +313,7 @@ class ScorePageBase {
       Array<int> pageStaffListReverse;
 
       // itemSystemStaffIndex -- reverse lookup of lineStaffSequence
-      Array<int> itemSystemStaffIndex;  
+      Array<int> itemSystemStaffIndex;
 
       // staffToSystemIdx -- mapping from pageStaff to systemIndex
       // The size of this list is 100 elements.  Staves which are not
@@ -323,12 +321,12 @@ class ScorePageBase {
       // which do not exist in the data) are set to -1.  The system
       // index starts at 0 for the top system of the page and increases
       // downward.
-      Array<int> P2ToSystemIdx;  
+      Array<int> P2ToSystemIdx;
 
       // staffToSystemStaffIdx -- mapping from P2 to systemStaff
       // This list stores the mapping of P2 staff number to system
-      // staff index.  
-      Array<int> P2ToSystemStaffIdx; 
+      // staff index.
+      Array<int> P2ToSystemStaffIdx;
 
       // systemStaffIdxToP2
       Array<Array<int> > systemStaffIdxToP2;
@@ -339,7 +337,7 @@ class ScorePageBase {
       //
 
       // systemRhythm -- durnation from start of system to systemObjects item
-      Array<Array<double> > systemRhythm;   
+      Array<Array<double> > systemRhythm;
 
       // systemDuration -- durations of each system (P7 values of rests & notes)
       Array<double> systemDuration;
@@ -355,9 +353,9 @@ class ScorePageBase {
 
       // sortAnalysisQ: used to check if basic sorting was done.  Affects
       // the variables pagePrintSequence and lineStaffSequence.
-      int sortAnalysisQ;         
+      int sortAnalysisQ;
 
-      // printAnalysisQ: used to create the printing order.  This is 
+      // printAnalysisQ: used to create the printing order.  This is
       // usually the order of the data in the input file.  However, the
       // print order can be modified by other member functions, or could
       // be refined to conform with the WinScore print layer parameter.
@@ -389,7 +387,7 @@ class ScorePageBase {
 
 
 class SystemRecord {
-   public: 
+   public:
       SystemRecord(void) { clear(); }
      ~SystemRecord() { clear(); }
       void clear(void) { system = 0; index = 0; ptr = NULL; }

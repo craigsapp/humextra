@@ -6,7 +6,7 @@
 // Filename:      ...sig/maint/code/base/FileIO/FileIO.h
 // Web Address:   http://sig.sapp.org/include/sigBase/FileIO.h
 // Documentation: http://sig.sapp.org/doc/classes/FileIO
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Derived from the fstream class, this class has
 //                functions which allow writing binary files in
@@ -32,7 +32,7 @@ typedef unsigned long ulong;
 typedef unsigned int uint;
 
 
-// templates would be nice to use here, but they don't seem 
+// templates would be nice to use here, but they don't seem
 // to work intuitively...
 
 class FileIO : public fstream {

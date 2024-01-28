@@ -5,7 +5,7 @@
 // Last Modified: Wed Jul 31 17:27:18 PDT 2002 (added getRow() and getColumn())
 // Last Modified: Wed Jul 31 17:27:18 PDT 2002 (added setRow() and setColumn())
 // Filename:      .../sig/maint/code/net/Matrix/Matrix.cpp
-// Syntax:        C++ 
+// Syntax:        C++
 // $Smake:        g++ -O3 -g -c %f && rm %b.o
 //
 
@@ -29,7 +29,7 @@
 //
 
 template <class type>
-Matrix<type>::Matrix (void) { 
+Matrix<type>::Matrix (void) {
    transposeQ = 0;
    dim1 = 0;
    dim2 = 0;
@@ -38,14 +38,14 @@ Matrix<type>::Matrix (void) {
 
 
 template <class type>
-Matrix<type>::Matrix(const Matrix<type>& aMatrix) { 
+Matrix<type>::Matrix(const Matrix<type>& aMatrix) {
    transposeQ = 0;
    if (aMatrix.transposeQ) {
-      dim1 = aMatrix.dim2;   
-      dim2 = aMatrix.dim1;   
+      dim1 = aMatrix.dim2;
+      dim2 = aMatrix.dim1;
    } else {
-      dim1 = aMatrix.dim1;   
-      dim2 = aMatrix.dim2;   
+      dim1 = aMatrix.dim1;
+      dim2 = aMatrix.dim2;
    }
 
    int size = dim1 * dim2;
@@ -54,15 +54,15 @@ Matrix<type>::Matrix(const Matrix<type>& aMatrix) {
    for (int r=0; r<size; r++) {
       for (int c=0; c<dim2; c++) {
          cell(r, c) = aMatrix.cell(r, c);
-      }  
+      }
    }
 }
 
 
 template <class type>
-Matrix<type>::Matrix (int rowCount, int columnCount) { 
+Matrix<type>::Matrix (int rowCount, int columnCount) {
    if (rowCount < 1 || columnCount < 1) {
-      cout << "Error: invalid maxtrix dimensions: " << rowCount 
+      cout << "Error: invalid maxtrix dimensions: " << rowCount
            << ", " << columnCount << endl;
       exit(1);
    }
@@ -74,9 +74,9 @@ Matrix<type>::Matrix (int rowCount, int columnCount) {
 
 
 template <class type>
-Matrix<type>::Matrix (int rowCount, int columnCount, type& thing) { 
+Matrix<type>::Matrix (int rowCount, int columnCount, type& thing) {
    if (rowCount < 1 || columnCount < 1) {
-      cout << "Error: invalid maxtrix dimensions: " << rowCount 
+      cout << "Error: invalid maxtrix dimensions: " << rowCount
            << ", " << columnCount << endl;
       exit(1);
    }
@@ -93,7 +93,7 @@ Matrix<type>::Matrix (int rowCount, int columnCount, type& thing) {
 
 
 template <class type>
-Matrix<type>::Matrix (int columnCount) { 
+Matrix<type>::Matrix (int columnCount) {
    if (columnCount < 1) {
       cout << "Error: invalid maxtrix dimensions: " << columnCount << endl;
       exit(1);
@@ -106,9 +106,9 @@ Matrix<type>::Matrix (int columnCount) {
 
 
 template <class type>
-Matrix<type>::Matrix (type* data, int rowCount, int columnCount) { 
+Matrix<type>::Matrix (type* data, int rowCount, int columnCount) {
    if (rowCount < 1 || columnCount < 1) {
-      cout << "Error: invalid maxtrix dimension: " << rowCount 
+      cout << "Error: invalid maxtrix dimension: " << rowCount
            << ", " << columnCount << endl;
       exit(1);
    }
@@ -151,7 +151,7 @@ Matrix<type>& Matrix<type>::add(type scalar) {
          cell(r, c) += scalar;
       }
    }
-  
+
    return *this;
 }
 
@@ -163,7 +163,7 @@ Matrix<type>& Matrix<type>::add(const Matrix<type>& aMatrix) {
          cell(r, c) += aMatrix.cell(r, c);
       }
    }
-  
+
    return *this;
 }
 
@@ -208,7 +208,7 @@ template <class type>
 void Matrix<type>::getRow(Array<type>& anArray, int index) {
    int length = getColumnCount();
    anArray.setSize(length);
-   
+
    int i;
    for (i=0; i<length; i++) {
       anArray[i] = cell(index, i);
@@ -226,7 +226,7 @@ template <class type>
 void Matrix<type>::getColumn(Array<type>& anArray, int index) {
    int length = getRowCount();
    anArray.setSize(length);
-   
+
    int i;
    for (i=0; i<length; i++) {
       anArray[i] = cell(i, index);
@@ -281,7 +281,7 @@ void Matrix<type>::setColumn(int index, Array<type>& anArray) {
 //
 
 template <class type>
-int Matrix<type>::getColumnCount (void) const { 
+int Matrix<type>::getColumnCount (void) const {
    if (transposeQ) {
       return dim1;
    } else {
@@ -297,7 +297,7 @@ int Matrix<type>::getColumnCount (void) const {
 //
 
 template <class type>
-int Matrix<type>::getRowCount(void) const { 
+int Matrix<type>::getRowCount(void) const {
    if (transposeQ) {
       return dim2;
    } else {
@@ -331,7 +331,7 @@ Matrix<type>& Matrix<type>::multiply(type scalar) {
          cell(r, c) *= scalar;
       }
    }
-  
+
    return *this;
 }
 
@@ -343,7 +343,7 @@ Matrix<type>& Matrix<type>::multiply(type scalar) {
 //
 
 template<class type>
-type& Matrix<type>::operator[](int index) { 
+type& Matrix<type>::operator[](int index) {
    if (dim1 == 1) {
       if (index < dim2) {
          return storage[index];
@@ -376,7 +376,7 @@ type& Matrix<type>::operator[](int index) {
 //
 
 template<class type>
-Matrix<type>& Matrix<type>::operator=(const Matrix& aMatrix) { 
+Matrix<type>& Matrix<type>::operator=(const Matrix& aMatrix) {
    if (this == &aMatrix) {
       return *this;
    }
@@ -411,7 +411,7 @@ Matrix<type>& Matrix<type>::operator=(const Matrix& aMatrix) {
 //
 
 template<class type>
-Matrix<type>& Matrix<type>::operator+=(const Matrix& aMatrix) { 
+Matrix<type>& Matrix<type>::operator+=(const Matrix& aMatrix) {
    if (dim1 * dim2 != aMatrix.dim1 * aMatrix.dim2) {
       cout << "Error in operator += for Matrices" << endl;
    }
@@ -455,7 +455,7 @@ void Matrix<type>::setSize(int row, int column) {
 //
 
 template<class type>
-void Matrix<type>::transpose(void) { 
+void Matrix<type>::transpose(void) {
    transposeQ = !transposeQ;
 }
 
@@ -467,7 +467,7 @@ void Matrix<type>::transpose(void) {
 //
 
 template<class type>
-void Matrix<type>::zero(void){ 
+void Matrix<type>::zero(void){
    int size = dim1 * dim2;
    for (int i=0; i<size; i++) {
       storage[i] = (type)0;
@@ -486,7 +486,7 @@ void Matrix<type>::zero(void){
 //
 
 template<class type>
-Matrix<type>& Matrix<type>::multiply(Matrix& output, const Matrix& one, 
+Matrix<type>& Matrix<type>::multiply(Matrix& output, const Matrix& one,
       Matrix<type>& two) {
    if (one.getColumnCount() != two.getRowCount()) {
       cerr << "Error: sizes of input matrices not condusive"
@@ -494,12 +494,12 @@ Matrix<type>& Matrix<type>::multiply(Matrix& output, const Matrix& one,
       exit(1);
    }
    if (output.getRowCount() != one.getRowCount()) {
-      cerr << "Error: Row length of output matrix is not equal to input ." 
+      cerr << "Error: Row length of output matrix is not equal to input ."
            << endl;
       exit(1);
    }
    if (output.getColumnCount() != two.getColumnCount()) {
-      cerr << "Error: Column length of output matrix is not equal to input." 
+      cerr << "Error: Column length of output matrix is not equal to input."
            << endl;
       exit(1);
    }
@@ -519,12 +519,12 @@ Matrix<type>& Matrix<type>::multiply(Matrix& output, const Matrix& one,
 }
 
 template<class type>
-Matrix<type>& Matrix<type>::multiply(Matrix& output, Matrix& one, 
+Matrix<type>& Matrix<type>::multiply(Matrix& output, Matrix& one,
       type aScalar) {
    for (int i=0; i<one.getSize(); i++) {
       output[i] = one[i] * aScalar;
    }
-   
+
    return output;
 }
 
@@ -536,7 +536,7 @@ Matrix<type>& Matrix<type>::multiply(Matrix& output, Matrix& one,
 //
 
 template<class type>
-Matrix<type>& Matrix<type>::add(Matrix& output, const Matrix& one, 
+Matrix<type>& Matrix<type>::add(Matrix& output, const Matrix& one,
       const Matrix& two) {
 
    if (one.getRowCount() != two.getRowCount()) {
@@ -544,17 +544,17 @@ Matrix<type>& Matrix<type>::add(Matrix& output, const Matrix& one,
       exit(1);
    }
    if (one.getColumnCount() != two.getColumnCount()) {
-      cerr << "Error: Column length of matrices are not equal for adding." 
+      cerr << "Error: Column length of matrices are not equal for adding."
            << endl;
       exit(1);
    }
    if (one.getRowCount() != output.getRowCount()) {
-      cerr << "Error: Row length of output matrix is not equal to input ." 
+      cerr << "Error: Row length of output matrix is not equal to input ."
            << endl;
       exit(1);
    }
    if (output.getColumnCount() != two.getColumnCount()) {
-      cerr << "Error: Column length of output matrix is not equal to input." 
+      cerr << "Error: Column length of output matrix is not equal to input."
            << endl;
       exit(1);
    }
@@ -623,7 +623,7 @@ void Matrix<type>::checkdim(int row, int column) const {
       }
    }
 
-   cerr << "Error: dimensions of matrix are: " << 
+   cerr << "Error: dimensions of matrix are: " <<
       getRowCount() << ", " << getColumnCount() << " but you accessed: "
       << row << ", " << column << endl;
    exit(1);

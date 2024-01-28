@@ -14,7 +14,7 @@
 //
 // Description:   Add a spine indicating the time of performance for
 //                a given line of music.
-// 
+//
 
 #include <string.h>
 #include <stdio.h>
@@ -33,7 +33,7 @@ void   printAnalysis            (HumdrumFile& infile, vector<double>& timings,
 void   analyzeTiming            (HumdrumFile& infile, vector<double>& timings,
                                  vector<double>& tempo);
 void   usage                    (const char* command);
-void   interpolateGeometric     (HumdrumFile& infile, vector<double>& tempo, 
+void   interpolateGeometric     (HumdrumFile& infile, vector<double>& tempo,
                                  int startindex, int stopindex);
 int    getNextTempoIndex        (HumdrumFile& infile, int startindex);
 void   printtime                (const string& filename, double totaldur);
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
          if (totalQ) {
             totaldur += timings[(int)timings.size()-1];
             if (infiles.getCount() > 1) {
-               printtime(infiles[i].getFilename(), 
+               printtime(infiles[i].getFilename(),
                      timings[(int)timings.size()-1]);
             }
          } else {
@@ -164,10 +164,10 @@ void doLinearInterpolation(HumdrumFile& infile, int setcount) {
       if (infile[i].getType() == E_humrec_data) {
          tfound = 0;
          for (int j=0; j<infile[i].getFieldCount(); j++) {
-            if ((tfound == 0) && 
+            if ((tfound == 0) &&
                 (strcmp(infile[i].getExInterp(j), "**time") == 0)) {
                tfound = 1;
-               if (timings[i] < 0) { 
+               if (timings[i] < 0) {
                   cout << "0.0";
                } else {
                   cout << timings[i];
@@ -211,7 +211,7 @@ void fixendingtimes(vector<double>& timings, HumdrumFile& infile) {
       return;
    }
 
-   double beatincrement = (timings[lastdatai] - timings[lastlastdatai]) / 
+   double beatincrement = (timings[lastdatai] - timings[lastlastdatai]) /
          (infile[lastdatai].getAbsBeat() - infile[lastlastdatai].getAbsBeat());
    double beatdiff = 0.0;
 
@@ -237,7 +237,7 @@ void interpolateTimings(vector<double>& timings, HumdrumFile& infile,
       int startindex, int endindex) {
 
    int i;
-   double beatwidth = infile[endindex].getAbsBeat() - 
+   double beatwidth = infile[endindex].getAbsBeat() -
                             infile[startindex].getAbsBeat();
    double timewidth = timings[endindex] - timings[startindex];
    double lbeat = 0.0;
@@ -329,7 +329,7 @@ void printtime(const string& filename, double totaldur) {
 //
 // analyzeTiming -- determing the absolute time position of each
 //     line in the file.
-// 
+//
 
 void analyzeTiming(HumdrumFile& infile, vector<double>& timings,
       vector<double>& tempo) {
@@ -382,7 +382,7 @@ void analyzeTiming(HumdrumFile& infile, vector<double>& timings,
       }
 
       tempo[i] = currtempo;
-      timings[i] = timings[i-1] + (infile[i].getAbsBeat() - 
+      timings[i] = timings[i-1] + (infile[i].getAbsBeat() -
             infile[i-1].getAbsBeat()) * 60.0/currtempo;
    }
 
@@ -423,7 +423,7 @@ void analyzeTiming(HumdrumFile& infile, vector<double>& timings,
       starttempo   = tempo[i];
       ntindex      = getNextTempoIndex(infile, i);
       stoptempo    = tempo[ntindex];
-      
+
       startbeat    = infile[i-1].getAbsBeat();
       stopbeat     = infile[i].getAbsBeat();
       beatduration = stopbeat - startbeat;
@@ -490,7 +490,7 @@ int getNextTempoIndex(HumdrumFile& infile, int startindex) {
 // interpolateGeometric --
 //
 
-void interpolateGeometric(HumdrumFile& infile, vector<double>& tempo, 
+void interpolateGeometric(HumdrumFile& infile, vector<double>& tempo,
       int startindex, int stopindex) {
    double duration   = 0.0;
    double newtempo   = 0.0;
@@ -536,15 +536,15 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("m|ms|milliseconds=b", "use seconds as the time unit");
    opts.define("simple=b",          "print total time in pure seconds");
    opts.define("t|tempo=b",         "display tempo rather than time");
-   opts.define("d|default-tempo=d:60.0",  "default tempo to use if none in file");   
+   opts.define("d|default-tempo=d:60.0",  "default tempo to use if none in file");
 
-   opts.define("debug=b",   "trace input parsing");   
-   opts.define("author=b",  "author of the program");   
-   opts.define("version=b", "compilation information"); 
-   opts.define("example=b", "example usage"); 
-   opts.define("h|help=b",  "short description"); 
+   opts.define("debug=b",   "trace input parsing");
+   opts.define("author=b",  "author of the program");
+   opts.define("version=b", "compilation information");
+   opts.define("example=b", "example usage");
+   opts.define("h|help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -606,7 +606,7 @@ void example(void) {
 
 //////////////////////////////
 //
-// printAnalysis -- 
+// printAnalysis --
 //
 
 void printAnalysis(HumdrumFile& infile, vector<double>& timings,

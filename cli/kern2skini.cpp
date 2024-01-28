@@ -6,7 +6,7 @@
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/kern2skini.cpp
 // Syntax:        C++; museinfo
 //
-// Description:   Generates a list of pitches in a Humdrum file 
+// Description:   Generates a list of pitches in a Humdrum file
 //                according to the STK SKINI format.
 //
 
@@ -98,10 +98,10 @@ void printSkini(SigCollection<SKINI>& skini) {
    int i;
 
    qsort(skini.getBase(), skini.getSize(), sizeof(SKINI), skinicompare);
- 
+
    // convert to delta times:
    for (i=skini.getSize()-1; i>0; i--) {
-      skini[i].time = skini[i].time - skini[i-1].time; 
+      skini[i].time = skini[i].time - skini[i-1].time;
       if (skini[i].time < 0.00001) {
          skini[i].time  = 0.0;
       }
@@ -117,7 +117,7 @@ void printSkini(SigCollection<SKINI>& skini) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
@@ -126,12 +126,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("c|class=b", "display pitches in pitch class notation");
    opts.define("t|tempo|default-tempo=d:60.0", "tempo if none specified");
 
-   opts.define("author=b",  "author of program"); 
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("h|help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -209,7 +209,7 @@ void generateSkini(HumdrumFile& hfile, SigCollection<SKINI>& skini) {
    char buffer2[1024] = {0};
    double duration;
    for (i=0; i<hfile.getNumLines(); i++) {
-      currentmillisecond = currentmillisecond + 
+      currentmillisecond = currentmillisecond +
             lastduration * 60000.0 / tempo[i];
       lastduration = hfile[i].getDuration();
 
@@ -319,10 +319,10 @@ void generateSkini(HumdrumFile& hfile, SigCollection<SKINI>& skini) {
                continue;
             }
             double tempomark = 0.0;
-            if (strncmp(hfile[i][j], "*MM", 3) == 0 && 
+            if (strncmp(hfile[i][j], "*MM", 3) == 0 &&
                   std::isdigit(hfile[i][j][3])) {
                sscanf(hfile[i][j], "*MM%lf", &tempomark);
-               // cout << "// Tempo " << tempomark << " MM per quarter note" 
+               // cout << "// Tempo " << tempomark << " MM per quarter note"
                //      << endl;
                tempskini.message = TEMPO;
                tempskini.time = currentmillisecond/1000.0;
@@ -344,7 +344,7 @@ void generateSkini(HumdrumFile& hfile, SigCollection<SKINI>& skini) {
             if (hfile[i].getExInterpNum(j) != E_KERN_EXINT) {
                continue;
             }
-            if (strncmp(hfile[i][j], "*I", 2) == 0 && 
+            if (strncmp(hfile[i][j], "*I", 2) == 0 &&
                   std::islower(hfile[i][j][2])) {
                tempskini.message = INSTRUMENT;
                tempskini.time = currentmillisecond/1000.0;
@@ -427,7 +427,7 @@ void generateSkini(HumdrumFile& hfile, SigCollection<SKINI>& skini) {
             tempskini.vel  = 64;
             tempskini.id   = idcounter;
             skini.append(tempskini);
- 
+
 
             endmillisecond = currentmillisecond + duration * 60000 / tempo[i];
             tempskini.message = NOTEOFF;
@@ -479,8 +479,8 @@ ostream& operator<<(ostream& out, SKINI skini) {
       out << "\n";
       out << "// Measure ";
       if (skini.chan > 0) {
-         out << "number " << skini.chan; 
-      } 
+         out << "number " << skini.chan;
+      }
       out << "\t=" << skini.vel;
 
       return out;
@@ -573,6 +573,6 @@ int skinicompare(const void* a, const void* b) {
 
    return 1;
 }
-    
+
 
 

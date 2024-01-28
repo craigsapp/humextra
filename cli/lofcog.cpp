@@ -9,9 +9,9 @@
 // Description:   Line of 5ths median (center of gravity) calculations.
 //
 // Reference:     David Temperley, "The Cognition of Basic Musical Structures"
-//		  MIT Press; 2001, Chapter 5: Pitch Spelling and the 
+//		  MIT Press; 2001, Chapter 5: Pitch Spelling and the
 //                Tonal-Pitch-Class, pp. 114-136.
-// 
+//
 
 #include "humdrum.h"
 #include "CircularBuffer.h"
@@ -31,8 +31,8 @@ void   analyzeFile       (HumdrumFile& infile, vector<double>& fifthmean);
 void   printAnalysis     (HumdrumFile& infile, vector<double>& fifthmeean);
 int    lo5ToBase40       (double lineval);
 int    base40ToLo5       (int base40);
-double getFifthMean      (HumdrumFile& infile, int line, double beats, 
-                          CircularBuffer<int>& notes, 
+double getFifthMean      (HumdrumFile& infile, int line, double beats,
+                          CircularBuffer<int>& notes,
                           CircularBuffer<double>& absbeat, double& meansum,
                           int measure);
 void   printXfig         (HumdrumFile& infile, vector<double>& fifthmean);
@@ -40,7 +40,7 @@ int    chooseLineNumber  (int base12, double average);
 void   convertBase12ToBase40(int base12, int& x, int& y, int& z);
 void   getDeviation      (HumdrumFile& infile, vector<double>& cog,
                           vector<vector<double> >& deviation);
-double getAverage        (HumdrumFile& infile, 
+double getAverage        (HumdrumFile& infile,
                           vector<vector<double> >& pastdist, double abeat,
                           int index);
 
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
             CurrentFile = strrchr(options.getArg(i).c_str(), '/') + 1;
          }
       }
-     
+
       infile.analyzeRhythm();
       analyzeFile(infile, fifthmean);
       if (xfigQ) {
@@ -163,7 +163,7 @@ void printXfig(HumdrumFile& infile, vector<double>& fifthmean) {
             snprintf(buffer, 1024, "%d", mnum);
             plot.addVLine(infile[i].getAbsBeat(), "");
             if ((mnum > 0) && (mnum % 10 == 0)) {
-               plot.addText(buffer, infile[i].getAbsBeat(), 
+               plot.addText(buffer, infile[i].getAbsBeat(),
                      ymin-0.75, 14, 0, 0);
             }
          }
@@ -244,7 +244,7 @@ void analyzeFile(HumdrumFile& infile, vector<double>& fifthmean) {
             fifthmean[i] = fifthmean[i-1];
             break;
          case E_humrec_data:
-            fifthmean[i] = 
+            fifthmean[i] =
                getFifthMean(infile, i, beats, notes, absbeat, meansum, measure);
             break;
       }
@@ -258,8 +258,8 @@ void analyzeFile(HumdrumFile& infile, vector<double>& fifthmean) {
 // getFifthMean -- process the notes in a line.
 //
 
-double getFifthMean(HumdrumFile& infile, int line, double beats, 
-      CircularBuffer<int>& notes, CircularBuffer<double>& absbeat, 
+double getFifthMean(HumdrumFile& infile, int line, double beats,
+      CircularBuffer<int>& notes, CircularBuffer<double>& absbeat,
       double& meansum, int measure) {
    char buffer[1024] = {0};
    int tnote;
@@ -294,16 +294,16 @@ double getFifthMean(HumdrumFile& infile, int line, double beats,
             linenum = base40ToLo5(base40);
          } else {
             // forget the spelling and try to figure it out from the
-            // line of fifths mean 
+            // line of fifths mean
             base12 = Convert::base40ToMidiNoteNumber(base40) % 12;
             bias = 0.0;
             if (infile[line].getAbsBeat() <= beats) {
                bias = startbranch * 3;   // shift to sharps, flats or naturals
                // gradually remove effect of bias as more notes are added
-               bias = bias - bias/(notes.getCount()+10);  
+               bias = bias - bias/(notes.getCount()+10);
             }
             if (notes.getCount() > 0) {
-               linenum = chooseLineNumber(base12, 
+               linenum = chooseLineNumber(base12,
                      bias+meansum/notes.getCount());
             } else {
                linenum = chooseLineNumber(base12, bias);
@@ -312,8 +312,8 @@ double getFifthMean(HumdrumFile& infile, int line, double beats,
             if (errorQ && (tlinenum != linenum)) {
                cout << "!! naming error";
 
-               if (measure > 0) { 
-                  cout << " in bar=" << measure 
+               if (measure > 0) {
+                  cout << " in bar=" << measure
                        << ", beat=" << infile[line].getBeat();
                } else {
                   cout << " on original line=" << line;
@@ -322,7 +322,7 @@ double getFifthMean(HumdrumFile& infile, int line, double beats,
                if (infile[line].getTokenCount(i) > 1) {
                   cout << " token=" << j+1;
                }
-               cout << " (" << Convert::base40ToKern(buffer, 1024, lo5ToBase40(tlinenum)+4*40) 
+               cout << " (" << Convert::base40ToKern(buffer, 1024, lo5ToBase40(tlinenum)+4*40)
                     << " is changed to ";
 
                cout << Convert::base40ToKern(buffer, 1024, lo5ToBase40(linenum)+4*40)
@@ -330,16 +330,16 @@ double getFifthMean(HumdrumFile& infile, int line, double beats,
                cout << " [" << tlinenum << " to " << linenum << "]";
                cout << endl;
             }
-            
+
          }
 
-         notes.insert(linenum);         
+         notes.insert(linenum);
          absbeat.insert(infile[line].getAbsBeat());
          meansum += linenum;
 
          // remove any old notes which are outside of the analysis window
-         while ((notes.getCount() > 0) && 
-                (infile[line].getAbsBeat() - absbeat[absbeat.getCount()-1] 
+         while ((notes.getCount() > 0) &&
+                (infile[line].getAbsBeat() - absbeat[absbeat.getCount()-1]
                       > beats)) {
             tnote = notes.extract();
             absbeat.extract();
@@ -360,7 +360,7 @@ double getFifthMean(HumdrumFile& infile, int line, double beats,
 
 //////////////////////////////
 //
-// chooseLineNumber --  Choose the pitch spelling which is closest to 
+// chooseLineNumber --  Choose the pitch spelling which is closest to
 //   the average pitch value.
 //
 
@@ -388,7 +388,7 @@ int chooseLineNumber(int base12, double average) {
 
 ///////////////////////////////
 //
-// convertBase12ToBase40 -- give a list of the 
+// convertBase12ToBase40 -- give a list of the
 
 void convertBase12ToBase40(int base12, int& x, int& y, int& z) {
    switch (base12) {
@@ -447,7 +447,7 @@ void getDeviation(HumdrumFile& infile, vector<double>& cog,
          if (strcmp(infile[i][j], ".") == 0) {
             continue;
          }
-         
+
          tokencount = infile[i].getTokenCount(j);
          for (k=0; k<tokencount; k++) {
             infile[i].getToken(buffer, j, k);
@@ -552,9 +552,9 @@ void printAnalysis(HumdrumFile& infile, vector<double>& fifthmean) {
                   }
                   cout << "*b=" << beats << endl;
                   printbeat = 1;
-               } 
+               }
                cout << infile[i] << "\t";
-            } 
+            }
             if (deviationQ) {
                if (lo5ToBase40(fifthmean[i]) < -100) {
                   cout << ".";
@@ -588,7 +588,7 @@ void printAnalysis(HumdrumFile& infile, vector<double>& fifthmean) {
             }
             cout << endl;
             break;
-      
+
       }
    }
 }
@@ -613,13 +613,13 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("d|deviation=b",   "deviation of a note from the lof cog");
    opts.define("g|average=d:4.0", "average the deviations of individual notes");
 
-   opts.define("debug=b",         "trace input parsing");   
-   opts.define("author=b",        "author of the program");   
-   opts.define("version=b",       "compilation information"); 
-   opts.define("example=b",       "example usage"); 
-   opts.define("h|help=b",        "short description"); 
+   opts.define("debug=b",         "trace input parsing");
+   opts.define("author=b",        "author of the program");
+   opts.define("version=b",       "compilation information");
+   opts.define("example=b",       "example usage");
+   opts.define("h|help=b",        "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -699,7 +699,7 @@ int lo5ToBase40(double lineval) {
 
    if (lv >= 0) {
       return ((lv * 23 + 2) + 4000) % 40;
-   } else { 
+   } else {
       return ((-(lv-1) * 17 + 2) + 4000) % 40;
    }
 }

@@ -5,7 +5,7 @@
 // Last Modified: Thu Jul  7 13:22:35 PDT 2011
 // Filename:      ...sig/include/SigInfo/XmlFile.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/XmlFile.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A class that stores a list of XML text fragments
 //                and then parses the element structure of the file.
@@ -66,7 +66,7 @@ class XmlFile {
       void   clearElements           (void);
 
 };
-   
+
 
 ostream& operator<<(ostream& out, XmlFile& xmlfile);
 

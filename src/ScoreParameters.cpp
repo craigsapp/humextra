@@ -34,13 +34,13 @@ using namespace std;
 //
 
 ScoreNamedParameter::ScoreNamedParameter(void) {
-	name.setSize(0);
+	m_name = "";
 	value = 0.0;
 }
 
 
 ScoreNamedParameter::ScoreNamedParameter(ScoreNamedParameter& aKeyParam) {
-	name = aKeyParam.name;
+	m_name = aKeyParam.m_name;
 	value = aKeyParam.value;
 }
 
@@ -63,7 +63,7 @@ ScoreNamedParameter::~ScoreNamedParameter() {
 //
 
 void ScoreNamedParameter::clear(void) {
-	name.setSize(0);
+	m_name.resize(0);
 	value = 0.0;
 }
 
@@ -76,8 +76,8 @@ void ScoreNamedParameter::clear(void) {
 //
 
 const char* ScoreNamedParameter::getName(void) {
-	if (name.getSize() > 0) {
-		return name.getBase();
+	if (m_name.size() > 0) {
+		return m_name.c_str();
 	} else {
 		return "";
 	}
@@ -103,9 +103,7 @@ double ScoreNamedParameter::getValue(void) {
 //
 
 void ScoreNamedParameter::setNameAndValue(const char* string, double aValue) {
-	int len = strlen(string);
-	name.setSize(len+1);
-	strcpy(name.getBase(), string);
+   m_name = string;
 	value = aValue;
 }
 
@@ -117,9 +115,7 @@ void ScoreNamedParameter::setNameAndValue(const char* string, double aValue) {
 //
 
 void ScoreNamedParameter::setName(const char* aName) {
-	int len = strlen(aName);
-	name.setSize(len+1);
-	strcpy(name.getBase(), aName);
+   m_name = aName;
 }
 
 
@@ -142,7 +138,7 @@ void ScoreNamedParameter::setValue(double aValue) {
 //
 
 int ScoreNamedParameter::isValid(void) {
-	return name.getSize() == 0 ? 0 : 1;
+	return m_name.size() == 0 ? 0 : 1;
 }
 
 
@@ -152,7 +148,7 @@ int ScoreNamedParameter::isValid(void) {
 //
 
 int ScoreNamedParameter::isInvalid(void) {
-	return name.getSize() == 0 ? 1 : 0;
+	return m_name.size() == 0 ? 1 : 0;
 }
 
 
@@ -177,12 +173,11 @@ int ScoreNamedParameter::isNamed(const char* aName) {
 // ScoreNamedParameter::operator= --
 //
 
-ScoreNamedParameter& ScoreNamedParameter::operator=(ScoreNamedParameter&
-		aKeyParam) {
+ScoreNamedParameter& ScoreNamedParameter::operator=(const ScoreNamedParameter& aKeyParam) {
 	if (&aKeyParam == this) {
 		return *this;
 	}
-	name = aKeyParam.name;
+	m_name = aKeyParam.m_name;
 	value = aKeyParam.value;
 	return *this;
 }
@@ -448,7 +443,7 @@ void  ScoreParameters::setPValue(const char* keyName, double keyValue) {
 // ScoreParameters::operator= --
 //
 
-ScoreParameters& ScoreParameters::operator=(ScoreParameters& anItem) {
+ScoreParameters& ScoreParameters::operator=(const ScoreParameters& anItem) {
 	if (&anItem == this) {
 		return *this;
 	}

@@ -5,10 +5,10 @@
 // Last Modified: Fri Jun 12 22:53:00 PDT 1998
 // Filename:      ...sig/include/sigInfo/EnumerationCQT.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/EnumerationCQT.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Enumeration database for chord qualities.
-// 
+//
 
 #ifndef _ENUMERATIONCQT_H_INCLUDED
 #define _ENUMERATIONCQT_H_INCLUDED
@@ -51,7 +51,7 @@ class EnumerationCQT : public Enumeration {
          add(E_chord_secsev   ,   E_chord_name_secsev   ,   ENUM_FIXED_ALLOC);
          add(E_chord_secsevo  ,   E_chord_name_secsevo  ,   ENUM_FIXED_ALLOC);
          add(E_chord_secsevc  ,   E_chord_name_secsevc  ,   ENUM_FIXED_ALLOC);
-        
+
       }
 
 };

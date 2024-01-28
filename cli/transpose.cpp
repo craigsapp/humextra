@@ -9,7 +9,7 @@
 // Last Modified: Thu Nov 19 14:08:32 PST 2009 Added -q, -d and -c options
 // Last Modified: Thu Nov 19 15:12:01 PST 2009 Added -I options and *ITr marks
 // Last Modified: Thu Nov 19 19:28:26 PST 2009 Added -W and -C options
-// Last Modified: Sat Apr 28 08:49:41 PDT 2018 
+// Last Modified: Sat Apr 28 08:49:41 PDT 2018
 // Filename:      ...sig/examples/all/transpose.cpp
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/transpose.cpp
 // Syntax:        C++; museinfo
@@ -38,68 +38,68 @@ void      printFile             (HumdrumFile& infile);
 void      processFile           (HumdrumFile& infile);
 void      processFile           (HumdrumFile& infile, Array<int>& spines);
 void      printNewKernString    (const char* string, int transval);
-void      printHumdrumKernToken (HumdrumRecord& record, int index, 
+void      printHumdrumKernToken (HumdrumRecord& record, int index,
                                  int transval);
-void      printHumdrumDataRecord(HumdrumRecord& record, 
+void      printHumdrumDataRecord(HumdrumRecord& record,
                                  Array<int>& spineprocess);
 int       getBase40ValueFromInterval(const char* string);
 void      printNewKeyInterpretation(HumdrumRecord& aRecord, int index,
                                   int transval);
 void      printNewKeySignature   (const char* keysig, int trans);
 void      convertScore           (HumdrumFile& infile, int style);
-void      printTransposedToken   (HumdrumFile& infile, int row, int col, 
+void      printTransposedToken   (HumdrumFile& infile, int row, int col,
                                   int transval);
-void      processInterpretationLine(HumdrumFile& infile, int line, 
+void      processInterpretationLine(HumdrumFile& infile, int line,
                                   Array<int>& tvals, int style);
 int       isKeyMarker            (const char* string);
 int       getTransposeInfo       (HumdrumFile& infile, int row, int col);
 int       hasTrMarkers           (HumdrumFile& infile, int line);
-void      convertToWrittenPitches(HumdrumFile& infile, int line, 
+void      convertToWrittenPitches(HumdrumFile& infile, int line,
                                   Array<int>& tvals);
-void      convertToConcertPitches(HumdrumFile& infile, int line, 
+void      convertToConcertPitches(HumdrumFile& infile, int line,
                                   Array<int>& tvals);
 
 // auto transpose functions:
 double    pearsonCorrelation     (int size, double* x, double* y);
 void      doAutoTransposeAnalysis(HumdrumFile& infile);
-void      addToHistogramDouble   (Array<Array<double> >& histogram, int pc, 
-                                  double start, double dur, double tdur, 
+void      addToHistogramDouble   (Array<Array<double> >& histogram, int pc,
+                                  double start, double dur, double tdur,
                                   int segments);
-double    storeHistogramForTrack (Array<Array<double> >& histogram, 
+double    storeHistogramForTrack (Array<Array<double> >& histogram,
                                   HumdrumFile& infile, int track, int segments);
-void      printHistograms        (int segments, Array<int> ktracks, 
+void      printHistograms        (int segments, Array<int> ktracks,
                                   Array<Array<Array<double> > >& trackhist);
-void      doAutoKeyAnalysis      (Array<Array<Array<double> > >& analysis, 
-                                  int level, int hop, int count, int segments, 
-                                  Array<int>& ktracks, 
+void      doAutoKeyAnalysis      (Array<Array<Array<double> > >& analysis,
+                                  int level, int hop, int count, int segments,
+                                  Array<int>& ktracks,
                                   Array<Array<Array<double> > >& trackhist);
-void      doTrackKeyAnalysis     (Array<Array<double> >& analysis, int level, 
-                                  int hop, int count, 
+void      doTrackKeyAnalysis     (Array<Array<double> >& analysis, int level,
+                                  int hop, int count,
                                   Array<Array<double> >& trackhist,
                                   Array<double>& majorweights,
                                   Array<double>& minorweights);
-void      identifyKeyDouble      (Array<double>& correls, 
-                                  Array<double>& histogram, 
-                                  Array<double>& majorweights, 
+void      identifyKeyDouble      (Array<double>& correls,
+                                  Array<double>& histogram,
+                                  Array<double>& majorweights,
                                   Array<double>& minorweights);
 void      fillWeightsWithKostkaPayne(Array<double>& maj, Array<double>& min);
 void      printRawTrackAnalysis  (Array<Array<Array<double> > >& analysis,
                                   Array<int>& ktracks);
-void      doSingleAnalysis       (Array<double>& analysis, int startindex, 
-                                  int length, Array<Array<double> >& trackhist, 
-                                  Array<double>& majorweights, 
+void      doSingleAnalysis       (Array<double>& analysis, int startindex,
+                                  int length, Array<Array<double> >& trackhist,
+                                  Array<double>& majorweights,
                                   Array<double>& minorweights);
-void      identifyKey            (Array<double>& correls, 
+void      identifyKey            (Array<double>& correls,
                                   Array<double>& histogram,
-                                  Array<double>& majorweights, 
+                                  Array<double>& majorweights,
                                   Array<double>& minorweights);
 void      doTranspositionAnalysis(Array<Array<Array<double> > >& analysis);
 int       calculateTranspositionFromKey(int targetkey, HumdrumFile& infile);
 
 // spine list parsing functions:
-void      processFieldEntry      (Array<int>& field, const char* astring, 
+void      processFieldEntry      (Array<int>& field, const char* astring,
                                   HumdrumFile& infile);
-void      fillFieldData          (Array<int>& field, const string& fieldstring, 
+void      fillFieldData          (Array<int>& field, const string& fieldstring,
                                   HumdrumFile& infile);
 void      removeDollarsFromString(Array<char>& buffer, int maxtrack);
 
@@ -172,7 +172,7 @@ void processFile(HumdrumFile& infile) {
       cout << value << endl;
       exit(0);
    }
-	    
+
    if (concertQ) {
       convertScore(infile, STYLE_CONCERT);
    } else if (writtenQ) {
@@ -193,7 +193,7 @@ void processFile(HumdrumFile& infile) {
 //     a written pitch score.  The function will search for *Tr
 //     interpretations in spines, and convert them to *ITr interpretations
 //     as well as transposing notes, and transposing key signatures and
-//     key interpretations.  Or create a written score from a 
+//     key interpretations.  Or create a written score from a
 //     concert pitch score based on the style parameter.
 //
 
@@ -245,11 +245,11 @@ void convertScore(HumdrumFile& infile, int style) {
 
 //////////////////////////////
 //
-// processInterpretationLine --  Used in converting between 
+// processInterpretationLine --  Used in converting between
 //   concert pitch and written pitch scores.
 //
 
-void processInterpretationLine(HumdrumFile& infile, int line, 
+void processInterpretationLine(HumdrumFile& infile, int line,
      Array<int>& tvals, int style) {
 
    PerlRegularExpression pre;
@@ -383,7 +383,7 @@ int hasTrMarkers(HumdrumFile& infile, int line) {
    for (j=0; j<infile[line].getFieldCount(); j++) {
       if (pre.search(infile[line][j], "^\\*I?Trd[+-]?\\d+c[+-]?\\d+$", "")) {
          return 1;
-      } 
+      }
    }
 
    return 0;
@@ -415,7 +415,7 @@ int isKeyMarker(const char* string) {
 void printTransposedToken(HumdrumFile& infile, int row, int col, int transval) {
    if (strcmp("**kern", infile[row].getExInterp(col)) != 0) {
       // don't know how to transpose this type of data, so leave it as is
-      cout << infile[row][col]; 
+      cout << infile[row][col];
       return;
    }
 
@@ -444,7 +444,7 @@ int calculateTranspositionFromKey(int targetkey, HumdrumFile& infile) {
          // in the future, maybe allow an automatic key analysis
          // to be performed on the data if there is not explicit
          // key designation.
-         return 0;   
+         return 0;
       }
       if (!infile[i].isInterpretation()) {
          continue;
@@ -477,7 +477,7 @@ int calculateTranspositionFromKey(int targetkey, HumdrumFile& infile) {
    // base40 = targetkey + (3 + mode) * 40;
    if (trans > 40) {
       trans -= 40;
-   } 
+   }
    if (trans > 20) {
       trans = 40 - trans;
       trans = -trans;
@@ -572,7 +572,7 @@ void printTransposeInformation(HumdrumFile& infile, Array<int>& spineprocess,
 
 //////////////////////////////
 //
-// getTransposeInfo -- returns the Transpose information found in 
+// getTransposeInfo -- returns the Transpose information found in
 //    the specified spine starting at the current line, and searching
 //    until data is found (or a *- record is found). Return value is a
 //    base-40 number.
@@ -587,12 +587,12 @@ int getTransposeInfo(HumdrumFile& infile, int row, int col) {
 
    int base;
    int output = 0;
- 
+
    for (i=row; i<infile.getNumLines(); i++) {
       if (infile[i].isData()) {
          break;
       }
-      if (!infile[i].isInterpretation()) { 
+      if (!infile[i].isInterpretation()) {
          continue;
       }
       for (j=0; j<infile[i].getFieldCount(); j++) {
@@ -707,7 +707,7 @@ void processFile(HumdrumFile& infile, Array<int>& spineprocess) {
 
                // check for key signature in a spine which is being
                // transposed, and adjust it.
-               if (spineprocess[infile[i].getPrimaryTrack(j)-1] && 
+               if (spineprocess[infile[i].getPrimaryTrack(j)-1] &&
                   pre.search(infile[i][j], "^\\*k\\[([a-gA-G\\#-]*)\\]", "")) {
                   printNewKeySignature(pre.getSubmatch(1), transval);
                   if (j<infile[i].getFieldCount()-1) {
@@ -762,7 +762,7 @@ void processFile(HumdrumFile& infile, Array<int>& spineprocess) {
 
 //////////////////////////////
 //
-// printNewKeySignature -- 
+// printNewKeySignature --
 //
 
 void printNewKeySignature(const char* keysig, int trans) {
@@ -785,10 +785,10 @@ void printNewKeySignature(const char* keysig, int trans) {
 
 //////////////////////////////
 //
-// printNewKeyInterpretation -- 
+// printNewKeyInterpretation --
 //
 
-void printNewKeyInterpretation(HumdrumRecord& aRecord, int index, 
+void printNewKeyInterpretation(HumdrumRecord& aRecord, int index,
       int transval) {
 
    int mode = 0;
@@ -844,7 +844,7 @@ void printHumdrumDataRecord(HumdrumRecord& record, Array<int>& spineprocess) {
       }
       continue;
    }
-   
+
 }
 
 
@@ -870,7 +870,7 @@ void printHumdrumKernToken(HumdrumRecord& record, int index, int transval) {
       printNewKernString(buffer, transval);
       if (k<tokencount-1) {
          cout << " ";
-      }         
+      }
    }
 }
 
@@ -895,7 +895,7 @@ void printNewKernString(const char* string, int transval) {
    char* ptr1 = strtok(buffer, "ABCDEFGabcdefg#-n");
    char* ptr2 = strtok(NULL, "ABCDEFGabcdefg#-n");
    char* ptr3 = strtok(NULL, "ABCDEFGabcdefg#-n");
-   
+
    if (ptr3 != NULL) {
       cout << "Error in **kern pitch token: " << string << endl;
       exit(1);
@@ -915,7 +915,7 @@ void printNewKernString(const char* string, int transval) {
 
 //////////////////////////////
 //
-// checkOptions -- 
+// checkOptions --
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
@@ -934,12 +934,12 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("W|written=b",    "trans. concert pitch score to written score");
    opts.define("rotation=b",     "display transposition in half-steps");
 
-   opts.define("author=b",  "author of program"); 
+   opts.define("author=b",  "author of program");
    opts.define("version=b", "compilation info");
-   opts.define("example=b", "example usages");   
+   opts.define("example=b", "example usages");
    opts.define("help=b",  "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -984,7 +984,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
          }
          break;
    }
-	     
+
    ssetkey = ssetkey % 40;
 
    if (opts.getBoolean("transpose")) {
@@ -1146,7 +1146,7 @@ void doAutoTransposeAnalysis(HumdrumFile& infile) {
       trackhist[i].setSize(0);
       if (ktracks[i]) {
          storeHistogramForTrack(trackhist[i], infile, i, segments);
-      } 
+      }
    }
 
    if (debugQ) {
@@ -1235,7 +1235,7 @@ void doTranspositionAnalysis(Array<Array<Array<double> > >& analysis) {
 // printRawTrackAnalysis --
 //
 
-void printRawTrackAnalysis(Array<Array<Array<double> > >& analysis, 
+void printRawTrackAnalysis(Array<Array<Array<double> > >& analysis,
       Array<int>& ktracks) {
 
    int i, j;
@@ -1270,8 +1270,8 @@ void printRawTrackAnalysis(Array<Array<Array<double> > >& analysis,
 // doAutoKeyAnalysis --
 //
 
-void doAutoKeyAnalysis(Array<Array<Array<double> > >& analysis, int level, 
-      int hop, int count, int segments, Array<int>& ktracks, 
+void doAutoKeyAnalysis(Array<Array<Array<double> > >& analysis, int level,
+      int hop, int count, int segments, Array<int>& ktracks,
       Array<Array<Array<double> > >& trackhist) {
 
    Array<double> majorweights;
@@ -1299,7 +1299,7 @@ void doAutoKeyAnalysis(Array<Array<Array<double> > >& analysis, int level,
       if (!ktracks[i]) {
          continue;
       }
-      doTrackKeyAnalysis(analysis[aindex++], level, hop, count, 
+      doTrackKeyAnalysis(analysis[aindex++], level, hop, count,
             trackhist[i], majorweights, minorweights);
    }
 }
@@ -1312,8 +1312,8 @@ void doAutoKeyAnalysis(Array<Array<Array<double> > >& analysis, int level,
 //   given track.
 //
 
-void doTrackKeyAnalysis(Array<Array<double> >& analysis, int level, int hop, 
-      int count, Array<Array<double> >& trackhist, 
+void doTrackKeyAnalysis(Array<Array<double> >& analysis, int level, int hop,
+      int count, Array<Array<double> >& trackhist,
       Array<double>& majorweights, Array<double>& minorweights) {
 
    int i;
@@ -1335,7 +1335,7 @@ void doTrackKeyAnalysis(Array<Array<double> >& analysis, int level, int hop,
 //
 
 void doSingleAnalysis(Array<double>& analysis, int startindex, int length,
-      Array<Array<double> >& trackhist, Array<double>& majorweights, 
+      Array<Array<double> >& trackhist, Array<double>& majorweights,
       Array<double>& minorweights) {
    Array<double> histsum(12);
    histsum.allowGrowth(0);
@@ -1398,7 +1398,7 @@ void fillWeightsWithKostkaPayne(Array<double>& maj, Array<double>& min) {
 //
 // identifyKey -- correls contains the 12 major key correlation
 //      values, then the 12 minor key correlation values, then two
-//      more values: index=24 is the best key, and index=25 is the 
+//      more values: index=24 is the best key, and index=25 is the
 //      second best key.  If [24] or [25] is -1, then that means that
 //      all entries in the original histogram were zero (all rests).
 //
@@ -1440,7 +1440,7 @@ void identifyKey(Array<double>& correls, Array<double>& histogram,
       }
    }
 
-   // find second best key 
+   // find second best key
    int secondbesti = 0;
    if (besti == 0) {
       secondbesti = 1;
@@ -1499,17 +1499,17 @@ double pearsonCorrelation(int size, double* x, double* y) {
 
 //////////////////////////////
 //
-// printHistograms -- 
+// printHistograms --
 //
 
-void printHistograms(int segments, Array<int> ktracks, 
+void printHistograms(int segments, Array<int> ktracks,
        Array<Array<Array<double> > >& trackhist) {
    int i, j, k;
    int start;
 
    for (i=0; i<segments; i++) {
 //cout << "i=" << i << endl;
-      cout << "segment " << i 
+      cout << "segment " << i
 	   << " ==========================================\n";
       for (j=0; j<12; j++) {
          start = 0;
@@ -1541,7 +1541,7 @@ void printHistograms(int segments, Array<int> ktracks,
 // storeHistogramForTrack --
 //
 
-double storeHistogramForTrack(Array<Array<double> >& histogram, 
+double storeHistogramForTrack(Array<Array<double> >& histogram,
       HumdrumFile& infile, int track, int segments) {
 
    histogram.setSize(segments);
@@ -1556,7 +1556,7 @@ double storeHistogramForTrack(Array<Array<double> >& histogram,
       histogram[i].setGrowth(0);
       histogram[i].setAll(0);
    }
-	    
+
    infile.analyzeRhythm("4");
    double totalduration = infile.getTotalDuration();
 
@@ -1573,8 +1573,8 @@ double storeHistogramForTrack(Array<Array<double> >& histogram,
       for (j=0; j<infile[i].getFieldCount(); j++) {
 	 if (infile[i].getPrimaryTrack(j) != track) {
             continue;
-		    
-         }	 
+
+         }
          if (strcmp(infile[i].getExInterp(j), "**kern") != 0) {
             continue;
          }
@@ -1612,7 +1612,7 @@ double storeHistogramForTrack(Array<Array<double> >& histogram,
 // addToHistogramDouble -- fill the pitch histogram in the right spots.
 //
 
-void addToHistogramDouble(Array<Array<double> >& histogram, int pc, 
+void addToHistogramDouble(Array<Array<double> >& histogram, int pc,
       double start, double dur, double tdur, int segments) {
 
    pc = (pc + 12) % 12;
@@ -1657,7 +1657,7 @@ void addToHistogramDouble(Array<Array<double> >& histogram, int pc,
 // fillFieldData --
 //
 
-void fillFieldData(Array<int>& field, const string& fieldstring, 
+void fillFieldData(Array<int>& field, const string& fieldstring,
       HumdrumFile& infile) {
 
    int maxtrack = infile.getMaxTracks();
@@ -1687,7 +1687,7 @@ void fillFieldData(Array<int>& field, const string& fieldstring,
 
    int i;
    for (i=0; i<tempfield.getSize(); i++) {
-     field[tempfield[i]-1] = 1; 
+     field[tempfield[i]-1] = 1;
    }
 }
 
@@ -1695,13 +1695,13 @@ void fillFieldData(Array<int>& field, const string& fieldstring,
 
 //////////////////////////////
 //
-// processFieldEntry -- 
+// processFieldEntry --
 //   3-6 expands to 3 4 5 6
 //   $   expands to maximum spine track
 //   $-1 expands to maximum spine track minus 1, etc.
 //
 
-void processFieldEntry(Array<int>& field, const char* astring, 
+void processFieldEntry(Array<int>& field, const char* astring,
       HumdrumFile& infile) {
 
    int maxtrack = infile.getMaxTracks();
@@ -1722,25 +1722,25 @@ void processFieldEntry(Array<int>& field, const char* astring,
       int lastone  = strtol(pre.getSubmatch(2), NULL, 10);
 
       if ((firstone < 1) && (firstone != 0)) {
-         cerr << "Error: range token: \"" << astring << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains too small a number at start: " << firstone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if ((lastone < 1) && (lastone != 0)) {
-         cerr << "Error: range token: \"" << astring << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains too small a number at end: " << lastone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if (firstone > maxtrack) {
-         cerr << "Error: range token: \"" << astring << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains number too large at start: " << firstone << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);
       }
       if (lastone > maxtrack) {
-         cerr << "Error: range token: \"" << astring << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains number too large at end: " << lastone << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);
@@ -1759,13 +1759,13 @@ void processFieldEntry(Array<int>& field, const char* astring,
    } else if (pre.search(buffer.getBase(), "^(\\d+)")) {
       int value = strtol(pre.getSubmatch(1), NULL, 10);
       if ((value < 1) && (value != 0)) {
-         cerr << "Error: range token: \"" << astring << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains too small a number at end: " << value << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if (value > maxtrack) {
-         cerr << "Error: range token: \"" << astring << "\"" 
+         cerr << "Error: range token: \"" << astring << "\""
               << " contains number too large at start: " << value << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);
@@ -1824,7 +1824,7 @@ void removeDollarsFromString(Array<char>& buffer, int maxtrack) {
 
 transpose options:
 
-   -t interval = transpose music by the specified interval, where 
+   -t interval = transpose music by the specified interval, where
                  interval is of the form:
                     P1 = perfect unison (no transposition)
                     m2 = up a minor second
@@ -1853,7 +1853,7 @@ transpose options:
  			transpose -f3     -t P4 fourpart.krn
 		   Note: does not work yet with the -k option
 
-                    
+
 
 ##########################################################################
 ##

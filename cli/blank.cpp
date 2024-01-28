@@ -17,21 +17,21 @@ void      checkOptions       (Options& opts, int argc, char* argv[]);
 void      example            (void);
 void      usage              (const char* command);
 ostream&  printOutput        (ostream& out, HumdrumFile& infile);
-ostream&  printBlanks        (ostream& out, HumdrumFile& infile, int line, 
+ostream&  printBlanks        (ostream& out, HumdrumFile& infile, int line,
                               const char* string, int count);
-ostream&  printInterpretation(ostream& out, HumdrumFile& infile, int line, 
+ostream&  printInterpretation(ostream& out, HumdrumFile& infile, int line,
                               int count);
-ostream&  printExclusiveInterpretations(ostream& out, HumdrumFile& infile, 
-                              int line, int count, 
+ostream&  printExclusiveInterpretations(ostream& out, HumdrumFile& infile,
+                              int line, int count,
                               Array<SigString>& exinterps);
 int       afterMeasure       (HumdrumFile& infile, int line);
 void      blankSpines        (HumdrumFile& infile, Array<int>& trackstates);
 void      addRests           (HumdrumFile& infile, Array<int>& trackstates);
-void      fillFieldData      (Array<int>& field, Array<int>& subfield, 
-                              Array<int>& model, string& fieldstring, 
+void      fillFieldData      (Array<int>& field, Array<int>& subfield,
+                              Array<int>& model, string& fieldstring,
                               HumdrumFile& infile);
-void      processFieldEntry  (Array<int>& field, Array<int>& subfield, 
-                              Array<int>& model, const char* string, 
+void      processFieldEntry  (Array<int>& field, Array<int>& subfield,
+                              Array<int>& model, const char* string,
                               HumdrumFile& infile);
 void      removeDollarsFromString(Array<char>& buffer, int maxtrack);
 
@@ -223,7 +223,7 @@ void blankSpines(HumdrumFile& infile, Array<int>& trackstates) {
 // printInterpretation --
 //
 
-ostream& printInterpretation(ostream& out, HumdrumFile& infile, int line, 
+ostream& printInterpretation(ostream& out, HumdrumFile& infile, int line,
       int count) {
 
    if (strncmp(infile[line][0], "**", 2) == 0) {
@@ -247,7 +247,7 @@ ostream& printInterpretation(ostream& out, HumdrumFile& infile, int line,
 //    which may be the same or different for each new blank spine.
 //
 
-ostream& printExclusiveInterpretations(ostream& out, HumdrumFile& infile, 
+ostream& printExclusiveInterpretations(ostream& out, HumdrumFile& infile,
       int line, int count, Array<SigString>& exinterps) {
    if (appendQ) {
       out << infile[line] << '\t';
@@ -265,7 +265,7 @@ ostream& printExclusiveInterpretations(ostream& out, HumdrumFile& infile,
    }
    if (prependQ) {
       out << '\t' << infile[line];
-   } 
+   }
    out << '\n';
    return out;
 }
@@ -277,7 +277,7 @@ ostream& printExclusiveInterpretations(ostream& out, HumdrumFile& infile,
 // printBlanks --
 //
 
-ostream& printBlanks(ostream& out, HumdrumFile& infile, int line, 
+ostream& printBlanks(ostream& out, HumdrumFile& infile, int line,
      const char* string, int count) {
    if (appendQ) {
       out << infile[line] << '\t';
@@ -306,7 +306,7 @@ ostream& printBlanks(ostream& out, HumdrumFile& infile, int line,
       } else if (timesigQ && (infile[line].isTimeSig(0)
             || infile[line].isTempo(0) || infile[line].isMetSig(0))) {
          out << infile[line][0];
-      } else if (keysigQ && (infile[line].isKeySig(0) 
+      } else if (keysigQ && (infile[line].isKeySig(0)
             || infile[line].isKey(0))) {
          out << infile[line][0];
       } else {
@@ -318,7 +318,7 @@ ostream& printBlanks(ostream& out, HumdrumFile& infile, int line,
    }
    if (prependQ) {
       out << '\t' << infile[line];
-   } 
+   }
    out << '\n';
    return out;
 }
@@ -378,7 +378,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");              // example usages
    opts.define("h|help=b");               // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -427,7 +427,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    PerlRegularExpression pre;
    pre.getTokens(Exinterps, "[\\s,\\*]+", opts.getString("exinterp").c_str());
 }
-  
+
 
 
 //////////////////////////////
@@ -499,13 +499,13 @@ void fillFieldData(Array<int>& field, Array<int>& subfield, Array<int>& model,
 
 //////////////////////////////
 //
-// processFieldEntry -- 
+// processFieldEntry --
 //   3-6 expands to 3 4 5 6
 //   $   expands to maximum spine track
 //   $-1 expands to maximum spine track minus 1, etc.
 //
 
-void processFieldEntry(Array<int>& field, Array<int>& subfield, 
+void processFieldEntry(Array<int>& field, Array<int>& subfield,
       Array<int>& model, const char* string, HumdrumFile& infile) {
 
    int maxtrack = infile.getMaxTracks();
@@ -529,25 +529,25 @@ void processFieldEntry(Array<int>& field, Array<int>& subfield,
       int lastone  = strtol(pre.getSubmatch(2), NULL, 10);
 
       if ((firstone < 1) && (firstone != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << string << "\""
               << " contains too small a number at start: " << firstone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if ((lastone < 1) && (lastone != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << string << "\""
               << " contains too small a number at end: " << lastone << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if (firstone > maxtrack) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << string << "\""
               << " contains number too large at start: " << firstone << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);
       }
       if (lastone > maxtrack) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << string << "\""
               << " contains number too large at end: " << lastone << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);
@@ -591,13 +591,13 @@ void processFieldEntry(Array<int>& field, Array<int>& subfield,
       }
 
       if ((value < 1) && (value != 0)) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << string << "\""
               << " contains too small a number at end: " << value << endl;
          cerr << "Minimum number allowed is " << 1 << endl;
          exit(1);
       }
       if (value > maxtrack) {
-         cerr << "Error: range token: \"" << string << "\"" 
+         cerr << "Error: range token: \"" << string << "\""
               << " contains number too large at start: " << value << endl;
          cerr << "Maximum number allowed is " << maxtrack << endl;
          exit(1);

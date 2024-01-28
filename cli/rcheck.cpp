@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
 	} else if (argc == 1) {
 		hfile.read(cin);
 	}
-	
+
 	hfile.analyzeRhythm("4", DEBUG);
 
 	int measure = 0;

@@ -166,7 +166,7 @@ void generateAnalysis(HumdrumFile& infile, Array<double>& durs) {
 							Array<int> pitches;
 							getChordPitches(pitches, infile[i][j], rootinterval, keyroot, keymode);
 							int bass = pitches[inversion] % 40 + boctave * 40;
-							
+
 //cerr << "Pitch IS " << pitches[inversion] << " FOR " << infile[i][j] << endl;
 
                      if (durs.getSize() > 0) {

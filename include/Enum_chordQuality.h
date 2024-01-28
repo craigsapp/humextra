@@ -5,7 +5,7 @@
 // Last Modified: Tue Jun  9 22:56:33 PDT 1998
 // Filename:      ...sig/include/sigInfo/Enum_chordQuality.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Enum_chordQuality.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 //
 // Description:   Enumeration defined for the ChordQuality class.
@@ -36,7 +36,7 @@
 #define E_chord_incmaj         (102)       /* example:   C E            */
 #define E_chord_incmin         (103)       /* example:   C Eb           */
 #define E_chord_incmajx3       (104)       /* example:   C G            */
- 
+
 // triads
 #define E_chord_dim            (105)       /* example:   C Eb Gb        */
 #define E_chord_min            (106)       /* example:   C Eb G         */
@@ -122,13 +122,13 @@
 // Chord Inversions
 //
 
-#define E_inv_root    (0)  
-#define E_inv_first   (1)  
-#define E_inv_second  (2)  
-#define E_inv_third   (3)  
-#define E_inv_fourth  (4)  
-#define E_inv_fifth   (5)  
-#define E_inv_sixth   (6)  
+#define E_inv_root    (0)
+#define E_inv_first   (1)
+#define E_inv_second  (2)
+#define E_inv_third   (3)
+#define E_inv_fourth  (4)
+#define E_inv_fifth   (5)
+#define E_inv_sixth   (6)
 
 
 #define E_inv_name_root   "0"

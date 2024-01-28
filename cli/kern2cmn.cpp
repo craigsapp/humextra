@@ -7,11 +7,11 @@
 // Syntax:        C++; museinfo
 // Reference:     http://www-ccrma.stanford.edu/CCRMA/Software/cmn/cmn-manual/cmn.html
 //
-// Description:   Converts kern data into the format used in CMN, 
+// Description:   Converts kern data into the format used in CMN,
 //                a LISP program that genrates PostScript musical scores.
 //
 // Note: Not completed
-// 
+//
 
 #include "humdrum.h"
 
@@ -46,7 +46,7 @@ int   nameinit  = 0;
 char name[128]  = {0};
 int   bar       = 0;    // bar number
 int   mode      = -1;   // for storing the mode (0 = major, 1 = minor)
-float metronome = -1.0; 
+float metronome = -1.0;
 int   start     = -1;
 int   terminus  = -1;
 
@@ -200,14 +200,14 @@ int parseInterpretation(HumdrumFile& infile, int line, int track) {
             } else {
                status = 1;
             }
-         } else if (infile[line][i][0] == '*' && 
+         } else if (infile[line][i][0] == '*' &&
                infile[line][i][length-1] == ':') {
             key = Convert::kernToBase40(infile[line][i]);
             if (std::isupper(infile[line][i][1])) {
                cout << " " << (char)tolower(infile[line][i][1]) << "-major\n";
             } else if (std::islower(infile[line][i][1])) {
                cout << " " << infile[line][i][1] << "-minor\n";
-            } 
+            }
          } else if (strncmp(infile[line][i], "*I", 2) == 0) {
             if (std::islower(infile[line][i][2])) {
                strcpy(name, &infile[line][i][2]);
@@ -223,11 +223,11 @@ int parseInterpretation(HumdrumFile& infile, int line, int track) {
             cout << " treble\n";
          } else if (strcmp(infile[line][i], "*clefF4") == 0) {
             cout << " bass\n";
-         } 
+         }
          if (strcmp(infile[line][i], "**kern") == 0) {
             cout << " staff\n";
          }
-        
+
       }
    }
    return status;
@@ -355,7 +355,7 @@ void printCMNDuration(double duration) {
    } else if (strcmp(buffer, "1.") == 0) {
       cout << "w.";
    }
-   
+
 }
 
 
@@ -366,7 +366,7 @@ void printCMNDuration(double duration) {
 //
 
 void printPitchClass(int base40) {
-   switch ((base40 % 40) - 2) {	
+   switch ((base40 % 40) - 2) {
       case -2:  cout << "cff";	break; case -1:  cout << "cf";	break;
       case 0:   cout << "c";	break; case 1:   cout << "cs";	break;
       case 2:   cout << "css";	break; case 3:   cout << "x";	break;
@@ -411,13 +411,13 @@ void printNote(int base40) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("debug=b",           "trace input parsing");   
-   opts.define("author=b",          "author of the program");   
-   opts.define("version=b",         "compilation information"); 
-   opts.define("example=b",         "example usage"); 
-   opts.define("h|help=b",          "short description"); 
+   opts.define("debug=b",           "trace input parsing");
+   opts.define("author=b",          "author of the program");
+   opts.define("version=b",         "compilation information");
+   opts.define("example=b",         "example usage");
+   opts.define("h|help=b",          "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

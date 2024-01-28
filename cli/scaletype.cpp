@@ -8,9 +8,9 @@
 // Web Address:   http://sig.sapp.org/examples/museinfo/humdrum/scaletype.cpp
 // Syntax:        C++; museinfo
 //
-// Description:   Identifies **kern data as pentatonic, sexatonic, 
+// Description:   Identifies **kern data as pentatonic, sexatonic,
 //                or heptatonic.
-// 
+//
 
 #include "humdrum.h"
 
@@ -20,7 +20,7 @@ void   example                  (void);
 void   usage                    (const char* command);
 void   analyzeFile              (HumdrumFile& infile, Array<int>& pc12,
                                  Array<int>& pc40);
-void   printAnalysis            (HumdrumFile& infile, Array<int>& pc12, 
+void   printAnalysis            (HumdrumFile& infile, Array<int>& pc12,
                                  Array<int>& pc40, const string& filename);
 int    countPitchClasses        (Array<int>& pc12);
 void   printPitches             (Array<int>& pc40);
@@ -87,13 +87,13 @@ int main(int argc, char* argv[]) {
 // printAnalysis --
 //
 
-void printAnalysis(HumdrumFile& infile, Array<int>& pc12, 
+void printAnalysis(HumdrumFile& infile, Array<int>& pc12,
       Array<int>& pc40, const string& filename) {
 
    int setcount = countPitchClasses(pc12);
 
    if (filename[0] != '\0') {
-      if (shortQ && (strrchr(filename.c_str(), '/') != NULL)) { 
+      if (shortQ && (strrchr(filename.c_str(), '/') != NULL)) {
          cout << strrchr(filename.c_str(), '/')+1 << ":\t";
       } else {
          cout << filename << ":\t";
@@ -178,7 +178,7 @@ void analyzeFile(HumdrumFile& infile, Array<int>& pc12, Array<int>& pc40) {
          // ignore non-data lines in the humdrum file
          continue;
       }
-      
+
       for (j=0; j<infile[i].getFieldCount(); j++) {
          if (infile[i].getExInterpNum(j) != E_KERN_EXINT) {
             // ignore non-**kern spine data
@@ -213,17 +213,17 @@ void analyzeFile(HumdrumFile& infile, Array<int>& pc12, Array<int>& pc40) {
 //
 
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("p|pitches=b",   "display used pitches classes");   
-   opts.define("D|no-directory=b", "do not display directory in filename");   
-   opts.define("F|no-filename=b",  "do not display filename");   
+   opts.define("p|pitches=b",   "display used pitches classes");
+   opts.define("D|no-directory=b", "do not display directory in filename");
+   opts.define("F|no-filename=b",  "do not display filename");
 
-   opts.define("debug=b",       "trace input parsing");   
-   opts.define("author=b",      "author of the program");   
-   opts.define("version=b",     "compilation information"); 
-   opts.define("example=b",     "example usage"); 
-   opts.define("h|help=b",      "short description"); 
+   opts.define("debug=b",       "trace input parsing");
+   opts.define("author=b",      "author of the program");
+   opts.define("version=b",     "compilation information");
+   opts.define("example=b",     "example usage");
+   opts.define("h|help=b",      "short description");
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "

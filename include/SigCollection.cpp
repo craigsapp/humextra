@@ -8,7 +8,7 @@
 // Last Modified: Fri Aug 10 09:17:03 PDT 2012 added reverse()
 // Filename:      ...sig/maint/code/base/SigCollection/SigCollection.cpp
 // Web Address:   http://sig.sapp.org/src/sigBase/SigCollection.cpp
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A dynamic array which can grow as necessary.
 //                This class can hold any type of item, but the
@@ -20,8 +20,9 @@
 #define _SIGCOLLECTION_CPP_INCLUDED
 
 #include "SigCollection.h"
+
+#include <cstdlib>
 #include <iostream>
-#include <stdlib.h>
 
 
 using namespace std;
@@ -33,52 +34,70 @@ using namespace std;
 
 template<class type>
 SigCollection<type>::SigCollection(void) {
-   this->allocSize = 0;
-   this->size = 0;
-   this->array = NULL;
-   this->allowGrowthQ = 0;
-   this->growthAmount = 8;
-   this->maxSize = 0;
+	this->m_allocSize = 0;
+	this->m_size = 0;
+	this->m_array = NULL;
+	this->m_allowGrowthQ = 0;
+	this->m_growthAmount = 8;
+	this->m_maxSize = 0;
 }
 
 template<class type>
 SigCollection<type>::SigCollection(int arraySize) {
-   this->array = new type[arraySize];
-   
-   this->size = arraySize;
-   this->allocSize = arraySize;
-   this->allowGrowthQ = 0;
-   this->growthAmount = arraySize;
-   this->maxSize = 0;
+	// this->m_array = new type[arraySize];
+	this->m_array = std::make_unique<type[]>(arraySize);
+
+	this->m_size = arraySize;
+	this->m_allocSize = arraySize;
+	this->m_allowGrowthQ = 0;
+	this->m_growthAmount = arraySize;
+	this->m_maxSize = 0;
 }
+
 
 
 template<class type>
 SigCollection<type>::SigCollection(int arraySize, type *aSigCollection) {
-   this->size = arraySize;
-   this->allocSize = arraySize;
-   this->array = new type[size];
-   for (int i=0; i<size; i++) {
-      this->array[i] = aSigCollection[i];
-   }
-   this->growthAmount = arraySize;
-   this->allowGrowthQ = 0;
-   this->maxSize = 0;
+	this->m_size = arraySize;
+	this->m_allocSize = arraySize;
+	// this->m_array = new type[this->m_size];
+	this->m_array = std::make_unique<type[]>(this->m_size);
+	for (int i=0; i<this->m_size; i++) {
+		this->m_array[i] = aSigCollection[i];
+	}
+	this->m_growthAmount = arraySize;
+	this->m_allowGrowthQ = 0;
+	this->m_maxSize = 0;
 }
+
+
+//template<class type>
+//SigCollection<type>::SigCollection(SigCollection<type>& aSigCollection) {
+//	this->m_size = aSigCollection.m_size;
+//	this->m_allocSize = this->m_size;
+//	this->m_array = new type[this->m_size];
+//	for (int i=0; i<this->m_size; i++) {
+//		this->m_array[i] = aSigCollection.m_array[i];
+//	}
+//	this->m_allowGrowthQ = aSigCollection.m_allowGrowthQ;
+//	this->m_growthAmount = aSigCollection.m_growthAmount;
+//	this->m_maxSize = aSigCollection.m_maxSize;
+//}
 
 
 template<class type>
-SigCollection<type>::SigCollection(SigCollection<type>& aSigCollection) {
-   this->size = aSigCollection.size;
-   this->allocSize = size;
-   this->array = new type[size];
-   for (int i=0; i<size; i++) {
-      this->array[i] = aSigCollection.array[i];
+SigCollection<type>::SigCollection(const SigCollection<type>& aSigCollection) {
+   this->m_size = aSigCollection.m_size;
+   this->m_allocSize = this->m_size;
+   this->m_array = std::make_unique<type[]>(this->m_size);
+   for (int i = 0; i < this->m_size; i++) {
+      this->m_array[i] = aSigCollection.m_array[i];
    }
-   this->allowGrowthQ = aSigCollection.allowGrowthQ;
-   this->growthAmount = aSigCollection.growthAmount;
-   this->maxSize = aSigCollection.maxSize;
+   this->m_allowGrowthQ = aSigCollection.m_allowGrowthQ;
+   this->m_growthAmount = aSigCollection.m_growthAmount;
+   this->m_maxSize = aSigCollection.m_maxSize;
 }
+
 
 
 
@@ -87,28 +106,37 @@ SigCollection<type>::SigCollection(SigCollection<type>& aSigCollection) {
 // SigCollection::~SigCollection --
 //
 
+//template<class type>
+//SigCollection<type>::~SigCollection() {
+//	if (this->getAllocSize() != 0) {
+//		delete [] this->m_array;
+//		this->m_array = NULL;
+//	}
+//}
+
 template<class type>
 SigCollection<type>::~SigCollection() {
-   if (this->getAllocSize() != 0) {
-      delete [] this->array;
-   }
+   // No need to manually delete[] with std::unique_ptr
+   // It will automatically release the allocated memory when it goes out of scope
+   // this->m_array = NULL; // No need for this line
 }
+
 
 
 
 //////////////////////////////
 //
 // SigCollection::allowGrowth --
-//	default value: status = 1 
+//	default value: status = 1
 //
 
 template<class type>
 void SigCollection<type>::allowGrowth(int status) {
-   if (status == 0) {
-      this->allowGrowthQ = 0;
-   } else {
-      this->allowGrowthQ = 1;
-   }
+	if (status == 0) {
+		this->m_allowGrowthQ = 0;
+	} else {
+		this->m_allowGrowthQ = 1;
+	}
 }
 
 
@@ -120,29 +148,29 @@ void SigCollection<type>::allowGrowth(int status) {
 
 template<class type>
 void SigCollection<type>::append(type& element) {
-   if (this->size == this->getAllocSize()) {
-      this->grow();
-   }
-   this->array[size] = element;
-   this->size++;
+	if (this->m_size == this->getAllocSize()) {
+		this->grow();
+	}
+	this->m_array[this->m_size] = element;
+	this->m_size++;
 }
 
 template<class type>
 void SigCollection<type>::appendcopy(type element) {
-   if (this->size == this->getAllocSize()) {
-      this->grow();
-   }
-   this->array[size] = element;
-   this->size++;
+	if (this->m_size == this->getAllocSize()) {
+		this->grow();
+	}
+	this->m_array[this->m_size] = element;
+	this->m_size++;
 }
 
 template<class type>
 void SigCollection<type>::append(type *element) {
-   if (this->size == this->getAllocSize()) {
-      this->grow();
-   }
-   this->array[size] = *element;
-   this->size++;
+	if (this->m_size == this->getAllocSize()) {
+		this->grow();
+	}
+	this->m_array[m_size] = *element;
+	this->m_size++;
 }
 
 
@@ -153,20 +181,42 @@ void SigCollection<type>::append(type *element) {
 // 	default parameter: growamt = -1
 //
 
+//template<class type>
+//void SigCollection<type>::grow(long growamt) {
+//   this->m_allocSize += growamt > 0 ? growamt : this->m_growthAmount;
+//   if (this->m_maxSize != 0 && this->getAllocSize() > this->m_maxSize) {
+//      std::cerr << "Error: Maximum size allowed for array exceeded." << std::endl;
+//      exit(1);
+//   }
+//
+//   type *temp = new type[this->getAllocSize()];
+//   for (int i=0; i<this->m_size; i++) {
+//      temp[i] = this->m_array[i];
+//   }
+//   delete [] this->m_array;
+//   this->m_array = temp;
+//}
+
+
 template<class type>
 void SigCollection<type>::grow(long growamt) {
-   this->allocSize += growamt > 0 ? growamt : this->growthAmount;
-   if (this->maxSize != 0 && this->getAllocSize() > this->maxSize) {
-      std::cerr << "Error: Maximum size allowed for array exceeded." << std::endl;
+   if (growamt <= 0) {
+      growamt = this->m_growthAmount;
+   }
+   if (growamt <= 0) {
+      growamt = 8;
+   }
+   if (this->m_size > this->m_allocSize) {
+      cerr << "Error: m_size " << this->m_size << " is larger than M_allocSize: " << this->m_allocSize << endl;
       exit(1);
    }
- 
-   type *temp = new type[this->getAllocSize()];
-   for (int i=0; i<size; i++) {
-      temp[i] = this->array[i];
-   }
-   delete [] this->array;
-   this->array = temp;
+	std::unique_ptr<type[]> temp(new type[this->getAllocSize() + growamt]);
+	for (int i=0; i<this->m_size; i++) {
+		temp[i] = this->m_array[i];
+	}
+	this->m_allocSize += growamt;
+	// The old array will be automatically deleted when temp goes out of scope
+	this->m_array = std::move(temp);
 }
 
 
@@ -178,7 +228,7 @@ void SigCollection<type>::grow(long growamt) {
 
 template<class type>
 type* SigCollection<type>::pointer(void) {
-   return this->array;
+	return this->m_array;
 }
 
 
@@ -190,7 +240,8 @@ type* SigCollection<type>::pointer(void) {
 
 template<class type>
 type* SigCollection<type>::getBase(void) const {
-   return this->array;
+	// return this->m_array;
+   return this->m_array.get();
 }
 
 
@@ -202,7 +253,7 @@ type* SigCollection<type>::getBase(void) const {
 
 template<class type>
 long SigCollection<type>::getAllocSize(void) const {
-   return this->allocSize;
+	return this->m_allocSize;
 }
 
 
@@ -214,7 +265,7 @@ long SigCollection<type>::getAllocSize(void) const {
 
 template<class type>
 long SigCollection<type>::getSize(void) const {
-   return this->size;
+	return this->m_size;
 }
 
 
@@ -227,7 +278,7 @@ long SigCollection<type>::getSize(void) const {
 
 template<class type>
 type& SigCollection<type>::last(int index) {
-   return this->array[getSize()-1-abs(index)];
+	return this->m_array[getSize()-1-abs(index)];
 }
 
 
@@ -239,18 +290,18 @@ type& SigCollection<type>::last(int index) {
 
 template<class type>
 void SigCollection<type>::setAllocSize(long aSize) {
-   if (aSize < this->getSize()) {
-      std::cerr << "Error: cannot set allocated size smaller than actual size." 
-           << std::endl;
-      exit(1);
-   }
+	if (aSize < this->getSize()) {
+		std::cerr << "Error: cannot set allocated size smaller than actual size.";
+		std::cerr << std::endl;
+		exit(1);
+	}
 
-   if (aSize <= this->getAllocSize()) {
-      this->shrinkTo(aSize);
-   } else {
-      this->grow(aSize-this->getAllocSize());
-      this->size = aSize;
-   }
+	if (aSize <= this->getAllocSize()) {
+		this->shrinkTo(aSize);
+	} else {
+		this->grow(aSize-this->getAllocSize());
+		this->m_size = aSize;
+	}
 }
 
 
@@ -263,9 +314,9 @@ void SigCollection<type>::setAllocSize(long aSize) {
 
 template<class type>
 void SigCollection<type>::setGrowth(long growth) {
-   if (growth > 0) {
-      this->growthAmount = growth;
-   }
+	if (growth > 0) {
+		this->m_growthAmount = growth;
+	}
 }
 
 
@@ -277,14 +328,13 @@ void SigCollection<type>::setGrowth(long growth) {
 
 template<class type>
 void SigCollection<type>::setSize(long newSize) {
-   if (newSize <= this->getAllocSize()) { 
-      this->size = newSize;
-   } else {
-      this->grow(newSize-this->getAllocSize());
-      this->size = newSize;
-   }
+	if (newSize <= this->getAllocSize()) {
+		this->m_size = newSize;
+	} else {
+		this->grow(newSize-this->getAllocSize());
+		this->m_size = newSize;
+	}
 }
-
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -299,19 +349,20 @@ void SigCollection<type>::setSize(long newSize) {
 
 template<class type>
 type& SigCollection<type>::operator[](int elementIndex) {
-   if (this->allowGrowthQ && elementIndex == this->size) {
-      if (this->size == this->getAllocSize()) {
-         this->grow();
-      }
-      this->size++;
-   } else if ((elementIndex >= this->size) || (elementIndex < 0)) {
-      std::cerr << "Error: accessing invalid array location " 
-           << elementIndex 
-           << " Maximum is " << this->size-1 << std::endl;
-      exit(1);
-   }
-   return this->array[elementIndex];
+	if (this->m_allowGrowthQ && elementIndex == this->m_size) {
+		if (this->m_size == this->getAllocSize()) {
+		   this->grow();
+		}
+		this->m_size++;
+	} else if ((elementIndex >= this->m_size) || (elementIndex < 0)) {
+		std::cerr << "Error: accessing invalid array location "
+		     << elementIndex
+		     << " Maximum is " << this->m_size-1 << std::endl;
+		exit(1);
+	}
+	return this->m_array[elementIndex];
 }
+
 
 
 //////////////////////////////
@@ -321,13 +372,13 @@ type& SigCollection<type>::operator[](int elementIndex) {
 
 template<class type>
 type SigCollection<type>::operator[](int elementIndex) const {
-   if ((elementIndex >= this->size) || (elementIndex < 0)) {
-      std::cerr << "Error: accessing invalid array location " 
-           << elementIndex 
-           << " Maximum is " << this->size-1 << std::endl;
-      exit(1);
-   }
-   return this->array[elementIndex];
+	if ((elementIndex >= this->m_size) || (elementIndex < 0)) {
+		std::cerr << "Error: accessing invalid array location "
+		     << elementIndex
+		     << " Maximum is " << this->m_size-1 << std::endl;
+		exit(1);
+	}
+	return this->m_array[elementIndex];
 }
 
 
@@ -339,21 +390,24 @@ type SigCollection<type>::operator[](int elementIndex) const {
 
 template<class type>
 void SigCollection<type>::shrinkTo(long aSize) {
-   if (aSize < this->getSize()) {
-      exit(1);
-   }
+	if (aSize < this->getSize()) {
+		exit(1);
+	}
 
-   type *temp = new type[aSize];
-   for (int i=0; i<this->size; i++) {
-      temp[i] = this->array[i];
-   }
-   delete [] this->array;
-   this->array = temp;
+	// type *temp = new type[aSize];
+   std::unique_ptr<type[]> temp = std::make_unique<type[]>(aSize);
 
-   allocSize = aSize;
-   if (size > allocSize) {
-      size = allocSize;
-   }
+	for (int i=0; i<this->m_size; i++) {
+		temp[i] = this->m_array[i];
+	}
+	// delete [] this->m_array;
+	// this->m_array = temp;
+   this->m_array = std::move(temp);
+
+	this->m_allocSize = aSize;
+	if (this->m_size > this->m_allocSize) {
+		this->m_size = this->m_allocSize;
+	}
 }
 
 
@@ -365,10 +419,10 @@ void SigCollection<type>::shrinkTo(long aSize) {
 
 template<class type>
 int SigCollection<type>::increase(int addcount) {
-   if (addcount > 0) {
-      this->setSize(this->getSize() + addcount);
-   }
-   return this->getSize();
+	if (addcount > 0) {
+		this->setSize(this->getSize() + addcount);
+	}
+	return this->getSize();
 }
 
 
@@ -380,13 +434,14 @@ int SigCollection<type>::increase(int addcount) {
 
 template<class type>
 int SigCollection<type>::decrease(int subcount) {
-   if (this->getSize() - subcount <= 0) {
-      this->setSize(0);
-   } else if (subcount > 0) {
-      this->setSize(this->getSize() - subcount);
-   }
-   return this->getSize();
+	if (this->getSize() - subcount <= 0) {
+		this->setSize(0);
+	} else if (subcount > 0) {
+		this->setSize(this->getSize() - subcount);
+	}
+	return this->getSize();
 }
+
 
 
 //////////////////////////////
@@ -396,16 +451,16 @@ int SigCollection<type>::decrease(int subcount) {
 
 template<class type>
 void SigCollection<type>::reverse(void) {
-   int i;
-   type tempval;
-   int mirror;
-   int pivot = this->getSize() / 2;
-   for (i=0; i<pivot; i++) {
-      tempval = this->array[i];
-      mirror = this->getSize() - i - 1;
-      this->array[i] = this->array[mirror];
-      this->array[mirror] = tempval;
-   }
+	int i;
+	type tempval;
+	int mirror;
+	int pivot = this->getSize() / 2;
+	for (i=0; i<pivot; i++) {
+		tempval = this->m_array[i];
+		mirror = this->getSize() - i - 1;
+		this->m_array[i] = this->m_array[mirror];
+		this->m_array[mirror] = tempval;
+	}
 }
 
 

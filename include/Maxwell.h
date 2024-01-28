@@ -5,7 +5,7 @@
 // Creation Date: Wed Jan  1 16:38:30 PST 2003
 // Filename:      ...sig/include/sigInfo/Maxwell.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/Maxwell.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   Harmony analysis functions based on Maxwell's dissertation.
 //
@@ -93,68 +93,68 @@ class Maxwell {
             Maxwell                       (void);
            ~Maxwell                       ();
 
-      static void  analyzeVerticalDissonance(HumdrumFile& score, 
+      static void  analyzeVerticalDissonance(HumdrumFile& score,
                                              Array<int>& vertdis);
       static void  analyzeTertian           (HumdrumFile& score,
                                              Array<int>& tertian);
       static void  analyzeAccent            (HumdrumFile& score,
-                                             Array<int>& accent, 
+                                             Array<int>& accent,
                                              int flag = AFLAG_COMPOUND_METER);
       static void  analyzeTertianDissonanceLevel (HumdrumFile& score,
                                              Array<double>& terdis);
       static void  analyzeDissonantInContext(HumdrumFile& score,
                                              Array<int>& dissic,
-                                             Array<int>& vertdis, 
-                                             Array<int>& tertian, 
-                                             Array<double>& terdis, 
+                                             Array<int>& vertdis,
+                                             Array<int>& tertian,
+                                             Array<double>& terdis,
                                              Array<int>& accent,
                                              int flag = AFLAG_COMPOUND_METER);
       static void  analyzeDissonantInContext(HumdrumFile& score,
-                                             Array<int>& dissic, 
+                                             Array<int>& dissic,
                                              int flag = AFLAG_COMPOUND_METER);
-      static void  analyzeDissonantNotes   (HumdrumFile& score, 
+      static void  analyzeDissonantNotes   (HumdrumFile& score,
                                              Array<ArrayInt>& notediss);
       static void  analyzeDissonantNotes   (HumdrumFile& score,
                                              Array<ArrayInt>& notediss,
-                                             Array<int>& vertdis, 
-                                             Array<int>& tertian, 
-                                             Array<double>& terdis, 
-                                             Array<int>& accent, 
+                                             Array<int>& vertdis,
+                                             Array<int>& tertian,
+                                             Array<double>& terdis,
+                                             Array<int>& accent,
                                              Array<int>& dissic);
-      static void  analyzeSonorityRelations (HumdrumFile& score, 
+      static void  analyzeSonorityRelations (HumdrumFile& score,
                                              Array<int>&sonrel,
-                                             Array<int>& vertdis, 
-                                             Array<int>& tertian, 
-                                             Array<double>& terdis, 
-                                             Array<int>& accent, 
+                                             Array<int>& vertdis,
+                                             Array<int>& tertian,
+                                             Array<double>& terdis,
+                                             Array<int>& accent,
                                              Array<int>& dissic,
-                                             Array<double>& beatdur, 
-                                             Array<ChordQuality>& cq, 
+                                             Array<double>& beatdur,
+                                             Array<ChordQuality>& cq,
                                              int flag = AFLAG_COMPOUND_METER);
       static void  analyzeSonorityRelations (HumdrumFile& score,
-                                             Array<int>&sonrel, 
+                                             Array<int>&sonrel,
                                              int flag = AFLAG_COMPOUND_METER);
-           
+
    private:
 
       // for use with analyzeTertian
       static void  rotateNotes         (Array<int>& notes);
- 
+
       // for use with analyzeDissonantNotes
-      static int   measureNoteDissonance(HumdrumFile& score, int line, int note, 
-                                       Array<int>& vertdis, Array<int>& accent, 
+      static int   measureNoteDissonance(HumdrumFile& score, int line, int note,
+                                       Array<int>& vertdis, Array<int>& accent,
                                        Array<int>& dissic);
 
       // for use with analyzeSonorityRelations
-      static int   measureChordFunction1(HumdrumFile& score, int line, 
-                                       Array<int>& vertdis, Array<int>& tertian, 
+      static int   measureChordFunction1(HumdrumFile& score, int line,
+                                       Array<int>& vertdis, Array<int>& tertian,
                                        Array<double>& terdis, Array<int>& accent,
                                        Array<int>& dissic, Array<double>& beatdur,
                                        Array<ChordQuality>& cq);
-      static int   measureChordFunction2(HumdrumFile& score, int line, 
-                                       Array<int>& vertdis, Array<int>& tertian, 
-                                       Array<double>& terdis, Array<int>& accent, 
-                                       Array<int>& dissic, 
+      static int   measureChordFunction2(HumdrumFile& score, int line,
+                                       Array<int>& vertdis, Array<int>& tertian,
+                                       Array<double>& terdis, Array<int>& accent,
+                                       Array<int>& dissic,
                                        Array<ChordQuality>& cq);
 
 };

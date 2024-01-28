@@ -19,7 +19,7 @@
 #include "humdrum.h"
 
 using namespace std;
-   
+
 
 // function declarations
 void      checkOptions            (Options& opts, int argc, char* argv[]);
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
    } else {
       infile.read(options.getArg(1));
    }
-   
+
    if (removeQ) {
       removeBarNumbers(infile);
    } else{
@@ -134,7 +134,7 @@ int getEndingBarline(HumdrumFile& infile) {
       }
    }
 
-   return -1; 
+   return -1;
 }
 
 
@@ -169,7 +169,7 @@ void processFile(HumdrumFile& infile) {
       }
       if (infile[i].getType() == E_humrec_interpretation) {
          for (j=0; j<infile[i].getFieldCount(); j++) {
-            if ((strncmp(infile[i][j], "*M", 2) == 0) 
+            if ((strncmp(infile[i][j], "*M", 2) == 0)
                   && (strchr(infile[i][j], '/') != NULL)) {
                timetop = Convert::kernTimeSignatureTop(infile[i][j]);
                timebot = Convert::kernTimeSignatureBottomToDuration(infile[i][j]);
@@ -207,7 +207,7 @@ void processFile(HumdrumFile& infile) {
 
    // Identify controlling/non-controlling barlines
    // at each measure line determine one of three cases:
-   // 
+   //
    // (1) all ok -- the summation of durations in the measure
    //     matches the current time sign
    // (2) a partial measure -- the measure durations do not
@@ -215,7 +215,7 @@ void processFile(HumdrumFile& infile) {
    //     at the start/end of a musical section such as the
    //     beginning of a piece, end of a piece, or between
    //     repeat bar dividing a full measure.
-   // (3) the sum of the durations does not match the 
+   // (3) the sum of the durations does not match the
    //     time signature because the durations are incorrectly
    //     given.
    //
@@ -318,7 +318,7 @@ void processFile(HumdrumFile& infile) {
    }
 
    // if there is no time data, just label each barline
-   // as a new measure. 
+   // as a new measure.
    if (infile[infile.getNumLines()-1].getAbsBeat() == 0.0) {
       for (i=0; i<(int)control.size(); i++) {
          control[i] = 1;
@@ -417,10 +417,10 @@ void printSingleBarNumber(const string& astring, int measurenum) {
 // checkOptions -- validate and process command-line options.
 //
 
-  
+
 void checkOptions(Options& opts, int argc, char* argv[]) {
-   opts.define("r|remove=b", "Remove barlines from the file");             
-   opts.define("s|start=i:1", "starting barline number");             
+   opts.define("r|remove=b", "Remove barlines from the file");
+   opts.define("s|start=i:1", "starting barline number");
    opts.define("a|all=b",     "print numbers on all barlines");
 
    opts.define("debug=b");                // print debug info
@@ -429,7 +429,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    opts.define("example=b");              // example usages
    opts.define("h|help=b");               // short description
    opts.process(argc, argv);
-   
+
    // handle basic options:
    if (opts.getBoolean("author")) {
       cout << "Written by Craig Stuart Sapp, "
@@ -454,7 +454,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
    allQ     = opts.getBoolean("all");
 
 }
-  
+
 
 
 //////////////////////////////

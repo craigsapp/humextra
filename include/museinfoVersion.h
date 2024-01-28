@@ -4,9 +4,9 @@
 // Creation Date: Sat Jun 13 23:12:37 PDT 1998
 // Last Modified: Sat Jun 13 23:12:41 PDT 1998
 // Filename:      ...sig/include/sigInfo/museinfoVersion.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
-// Description:   Lists the version date of the humdrum++ library 
+// Description:   Lists the version date of the humdrum++ library
 //
 
 

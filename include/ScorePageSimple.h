@@ -5,7 +5,7 @@
 // Last Modified: Tue Mar 26 00:51:52 PST 2002 (item access by staff added)
 // Filename:      ...sig/src/sigInfo/ScorePageSimple.h
 // Web Address:   http://sig.sapp.org/include/sigInfo/ScorePageSimple.h
-// Syntax:        C++ 
+// Syntax:        C++
 //
 // Description:   A page of SCORE data with analysis functions.
 //
@@ -26,7 +26,7 @@ class ScorePageSimple : public ScorePageBaseSimple {
                      ScorePageSimple      (void);
                     ~ScorePageSimple      ();
 
-      // system analysis functions 
+      // system analysis functions
       void           analyzeSystems       (void);
       int            getStaffCount        (void);
       int            getMaxStaff          (void);
@@ -40,7 +40,7 @@ class ScorePageSimple : public ScorePageBaseSimple {
       ScoreRecord&   getSystemItem        (int sysno, int index);
       int            getSystemSize        (int sysno);
 
-      // pitch analysis functions 
+      // pitch analysis functions
       void           analyzePitch         (void);
       ScoreRecord&   getClefAtLocation    (int staffno, float position);
       ScoreRecord&   getKeysigAtLocation  (int staffno, float position);
@@ -51,10 +51,10 @@ class ScorePageSimple : public ScorePageBaseSimple {
       // pitch analysis functions
       int            assignPitch          (int staff, int currentposition);
       void           resetAccidentals     (Array<int>& accidentals, int keysig);
-      int            convertPitchToBase40 (int line, int acc, int clef, 
-                                           int clefoffset, 
+      int            convertPitchToBase40 (int line, int acc, int clef,
+                                           int clefoffset,
                                            Array<int>& accidentals);
- 
+
       // system analysis functions
       void           buildSystemIndexDatabase(void);
 
