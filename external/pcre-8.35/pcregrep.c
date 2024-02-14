@@ -911,7 +911,7 @@ for (op = optionlist; op->one_char != 0; op++)
     n = 31 - printf("  -%c", op->one_char);
   else
     {
-    if (op->one_char > 0) sprintf(s, "-%c,", op->one_char);
+    if (op->one_char > 0) snprintf(s, 4, "-%c,", op->one_char);
       else strcpy(s, "   ");
     n = 31 - printf("  %s --%s", s, op->long_name);
     }
@@ -2196,7 +2196,7 @@ if (isdirectory(pathname))
     while ((nextfile = readdirectory(dir)) != NULL)
       {
       int frc;
-      sprintf(buffer, "%.512s%c%.128s", pathname, FILESEP, nextfile);
+      snprintf(buffer, 1024, "%.512s%c%.128s", pathname, FILESEP, nextfile);
       frc = grep_or_recurse(buffer, dir_recurse, FALSE);
       if (frc > 1) rc = frc;
        else if (frc == 0 && rc == 1) rc = 0;
@@ -2403,7 +2403,7 @@ ordin(int n)
 {
 static char buffer[8];
 char *p = buffer;
-sprintf(p, "%d", n);
+snprintf(p, 8, "%d", n);
 while (*p != 0) p++;
 switch (n%10)
   {
@@ -2467,7 +2467,7 @@ if ((popts & PO_FIXED_STRINGS) != 0)
     }
   }
 
-sprintf(buffer, "%s%.*s%s", prefix[popts], patlen, ps, suffix[popts]);
+snprintf(buffer, PATBUFSIZE, "%s%.*s%s", prefix[popts], patlen, ps, suffix[popts]);
 p->compiled = pcre_compile(buffer, options, &error, &errptr, pcretables);
 if (p->compiled != NULL) return TRUE;
 
@@ -2696,8 +2696,8 @@ for (i = 1; i < argc; i++)
         int arglen = (argequals == NULL || equals == NULL)?
           (int)strlen(arg) : (int)(argequals - arg);
 
-        sprintf(buff1, "%.*s", baselen, op->long_name);
-        sprintf(buff2, "%s%.*s", buff1, fulllen - baselen - 2, opbra + 1);
+        snprintf(buff1, 24, "%.*s", baselen, op->long_name);
+        snprintf(buff2, 24, "%s%.*s", buff1, fulllen - baselen - 2, opbra + 1);
 
         if (strncmp(arg, buff1, arglen) == 0 ||
            strncmp(arg, buff2, arglen) == 0)
@@ -3131,7 +3131,7 @@ for (j = 1, cp = patterns; cp != NULL; j++, cp = cp->next)
   if (error != NULL)
     {
     char s[16];
-    if (patterns->next == NULL) s[0] = 0; else sprintf(s, " number %d", j);
+    if (patterns->next == NULL) s[0] = 0; else snprintf(s, 16, " number %d", j);
     fprintf(stderr, "pcregrep: Error while studying regex%s: %s\n", s, error);
     goto EXIT2;
     }

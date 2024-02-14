@@ -130,7 +130,7 @@ static void TestBigComment() {
   string input;
   for (int i = 0; i < 1024; ++i) {
     char buf[1024];  // definitely big enough
-    sprintf(buf, "    # Comment %d\n", i);
+    snprintf(buf, 1024, "    # Comment %d\n", i);
     input += buf;
   }
   input += "name = value;\n";

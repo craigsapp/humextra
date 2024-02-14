@@ -112,7 +112,7 @@ static void LeakTest() {
       printf("Size after 50000: %llu\n", initial_size);
     }
     char buf[100];  // definitely big enough
-    sprintf(buf, "pat%09d", i);
+    snprintf(buf, 100, "pat%09d", i);
     RE newre(buf);
   }
   uint64 final_size = VirtualProcessSize();
@@ -975,18 +975,18 @@ int main(int argc, char** argv) {
     CHECK(RE("(-?\\d+)").FullMatch("100", &v)); CHECK_EQ(v, 100);
     CHECK(RE("(-?\\d+)").FullMatch("-100",&v)); CHECK_EQ(v, -100);
 
-    sprintf(buf, LLD, max_value);
+    snprintf(buf, 32, LLD, max_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, max_value);
 
-    sprintf(buf, LLD, min_value);
+    snprintf(buf, 32, LLD, min_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, min_value);
 
-    sprintf(buf, LLD, max_value);
+    snprintf(buf, 32, LLD, max_value);
     assert(buf[strlen(buf)-1] != '9');
     buf[strlen(buf)-1]++;
     CHECK(!RE("(-?\\d+)").FullMatch(buf, &v));
 
-    sprintf(buf, LLD, min_value);
+    snprintf(buf, 32, LLD, min_value);
     assert(buf[strlen(buf)-1] != '9');
     buf[strlen(buf)-1]++;
     CHECK(!RE("(-?\\d+)").FullMatch(buf, &v));
@@ -1002,7 +1002,7 @@ int main(int argc, char** argv) {
     CHECK(RE("(-?\\d+)").FullMatch("100",&v)); CHECK_EQ(v, 100);
     CHECK(RE("(-?\\d+)").FullMatch("-100",&v2)); CHECK_EQ(v2, -100);
 
-    sprintf(buf, LLU, max_value);
+    snprintf(buf, 32, LLU, max_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, max_value);
 
     assert(buf[strlen(buf)-1] != '9');
