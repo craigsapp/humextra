@@ -100,6 +100,10 @@ push:
 	git checkout external/pcre-8.35
 	git push
 
+pull:
+	git checkout external/pcre-8.35
+	git pull
+
 #                                                                         #
 #                                                                         #
 ###########################################################################
