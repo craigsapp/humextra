@@ -14,7 +14,7 @@
 ##
 
 # targets which don't actually refer to files
-.PHONY : src-programs lib src-library include bin scripts update libupdate updatelib libup uplib regression test tests regression-fails-only test-fail tests-fail clear clean
+.PHONY : cli lib src-library include bin scripts update libupdate updatelib libup uplib regression test tests regression-fails-only test-fail tests-fail clear clean
 
 ###########################################################################
 #                                                                         #
@@ -47,7 +47,7 @@ examples-update: programs-update
 example-update:  programs-update
 program-update:  programs-update
 programs-update: 
-	touch src-programs/*.cpp
+	touch cli/*.cpp
 	$(MAKE) -f Makefile.programs
 
 libupdate: library-update
