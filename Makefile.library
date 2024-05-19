@@ -211,7 +211,7 @@ endif
 
 
 %.o : %.cpp
-	@echo [CC] $@
+	@echo "[CC] $@"
 	@$(COMPILER) $(PREFLAGS) -o $(OBJDIR)/$(notdir $@) $(POSTFLAGS) $<
 
 #                                                                         #

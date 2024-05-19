@@ -300,7 +300,7 @@ clear:
 	-rm -f $(addprefix $(TARGDIR)/,$(PROGS))
 
 all: clear bin scripts $(addprefix $(TARGDIR)/,$(PROGS))
-	@echo Finished compiling all programs.
+	@echo "Finished compiling all programs."
 
 info:
 	@echo "Programs to compile: $(PROGS)" | fmt
@@ -359,7 +359,7 @@ $(TARGDIR)/humplay:   POSTFLAGS += $(IMPROV_POSTFLAGS) $(ALSA_POSTFLAGS)
 	@if [[ "$@" == "humplay" ]]; then                                        \
 		if [[ -e "external/improv/lib/libimprov.a" ]]; then              \
 			mkdir -p $(TARGDIR);                                     \
-			echo [CC] $@;                                            \
+			echo "[CC] $@";                                          \
 			$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
 				&& strip $(TARGDIR)/$@$(EXTEN);                  \
 		else                                                             \
@@ -367,7 +367,7 @@ $(TARGDIR)/humplay:   POSTFLAGS += $(IMPROV_POSTFLAGS) $(ALSA_POSTFLAGS)
 		fi                                                               \
 	else                                                                     \
 		mkdir -p $(TARGDIR);                                             \
-		echo [CC] $@;                                                    \
+		echo "[CC] $@";                                                  \
 		$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS)         \
 			&& strip $(TARGDIR)/$@$(EXTEN);                          \
 	fi
@@ -379,7 +379,7 @@ $(TARGDIR)/% : $(notdir %.cpp)
 	@if [[ "$@" == "$(TARGDIR)/humplay" ]]; then                  \
 		if [[ -e "external/improv/lib/libimprov.a" ]]; then   \
 			mkdir -p $(TARGDIR);                          \
-			echo [CC] $@;                                 \
+			echo "[CC] $@";                               \
 			$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
 				&& strip $@$(EXTEN);                  \
 		else                                                  \
@@ -387,7 +387,7 @@ $(TARGDIR)/% : $(notdir %.cpp)
 		fi                                                    \
 	else                                                          \
 		mkdir -p $(TARGDIR);                                  \
-		echo [CC] $@;                                         \
+		echo "[CC] $@";                                       \
 		$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS)         \
 			&& strip $@$(EXTEN);                          \
 	fi
