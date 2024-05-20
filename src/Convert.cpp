@@ -3065,7 +3065,7 @@ void Convert::base12ToTnSetNameAllSubsets(Array<int>& list, Array<int>& notes) {
 	const char* name;
 	int cardinality;
 	int enumeration;
-	int number;
+	int number = 0;
 	for (i=0; i<combinations.getSize(); i++) {
 		name = Convert::base12ToTnSetName(combinations[i]);
 		if (sscanf(name, "%d-%d", &cardinality, &enumeration)) {
