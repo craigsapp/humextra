@@ -8,6 +8,7 @@
 // Last Modified: Fri Aug 10 09:17:03 PDT 2012 added reverse()
 // Filename:      ...sig/maint/code/base/SigCollection/SigCollection.cpp
 // Web Address:   http://sig.sapp.org/src/sigBase/SigCollection.cpp
+// vim:           ts=3:nowrap
 // Syntax:        C++
 //
 // Description:   A dynamic array which can grow as necessary.
@@ -87,17 +88,16 @@ SigCollection<type>::SigCollection(int arraySize, type *aSigCollection) {
 
 template<class type>
 SigCollection<type>::SigCollection(const SigCollection<type>& aSigCollection) {
-   this->m_size = aSigCollection.m_size;
-   this->m_allocSize = this->m_size;
-   this->m_array = std::make_unique<type[]>(this->m_size);
-   for (int i = 0; i < this->m_size; i++) {
-      this->m_array[i] = aSigCollection.m_array[i];
-   }
-   this->m_allowGrowthQ = aSigCollection.m_allowGrowthQ;
-   this->m_growthAmount = aSigCollection.m_growthAmount;
-   this->m_maxSize = aSigCollection.m_maxSize;
+	this->m_size = aSigCollection.m_size;
+	this->m_allocSize = this->m_size;
+	this->m_array = std::make_unique<type[]>(this->m_size);
+	for (int i=0; i<this->m_size; i++) {
+		this->m_array[i] = aSigCollection.m_array[i];
+	}
+	this->m_allowGrowthQ = aSigCollection.m_allowGrowthQ;
+	this->m_growthAmount = aSigCollection.m_growthAmount;
+	this->m_maxSize = aSigCollection.m_maxSize;
 }
-
 
 
 
@@ -120,7 +120,6 @@ SigCollection<type>::~SigCollection() {
    // It will automatically release the allocated memory when it goes out of scope
    // this->m_array = NULL; // No need for this line
 }
-
 
 
 
@@ -197,19 +196,18 @@ void SigCollection<type>::append(type *element) {
 //   this->m_array = temp;
 //}
 
-
 template<class type>
 void SigCollection<type>::grow(long growamt) {
-   if (growamt <= 0) {
-      growamt = this->m_growthAmount;
-   }
-   if (growamt <= 0) {
-      growamt = 8;
-   }
-   if (this->m_size > this->m_allocSize) {
-      cerr << "Error: m_size " << this->m_size << " is larger than M_allocSize: " << this->m_allocSize << endl;
-      exit(1);
-   }
+	if (growamt <= 0) {
+		growamt = this->m_growthAmount;
+	}
+	if (growamt <= 0) {
+		growamt = 8;
+	}
+	if (this->m_size > this->m_allocSize) {
+		cerr << "Error: m_size " << this->m_size << " is larger than m_allocSize: " << this->m_allocSize << endl;
+		exit(1);
+	}
 	std::unique_ptr<type[]> temp(new type[this->getAllocSize() + growamt]);
 	for (int i=0; i<this->m_size; i++) {
 		temp[i] = this->m_array[i];
@@ -219,7 +217,7 @@ void SigCollection<type>::grow(long growamt) {
 	this->m_array = std::move(temp);
 }
 
-
+   
 
 //////////////////////////////
 //
