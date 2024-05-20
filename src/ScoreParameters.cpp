@@ -197,7 +197,6 @@ ScoreParameters::ScoreParameters(void) {
 	fixedParameters.setGrowth(32);
 	keyParameters.setSize(0);
 	keyParameters.setGrowth(32);
-	text.setSize(0);
 	textFont = 0;
 }
 
@@ -229,7 +228,7 @@ ScoreParameters::~ScoreParameters() {
 
 void ScoreParameters::clear(void) {
 	fixedParameters.setSize(0);
-	text.setSize(0);
+	text.clear();
 	clearKeyParameters();
 }
 
@@ -241,16 +240,12 @@ void ScoreParameters::clear(void) {
 //    Only valid if P1=16; otherwise should return an empty string.
 //
 
-const char* ScoreParameters::getText(void) {
-	if (text.getSize() > 0) {
-		return text.getBase();
-	} else {
-		return "";
-	}
+string ScoreParameters::getText(void) {
+	return text;
 }
 
 
-const char* ScoreParameters::getTextData(void) {
+string ScoreParameters::getTextData(void) {
 	return getText();
 }
 
@@ -262,9 +257,7 @@ const char* ScoreParameters::getTextData(void) {
 //
 
 void ScoreParameters::setText(const char* aString) {
-	int len = strlen(aString);
-	text.setSize(len+1);
-	strcpy(text.getBase(), aString);
+	text = aString;
 }
 
 

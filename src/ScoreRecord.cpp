@@ -450,7 +450,8 @@ int ScoreRecord::writeBinary(ostream& out) {
 	int i;
 	if (getValue(0) == P1_Text) {
 		// set the length of the text in P12
-		int textlen = strlen(getTextData());
+		string textdata = getTextData();
+		int textlen = (int)textdata.size();
 		int totaltextlen = textlen;
 
 		setPValue(12, totaltextlen);
@@ -469,11 +470,8 @@ int ScoreRecord::writeBinary(ostream& out) {
 			writeLittleEndian(out, getValue(i));
 		}
 
-		const char* ptr;
-		ptr = getTextData();
-		for (i=0; i<textlen; i++) {
-			out << ptr[i];
-		}
+		string textData = getTextData();
+		out << textData;
 
 		for (i=0; i<spaces; i++) {
 			out << ' ';
@@ -1410,8 +1408,9 @@ int ScoreRecord::isWordMiddle(void) {
 
 Array<char>& ScoreRecord::getTextDataWithoutFonts(Array<char>& textdata) {
 	PerlRegularExpression pre;
-	textdata.setSize(strlen(getTextData())+1);
-	strcpy(textdata.getBase(), getTextData());
+	string textData= getTextData();
+	textdata.setSize(textData.size()+1);
+	strcpy(textdata.getBase(), textData.c_str());
 	pre.sar(textdata, "_\\d\\d", "", "g");
 	return textdata;
 }

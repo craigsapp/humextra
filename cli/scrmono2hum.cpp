@@ -260,13 +260,13 @@ void findMetronome(ScorePageSimple& score, Array<Thing>& things) {
       for (j=0; j<score.getStaffSize(i); j++) {
          tempo = 0;
          if (score.getStaff(i, j).isTextItem()) {
-            if ((pos = strstr(score.getStaff(i, j).getTextData(), "[ = "))) {
+            if ((pos = strstr(score.getStaff(i, j).getTextData().c_str(), "[ = "))) {
                sscanf(pos, "[ = %d", &tempo);
-            } else if ((pos = strstr(score.getStaff(i, j).getTextData(), "[= "))) {
+            } else if ((pos = strstr(score.getStaff(i, j).getTextData().c_str(), "[= "))) {
                sscanf(pos, "[= %d", &tempo);
-            } else if ((pos = strstr(score.getStaff(i, j).getTextData(), "[ ="))) {
+            } else if ((pos = strstr(score.getStaff(i, j).getTextData().c_str(), "[ ="))) {
                sscanf(pos, "[ =%d", &tempo);
-            } else if ((pos = strstr(score.getStaff(i, j).getTextData(), "[="))) {
+            } else if ((pos = strstr(score.getStaff(i, j).getTextData().c_str(), "[="))) {
                sscanf(pos, "[=%d", &tempo);
             }
             if (tempo > 0) {
@@ -1122,10 +1122,14 @@ char* getTitle(char* buffer, ScorePageSimple& score) {
       if (score.getStaff(staff, i).isTextItem()) {
          ScoreRecord& record = score.getStaff(staff, i);
          if (record.getPValue(4) >= 20) {
-            if (record.getTextData()[0] == '_') {
-               strcpy(buffer, &record.getTextData()[3]);
+            string textData = record.getTextData();
+            if (!textData.empty() && (textData[0] == '_')) {
+               if (textData.size() > 3) {
+                    string td = textData.substr(3);
+                    strcpy(buffer, td.c_str());
+               }
             } else {
-               strcpy(buffer, record.getTextData());
+               strcpy(buffer, textData.c_str());
             }
             break;
          }

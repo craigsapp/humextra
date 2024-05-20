@@ -49,8 +49,8 @@ class ScoreParameters {
 
       void                clear               (void);
 
-      const char*         getText             (void);
-      const char*         getTextData         (void);
+      string              getText             (void);
+      string              getTextData         (void);
       void                setText             (const char* aString);
       void                setTextData         (const char* aString);
 
@@ -91,7 +91,7 @@ class ScoreParameters {
 
    protected:
       Array<double>        fixedParameters;     // SCORE fixed parameter list
-      Array<char>          text;                // Used for text when P1=16
+      string               text;                // Used for text when P1=16
       int                  textFont;            // for default font of text
 
       Array<ScoreNamedParameter> keyParameters; // Extended SCORE key parameters
