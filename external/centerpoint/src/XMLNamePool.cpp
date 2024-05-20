@@ -65,8 +65,8 @@ void XMLNamePool::Release()
 
 const XMLName* XMLNamePool::Insert(const XMLString& namespaceURI, const XMLString& localName, const XMLString& qname)
 {
-	register unsigned long i = 0;
-	register unsigned long n = Hash(namespaceURI, localName, qname) % m_size;
+	unsigned long i = 0;
+	unsigned long n = Hash(namespaceURI, localName, qname) % m_size;
 
 	while (m_pPool[n].m_used && (m_pPool[n].m_namespaceURI != namespaceURI || m_pPool[n].m_localName != localName || m_pPool[n].m_qname != qname) && i++ < m_size) n = (n + 1) % m_size;
 	if (!m_pPool[n].m_used) 
@@ -84,8 +84,8 @@ const XMLName* XMLNamePool::Insert(const XMLString& namespaceURI, const XMLStrin
 
 unsigned long XMLNamePool::Hash(const XMLString& namespaceURI, const XMLString& localName, const XMLString& qname)
 {
-	register unsigned long h = 0;
-	register const XMLChar* s = namespaceURI.c_str();
+	unsigned long h = 0;
+	const XMLChar* s = namespaceURI.c_str();
 	while (*s) h = (h << 5) + h + (unsigned long) *s++;
 	s = localName.c_str();
 	while (*s) h = (h << 5) + h + (unsigned long) *s++;

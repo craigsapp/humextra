@@ -57,8 +57,8 @@ const XMLString& CXMLStringPool::Get(const XMLString& str)
 	CSL::Base::CAutoLock lock(m_mtx);
 #endif
 
-	register unsigned long i = 0;
-	register unsigned long n = Hash(str) % m_size;
+	unsigned long i = 0;
+	unsigned long n = Hash(str) % m_size;
 
 	while (m_pPool[n].m_used && m_pPool[n].m_data != str && i++ < m_size) n = (n + 1) % m_size;
 	if (!m_pPool[n].m_used) 
@@ -74,8 +74,8 @@ const XMLString& CXMLStringPool::Get(const XMLString& str)
 
 unsigned long CXMLStringPool::Hash(const XMLString& str)
 {
-	register unsigned long h = 0;
-	register const XMLChar* s = str.c_str();
+	unsigned long h = 0;
+	const XMLChar* s = str.c_str();
 
 	while (*s) h = (h << 5) + h + (unsigned char) *s++;
 

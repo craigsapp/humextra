@@ -596,16 +596,16 @@ void CXMLWriter2::Characters(const XMLChar ch[], int start, int length)
 	if (m_needFinalizeStartElement) FinalizeStartElement();
 	if (m_inCDATA)
 	{
-		for (register int i = 0; i < length; i++, start++)
+		for (int i = 0; i < length; i++, start++)
 		{
 			WriteXML(ch[start]);
 		}
 	}
 	else
 	{
-		for (register int i = 0; i < length; i++, start++)
+		for (int i = 0; i < length; i++, start++)
 		{
-			register unsigned char c = (unsigned char) ch[start];
+			unsigned char c = (unsigned char) ch[start];
 			if (c == quot)
 				WriteMarkup(MARKUP_QUOTENC);
 			else if (c == apos)

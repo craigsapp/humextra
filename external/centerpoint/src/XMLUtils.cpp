@@ -125,10 +125,10 @@ XMLString CXMLUtils::AsciiToXML(const string& str)
 string CXMLUtils::XMLToAscii(const XMLString& str)
 {
 	string asciiStr;
-	register int n = str.length();
-	for (register int i = 0; i < n; i++)
+	int n = str.length();
+	for (int i = 0; i < n; i++)
 	{
-		register XMLChar c = str[i];
+		XMLChar c = str[i];
 		asciiStr += (c <= 127) ? c : '_';
 	}
 	return asciiStr;
@@ -138,10 +138,10 @@ string CXMLUtils::XMLToAscii(const XMLString& str)
 XMLString CXMLUtils::AsciiToXML(const string& str)
 {
 	XMLString xmlStr;
-	register int n = str.length();
-	for (register int i = 0; i < n; i++)
+	int n = (int)str.length();
+	for (int i = 0; i < n; i++)
 	{
-		register char c = str[i];
+		char c = str[i];
 		xmlStr += (c <= 127) ? c : '_';
 	}
 	return xmlStr;

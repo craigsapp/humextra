@@ -108,7 +108,7 @@ void CSAX2ParserNS::HandleEndNamespace(const XML_Char* prefix)
 
 void CSAX2ParserNS::SplitName(const XMLChar* qname, XMLString& uri, XMLString& localName)
 {
-	register const XMLChar* p = qname;
+	const XMLChar* p = qname;
 	while (*p)
 	{
 		if (*p == XML_NS_SEPARATOR)

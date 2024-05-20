@@ -75,7 +75,7 @@ protected:
 		
 		while (length > 0)
 		{
-			register unsigned chr = (unsigned char) ch[start];
+			unsigned chr = (unsigned char) ch[start];
 			if (chr <= 0x7F)
 			{
 				target += (XMLChar) chr;

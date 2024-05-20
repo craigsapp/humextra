@@ -470,7 +470,7 @@ Node* SimpleNode::getPreviousSibling() const
 {
 	if (m_pParent)
 	{
-		register SimpleNode* pSibling = m_pParent->m_pFirstChild;
+		SimpleNode* pSibling = m_pParent->m_pFirstChild;
 		while (pSibling)
 		{
 		    if (pSibling->m_pNext == this) return pSibling;
@@ -828,7 +828,7 @@ Node* ContainerNode::getFirstChild() const
 
 Node* ContainerNode::getLastChild() const
 {
-	register SimpleNode* pChild = m_pFirstChild;
+	SimpleNode* pChild = m_pFirstChild;
 	if (pChild)
 	{
 		while (pChild->m_pNext) pChild = pChild->m_pNext;
@@ -1318,7 +1318,7 @@ Node* Attr::getPreviousSibling() const
 {
 	if (m_pParent)
 	{
-		register Attr* pSibling = static_cast<Element*>(m_pParent)->m_pFirstAttr;
+		Attr* pSibling = static_cast<Element*>(m_pParent)->m_pFirstAttr;
 		while (pSibling)
 		{
 		    if (pSibling->m_pNext == const_cast<Attr*>(this)) return pSibling;
