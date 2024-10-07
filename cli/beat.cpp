@@ -112,7 +112,7 @@ Options   options;             // database for command-line arguments
 int       appendQ  = 0;        // used with -a option
 int       prependQ = 0;        // used with -p option
 int       durQ     = 0;        // used with -d option
-int       absQ     = 0;        // used with -t option
+int       absQ     = 0;        // used with -c option
 int       beatQ    = 0;        // used with -b option
 int       sumQ     = 0;        // used with -s option
 int       zeroQ    = 0;        // zero offset instead of 1 for first beat

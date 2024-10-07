@@ -158,8 +158,8 @@ char& MuseRecordBasic::getColumn(int columnNumber) {
 	int length = recordString.getSize();
 	// originally the limiit for data columns was 80:
 	//if (realindex < 0 || realindex >= 80) {
-	//the new limit is somewhere above 900, but limit to 180
-	if (realindex < 0 || realindex >= 180) {
+	//the new limit is somewhere above 900, but limit to 1024
+	if (realindex < 0 || realindex >= 1024) {
 		cerr << "Error trying to access column: " << columnNumber  << endl;
 		cerr << "CURRENT DATA: ===============================" << endl;
 		cerr << (*this);
