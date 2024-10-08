@@ -124,10 +124,12 @@ double    Tolerance = 0.001;   // used for rounding
 int       Attack   = 1;        // used with -A option
 vector<int> Attacks;           // used with -A option
 int       tickQ    = 0;        // used with -t option
+int       quarterQ = 0;        // used with --quarter option
 int       metertopQ= 0;        // used with -m option
 int       meterbotQ= 0;        // used with --meter-bottom option
 int       meterdurQ= 0;        // used with --meter-duration option
 int       rationalQ= 0;        // used with -r option
+int       noreduceQ= 0;        // used with --ff option
 int       tpwQ     = 0;        // used with --tpw option
 int       tpqQ     = 0;        // used with --tpq option
 int       fillQ    = 0;        // used with --fill option
@@ -1149,7 +1151,15 @@ void printOutput(HumdrumFile& file, vector<RationalNumber>& Bfeatures,
 						if (uQ) {
 							anumber *= 4;
 						}
-						anumber.printTwoPart(cout);
+						if (noreduceQ) {
+							cout << anumber;
+						} else {
+							if (noreduceQ) {
+								cout << anumber;
+							} else {
+								anumber.printTwoPart(cout);
+							}
+						}
 					} else {
 						cout << file[i].getAbsBeat();
 					}
@@ -1218,7 +1228,11 @@ void printOutput(HumdrumFile& file, vector<RationalNumber>& Bfeatures,
 						} else if (tickQ && !rationalQ) {
 							cout << (Binfo[i] * minrhy);
 						} else {
-							Binfo[i].printTwoPart(cout);
+							if (noreduceQ) {
+								cout << Binfo[i];
+							} else {
+								Binfo[i].printTwoPart(cout);
+							}
 						}
 					} else {
 						if (nullQ || appendQ || prependQ) {
@@ -1314,8 +1328,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("A|attacks|attack=i:1"); // Minimum num of note onsets for event
 	opts.define("t|tick=b", "display durations as tick values");
 	opts.define("f|rational=b", "display durations as rational values");
+	opts.define("ff|no-reduce=b", "display durations as rational values without splitting out the integer and fractional part");
 	opts.define("tpw=b", "display only ticks per whole note");
 	opts.define("tpq=b", "display only ticks per quarter note");
+	opts.define("quarter=b", "output duratios in quarter notes instead of whole notes");
 	opts.define("debug=b");              // determine bad input line num
 	opts.define("author=b");             // author of program
 	opts.define("version=b");            // compilation info
@@ -1356,6 +1372,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	nullQ     = opts.getBoolean("keep-nulls");
 	tickQ     = opts.getBoolean("tick");
 	rationalQ = opts.getBoolean("rational");
+	noreduceQ = opts.getBoolean("no-reduce");
 	tpwQ      = opts.getBoolean("tpw");
 	tpqQ      = opts.getBoolean("tpq");
 	fillQ     = opts.getBoolean("fill-meter");
@@ -1363,6 +1380,10 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	beatbase  = opts.getString("beatsize");
 	uQ        = opts.getBoolean("beatsize");
 	debugQ    = opts.getBoolean("debug");
+
+	if (noreduceQ) {
+		rationalQ = 1;
+	}
 
 	if (rationalQ) {
 		tickQ = 1;
