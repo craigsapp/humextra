@@ -2596,6 +2596,8 @@ void cleanP12tonePitchClass(string& data) {
 	// minimizing use of A and B in raw search from user.
 	pre.tr(data, "yz", "YZ");
 
+	bool numberQ = pre.search(data, "\\d");
+
 	if (!pre.search(data, "[YZ]", "")) {
 		// convert "10" and "11" to "A" and "B" if they are present in query
 		pre.sar(data, "\\b10\\b", "Y", "g");
@@ -2665,8 +2667,10 @@ void cleanP12tonePitchClass(string& data) {
 		pre.sar(data, "e", "4", "gi");
 		pre.sar(data, "f", "5", "gi");
 		pre.sar(data, "g", "7", "gi");
-		pre.sar(data, "a", "9", "gi");
-		pre.sar(data, "b", "Z", "gi");
+		if (!numberQ) {
+			pre.sar(data, "a", "9", "gi");
+			pre.sar(data, "b", "Z", "gi");
+		}
 
 	}
 
