@@ -1,6 +1,8 @@
 # Not needed in git repository:
 TIMESTAMP
 
+.DS_Store
+
 # Compiled Object files
 *.slo
 *.lo
