@@ -1331,7 +1331,7 @@ void checkOptions(Options& opts, int argc, char* argv[]) {
 	opts.define("ff|no-reduce=b", "display durations as rational values without splitting out the integer and fractional part");
 	opts.define("tpw=b", "display only ticks per whole note");
 	opts.define("tpq=b", "display only ticks per quarter note");
-	opts.define("quarter=b", "output duratios in quarter notes instead of whole notes");
+	opts.define("quarter=b", "output durations in quarter notes instead of whole notes");
 	opts.define("debug=b");              // determine bad input line num
 	opts.define("author=b");             // author of program
 	opts.define("version=b");            // compilation info
