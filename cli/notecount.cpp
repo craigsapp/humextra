@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
             }
          }
       }
-      if (totalQ && (counts.getSize() > 1)) {
+      if (totalQ) {
          int sounding    = 0;
          int written     = 0;
          int rests       = 0;
