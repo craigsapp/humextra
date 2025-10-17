@@ -2239,7 +2239,7 @@ int HumdrumFileBasic::open_network_socket(const char *hostname,
 	if (connect(inet_socket, (struct sockaddr *)&servaddr,
 			sizeof(struct sockaddr_in)) < 0) {
 		// connect returns -1 on error
-		cerr << "Error opening connection to coputer: " << hostname << endl;
+		cerr << "Error opening connection to computer: " << hostname << endl;
 		exit(1);
 	}
 
